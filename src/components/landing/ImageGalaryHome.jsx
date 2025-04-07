@@ -46,7 +46,7 @@ const ImageGallery = () => {
                             <div className="relative w-full h-full group">
                                 <Image
                                     src={item.imageUrl}
-                                    alt={item.title}
+                                    alt="img"
                                     fill
                                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                                 />

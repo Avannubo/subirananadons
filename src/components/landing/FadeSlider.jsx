@@ -61,7 +61,7 @@ export default function FadeSlider() {
                         </div>
                         <Image
                             src={slide.image}
-                            alt={slide.title}
+                            alt="img"
                             fill
                             className="object-cover"
                             priority

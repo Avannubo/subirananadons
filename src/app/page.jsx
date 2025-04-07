@@ -1,17 +1,19 @@
 import FadeSlider from "@/components/landing/FadeSlider";
 import ImageGallery from "@/components/landing/ImageGalaryHome";
 import ProductSlider from "@/components/landing/ProductSlider";
+import ShopLayout from "./(shop)/shop-layout";
+
 
 export default function Home() {
   return (
-    <>
+    <ShopLayout>
       <div className="w-full h-full flex flex-col justify-start items-start">
         <FadeSlider />
         <ImageGallery />
         <ProductSlider />
         {/* New Section with Background */}
         <div
-          className="w-[100%] overflow-hidden h-[70vh] py-20 px-4 bg-gradient-to-r from-blue-50 to-purple-50"
+          className="w-[100%] overflow-hidden h-[80vh] py-20 px-4 bg-gradient-to-r from-blue-50 to-purple-50"
           style={{
             backgroundImage: "url('/assets/images/Screenshot_4.png')",
             backgroundSize: "contain",
@@ -67,6 +69,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </>
+    </ShopLayout>
   );
 }
