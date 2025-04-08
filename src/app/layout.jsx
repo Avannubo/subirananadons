@@ -9,7 +9,6 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body
         className="w-full overflow-x-hidden">
-        
         {children} 
       </body>
     </html>
