@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Menu() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,9 +13,8 @@ export default function Menu() {
 
     // Dynamic menu data from JSON
     const menuData = {
-        logo: "/assets/logo-footer.svg",
-        items: [
-            { label: "Home", href: "#" },
+        logo: "/assets/logo-header.svg",
+        items: [ 
             {
                 label: "Productos",
                 submenu: [
@@ -135,10 +135,7 @@ export default function Menu() {
             },
             { label: "Marcas", href: "#" },
             {
-                label: "Listas de nacimientos", submenu: [
-                    { label: "Recomendaciones " },
-                    { label: "Acceso a listas" },
-                ]
+                label: "Listas de nacimientos", 
             },
             { label: "Contacto", href: "#" },
         ]
@@ -157,16 +154,16 @@ export default function Menu() {
             return (
                 <li key={currentPath} className="relative">
                     {!item.submenu ? (
-                        <a href={item.href} className="block py-1 font-medium hover:text-[#00B0C8] hover:bg-gray-700 px-2 rounded">
-                            {item.label}
+                        <a href={item.href} className="block py-1 font-medium hover:text-[#353535] hover:bg-gray-200 px-2 rounded uppercase">
+                            {item.label.toUpperCase()}
                         </a>
                     ) : (
                         <>
                             <button
                                 onClick={() => toggleSubmenu(currentPath)}
-                                className="w-full text-left py-2 hover:bg-gray-700 px-2 rounded flex justify-between items-center"
+                                className="w-full text-left py-2 hover:bg-gray-200 px-2 rounded flex justify-between items-center uppercase"
                             >
-                                <span className="font-medium">{item.label}</span>
+                                <span className="font-medium">{item.label.toUpperCase()}</span>
                                 <svg
                                     className={`w-4 h-4 transition-transform ${openSubmenus[currentPath] ? 'rotate-90' : ''}`}
                                     fill="none"
@@ -193,7 +190,7 @@ export default function Menu() {
         <div className={`absolute ${isMenuOpen ? 'overflow-hidden h-screen' : ''}`}>
             {isMenuOpen && (
                 <div
-                    className="fixed inset-0 bg-[#00000050] bg-opacity-60 z-10"
+                    className="fixed inset-0 bg-[#00000080] bg-opacity-60 z-10"
                     onClick={toggleMenu}
                 ></div>
             )}
@@ -206,24 +203,25 @@ export default function Menu() {
                     <svg width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 6H20M4 12H20M4 18H20" stroke="#353535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
                     </svg>
-                    <span>Menú</span>
+                    <span>MENÚ</span>
                 </button>
             </header>
 
             <div
-                className={`fixed top-0 left-0 w-[40vh] h-full bg-[#353535] text-white z-20 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 w-[50vh] h-full bg-white text-[#353535] z-20 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
-                <div className="p-4 py-8 h-full flex flex-col">
+                <div className="p-4 py-8 h-full flex flex-col ">
+                    <Link href="/" className="flex items-center mb-4">
                     <Image
-                        src="/assets/logo-footer.svg"
+                        src="/assets/logo-header.svg"
                         alt="logo"
-                        width={180}
+                        width={280}
                         height={150}
                         className="mb-4 mt-6"
-                    />
-                    <nav className="flex-1 overflow-y-auto">
-                        <ul>
+                    /></Link>
+                    <nav className="flex-1 overflow-y-scroll " style={{ scrollbarWidth: 'none'  }}>
+                        <ul className=" ">
                             {renderMenuItems(menuData.items)}
                         </ul>
                     </nav>
