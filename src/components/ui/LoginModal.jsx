@@ -133,10 +133,10 @@ export default function IniciarSesion() {
                             </div>
 
                             <div className="mt-6">
-                                <p className="text-start text-sm font-bold text-gray-500 mb-3">
+                                <p className="text-center text-sm font-bold text-gray-500 mb-3">
                                     CONECTAR CON LAS REDES SOCIALES
                                 </p>
-                                <div className="flex justify-start space-x-2">
+                                <div className="flex justify-center space-x-2">
                                     <button className="p-2 rounded-none bg-blue-700 hover:bg-blue-600 transition-colors">
                                         <span className="sr-only">Facebook</span>
                                         <svg fill="#ffffff" width="14px" height="14px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
