@@ -1,14 +1,13 @@
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+// import { redirect } from 'next/navigation';
+// import { cookies } from 'next/headers';
 import LogoutBtn from '@/components/ui/LogoutBtn';
 import Link from 'next/link';
 export default async function Sidebar() {
-    const cookieStore = cookies();
-    const token = await cookieStore.has('token');
-    if (!token) {
-        redirect('/');
-    }
-
+    // const cookieStore = cookies();
+    // const token = await cookieStore.has('token');
+    // if (!token) {
+    //     redirect('/');
+    // }
     return (
         <div className="w-64 bg-white  min-h-screen text-xl p-4 pt-30">
             <div className="space-y-4">
