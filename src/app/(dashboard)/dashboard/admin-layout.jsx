@@ -1,18 +1,13 @@
-import React from 'react';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import { auth } from "@/auth";
+import Sidebar from '@/components/admin/Sidebar';
+import Header from '@/components/landing/header'; 
 
-export default async function AdminLayout({ children }) {
-    const session = await auth();
-    if (!session) redirect("/");
-
+export default function AdminLayout({ children }) {
     return (
-        <div className="flex h-screen">
-            <Sidebar />
-            <div className="flex flex-1 flex-col">
-                <Header />
-                <div className="flex-1 p-5 bg-gray-100">
+        <div className="flex flex-col ">
+            <Header />
+            <div className="flex flex-1">
+                <Sidebar />
+                <div className="flex-1 bg-gray-100 pt-28 p-14">
                     {children}
                 </div>
             </div>

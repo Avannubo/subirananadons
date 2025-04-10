@@ -179,7 +179,7 @@ export default  function AuthModal() {
                         <div
                             ref={backdropRef}
                             className="fixed inset-0 bg-[#00000050] bg-opacity-50 transition-opacity duration-800 opacity-0"
-                            onClick={closeModal}
+                            // onClick={closeModal}
                         />
 
                         {/* Modal Content */}
