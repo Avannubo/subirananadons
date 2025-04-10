@@ -5,7 +5,7 @@ export default function ProductsStats() {
     // These would likely come from props or API in a real app
     const stats = [
         {
-            icon: <FiShoppingBag className="text-blue-600 text-xl" />,
+            icon: <FiShoppingBag className="text-[#00B0C8] text-xl" />,
             title: "Productos",
             value: "120 Productos",
             description: "Todo el tiempo",

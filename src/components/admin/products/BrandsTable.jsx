@@ -53,7 +53,7 @@ export default function BrandsTable({ brands }) {
                                 type="checkbox"
                                 checked={showEnabledOnly}
                                 onChange={() => setShowEnabledOnly(!showEnabledOnly)}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
                             />
                             <span>Mostrar solo marcas activas</span>
                         </label>

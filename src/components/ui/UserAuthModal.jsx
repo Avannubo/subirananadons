@@ -1,9 +1,9 @@
 "use client"
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
-export default  function AuthModal() {
+export default function AuthModal() {
 
     const [isOpen, setIsOpen] = useState(false);
     const [activeView, setActiveView] = useState('login'); // 'login' or 'register'
@@ -12,7 +12,7 @@ export default  function AuthModal() {
     const backdropRef = useRef(null);
     const router = useRouter();
 
-    const openLogin =  () => {
+    const openLogin = () => {
         const token = Cookies.get('token');
         console.log(token);//im getting undefined
 
@@ -179,7 +179,7 @@ export default  function AuthModal() {
                         <div
                             ref={backdropRef}
                             className="fixed inset-0 bg-[#00000050] bg-opacity-50 transition-opacity duration-800 opacity-0"
-                            // onClick={closeModal}
+                        // onClick={closeModal}
                         />
 
                         {/* Modal Content */}
@@ -376,7 +376,7 @@ export default  function AuthModal() {
                                     <div className="flex justify-center space-x-2">
                                         <button
                                             type="button"
-                                            className="p-2 rounded-none bg-blue-700 hover:bg-blue-600 transition-colors"
+                                            className="p-2 rounded-none bg-blue-700 hover:bg-[#00B0C8] transition-colors"
                                         >
                                             <span className="sr-only">Facebook</span>
                                             <svg fill="#ffffff" width="14px" height="14px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">

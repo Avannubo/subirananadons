@@ -9,7 +9,7 @@ export default function ProductsTable({ products }) {
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 className="text-lg font-semibold">Productos</h2>
                 <div className="flex space-x-2">
-                    <button className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    <button className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C8]">
                         Añadir producto
                     </button>
                     <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
@@ -119,7 +119,7 @@ export default function ProductsTable({ products }) {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div className="flex space-x-2">
-                                        <button className="text-blue-600 hover:text-blue-900">
+                                        <button className="text-[#00B0C8] hover:text-[#00B0C870]">
                                             <FiEye />
                                         </button>
                                         <button className="text-yellow-600 hover:text-yellow-900">
@@ -150,7 +150,7 @@ export default function ProductsTable({ products }) {
                                 <span className="sr-only">Anterior</span>
                                 &larr;
                             </button>
-                            <button aria-current="page" className="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                            <button aria-current="page" className="z-10 bg-blue-50 border-[#00B0C8] text-[#00B0C8] relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                                 1
                             </button>
                             <button className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">

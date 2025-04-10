@@ -23,7 +23,12 @@ export default function ClientsTabs() {
         { id: 2, name: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', sales: 3, registrationDate: '2023-02-10', active: false, newsletter: false, partnerOffers: true },
         { id: 3, name: 'Alice', lastName: 'Johnson', email: 'alice.johnson@example.com', sales: 8, registrationDate: '2023-03-05', active: true, newsletter: true, partnerOffers: true },
         { id: 4, name: 'Bob', lastName: 'Brown', email: 'bob.brown@example.com', sales: 2, registrationDate: '2023-04-20', active: false, newsletter: false, partnerOffers: false },
-        { id: 5, name: 'Charlie', lastName: 'Davis', email: 'charlie.davis@example.com', sales: 10, registrationDate: '2023-05-30', active: true, newsletter: true, partnerOffers: true }
+        { id: 5, name: 'Charlie', lastName: 'Davis', email: 'charlie.davis@example.com', sales: 10, registrationDate: '2023-05-30', active: true, newsletter: true, partnerOffers: true },
+        { id: 6, name: 'Emily', lastName: 'Clark', email: 'emily.clark@example.com', sales: 7, registrationDate: '2023-06-15', active: true, newsletter: false, partnerOffers: true },
+        { id: 7, name: 'Frank', lastName: 'Miller', email: 'frank.miller@example.com', sales: 4, registrationDate: '2023-07-10', active: false, newsletter: true, partnerOffers: false },
+        { id: 8, name: 'Grace', lastName: 'Wilson', email: 'grace.wilson@example.com', sales: 6, registrationDate: '2023-08-05', active: true, newsletter: true, partnerOffers: true },
+        { id: 9, name: 'Henry', lastName: 'Taylor', email: 'henry.taylor@example.com', sales: 1, registrationDate: '2023-09-20', active: false, newsletter: false, partnerOffers: false },
+        { id: 10, name: 'Ivy', lastName: 'Anderson', email: 'ivy.anderson@example.com', sales: 9, registrationDate: '2023-10-30', active: true, newsletter: true, partnerOffers: true }
     ];
 
     const statusCounts = {
@@ -34,7 +39,7 @@ export default function ClientsTabs() {
         Ofertas: clients.filter(c => c.partnerOffers).length
     };
 
-    const filteredClients = clients.filter(client => {  
+    const filteredClients = clients.filter(client => {
         // First filter by active tab
         if (activeTab === 'Activos' && !client.active) return false;
         if (activeTab === 'Inactivos' && client.active) return false;
@@ -73,98 +78,98 @@ export default function ClientsTabs() {
 
     return (
         <>
-            <div className="flex border-b border-gray-200 mb-6">
+            <div className="flex border-b border-gray-200">
                 {tabs.map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`px-4 py-3 text-sm font-medium ${activeTab === tab
-                                ? 'border-b-2 border-blue-500 text-blue-600'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         {tab} ({statusCounts[tab]})
                     </button>
                 ))}
             </div>
-       
+
             <div className="bg-white rounded-lg shadow">
-            
-            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <div className="flex items-center">
-                    <h2 className="text-lg font-medium">Administración de clientes ({clients.length})</h2>
-                    <button className="ml-2 text-gray-500 hover:text-gray-700">
-                        <FiRefreshCw />
-                    </button>
-                </div>
-                <div className="flex space-x-2">
-                    <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">
-                        Ajustes
-                    </button>
-                    <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">
-                        Acciones Agrupadas
-                    </button>
-                </div>
-            </div>
 
-            
-
-            {/* Search and Filters */}
-            <div className="p-4 border-b border-gray-200 flex flex-row justify-start items-start space-x-4">
-                <div className=" flex flex-row justify-center space-x-2">
-                    <div className="relative ">
-                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Buscar ID"
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                            value={filters.searchId}
-                            onChange={(e) => setFilters({ ...filters, searchId: e.target.value })}
-                        />
-                    </div>
-                    <div className="relative ">
-                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Buscar Nombre"
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                            value={filters.searchId}
-                            onChange={(e) => setFilters({ ...filters, searchId: e.target.value })}
-                        />
-                    </div>
-                    <div className="relative ">
-                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Buscar Email"
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                            value={filters.searchId}
-                            onChange={(e) => setFilters({ ...filters, searchId: e.target.value })}
-                        />
-                    </div>
-
-                    {/* Other search inputs */}
-                </div>
-                <div className=" flex justify-center gap-4">
-                    {/* Date filters */}
-                    <div className="flex items-end space-x-2">
-                        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                            <FiFilter className="mr-2" />
-                            Buscar
+                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <div className="flex items-center">
+                        <h2 className="text-lg font-medium">Administración de clientes ({clients.length})</h2>
+                        <button className="ml-2 text-gray-500 hover:text-gray-700">
+                            <FiRefreshCw />
                         </button>
-                        <button
-                            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                            onClick={clearFilters}
-                        >
-                            Limpiar
+                    </div>
+                    <div className="flex space-x-2">
+                        <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">
+                            Ajustes
+                        </button>
+                        <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">
+                            Acciones Agrupadas
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <ClientsTable clients={filteredClients} />
-        </div>
+
+
+                {/* Search and Filters */}
+                <div className="p-4 border-b border-gray-200 flex flex-row justify-start items-start space-x-4">
+                    <div className=" flex flex-row justify-center space-x-2">
+                        <div className="relative ">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar ID"
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                                value={filters.searchId}
+                                onChange={(e) => setFilters({ ...filters, searchId: e.target.value })}
+                            />
+                        </div>
+                        <div className="relative ">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar Nombre"
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                                value={filters.searchId}
+                                onChange={(e) => setFilters({ ...filters, searchId: e.target.value })}
+                            />
+                        </div>
+                        <div className="relative ">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar Email"
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                                value={filters.searchId}
+                                onChange={(e) => setFilters({ ...filters, searchId: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Other search inputs */}
+                    </div>
+                    <div className=" flex justify-center gap-4">
+                        {/* Date filters */}
+                        <div className="flex items-end space-x-2">
+                            <button className="flex items-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-blue-700">
+                                <FiFilter className="mr-2" />
+                                Buscar
+                            </button>
+                            <button
+                                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                                onClick={clearFilters}
+                            >
+                                Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <ClientsTable clients={filteredClients} />
+            </div>
         </>
-        
+
     );
 }

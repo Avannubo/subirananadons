@@ -5,7 +5,7 @@ export default function BillsStats() {
     // These would likely come from props or API in a real app
     const stats = [
         {
-            icon: <FiUser className="text-blue-600 text-xl" />,
+            icon: <FiUser className="text-[#00B0C8] text-xl" />,
             title: "Facturas emitidas",
             value: "120",
             description: "Este mes",

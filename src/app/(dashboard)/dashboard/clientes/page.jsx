@@ -14,7 +14,7 @@ export default async function Page() {
 
     return (
         <AdminLayout>
-            <div className="p-6">
+            <div className="p-6 pt-[100px]]">
                 <h1 className="text-3xl font-bold mb-6">Clientes</h1>
                 <ClientsStats />
                 <ClientsTabs />

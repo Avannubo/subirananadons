@@ -142,7 +142,7 @@ export default function OrdersTabs() {
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`px-4 py-2 font-medium text-sm ${activeTab === tab
-                            ? 'border-b-2 border-blue-500 text-blue-600'
+                            ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
                             : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >

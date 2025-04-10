@@ -72,7 +72,7 @@ export default function StockManagement({ products }) {
                                 type="checkbox"
                                 checked={showLowStock}
                                 onChange={() => setShowLowStock(!showLowStock)}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                className="rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
                             />
                             <span>Mostrar primero productos por debajo del nivel de stock</span>
                         </label>
@@ -147,7 +147,7 @@ export default function StockManagement({ products }) {
                                     {editingId === product.id ? (
                                         <button
                                             onClick={() => saveChanges(product.id)}
-                                            className="text-blue-600 hover:text-blue-900"
+                                            className="text-[#00B0C8] hover:text-[#00B0C870]"
                                         >
                                             Guardar
                                         </button>

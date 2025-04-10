@@ -4,7 +4,7 @@ import { FiUser, FiCalendar, FiShoppingBag, FiMail } from 'react-icons/fi';
 export default function OrdersStats() {
     const stats = [
         {
-            icon: <FiUser className="text-blue-600 text-xl" />,
+            icon: <FiUser className="text-[#00B0C8] text-xl" />,
             title: "Pedidos totales",
             value: "10",
             description: "Últimos 30 días",

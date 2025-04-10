@@ -110,7 +110,7 @@ export default function BillsTable({ bills = [], filters, setFilters }) {
                         />
                     </div>
                     <div className="flex items-end space-x-2">
-                        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <button className="flex items-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C880]">
                             <FiFilter className="mr-2" />
                             Buscar
                         </button>
@@ -151,7 +151,7 @@ export default function BillsTable({ bills = [], filters, setFilters }) {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{bill.paymentMethod}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${bill.status === 'Pagada' ? 'bg-green-100 text-green-800' :
-                                                'bg-yellow-100 text-yellow-800'
+                                            'bg-yellow-100 text-yellow-800'
                                             }`}>
                                             {bill.status}
                                         </span>
@@ -160,7 +160,7 @@ export default function BillsTable({ bills = [], filters, setFilters }) {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{bill.dueDate}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-2">
-                                            <button className="text-blue-600 hover:text-blue-900">
+                                            <button className="text-[#00B0C8] hover:text-[#00B0C870]">
                                                 <FiEye />
                                             </button>
                                             <button className="text-yellow-600 hover:text-yellow-900">
@@ -198,7 +198,7 @@ export default function BillsTable({ bills = [], filters, setFilters }) {
                                 <span className="sr-only">Anterior</span>
                                 &larr;
                             </button>
-                            <button aria-current="page" className="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                            <button aria-current="page" className="z-10 bg-blue-50 border-[#00B0C8] text-[#00B0C8] relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                                 1
                             </button>
                             <button className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">

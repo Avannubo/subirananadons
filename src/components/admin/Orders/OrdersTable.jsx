@@ -17,7 +17,7 @@ export default function OrdersTable({ orders = [], statusCounts, activeTab, setA
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-4 py-3 text-sm font-medium ${activeTab === tab.id
-                            ? 'border-b-2 border-blue-500 text-blue-600'
+                            ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
                             : 'text-gray-500 hover:text-gray-700'}`}
                     >
                         {tab.label} ({statusCounts[tab.id]})
@@ -59,7 +59,7 @@ export default function OrdersTable({ orders = [], statusCounts, activeTab, setA
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Pago aceptado' ? 'bg-green-100 text-green-800' :
                                                 order.status === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                                                    order.status === 'Enviado' ? 'bg-blue-100 text-blue-800' :
+                                                    order.status === 'Enviado' ? 'bg-blue-100 text-[#00B0C8]' :
                                                         'bg-red-100 text-red-800'
                                             }`}>
                                             {order.status}
@@ -68,7 +68,7 @@ export default function OrdersTable({ orders = [], statusCounts, activeTab, setA
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.date}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-2">
-                                            <button className="text-blue-600 hover:text-blue-900">
+                                            <button className="text-[#00B0C8] hover:text-[#00B0C870]">
                                                 <FiEye />
                                             </button>
                                             <button className="text-yellow-600 hover:text-yellow-900">

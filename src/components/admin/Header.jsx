@@ -42,7 +42,7 @@ export default function Header() {
                         alt="User Avatar"
                         width={240}
                         height={240}
-                        className="w-10 h-10 rounded-full object-cover cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-10 h-10 rounded-full object-cover cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
                         onClick={toggleDropdown}
                         tabIndex={0}
                     />
