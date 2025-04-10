@@ -21,6 +21,9 @@ export default async function Sidebar() {
                     <Link href="/dashboard/clientes" className="text-gray-800 font-medium no-underline">Clientes</Link>
                 </button>
                 <button className="w-full mb-2 shadow rounded-sm  bg-gray-100 hover:bg-[#00B0C830] p-2 text-center">
+                    <Link href="/dashboard/facturacion" className="text-gray-800 font-medium no-underline">Facturación</Link>
+                </button>
+                <button className="w-full mb-2 shadow rounded-sm  bg-gray-100 hover:bg-[#00B0C830] p-2 text-center">
                     <Link href="/dashboard/listas" className="text-gray-800 font-medium no-underline text-nowrap">Listas de nacimientos</Link>
                 </button>
                 <button className="w-full mb-2 shadow rounded-sm  bg-gray-100 hover:bg-[#00B0C830] p-2 text-center">

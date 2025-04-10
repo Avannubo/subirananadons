@@ -1,7 +1,7 @@
-
-import AdminLayout from '@/app/(dashboard)/dashboard/admin-layout';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers'
+import { cookies } from 'next/headers';
+import AdminLayout from '@/app/(dashboard)/dashboard/admin-layout';
+import BillTabs from '@/components/admin/bills/BillsTabs';
 export default async function Page() {
     const cookieStore = cookies()
     const token = await cookieStore.has('token');
@@ -10,10 +10,9 @@ export default async function Page() {
     }
     return (
         <AdminLayout>
-
             <div className="p-6">
                 <h1 className="text-3xl font-bold mb-6">Facturación</h1>
-                page
+                <BillTabs />
             </div>
         </AdminLayout>
     );

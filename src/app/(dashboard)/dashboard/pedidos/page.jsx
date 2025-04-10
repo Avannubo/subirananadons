@@ -1,8 +1,8 @@
 import AdminLayout from '@/app/(dashboard)/dashboard/admin-layout';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers'; 
-import OrdersTabs from '@/components/admin/Orders/OrdersTabs';
-import OrdersStats from '@/components/admin/Orders/OrdersStats';
+import OrdersTabs from '@/components/admin/orders/OrdersTabs';
+import OrdersStats from '@/components/admin/orders/OrdersStats';
 export default async function Page() {
     const cookieStore = cookies();
     const hasToken = cookieStore.has('token');
