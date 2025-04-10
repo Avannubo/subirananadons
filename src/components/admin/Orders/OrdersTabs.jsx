@@ -113,8 +113,6 @@ const orders = [
         date: '10/04/2025 20:15:40'
     },
 ];
-
-
 export default function OrdersTabs() {
     const [activeTab, setActiveTab] = useState('Todos');
     const [filters, setFilters] = useState({
@@ -126,9 +124,7 @@ export default function OrdersTabs() {
         dateFrom: '',
         dateTo: ''
     });
-
     const tabs = ['Todos', 'Pendientes', 'Pagados', 'Enviados', 'Devueltos'];
-
     const filteredOrders = orders.filter((order) => {
         if (activeTab === 'Todos') return true;
         if (activeTab === 'Pendientes') return order.status === 'Pendiente de pago';
@@ -137,7 +133,6 @@ export default function OrdersTabs() {
         if (activeTab === 'Devueltos') return order.status === 'Devuelto';
         return false;
     });
-
     return (
         <div>
             {/* Tabs Navigation */}
@@ -161,7 +156,6 @@ export default function OrdersTabs() {
                     </button>
                 ))}
             </div>
-
             {/* Orders Table */}
             <OrdersTable orders={filteredOrders} filters={filters} setFilters={setFilters} />
         </div>

@@ -1,7 +1,6 @@
 'use client';
 import { FiSearch, FiFilter, FiEdit, FiTrash2, FiEye, FiChevronDown } from 'react-icons/fi';
 import { useState } from 'react';
-
 export default function OrdersTable({ orders = [] }) {
     const [activeTab, setActiveTab] = useState('all');
     const [filters, setFilters] = useState({
@@ -13,7 +12,6 @@ export default function OrdersTable({ orders = [] }) {
         dateFrom: '',
         dateTo: ''
     });
-
     // Filter orders based on active tab and search criteria
     const filteredOrders = orders.filter(order => {
         // Status filter
@@ -23,7 +21,6 @@ export default function OrdersTable({ orders = [] }) {
             (activeTab === 'paid' && order.status === 'Pago aceptado') ||
             (activeTab === 'shipped' && order.status === 'Enviado') ||
             (activeTab === 'returned' && order.status === 'Devuelto');
-
         // Search filters
         const searchMatch =
             order.id.toString().includes(filters.searchId) &&
@@ -31,15 +28,12 @@ export default function OrdersTable({ orders = [] }) {
             order.customer.toLowerCase().includes(filters.searchCustomer.toLowerCase()) &&
             order.total.toLowerCase().includes(filters.searchTotal.toLowerCase()) &&
             order.payment.toLowerCase().includes(filters.searchPayment.toLowerCase());
-
         // Date filters
         const dateMatch =
             (filters.dateFrom === '' || new Date(order.date) >= new Date(filters.dateFrom)) &&
             (filters.dateTo === '' || new Date(order.date) <= new Date(filters.dateTo));
-
         return statusMatch && searchMatch && dateMatch;
     });
-
     // Count orders by status
     const statusCounts = {
         all: orders.length,
@@ -48,7 +42,6 @@ export default function OrdersTable({ orders = [] }) {
         shipped: orders.filter(o => o.status === 'Enviado').length,
         returned: orders.filter(o => o.status === 'Devuelto').length
     };
-
     return (
         <div className="bg-white rounded-lg shadow">
             {/* Status Tabs */}
@@ -71,7 +64,6 @@ export default function OrdersTable({ orders = [] }) {
                     </button>
                 ))}
             </div>
-
             {/* Search and Filters */}
             <div className="p-4 border-b border-gray-200">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
@@ -167,7 +159,6 @@ export default function OrdersTable({ orders = [] }) {
                     </div>
                 </div>
             </div>
-
             {/* Orders Table */}
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -235,7 +226,6 @@ export default function OrdersTable({ orders = [] }) {
                     </tbody>
                 </table>
             </div>
-
             {/* Pagination */}
             <div className="px-6 py-4 flex items-center justify-between border-t border-gray-200">
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
