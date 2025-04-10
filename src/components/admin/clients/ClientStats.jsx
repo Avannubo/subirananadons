@@ -1,37 +1,39 @@
 'use client';
 import { FiUser, FiCalendar, FiShoppingBag, FiMail } from 'react-icons/fi';
 
-export default function OrdersStats() {
+export default function ClientsStats() {
+    // These would likely come from props or API in a real app
     const stats = [
         {
             icon: <FiUser className="text-blue-600 text-xl" />,
-            title: "Pedidos totales",
-            value: "10",
-            description: "Últimos 30 días",
+            title: "Clientes",
+            value: "5 Clientes",
+            description: "Todo el tiempo",
             bgColor: "bg-blue-100"
         },
         {
             icon: <FiCalendar className="text-green-600 text-xl" />,
-            title: "Pedidos completados",
-            value: "25",
-            description: "Últimos 30 días",
+            title: "Media de edad",
+            value: "71 años",
+            description: "Todo el tiempo",
             bgColor: "bg-green-100"
         },
         {
             icon: <FiShoppingBag className="text-yellow-600 text-xl" />,
-            title: "Pedidos pendientes",
-            value: "5",
-            description: "Últimos 30 días",
+            title: "Pedidos por cliente",
+            value: "0.69",
+            description: "Todo el tiempo",
             bgColor: "bg-yellow-100"
         },
         {
             icon: <FiMail className="text-purple-600 text-xl" />,
-            title: "Consultas de clientes",
-            value: "50",
-            description: "Últimos 30 días",
+            title: "Inscripciones al boletín",
+            value: "1478",
+            description: "Todo el tiempo",
             bgColor: "bg-purple-100"
         }
     ];
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             {stats.map((stat, index) => (

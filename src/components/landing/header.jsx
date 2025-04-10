@@ -5,7 +5,7 @@ export default function Page() {
     return (
         <div className="fixed top-0 z-50 w-full bg-white shadow-md p-5">
             <div className="flex flex-col justify-center ">
-                <div className="w-[1500px] self-center flex flex-row justify-between items-center ">
+                <div className="w-full self-center flex flex-row justify-between items-center ">
                     {/* add a hamburger menu */}
                     <div className=" flex justify-between items-center px-4 py-3 w-[300px]">
                         <MenuVertical />

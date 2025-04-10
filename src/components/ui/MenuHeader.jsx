@@ -211,14 +211,14 @@ export default function Menu() {
                 className={`fixed top-0 left-0 w-[50vh] h-full bg-white text-[#353535] z-20 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
-                <div className="p-4 py-8 h-full flex flex-col ">
+                <div className="p-4 pb-8 h-full flex flex-col ">
                     <Link href="/" className="flex items-center mb-4">
                     <Image
                         src="/assets/logo-header.svg"
                         alt="logo"
-                        width={280}
+                        width={400}
                         height={150}
-                        className="mb-4 mt-6"
+                        className="mb-4 mt-2"
                     /></Link>
                     <nav className="flex-1 overflow-y-scroll " style={{ scrollbarWidth: 'none'  }}>
                         <ul className=" ">
