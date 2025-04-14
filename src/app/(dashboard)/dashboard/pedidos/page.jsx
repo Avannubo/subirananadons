@@ -1,6 +1,6 @@
-import AdminLayout from '@/app/(dashboard)/dashboard/admin-layout';
+import AdminLayout from '@/components/Layouts/admin-layout';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers'; 
+import { cookies } from 'next/headers';
 import OrdersTabs from '@/components/admin/orders/OrdersTabs';
 import OrdersStats from '@/components/admin/orders/OrdersStats';
 export default async function Page() {

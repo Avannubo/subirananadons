@@ -1,4 +1,4 @@
-import AdminLayout from '@/app/(dashboard)/dashboard/admin-layout';
+import AdminLayout from '@/components/Layouts/admin-layout';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import ProductTabs from '@/components/admin/products/ProductTabs';

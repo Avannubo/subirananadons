@@ -21,14 +21,21 @@ export const POST = async (request) => {
             return new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 });
         }
 
-        // Generate a JWT token
-        const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
+        // Check if the user is an admin and include the admin status in the token payload
+        const isAdmin = user.role === 'admin'; // Assuming `role` field exists in the user model
+
+        // Generate a JWT token with admin status
+        const token = jwt.sign(
+            { id: user._id, email: user.email },
+            SECRET_KEY,
+            { expiresIn: '12h' }
+        );
 
         // Set the token in an HTTP-only cookie
         return new Response(JSON.stringify({ message: 'Login successful' }), {
             status: 200,
             headers: {
-                'Set-Cookie': `token=${token}; HttpOnly; Path=/; Max-Age=3600;`
+            'Set-Cookie': `token=${token}; HttpOnly; Path=/; Max-Age=100000;`
             }
         });
     } catch (error) {

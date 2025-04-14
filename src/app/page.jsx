@@ -1,7 +1,7 @@
 import FadeSlider from "@/components/landing/FadeSlider";
 import ImageGallery from "@/components/landing/ImageGalaryHome";
 import ProductSlider from "@/components/landing/ProductSlider";
-import ShopLayout from "./(shop)/shop-layout";
+import ShopLayout from "../components/Layouts/shop-layout";
 
 
 export default function Home() {
@@ -33,7 +33,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                 </div>
-                <h3 className="text-md font-bold text-gray-700 mb-2">Crea llista</h3> 
+                <h3 className="text-md font-bold text-gray-700 mb-2">Crea llista</h3>
               </div>
 
               {/* Feature 2 */}
@@ -43,7 +43,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </div>
-                <h3 className="text-md font-bold text-gray-700 mb-2">Afegeix els teus favorits</h3> 
+                <h3 className="text-md font-bold text-gray-700 mb-2">Afegeix els teus favorits</h3>
               </div>
 
               {/* Feature 3 */}
@@ -53,7 +53,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </div>
-                <h3 className="text-md font-bold text-gray-700 mb-2">Comparteix la llista</h3> 
+                <h3 className="text-md font-bold text-gray-700 mb-2">Comparteix la llista</h3>
               </div>
 
               {/* Feature 4 */}
@@ -63,7 +63,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m8-8v13m-8 0V8m-8 8v13" />
                   </svg>
                 </div>
-                <h3 className="text-md font-bold text-gray-700 mb-2">Rep els regals</h3> 
+                <h3 className="text-md font-bold text-gray-700 mb-2">Rep els regals</h3>
               </div>
             </div>
           </div>

@@ -24,7 +24,7 @@ export default function TransportistasTab() {
         <div className="space-y-12 ">
 
             <div className="overflow-x-auto">
-            <h2 className="text-xl font-semibold mb-4">Transportistas</h2>
+                <h2 className="text-xl font-semibold mb-4">Transportistas</h2>
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
@@ -59,7 +59,7 @@ export default function TransportistasTab() {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{t.posicion}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <button className="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
+                                    <button className="text-[#00B0C8] hover:text-[#00b1c8ad] mr-3">Editar</button>
                                     <button className="text-red-600 hover:text-red-900">Eliminar</button>
                                 </td>
                             </tr>

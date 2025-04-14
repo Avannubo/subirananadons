@@ -6,6 +6,12 @@ export async function middleware(request) {
     if (!session) {
         return NextResponse.redirect(new URL("/", request.url));
     }
+
+    // Check if the user is an admin
+    if (!session.user.isAdmin) {
+        return NextResponse.redirect(new URL("/not-authorized", request.url));
+    }
+
     return NextResponse.next();
 }
 

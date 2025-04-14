@@ -38,7 +38,7 @@ export default function PagoTab() {
                                                     <input
                                                         type="checkbox"
                                                         defaultChecked={module.currencies.includes(currency)}
-                                                        className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                                        className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded"
                                                     />
                                                 </td>
                                             </tr>
@@ -74,7 +74,7 @@ export default function PagoTab() {
                                                     <input
                                                         type="checkbox"
                                                         defaultChecked={module.groups.includes(group)}
-                                                        className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                                        className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded"
                                                     />
                                                 </td>
                                             </tr>
@@ -104,7 +104,7 @@ export default function PagoTab() {
                                                         <input
                                                             type="checkbox"
                                                             defaultChecked={module.countries.includes(countryCode)}
-                                                            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                                            className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded"
                                                         />
                                                     </td>
                                                 </tr>
@@ -132,7 +132,7 @@ export default function PagoTab() {
                                                 <input
                                                     type="checkbox"
                                                     defaultChecked={module.carriers.includes(47)}
-                                                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                                    className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded"
                                                 />
                                             </td>
                                         </tr>
@@ -142,7 +142,7 @@ export default function PagoTab() {
                                                 <input
                                                     type="checkbox"
                                                     defaultChecked={module.carriers.includes(48)}
-                                                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                                    className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded"
                                                 />
                                             </td>
                                         </tr>

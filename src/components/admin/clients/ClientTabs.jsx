@@ -153,7 +153,7 @@ export default function ClientsTabs() {
                     <div className=" flex justify-center gap-4">
                         {/* Date filters */}
                         <div className="flex items-end space-x-2">
-                            <button className="flex items-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-blue-700">
+                            <button className="flex items-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]">
                                 <FiFilter className="mr-2" />
                                 Buscar
                             </button>

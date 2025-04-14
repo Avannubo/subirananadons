@@ -1,6 +1,6 @@
-import AdminLayout from '@/app/(dashboard)/dashboard/admin-layout';
+import AdminLayout from '@/components/Layouts/admin-layout';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers'; 
+import { cookies } from 'next/headers';
 import SettingsTabs from '@/components/admin/settings/SettingsTabs';
 export default async function SettingsPage() {
     const cookieStore = cookies()

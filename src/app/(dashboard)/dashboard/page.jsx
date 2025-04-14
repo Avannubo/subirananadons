@@ -1,17 +1,15 @@
-import AdminLayout from './admin-layout';
+import AdminLayout from '@/components/Layouts/admin-layout';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import BarChart from '@/components/admin/charts/BarChart';
 import LineChart from '@/components/admin/charts/LineChart';
 import ChartContainer from '@/components/admin/charts/ChartContainer';
-
 export default async function Page() {
     const cookieStore = cookies();
     const token = await cookieStore.has('token');
     if (!token) {
         redirect('/');
     }
-
     const barData = {
         labels: ['January', 'February', 'March', 'April', 'May', 'June'],
         datasets: [
@@ -24,7 +22,6 @@ export default async function Page() {
             },
         ],
     };
-
     const lineData = {
         labels: ['January', 'February', 'March', 'April', 'May', 'June'],
         datasets: [
@@ -37,11 +34,9 @@ export default async function Page() {
             },
         ],
     };
-
     return (
         <AdminLayout>
             <h1 className="text-4xl font-bold text-start mb-8">Inicio</h1>
-
             <div className="grid grid-cols-2 gap-6">
                 <ChartContainer title="Client Orders Statistics">
                     <BarChart
@@ -56,7 +51,6 @@ export default async function Page() {
                         }}
                     />
                 </ChartContainer>
-
                 <ChartContainer title="Page Visits Statistics">
                     <LineChart
                         data={lineData}

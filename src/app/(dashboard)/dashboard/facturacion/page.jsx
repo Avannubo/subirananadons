@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
-import AdminLayout from '@/app/(dashboard)/dashboard/admin-layout';
+import AdminLayout from '@/components/Layouts/admin-layout';
 import BillTabs from '@/components/admin/bills/BillsTabs';
-import BillsStats from '@/components/admin/bills/BillsStats'; 
+import BillsStats from '@/components/admin/bills/BillsStats';
 export default async function Page() {
     const cookieStore = cookies()
     const token = await cookieStore.has('token');

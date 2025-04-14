@@ -376,7 +376,7 @@ export default function AuthModal() {
                                     <div className="flex justify-center space-x-2">
                                         <button
                                             type="button"
-                                            className="p-2 rounded-none bg-blue-700 hover:bg-[#00B0C8] transition-colors"
+                                            className="p-2 rounded-none bg-[#00B0C890] hover:bg-[#00B0C8] transition-colors"
                                         >
                                             <span className="sr-only">Facebook</span>
                                             <svg fill="#ffffff" width="14px" height="14px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
