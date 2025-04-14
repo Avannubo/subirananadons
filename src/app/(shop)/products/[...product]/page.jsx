@@ -1,4 +1,3 @@
-
 import ShopLayout from "@/components/Layouts/shop-layout";
 export default function Page() {
     return (
