@@ -24,9 +24,9 @@ export default function Page() {
                     {/* Icon stack for search, account, and cart icons */}
                     <div className=" w-[300px] flex justify-end space-x-4">
                         {/* Search Icon */}
-                        <button className="p-1 flex justify-center items-center">
+                        <Link href="/search" className="p-1 flex justify-center items-center">
                             <svg width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#353535" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
-                        </button>
+                        </Link>
                         {/* Account Icon */}
                         <UserAuth /> 
                         {/* Cart Icon */}

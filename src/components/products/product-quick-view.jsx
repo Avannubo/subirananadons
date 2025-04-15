@@ -1,5 +1,4 @@
 'use client';
-
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -116,7 +115,7 @@ export default function ProductQuickView({ product, onClose }) {
                                 {thumbnailImages.map((thumb, index) => (
                                     <div
                                         key={index}
-                                        className={`relative w-16 h-16 border rounded overflow-hidden cursor-pointer ${selectedImage === thumb ? 'border-black border-2' : 'border-gray-200'}`}
+                                        className={`relative w-16 h-16 border rounded overflow-hidden cursor-pointer ${selectedImage === thumb ? 'border-[#00B0C8] border-2' : 'border-gray-200'}`}
                                         onClick={() => handleThumbnailClick(thumb)}
                                     >
                                         <Image

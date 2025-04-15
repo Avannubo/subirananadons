@@ -316,13 +316,13 @@ export default function Page() {
 
     return (
         <ShopLayout>
-            <div className="relative w-full h-full flex flex-col justify-start items-start mt-20">
+            <div className="relative w-[1500px] h-full flex flex-col justify-start items-start mt-20">
                 <Image src="/assets/images/bg-beagrumb.jpg" alt="logo" className="w-full h-[20vh] object-cover" width={2010} height={2010} />
                 <div className="absolute inset-0 flex items-center mt-14 justify-center">
                     <h1 className="text-4xl text-zinc-800 font-bold">Tienda</h1>
                 </div>
             </div>
-            <div className="container w-full max-w-6xl mx-auto px-4 py-8">
+            <div className="container w-[1500px] bg-white  px-4 py-8">
                 {/* Breadcrumbs */}
                 <nav aria-label="Breadcrumb" className="mb-6">
                     <ol className="flex items-center space-x-1 text-sm text-gray-500 flex-wrap">

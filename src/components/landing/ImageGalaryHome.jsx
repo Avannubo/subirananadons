@@ -34,7 +34,7 @@ const ImageGallery = () => {
 
     return (
         <div className="w-screen  bg-white">
-            <div className="container w-[1300px] mt-20 mx-auto py-12">
+            <div className="container w-[1500px] mt-20 mx-auto py-12">
                 {/* First Row - 60/40 Split */}
                 <div className="flex flex-col md:flex-row gap-6 mb-6">
                     {galleryItems.slice(0, 2).map((item) => (

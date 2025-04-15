@@ -4,11 +4,10 @@ export default function ShopLayout({ children }) {
     return (
         <>
             <Header />
-            <div className="flex flex-col justify-center items-center w-full h-full bg-[#F5F5F5]">
-                <div className="flex flex-col justify-center items-center w-full h-full bg-[#F5F5F5]">
+            <div className="flex flex-col justify-center items-center w-full h-full bg-white">
+                <div className="flex flex-col justify-center items-center w-full ">
                     {children}
-                </div>
-
+                </div> 
             </div> 
             <Footer />
         </>
