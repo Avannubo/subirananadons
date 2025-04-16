@@ -14,10 +14,11 @@ export default function Menu() {
     // Dynamic menu data from JSON
     const menuData = {
         logo: "/assets/logo-header.svg",
-        items: [ 
+        items: [
             {
                 label: "Productos",
                 href: "/products",
+
                 // submenu: [
                 //     {
                 //         label: "Alimentación",
@@ -134,12 +135,16 @@ export default function Menu() {
                 //     }
                 // ]
             },
-            { label: "Marcas", href: "#" },
+            { label: "Marcas", href: "/brands" },
             {
-                label: "Listas de nacimientos", 
+                label: "Listas de nacimientos",
                 href: "/listas-de-nacimiento"
             },
-            { label: "Contacto", href: "#" },
+            {
+                label: "Recomendaciones",
+                href: "/recomendations"
+            },
+            { label: "Contacto", href: "/contact" },
         ]
     };
 
@@ -215,14 +220,14 @@ export default function Menu() {
             >
                 <div className="p-4 pb-8 h-full flex flex-col ">
                     <Link href="/" className="flex items-center mb-4">
-                    <Image
-                        src="/assets/logo-header.svg"
-                        alt="logo"
-                        width={400}
-                        height={150}
-                        className="mb-4 mt-2"
-                    /></Link>
-                    <nav className="flex-1 overflow-y-scroll " style={{ scrollbarWidth: 'none'  }}>
+                        <Image
+                            src="/assets/logo-header.svg"
+                            alt="logo"
+                            width={400}
+                            height={150}
+                            className="mb-4 mt-2"
+                        /></Link>
+                    <nav className="flex-1 overflow-y-scroll " style={{ scrollbarWidth: 'none' }}>
                         <ul className=" ">
                             {renderMenuItems(menuData.items)}
                         </ul>
