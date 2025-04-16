@@ -21,41 +21,96 @@ const product = {
     ],
     category: "Habitación"
 };
-// Sample related products
 const relatedProducts = [
     {
         id: 1,
-        name: "Bajera Capazo Con Saca Babitas Verde",
-        price: "22,85 €",
-        image: "/assets/images/screenshot_1.png",
-        hoverImage: "/assets/images/screenshot_7.png",
-        category: "Habitación"
+        name: 'Tripp Trapp Natural',
+        price: '259,00 €',
+        priceValue: 259.00,
+        image: '/assets/images/screenshot_1.png',
+        hoverImage: '/assets/images/screenshot_1.png',
+        category: 'Habitación',
+        brand: 'Stokke',
+        description: 'La trona que crece con tu hijo'
     },
     {
         id: 2,
-        name: "Bajera Capazo Con Saca Babitas Blanco",
-        price: "22,85 €",
-        image: "/assets/images/screenshot_2.png",
-        hoverImage: "/assets/images/screenshot_3.png",
-        category: "Habitación"
+        name: 'Stokke Xplory X Royal Blue',
+        price: '1099,00 €',
+        priceValue: 1099.00,
+        image: '/assets/images/screenshot_2.png',
+        hoverImage: '/assets/images/screenshot_2.png',
+        category: 'Cochecitos',
+        brand: 'Stokke',
+        description: 'Cochecito premium con diseño elegante'
     },
     {
         id: 3,
-        name: "Babitas Cotton",
-        price: "10,30 €",
-        image: "/assets/images/screenshot_3.png",
-        hoverImage: "/assets/images/screenshot_2.png",
-        category: "Habitación"
+        name: 'Cuna Sleepi Natural',
+        price: '799,00 €',
+        priceValue: 799.00,
+        image: '/assets/images/screenshot_3.png',
+        hoverImage: '/assets/images/screenshot_3.png',
+        category: 'Habitación',
+        brand: 'Stokke',
+        description: 'Cuna evolutiva que se adapta al crecimiento'
     },
     {
         id: 4,
-        name: "Bajera Capazo Con Saca Babitas Rosa",
-        price: "22,85 €",
-        image: "/assets/images/screenshot_4.png",
-        hoverImage: "/assets/images/screenshot_1.png",
-        category: "Habitación"
+        name: 'Saco Xplory X Royal Blue',
+        price: '169,00 €',
+        priceValue: 169.00,
+        image: '/assets/images/screenshot_4.png',
+        hoverImage: '/assets/images/screenshot_4.png',
+        category: 'Accesorios',
+        brand: 'Stokke',
+        description: 'Saco de invierno para cochecito'
+    },
+    {
+        id: 5,
+        name: 'Steps Bouncer Gris',
+        price: '199,00 €',
+        priceValue: 199.00,
+        image: '/assets/images/screenshot_1.png',
+        hoverImage: '/assets/images/screenshot_2.png',
+        category: 'Habitación',
+        brand: 'Stokke',
+        description: 'Hamaca ergonómica para bebés'
+    },
+    {
+        id: 6,
+        name: 'Cambiador Sleepi Natural',
+        price: '89,00 €',
+        priceValue: 89.00,
+        image: '/assets/images/screenshot_3.png',
+        hoverImage: '/assets/images/screenshot_4.png',
+        category: 'Habitación',
+        brand: 'Stokke',
+        description: 'Cambiador para cuna Sleepi'
+    },
+    {
+        id: 7,
+        name: 'Organizador Xplory X',
+        price: '39,00 €',
+        priceValue: 39.00,
+        image: '/assets/images/screenshot_2.png',
+        hoverImage: '/assets/images/screenshot_1.png',
+        category: 'Accesorios',
+        brand: 'Stokke',
+        description: 'Organizador para cochecito'
+    },
+    {
+        id: 8,
+        name: 'Cojín Steps Baby',
+        price: '49,00 €',
+        priceValue: 49.00,
+        image: '/assets/images/screenshot_3.png',
+        hoverImage: '/assets/images/screenshot_2.png',
+        category: 'Accesorios',
+        brand: 'Stokke',
+        description: 'Cojín para trona Steps'
     }
-];
+]; 
 
 export default function Page() {
     const [selectedImage, setSelectedImage] = useState(0);

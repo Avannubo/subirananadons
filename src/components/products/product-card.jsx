@@ -44,7 +44,7 @@ export default function ProductCard({ product, viewMode, onQuickViewClick }) {
                             alt={product.name}
                             layout="fill"
                             objectFit="cover"
-                            className="transition-opacity duration-300 ease-in-out"
+                            className="transition-opacity duration-300 ease-in-out rounded-lg"
                         />
                         {/* Hover Overlay Buttons */}
                         <div className="absolute bottom-2 left-2 flex items-center justify-center space-x-3 bg-opacity-0 group-hover:bg-opacity-70 opacity-0 group-hover:opacity-100 transition-all duration-300">

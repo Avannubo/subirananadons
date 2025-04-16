@@ -130,27 +130,10 @@ export default function BirthListsPage() {
 
             <div className="container mx-auto px-4 py-12">
                 {/* Create New List CTA */}
-                <motion.div
-                    className="bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                >
-                    <div className="flex flex-col md:flex-row items-center justify-between">
-                        <div>
-                            <h2 className="text-2xl font-bold mb-2">¿Esperando un bebé?</h2>
-                            <p className="text-white/90">Crea tu propia lista de nacimiento y compártela con tus seres queridos</p>
-                        </div>
-                        <Link
-                            href="/listas-de-nacimiento/crear"
-                            className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
-                        >
-                            Crear Lista
-                        </Link>
-                    </div>
-                </motion.div>
 
-                {/* Birth Lists Grid */}
+
+
+
                 <div className="mb-16">
                     <h2 className="text-2xl font-bold mb-8">Listas Activas</h2>
                     {filteredLists.length > 0 ? (
@@ -208,9 +191,27 @@ export default function BirthListsPage() {
                         </motion.div>
                     )}
                 </div>
-
+                <motion.div
+                    className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                >
+                    <div className="flex flex-col  items-start justify-start space-y-4">
+                        <div>
+                            <h2 className="text-2xl font-bold mb-2">¿Esperando un bebé?</h2>
+                            <p className="text-white/90">Crea tu propia lista de nacimiento y compártela con tus seres queridos. Es fácil, rápido y te ayudará a organizar todo lo que necesitas para la llegada de tu bebé.</p>
+                        </div>
+                        <Link
+                            href="/listas-de-nacimiento/crear"
+                            className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
+                        >
+                            Crear Lista
+                        </Link>
+                    </div>
+                </motion.div>
                 {/* Featured Products Section */}
-                <div>
+                <div className='my-16'>
                     <h2 className="text-2xl font-bold mb-8">Productos Más Solicitados</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {featuredProducts.map((product) => (
@@ -252,7 +253,25 @@ export default function BirthListsPage() {
                         ))}
                     </div>
                 </div>
-
+                <motion.div
+                    className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                >
+                    <div className="flex flex-col  items-start justify-start space-y-4">
+                        <div>
+                            <h2 className="text-2xl font-bold mb-2">¿No sabes qué comprar?</h2>
+                            <p className="text-white/90">Mira los productos esenciales y más comprados para un primer comprador en nuestra página de recomendaciones. Encuentra inspiración y asegúrate de elegir lo mejor para el bebé.</p>
+                        </div>
+                        <Link
+                            href="/recomendations"
+                            className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
+                        >
+                            Ver Recomendaciones
+                        </Link>
+                    </div>
+                </motion.div>
                 {/* How It Works Section */}
                 <motion.div
                     className="mt-16 py-12 bg-gray-50 rounded-lg"

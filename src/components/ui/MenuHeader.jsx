@@ -16,134 +16,18 @@ export default function Menu() {
         logo: "/assets/logo-header.svg",
         items: [
             {
-                label: "Productos",
-                href: "/products",
-
-                // submenu: [
-                //     {
-                //         label: "Alimentación",
-                //         submenu: [
-                //             { label: "Tronas de viaje" },
-                //             { label: "Robots de cocina" },
-                //             { label: "Platos y cubiertos" },
-                //             { label: "Botellas y vasos" },
-                //             { label: "Baberos" },
-                //             { label: "Botes y fiambreras" },
-                //             { label: "Termos" },
-                //             { label: "Lactancia" }
-                //         ]
-                //     },
-                //     {
-                //         label: "Baño",
-                //         submenu: [
-                //             { label: "Accesorios baño" },
-                //             { label: "Kits higiene y cosmética" },
-                //             { label: "Cajas toallitas" },
-                //             { label: "Pañales y contenedores pañales" },
-                //             { label: "Orinales y reductores WC" }
-                //         ]
-                //     },
-                //     {
-                //         label: "Casa",
-                //         submenu: [
-                //             { label: "Intercomunicadores" },
-                //             { label: "Tronas" },
-                //             { label: "Barandillas de escalera" },
-                //             { label: "Hamacas" }
-                //         ]
-                //     },
-                //     {
-                //         label: "Habitación",
-                //         submenu: [
-                //             { label: "Cuna, colecho y moisés" },
-                //             { label: "Mobiliario" },
-                //             { label: "Colchones y protectores" },
-                //             { label: "Téxtil" },
-                //             { label: "Cambiadores y fundas" },
-                //             { label: "Luces y decoración" },
-                //             { label: "Barreras cama" }
-                //         ]
-                //     },
-                //     {
-                //         label: "Gemelos", href: "#"
-                //     },
-                //     {
-                //         label: "Madres",
-                //         submenu: [
-                //             { label: "Ropa embarazo y porteo" },
-                //             { label: "Sujetadores embarazo i lactancia" },
-                //             { label: "Basicos embarazo" },
-                //             { label: "Basicos hospital" }]
-                //     },
-                //     {
-                //         label: "Cochecitos",
-                //         submenu: [
-                //             { label: "Sillas de paseo" },
-                //             { label: "Accesorios cochecito" }
-                //         ]
-                //     },
-                //     {
-                //         label: "Entretenimientos",
-                //         submenu: [
-                //             { label: "Doudous y peluches" },
-                //             { label: "Botellas sensoriales" },
-                //             { label: "Alfombras de actividades" },
-                //             { label: "Bolsa almacenaje" },
-                //             { label: "Mordedores" },
-                //             { label: "Varios" }
-                //         ]
-                //     },
-                //     {
-                //         label: "Salud",
-                //         submenu: [
-                //             { label: "Aspirador nasal" },
-                //             { label: "Termómetros" },
-                //             { label: "Humidificadores" },
-                //             { label: "Cojines" },
-                //             { label: "Cojines cabeza plana" },
-                //             { label: "Casco antiruido" }
-                //         ]
-                //     },
-                //     {
-                //         label: "Sillas De Coche",
-                //         submenu: [
-                //             { label: "Grupo 0+" },
-                //             { label: "Grupo 0-1" },
-                //             { label: "Grupo 0-1 - 2" },
-                //             { label: "Grupo 0-1 - 2 - 3" },
-                //             { label: "Grupo 2-3" },
-                //             { label: "Fundas silla" },
-                //             { label: "Accesorios coche" }
-                //         ]
-                //     },
-                //     {
-                //         label: "Otros Productos",
-                //         submenu: [
-                //             { label: "Mochilas" },
-                //             { label: "Fulares y bandoleras" },
-                //             { label: "Ropa porteo" },
-                //             { label: "Cunas de viaje" },
-                //             { label: "Ropa bebé" },
-                //             { label: "Bolsas maternales" },
-                //             { label: "Bolsas muda" },
-                //             { label: "Porta Documentos" },
-                //             { label: "Mochilas infantiles" },
-                //             { label: "Arrullos" },
-                //             { label: "Silla para bici" },
-                //             { label: "Cambiadores de viaje" }
-                //         ]
-                //     }
-                // ]
+                label: "Tienda",
+                href: "/products", 
             },
             { label: "Marcas", href: "/brands" },
             {
                 label: "Listas de nacimientos",
                 href: "/listas-de-nacimiento"
             },
-            {
-                label: "Recomendaciones",
-                href: "/recomendations"
-            },
+           // {
+          //      label: "Recomendaciones",
+          //      href: "/recomendations"
+          //  },
             { label: "Contacto", href: "/contact" },
         ]
     };
