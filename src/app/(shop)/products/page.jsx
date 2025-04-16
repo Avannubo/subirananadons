@@ -322,10 +322,10 @@ export default function Page() {
                     <h1 className="text-4xl text-zinc-800 font-bold">Tienda</h1>
                 </div>
             </div>
-            <div className="container w-[1500px] bg-white  px-4 py-8">
+            <div className="container w-[1500px] bg-white   px-4 py-8">
                 {/* Breadcrumbs */}
-                <nav aria-label="Breadcrumb" className="mb-6">
-                    <ol className="flex items-center space-x-1 text-sm text-gray-500 flex-wrap">
+                <nav aria-label="Breadcrumb" className="mb-6 pl-2">
+                    <ol className="flex items-center space-x-1 text-md text-gray-500 flex-wrap">
                         {categoryPath.map((label, index) => (
                             <li key={index} className="flex items-center">
                                 {index > 0 && (
@@ -375,7 +375,7 @@ export default function Page() {
                                                     onClick={() => handleSiblingCategoryChange(siblingCategory.label)}
                                                     className={`w-full text-left px-2 py-1.5 rounded transition-colors duration-150 
                                                         ${siblingCategory.label === currentCategoryLabel
-                                                        ? 'text-[#00B0C8] font-semibold bg-gray-100'
+                                                            ? 'text-[#00B0C8] font-semibold bg-gray-100'
                                                             : 'text-gray-600 hover:bg-gray-100 hover:font-semibold'
                                                         }`}
                                                 >

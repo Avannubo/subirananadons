@@ -5,21 +5,27 @@ import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
+import ProductCard from "@/components/products/product-card";
+import ProductQuickView from "@/components/products/product-quick-view";
+
+// Helper function to parse price
+const parsePrice = (price) => {
+    return parseFloat(price.replace(/[^0-9,]/g, '').replace(',', '.'));
+};
 
 // Sample brands data - in production this would come from your API/database
 const brands = [
-    { id: 1, name: "Stokke", logo: "/assets/images/joie.png" },
-    { id: 2, name: "Joie", logo: "/assets/images/joie.png" },
-    { id: 3, name: "Cybex", logo: "/assets/images/joie.png" },
-    { id: 4, name: "Bugaboo", logo: "/assets/images/joie.png" },
-    { id: 5, name: "Babyzen", logo: "/assets/images/joie.png" },
-    { id: 6, name: "Uppababy", logo: "/assets/images/joie.png" },
-    { id: 7, name: "Nuna", logo: "/assets/images/joie.png" },
-    { id: 8, name: "Silver Cross", logo: "/assets/images/joie.png" },
-    { id: 9, name: "Maxi-Cosi", logo: "/assets/images/joie.png" },
-    { id: 10, name: "Britax", logo: "/assets/images/joie.png" },
-    { id: 11, name: "Chicco", logo: "/assets/images/joie.png" },
-
+    { id: 1, name: "Stokke", logo: "/assets/images/screenshot_1.png" },
+    { id: 2, name: "Joie", logo: "/assets/images/screenshot_2.png" },
+    { id: 3, name: "Cybex", logo: "/assets/images/screenshot_3.png" },
+    { id: 4, name: "Bugaboo", logo: "/assets/images/screenshot_4.png" },
+    { id: 5, name: "Babyzen", logo: "/assets/images/screenshot_1.png" },
+    { id: 6, name: "Uppababy", logo: "/assets/images/screenshot_2.png" },
+    { id: 7, name: "Nuna", logo: "/assets/images/screenshot_3.png" },
+    { id: 8, name: "Silver Cross", logo: "/assets/images/screenshot_4.png" },
+    { id: 9, name: "Maxi-Cosi", logo: "/assets/images/screenshot_1.png" },
+    { id: 10, name: "Britax", logo: "/assets/images/screenshot_2.png" },
+    { id: 11, name: "Chicco", logo: "/assets/images/screenshot_3.png" },
 ];
 
 // Sample products data - in production this would come from your API/database
@@ -27,92 +33,119 @@ const products = [
     {
         id: 1,
         name: "Tripp Trapp Natural",
+        category: "Habitación",
         price: "259,00 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: parsePrice("259,00 €"),
+        salesCount: 45,
+        imageUrl: "/assets/images/screenshot_1.png",
+        imageUrlHover: "/assets/images/screenshot_2.png",
         brand: "Stokke",
-        category: "Habitación"
+        description: "La silla que crece con tu hijo. Tripp Trapp® es una silla ergonómica de madera de haya que se puede usar desde el nacimiento."
     },
     {
         id: 2,
         name: "Newborn Set Tripp Trapp",
+        category: "Habitación",
         price: "99,00 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: parsePrice("99,00 €"),
+        salesCount: 30,
+        imageUrl: "/assets/images/screenshot_1.png",
+        imageUrlHover: "/assets/images/screenshot_2.png",
         brand: "Stokke",
-        category: "Habitación"
+        description: "El Set Recién Nacido Tripp Trapp® es el primer asiento elevado ergonómico que permite a tu bebé sentarse cómodamente a la mesa."
     },
     {
         id: 3,
         name: "Trona De Viaje Arlo",
+        category: "Alimentación",
         price: "49,90 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: parsePrice("49,90 €"),
+        salesCount: 25,
+        imageUrl: "/assets/images/screenshot_1.png",
+        imageUrlHover: "/assets/images/screenshot_2.png",
         brand: "Joie",
-        category: "Alimentación"
+        description: "Trona de viaje compacta y ligera, perfecta para usar en casa o fuera. Fácil de plegar y transportar."
     },
     {
         id: 4,
         name: "Stokke Xplory X Royal Blue",
+        category: "Cochecitos",
         price: "1099,00 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: parsePrice("1099,00 €"),
+        salesCount: 15,
+        imageUrl: "/assets/images/screenshot_1.png",
+        imageUrlHover: "/assets/images/screenshot_2.png",
         brand: "Stokke",
-        category: "Cochecitos"
+        description: "El cochecito más innovador con asiento elevado que acerca al bebé a sus padres. Diseño premium y máxima comodidad."
     },
     {
         id: 5,
         name: "Stokke Steps Chair Oak",
+        category: "Habitación",
         price: "259,00 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: parsePrice("259,00 €"),
+        salesCount: 35,
+        imageUrl: "/assets/images/screenshot_1.png",
+        imageUrlHover: "/assets/images/screenshot_2.png",
         brand: "Stokke",
-        category: "Habitación"
+        description: "Sistema de asiento modular que evoluciona con tu hijo, desde recién nacido hasta niño. Fabricada en madera de roble natural."
     },
     {
         id: 6,
         name: "Stokke Clikk High Chair",
+        category: "Habitación",
         price: "149,00 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: parsePrice("149,00 €"),
+        salesCount: 40,
+        imageUrl: "/assets/images/screenshot_1.png",
+        imageUrlHover: "/assets/images/screenshot_2.png",
         brand: "Stokke",
-        category: "Habitación"
+        description: "Trona moderna y funcional que se monta en un clic. Diseño ergonómico y fácil de limpiar."
     },
     {
         id: 7,
         name: "Stokke Sleepi Mini Bundle",
+        category: "Habitación",
         price: "789,00 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: parsePrice("789,00 €"),
+        salesCount: 20,
+        imageUrl: "/assets/images/screenshot_1.png",
+        imageUrlHover: "/assets/images/screenshot_2.png",
         brand: "Stokke",
-        category: "Habitación"
+        description: "Cuna evolutiva que crece con tu bebé. Incluye colchón y extensión para convertirla en cama infantil."
     },
     {
         id: 8,
         name: "Stokke Flexi Bath",
+        category: "Baño",
         price: "45,00 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: parsePrice("45,00 €"),
+        salesCount: 55,
+        imageUrl: "/assets/images/screenshot_1.png",
+        imageUrlHover: "/assets/images/screenshot_2.png",
         brand: "Stokke",
-        category: "Baño"
+        description: "Bañera plegable perfecta para el baño diario. Compacta y fácil de guardar, ideal para espacios pequeños."
     },
     {
         id: 9,
         name: "Stokke JetKids BedBox",
+        category: "Viaje",
         price: "159,00 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: parsePrice("159,00 €"),
+        salesCount: 28,
+        imageUrl: "/assets/images/screenshot_1.png",
+        imageUrlHover: "/assets/images/screenshot_2.png",
         brand: "Stokke",
-        category: "Viaje"
+        description: "Maleta-cama que hace que viajar con niños sea más fácil. Se convierte en una cama de avión para mayor comodidad."
     }
 ];
 
 export default function BrandsPage() {
     const [selectedBrand, setSelectedBrand] = useState(brands[0].name);
-    const [hoveredProduct, setHoveredProduct] = useState(null);
     const [viewMode, setViewMode] = useState('grid');
     const [sortBy, setSortBy] = useState('default');
     const [filteredProducts, setFilteredProducts] = useState([]);
+    const [quickViewProduct, setQuickViewProduct] = useState(null);
 
     useEffect(() => {
         let sorted = [...products].filter(product => !selectedBrand || product.brand === selectedBrand);
@@ -128,27 +161,21 @@ export default function BrandsPage() {
                 sorted.sort((a, b) => a.name.localeCompare(b.name));
                 break;
             case 'newest':
-                // In a real app, you'd sort by date
                 sorted.reverse();
                 break;
             default:
-                // Keep default order
                 break;
         }
 
         setFilteredProducts(sorted);
     }, [selectedBrand, sortBy]);
 
-    const handleQuickView = (e, product) => {
-        e.preventDefault();
-        // Implement quick view functionality
-        console.log('Quick view:', product);
+    const handleOpenQuickView = (product) => {
+        setQuickViewProduct(product);
     };
 
-    const handleAddToCart = (e, product) => {
-        e.preventDefault();
-        // Implement add to cart functionality
-        console.log('Add to cart:', product);
+    const handleCloseQuickView = () => {
+        setQuickViewProduct(null);
     };
 
     const handleSortChange = (e) => {
@@ -184,7 +211,7 @@ export default function BrandsPage() {
 
             <div className="container mx-auto px-4 py-8">
                 {/* Breadcrumb */}
-                <motion.nav
+                {/*   <motion.nav
                     className="mb-8"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -195,7 +222,7 @@ export default function BrandsPage() {
                         <li><span className="mx-2">/</span></li>
                         <li className="text-gray-900 font-medium">Marcas</li>
                     </ol>
-                </motion.nav>
+                </motion.nav>*/}
 
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Brands Sidebar */}
@@ -299,86 +326,26 @@ export default function BrandsPage() {
                                 }`}
                         >
                             {filteredProducts.map((product, index) => (
-                                <motion.div
+                                <ProductCard
                                     key={product.id}
-                                    layout
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{
-                                        layout: { duration: 0.3 },
-                                        opacity: { delay: 0.1 * index, duration: 0.3 }
-                                    }}
-                                >
-                                    <Link
-                                        href={`/products/${product.category.toLowerCase()}/${product.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                        className={`group relative overflow-hidden duration-300 flex ${viewMode === 'grid' ? 'flex-col' : 'flex-row gap-6'
-                                            }`}
-                                        onMouseEnter={() => setHoveredProduct(product.id)}
-                                        onMouseLeave={() => setHoveredProduct(null)}
-                                    >
-                                        {/* Image Container with Hover Effect */}
-                                        <div className={`aspect-square relative overflow-hidden   ${viewMode === 'list' ? 'w-1/3' : 'w-full'
-                                            }`}>
-                                            {/* Main Image */}
-                                            <Image
-                                                src={product.image}
-                                                alt={product.name}
-                                                fill
-                                                className={`object-cover transition-opacity duration-500 ${hoveredProduct === product.id ? 'opacity-0' : 'opacity-100'}`}
-                                            />
-
-                                            {/* Hover Image */}
-                                            <Image
-                                                src={product.hoverImage || product.image}
-                                                alt={`${product.name} - hover`}
-                                                fill
-                                                className={`object-cover transition-opacity duration-500 ${hoveredProduct === product.id ? 'opacity-100' : 'opacity-0'}`}
-                                            />
-
-                                            {/* Action Buttons */}
-                                            <div className="absolute bottom-0 left-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                <div className="flex flex-row justify-center space-x-2">
-                                                    <button
-                                                        className="bg-white text-primary font-bold rounded-full hover:bg-gray-100 transition-colors p-2 shadow-lg"
-                                                        onClick={(e) => handleQuickView(e, product)}
-                                                    >
-                                                        {/* Quick View Icon */}
-                                                        <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none">
-                                                            <circle cx="10.5" cy="10.5" r="6.5" stroke="#000000" strokeLinejoin="round" />
-                                                            <path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="#000000" />
-                                                        </svg>
-                                                    </button>
-                                                    <button
-                                                        className="bg-white text-primary font-bold rounded-full hover:bg-gray-100 transition-colors p-2 shadow-lg"
-                                                        onClick={(e) => handleAddToCart(e, product)}
-                                                    >
-                                                        {/* Add to Cart Icon */}
-                                                        <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none">
-                                                            <path d="M7.5 18C8.32843 18 9 18.6716 9 19.5C9 20.3284 8.32843 21 7.5 21C6.67157 21 6 20.3284 6 19.5C6 18.6716 6.67157 18 7.5 18Z" stroke="#000000" strokeWidth="1.5" />
-                                                            <path d="M16.5 18.0001C17.3284 18.0001 18 18.6716 18 19.5001C18 20.3285 17.3284 21.0001 16.5 21.0001C15.6716 21.0001 15 20.3285 15 19.5001C15 18.6716 15.6716 18.0001 16.5 18.0001Z" stroke="#000000" strokeWidth="1.5" />
-                                                            <path d="M2 3L2.26121 3.09184C3.5628 3.54945 4.2136 3.77826 4.58584 4.32298C4.95808 4.86771 4.95808 5.59126 4.95808 7.03836V9.76C4.95808 12.7016 5.02132 13.6723 5.88772 14.5862C6.75412 15.5 8.14857 15.5 10.9375 15.5H12M16.2404 15.5C17.8014 15.5 18.5819 15.5 19.1336 15.0504C19.6853 14.6008 19.8429 13.8364 20.158 12.3075L20.6578 9.88275C21.0049 8.14369 21.1784 7.27417 20.7345 6.69708C20.2906 6.12 18.7738 6.12 17.0888 6.12H11.0235M4.95808 6.12H7" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Product Info */}
-                                        <div className={`flex-grow flex flex-col ${viewMode === 'grid'
-                                            ? 'py-4 pb-8 justify-center items-center'
-                                            : 'justify-center'
-                                            }`}>
-                                            <h3 className={`text-lg font-medium mb-2 group-hover:text-[#00B0C8] transition-colors ${viewMode === 'grid' ? 'text-center' : ''
-                                                }`}>{product.name}</h3>
-                                            <p className="text-md font-light text-primary">{product.price}</p>
-                                        </div>
-                                    </Link>
-                                </motion.div>
+                                    product={product}
+                                    index={index}
+                                    viewMode={viewMode}
+                                    onQuickViewClick={handleOpenQuickView}
+                                />
                             ))}
                         </motion.div>
                     </motion.div>
                 </div>
             </div>
+
+            {/* Quick View Modal */}
+            {quickViewProduct && (
+                <ProductQuickView
+                    product={quickViewProduct}
+                    onClose={handleCloseQuickView}
+                />
+            )}
         </ShopLayout>
     );
 } 
