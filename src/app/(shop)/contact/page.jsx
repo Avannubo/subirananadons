@@ -53,7 +53,7 @@ export default function ContactPage() {
                             transition={{ delay: 0.2, duration: 0.5 }}
                         >
                             Contacto
-                        </motion.h1> 
+                        </motion.h1>
                     </div>
                 </div>
             </motion.div>

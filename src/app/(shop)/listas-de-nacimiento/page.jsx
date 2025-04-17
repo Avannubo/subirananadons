@@ -163,7 +163,7 @@ export default function BirthListsPage() {
                 </div>
             </motion.div>
 
-            <div className="container mx-auto px-4 py-12"> 
+            <div className="container mx-auto px-4 py-12">
                 <div className="mb-16">
                     {filteredLists.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

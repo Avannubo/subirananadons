@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
     ShoppingBag,
@@ -7,13 +9,14 @@ import {
     GiftIcon,
     Settings
 } from 'lucide-react';
-export default async function Sidebar() {
+
+export default function Sidebar() {
     return (
-        <div className=" w-64 h-screen bg-white shadow-md  sticky ">
+        <div className="w-64 h-screen bg-white shadow-md sticky">
             <div className="px-4 py-2">
-                <nav className="space-y-1 ">
+                <nav className="space-y-1">
                     <Link href="/dashboard/productos" className="flex items-center p-3 text-gray-700 hover:bg-[#00B0C810] hover:text-[#00B0C8] rounded-lg transition-colors">
-                        <ShoppingBag className="mr-3 hover:text-[#00B0C8] " size={20} />
+                        <ShoppingBag className="mr-3 hover:text-[#00B0C8]" size={20} />
                         <span className="font-medium">Productos</span>
                     </Link>
                     <Link href="/dashboard/pedidos" className="flex items-center p-3 text-gray-700 hover:bg-[#00B0C810] hover:text-[#00B0C8] rounded-lg transition-colors">

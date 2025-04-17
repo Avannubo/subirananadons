@@ -1,23 +1,18 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://arjunsingh:2LKnqF4ZpQVxZvvh@cluster0.zzuehnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-console.log(MONGODB_URI);
+const MONGODB_URI = process.env.MONGODB_URI;
+
 if (!MONGODB_URI) {
     throw new Error('Please define the MONGODB_URI environment variable inside .env');
 }
 
-/**
- * Global is used here to maintain a cached connection across hot reloads
- * in development. This prevents connections growing exponentially
- * during API Route usage.
- */
 let cached = global.mongoose;
 
 if (!cached) {
     cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function dbConnect() {
+async function connectDB() {
     if (cached.conn) {
         return cached.conn;
     }
@@ -42,4 +37,4 @@ async function dbConnect() {
     return cached.conn;
 }
 
-export default dbConnect; 
+export default connectDB; 
