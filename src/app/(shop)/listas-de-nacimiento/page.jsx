@@ -117,7 +117,7 @@ export default function BirthListsPage() {
         <ShopLayout>
             {/* Hero Section */}
             <motion.div
-                className="relative w-full h-[400px] bg-gray-100"
+                className="relative w-full h-[35vh] bg-gray-100"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -131,7 +131,7 @@ export default function BirthListsPage() {
                 <div className="absolute inset-0 text-zinc-900 mt-20">
                     <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
                         <motion.h1
-                            className="text-2xl md:text-5xl font-bold  mb-6"
+                            className="text-4xl font-bold text-zinc-900 mb-4"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2, duration: 0.5 }}
@@ -163,12 +163,7 @@ export default function BirthListsPage() {
                 </div>
             </motion.div>
 
-            <div className="container mx-auto px-4 py-12">
-                {/* Create New List CTA */}
-
-
-
-
+            <div className="container mx-auto px-4 py-12"> 
                 <div className="mb-16">
                     {filteredLists.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

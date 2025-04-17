@@ -35,7 +35,7 @@ const listProducts = [
         price: "149,90 €",
         image: "/assets/images/Screenshot_4.png",
         category: "Esenciales",
-        status: "reserved",
+        status: "purchased",
         quantity: 1,
         reservedBy: "Carlos Martínez"
     }
@@ -120,24 +120,24 @@ export default function BirthListPage({ params }) {
     return (
         <ShopLayout>
             {/* Hero Section */}
-            <div className="relative w-full h-[300px] bg-gray-100">
+            <div className="relative w-full h-[35vh] bg-gray-100">
                 <Image
-                    src={list.image}
+                    src="/assets/images/bg-beagrumb.jpg"
                     alt={list.babyName}
                     fill
                     className="object-cover"
                 />
-                <div className="absolute inset-0 bg-[#00000070] mt-20 font-medium">
+                <div className="absolute inset-0  mt-20 font-medium">
                     <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
                         <motion.h1
-                            className="text-4xl font-bold text-white mb-4"
+                            className="text-4xl font-bold text-zinc-900 mb-4"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                         >
                             Lista de {list.babyName}
                         </motion.h1>
                         <motion.p
-                            className="text-lg text-white mb-2"
+                            className="text-lg text-zinc-900 mb-2"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.1 }}
@@ -145,7 +145,7 @@ export default function BirthListPage({ params }) {
                             {list.parents}
                         </motion.p>
                         <motion.p
-                            className="text-white/90"
+                            className="text-zinc-900"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2 }}
@@ -258,7 +258,7 @@ export default function BirthListPage({ params }) {
                                         onClick={() => handleReserveClick(product)}
                                         className="w-full bg-[#00B0C8] text-white py-2 rounded-md hover:bg-[#0090a8] transition-colors"
                                     >
-                                        Reservar Regalo
+                                        Comprar Regalo
                                     </button>
                                 ) : (
                                     <div className="text-sm text-gray-500">
@@ -281,7 +281,7 @@ export default function BirthListPage({ params }) {
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                         >
-                            <h3 className="text-xl font-bold mb-4">Reservar Regalo</h3>
+                            <h3 className="text-xl font-bold mb-4">Comprar Regalo</h3>
                             <p className="mb-4">¿Deseas reservar {selectedProduct.name}?</p>
                             <div className="flex justify-end space-x-4">
                                 <button

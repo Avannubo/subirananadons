@@ -186,7 +186,7 @@ export default function BrandsPage() {
         <ShopLayout>
             {/* Header Image */}
             <motion.div
-                className="relative w-full h-[300px]  bg-gray-100"
+                className="relative w-full h-[30vh]  bg-gray-100"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -199,7 +199,7 @@ export default function BrandsPage() {
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                     <motion.h1
-                        className="text-4xl font-bold text-zinc-900"
+                        className="text-4xl font-bold text-zinc-900 mt-20"
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
@@ -260,7 +260,7 @@ export default function BrandsPage() {
                                                         className="object-cover overflow-hidden w-10 h-10 rounded-lg"
                                                     />
                                                 </div>
-                                                <span className="hover:text-[#00B0C8] transition-colors focus:font-bold">{brand.name}</span>
+                                                <span className="hover:text-[#00B0C8] transition-colors active:font-bold">{brand.name}</span>
                                             </button>
                                         </motion.li>
                                     ))}
