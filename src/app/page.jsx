@@ -9,64 +9,64 @@ const featuredProducts = [
     id: 1,
     name: "Peck 2 Pints Silicon",
     price: "23,95 €",
-    image: "/assets/images/Screenshot_4.png",
-    hoverImage: "/assets/images/Screenshot_1.png",
+    imageUrl: "/assets/images/Screenshot_4.png",
+    imageUrlHover: "/assets/images/Screenshot_1.png",
     category: "Alimentación"
   },
   {
     id: 2,
     name: "Sac Cobés Bùba Paper Boat",
     price: "78,00 €",
-    image: "/assets/images/Screenshot_3.png",
-    hoverImage: "/assets/images/Screenshot_2.png",
+    imageUrl: "/assets/images/Screenshot_3.png",
+    imageUrlHover: "/assets/images/Screenshot_2.png",
     category: "Habitación"
   },
   {
     id: 3,
     name: "Robot De Cuina Chefy6",
     price: "119,00 €",
-    image: "/assets/images/Screenshot_2.png",
-    hoverImage: "/assets/images/Screenshot_3.png",
+    imageUrl: "/assets/images/Screenshot_2.png",
+    imageUrlHover: "/assets/images/Screenshot_3.png",
     category: "Alimentación"
   },
   {
     id: 4,
     name: "Trona De Viaje Arlo",
     price: "49,90 €",
-    image: "/assets/images/Screenshot_1.png",
-    hoverImage: "/assets/images/Screenshot_4.png",
+    imageUrl: "/assets/images/Screenshot_1.png",
+    imageUrlHover: "/assets/images/Screenshot_4.png",
     category: "Alimentación"
   },
   {
     id: 5,
     name: "Tripp Trapp Natural",
     price: "259,00 €",
-    image: "/assets/images/Screenshot_4.png",
-    hoverImage: "/assets/images/Screenshot_1.png",
+    imageUrl: "/assets/images/Screenshot_4.png",
+    imageUrlHover: "/assets/images/Screenshot_1.png",
     category: "Habitación"
   },
   {
     id: 6,
     name: "Termo papillero",
     price: "24,90 €",
-    image: "/assets/images/Screenshot_3.png",
-    hoverImage: "/assets/images/Screenshot_2.png",
+    imageUrl: "/assets/images/Screenshot_3.png",
+    imageUrlHover: "/assets/images/Screenshot_2.png",
     category: "Alimentación"
   },
   {
     id: 7,
     name: "Biberón aprendizaje",
     price: "12,90 €",
-    image: "/assets/images/Screenshot_2.png",
-    hoverImage: "/assets/images/Screenshot_3.png",
+    imageUrl: "/assets/images/Screenshot_2.png",
+    imageUrlHover: "/assets/images/Screenshot_3.png",
     category: "Alimentación"
   },
   {
     id: 8,
     name: "Newborn Set Tripp Trapp",
     price: "99,00 €",
-    image: "/assets/images/Screenshot_1.png",
-    hoverImage: "/assets/images/Screenshot_4.png",
+    imageUrl: "/assets/images/Screenshot_1.png",
+    imageUrlHover: "/assets/images/Screenshot_4.png",
     category: "Habitación"
   }
 ];
@@ -88,7 +88,7 @@ export default function Home() {
               desktop: 4
             }}
           />
-        </div>
+        </div>  
 
         {/* New Section with Background */}
         <div

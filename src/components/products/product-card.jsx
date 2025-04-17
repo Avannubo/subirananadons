@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 // Product Card Component - Handles both grid and list view with hover effect
-export default function ProductCard({ product, viewMode, onQuickViewClick }) {
+export default function ProductCard({ product, viewMode = "grid", onQuickViewClick, addToCart }) {
     const [isHovered, setIsHovered] = useState(false);
 
     // Determine which image URL to use based on hover state
@@ -22,7 +22,7 @@ export default function ProductCard({ product, viewMode, onQuickViewClick }) {
     );
 
     // Generate the product URL based on category and name
-    const productUrl = `/products/${encodeURIComponent(product.category.toLowerCase())}/${encodeURIComponent(product.name.toLowerCase())}`;
+    const productUrl = `/products/${encodeURIComponent(product.category.toLowerCase().replace(/\s+/g, '-'))}/${encodeURIComponent(product.name.toLowerCase().replace(/\s+/g, '-'))}`;
 
     if (viewMode === 'grid') {
         // Grid View Layout
@@ -33,7 +33,7 @@ export default function ProductCard({ product, viewMode, onQuickViewClick }) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
-                className="overflow-hidden flex flex-col items-center text-center h-full group"
+                className="overflow-hidden flex flex-col items-center text-center h-full group hover:text-[#00B0C8]"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
@@ -66,7 +66,7 @@ export default function ProductCard({ product, viewMode, onQuickViewClick }) {
                         </div>
                     </div>
                     <h3 className="font-semibold text-lg mb-2 flex-grow">{product.name}</h3>
-                    <p className="text-gray-700">{product.price}</p>
+                    <p className="text-gray-700 hover:text-gray-900">{product.price}</p>
                 </Link>
             </motion.div>
         );
@@ -79,7 +79,7 @@ export default function ProductCard({ product, viewMode, onQuickViewClick }) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
-                className="flex flex-row items-start text-left p-4 w-full overflow-hidden group"
+                className="flex flex-row items-start text-left p-4 w-full overflow-hidden group "
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
@@ -90,7 +90,7 @@ export default function ProductCard({ product, viewMode, onQuickViewClick }) {
                             alt={product.name}
                             layout="fill"
                             objectFit="cover"
-                            className="transition-opacity duration-300 ease-in-out"
+                            className="transition-opacity duration-300 ease-in-out rounded-lg"
                         />
                         {/* Hover Overlay Buttons */}
                         <div className="absolute bottom-2 left-2 flex items-center justify-center space-x-3 bg-opacity-0 group-hover:bg-opacity-30 opacity-0 group-hover:opacity-100 transition-all duration-300">

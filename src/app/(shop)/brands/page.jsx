@@ -255,12 +255,12 @@ export default function BrandsPage() {
                                                     <Image
                                                         src={brand.logo}
                                                         alt={brand.name}
-                                                        width={1000}
-                                                        height={1000}
-                                                        className="cover w-12 h-10 rounded-lg"
+                                                        width={100}
+                                                        height={100}
+                                                        className="object-cover overflow-hidden w-10 h-10 rounded-lg"
                                                     />
                                                 </div>
-                                                <span className="hover:text-[#00B0C8] transition-colors">{brand.name}</span>
+                                                <span className="hover:text-[#00B0C8] transition-colors focus:font-bold">{brand.name}</span>
                                             </button>
                                         </motion.li>
                                     ))}

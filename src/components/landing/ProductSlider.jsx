@@ -9,7 +9,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import ProductCard from "@/components/ui/ProductCard";
+import ProductCard from "@/components/products/product-card";
 import ProductQuickView from '../products/product-quick-view';
 
 // Default products can be moved to a separate data file if needed

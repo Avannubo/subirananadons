@@ -6,7 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { Range } from 'react-range';
-
+import ProductCard from "@/components/products/product-card";
+import ProductQuickView from "@/components/products/product-quick-view";
 // Sample categories
 const categories = [
     { id: 1, name: "Cochecitos", count: 24 },
@@ -17,125 +18,124 @@ const categories = [
     { id: 6, name: "Seguridad", count: 10 },
 ];
 
-// Sample products (using the same data structure as your brands page)
 const allProducts = [
     {
         id: 1,
         name: "Tripp Trapp Natural",
-        price: 259.00,
-        priceFormatted: "259,00 €",
-        image: "/assets/images/joie.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: 259.00,
+        price: "259,00€",
+        imageUrl: "/assets/images/joie.png",
+        imageUrlHover: "/assets/images/Screenshot_1.png",
         brand: "Stokke",
         category: "Habitación"
     },
     {
         id: 2,
         name: "Robot De Cuina Chefy6",
-        price: 119.00,
-        priceFormatted: "119,00 €",
-        image: "/assets/images/Screenshot_2.png",
-        hoverImage: "/assets/images/Screenshot_3.png",
+        priceValue: 119.00,
+        price: "119,00€",
+        imageUrl: "/assets/images/Screenshot_2.png",
+        imageUrlHover: "/assets/images/Screenshot_3.png",
         brand: "Miniland",
         category: "Alimentación"
     },
     {
         id: 3,
         name: "Trona De Viaje Arlo",
-        price: 49.90,
-        priceFormatted: "49,90 €",
-        image: "/assets/images/Screenshot_1.png",
-        hoverImage: "/assets/images/Screenshot_4.png",
+        priceValue: 49.90,
+        price: "49,90€",
+        imageUrl: "/assets/images/Screenshot_1.png",
+        imageUrlHover: "/assets/images/Screenshot_4.png",
         brand: "Joie",
         category: "Viaje"
     },
     {
         id: 4,
         name: "Newborn Set Tripp Trapp",
-        price: 99.00,
-        priceFormatted: "99,00 €",
-        image: "/assets/images/Screenshot_4.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: 99.00,
+        price: "99,00€",
+        imageUrl: "/assets/images/Screenshot_4.png",
+        imageUrlHover: "/assets/images/Screenshot_1.png",
         brand: "Stokke",
         category: "Habitación"
     },
     {
         id: 5,
         name: "Bañera Plegable Flexi Bath",
-        price: 45.00,
-        priceFormatted: "45,00 €",
-        image: "/assets/images/Screenshot_3.png",
-        hoverImage: "/assets/images/Screenshot_2.png",
+        priceValue: 45.00,
+        price: "45,00€",
+        imageUrl: "/assets/images/Screenshot_3.png",
+        imageUrlHover: "/assets/images/Screenshot_2.png",
         brand: "Stokke",
         category: "Baño"
     },
     {
         id: 6,
         name: "Termo Papillero Premium",
-        price: 24.90,
-        priceFormatted: "24,90 €",
-        image: "/assets/images/Screenshot_2.png",
-        hoverImage: "/assets/images/Screenshot_3.png",
+        priceValue: 24.90,
+        price: "24,90€",
+        imageUrl: "/assets/images/Screenshot_2.png",
+        imageUrlHover: "/assets/images/Screenshot_3.png",
         brand: "Suavinex",
         category: "Alimentación"
     },
     {
         id: 7,
         name: "Barrera de Seguridad Flex",
-        price: 89.90,
-        priceFormatted: "89,90 €",
-        image: "/assets/images/Screenshot_1.png",
-        hoverImage: "/assets/images/Screenshot_4.png",
+        priceValue: 89.90,
+        price: "89,90€",
+        imageUrl: "/assets/images/Screenshot_1.png",
+        imageUrlHover: "/assets/images/Screenshot_4.png",
         brand: "BabyDan",
         category: "Seguridad"
     },
     {
         id: 8,
         name: "Cochecito Xplory X Royal",
-        price: 1099.00,
-        priceFormatted: "1.099,00 €",
-        image: "/assets/images/Screenshot_4.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: 1099.00,
+        price: "1.099,00€",
+        imageUrl: "/assets/images/Screenshot_4.png",
+        imageUrlHover: "/assets/images/Screenshot_1.png",
         brand: "Stokke",
         category: "Cochecitos"
     },
     {
         id: 9,
         name: "Set Babero Silicona",
-        price: 15.90,
-        priceFormatted: "15,90 €",
-        image: "/assets/images/Screenshot_3.png",
-        hoverImage: "/assets/images/Screenshot_2.png",
+        priceValue: 15.90,
+        price: "15,90€",
+        imageUrl: "/assets/images/Screenshot_3.png",
+        imageUrlHover: "/assets/images/Screenshot_2.png",
         brand: "Miniland",
         category: "Alimentación"
     },
     {
         id: 10,
         name: "Monitor Bebé Digital",
-        price: 159.00,
-        priceFormatted: "159,00 €",
-        image: "/assets/images/Screenshot_2.png",
-        hoverImage: "/assets/images/Screenshot_3.png",
+        priceValue: 159.00,
+        price: "159,00€",
+        imageUrl: "/assets/images/Screenshot_2.png",
+        imageUrlHover: "/assets/images/Screenshot_3.png",
         brand: "Philips Avent",
         category: "Seguridad"
     },
     {
         id: 11,
         name: "Cuna Colecho Side",
-        price: 199.00,
-        priceFormatted: "199,00 €",
-        image: "/assets/images/Screenshot_1.png",
-        hoverImage: "/assets/images/Screenshot_4.png",
+        priceValue: 199.00,
+        price: "199,00€",
+        imageUrl: "/assets/images/Screenshot_1.png",
+        imageUrlHover: "/assets/images/Screenshot_4.png",
         brand: "Chicco",
         category: "Habitación"
     },
     {
         id: 12,
         name: "Mochila Portabebés Adapt",
-        price: 179.00,
-        priceFormatted: "179,00 €",
-        image: "/assets/images/Screenshot_4.png",
-        hoverImage: "/assets/images/Screenshot_1.png",
+        priceValue: 179.00,
+        price: "179,00 €",
+        imageUrl: "/assets/images/Screenshot_4.png",
+        imageUrlHover: "/assets/images/Screenshot_1.png",
         brand: "Ergobaby",
         category: "Viaje"
     }
@@ -149,6 +149,18 @@ export default function SearchPage() {
     const [viewMode, setViewMode] = useState('grid');
     const [hoveredProduct, setHoveredProduct] = useState(null);
     const [filteredProducts, setFilteredProducts] = useState(allProducts);
+    const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+    const [quickViewProduct, setQuickViewProduct] = useState(null);
+
+    const handleQuickView = (product) => {
+        setQuickViewProduct(product);
+        setIsQuickViewOpen(true);
+    };
+
+    const handleCloseQuickView = () => {
+        setIsQuickViewOpen(false);
+        setQuickViewProduct(null);
+    };
 
     // Filter products based on search term, categories, and price range
     useEffect(() => {
@@ -171,16 +183,16 @@ export default function SearchPage() {
 
         // Price range filter
         filtered = filtered.filter(product =>
-            product.price >= priceRange[0] && product.price <= priceRange[1]
+            product.priceValue >= priceRange[0] && product.priceValue <= priceRange[1]
         );
 
         // Sort products
         switch (sortBy) {
             case 'price-asc':
-                filtered.sort((a, b) => a.price - b.price);
+                filtered.sort((a, b) => a.priceValue - b.priceValue);
                 break;
             case 'price-desc':
-                filtered.sort((a, b) => b.price - a.price);
+                filtered.sort((a, b) => b.priceValue - a.priceValue);
                 break;
             case 'name-asc':
                 filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -199,11 +211,6 @@ export default function SearchPage() {
                 ? prev.filter(c => c !== category)
                 : [...prev, category]
         );
-    };
-
-    const handleQuickView = (e, product) => {
-        e.preventDefault();
-        console.log('Quick view:', product);
     };
 
     const handleAddToCart = (e, product) => {
@@ -399,76 +406,13 @@ export default function SearchPage() {
                                 }`}
                         >
                             {filteredProducts.map((product, index) => (
-                                <motion.div
-                                    key={product.id}
-                                    layout
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{
-                                        layout: { duration: 0.3 },
-                                        opacity: { delay: 0.1 * index, duration: 0.3 }
-                                    }}
-                                >
-                                    <Link
-                                        href={`/products/${product.category.toLowerCase()}/${product.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                        className={`group relative overflow-hidden duration-300 flex ${viewMode === 'grid' ? 'flex-col' : 'flex-row gap-6'
-                                            }`}
-                                        onMouseEnter={() => setHoveredProduct(product.id)}
-                                        onMouseLeave={() => setHoveredProduct(null)}
-                                    >
-                                        {/* Product Image with Hover Effect */}
-                                        <div className={`aspect-square relative overflow-hidden ${viewMode === 'list' ? 'w-1/3' : 'w-full'}`}>
-                                            <Image
-                                                src={product.image}
-                                                alt={product.name}
-                                                fill
-                                                className={`object-cover transition-opacity duration-500 ${hoveredProduct === product.id ? 'opacity-0' : 'opacity-100'}`}
-                                            />
-                                            <Image
-                                                src={product.hoverImage}
-                                                alt={`${product.name} - hover`}
-                                                fill
-                                                className={`object-cover transition-opacity duration-500 ${hoveredProduct === product.id ? 'opacity-100' : 'opacity-0'}`}
-                                            />
-
-                                            {/* Quick View & Add to Cart Buttons */}
-                                            <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                <div className="flex justify-center space-x-2">
-                                                    <button
-                                                        onClick={(e) => handleQuickView(e, product)}
-                                                        className="bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition-colors"
-                                                    >
-                                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                        </svg>
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => handleAddToCart(e, product)}
-                                                        className="bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition-colors"
-                                                    >
-                                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Product Info */}
-                                        <div className={`flex-grow flex flex-col ${viewMode === 'grid'
-                                            ? 'py-4 pb-8 justify-center items-center'
-                                            : 'justify-center'
-                                            }`}>
-                                            <h3 className={`text-lg font-medium mb-2 group-hover:text-[#00B0C8] transition-colors ${viewMode === 'grid' ? 'text-center' : ''
-                                                }`}>{product.name}</h3>
-                                            <p className="text-md font-light text-primary">{product.priceFormatted}</p>
-                                            {viewMode === 'list' && (
-                                                <p className="text-gray-600 mt-2">{product.brand}</p>
-                                            )}
-                                        </div>
-                                    </Link>
-                                </motion.div>
+                                <ProductCard
+                                    key={index}
+                                    product={product}
+                                    viewMode={viewMode}
+                                    onQuickViewClick={handleQuickView}
+                                    addToCart={handleAddToCart}
+                                />
                             ))}
                         </motion.div>
 
@@ -485,6 +429,13 @@ export default function SearchPage() {
                     </motion.div>
                 </div>
             </div>
+            {isQuickViewOpen && quickViewProduct && (
+                <ProductQuickView
+                    product={quickViewProduct}
+                    isOpen={isQuickViewOpen}
+                    onClose={handleCloseQuickView}
+                />
+            )}
         </ShopLayout>
     );
-} 
+}

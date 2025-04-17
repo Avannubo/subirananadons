@@ -27,8 +27,8 @@ const relatedProducts = [
         name: 'Tripp Trapp Natural',
         price: '259,00 €',
         priceValue: 259.00,
-        image: '/assets/images/screenshot_1.png',
-        hoverImage: '/assets/images/screenshot_1.png',
+        imageUrl: '/assets/images/screenshot_1.png',
+        imageUrlHover: '/assets/images/screenshot_3.png',
         category: 'Habitación',
         brand: 'Stokke',
         description: 'La trona que crece con tu hijo'
@@ -38,8 +38,8 @@ const relatedProducts = [
         name: 'Stokke Xplory X Royal Blue',
         price: '1099,00 €',
         priceValue: 1099.00,
-        image: '/assets/images/screenshot_2.png',
-        hoverImage: '/assets/images/screenshot_2.png',
+        imageUrl: '/assets/images/screenshot_2.png',
+        imageUrlHover: '/assets/images/screenshot_3.png',
         category: 'Cochecitos',
         brand: 'Stokke',
         description: 'Cochecito premium con diseño elegante'
@@ -49,8 +49,8 @@ const relatedProducts = [
         name: 'Cuna Sleepi Natural',
         price: '799,00 €',
         priceValue: 799.00,
-        image: '/assets/images/screenshot_3.png',
-        hoverImage: '/assets/images/screenshot_3.png',
+        imageUrl: '/assets/images/screenshot_3.png',
+        imageUrlHover: '/assets/images/screenshot_4.png',
         category: 'Habitación',
         brand: 'Stokke',
         description: 'Cuna evolutiva que se adapta al crecimiento'
@@ -60,8 +60,8 @@ const relatedProducts = [
         name: 'Saco Xplory X Royal Blue',
         price: '169,00 €',
         priceValue: 169.00,
-        image: '/assets/images/screenshot_4.png',
-        hoverImage: '/assets/images/screenshot_4.png',
+        imageUrl: '/assets/images/screenshot_4.png',
+        imageUrlHover: '/assets/images/screenshot_1.png',
         category: 'Accesorios',
         brand: 'Stokke',
         description: 'Saco de invierno para cochecito'
@@ -71,8 +71,8 @@ const relatedProducts = [
         name: 'Steps Bouncer Gris',
         price: '199,00 €',
         priceValue: 199.00,
-        image: '/assets/images/screenshot_1.png',
-        hoverImage: '/assets/images/screenshot_2.png',
+        imageUrl: '/assets/images/screenshot_1.png',
+        imageUrlHover: '/assets/images/screenshot_2.png',
         category: 'Habitación',
         brand: 'Stokke',
         description: 'Hamaca ergonómica para bebés'
@@ -82,8 +82,8 @@ const relatedProducts = [
         name: 'Cambiador Sleepi Natural',
         price: '89,00 €',
         priceValue: 89.00,
-        image: '/assets/images/screenshot_3.png',
-        hoverImage: '/assets/images/screenshot_4.png',
+        imageUrl: '/assets/images/screenshot_3.png',
+        imageUrlHover: '/assets/images/screenshot_4.png',
         category: 'Habitación',
         brand: 'Stokke',
         description: 'Cambiador para cuna Sleepi'
@@ -93,8 +93,8 @@ const relatedProducts = [
         name: 'Organizador Xplory X',
         price: '39,00 €',
         priceValue: 39.00,
-        image: '/assets/images/screenshot_2.png',
-        hoverImage: '/assets/images/screenshot_1.png',
+        imageUrl: '/assets/images/screenshot_2.png',
+        imageUrlHover: '/assets/images/screenshot_1.png',
         category: 'Accesorios',
         brand: 'Stokke',
         description: 'Organizador para cochecito'
@@ -104,13 +104,13 @@ const relatedProducts = [
         name: 'Cojín Steps Baby',
         price: '49,00 €',
         priceValue: 49.00,
-        image: '/assets/images/screenshot_3.png',
-        hoverImage: '/assets/images/screenshot_2.png',
+        imageUrl: '/assets/images/screenshot_3.png',
+        imageUrlHover: '/assets/images/screenshot_2.png',
         category: 'Accesorios',
         brand: 'Stokke',
         description: 'Cojín para trona Steps'
     }
-]; 
+];
 
 export default function Page() {
     const [selectedImage, setSelectedImage] = useState(0);
@@ -128,7 +128,7 @@ export default function Page() {
         <ShopLayout>
             <div className="container mx-auto px-4 py-8  mt-22">
                 {/* Breadcrumb */}
-                <nav className="mb-8">
+                {/* <nav className="mb-8">
                     <ol className="flex items-center space-x-2 text-sm text-gray-500">
                         <li><a href="/products" className="hover:text-gray-700">Productos</a></li>
                         <li><span className="mx-2">/</span></li>
@@ -136,7 +136,7 @@ export default function Page() {
                         <li><span className="mx-2">/</span></li>
                         <li className="text-gray-900 font-medium">{product.name}</li>
                     </ol>
-                </nav>
+                </nav>*/}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Product Images */}
@@ -230,7 +230,7 @@ export default function Page() {
                 <div className="mt-16">
                     <div className="border-b border-gray-200">
                         <nav className="-mb-px flex space-x-8">
-                            {['DESCRIPCIÓN', 'DETALLES DEL PRODUCTO', 'COMENTARIOS'].map((tab) => (
+                            {['DESCRIPCIÓN', 'DETALLES DEL PRODUCTO'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
@@ -245,7 +245,7 @@ export default function Page() {
                         </nav>
                     </div>
 
-                    <div className="mt-6 pb-16 border-b">
+                    <div className="mt-6 pb-16 border-b border-gray-200">
                         {activeTab === 'DESCRIPCIÓN' && (
                             <div className="prose max-w-none">
                                 <p className="text-gray-600">{product.description}</p>
@@ -257,11 +257,6 @@ export default function Page() {
                                     <li>Dimensiones: {product.details.dimensions}</li>
                                     <li>Instrucciones de lavado: {product.details.washingInstructions}</li>
                                 </ul>
-                            </div>
-                        )}
-                        {activeTab === 'COMENTARIOS' && (
-                            <div className="prose max-w-none">
-                                <p className="text-gray-600">No hay comentarios todavía.</p>
                             </div>
                         )}
                     </div>
@@ -281,6 +276,7 @@ export default function Page() {
                     />
                 </div>
             </div>
+           
         </ShopLayout>
     );
 }
