@@ -32,7 +32,7 @@ export default function ContactPage() {
         <ShopLayout>
             {/* Hero Section */}
             <motion.div
-                className="relative w-full h-[400px] bg-gray-100"
+                className="relative w-full h-[35vh] bg-gray-100"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -47,23 +47,13 @@ export default function ContactPage() {
                 <div className="absolute inset-0 text-zinc-900 mt-20">
                     <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
                         <motion.h1
-                            className="text-2xl md:text-5xl font-bold mb-6"
+                            className="text-4xl font-bold mb-6"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2, duration: 0.5 }}
                         >
                             Contacto
-                        </motion.h1>
-                        <motion.div
-                            className="w-full max-w-2xl"
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.4, duration: 0.5 }}
-                        >
-                            <p className="text-lg mb-4">
-                                Estamos aquí para ayudarte. Contáctanos para cualquier consulta.
-                            </p>
-                        </motion.div>
+                        </motion.h1> 
                     </div>
                 </div>
             </motion.div>

@@ -2,7 +2,6 @@ import FadeSlider from "@/components/landing/FadeSlider";
 import ImageGallery from "@/components/landing/ImageGalaryHome";
 import ProductSlider from "@/components/landing/ProductSlider";
 import ShopLayout from "../components/Layouts/shop-layout";
-
 // Featured products data
 const featuredProducts = [
   {
@@ -70,7 +69,6 @@ const featuredProducts = [
     category: "Habitación"
   }
 ];
-
 export default function Home() {
   return (
     <ShopLayout>
@@ -89,7 +87,6 @@ export default function Home() {
             }}
           />
         </div>  
-
         {/* New Section with Background */}
         <div
           className="w-[100%] overflow-hidden h-[80vh] py-20 px-4 bg-gradient-to-r from-blue-50 to-purple-50"
@@ -114,7 +111,6 @@ export default function Home() {
                 </div>
                 <h3 className="text-md font-bold text-gray-700 mb-2">Crea llista</h3>
               </div>
-
               {/* Feature 2 */}
               <div className="flex flex-col items-center text-center p-6 rounded-lg transition-colors">
                 <div className=" flex items-center justify-center mb-4 hover:rotate-360 transition-transform duration-300">
@@ -124,7 +120,6 @@ export default function Home() {
                 </div>
                 <h3 className="text-md font-bold text-gray-700 mb-2">Afegeix els teus favorits</h3>
               </div>
-
               {/* Feature 3 */}
               <div className="flex flex-col items-center text-center p-6 rounded-lg transition-colors">
                 <div className=" flex items-center justify-center mb-4 hover:rotate-360 transition-transform duration-300">
@@ -134,7 +129,6 @@ export default function Home() {
                 </div>
                 <h3 className="text-md font-bold text-gray-700 mb-2">Comparteix la llista</h3>
               </div>
-
               {/* Feature 4 */}
               <div className="flex flex-col items-center text-center p-6 rounded-lg transition-colors">
                 <div className=" flex items-center justify-center mb-4 hover:rotate-360 transition-transform duration-300">

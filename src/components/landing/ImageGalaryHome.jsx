@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 const ImageGallery = () => {
     const galleryItems = [
@@ -7,28 +8,32 @@ const ImageGallery = () => {
             // title: 'Premium Collection',
             // description: 'Explore our exclusive designs',
             imageUrl: '/assets/images/joolz.png',
-            width: 60
+            width: 60,
+            href: "/brands"
         },
         {
             id: 2,
             // title: 'Summer Edition',
             // description: 'New arrivals just for you',
             imageUrl: '/assets/images/stokke.png',
-            width: 40
+            width: 40,
+            href: "/brands"
         },
         {
             id: 3,
             // title: 'Limited Offers',
             // description: 'Special discounts available',
             imageUrl: '/assets/images/bugaboo.jpg',
-            width: 40
+            width: 40,
+            href: "/brands"
         },
         {
             id: 4,
             // title: 'Baby Essentials',
             // description: 'Everything you need',
             imageUrl: '/assets/images/joie.png',
-            width: 60
+            width: 60,
+            href: "/brands"
         }
     ];
 
@@ -38,8 +43,9 @@ const ImageGallery = () => {
                 {/* First Row - 60/40 Split */}
                 <div className="flex flex-col md:flex-row gap-6 mb-6">
                     {galleryItems.slice(0, 2).map((item) => (
-                        <div
+                        <Link
                             key={item.id}
+                            href={item.href}
                             className={`relative overflow-hidden ${item.width === 60 ? 'md:w-3/5' : 'md:w-2/5'}`}
                             style={{ height: '420px' }}
                         >
@@ -57,15 +63,16 @@ const ImageGallery = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
 
                 {/* Second Row - 40/60 Split (reversed) */}
                 <div className="flex flex-col md:flex-row gap-6">
                     {galleryItems.slice(2, 4).map((item) => (
-                        <div
+                        <Link
                             key={item.id}
+                            href={item.href}
                             className={`relative overflow-hidden ${item.width === 60 ? 'md:w-3/5' : 'md:w-2/5'}`}
                             style={{ height: '400px' }}
                         >
@@ -83,7 +90,7 @@ const ImageGallery = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>
