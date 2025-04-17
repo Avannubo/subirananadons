@@ -14,7 +14,9 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Please provide a password'],
+        required: [function () {
+            return this.provider === 'credentials';
+        }, 'Please provide a password'],
         minlength: [6, 'Password should be at least 6 characters long'],
         select: false,
     },
@@ -23,11 +25,12 @@ const userSchema = new mongoose.Schema({
         default: null
     },
     emailVerified: {
-        type: Boolean,
-        default: false
+        type: Date,
+        default: null
     },
     provider: {
         type: String,
+        enum: ['credentials', 'google'],
         default: 'credentials'
     },
     role: {
@@ -35,18 +38,19 @@ const userSchema = new mongoose.Schema({
         enum: ['user', 'admin'],
         default: 'user',
     },
-    createdAt: {
+    lastLogin: {
         type: Date,
-        default: Date.now,
-    },
+        default: Date.now
+    }
 }, {
     timestamps: true
 });
 
-// Hash password before saving
+// Hash password before saving only for credentials provider
 userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-        next();
+    // Only hash the password if it's been modified (or is new) and provider is credentials
+    if (!this.isModified('password') || this.provider !== 'credentials') {
+        return next();
     }
 
     try {
@@ -60,8 +64,23 @@ userSchema.pre('save', async function (next) {
 
 // Method to compare passwords
 userSchema.methods.comparePassword = async function (enteredPassword) {
+    if (!this.password) return false;
     return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Method to update last login
+userSchema.methods.updateLastLogin = async function () {
+    this.lastLogin = new Date();
+    return this.save();
+};
+
+// Ensure email is lowercase before saving
+userSchema.pre('save', function (next) {
+    if (this.email) {
+        this.email = this.email.toLowerCase();
+    }
+    next();
+});
 
 // Virtual for formatted birth date
 userSchema.virtual('formattedBirthDate').get(function () {
@@ -72,8 +91,8 @@ userSchema.virtual('formattedBirthDate').get(function () {
     return `${day}/${month}/${year}`;
 });
 
-// Delete existing model if it exists
-delete mongoose.connection.models.User;
+// Delete existing model if it exists to prevent model redefinition errors
+mongoose.models = {};
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 export default User;

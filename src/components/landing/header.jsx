@@ -1,8 +1,13 @@
+'use client';
 import Image from "next/image";
 import MenuVertical from "@/components/ui/MenuHeader";
 import UserAuth from "@/components/ui/UserAuthModal";
 import Link from "next/link";
+import { useSession } from 'next-auth/react';
+
 export default function Page() {
+    const { data: session } = useSession();
+
     return (
         <div className="fixed top-0 z-50 w-full bg-white shadow-md p-5">
             <div className="flex flex-col justify-center ">
@@ -12,7 +17,7 @@ export default function Page() {
                         <MenuVertical />
                     </div>
                     {/* Logo */}
-                    <Link href="/" className="flex justify-center items-center w-[300px]">
+                    <Link href={session ? "/dashboard" : "/"} className="flex justify-center items-center w-[300px]">
                         <Image
                             src="/assets/logo-header.svg"
                             alt="logo"
