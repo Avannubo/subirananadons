@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
-
+import { LogOut, UserRound } from 'lucide-react';
 export default function AuthModal() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeView, setActiveView] = useState('login');
@@ -10,8 +10,7 @@ export default function AuthModal() {
     const modalRef = useRef(null);
     const backdropRef = useRef(null);
     const router = useRouter();
-    const { data: session } = useSession();
-
+    const { data: session, status } = useSession();
     const openLogin = () => {
         if (session) {
             router.push("/dashboard");
@@ -21,17 +20,14 @@ export default function AuthModal() {
             setMessage({ text: '', type: '' });
         }
     };
-
     const closeModal = () => {
         setIsOpen(false);
         setMessage({ text: '', type: '' });
     };
-
     const toggleView = () => {
         setActiveView(activeView === 'login' ? 'register' : 'login');
         setMessage({ text: '', type: '' });
     };
-
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -47,12 +43,14 @@ export default function AuthModal() {
         } else {
             document.body.style.overflow = '';
         }
-
         return () => {
             document.body.style.overflow = '';
         };
     }, [isOpen]);
-
+    useEffect(() => {
+        console.log('Session Status:', status);
+        console.log('Session Data:', session);
+    }, [session, status]);
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -60,14 +58,19 @@ export default function AuthModal() {
             const email = formData.get('email');
             const password = formData.get('password');
 
+            console.log('Attempting login with email:', email);
+
             const result = await signIn('credentials', {
                 redirect: false,
                 email,
                 password,
             });
 
+            console.log('Login result:', result);
+
             if (result?.error) {
                 let errorMessage = 'Error al iniciar sesión. ';
+                console.error('Login error:', result.error);
                 switch (result.error) {
                     case 'No user found with this email':
                         errorMessage += 'El correo electrónico no está registrado.';
@@ -83,6 +86,8 @@ export default function AuthModal() {
             }
 
             setMessage({ text: '¡Inicio de sesión exitoso!', type: 'success' });
+            console.log('Login successful, redirecting to dashboard...');
+
             setTimeout(() => {
                 closeModal();
                 router.push('/dashboard');
@@ -96,7 +101,6 @@ export default function AuthModal() {
             });
         }
     };
-
     const handleRegisterSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -106,11 +110,15 @@ export default function AuthModal() {
             const password = formData.get('password');
             const confirmPassword = formData.get('confirmPassword');
 
+            console.log('Attempting registration with:', { name, email });
+
             if (password !== confirmPassword) {
+                console.log('Password mismatch');
                 setMessage({ text: 'Las contraseñas no coinciden', type: 'error' });
                 return;
             }
 
+            console.log('Sending registration request...');
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
@@ -120,8 +128,10 @@ export default function AuthModal() {
             });
 
             const data = await response.json();
+            console.log('Registration response:', data);
 
             if (!response.ok) {
+                console.error('Registration failed:', data);
                 setMessage({
                     text: data.message || 'Error en el registro. Por favor intenta nuevamente.',
                     type: 'error'
@@ -130,13 +140,33 @@ export default function AuthModal() {
             }
 
             setMessage({
-                text: '¡Registro exitoso! Por favor inicia sesión.',
+                text: '¡Registro exitoso! Iniciando sesión...',
                 type: 'success'
             });
+
+            console.log('Registration successful, attempting automatic login...');
+            const signInResult = await signIn('credentials', {
+                redirect: false,
+                email,
+                password,
+            });
+
+            console.log('Auto-login result:', signInResult);
+
+            if (signInResult?.error) {
+                console.error('Auto-login failed:', signInResult.error);
+                setMessage({
+                    text: 'Registro exitoso pero error al iniciar sesión. Por favor inicia sesión manualmente.',
+                    type: 'error'
+                });
+                return;
+            }
+
+            console.log('Auto-login successful, redirecting to dashboard...');
             setTimeout(() => {
-                setActiveView('login');
-                setMessage({ text: '', type: '' });
-            }, 2000);
+                closeModal();
+                router.push('/dashboard');
+            }, 1000);
 
         } catch (error) {
             console.error('Registration error:', error);
@@ -146,23 +176,21 @@ export default function AuthModal() {
             });
         }
     };
-
-    const handleSocialLogin = async (provider) => {
-        try {
-            await signIn(provider, { callbackUrl: '/dashboard' });
-        } catch (error) {
-            setMessage({ text: `Error al iniciar sesión con ${provider}`, type: 'error' });
-        }
-    };
-
+    // Handle social login (Google, GitHub) with error handling and redirect
+  //  const handleSocialLogin = async (provider) => {
+   //     try {
+   //         await signIn(provider, { callbackUrl: '/dashboard' });
+   //     } catch (error) {
+   //         setMessage({ text: `Error al iniciar sesión con ${provider}`, type: 'error' });
+   //     }
+   // };
     return (
         <div className="flex">
             {message.text && (
-                <div
-                    className={`fixed top-4 right-4 z-[99] flex items-center space-x-2 px-4 py-3 rounded shadow-lg animate-slide-in ${message.type === 'success'
-                        ? 'bg-green-100 border border-green-400 text-green-700'
-                        : 'bg-red-100 border border-red-400 text-red-700'
-                        }`}
+                <div className={`fixed top-4 right-4 z-[99] flex items-center space-x-2 px-4 py-3 rounded shadow-lg animate-slide-in ${message.type === 'success'
+                    ? 'bg-green-100 border border-green-400 text-green-700'
+                    : 'bg-red-100 border border-red-400 text-red-700'
+                    }`}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -183,42 +211,24 @@ export default function AuthModal() {
                 {session ? (
                     <button
                         onClick={() => signOut()}
-                        className="flex flex-row items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:text-[#00B0C8] rounded-md transition-colors"
+                        className="flex flex-row items-center space-x-2 py-2 text-sm  text-gray-700 "
                     >
-                        <svg className="hover:text-[#00B0C8]" width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M5 21C5 17.134 8.13401 14 12 14C15.866 14 19 17.134 19 21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
-                                stroke="#353535"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
+                        <LogOut />
                     </button>
                 ) : (
                     <button
                         onClick={openLogin}
-                        className="flex flex-row items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:text-[#00B0C8] rounded-md transition-colors"
+                        className="flex flex-row items-center space-x-2  py-2 text-sm text-gray-700 rounded-md transition-colors"
                     >
-                        <svg className="hover:text-[#00B0C8]" width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M5 21C5 17.134 8.13401 14 12 14C15.866 14 19 17.134 19 21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
-                                stroke="#353535"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
+                        <UserRound />
                     </button>
                 )}
-
                 {isOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center">
                         <div
                             ref={backdropRef}
                             className="fixed inset-0 bg-[#00000050] bg-opacity-50 transition-opacity duration-800 opacity-0"
                         />
-
                         <div
                             ref={modalRef}
                             className="relative bg-white rounded-lg w-full max-w-md mx-4 opacity-0 transform translate-y-4 transition-all duration-800"
@@ -237,7 +247,6 @@ export default function AuthModal() {
                                         </svg>
                                     </button>
                                 </div>
-
                                 {activeView === 'login' && (
                                     <form className="space-y-4" onSubmit={handleLoginSubmit}>
                                         <div>
@@ -253,7 +262,6 @@ export default function AuthModal() {
                                                 required
                                             />
                                         </div>
-
                                         <div>
                                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                                                 Contraseña
@@ -267,7 +275,6 @@ export default function AuthModal() {
                                                 required
                                             />
                                         </div>
-
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
                                                 <input
@@ -288,14 +295,12 @@ export default function AuthModal() {
                                                 Se te olvidó tu contraseña
                                             </button>
                                         </div>
-
                                         <button
                                             type="submit"
                                             className="w-full bg-[#00B0C8] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
                                         >
                                             INICIAR SESIÓN
                                         </button>
-
                                         <div className="mt-4 text-center">
                                             <p className="text-sm text-gray-600">
                                                 ¿No tienes cuenta?{' '}
@@ -310,7 +315,6 @@ export default function AuthModal() {
                                         </div>
                                     </form>
                                 )}
-
                                 {activeView === 'register' && (
                                     <form className="space-y-4" onSubmit={handleRegisterSubmit}>
                                         <div>
@@ -326,7 +330,6 @@ export default function AuthModal() {
                                                 required
                                             />
                                         </div>
-
                                         <div>
                                             <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-1">
                                                 Dirección de correo electrónico
@@ -340,7 +343,6 @@ export default function AuthModal() {
                                                 required
                                             />
                                         </div>
-
                                         <div>
                                             <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-1">
                                                 Contraseña
@@ -355,7 +357,6 @@ export default function AuthModal() {
                                                 minLength={6}
                                             />
                                         </div>
-
                                         <div>
                                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                                                 Confirmar Contraseña
@@ -370,7 +371,6 @@ export default function AuthModal() {
                                                 minLength={6}
                                             />
                                         </div>
-
                                         <div className="flex items-center">
                                             <input
                                                 id="terms"
@@ -383,14 +383,12 @@ export default function AuthModal() {
                                                 Acepto los <a href="#" className="text-[#00B0C8] hover:text-[#00a2b8] transition-colors">Términos y Condiciones</a>
                                             </label>
                                         </div>
-
                                         <button
                                             type="submit"
                                             className="w-full bg-[#00B0C8] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
                                         >
                                             REGISTRARSE
                                         </button>
-
                                         <div className="mt-4 text-center">
                                             <p className="text-sm text-gray-600">
                                                 ¿Ya tienes cuenta?{' '}
@@ -405,7 +403,6 @@ export default function AuthModal() {
                                         </div>
                                     </form>
                                 )}
-
                                 <div className="mt-6">
                                     <p className="text-center text-sm font-bold text-gray-500 mb-3">
                                         {activeView === 'login' ? 'CONECTAR CON LAS REDES SOCIALES' : 'REGISTRARSE CON REDES SOCIALES'}

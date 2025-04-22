@@ -1,9 +1,11 @@
-import { AuthCheck } from '@/components/auth/AuthCheck';
+import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import LineChart from '@/components/admin/charts/LineChart';
 import ChartContainer from '@/components/admin/charts/ChartContainer';
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
+    console.log('DashboardPage - Component rendering');
+
     const salesData = {
         labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
         datasets: [

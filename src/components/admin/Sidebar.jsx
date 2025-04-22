@@ -24,7 +24,7 @@ const getNavigationItems = (userRole) => [
         href: "/dashboard/productos",
         icon: ShoppingBag,
         label: "Productos",
-        roles: [ 'admin']
+        roles: ['admin']
     },
     {
         href: "/dashboard/pedidos",
