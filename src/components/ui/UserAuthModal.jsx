@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { LogOut, UserRound } from 'lucide-react';
+import Image from 'next/image';
+
 export default function AuthModal() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeView, setActiveView] = useState('login');
@@ -11,6 +13,9 @@ export default function AuthModal() {
     const backdropRef = useRef(null);
     const router = useRouter();
     const { data: session, status } = useSession();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+
     const openLogin = () => {
         if (session) {
             router.push("/dashboard");
@@ -28,6 +33,10 @@ export default function AuthModal() {
         setActiveView(activeView === 'login' ? 'register' : 'login');
         setMessage({ text: '', type: '' });
     };
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -177,13 +186,27 @@ export default function AuthModal() {
         }
     };
     // Handle social login (Google, GitHub) with error handling and redirect
-  //  const handleSocialLogin = async (provider) => {
-   //     try {
-   //         await signIn(provider, { callbackUrl: '/dashboard' });
-   //     } catch (error) {
-   //         setMessage({ text: `Error al iniciar sesión con ${provider}`, type: 'error' });
-   //     }
-   // };
+    //  const handleSocialLogin = async (provider) => {
+    //     try {
+    //         await signIn(provider, { callbackUrl: '/dashboard' });
+    //     } catch (error) {
+    //         setMessage({ text: `Error al iniciar sesión con ${provider}`, type: 'error' });
+    //     }
+    // };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     return (
         <div className="flex">
             {message.text && (
@@ -209,12 +232,38 @@ export default function AuthModal() {
             )}
             <div className="flex">
                 {session ? (
-                    <button
-                        onClick={() => signOut()}
-                        className="flex flex-row items-center space-x-2 py-2 text-sm  text-gray-700 "
-                    >
-                        <LogOut />
-                    </button>
+                    <div className="relative">
+                        <button onClick={toggleMenu} className="flex items-center space-x-2">
+                            <Image
+                                src={session.user.image || '/assets/images/joie.png'}
+                                alt="Profile Picture"
+                                width={500}
+                                height={500}
+                                className="rounded-full h-10 w-10 object-cover"
+                            />
+                        </button>
+                        {isMenuOpen && (
+                            <div ref={menuRef} className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden">
+                                <button
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    Profile
+                                </button>
+                                <button
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    Settings
+                                </button>
+                                <button
+                                    onClick={() => signOut()}
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700  hover:bg-gray-100"
+                                >
+                                    Logout
+                                </button>
+
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <button
                         onClick={openLogin}
