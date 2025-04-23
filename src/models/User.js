@@ -43,8 +43,35 @@ const userSchema = new mongoose.Schema({
         default: Date.now
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
+
+// Virtual for user's sessions
+userSchema.virtual('sessions', {
+    ref: 'Session',
+    localField: '_id',
+    foreignField: 'userId'
+});
+
+// Method to get active sessions
+userSchema.methods.getActiveSessions = async function () {
+    await this.populate({
+        path: 'sessions',
+        match: { isValid: true }
+    });
+    return this.sessions;
+};
+
+// Method to invalidate all sessions
+userSchema.methods.invalidateAllSessions = async function () {
+    const Session = mongoose.model('Session');
+    await Session.updateMany(
+        { userId: this._id },
+        { isValid: false }
+    );
+};
 
 // Hash password before saving only for credentials provider
 userSchema.pre('save', async function (next) {
@@ -62,10 +89,13 @@ userSchema.pre('save', async function (next) {
     }
 });
 
-// Method to compare passwords
-userSchema.methods.comparePassword = async function (enteredPassword) {
-    if (!this.password) return false;
-    return await bcrypt.compare(enteredPassword, this.password);
+// Method to compare password
+userSchema.methods.comparePassword = async function (candidatePassword) {
+    try {
+        return await bcrypt.compare(candidatePassword, this.password);
+    } catch (error) {
+        throw new Error('Error comparing passwords');
+    }
 };
 
 // Method to update last login

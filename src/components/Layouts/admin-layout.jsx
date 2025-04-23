@@ -1,5 +1,3 @@
-'use client';
-
 import Sidebar from '@/components/admin/Sidebar';
 import Header from '@/components/landing/header';
 

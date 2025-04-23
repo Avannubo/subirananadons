@@ -1,5 +1,5 @@
-import Header from "@/components/landing/header.jsx";
-import Footer from "@/components/landing/footer.jsx";
+import Header from "@/components/landing/header";
+import Footer from "@/components/landing/footer";
 export default function ShopLayout({ children }) {
     return (
         <>

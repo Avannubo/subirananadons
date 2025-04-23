@@ -1,4 +1,4 @@
-import  AuthCheck  from '@/components/auth/AuthCheck';
+import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import ClientsTabs from '@/components/admin/clients/ClientTabs';
 import ClientsStats from '@/components/admin/clients/ClientStats';

@@ -5,6 +5,7 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import { headers } from 'next/headers';
+import { trackUserSession, invalidateSession } from '@/lib/auth/sessionTracker';
 
 const handler = NextAuth({
     providers: [
@@ -15,7 +16,7 @@ const handler = NextAuth({
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials) {
+            async authorize(credentials, req) {
                 try {
                     await dbConnect();
 
@@ -35,6 +36,11 @@ const handler = NextAuth({
                     if (!isValid) {
                         throw new Error('Invalid password');
                     }
+
+                    // Update last login timestamp
+                    await User.findByIdAndUpdate(user._id, {
+                        lastLogin: new Date()
+                    });
 
                     // Return user object without sensitive data
                     return {
@@ -81,9 +87,15 @@ const handler = NextAuth({
                         dbUser = await User.create({
                             email: profile.email,
                             name: profile.name,
-                            role: 'user'
+                            role: 'user',
+                            provider: 'google'
                         });
                     }
+
+                    // Update last login timestamp
+                    await User.findByIdAndUpdate(dbUser._id, {
+                        lastLogin: new Date()
+                    });
 
                     return true;
                 } catch (error) {
@@ -104,8 +116,39 @@ const handler = NextAuth({
             if (token) {
                 session.user.role = token.role;
                 session.user.id = token.id;
+
+                // Get request headers
+                const headersList = headers();
+                const userAgent = headersList.get('user-agent') || '';
+                const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0] ||
+                    headersList.get('x-real-ip') ||
+                    'unknown';
+
+                // Track the session
+                try {
+                    await trackUserSession(
+                        token.id,
+                        session.sessionToken || token.jti,
+                        userAgent,
+                        ipAddress
+                    );
+                } catch (error) {
+                    console.error('Error tracking session:', error);
+                }
             }
             return session;
+        }
+    },
+    events: {
+        async signOut({ token }) {
+            try {
+                // Invalidate the session in the database
+                if (token?.jti) {
+                    await invalidateSession(token.jti);
+                }
+            } catch (error) {
+                console.error('Error handling signOut:', error);
+            }
         }
     },
     pages: {
