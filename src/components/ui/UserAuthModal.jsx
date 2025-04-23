@@ -1,22 +1,23 @@
 "use client"
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
+import { signIn, signOut, useSession } from 'next-auth/react';
+import { LogOut, UserRound } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AuthModal() {
-
     const [isOpen, setIsOpen] = useState(false);
-    const [activeView, setActiveView] = useState('login'); // 'login' or 'register'
-    const [message, setMessage] = useState({ text: '', type: '' }); // { text: string, type: 'success' | 'error' }
+    const [activeView, setActiveView] = useState('login');
+    const [message, setMessage] = useState({ text: '', type: '' });
     const modalRef = useRef(null);
     const backdropRef = useRef(null);
     const router = useRouter();
+    const { data: session, status } = useSession();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
 
     const openLogin = () => {
-        const token = Cookies.get('token');
-        console.log(token);//im getting undefined
-
-        if (token) {
+        if (session) {
             router.push("/dashboard");
         } else {
             setActiveView('login');
@@ -24,21 +25,16 @@ export default function AuthModal() {
             setMessage({ text: '', type: '' });
         }
     };
-
-    // const openRegister = () => {
-    //     setActiveView('register');
-    //     setIsOpen(true);
-    //     setMessage({ text: '', type: '' });
-    // };
-
     const closeModal = () => {
         setIsOpen(false);
         setMessage({ text: '', type: '' });
     };
-
     const toggleView = () => {
         setActiveView(activeView === 'login' ? 'register' : 'login');
         setMessage({ text: '', type: '' });
+    };
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
     };
 
     useEffect(() => {
@@ -56,12 +52,14 @@ export default function AuthModal() {
         } else {
             document.body.style.overflow = '';
         }
-
         return () => {
             document.body.style.overflow = '';
         };
     }, [isOpen]);
-
+    useEffect(() => {
+        console.log('Session Status:', status);
+        console.log('Session Data:', session);
+    }, [session, status]);
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -69,26 +67,49 @@ export default function AuthModal() {
             const email = formData.get('email');
             const password = formData.get('password');
 
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
+            console.log('Attempting login with email:', email);
+
+            const result = await signIn('credentials', {
+                redirect: false,
+                email,
+                password,
             });
 
-            if (response.status === 200) {
-                setMessage({ text: '¡Inicio de sesión exitoso!', type: 'success' });
+            console.log('Login result:', result);
+
+            if (result?.error) {
+                let errorMessage = 'Error al iniciar sesión. ';
+                console.error('Login error:', result.error);
+                switch (result.error) {
+                    case 'No user found with this email':
+                        errorMessage += 'El correo electrónico no está registrado.';
+                        break;
+                    case 'Invalid password':
+                        errorMessage += 'La contraseña es incorrecta.';
+                        break;
+                    default:
+                        errorMessage += 'Por favor verifica tus credenciales.';
+                }
+                setMessage({ text: errorMessage, type: 'error' });
+                return;
+            }
+
+            setMessage({ text: '¡Inicio de sesión exitoso!', type: 'success' });
+            console.log('Login successful, redirecting to dashboard...');
+
+            setTimeout(() => {
                 closeModal();
                 router.push('/dashboard');
-            } else {
-                setMessage({ text: 'Error al iniciar sesión. Por favor intenta nuevamente.', type: 'error' });
-            }
+            }, 1000);
+
         } catch (error) {
-            setMessage({ text: 'Error al iniciar sesión. Por favor intenta nuevamente.', type: 'error' });
+            console.error('Login error:', error);
+            setMessage({
+                text: 'Error al iniciar sesión. Por favor intenta nuevamente.',
+                type: 'error'
+            });
         }
     };
-
     const handleRegisterSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -98,13 +119,16 @@ export default function AuthModal() {
             const password = formData.get('password');
             const confirmPassword = formData.get('confirmPassword');
 
+            console.log('Attempting registration with:', { name, email });
+
             if (password !== confirmPassword) {
+                console.log('Password mismatch');
                 setMessage({ text: 'Las contraseñas no coinciden', type: 'error' });
-                setTimeout(() => setMessage({ text: '', type: '' }), 5000); // Clear message after 5 seconds
                 return;
             }
 
-            const response = await fetch('/api/register', {
+            console.log('Sending registration request...');
+            const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,25 +136,84 @@ export default function AuthModal() {
                 body: JSON.stringify({ name, email, password }),
             });
 
-            if (response.status === 200) {
-                setMessage({ text: '¡Registro exitoso! Por favor inicia sesión.', type: 'success' });
-                setActiveView('login');
-            } else {
-                setMessage({ text: 'Error en el registro. Por favor intenta nuevamente.', type: 'error' });
+            const data = await response.json();
+            console.log('Registration response:', data);
+
+            if (!response.ok) {
+                console.error('Registration failed:', data);
+                setMessage({
+                    text: data.message || 'Error en el registro. Por favor intenta nuevamente.',
+                    type: 'error'
+                });
+                return;
             }
+
+            setMessage({
+                text: '¡Registro exitoso! Iniciando sesión...',
+                type: 'success'
+            });
+
+            console.log('Registration successful, attempting automatic login...');
+            const signInResult = await signIn('credentials', {
+                redirect: false,
+                email,
+                password,
+            });
+
+            console.log('Auto-login result:', signInResult);
+
+            if (signInResult?.error) {
+                console.error('Auto-login failed:', signInResult.error);
+                setMessage({
+                    text: 'Registro exitoso pero error al iniciar sesión. Por favor inicia sesión manualmente.',
+                    type: 'error'
+                });
+                return;
+            }
+
+            console.log('Auto-login successful, redirecting to dashboard...');
+            setTimeout(() => {
+                closeModal();
+                router.push('/dashboard');
+            }, 1000);
+
         } catch (error) {
-            setMessage({ text: 'Error en el registro. Por favor intenta nuevamente.', type: 'error' });
+            console.error('Registration error:', error);
+            setMessage({
+                text: 'Error en el registro. Por favor intenta nuevamente.',
+                type: 'error'
+            });
         }
     };
+    // Handle social login (Google, GitHub) with error handling and redirect
+    //  const handleSocialLogin = async (provider) => {
+    //     try {
+    //         await signIn(provider, { callbackUrl: '/dashboard' });
+    //     } catch (error) {
+    //         setMessage({ text: `Error al iniciar sesión con ${provider}`, type: 'error' });
+    //     }
+    // };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     return (
         <div className="flex">
             {message.text && (
-                <div
-                    className={`fixed top-4 right-4 z-[99] flex items-center space-x-2 px-4 py-3 rounded shadow-lg animate-slide-in ${message.type === 'success'
-                        ? 'bg-green-100 border border-green-400 text-green-700'
-                        : 'bg-red-100 border border-red-400 text-red-700'
-                        }`}
+                <div className={`fixed top-4 right-4 z-[99] flex items-center space-x-2 px-4 py-3 rounded shadow-lg animate-slide-in ${message.type === 'success'
+                    ? 'bg-green-100 border border-green-400 text-green-700'
+                    : 'bg-red-100 border border-red-400 text-red-700'
+                    }`}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -148,41 +231,53 @@ export default function AuthModal() {
                 </div>
             )}
             <div className="flex">
-                {/* Login Button */}
-                <button
-                    onClick={openLogin}
-                    className="flex flex-row items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:text-[#00B0C8] rounded-md transition-colors"
-                >
-                    <svg className="hover:text-[#00B0C8]" width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M5 21C5 17.134 8.13401 14 12 14C15.866 14 19 17.134 19 21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
-                            stroke="#353535"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    </svg>
-                </button>
+                {session ? (
+                    <div className="relative">
+                        <button onClick={toggleMenu} className="flex items-center space-x-2">
+                            <Image
+                                src={session.user.image || '/assets/images/joie.png'}
+                                alt="Profile Picture"
+                                width={500}
+                                height={500}
+                                className="rounded-full h-10 w-10 object-cover"
+                            />
+                        </button>
+                        {isMenuOpen && (
+                            <div ref={menuRef} className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden">
+                                <button
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    Profile
+                                </button>
+                                <button
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    Settings
+                                </button>
+                                <button
+                                    onClick={() => signOut()}
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700  hover:bg-gray-100"
+                                >
+                                    Logout
+                                </button>
 
-                {/* Register Button */}
-                {/* <button
-                onClick={openRegister}
-                className="flex flex-row items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:text-[#00B0C8] rounded-md transition-colors"
-            >
-                <span>Registrarse</span>
-            </button> */}
-
-                {/* Modal */}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <button
+                        onClick={openLogin}
+                        className="flex flex-row items-center space-x-2  py-2 text-sm text-gray-700 rounded-md transition-colors"
+                    >
+                        <UserRound />
+                    </button>
+                )}
                 {isOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center">
-                        {/* Backdrop */}
                         <div
                             ref={backdropRef}
                             className="fixed inset-0 bg-[#00000050] bg-opacity-50 transition-opacity duration-800 opacity-0"
-                        // onClick={closeModal}
                         />
-
-                        {/* Modal Content */}
                         <div
                             ref={modalRef}
                             className="relative bg-white rounded-lg w-full max-w-md mx-4 opacity-0 transform translate-y-4 transition-all duration-800"
@@ -201,8 +296,6 @@ export default function AuthModal() {
                                         </svg>
                                     </button>
                                 </div>
-
-                                {/* Login Form */}
                                 {activeView === 'login' && (
                                     <form className="space-y-4" onSubmit={handleLoginSubmit}>
                                         <div>
@@ -218,7 +311,6 @@ export default function AuthModal() {
                                                 required
                                             />
                                         </div>
-
                                         <div>
                                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                                                 Contraseña
@@ -232,7 +324,6 @@ export default function AuthModal() {
                                                 required
                                             />
                                         </div>
-
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
                                                 <input
@@ -245,18 +336,20 @@ export default function AuthModal() {
                                                     Recuérdame
                                                 </label>
                                             </div>
-                                            <a href="#" className="text-sm text-[#00B0C8] hover:text-[#00a2b8] transition-colors">
+                                            <button
+                                                type="button"
+                                                onClick={() => signIn('email')}
+                                                className="text-sm text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
+                                            >
                                                 Se te olvidó tu contraseña
-                                            </a>
+                                            </button>
                                         </div>
-
                                         <button
                                             type="submit"
                                             className="w-full bg-[#00B0C8] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
                                         >
                                             INICIAR SESIÓN
                                         </button>
-
                                         <div className="mt-4 text-center">
                                             <p className="text-sm text-gray-600">
                                                 ¿No tienes cuenta?{' '}
@@ -271,8 +364,6 @@ export default function AuthModal() {
                                         </div>
                                     </form>
                                 )}
-
-                                {/* Register Form */}
                                 {activeView === 'register' && (
                                     <form className="space-y-4" onSubmit={handleRegisterSubmit}>
                                         <div>
@@ -288,7 +379,6 @@ export default function AuthModal() {
                                                 required
                                             />
                                         </div>
-
                                         <div>
                                             <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-1">
                                                 Dirección de correo electrónico
@@ -302,7 +392,6 @@ export default function AuthModal() {
                                                 required
                                             />
                                         </div>
-
                                         <div>
                                             <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-1">
                                                 Contraseña
@@ -317,7 +406,6 @@ export default function AuthModal() {
                                                 minLength={6}
                                             />
                                         </div>
-
                                         <div>
                                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                                                 Confirmar Contraseña
@@ -332,7 +420,6 @@ export default function AuthModal() {
                                                 minLength={6}
                                             />
                                         </div>
-
                                         <div className="flex items-center">
                                             <input
                                                 id="terms"
@@ -345,14 +432,12 @@ export default function AuthModal() {
                                                 Acepto los <a href="#" className="text-[#00B0C8] hover:text-[#00a2b8] transition-colors">Términos y Condiciones</a>
                                             </label>
                                         </div>
-
                                         <button
                                             type="submit"
                                             className="w-full bg-[#00B0C8] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
                                         >
                                             REGISTRARSE
                                         </button>
-
                                         <div className="mt-4 text-center">
                                             <p className="text-sm text-gray-600">
                                                 ¿Ya tienes cuenta?{' '}
@@ -367,8 +452,6 @@ export default function AuthModal() {
                                         </div>
                                     </form>
                                 )}
-
-                                {/* Social Login Section */}
                                 <div className="mt-6">
                                     <p className="text-center text-sm font-bold text-gray-500 mb-3">
                                         {activeView === 'login' ? 'CONECTAR CON LAS REDES SOCIALES' : 'REGISTRARSE CON REDES SOCIALES'}
@@ -376,20 +459,22 @@ export default function AuthModal() {
                                     <div className="flex justify-center space-x-2">
                                         <button
                                             type="button"
+                                            onClick={() => handleSocialLogin('google')}
                                             className="p-2 rounded-none bg-[#00B0C890] hover:bg-[#00B0C8] transition-colors"
                                         >
-                                            <span className="sr-only">Facebook</span>
-                                            <svg fill="#ffffff" width="14px" height="14px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M21.95 5.005l-3.306-.004c-3.206 0-5.277 2.124-5.277 5.415v2.495H10.05v4.515h3.317l-.004 9.575h4.641l.004-9.575h3.806l-.003-4.514h-3.803v-2.117c0-1.018.241-1.533 1.566-1.533l2.366-.001.01-4.256z"></path>
+                                            <span className="sr-only">Google</span>
+                                            <svg width="14px" height="14px" viewBox="0 0 24 24" fill="#ffffff">
+                                                <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
                                             </svg>
                                         </button>
                                         <button
                                             type="button"
-                                            className="p-2 rounded-none bg-cyan-500 hover:bg-cyan-400 transition-colors"
+                                            onClick={() => handleSocialLogin('github')}
+                                            className="p-2 rounded-none bg-gray-800 hover:bg-gray-700 transition-colors"
                                         >
-                                            <span className="sr-only">Twitter</span>
-                                            <svg fill="#ffffff" width="14px" height="14px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M30.917 6.728c-1.026 0.465-2.217 0.805-3.464 0.961l-0.061 0.006c1.268-0.771 2.222-1.952 2.687-3.354l0.013-0.044c-1.124 0.667-2.431 1.179-3.82 1.464l-0.082 0.014c-1.123-1.199-2.717-1.946-4.485-1.946-3.391 0-6.14 2.749-6.14 6.14 0 0.496 0.059 0.979 0.17 1.441l-0.008-0.042c-5.113-0.254-9.613-2.68-12.629-6.366l-0.025-0.031c-0.522 0.873-0.831 1.926-0.831 3.052 0 0.013 0 0.026 0 0.039v-0.002c0 0.001 0 0.003 0 0.005 0 2.12 1.075 3.989 2.709 5.093l0.022 0.014c-1.026-0.034-1.979-0.315-2.811-0.785l0.031 0.016v0.075c0 0.001 0 0.002 0 0.002 0 2.961 2.095 5.434 4.884 6.014l0.040 0.007c-0.484 0.135-1.040 0.212-1.614 0.212-0.406 0-0.802-0.039-1.186-0.113l0.039 0.006c0.813 2.459 3.068 4.212 5.739 4.264l0.006 0c-2.072 1.638-4.721 2.627-7.602 2.627-0.005 0-0.009 0-0.014 0h0.001c-0.515-0.001-1.022-0.031-1.521-0.089l0.061 0.006c2.663 1.729 5.92 2.757 9.418 2.757 0.005 0 0.009 0 0.014 0h-0.001c0.037 0 0.082 0 0.126 0 9.578 0 17.343-7.765 17.343-17.343 0-0.039-0-0.077-0-0.116l0 0.006c0-0.262 0-0.524-0.019-0.786 1.21-0.878 2.229-1.931 3.042-3.136l0.028-0.044z"></path>
+                                            <span className="sr-only">GitHub</span>
+                                            <svg width="14px" height="14px" viewBox="0 0 24 24" fill="#ffffff">
+                                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
                                             </svg>
                                         </button>
                                     </div>

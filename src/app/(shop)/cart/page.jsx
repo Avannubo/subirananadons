@@ -1,15 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
+import { useCart } from '@/contexts/CartContext';
 
 // Sample cart data
 const initialCartItems = [
     {
         id: 1,
+        name: "Tripp Trapp Natural",
+        price: "259,00 €",
+        priceValue: 259.00,
+        quantity: 1,
+        imageUrl: "/assets/images/screenshot_1.png",
+        brand: "Stokke",
+        category: "Habitación"
+    },
+    {
+        id: 2,
         name: "Tripp Trapp Natural",
         price: "259,00 €",
         priceValue: 259.00,
@@ -31,7 +42,7 @@ const initialCartItems = [
 ];
 
 export default function CartPage() {
-    const [cartItems, setCartItems] = useState(initialCartItems);
+    const { cartItems, updateQuantity, removeItem } = useCart();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
         name: '',
@@ -54,26 +65,12 @@ export default function CartPage() {
         }));
     };
 
-    const updateQuantity = (id, newQuantity) => {
-        if (newQuantity < 1) return;
-        setCartItems(items =>
-            items.map(item =>
-                item.id === id ? { ...item, quantity: newQuantity } : item
-            )
-        );
-    };
-
-    const removeItem = (id) => {
-        setCartItems(items => items.filter(item => item.id !== id));
+    const handleDeliveryMethodChange = (method) => {
+        setDeliveryMethod(method);
     };
 
     const calculateSubtotal = () => {
-        console.log(cartItems.reduce((sum, item) => sum + (item.priceValue * item.quantity), 0));
         return cartItems.reduce((sum, item) => sum + (item.priceValue * item.quantity), 0);
-    };
-
-    const handleDeliveryMethodChange = (method) => {
-        setDeliveryMethod(method);
     };
 
     const calculateShipping = () => {
@@ -358,8 +355,6 @@ export default function CartPage() {
                                 </div>
                             </div>
                         </div>
-
-
                     </>
                 ) : (
                     <motion.div

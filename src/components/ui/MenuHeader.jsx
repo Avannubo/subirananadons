@@ -16,7 +16,7 @@ export default function Menu() {
         logo: "/assets/logo-header.svg",
         items: [
             {
-                label: "Tienda",
+                label: "Productos",
                 href: "/products", 
             },
             { label: "Marcas", href: "/brands" },

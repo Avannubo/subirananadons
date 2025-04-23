@@ -5,6 +5,8 @@ import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import { motion } from 'framer-motion';
 import ProductSlider from '@/components/landing/ProductSlider';
+import { useCart } from '@/contexts/CartContext';
+import { toast } from 'react-hot-toast';
 // Sample product data - in production this would come from an API or database
 const product = {
     id: 1,
@@ -116,11 +118,22 @@ export default function Page() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('DETALLES DEL PRODUCTO');
+    const { addToCart } = useCart();
 
     const handleQuantityChange = (change) => {
         const newQuantity = quantity + change;
         if (newQuantity >= 1) {
             setQuantity(newQuantity);
+        }
+    };
+
+    const handleAddToCart = async () => {
+        try {
+            await addToCart(product, quantity);
+            toast.success(`${quantity} ${product.name} añadido al carrito`);
+        } catch (error) {
+            toast.error('Error al añadir al carrito');
+            console.error('Error adding to cart:', error);
         }
     };
 
@@ -211,7 +224,10 @@ export default function Page() {
                             </div>
 
                             {/* Add to Cart Button */}
-                            <button className="w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200">
+                            <button
+                                onClick={handleAddToCart}
+                                className="w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200"
+                            >
                                 Añadir al carrito
                             </button>
 
@@ -276,7 +292,7 @@ export default function Page() {
                     />
                 </div>
             </div>
-           
+
         </ShopLayout>
     );
 }

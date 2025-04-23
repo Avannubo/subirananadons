@@ -86,7 +86,7 @@ export default function Home() {
               desktop: 4
             }}
           />
-        </div>  
+        </div>
         {/* New Section with Background */}
         <div
           className="w-[100%] overflow-hidden h-[80vh] py-20 px-4 bg-gradient-to-r from-blue-50 to-purple-50"

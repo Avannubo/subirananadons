@@ -1,20 +1,16 @@
+import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
 import SettingsTabs from '@/components/admin/settings/SettingsTabs';
-export default async function SettingsPage() {
-    const cookieStore = cookies()
-    const token = await cookieStore.has('token');
-    if (!token) {
-        redirect('/');
-    }
 
+export default async function ConfiguracionPage() {
     return (
-        <AdminLayout>
-            <div className="p-6">
-                <h1 className="text-3xl font-bold mb-6">Configuración</h1>
-                <SettingsTabs />
-            </div>
-        </AdminLayout>
+        <AuthCheck>
+            <AdminLayout>
+                <div className="p-6">
+                    <h1 className="text-3xl font-bold mb-6">Configuración</h1>
+                    <SettingsTabs />
+                </div>
+            </AdminLayout>
+        </AuthCheck>
     );
 }
