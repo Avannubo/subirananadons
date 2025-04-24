@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle } from '@headlessui/react';
-import { FiX, FiUpload } from 'react-icons/fi';
+import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus } from 'react-icons/fi';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 
@@ -11,6 +11,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         reference: '',
         description: '',
         category: '',
+        categoryId: '',
         brand: '',
         price_excl_tax: '',
         price_incl_tax: '',
@@ -28,6 +29,66 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(false);
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+
+    // Fetch all categories when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            fetchCategories();
+        }
+    }, [isOpen]);
+
+    // Fetch categories for the dropdown
+    const fetchCategories = async () => {
+        try {
+            setLoadingCategories(true);
+            const response = await fetch('/api/categories?flat=true');
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch categories');
+            }
+
+            const data = await response.json();
+            setCategories(data);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            toast.error('Error al cargar las categorías');
+        } finally {
+            setLoadingCategories(false);
+        }
+    };
+
+    // Organize categories into a proper hierarchy for the dropdown
+    const organizeCategories = (allCategories) => {
+        const categoriesMap = {};
+        const rootCategories = [];
+
+        // First pass: create a map of all categories by ID
+        allCategories.forEach(category => {
+            categoriesMap[category._id] = {
+                ...category,
+                children: []
+            };
+        });
+
+        // Second pass: build the hierarchy
+        allCategories.forEach(category => {
+            if (category.parent && categoriesMap[category.parent]) {
+                // This is a child category, add it to its parent's children
+                categoriesMap[category.parent].children.push(categoriesMap[category._id]);
+            } else {
+                // This is a root category (no parent or parent not found)
+                rootCategories.push(categoriesMap[category._id]);
+            }
+        });
+
+        return rootCategories;
+    };
+
+    // Get hierarchical categories for the dropdown
+    const hierarchicalCategories = organizeCategories(categories);
 
     // Load product data when editing
     useEffect(() => {
@@ -37,6 +98,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 reference: product.reference || '',
                 description: product.description || '',
                 category: product.category || '',
+                categoryId: product.categoryId || '',
                 brand: product.brand || '',
                 price_excl_tax: product.price_excl_tax || '',
                 price_incl_tax: product.price_incl_tax || '',
@@ -70,6 +132,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 [name]: type === 'checkbox' ? checked : value
             }));
         }
+    };
+
+    // Handle category selection from the dropdown
+    const handleCategorySelect = (categoryName, categoryId) => {
+        setFormData(prev => ({
+            ...prev,
+            category: categoryName,
+            categoryId: categoryId
+        }));
+        setShowCategoryDropdown(false);
     };
 
     // Handle image selection
@@ -193,6 +265,44 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }
     };
 
+    // Render category tree for dropdown with improved hierarchy indicators
+    const renderCategoryOption = (category, level = 0, isLast = false, prefix = '') => {
+        // Determine the prefix for this category based on its position in the hierarchy
+        const currentPrefix = level === 0 ? '' : isLast ? `${prefix}└─ ` : `${prefix}├─ `;
+        // Determine the prefix for child categories
+        const childPrefix = level === 0 ? '' : isLast ? `${prefix}   ` : `${prefix}│  `;
+
+        return (
+            <div key={category._id} className="category-item">
+                <div
+                    className={`px-3 py-1 hover:bg-gray-100 cursor-pointer flex items-center ${level > 0 ? 'border-l border-gray-200' : ''}`}
+                    onClick={() => handleCategorySelect(category.name, category._id)}
+                >
+                    {level > 0 && (
+                        <span className="text-gray-400 font-mono mr-1">{currentPrefix}</span>
+                    )}
+                    <div className="flex items-center">
+                        <FiFolder className={`mr-1 ${level === 0 ? 'text-[#00B0C8]' : 'text-gray-400'}`} size={14} />
+                        <span className={`${level === 0 ? 'font-medium' : ''} text-sm`}>{category.name}</span>
+                    </div>
+                </div>
+
+                {category.children && category.children.length > 0 && (
+                    <div className="subcategory-group">
+                        {category.children.map((child, index) =>
+                            renderCategoryOption(
+                                child,
+                                level + 1,
+                                index === category.children.length - 1,
+                                childPrefix
+                            )
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -272,15 +382,48 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <label htmlFor="category" className="block text-sm font-medium text-gray-700">
                                             Categoría *
                                         </label>
-                                        <input
-                                            type="text"
-                                            id="category"
-                                            name="category"
-                                            value={formData.category}
-                                            onChange={handleChange}
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.category ? 'border-red-300' : 'border-gray-300'
-                                                } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                        />
+                                        <div className="relative">
+                                            <div
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.category ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none cursor-pointer flex justify-between items-center`}
+                                                onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                                            >
+                                                <span className="truncate">{formData.category || 'Seleccionar categoría'}</span>
+                                                <FiChevronRight className={`transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
+                                            </div>
+
+                                            {showCategoryDropdown && (
+                                                <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md overflow-auto border border-gray-300">
+                                                    {loadingCategories ? (
+                                                        <div className="flex justify-center p-4">
+                                                            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                            <span className="ml-2">Cargando categorías...</span>
+                                                        </div>
+                                                    ) : hierarchicalCategories.length === 0 ? (
+                                                        <div className="p-4 text-gray-500">No hay categorías disponibles</div>
+                                                    ) : (
+                                                        <div className="py-1 category-dropdown">
+                                                            <style jsx global>{`
+                                                                .category-dropdown .category-item {
+                                                                    margin: 0;
+                                                                    padding: 0;
+                                                                }
+                                                                .category-dropdown .subcategory-group {
+                                                                    margin: 0;
+                                                                    padding: 0;
+                                                                }
+                                                            `}</style>
+                                                            {hierarchicalCategories.map((category, index) =>
+                                                                renderCategoryOption(
+                                                                    category,
+                                                                    0,
+                                                                    index === hierarchicalCategories.length - 1
+                                                                )
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                         {errors.category && (
                                             <p className="mt-1 text-sm text-red-600">{errors.category}</p>
                                         )}
