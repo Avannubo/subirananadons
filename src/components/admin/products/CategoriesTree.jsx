@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { FiChevronRight, FiChevronDown, FiPlus, FiEdit, FiTrash2, FiFolder, FiFolderPlus } from 'react-icons/fi';
+import { FiChevronRight, FiChevronDown, FiPlus, FiEdit, FiTrash2, FiFolder, FiFolderPlus, FiMinusSquare, FiPlusSquare } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import CategoryModal from './CategoryModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
@@ -20,12 +20,39 @@ export default function CategoriesTree() {
         fetchCategories();
     }, []);
 
+    // Function to organize categories into a proper hierarchy
+    const organizeCategories = (allCategories) => {
+        const categoriesMap = {};
+        const rootCategories = [];
+
+        // First pass: create a map of all categories by ID
+        allCategories.forEach(category => {
+            // Ensure category has an empty children array
+            categoriesMap[category._id] = {
+                ...category,
+                children: []
+            };
+        });
+
+        // Second pass: build the hierarchy
+        allCategories.forEach(category => {
+            if (category.parent && categoriesMap[category.parent]) {
+                // This is a child category, add it to its parent's children
+                categoriesMap[category.parent].children.push(categoriesMap[category._id]);
+            } else {
+                // This is a root category (no parent or parent not found)
+                rootCategories.push(categoriesMap[category._id]);
+            }
+        });
+
+        return rootCategories;
+    };
+
     const fetchCategories = async (parentId = null) => {
         try {
             setLoading(true);
-            const url = parentId
-                ? `/api/categories?parent=${parentId}`
-                : '/api/categories?parent=root&includeChildren=true';
+            // Get all categories (flat list) to properly build the hierarchy
+            const url = '/api/categories?flat=true';
 
             const response = await fetch(url);
 
@@ -34,13 +61,50 @@ export default function CategoriesTree() {
             }
 
             const data = await response.json();
-            setCategories(data);
+            console.log('Fetched categories (raw):', data);
+
+            // Organize into proper hierarchy
+            const organizedCategories = organizeCategories(data);
+            console.log('Organized categories:', organizedCategories);
+
+            setCategories(organizedCategories);
+
+            // Automatically expand categories with children
+            const expandedState = {};
+            const expandCategoriesWithChildren = (cats) => {
+                cats.forEach(cat => {
+                    if (cat.children && cat.children.length > 0) {
+                        expandedState[cat._id] = true;
+                        expandCategoriesWithChildren(cat.children);
+                    }
+                });
+            };
+
+            expandCategoriesWithChildren(organizedCategories);
+            setExpandedCategories(expandedState);
         } catch (error) {
             console.error('Error fetching categories:', error);
             toast.error('Error loading categories');
         } finally {
             setLoading(false);
         }
+    };
+
+    // Expand or collapse all categories
+    const toggleAllCategories = (expand = true) => {
+        const newExpandedState = {};
+
+        const processCategories = (cats) => {
+            cats.forEach(cat => {
+                if (cat.children && cat.children.length > 0) {
+                    newExpandedState[cat._id] = expand;
+                    processCategories(cat.children);
+                }
+            });
+        };
+
+        processCategories(categories);
+        setExpandedCategories(newExpandedState);
     };
 
     const toggleCategory = (categoryId, e) => {
@@ -51,7 +115,8 @@ export default function CategoriesTree() {
         }));
     };
 
-    const handleAddCategory = (parentCat = null) => {
+    const handleAddCategory = (parentCat = null, e) => {
+        if (e) e.stopPropagation();
         setParentCategory(parentCat);
         setShowAddModal(true);
     };
@@ -91,7 +156,17 @@ export default function CategoriesTree() {
             toast.success(isEditing ? 'Category updated' : 'Category created');
             setShowAddModal(false);
             setShowEditModal(false);
-            fetchCategories(); // Refresh categories
+
+            // Auto-expand the parent category when a subcategory is added
+            if (!isEditing && categoryData.parent) {
+                setExpandedCategories(prev => ({
+                    ...prev,
+                    [categoryData.parent]: true
+                }));
+            }
+
+            // Fetch the full tree again to update the view
+            fetchCategories();
         } catch (error) {
             console.error('Error saving category:', error);
             toast.error(error.message || 'Error saving category');
@@ -126,10 +201,11 @@ export default function CategoriesTree() {
         const isExpanded = expandedCategories[category._id];
 
         return (
-            <div className="category-item">
+            <div className="category-item" data-id={category._id} data-level={level}>
                 <div
-                    className={`flex items-center py-2 pl-${level * 4} pr-2 hover:bg-gray-100 group cursor-pointer`}
-                    onClick={() => handleEditCategory(category)}
+                    className={`flex items-center py-2 pr-2 hover:bg-gray-100 group relative`}
+                    style={{ paddingLeft: `${level * 16 + 8}px` }}
+                    onClick={(e) => handleEditCategory(category, e)}
                 >
                     {hasChildren ? (
                         <button
@@ -147,32 +223,32 @@ export default function CategoriesTree() {
 
                     <FiFolder className="mr-2 text-gray-400" />
 
-                    <span className="flex-grow font-medium text-sm">
+                    <span className="flex-grow font-medium text-sm cursor-pointer">
                         {category.name}
+                        <span className="ml-2 text-xs text-gray-400">
+                            {level > 0 ? `(Nivel ${level + 1})` : ''}
+                        </span>
                     </span>
 
-                    <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center space-x-1 invisible group-hover:visible transition-all absolute right-2">
                         <button
-                            className="p-1 text-gray-500 hover:text-[#00B0C8]"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddCategory(category);
-                            }}
-                            title="Add subcategory"
+                            className="p-1 text-[#00abc2] hover:text-[#00B0C8] rounded"
+                            onClick={(e) => handleAddCategory(category, e)}
+                            title="Añadir subcategoría"
                         >
                             <FiFolderPlus size={16} />
                         </button>
                         <button
-                            className="p-1 text-gray-500 hover:text-yellow-600"
+                            className="p-1 text-yellow-600 hover:text-yellow-700 rounded"
                             onClick={(e) => handleEditCategory(category, e)}
-                            title="Edit category"
+                            title="Editar categoría"
                         >
                             <FiEdit size={16} />
                         </button>
                         <button
-                            className="p-1 text-gray-500 hover:text-red-600"
+                            className="p-1 text-red-600 hover:text-red-700 rounded"
                             onClick={(e) => handleDeleteCategory(category, e)}
-                            title="Delete category"
+                            title="Eliminar categoría"
                         >
                             <FiTrash2 size={16} />
                         </button>
@@ -180,7 +256,7 @@ export default function CategoriesTree() {
                 </div>
 
                 {hasChildren && isExpanded && (
-                    <div className="ml-4">
+                    <div>
                         {category.children.map(child => (
                             <CategoryItem
                                 key={child._id}
@@ -199,12 +275,30 @@ export default function CategoriesTree() {
             {/* Header */}
             <div className="flex justify-between items-center p-4 border-b border-gray-300">
                 <h3 className="text-lg font-medium">Categorías</h3>
-                <button
-                    onClick={() => handleAddCategory(null)}
-                    className="flex items-center text-sm px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B]"
-                >
-                    <FiPlus className="mr-1" /> Añadir categoría
-                </button>
+                <div className="flex items-center space-x-2">
+                    <div className="flex border border-gray-300 rounded overflow-hidden">
+                        <button
+                            onClick={() => toggleAllCategories(true)}
+                            className="flex items-center text-xs p-1 text-gray-700 bg-gray-100 hover:bg-gray-200 border-r border-gray-300"
+                            title="Expandir todas"
+                        >
+                            <FiPlusSquare size={14} className="mr-1" /> Expandir
+                        </button>
+                        <button
+                            onClick={() => toggleAllCategories(false)}
+                            className="flex items-center text-xs p-1 text-gray-700 bg-gray-100 hover:bg-gray-200"
+                            title="Colapsar todas"
+                        >
+                            <FiMinusSquare size={14} className="mr-1" /> Colapsar
+                        </button>
+                    </div>
+                    <button
+                        onClick={() => handleAddCategory(null)}
+                        className="flex items-center text-sm px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B]"
+                    >
+                        <FiPlus className="mr-1" /> Añadir categoría
+                    </button>
+                </div>
             </div>
 
             {/* Tree View */}

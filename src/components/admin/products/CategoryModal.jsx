@@ -14,6 +14,39 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [allCategories, setAllCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(false);
+
+    // Load available categories for parent selection
+    useEffect(() => {
+        if (isOpen) {
+            fetchAllCategories();
+        }
+    }, [isOpen]);
+
+    // Fetch all categories for the parent dropdown
+    const fetchAllCategories = async () => {
+        try {
+            setLoadingCategories(true);
+            const response = await fetch('/api/categories?flat=true');
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch categories');
+            }
+
+            const data = await response.json();
+            // Filter out the current category if editing to prevent circular references
+            const filteredCategories = isEditing && category?._id
+                ? data.filter(cat => cat._id !== category._id)
+                : data;
+
+            setAllCategories(filteredCategories);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        } finally {
+            setLoadingCategories(false);
+        }
+    };
 
     // Load category data when editing
     useEffect(() => {
@@ -38,10 +71,21 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
     // Handle form input changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+
+        // Special handling for the parent field to ensure it's properly set
+        if (name === 'parent') {
+            // If empty string (root category option), set to null
+            // Otherwise use the selected category ID
+            setFormData(prev => ({
+                ...prev,
+                parent: value === '' ? null : value
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            }));
+        }
     };
 
     // Generate slug from name
@@ -77,7 +121,13 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
         setLoading(true);
 
         try {
-            await onSave(formData);
+            // Ensure parent is either a valid ID or null
+            const submissionData = {
+                ...formData,
+                parent: formData.parent || null
+            };
+
+            await onSave(submissionData);
         } catch (error) {
             console.error('Error saving category:', error);
         } finally {
@@ -129,6 +179,31 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                 {errors.name && (
                                     <p className="mt-1 text-sm text-red-600">{errors.name}</p>
                                 )}
+                            </div>
+
+                            {/* Parent Category Selection */}
+                            <div>
+                                <label htmlFor="parent" className="block text-sm font-medium text-gray-700">
+                                    Categoría Padre
+                                </label>
+                                <select
+                                    id="parent"
+                                    name="parent"
+                                    value={formData.parent || ''}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                    disabled={loadingCategories}
+                                >
+                                    <option value="">Ninguna (Categoría Principal)</option>
+                                    {allCategories.map(cat => (
+                                        <option key={cat._id} value={cat._id}>
+                                            {cat.name} {cat.level > 1 ? `(Nivel ${cat.level})` : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Selecciona la categoría padre o déjalo vacío para crear una categoría principal.
+                                </p>
                             </div>
 
                             {/* Slug */}
