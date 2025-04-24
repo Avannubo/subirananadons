@@ -5,47 +5,64 @@ const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Please provide a name'],
+        maxlength: [60, 'Name cannot be more than 60 characters']
     },
     email: {
         type: String,
         required: [true, 'Please provide an email'],
         unique: true,
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email'],
+        lowercase: true,
+        trim: true,
+        validate: {
+            validator: function (v) {
+                return /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/.test(v);
+            },
+            message: props => `${props.value} is not a valid email address!`
+        }
     },
     password: {
         type: String,
-        required: [function () {
-            return this.provider === 'credentials';
-        }, 'Please provide a password'],
-        minlength: [6, 'Password should be at least 6 characters long'],
-        select: false,
+        required: [true, 'Please provide a password'],
+        minlength: [6, 'Password must be at least 6 characters']
     },
     image: {
         type: String,
-        default: null
+        default: ''
+    },
+    birthDate: {
+        type: String,
+        default: ''
+    },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
+    newsletter: {
+        type: Boolean,
+        default: false
+    },
+    partnerOffers: {
+        type: Boolean,
+        default: false
     },
     emailVerified: {
         type: Date,
         default: null
     },
-    provider: {
-        type: String,
-        enum: ['credentials', 'google'],
-        default: 'credentials'
+    cart: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Cart',
+        default: null
     },
-    role: {
-        type: String,
-        enum: ['user', 'admin'],
-        default: 'user',
-    },
-    lastLogin: {
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    createdAt: {
         type: Date,
         default: Date.now
     }
 }, {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    timestamps: true
 });
 
 // Virtual for user's sessions
@@ -73,12 +90,10 @@ userSchema.methods.invalidateAllSessions = async function () {
     );
 };
 
-// Hash password before saving only for credentials provider
+// Hash password before saving
 userSchema.pre('save', async function (next) {
-    // Only hash the password if it's been modified (or is new) and provider is credentials
-    if (!this.isModified('password') || this.provider !== 'credentials') {
-        return next();
-    }
+    // Only hash the password if it's modified or new
+    if (!this.isModified('password')) return next();
 
     try {
         const salt = await bcrypt.genSalt(10);
@@ -89,18 +104,14 @@ userSchema.pre('save', async function (next) {
     }
 });
 
-// Method to compare password
+// Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
-    try {
-        return await bcrypt.compare(candidatePassword, this.password);
-    } catch (error) {
-        throw new Error('Error comparing passwords');
-    }
+    return bcrypt.compare(candidatePassword, this.password);
 };
 
 // Method to update last login
 userSchema.methods.updateLastLogin = async function () {
-    this.lastLogin = new Date();
+    this.createdAt = new Date();
     return this.save();
 };
 

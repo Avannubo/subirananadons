@@ -1,13 +1,25 @@
+'use client';
+
+import { useSession } from 'next-auth/react';
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
+import ListasTabs from '@/components/admin/listas/ListasTabs';
+import ListasStats from '@/components/admin/listas/ListasStats';
 
-export default async function ListasPage() {
+export default function ListasPage() {
+    const { data: session } = useSession();
+    const userRole = session?.user?.role || 'user';
+
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="p-6">
-                    <h1 className="text-3xl font-bold mb-6">Gestión de Listas de Regalos</h1>
-                    {/* Add your gift list management components here */}
+                <div className="container mx-auto px-4 py-8">
+                    <h1 className="text-2xl font-bold mb-6">
+                        {userRole === 'admin' ? 'Gestión de Listas de Regalos' : 'Mis Listas de Regalos'}
+                    </h1>
+
+                    {userRole === 'admin' && <ListasStats />}
+                    <ListasTabs userRole={userRole} />
                 </div>
             </AdminLayout>
         </AuthCheck>

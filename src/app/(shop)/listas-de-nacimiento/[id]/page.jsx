@@ -6,6 +6,7 @@ import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 
 // Sample list products (in a real app, this would come from your database)
 const listProducts = [
@@ -110,10 +111,10 @@ export default function BirthListPage({ params }) {
         const listUrl = window.location.href;
         try {
             await navigator.clipboard.writeText(listUrl);
-            setShowCopyNotification(true);
-            setTimeout(() => setShowCopyNotification(false), 2000);
+            toast.success('¡URL copiada al portapapeles!');
         } catch (err) {
             console.error('Failed to copy URL:', err);
+            toast.error('Error al copiar la URL');
         }
     };
 
@@ -182,16 +183,6 @@ export default function BirthListPage({ params }) {
                                 </svg>
                                 Compartir Lista
                             </button>
-                            {showCopyNotification && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0 }}
-                                    className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-md text-sm whitespace-nowrap"
-                                >
-                                    ¡URL copiada al portapapeles!
-                                </motion.div>
-                            )}
                         </div>
                     </div>
                     <p className="text-gray-600 text-center italic">{list.message}</p>

@@ -1,6 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import OrdersTable from '@/components/admin/orders/OrdersTable';
+
+// Sample orders data - In a real app, this would come from an API
 const orders = [
     {
         id: 5453,
@@ -11,7 +13,8 @@ const orders = [
         total: '117,00 €',
         payment: 'Redsys - Tarjeta',
         status: 'Pago aceptado',
-        date: '09/04/2025 22:23:22'
+        date: '09/04/2025 22:23:22',
+        userId: 'user123'
     },
     {
         id: 5452,
@@ -22,7 +25,8 @@ const orders = [
         total: '71,82 €',
         payment: 'Redsys - Bizum',
         status: 'Pago aceptado',
-        date: '09/04/2025 19:30:32'
+        date: '09/04/2025 19:30:32',
+        userId: 'user456'
     },
     {
         id: 5454,
@@ -113,7 +117,8 @@ const orders = [
         date: '10/04/2025 20:15:40'
     },
 ];
-export default function OrdersTabs() {
+
+export default function OrdersTabs({ userRole = 'user' }) {
     const [activeTab, setActiveTab] = useState('Todos');
     const [filters, setFilters] = useState({
         searchId: '',
@@ -124,8 +129,27 @@ export default function OrdersTabs() {
         dateFrom: '',
         dateTo: ''
     });
+
+    // Determine which orders to show based on user role
+    // Admin sees all orders, regular users only see their own
+    const [displayOrders, setDisplayOrders] = useState([]);
+
+    useEffect(() => {
+        // In a real app, you would fetch orders from an API
+        // For now, we're simulating user-specific orders
+        if (userRole === 'admin') {
+            setDisplayOrders(orders);
+        } else {
+            // In a real app, you would filter by the actual user ID
+            // For this demo, we're just showing a subset
+            const userOrders = orders.slice(0, 3);
+            setDisplayOrders(userOrders);
+        }
+    }, [userRole]);
+
     const tabs = ['Todos', 'Pendientes', 'Pagados', 'Enviados', 'Devueltos'];
-    const filteredOrders = orders.filter((order) => {
+
+    const filteredOrders = displayOrders.filter((order) => {
         if (activeTab === 'Todos') return true;
         if (activeTab === 'Pendientes') return order.status === 'Pendiente de pago';
         if (activeTab === 'Pagados') return order.status === 'Pago aceptado';
@@ -133,6 +157,7 @@ export default function OrdersTabs() {
         if (activeTab === 'Devueltos') return order.status === 'Devuelto';
         return false;
     });
+
     return (
         <div>
             {/* Tabs Navigation */}
@@ -146,7 +171,7 @@ export default function OrdersTabs() {
                             : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
-                        {tab} {tab === 'Todos' ? `(${orders.length})` : `(${orders.filter(order => {
+                        {tab} {tab === 'Todos' ? `(${displayOrders.length})` : `(${displayOrders.filter(order => {
                             if (tab === 'Pendientes') return order.status === 'Pendiente de pago';
                             if (tab === 'Pagados') return order.status === 'Pago aceptado';
                             if (tab === 'Enviados') return order.status === 'Enviado';
@@ -156,8 +181,20 @@ export default function OrdersTabs() {
                     </button>
                 ))}
             </div>
+
             {/* Orders Table */}
-            <OrdersTable orders={filteredOrders} filters={filters} setFilters={setFilters} />
+            <OrdersTable
+                orders={filteredOrders}
+                filters={filters}
+                setFilters={setFilters}
+                userRole={userRole}
+            />
+
+            {displayOrders.length === 0 && (
+                <div className="text-center py-8">
+                    <p className="text-gray-500">No tienes pedidos en este momento.</p>
+                </div>
+            )}
         </div>
     );
 }

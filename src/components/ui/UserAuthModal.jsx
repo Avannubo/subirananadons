@@ -4,15 +4,17 @@ import { useRouter } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { LogOut, UserRound } from 'lucide-react';
 import Image from 'next/image';
+import { useUser } from '@/contexts/UserContext';
+import { toast } from 'react-hot-toast';
 
 export default function AuthModal() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeView, setActiveView] = useState('login');
-    const [message, setMessage] = useState({ text: '', type: '' });
     const modalRef = useRef(null);
     const backdropRef = useRef(null);
     const router = useRouter();
     const { data: session, status } = useSession();
+    const { user, loading: userLoading, refreshUser } = useUser();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
@@ -22,16 +24,13 @@ export default function AuthModal() {
         } else {
             setActiveView('login');
             setIsOpen(true);
-            setMessage({ text: '', type: '' });
         }
     };
     const closeModal = () => {
         setIsOpen(false);
-        setMessage({ text: '', type: '' });
     };
     const toggleView = () => {
         setActiveView(activeView === 'login' ? 'register' : 'login');
-        setMessage({ text: '', type: '' });
     };
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -90,11 +89,11 @@ export default function AuthModal() {
                     default:
                         errorMessage += 'Por favor verifica tus credenciales.';
                 }
-                setMessage({ text: errorMessage, type: 'error' });
+                toast.error(errorMessage);
                 return;
             }
 
-            setMessage({ text: '¡Inicio de sesión exitoso!', type: 'success' });
+            toast.success('¡Inicio de sesión exitoso!');
             console.log('Login successful, redirecting to dashboard...');
 
             setTimeout(() => {
@@ -104,10 +103,7 @@ export default function AuthModal() {
 
         } catch (error) {
             console.error('Login error:', error);
-            setMessage({
-                text: 'Error al iniciar sesión. Por favor intenta nuevamente.',
-                type: 'error'
-            });
+            toast.error('Error al iniciar sesión. Por favor intenta nuevamente.');
         }
     };
     const handleRegisterSubmit = async (e) => {
@@ -123,7 +119,7 @@ export default function AuthModal() {
 
             if (password !== confirmPassword) {
                 console.log('Password mismatch');
-                setMessage({ text: 'Las contraseñas no coinciden', type: 'error' });
+                toast.error('Las contraseñas no coinciden');
                 return;
             }
 
@@ -141,17 +137,11 @@ export default function AuthModal() {
 
             if (!response.ok) {
                 console.error('Registration failed:', data);
-                setMessage({
-                    text: data.message || 'Error en el registro. Por favor intenta nuevamente.',
-                    type: 'error'
-                });
+                toast.error(data.message || 'Error en el registro. Por favor intenta nuevamente.');
                 return;
             }
 
-            setMessage({
-                text: '¡Registro exitoso! Iniciando sesión...',
-                type: 'success'
-            });
+            toast.success('¡Registro exitoso! Iniciando sesión...');
 
             console.log('Registration successful, attempting automatic login...');
             const signInResult = await signIn('credentials', {
@@ -164,10 +154,7 @@ export default function AuthModal() {
 
             if (signInResult?.error) {
                 console.error('Auto-login failed:', signInResult.error);
-                setMessage({
-                    text: 'Registro exitoso pero error al iniciar sesión. Por favor inicia sesión manualmente.',
-                    type: 'error'
-                });
+                toast.error('Registro exitoso pero error al iniciar sesión. Por favor inicia sesión manualmente.');
                 return;
             }
 
@@ -179,10 +166,7 @@ export default function AuthModal() {
 
         } catch (error) {
             console.error('Registration error:', error);
-            setMessage({
-                text: 'Error en el registro. Por favor intenta nuevamente.',
-                type: 'error'
-            });
+            toast.error('Error en el registro. Por favor intenta nuevamente.');
         }
     };
     // Handle social login (Google, GitHub) with error handling and redirect
@@ -190,7 +174,7 @@ export default function AuthModal() {
     //     try {
     //         await signIn(provider, { callbackUrl: '/dashboard' });
     //     } catch (error) {
-    //         setMessage({ text: `Error al iniciar sesión con ${provider}`, type: 'error' });
+    //         toast.error(`Error al iniciar sesión con ${provider}`);
     //     }
     // };
 
@@ -207,35 +191,24 @@ export default function AuthModal() {
         };
     }, []);
 
+    const getUserImage = () => {
+        if (user?.image) {
+            return user.image;
+        }
+        if (session?.user?.image) {
+            return session.user.image;
+        }
+        return '/assets/images/joie.png';
+    };
+
     return (
         <div className="flex">
-            {message.text && (
-                <div className={`fixed top-4 right-4 z-[99] flex items-center space-x-2 px-4 py-3 rounded shadow-lg animate-slide-in ${message.type === 'success'
-                    ? 'bg-green-100 border border-green-400 text-green-700'
-                    : 'bg-red-100 border border-red-400 text-red-700'
-                    }`}
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                    >
-                        <path
-                            fillRule="evenodd"
-                            d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-8-3a1 1 0 00-.707.293l-3 3a1 1 0 001.414 1.414L10 9.414l2.293 2.293a1 1 0 001.414-1.414l-3-3A1 1 0 0010 7z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
-                    <span>{message.text}</span>
-                </div>
-            )}
             <div className="flex">
                 {session ? (
                     <div className="relative">
                         <button onClick={toggleMenu} className="flex items-center space-x-2">
                             <Image
-                                src={session.user.image || '/assets/images/joie.png'}
+                                src={getUserImage()}
                                 alt="Profile Picture"
                                 width={500}
                                 height={500}
@@ -246,21 +219,28 @@ export default function AuthModal() {
                             <div ref={menuRef} className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden">
                                 <button
                                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    onClick={() => {
+                                        router.push('/dashboard/account');
+                                        setIsMenuOpen(false);
+                                    }}
                                 >
                                     Profile
                                 </button>
                                 <button
                                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    onClick={() => {
+                                        refreshUser();
+                                        setIsMenuOpen(false);
+                                    }}
                                 >
-                                    Settings
+                                    Refresh User Data
                                 </button>
                                 <button
-                                    onClick={() => signOut()}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700  hover:bg-gray-100"
+                                    onClick={() => signOut({ callbackUrl: '/' })}
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                 >
                                     Logout
                                 </button>
-
                             </div>
                         )}
                     </div>

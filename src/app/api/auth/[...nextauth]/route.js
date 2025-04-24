@@ -58,23 +58,29 @@ export const authOptions = {
                 session.user.id = token.id;
                 session.user.role = token.role;
 
-                // Get request headers
-                const headersList = headers();
-                const userAgent = headersList.get('user-agent') || '';
-                const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0] ||
-                    headersList.get('x-real-ip') ||
-                    'unknown';
-
-                // Track the session
+                // Get request headers - Fix by awaiting the headers() function
                 try {
-                    await trackUserSession(
-                        token.id,
-                        session.sessionToken || token.jti,
-                        userAgent,
-                        ipAddress
-                    );
+                    // Use await with headers() since it's an async API in Next.js 13+
+                    const headersList = await headers();
+                    const userAgent = headersList.get('user-agent') || '';
+                    const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0] ||
+                        headersList.get('x-real-ip') ||
+                        'unknown';
+
+                    // Track the session
+                    try {
+                        await trackUserSession(
+                            token.id,
+                            session.sessionToken || token.jti,
+                            userAgent,
+                            ipAddress
+                        );
+                    } catch (error) {
+                        console.error('Error tracking session:', error);
+                    }
                 } catch (error) {
-                    console.error('Error tracking session:', error);
+                    console.error('Error accessing headers:', error);
+                    // Continue even if headers access fails
                 }
             }
             return session;

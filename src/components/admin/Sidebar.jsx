@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import {
     ShoppingBag,
@@ -47,7 +46,7 @@ const getNavigationItems = (userRole) => [
     {
         href: "/dashboard/listas",
         icon: GiftIcon,
-        label: userRole === 'admin' ? "Listas" : "Mi Listas",
+        label: userRole === 'admin' ? "Listas" : "Mis Listas",
         roles: ['user', 'admin']
     },
     {

@@ -1,41 +1,33 @@
 "use client"
-
 import { useState, useEffect, useRef } from 'react';
-
 export default function Account() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    
     const menuRef = useRef(null);
-
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
-
     const handleClickOutside = (event) => {
         if (menuRef.current && !menuRef.current.contains(event.target)) {
             setIsMenuOpen(false);
         }
     };
-
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
-   
     return (
         <div className="relative" ref={menuRef}>
             <button
                 className="p-1 hover:color-[#353535] "
                 onClick={toggleMenu}
-            > 
+            >
                 <svg width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 21C5 17.134 8.13401 14 12 14C15.866 14 19 17.134 19 21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#353535" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
-            </button> 
+            </button>
             {/* Dropdown Menu */}
             {isMenuOpen && (
                 <div className="absolute left-0 mt-2 w-46 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                   
                     <a
                         onClick={openLogin}
                         className="flex flex-row items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -58,8 +50,6 @@ export default function Account() {
                     </a>
                 </div>
             )}
-
-           
         </div>
     );
 } 
