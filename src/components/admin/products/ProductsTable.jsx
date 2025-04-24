@@ -8,7 +8,7 @@ import ProductModal from './ProductModal';
 import ProductViewModal from './ProductViewModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 
-export default function ProductsTable() {
+export default function ProductsTable(props) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -32,6 +32,9 @@ export default function ProductsTable() {
             if (filters.reference) queryParams.append('reference', filters.reference);
             if (filters.category) queryParams.append('category', filters.category);
 
+            // Add the category filter from props if it exists
+            if (props.categoryFilter) queryParams.append('categoryId', props.categoryFilter);
+
             const response = await fetch(`/api/products?${queryParams.toString()}`);
 
             if (!response.ok) {
@@ -51,7 +54,7 @@ export default function ProductsTable() {
     // Load products on component mount
     useEffect(() => {
         fetchProducts();
-    }, []);
+    }, [props.categoryFilter]);
 
     // Handle filter change
     const handleFilterChange = (e) => {

@@ -1,10 +1,21 @@
 'use client';
 import { Dialog } from '@headlessui/react';
-import { FiX } from 'react-icons/fi';
+import { FiX, FiPackage, FiDollarSign, FiTag, FiBox, FiImage } from 'react-icons/fi';
 import Image from 'next/image';
+import { useState } from 'react';
 
 export default function ProductViewModal({ isOpen, onClose, product }) {
     if (!product) return null;
+
+    // Sample gallery images - in production, these would come from product data
+    const [galleryImages] = useState([
+        product.image || '/assets/images/product-placeholder.jpg',
+        '/assets/images/joie.png',
+        '/assets/images/joolz.png',
+        '/assets/images/product-placeholder.jpg'
+    ]);
+
+    const [selectedImage, setSelectedImage] = useState(galleryImages[0]);
 
     // Format price with 2 decimal places and € symbol
     const formatPrice = (price) => {
@@ -19,10 +30,12 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
 
             <div className="fixed inset-0 flex items-center justify-center p-4">
-                <Dialog.Panel className="w-full max-w-2xl bg-white rounded-lg shadow-xl overflow-hidden">
-                    <div className="flex justify-between items-center p-4 border-b">
-                        <Dialog.Title className="text-lg font-medium">
-                            Detalles del Producto
+                <Dialog.Panel className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden">
+                    {/* Header with product name */}
+                    <div className="flex justify-between items-center p-4 border-b border-gray-300 bg-gray-50">
+                        <Dialog.Title className="text-lg font-medium text-gray-800 flex items-center">
+                            <FiPackage className="mr-2 text-[#00B0C8]" />
+                            {product.name}
                         </Dialog.Title>
                         <button
                             onClick={onClose}
@@ -33,121 +46,167 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                     </div>
 
                     <div className="p-6 max-h-[80vh] overflow-y-auto">
-                        <div className="flex flex-col md:flex-row gap-6">
-                            {/* Product Image */}
-                            <div className="md:w-1/3 flex justify-center">
-                                {product.image ? (
-                                    <div className="relative h-48 w-48">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Left column - Product Image */}
+                            <div className="md:col-span-1 flex flex-col items-center">
+                                <div className="bg-gray-50 p-1 rounded-lg border border-gray-200 w-full">
+                                    <div className="relative h-56 w-full">
                                         <Image
-                                            src={product.image}
+                                            src={selectedImage}
                                             alt={product.name}
                                             fill
-                                            style={{ objectFit: 'contain' }}
+                                            style={{ objectFit: 'cover' }}
                                             className="rounded-md"
                                         />
                                     </div>
-                                ) : (
-                                    <div className="h-48 w-48 bg-gray-100 flex items-center justify-center rounded-md">
-                                        <span className="text-gray-400">Sin imagen</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Product Details */}
-                            <div className="md:w-2/3">
-                                <h2 className="text-xl font-semibold text-gray-800">{product.name}</h2>
-
-                                <div className="mt-2 space-y-4">
-                                    <div className="flex items-center space-x-2">
-                                        <span className="text-sm font-medium text-gray-500">Referencia:</span>
-                                        <span className="text-sm text-gray-700">{product.reference}</span>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-4">
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">Categoría:</span>
-                                            <span className="ml-2 text-sm text-gray-700">{product.category || 'N/A'}</span>
-                                        </div>
-
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">Marca:</span>
-                                            <span className="ml-2 text-sm text-gray-700">{product.brand || 'N/A'}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">Precio (sin IVA):</span>
-                                            <span className="ml-2 text-sm text-gray-700">
-                                                {product.price_excl_tax ? formatPrice(product.price_excl_tax) : 'N/A'}
-                                            </span>
-                                        </div>
-
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">Precio (con IVA):</span>
-                                            <span className="ml-2 text-sm text-gray-700">
-                                                {product.price_incl_tax ? formatPrice(product.price_incl_tax) : 'N/A'}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">Stock Físico:</span>
-                                            <span className="ml-2 text-sm text-gray-700">
-                                                {product.stock?.physical !== undefined ? product.stock.physical : 'N/A'}
-                                            </span>
-                                        </div>
-
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">Stock Reservado:</span>
-                                            <span className="ml-2 text-sm text-gray-700">
-                                                {product.stock?.reserved !== undefined ? product.stock.reserved : 'N/A'}
-                                            </span>
-                                        </div>
-
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">Stock Disponible:</span>
-                                            <span className={`ml-2 text-sm ${availableStock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                                {availableStock}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <span className="text-sm font-medium text-gray-500">Estado:</span>
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === 'active' ? 'bg-green-100 text-green-800' :
-                                            product.status === 'inactive' ? 'bg-gray-100 text-gray-800' :
-                                                'bg-red-100 text-red-800'
-                                            }`}>
-                                            {product.status === 'active' ? 'Activo' :
-                                                product.status === 'inactive' ? 'Inactivo' :
-                                                    'Descontinuado'}
-                                        </span>
-                                    </div>
-
-                                    {product.featured && (
-                                        <div className="flex items-center space-x-2">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                Producto Destacado
-                                            </span>
-                                        </div>
-                                    )}
                                 </div>
 
-                                {product.description && (
-                                    <div className="mt-6">
-                                        <h3 className="text-sm font-medium text-gray-700">Descripción</h3>
-                                        <p className="mt-1 text-sm text-gray-600 whitespace-pre-line">
-                                            {product.description}
-                                        </p>
+                                {/* Product Gallery */}
+                                <div className="w-full mt-3">
+                                    <h4 className="text-xs font-medium text-gray-500 uppercase mb-2 flex items-center">
+                                        <FiImage className="mr-1 text-[#00B0C8]" /> Galería
+                                    </h4>
+                                    <div className="flex space-x-2 overflow-x-auto pb-2">
+                                        {galleryImages.map((img, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => setSelectedImage(img)}
+                                                className={`flex-shrink-0 w-14 h-14 relative rounded border ${selectedImage === img
+                                                    ? 'border-[#00B0C8] ring-2 ring-[#00B0C8]/30'
+                                                    : 'border-gray-200 hover:border-gray-300'}`}
+                                            >
+                                                <Image
+                                                    src={img}
+                                                    alt={`Thumbnail ${index + 1}`}
+                                                    fill
+                                                    style={{ objectFit: 'cover' }}
+                                                    className="rounded"
+                                                />
+                                            </button>
+                                        ))}
                                     </div>
+                                </div>
+
+                                {/* Status indicators */}
+                                <div className="flex flex-wrap gap-2 justify-center mt-4">
+                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${product.status === 'active' ? 'bg-green-100 text-green-800' :
+                                        product.status === 'inactive' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-red-100 text-red-800'
+                                        }`}>
+                                        {product.status === 'active' ? 'Activo' :
+                                            product.status === 'inactive' ? 'Inactivo' :
+                                                'Descontinuado'}
+                                    </span>
+
+                                    {product.featured && (
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            Destacado
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Right column - Product Details */}
+                            <div className="md:col-span-2 space-y-6">
+                                {/* Basic Information */}
+                                <section className="border-b border-gray-200 pb-4">
+                                    <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
+                                        <FiTag className="mr-2 text-[#00B0C8]" /> Información Básica
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <div>
+                                                <span className="text-sm font-medium text-gray-500">Referencia:</span>
+                                                <p className="text-sm text-gray-700">{product.reference || 'N/A'}</p>
+                                            </div>
+
+                                            <div>
+                                                <span className="text-sm font-medium text-gray-500">Categoría:</span>
+                                                <p className="text-sm text-gray-700">{product.category || 'N/A'}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <div>
+                                                <span className="text-sm font-medium text-gray-500">Marca:</span>
+                                                <p className="text-sm text-gray-700">{product.brand || 'N/A'}</p>
+                                            </div>
+
+                                            <div>
+                                                <span className="text-sm font-medium text-gray-500">ID:</span>
+                                                <p className="text-sm text-gray-700">{product._id || product.id || 'N/A'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Pricing Information */}
+                                <section className="border-b border-gray-200 pb-4">
+                                    <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
+                                        <FiDollarSign className="mr-2 text-[#00B0C8]" /> Precios
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-gray-50 p-3 rounded">
+                                            <span className="text-sm font-medium text-gray-500">Precio (sin IVA):</span>
+                                            <p className="text-base font-medium text-gray-800">
+                                                {product.price_excl_tax ? formatPrice(product.price_excl_tax) : 'N/A'}
+                                            </p>
+                                        </div>
+
+                                        <div className="bg-gray-50 p-3 rounded">
+                                            <span className="text-sm font-medium text-gray-500">Precio (con IVA):</span>
+                                            <p className="text-base font-medium text-gray-800">
+                                                {product.price_incl_tax ? formatPrice(product.price_incl_tax) : 'N/A'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Inventory Information */}
+                                <section className="border-b border-gray-200 pb-4">
+                                    <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
+                                        <FiBox className="mr-2 text-[#00B0C8]" /> Inventario
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="bg-gray-50 p-3 rounded">
+                                            <span className="text-sm font-medium text-gray-500">Stock Físico:</span>
+                                            <p className="text-base font-medium text-gray-800">
+                                                {product.stock?.physical !== undefined ? product.stock.physical : 'N/A'}
+                                            </p>
+                                        </div>
+
+                                        <div className="bg-gray-50 p-3 rounded">
+                                            <span className="text-sm font-medium text-gray-500">Stock Reservado:</span>
+                                            <p className="text-base font-medium text-gray-800">
+                                                {product.stock?.reserved !== undefined ? product.stock.reserved : 'N/A'}
+                                            </p>
+                                        </div>
+
+                                        <div className="bg-gray-50 p-3 rounded">
+                                            <span className="text-sm font-medium text-gray-500">Stock Disponible:</span>
+                                            <p className={`text-base font-medium ${availableStock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {availableStock}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Description if available */}
+                                {product.description && (
+                                    <section>
+                                        <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3">Descripción</h3>
+                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <p className="text-sm text-gray-600 whitespace-pre-line">
+                                                {product.description}
+                                            </p>
+                                        </div>
+                                    </section>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    <div className="p-4 border-t flex justify-end">
+                    <div className="p-4 border-t border-gray-300 bg-gray-50 flex justify-end">
                         <button
                             type="button"
                             onClick={onClose}
