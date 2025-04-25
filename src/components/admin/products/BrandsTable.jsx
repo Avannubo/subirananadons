@@ -472,92 +472,87 @@ export default function BrandsTable() {
 
             {/* Pagination */}
             {!loading && brands.length > 0 && (
-                <div className="px-6 py-4 border-t border-gray-200">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="text-sm text-gray-500 flex items-center gap-2 flex-wrap">
-                            <span>
-                                Mostrando <span className="font-medium">{Math.min(pagination.limit, brands.length)}</span> de{' '}
-                                <span className="font-medium">{pagination.totalItems || brands.length}</span> marcas
-                            </span>
-                            <div className="flex items-center ml-0 sm:ml-4 mt-2 sm:mt-0">
-                                <label htmlFor="limit" className="mr-2 text-sm text-gray-500">
-                                    Items por página:
-                                </label>
-                                <select
-                                    id="limit"
-                                    className="border border-gray-300 rounded px-2 py-1 text-sm"
-                                    value={pagination.limit}
-                                    onChange={handleLimitChange}
-                                >
-                                    <option value="5">5</option>
-                                    <option value="10">10</option>
-                                    <option value="20">20</option>
-                                    <option value="50">50</option>
-                                </select>
-                            </div>
+                <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6">
+                    <div className="text-sm text-gray-500 mb-2 sm:mb-0">
+                        Mostrando {(pagination.currentPage - 1) * pagination.limit + 1} de {pagination.totalItems} marcas
+                    </div>
+
+                    <div className="flex items-center">
+                        <div className="mr-4 flex items-center">
+                            <span className="mr-2 text-sm">Items por página:</span>
+                            <select
+                                className="border border-gray-300 rounded px-2 py-1 text-sm"
+                                value={pagination.limit}
+                                onChange={handleLimitChange}
+                            >
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
                         </div>
 
-                        {pagination.totalPages > 1 && (
-                            <div className="flex space-x-2 flex-wrap justify-center">
+                        <div className="flex items-center space-x-1">
+                            <button
+                                onClick={() => handlePageChange(pagination.currentPage - 1)}
+                                disabled={pagination.currentPage === 1}
+                                className={`px-3 py-1 border border-gray-300 rounded ${pagination.currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Anterior
+                            </button>
+
+                            {/* Page buttons */}
+                            {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                                // Show current page and its neighbors
+                                let pageNum;
+                                if (pagination.totalPages <= 5) {
+                                    // If 5 or fewer pages, show all
+                                    pageNum = i + 1;
+                                } else if (pagination.currentPage <= 3) {
+                                    // If near start, show first 5
+                                    pageNum = i + 1;
+                                } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                                    // If near end, show last 5
+                                    pageNum = pagination.totalPages - 4 + i;
+                                } else {
+                                    // Show 2 before and 2 after current page
+                                    pageNum = pagination.currentPage - 2 + i;
+                                }
+
+                                return (
+                                    <button
+                                        key={i}
+                                        onClick={() => handlePageChange(pageNum)}
+                                        className={`px-3 py-1 border ${pagination.currentPage === pageNum ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                );
+                            })}
+
+                            {/* Ellipsis if many pages */}
+                            {pagination.totalPages > 5 && pagination.currentPage < pagination.totalPages - 2 && (
+                                <span className="px-2 py-1">...</span>
+                            )}
+
+                            {/* Show last page if not in view */}
+                            {pagination.totalPages > 5 && pagination.currentPage < pagination.totalPages - 2 && (
                                 <button
-                                    onClick={() => handlePageChange(pagination.currentPage - 1)}
-                                    disabled={pagination.currentPage === 1}
-                                    className={`px-3 py-1 rounded border ${pagination.currentPage === 1
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                                        }`}
+                                    onClick={() => handlePageChange(pagination.totalPages)}
+                                    className="px-3 py-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
                                 >
-                                    Anterior
+                                    {pagination.totalPages}
                                 </button>
+                            )}
 
-                                <div className="flex space-x-1">
-                                    {[...Array(pagination.totalPages)].map((_, index) => {
-                                        const pageNumber = index + 1;
-                                        const isCurrentPage = pageNumber === pagination.currentPage;
-
-                                        if (
-                                            pagination.totalPages <= 7 ||
-                                            pageNumber === 1 ||
-                                            pageNumber === pagination.totalPages ||
-                                            (pageNumber >= pagination.currentPage - 1 && pageNumber <= pagination.currentPage + 1)
-                                        ) {
-                                            return (
-                                                <button
-                                                    key={pageNumber}
-                                                    onClick={() => handlePageChange(pageNumber)}
-                                                    className={`w-8 h-8 flex items-center justify-center rounded ${isCurrentPage
-                                                        ? 'bg-[#00B0C8] text-white'
-                                                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                                                        }`}
-                                                >
-                                                    {pageNumber}
-                                                </button>
-                                            );
-                                        }
-
-                                        if (
-                                            (pageNumber === 2 && pagination.currentPage > 3) ||
-                                            (pageNumber === pagination.totalPages - 1 && pagination.currentPage < pagination.totalPages - 2)
-                                        ) {
-                                            return <span key={pageNumber} className="w-8 h-8 flex items-center justify-center">...</span>;
-                                        }
-
-                                        return null;
-                                    })}
-                                </div>
-
-                                <button
-                                    onClick={() => handlePageChange(pagination.currentPage + 1)}
-                                    disabled={pagination.currentPage === pagination.totalPages}
-                                    className={`px-3 py-1 rounded border ${pagination.currentPage === pagination.totalPages
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    Siguiente
-                                </button>
-                            </div>
-                        )}
+                            <button
+                                onClick={() => handlePageChange(pagination.currentPage + 1)}
+                                disabled={pagination.currentPage === pagination.totalPages}
+                                className={`px-3 py-1 border border-gray-300 rounded ${pagination.currentPage === pagination.totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Siguiente
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

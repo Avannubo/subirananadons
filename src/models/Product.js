@@ -38,11 +38,6 @@ const productSchema = new mongoose.Schema({
         default: '/assets/images/default-product.png'
     },
     stock: {
-        physical: {
-            type: Number,
-            default: 0,
-            min: 0
-        },
         available: {
             type: Number,
             default: 0,
@@ -51,6 +46,11 @@ const productSchema = new mongoose.Schema({
         minStock: {
             type: Number,
             default: 5,
+            min: 0
+        },
+        physical: {
+            type: Number,
+            default: 0,
             min: 0
         }
     },
