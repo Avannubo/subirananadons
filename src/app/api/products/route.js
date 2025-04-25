@@ -64,7 +64,7 @@ export async function POST(request) {
             image: body.image || '/assets/images/default-product.png',
             stock: {
                 physical: parseInt(body.stock?.physical || 0),
-                reserved: parseInt(body.stock?.reserved || 0),
+                minStock: parseInt(body.stock?.minStock || 5)
             },
             status: body.status || 'active',
             featured: body.featured || false

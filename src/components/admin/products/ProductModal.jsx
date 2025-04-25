@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle } from '@headlessui/react';
-import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus } from 'react-icons/fi';
+import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus, FiPackage } from 'react-icons/fi';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
+import { useStats } from '@/contexts/StatsContext';
 
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
     const [formData, setFormData] = useState({
@@ -13,12 +14,13 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         category: '',
         categoryId: '',
         brand: '',
+        brandId: '',
         price_excl_tax: '',
         price_incl_tax: '',
         image: '',
         stock: {
             physical: '',
-            reserved: ''
+            minStock: 5
         },
         status: 'active',
         featured: false,
@@ -32,11 +34,17 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const [brands, setBrands] = useState([]);
+    const [loadingBrands, setLoadingBrands] = useState(false);
+    const [showBrandDropdown, setShowBrandDropdown] = useState(false);
+    const [brandSearchTerm, setBrandSearchTerm] = useState('');
+    const stats = useStats();
 
-    // Fetch all categories when modal opens
+    // Fetch all categories and brands when modal opens
     useEffect(() => {
         if (isOpen) {
             fetchCategories();
+            fetchBrands();
         }
     }, [isOpen]);
 
@@ -57,6 +65,29 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             toast.error('Error al cargar las categorías');
         } finally {
             setLoadingCategories(false);
+        }
+    };
+
+    // Fetch brands for the dropdown
+    const fetchBrands = async () => {
+        try {
+            setLoadingBrands(true);
+            // Fetch all brands without pagination to get the complete list
+            const response = await fetch('/api/brands?limit=100&enabled=true');
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch brands');
+            }
+
+            const data = await response.json();
+            // Handle both data formats (array or object with brands array)
+            const brandsArray = data.brands || data || [];
+            setBrands(brandsArray);
+        } catch (error) {
+            console.error('Error fetching brands:', error);
+            toast.error('Error al cargar las marcas');
+        } finally {
+            setLoadingBrands(false);
         }
     };
 
@@ -100,12 +131,13 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 category: product.category || '',
                 categoryId: product.categoryId || '',
                 brand: product.brand || '',
+                brandId: product.brandId || '',
                 price_excl_tax: product.price_excl_tax || '',
                 price_incl_tax: product.price_incl_tax || '',
                 image: product.image || '',
                 stock: {
                     physical: product.stock?.physical || '',
-                    reserved: product.stock?.reserved || ''
+                    minStock: product.stock?.minStock || 5
                 },
                 status: product.status || 'active',
                 featured: product.featured || false,
@@ -118,7 +150,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
 
-        if (name === 'physical' || name === 'reserved') {
+        if (name === 'physical' || name === 'minStock') {
             setFormData(prev => ({
                 ...prev,
                 stock: {
@@ -142,6 +174,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             categoryId: categoryId
         }));
         setShowCategoryDropdown(false);
+    };
+
+    // Handle brand selection
+    const handleBrandSelect = (brandName, brandId) => {
+        setFormData(prev => ({
+            ...prev,
+            brand: brandName,
+            brandId: brandId
+        }));
+        setShowBrandDropdown(false);
     };
 
     // Handle image selection
@@ -221,8 +263,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             newErrors.physical = 'Debe ser un número entero';
         }
 
-        if (formData.stock.reserved && isNaN(parseInt(formData.stock.reserved))) {
-            newErrors.reserved = 'Debe ser un número entero';
+        if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
+            newErrors.minStock = 'Debe ser un número entero';
         }
 
         setErrors(newErrors);
@@ -250,13 +292,23 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 image: imageUrl,
                 price_excl_tax: parseFloat(formData.price_excl_tax),
                 price_incl_tax: parseFloat(formData.price_incl_tax),
+                brandId: formData.brandId || '',
                 stock: {
                     physical: parseInt(formData.stock.physical || 0),
-                    reserved: parseInt(formData.stock.reserved || 0)
+                    minStock: parseInt(formData.stock.minStock || 5)
                 }
             };
 
+            // Save the product
             await onSave(processedData);
+
+            // Notify stats context about the change
+            if (stats.notifyChange) {
+                // Use setTimeout to ensure the API has time to process the change
+                setTimeout(() => {
+                    stats.notifyChange();
+                }, 500);
+            }
         } catch (error) {
             console.error('Error saving product:', error);
             toast.error('Error al guardar el producto');
@@ -301,6 +353,27 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 )}
             </div>
         );
+    };
+
+    // Filter brands based on search term
+    const filteredBrands = brands.filter(brand =>
+        brand.name.toLowerCase().includes(brandSearchTerm.toLowerCase())
+    );
+
+    // Reset search when dropdown closes
+    useEffect(() => {
+        if (!showBrandDropdown) {
+            setBrandSearchTerm('');
+        }
+    }, [showBrandDropdown]);
+
+    // Handle brand search input
+    const handleBrandSearch = (e) => {
+        setBrandSearchTerm(e.target.value);
+        // Keep the dropdown open
+        if (!showBrandDropdown) {
+            setShowBrandDropdown(true);
+        }
     };
 
     return (
@@ -433,14 +506,118 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
                                             Marca
                                         </label>
-                                        <input
-                                            type="text"
-                                            id="brand"
-                                            name="brand"
-                                            value={formData.brand}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                        />
+                                        <div className="relative">
+                                            <div
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.brand ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none cursor-pointer flex justify-between items-center`}
+                                                onClick={() => setShowBrandDropdown(!showBrandDropdown)}
+                                            >
+                                                {formData.brand ? (
+                                                    <div className="flex items-center space-x-3 truncate">
+                                                        {(() => {
+                                                            const selectedBrand = brands.find(b => b._id === formData.brandId || b.name === formData.brand);
+                                                            if (selectedBrand?.logo) {
+                                                                return (
+                                                                    <div className="w-6 h-6 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
+                                                                        <Image
+                                                                            src={selectedBrand.logo}
+                                                                            alt={selectedBrand.name}
+                                                                            width={100}
+                                                                            height={100}
+                                                                            className="object-cover w-full h-full"
+                                                                        />
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return (
+                                                                <div className="w-6 h-6 flex-shrink-0 rounded bg-gray-100 flex items-center justify-center">
+                                                                    <FiPackage size={14} className="text-gray-400" />
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                        <span className="truncate text-gray-700 font-medium">{formData.brand}</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center space-x-2">
+                                                        <FiPackage size={16} className="text-gray-400" />
+                                                        <span className="truncate text-gray-500">Seleccionar marca</span>
+                                                    </div>
+                                                )}
+                                                <FiChevronRight className={`transition-transform ${showBrandDropdown ? 'rotate-90' : ''}`} />
+                                            </div>
+
+                                            {showBrandDropdown && (
+                                                <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-80 rounded-md overflow-hidden border border-gray-300 flex flex-col">
+                                                    {/* Search input */}
+                                                    <div className="p-2 border-b border-gray-200 sticky top-0 bg-white z-10">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Buscar marca..."
+                                                            value={brandSearchTerm}
+                                                            onChange={handleBrandSearch}
+                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        />
+                                                    </div>
+
+                                                    {/* Results container */}
+                                                    <div className="overflow-auto max-h-60">
+                                                        {loadingBrands ? (
+                                                            <div className="flex justify-center p-4">
+                                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                                <span className="ml-2">Cargando marcas...</span>
+                                                            </div>
+                                                        ) : filteredBrands.length === 0 ? (
+                                                            <div className="p-4 text-center text-gray-500">
+                                                                {brandSearchTerm ?
+                                                                    `No se encontraron marcas con "${brandSearchTerm}"` :
+                                                                    "No hay marcas disponibles"}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="p-2  brand-dropdown">
+                                                                <style jsx global>{`
+                                                                    .brand-dropdown .brand-item {
+                                                                        margin: 0;
+                                                                        padding: 0;
+                                                                    }
+                                                                `}</style>
+                                                                {filteredBrands.map((brand, index) =>
+                                                                    <div
+                                                                        key={brand._id}
+                                                                        className="brand-item px-3 py-2   cursor-pointer flex items-center  space-x-3 my-2"
+                                                                        onClick={() => handleBrandSelect(brand.name, brand._id)}
+                                                                    >
+                                                                        {brand.logo ? (
+                                                                            <div className="w-10 h-10 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
+                                                                                <Image
+                                                                                    src={brand.logo}
+                                                                                    alt={brand.name}
+                                                                                    width={100}
+                                                                                    height={100}
+                                                                                    className="object-cover w-full h-full"
+                                                                                />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="w-10 h-10 flex-shrink-0 rounded bg-gray-100 flex items-center justify-center my-1">
+                                                                                <FiPackage className="text-gray-400" size={16} />
+                                                                            </div>
+                                                                        )}
+                                                                        <div>
+                                                                            <span className="text-sm font-medium text-gray-700">{brand.name}</span>
+                                                                            {brand.description && (
+                                                                                <p className="text-xs text-gray-500 truncate max-w-[200px]">{brand.description}</p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {errors.brand && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.brand}</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -504,21 +681,20 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     </div>
 
                                     <div>
-                                        <label htmlFor="reserved" className="block text-sm font-medium text-gray-700">
-                                            Stock Reservado
+                                        <label htmlFor="minStock" className="block text-sm font-medium text-gray-700">
+                                            Stock Mínimo
                                         </label>
                                         <input
                                             type="number"
-                                            id="reserved"
-                                            name="reserved"
-                                            value={formData.stock.reserved}
+                                            id="minStock"
+                                            name="minStock"
+                                            value={formData.stock.minStock}
                                             onChange={handleChange}
                                             min="0"
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.reserved ? 'border-red-300' : 'border-gray-300'
-                                                } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                            className={`mt-1 block w-full px-3 py-2 border ${errors.minStock ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
                                         />
-                                        {errors.reserved && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.reserved}</p>
+                                        {errors.minStock && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.minStock}</p>
                                         )}
                                     </div>
                                 </div>

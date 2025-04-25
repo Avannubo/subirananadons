@@ -43,14 +43,14 @@ const productSchema = new mongoose.Schema({
             default: 0,
             min: 0
         },
-        reserved: {
+        available: {
             type: Number,
             default: 0,
             min: 0
         },
-        available: {
+        minStock: {
             type: Number,
-            default: 0,
+            default: 5,
             min: 0
         }
     },
@@ -70,9 +70,9 @@ const productSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Calculate available stock before saving
+// Set available stock to be the same as physical stock
 productSchema.pre('save', function (next) {
-    this.stock.available = Math.max(0, this.stock.physical - this.stock.reserved);
+    this.stock.available = this.stock.physical;
     next();
 });
 

@@ -3,32 +3,23 @@ import { Dialog } from '@headlessui/react';
 import { FiX, FiPackage, FiDollarSign, FiTag, FiBox, FiImage } from 'react-icons/fi';
 import Image from 'next/image';
 import { useState } from 'react';
-
 export default function ProductViewModal({ isOpen, onClose, product }) {
     if (!product) return null;
-
     // Sample gallery images - in production, these would come from product data
     const [galleryImages] = useState([
         product.image || '/assets/images/product-placeholder.jpg',
-        '/assets/images/joie.png',
-        '/assets/images/joolz.png',
-        '/assets/images/product-placeholder.jpg'
+        '/assets/images/joie.png'
     ]);
-
     const [selectedImage, setSelectedImage] = useState(galleryImages[0]);
-
     // Format price with 2 decimal places and € symbol
     const formatPrice = (price) => {
         return `${parseFloat(price).toFixed(2)} €`;
     };
-
     // Calculate available stock
     const availableStock = (product.stock?.physical || 0) - (product.stock?.reserved || 0);
-
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-
             <div className="fixed inset-0 flex items-center justify-center p-4">
                 <Dialog.Panel className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden">
                     {/* Header with product name */}
@@ -44,7 +35,6 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                             <FiX className="h-5 w-5" />
                         </button>
                     </div>
-
                     <div className="p-6 max-h-[80vh] overflow-y-auto">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Left column - Product Image */}
@@ -60,7 +50,6 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                         />
                                     </div>
                                 </div>
-
                                 {/* Product Gallery */}
                                 <div className="w-full mt-3">
                                     <h4 className="text-xs font-medium text-gray-500 uppercase mb-2 flex items-center">
@@ -86,7 +75,6 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                         ))}
                                     </div>
                                 </div>
-
                                 {/* Status indicators */}
                                 <div className="flex flex-wrap gap-2 justify-center mt-4">
                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${product.status === 'active' ? 'bg-green-100 text-green-800' :
@@ -97,7 +85,6 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                             product.status === 'inactive' ? 'Inactivo' :
                                                 'Descontinuado'}
                                     </span>
-
                                     {product.featured && (
                                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             Destacado
@@ -105,7 +92,6 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                     )}
                                 </div>
                             </div>
-
                             {/* Right column - Product Details */}
                             <div className="md:col-span-2 space-y-6">
                                 {/* Basic Information */}
@@ -119,19 +105,16 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                                 <span className="text-sm font-medium text-gray-500">Referencia:</span>
                                                 <p className="text-sm text-gray-700">{product.reference || 'N/A'}</p>
                                             </div>
-
                                             <div>
                                                 <span className="text-sm font-medium text-gray-500">Categoría:</span>
                                                 <p className="text-sm text-gray-700">{product.category || 'N/A'}</p>
                                             </div>
                                         </div>
-
                                         <div className="space-y-2">
                                             <div>
                                                 <span className="text-sm font-medium text-gray-500">Marca:</span>
                                                 <p className="text-sm text-gray-700">{product.brand || 'N/A'}</p>
                                             </div>
-
                                             <div>
                                                 <span className="text-sm font-medium text-gray-500">ID:</span>
                                                 <p className="text-sm text-gray-700">{product._id || product.id || 'N/A'}</p>
@@ -139,7 +122,6 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                         </div>
                                     </div>
                                 </section>
-
                                 {/* Pricing Information */}
                                 <section className="border-b border-gray-200 pb-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
@@ -152,7 +134,6 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                                 {product.price_excl_tax ? formatPrice(product.price_excl_tax) : 'N/A'}
                                             </p>
                                         </div>
-
                                         <div className="bg-gray-50 p-3 rounded">
                                             <span className="text-sm font-medium text-gray-500">Precio (con IVA):</span>
                                             <p className="text-base font-medium text-gray-800">
@@ -161,7 +142,6 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                         </div>
                                     </div>
                                 </section>
-
                                 {/* Inventory Information */}
                                 <section className="border-b border-gray-200 pb-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
@@ -169,28 +149,19 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="bg-gray-50 p-3 rounded">
-                                            <span className="text-sm font-medium text-gray-500">Stock Físico:</span>
-                                            <p className="text-base font-medium text-gray-800">
-                                                {product.stock?.physical !== undefined ? product.stock.physical : 'N/A'}
-                                            </p>
-                                        </div>
-
-                                        <div className="bg-gray-50 p-3 rounded">
-                                            <span className="text-sm font-medium text-gray-500">Stock Reservado:</span>
-                                            <p className="text-base font-medium text-gray-800">
-                                                {product.stock?.reserved !== undefined ? product.stock.reserved : 'N/A'}
-                                            </p>
-                                        </div>
-
-                                        <div className="bg-gray-50 p-3 rounded">
                                             <span className="text-sm font-medium text-gray-500">Stock Disponible:</span>
-                                            <p className={`text-base font-medium ${availableStock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            <p className={`text-base font-medium ${availableStock >= (product.stock?.minStock || 5) ? 'text-green-600' : 'text-red-600'}`}>
                                                 {availableStock}
+                                            </p>
+                                        </div>
+                                        <div className="bg-gray-50 p-3 rounded">
+                                            <span className="text-sm font-medium text-gray-500">Stock Mínimo:</span>
+                                            <p className="text-base font-medium text-gray-800">
+                                                {product.stock?.minStock !== undefined ? product.stock.minStock : '0'}
                                             </p>
                                         </div>
                                     </div>
                                 </section>
-
                                 {/* Description if available */}
                                 {product.description && (
                                     <section>
@@ -205,7 +176,6 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                             </div>
                         </div>
                     </div>
-
                     <div className="p-4 border-t border-gray-300 bg-gray-50 flex justify-end">
                         <button
                             type="button"

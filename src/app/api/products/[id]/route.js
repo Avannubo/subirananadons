@@ -71,7 +71,7 @@ export async function PUT(request, { params }) {
         // Update stock if provided
         if (body.stock) {
             if (body.stock.physical !== undefined) product.stock.physical = parseInt(body.stock.physical);
-            if (body.stock.reserved !== undefined) product.stock.reserved = parseInt(body.stock.reserved);
+            if (body.stock.minStock !== undefined) product.stock.minStock = parseInt(body.stock.minStock);
         }
 
         if (body.status) product.status = body.status;
