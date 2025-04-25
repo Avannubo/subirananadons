@@ -1,40 +1,59 @@
-import mongoose from 'mongoose';
+import { MongoClient } from 'mongodb';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+// Connection URL
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const MONGODB_DB = process.env.MONGODB_DB || 'your_database_name';
 
-if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env');
-}
+// Connection options
+const options = {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+};
 
-let cached = global.mongoose;
+// Global MongoDB client reference
+let cachedClient = null;
+let cachedDb = null;
 
-if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function connectDB() {
-    if (cached.conn) {
-        return cached.conn;
+/**
+ * Connect to MongoDB and return the client and database
+ */
+export async function connectToDatabase() {
+    // Check for cached connection
+    if (cachedClient && cachedDb) {
+        return { client: cachedClient, db: cachedDb };
     }
 
-    if (!cached.promise) {
-        const opts = {
-            bufferCommands: false,
-        };
-
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            return mongoose;
-        });
+    // Validate MongoDB URI
+    if (!MONGODB_URI) {
+        throw new Error('Please define the MONGODB_URI environment variable');
     }
 
-    try {
-        cached.conn = await cached.promise;
-    } catch (e) {
-        cached.promise = null;
-        throw e;
+    // Validate MongoDB DB name
+    if (!MONGODB_DB) {
+        throw new Error('Please define the MONGODB_DB environment variable');
     }
 
-    return cached.conn;
+    // Create new client if not cached
+    if (!cachedClient) {
+        cachedClient = new MongoClient(MONGODB_URI, options);
+        await cachedClient.connect();
+    }
+
+    // Get or create database
+    if (!cachedDb) {
+        cachedDb = cachedClient.db(MONGODB_DB);
+    }
+
+    return { client: cachedClient, db: cachedDb };
 }
 
-export default connectDB; 
+/**
+ * Close MongoDB connection
+ */
+export async function closeConnection() {
+    if (cachedClient) {
+        await cachedClient.close();
+        cachedClient = null;
+        cachedDb = null;
+    }
+} 

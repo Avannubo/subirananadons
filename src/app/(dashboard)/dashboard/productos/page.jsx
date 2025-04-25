@@ -7,7 +7,7 @@ export default async function ProductosPage() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="p-2 h-[87vh]">
+                <div className="p-2 min-h-[87vh]">
                     <h1 className="text-3xl font-bold mb-4">Catálogo</h1>
                     <ProductsStats />
                     <ProductTabs />

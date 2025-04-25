@@ -147,7 +147,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
 
             <div className="fixed inset-0 flex items-center justify-center p-4">
                 <Dialog.Panel className="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
-                    <div className="flex justify-between items-center p-4 border-b">
+                    <div className="flex justify-between items-center p-4 ">
                         <DialogTitle className="text-lg font-medium">
                             {modalTitle}
                         </DialogTitle>
@@ -159,7 +159,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="p-4">
+                    <form onSubmit={handleSubmit} className="px-4 pb-4" >
                         <div className="space-y-4">
                             {/* Name */}
                             <div>
