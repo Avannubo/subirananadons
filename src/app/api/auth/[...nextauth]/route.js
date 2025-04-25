@@ -1,11 +1,13 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import User from '@/models/User';
 import dbConnect from '@/lib/dbConnect';
 import { headers } from 'next/headers';
-import { trackUserSession, invalidateSession } from '@/lib/auth/sessionTracker';
+import { trackUserSession } from '@/lib/auth/sessionTracker';
+
+// Fallback secret for development - in production always use environment variable
+const SECRET = process.env.NEXTAUTH_SECRET || "e991fff4025f411ec955c2d62674427bcfcb49e01bc5a2b488985ddc864ba25e";
 
 export const authOptions = {
     providers: [
@@ -39,10 +41,6 @@ export const authOptions = {
                     role: user.role
                 };
             }
-        }),
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         })
     ],
     callbacks: {
@@ -93,7 +91,7 @@ export const authOptions = {
     session: {
         strategy: 'jwt'
     },
-    secret: process.env.NEXTAUTH_SECRET
+    secret: SECRET
 };
 
 const handler = NextAuth(authOptions);

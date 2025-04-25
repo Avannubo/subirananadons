@@ -9,7 +9,7 @@ export default function AdminLayout({ children }) {
                 <div className="sticky top-0 shadow-md pt-[100px]">
                     <Sidebar />
                 </div>
-                <div className="flex-1 bg-gray-100 pt-28 p-14">
+                <div className="flex-1 bg-gray-100 pt-28 p-8">
                     {children}
                 </div>
             </div>

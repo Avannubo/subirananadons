@@ -22,7 +22,7 @@ export default function OrdersTable({ orders, filters, setFilters, userRole = 'u
         <div className="bg-white rounded-lg shadow overflow-hidden">
             {/* Search Filters for Admin Users */}
             {userRole === 'admin' && (
-                <div className="p-4 bg-gray-50 border-b">
+                <div className="p-4 bg-gray-50 border-b border-gray-400">
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                         <div>
                             <input
@@ -115,11 +115,11 @@ export default function OrdersTable({ orders, filters, setFilters, userRole = 'u
                                     </td>
                                     <td className="px-6 py-4">{order.date}</td>
                                     <td className="px-6 py-4 text-sm">
-                                        <button className="text-[#00B0C8] hover:text-[#008da0] mr-2">Ver</button>
+                                        <button className="text-[#00B0C8] hover:text-[#008da0] mr-2"><FiEye className="inline mr-1" /></button>
                                         {userRole === 'admin' && (
                                             <>
-                                                <button className="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
-                                                <button className="text-red-500 hover:text-red-700">Eliminar</button>
+                                                <button className="text-blue-600 hover:text-blue-800 mr-2"><FiEdit className="inline mr-1" /></button>
+                                                <button className="text-red-500 hover:text-red-700"><FiTrash2 className="inline mr-1" /></button>
                                             </>
                                         )}
                                     </td>
