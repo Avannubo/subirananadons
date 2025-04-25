@@ -21,9 +21,17 @@ export default function ProductsTable(props) {
     const [showViewModal, setShowViewModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        limit: 5
+    });
+    const [allProducts, setAllProducts] = useState([]); // Store all products for client-side pagination
+    const [useClientPagination, setUseClientPagination] = useState(false); // Flag to determine pagination mode
 
     // Fetch products from the API
-    const fetchProducts = async () => {
+    const fetchProducts = async (page = 1, limit = pagination.limit) => {
         try {
             setLoading(true);
             const queryParams = new URLSearchParams();
@@ -35,6 +43,13 @@ export default function ProductsTable(props) {
             // Add the category filter from props if it exists
             if (props.categoryFilter) queryParams.append('categoryId', props.categoryFilter);
 
+            // For server-side pagination
+            if (!useClientPagination) {
+                // Add pagination parameters
+                queryParams.append('page', page);
+                queryParams.append('limit', limit);
+            }
+
             const response = await fetch(`/api/products?${queryParams.toString()}`);
 
             if (!response.ok) {
@@ -42,7 +57,41 @@ export default function ProductsTable(props) {
             }
 
             const data = await response.json();
-            setProducts(data);
+
+            // Check for different possible API response structures
+            if (Array.isArray(data)) {
+                // If we get a full array, use client-side pagination
+                setAllProducts(data);
+                setUseClientPagination(true);
+
+                // Apply client-side pagination
+                applyClientPagination(data, page, limit);
+            } else if (data.products && Array.isArray(data.products)) {
+                // Handle case where API returns {products: [...], pagination: {...}}
+                if (data.pagination) {
+                    // Server pagination is working
+                    setUseClientPagination(false);
+                    setProducts(data.products);
+                    setPagination({
+                        currentPage: data.pagination.currentPage || page,
+                        totalPages: data.pagination.totalPages || Math.ceil(data.products.length / limit) || 1,
+                        totalItems: data.pagination.totalItems || data.products.length,
+                        limit: limit
+                    });
+                } else {
+                    // No pagination info from server, use client-side
+                    setAllProducts(data.products);
+                    setUseClientPagination(true);
+                    applyClientPagination(data.products, page, limit);
+                }
+            } else {
+                // Fallback for unexpected response structure
+                console.warn('Unexpected API response format:', data);
+                const productsArray = data.products || data || [];
+                setAllProducts(productsArray);
+                setUseClientPagination(true);
+                applyClientPagination(productsArray, page, limit);
+            }
         } catch (error) {
             console.error('Error fetching products:', error);
             toast.error('Error loading products');
@@ -51,9 +100,26 @@ export default function ProductsTable(props) {
         }
     };
 
+    // Apply client-side pagination
+    const applyClientPagination = (productsArray, page, limit) => {
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedProducts = productsArray.slice(startIndex, endIndex);
+
+        setProducts(paginatedProducts);
+        setPagination({
+            currentPage: page,
+            totalPages: Math.ceil(productsArray.length / limit) || 1,
+            totalItems: productsArray.length,
+            limit: limit
+        });
+
+        console.log(`Client pagination: showing items ${startIndex + 1}-${Math.min(endIndex, productsArray.length)} of ${productsArray.length}`);
+    };
+
     // Load products on component mount
     useEffect(() => {
-        fetchProducts();
+        fetchProducts(1); // Always start at page 1 when category filter changes
     }, [props.categoryFilter]);
 
     // Handle filter change
@@ -64,7 +130,30 @@ export default function ProductsTable(props) {
 
     // Apply filters
     const applyFilters = () => {
-        fetchProducts();
+        if (useClientPagination) {
+            // If we have all products loaded, filter client-side
+            const filteredProducts = filterProductsClientSide(allProducts);
+            applyClientPagination(filteredProducts, 1, pagination.limit);
+        } else {
+            // Otherwise use server filtering
+            fetchProducts(1); // Reset to page 1 when applying new filters
+        }
+    };
+
+    // Filter products client-side
+    const filterProductsClientSide = (productsToFilter) => {
+        return productsToFilter.filter(product => {
+            const nameMatch = !filters.name ||
+                product.name.toLowerCase().includes(filters.name.toLowerCase());
+
+            const referenceMatch = !filters.reference ||
+                product.reference.toLowerCase().includes(filters.reference.toLowerCase());
+
+            const categoryMatch = !filters.category ||
+                product.category.toLowerCase().includes(filters.category.toLowerCase());
+
+            return nameMatch && referenceMatch && categoryMatch;
+        });
     };
 
     // Clear filters
@@ -74,7 +163,13 @@ export default function ProductsTable(props) {
             reference: '',
             category: '',
         });
-        fetchProducts();
+
+        if (useClientPagination) {
+            // If client-side, just reset to show all products
+            applyClientPagination(allProducts, 1, pagination.limit);
+        } else {
+            fetchProducts(1); // Reset to page 1 when clearing filters
+        }
     };
 
     // Handle product view
@@ -112,8 +207,26 @@ export default function ProductsTable(props) {
             toast.success('Product deleted successfully');
             setShowConfirmModal(false);
 
-            // Refresh the product list
-            fetchProducts();
+            if (useClientPagination) {
+                // Update local state for client-side pagination
+                const updatedProducts = allProducts.filter(p => p._id !== selectedProduct._id);
+                setAllProducts(updatedProducts);
+
+                // Calculate new page (go to previous page if this was the last item on the page)
+                const newPage = products.length === 1 && pagination.currentPage > 1
+                    ? pagination.currentPage - 1
+                    : pagination.currentPage;
+
+                applyClientPagination(updatedProducts, newPage, pagination.limit);
+            } else {
+                // Refresh the product list while maintaining the current page if possible
+                // If the deleted product was the last one on the page, go to the previous page
+                const newPage = products.length === 1 && pagination.currentPage > 1
+                    ? pagination.currentPage - 1
+                    : pagination.currentPage;
+
+                fetchProducts(newPage);
+            }
         } catch (error) {
             console.error('Error deleting product:', error);
             toast.error('Error deleting product');
@@ -157,16 +270,65 @@ export default function ProductsTable(props) {
                 throw new Error(errorData.error || 'Operation failed');
             }
 
+            const savedProduct = await response.json();
             toast.success(isEditing ? 'Product updated successfully' : 'Product added successfully');
             setShowModal(false);
 
-            // Refresh the product list
-            fetchProducts();
+            if (useClientPagination) {
+                let updatedProducts;
+
+                if (isEditing) {
+                    // Replace the updated product in the array
+                    updatedProducts = allProducts.map(p =>
+                        p._id === savedProduct._id ? savedProduct : p
+                    );
+                } else {
+                    // Add the new product to the array
+                    updatedProducts = [savedProduct, ...allProducts];
+                }
+
+                setAllProducts(updatedProducts);
+
+                // When adding, go to first page. When editing, stay on current page
+                const newPage = isEditing ? pagination.currentPage : 1;
+                applyClientPagination(updatedProducts, newPage, pagination.limit);
+            } else {
+                // When adding a new product, go to first page to see it
+                // When editing, stay on current page
+                fetchProducts(isEditing ? pagination.currentPage : 1);
+            }
         } catch (error) {
             console.error('Error saving product:', error);
             toast.error(error.message || 'Error saving product');
         }
     };
+
+    // Handle page change
+    const handlePageChange = (page) => {
+        console.log(`Changing to page ${page}`);
+        if (useClientPagination) {
+            applyClientPagination(allProducts, page, pagination.limit);
+        } else {
+            fetchProducts(page);
+        }
+    };
+
+    // Handle items per page change
+    const handleLimitChange = (e) => {
+        const newLimit = parseInt(e.target.value);
+        console.log(`Changing limit to ${newLimit}`);
+        if (useClientPagination) {
+            applyClientPagination(allProducts, 1, newLimit);
+        } else {
+            fetchProducts(1, newLimit); // Reset to page 1 when changing limit
+        }
+    };
+
+    // For debugging
+    useEffect(() => {
+        console.log("Current pagination state:", pagination);
+        console.log("Products count:", products.length);
+    }, [pagination, products]);
 
     return (
         <div className="bg-white rounded-lg shadow">
@@ -239,8 +401,55 @@ export default function ProductsTable(props) {
             {/* Products Table */}
             <div className="overflow-x-auto">
                 {loading ? (
-                    <div className="text-center py-6">
-                        <p>Cargando productos...</p>
+                    <div>
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Imagen</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referencia</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio (imp. incl.)</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {[1, 2, 3, 4, 5].map((item) => (
+                                    <tr key={item}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex space-x-2">
+                                                <div className="h-5 w-5 bg-gray-200 rounded-full animate-pulse"></div>
+                                                <div className="h-5 w-5 bg-gray-200 rounded-full animate-pulse"></div>
+                                                <div className="h-5 w-5 bg-gray-200 rounded-full animate-pulse"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 ) : (
                     <table className="min-w-full divide-y divide-gray-200">
@@ -261,9 +470,9 @@ export default function ProductsTable(props) {
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Categoría
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Precio (imp. excl.)
-                                </th>
+                                </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Precio (imp. incl.)
                                 </th>
@@ -298,9 +507,9 @@ export default function ProductsTable(props) {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.category}>
                                             {product.category}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {product.price_excl_tax.toFixed(2)} €
-                                        </td>
+                                        </td> */}
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {product.price_incl_tax.toFixed(2)} €
                                         </td>
@@ -343,8 +552,14 @@ export default function ProductsTable(props) {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="9" className="px-6 py-4 text-center text-sm text-gray-500">
-                                        No se encontraron productos
+                                    <td colSpan="9" className="px-6 py-8 text-center">
+                                        <div className="flex flex-col items-center justify-center">
+                                            <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <p className="text-gray-600 text-lg">No se encontraron productos</p>
+                                            <p className="text-gray-500 text-sm mt-1">Prueba a cambiar los filtros o añade un nuevo producto</p>
+                                        </div>
                                     </td>
                                 </tr>
                             )}
@@ -352,6 +567,101 @@ export default function ProductsTable(props) {
                     </table>
                 )}
             </div>
+
+            {/* Pagination */}
+            {!loading && products.length > 0 && (
+                <div className="px-6 py-4 border-t border-gray-200">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="text-sm text-gray-500 flex items-center gap-2 flex-wrap">
+                            <span>
+                                Mostrando <span className="font-medium">{Math.min(pagination.limit, products.length)}</span> de{' '}
+                                <span className="font-medium">{pagination.totalItems || products.length}</span> productos
+                            </span>
+                            <div className="flex items-center ml-0 sm:ml-4 mt-2 sm:mt-0">
+                                <label htmlFor="limit" className="mr-2 text-sm text-gray-500">
+                                    Items por página:
+                                </label>
+                                <select
+                                    id="limit"
+                                    className="border border-gray-300 rounded px-2 py-1 text-sm"
+                                    value={pagination.limit}
+                                    onChange={handleLimitChange}
+                                >
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {pagination.totalPages > 1 && (
+                            <div className="flex space-x-2 flex-wrap justify-center">
+                                <button
+                                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                                    disabled={pagination.currentPage === 1}
+                                    className={`px-3 py-1 rounded border ${pagination.currentPage === 1
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    Anterior
+                                </button>
+
+                                {/* Page numbers */}
+                                <div className="flex space-x-1">
+                                    {[...Array(pagination.totalPages)].map((_, index) => {
+                                        const pageNumber = index + 1;
+                                        const isCurrentPage = pageNumber === pagination.currentPage;
+
+                                        // Show limited page numbers to avoid overwhelming UI
+                                        if (
+                                            pagination.totalPages <= 7 ||
+                                            pageNumber === 1 ||
+                                            pageNumber === pagination.totalPages ||
+                                            (pageNumber >= pagination.currentPage - 1 && pageNumber <= pagination.currentPage + 1)
+                                        ) {
+                                            return (
+                                                <button
+                                                    key={pageNumber}
+                                                    onClick={() => handlePageChange(pageNumber)}
+                                                    className={`w-8 h-8 flex items-center justify-center rounded ${isCurrentPage
+                                                        ? 'bg-[#00B0C8] text-white'
+                                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                                        }`}
+                                                >
+                                                    {pageNumber}
+                                                </button>
+                                            );
+                                        }
+
+                                        // Show ellipsis for skipped pages
+                                        if (
+                                            (pageNumber === 2 && pagination.currentPage > 3) ||
+                                            (pageNumber === pagination.totalPages - 1 && pagination.currentPage < pagination.totalPages - 2)
+                                        ) {
+                                            return <span key={pageNumber} className="w-8 h-8 flex items-center justify-center">...</span>;
+                                        }
+
+                                        return null;
+                                    })}
+                                </div>
+
+                                <button
+                                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                                    disabled={pagination.currentPage === pagination.totalPages}
+                                    className={`px-3 py-1 rounded border ${pagination.currentPage === pagination.totalPages
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    Siguiente
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Add/Edit Product Modal */}
             {showModal && (

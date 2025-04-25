@@ -35,7 +35,7 @@ export default function ProductsStats() {
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2">
             {stats.map((stat, index) => (
                 <div key={index} className="bg-white p-4 rounded-lg shadow flex items-center">
                     <div className={`${stat.bgColor} p-3 rounded-full mr-4`}>

@@ -42,7 +42,7 @@ export default function ProductTabs() {
     return (
         <div>
             {/* Tabs Navigation */}
-            <div className="flex border-b border-gray-200 mb-6">
+            <div className="flex border-b border-gray-200 mb-2">
                 {tabs.map((tab) => (
                     <button
                         key={tab}

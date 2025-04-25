@@ -302,7 +302,7 @@ export default function CategoriesTree() {
             </div>
 
             {/* Tree View */}
-            <div className="p-4 max-h-[480px] overflow-y-auto">
+            <div className="p-4 max-h-[550px] overflow-y-auto">
                 {loading ? (
                     <div className="flex justify-center my-4">
                         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>

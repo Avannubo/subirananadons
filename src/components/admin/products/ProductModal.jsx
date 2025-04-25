@@ -562,17 +562,19 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <h3 className="text-md font-medium">Imagen del Producto</h3>
 
                                 <div className="flex flex-col items-center space-y-4">
-                                    <div className="w-full h-64 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
+                                    <div className="w-full p-2 h-64 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
                                         {isUploading && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
                                                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
                                             </div>
                                         )}
                                         {imagePreview ? (
-                                            <img
+                                            <Image
                                                 src={imagePreview}
                                                 alt="Vista previa"
-                                                className="w-full h-full object-contain"
+                                                width={1000}
+                                                height={1000}
+                                                className="w-full h-full object-cover rounded-lg"
                                             />
                                         ) : (
                                             <div className="flex flex-col items-center justify-center h-full">
