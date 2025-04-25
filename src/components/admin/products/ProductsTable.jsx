@@ -289,13 +289,13 @@ export default function ProductsTable(props) {
                                                 className="h-10 w-10 rounded object-cover"
                                             />
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-xs truncate" title={product.name}>
                                             {product.name}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.reference}>
                                             {product.reference}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.category}>
                                             {product.category}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -321,21 +321,21 @@ export default function ProductsTable(props) {
                                                     onClick={() => handleViewProduct(product)}
                                                     title="Ver detalles"
                                                 >
-                                                    <FiEye />
+                                                    <FiEye size={20} />
                                                 </button>
                                                 <button
                                                     className="text-yellow-600 hover:text-yellow-900"
                                                     onClick={() => handleEditProduct(product)}
                                                     title="Editar producto"
                                                 >
-                                                    <FiEdit />
+                                                    <FiEdit size={20} />
                                                 </button>
                                                 <button
                                                     className="text-red-600 hover:text-red-900"
                                                     onClick={() => handleDeleteConfirm(product)}
                                                     title="Eliminar producto"
                                                 >
-                                                    <FiTrash2 />
+                                                    <FiTrash2 size={20} />
                                                 </button>
                                             </div>
                                         </td>

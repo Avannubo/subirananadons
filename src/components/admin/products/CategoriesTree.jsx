@@ -223,7 +223,7 @@ export default function CategoriesTree() {
 
                     <FiFolder className="mr-2 text-gray-400" />
 
-                    <span className="flex-grow font-medium text-sm cursor-pointer">
+                    <span className="flex-grow font-medium text-lg cursor-pointer">
                         {category.name}
                         <span className="ml-2 text-xs text-gray-400">
                             {level > 0 ? `(Nivel ${level + 1})` : ''}
@@ -236,21 +236,21 @@ export default function CategoriesTree() {
                             onClick={(e) => handleAddCategory(category, e)}
                             title="Añadir subcategoría"
                         >
-                            <FiFolderPlus size={16} />
+                            <FiFolderPlus size={20} />
                         </button>
                         <button
                             className="p-1 text-yellow-600 hover:text-yellow-700 rounded"
                             onClick={(e) => handleEditCategory(category, e)}
                             title="Editar categoría"
                         >
-                            <FiEdit size={16} />
+                            <FiEdit size={20} />
                         </button>
                         <button
                             className="p-1 text-red-600 hover:text-red-700 rounded"
                             onClick={(e) => handleDeleteCategory(category, e)}
                             title="Eliminar categoría"
                         >
-                            <FiTrash2 size={16} />
+                            <FiTrash2 size={20} />
                         </button>
                     </div>
                 </div>
@@ -302,7 +302,7 @@ export default function CategoriesTree() {
             </div>
 
             {/* Tree View */}
-            <div className="p-4 max-h-[600px] overflow-y-auto">
+            <div className="p-4 max-h-[480px] overflow-y-auto">
                 {loading ? (
                     <div className="flex justify-center my-4">
                         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>

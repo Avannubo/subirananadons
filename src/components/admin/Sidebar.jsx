@@ -63,7 +63,7 @@ export default function Sidebar() {
     const navigationItems = getNavigationItems(userRole);
 
     return (
-        <div className="w-64 h-screen bg-white shadow-md sticky">
+        <div className="w-64 h-screen bg-white  sticky">
             <div className="px-4 py-2">
                 <nav className="space-y-1">
                     <div className='flex items-center justify-center font-bold text-2xl border-b pb-2 border-gray-200'>
