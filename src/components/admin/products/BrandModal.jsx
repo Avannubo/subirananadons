@@ -157,7 +157,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-start pt-10 p-4 overflow-y-auto">
             <div className="bg-white rounded-md shadow w-full max-w-lg">
-                <div className="flex justify-between items-center p-4 border-b">
+                <div className="flex justify-between items-center p-4 border-b border-gray-300">
                     <h2 className="text-xl font-medium">
                         {isEditing ? 'Editar Marca' : 'Añadir Nueva Marca'}
                     </h2>

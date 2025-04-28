@@ -7,7 +7,8 @@ import {
     CreditCard,
     GiftIcon,
     Settings,
-    CircleUserRound
+    CircleUserRound,
+    DatabaseIcon
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
@@ -53,6 +54,12 @@ const getNavigationItems = (userRole) => [
         href: "/dashboard/configuracion",
         icon: Settings,
         label: "Configuraciones",
+        roles: ['admin']
+    },
+    {
+        href: "/dashboard/admin/migrate",
+        icon: DatabaseIcon,
+        label: "Migrar Stock",
         roles: ['admin']
     }
 ];

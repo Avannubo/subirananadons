@@ -40,7 +40,6 @@ async function migrateProducts() {
                 } else {
                     // Initialize stock if it doesn't exist
                     product.stock = {
-                        physical: 0,
                         available: 0,
                         minStock: 5
                     };

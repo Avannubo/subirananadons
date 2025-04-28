@@ -19,10 +19,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         price_incl_tax: '',
         image: '',
         stock: {
-            physical: '',
+            available: '',
             minStock: 5
         },
-        status: 'active',
+        status: 'active',   
         featured: false,
     });
 
@@ -136,7 +136,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 price_incl_tax: product.price_incl_tax || '',
                 image: product.image || '',
                 stock: {
-                    physical: product.stock?.physical || '',
+                    available: product.stock?.available || '',
                     minStock: product.stock?.minStock || 5
                 },
                 status: product.status || 'active',
@@ -150,7 +150,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
 
-        if (name === 'physical' || name === 'minStock') {
+        if (name === 'available' || name === 'minStock') {
             setFormData(prev => ({
                 ...prev,
                 stock: {
@@ -259,8 +259,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             newErrors.price_incl_tax = 'Debe ser un número válido';
         }
 
-        if (formData.stock.physical && isNaN(parseInt(formData.stock.physical))) {
-            newErrors.physical = 'Debe ser un número entero';
+        if (formData.stock.available && isNaN(parseInt(formData.stock.available))) {
+            newErrors.ava = 'Debe ser un número entero';
         }
 
         if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
@@ -294,7 +294,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 price_incl_tax: parseFloat(formData.price_incl_tax),
                 brandId: formData.brandId || '',
                 stock: {
-                    physical: parseInt(formData.stock.physical || 0),
+                    ava: parseInt(formData.stock.ava || 0),
                     minStock: parseInt(formData.stock.minStock || 5)
                 }
             };
@@ -382,7 +382,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
 
             <div className="fixed inset-0 flex items-center justify-center p-4">
                 <Dialog.Panel className="w-full max-w-6xl bg-white rounded-lg shadow-xl overflow-hidden">
-                    <div className="flex justify-between items-center p-4 border-b">
+                    <div className="flex justify-between items-center p-4 border-b border-gray-300">
                         <DialogTitle className="text-lg font-medium">
                             {isEditing ? 'Editar Producto' : 'Añadir Nuevo Producto'}
                         </DialogTitle>
@@ -662,21 +662,21 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <h3 className="text-md font-medium mt-6">Inventario</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="physical" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="ava" className="block text-sm font-medium text-gray-700">
                                             Stock Físico
                                         </label>
                                         <input
                                             type="number"
-                                            id="physical"
-                                            name="physical"
-                                            value={formData.stock.physical}
+                                            id="ava"
+                                            name="ava"
+                                            value={formData.stock.ava}
                                             onChange={handleChange}
                                             min="0"
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.physical ? 'border-red-300' : 'border-gray-300'
+                                            className={`mt-1 block w-full px-3 py-2 border ${errors.ava ? 'border-red-300' : 'border-gray-300'
                                                 } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
                                         />
-                                        {errors.physical && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.physical}</p>
+                                        {errors.ava && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.ava}</p>
                                         )}
                                     </div>
 

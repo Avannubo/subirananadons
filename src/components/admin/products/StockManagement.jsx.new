@@ -115,7 +115,7 @@ export default function StockManagement() {
                         const toastId = toast.loading('Actualizando stock...');
 
                         // Get the new values from quantities
-                        const newPhysical = quantities[productId].physical;
+                        const newAvailable = quantities[productId].available;
                         const newMinStock = quantities[productId].minStock ?? product.stock?.minStock ?? 5;
 
                         const response = await fetch(`/api/products/${productId}/stock`, {
@@ -125,9 +125,8 @@ export default function StockManagement() {
                             },
                             body: JSON.stringify({
                                 stock: {
-                                    physical: newPhysical,
-                                    minStock: newMinStock,
-                                    available: newPhysical
+                                    available: newAvailable,
+                                    minStock: newMinStock
                                 }
                             }),
                         });
@@ -176,17 +175,17 @@ export default function StockManagement() {
         }
     };
 
-    // Calculate available stock (physical stock)
-    const calculateAvailable = (product) => {
+    // Get current available stock
+    const getAvailableStock = (product) => {
         if (editingId === product._id) {
-            return quantities[product._id]?.physical ?? (product.stock?.physical ?? 0);
+            return quantities[product._id]?.available ?? (product.stock?.available ?? 0);
         }
-        return product.stock?.physical ?? 0;
+        return product.stock?.available ?? 0;
     };
 
     // Determine if product is low on stock
     const isLowStock = (product) => {
-        const available = calculateAvailable(product);
+        const available = getAvailableStock(product);
         return available < (product.stock?.minStock ?? 5);
     };
 
@@ -200,7 +199,7 @@ export default function StockManagement() {
                 product._id,
                 product.reference,
                 `"${product.name.replace(/"/g, '""')}"`,
-                calculateAvailable(product),
+                getAvailableStock(product),
                 product.stock?.minStock ?? 5,
                 product.status
             ].join(','))
@@ -282,7 +281,7 @@ export default function StockManagement() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referencia</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Físico</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Disponible</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Mínimo</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                             </tr>
@@ -320,12 +319,12 @@ export default function StockManagement() {
                                                     type="number"
                                                     min="0"
                                                     className="w-16 border rounded p-1"
-                                                    value={quantities[product._id]?.physical ?? calculateAvailable(product)}
-                                                    onChange={(e) => handleQuantityChange(product._id, 'physical', e.target.value)}
+                                                    value={quantities[product._id]?.available ?? getAvailableStock(product)}
+                                                    onChange={(e) => handleQuantityChange(product._id, 'available', e.target.value)}
                                                 />
                                             ) : (
                                                 <>
-                                                    {calculateAvailable(product)}
+                                                    {getAvailableStock(product)}
                                                     {isLowStock(product) && (
                                                         <FiAlertCircle className="ml-1 text-amber-500" title="Stock bajo" />
                                                     )}

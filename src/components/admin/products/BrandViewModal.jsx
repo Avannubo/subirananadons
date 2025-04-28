@@ -1,14 +1,11 @@
 'use client';
-
 import { FiX, FiExternalLink } from 'react-icons/fi';
-
 export default function BrandViewModal({ isOpen, onClose, brand }) {
     if (!isOpen || !brand) return null;
-
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-start pt-10 p-4 overflow-y-auto">
             <div className="bg-white rounded-md shadow w-full max-w-lg">
-                <div className="flex justify-between items-center p-4 border-b">
+                <div className="flex justify-between items-center p-4 border-b border-gray-300">
                     <h2 className="text-xl font-medium">
                         Detalles de la marca
                     </h2>
@@ -19,7 +16,6 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                         <FiX className="w-5 h-5" />
                     </button>
                 </div>
-
                 <div className="p-4">
                     <div className="flex flex-col md:flex-row gap-4">
                         {/* Logo Section */}
@@ -28,11 +24,11 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                 <img
                                     src={brand.logo}
                                     alt={brand.name}
-                                    className="w-32 h-32 object-contain border rounded p-2"
+                                    className="w-32 h-32 object-cover border border-gray-300 rounded p-2"
                                     onError={(e) => { e.target.src = '/placeholder.png'; }}
                                 />
                             ) : (
-                                <div className="w-32 h-32 flex items-center justify-center bg-gray-100 border rounded p-2">
+                                <div className="w-32 h-32 flex items-center justify-center bg-gray-100 border border-gray-300 rounded p-2">
                                     <span className="text-gray-400 text-sm">No hay logotipo</span>
                                 </div>
                             )}
@@ -43,7 +39,6 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                 </span>
                             </div>
                         </div>
-
                         {/* Details Section */}
                         <div className="md:w-2/3">
                             <div className="space-y-3">
@@ -51,26 +46,22 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                     <h4 className="text-sm text-gray-500">ID</h4>
                                     <p className="font-medium">{brand.id || brand._id || 'N/A'}</p>
                                 </div>
-
                                 <div>
                                     <h4 className="text-sm text-gray-500">Nombre</h4>
                                     <p className="font-medium">{brand.name || 'N/A'}</p>
                                 </div>
-
                                 {brand.slug && (
                                     <div>
                                         <h4 className="text-sm text-gray-500">Slug</h4>
                                         <p>{brand.slug}</p>
                                     </div>
                                 )}
-
                                 {brand.description && (
                                     <div>
                                         <h4 className="text-sm text-gray-500">Descripción</h4>
                                         <p>{brand.description}</p>
                                     </div>
                                 )}
-
                                 {brand.website && (
                                     <div>
                                         <h4 className="text-sm text-gray-500">Sitio web</h4>
@@ -85,8 +76,6 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                         </a>
                                     </div>
                                 )}
- 
-
                                 <div>
                                     <h4 className="text-sm text-gray-500">Productos</h4>
                                     <p>{brand.products || 0}</p>
@@ -95,8 +84,7 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                         </div>
                     </div>
                 </div>
-
-                <div className="flex justify-end p-4 border-t">
+                <div className="flex justify-end p-4 border-t border-gray-300">
                     <button
                         type="button"
                         onClick={onClose}
