@@ -4,8 +4,9 @@ import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import ProductCard from "@/components/products/product-card";
 import ProductQuickView from "@/components/products/product-quick-view";
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { fetchProducts, formatProduct } from '@/services/ProductService';
 
 // Helper function to parse price string to number
 const parsePrice = (priceString) => {
@@ -130,76 +131,6 @@ const productMenuTree = {
     ]
 };
 
-// Sample product data with MORE SPECIFIC categories assigned
-const products = [
-    {
-        id: 1,
-        name: "Robot De Cuina Chefy6",
-        category: "Robots de cocina", // Specific category
-        price: "119,00 €",
-        priceValue: parsePrice("119,00 €"),
-        salesCount: 50,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "¡ Nuevo modelo! chefy 6 es un completo robot de cocina para bebés multifuncional 6 en 1, de diseño compacto y con grandes prestaciones. Además,..."
-    },
-    {
-        id: 2,
-        name: "Bolso Trona De Viaje Arlo...",
-        category: "Tronas de viaje", // Specific category
-        price: "49,90 €",
-        priceValue: parsePrice("49,90 €"),
-        salesCount: 75,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "Arlo es un asiento elevador ultra ligero. Perfecto para cualquier situación ya que se puede usar como elevador y bolso/mochila de viaje,..."
-    },
-    {
-        id: 3,
-        name: "Tripp Trapp Natural",
-        category: "Tronas", // Specific category
-        price: "259,00 €",
-        priceValue: parsePrice("259,00 €"),
-        salesCount: 30,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "La trona que crece con el niño. Desde el nacimiento. Tripp Trapp® es una ingeniosa trona que revolucionó la categoría infantil en 1972,..."
-    },
-    {
-        id: 4,
-        name: "Termo papillero",
-        category: "Termos", // Specific category
-        price: "24,90 €",
-        priceValue: parsePrice("24,90 €"),
-        salesCount: 120,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "Termo para alimentos sólidos de acero inoxidable, ideal para llevar la comida del bebé. Mantiene la temperatura durante horas."
-    },
-    {
-        id: 5,
-        name: "Biberón aprendizaje",
-        category: "Botellas y vasos", // Specific category
-        price: "12,90 €",
-        priceValue: parsePrice("12,90 €"),
-        salesCount: 90,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "Biberón con asas y boquilla de silicona suave, diseñado para facilitar la transición del biberón al vaso."
-    },
-    {
-        id: 6,
-        name: "Newborn Set para Tripp Trapp",
-        category: "Tronas", // Specific category (Accessory for Tronas)
-        price: "99,00 €",
-        priceValue: parsePrice("99,00 €"),
-        salesCount: 45,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "Permite usar la trona Tripp Trapp® desde el nacimiento. Acogedor y ergonómico para el recién nacido."
-    }
-];
-
 // Helper function to find a category node and its path by label
 function findCategoryAndPath(node, labelToFind, currentPath = []) {
     const pathIncludingSelf = [...currentPath, node.label]; // Build path first
@@ -237,6 +168,14 @@ export default function Page() {
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     // Initialize with the root label from the tree
     const [categoryPath, setCategoryPath] = useState([productMenuTree.label]);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalProducts, setTotalProducts] = useState(0);
+    const productsPerPage = 12;
 
     // Get the current category node based on the last item in the path
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
@@ -244,20 +183,63 @@ export default function Page() {
     const currentCategoryData = useMemo(() => findCategoryAndPath(productMenuTree, currentCategoryLabel), [currentCategoryLabel]);
     const currentSubcategories = currentCategoryData?.node?.submenu || [];
 
+    // Fetch products from the database
+    useEffect(() => {
+        async function loadProducts() {
+            try {
+                setLoading(true);
+
+                // Define fetch options
+                const options = {
+                    page: currentPage,
+                    limit: productsPerPage,
+                    status: 'active'
+                };
+
+                // Get current leaf categories if we're in a specific category
+                if (currentCategoryData?.node && categoryPath.length > 1) {
+                    const leafCategories = getAllLeafCategoryLabels(currentCategoryData.node);
+                    if (leafCategories.length > 0) {
+                        options.category = leafCategories.join(',');
+                    }
+                }
+
+                // Fetch products with category filtering
+                const data = await fetchProducts(options);
+
+                // Format the products for display
+                const formattedProducts = data.products.map(formatProduct);
+
+                setProducts(formattedProducts);
+                setTotalPages(data.pagination.totalPages);
+                setTotalProducts(data.pagination.totalItems);
+                setError(null);
+            } catch (err) {
+                console.error('Error fetching products:', err);
+                setError('Failed to load products. Please try again later.');
+                setProducts([]);
+                setTotalPages(1);
+                setTotalProducts(0);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadProducts();
+    }, [categoryPath, currentCategoryData, currentPage]);
+
+    // Reset to page 1 when category changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [categoryPath]);
+
     // Memoize filtered and sorted products
     const filteredAndSortedProducts = useMemo(() => {
-        let filtered = [...products];
+        if (loading) return [];
 
-        // If a specific category (not just 'Productos') is selected
-        if (currentCategoryData?.node && categoryPath.length > 1) {
-            // Get all LEAF category labels under the selected node
-            const targetLeafLabels = getAllLeafCategoryLabels(currentCategoryData.node);
-            // Filter products whose specific category is within the target leaves
-            filtered = products.filter(product => targetLeafLabels.includes(product.category));
-        } // else, if path is just ['Productos'], show all products
+        // Products are already filtered by the API call, we just need to sort them
+        const sortableProducts = [...products];
 
-        // Then sort the filtered list
-        const sortableProducts = [...filtered];
         switch (sortOrder) {
             case 'price-asc':
                 sortableProducts.sort((a, b) => a.priceValue - b.priceValue);
@@ -276,8 +258,9 @@ export default function Page() {
                 sortableProducts.sort((a, b) => b.salesCount - a.salesCount);
                 break;
         }
+
         return sortableProducts;
-    }, [sortOrder, categoryPath, currentCategoryData?.node]); // Update dependency
+    }, [products, sortOrder, loading]);
 
     const handleSortChange = (event) => {
         setSortOrder(event.target.value);
@@ -314,6 +297,78 @@ export default function Page() {
         setQuickViewProduct(null);
     };
 
+    // Pagination handlers
+    const goToPage = (page) => {
+        setCurrentPage(page);
+        // Scroll to top when changing pages
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+            goToPage(currentPage - 1);
+        }
+    };
+
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+            goToPage(currentPage + 1);
+        }
+    };
+
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        let pages = [];
+        const maxPagesToShow = 5;
+
+        if (totalPages <= maxPagesToShow) {
+            // If we have fewer pages than the max, show all pages
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Calculate how many numbers to show on each side of current page
+            const sidesCount = Math.floor(maxPagesToShow / 2);
+
+            // Start with the current page in the center
+            let startPage = Math.max(2, currentPage - sidesCount);
+            let endPage = Math.min(totalPages - 1, currentPage + sidesCount);
+
+            // Adjust if we're near the start
+            if (currentPage - sidesCount < 2) {
+                endPage = Math.min(1 + maxPagesToShow - 1, totalPages - 1);
+            }
+
+            // Adjust if we're near the end
+            if (currentPage + sidesCount > totalPages - 1) {
+                startPage = Math.max(2, totalPages - maxPagesToShow + 1);
+            }
+
+            // Always add first page
+            pages.push(1);
+
+            // Add ellipsis after first page if needed
+            if (startPage > 2) {
+                pages.push('...');
+            }
+
+            // Add pages around current page
+            for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+            }
+
+            // Add ellipsis before last page if needed
+            if (endPage < totalPages - 1) {
+                pages.push('...');
+            }
+
+            // Always add last page
+            pages.push(totalPages);
+        }
+
+        return pages;
+    };
+
     return (
         <ShopLayout>
             <div className="relative w-full h-full flex flex-col justify-start items-start mt-20">
@@ -322,7 +377,7 @@ export default function Page() {
                     <h1 className="text-4xl text-zinc-800 font-bold">Tienda</h1>
                 </div>
             </div>
-            <div className="container w-[1500px] bg-white   px-4 py-8">
+            <div className="container w-[1500px] bg-white px-4 py-8">
                 {/* Breadcrumbs */}
                 <nav aria-label="Breadcrumb" className="mb-6 pl-2">
                     <ol className="flex items-center space-x-1 text-md text-gray-500 flex-wrap">
@@ -407,7 +462,15 @@ export default function Page() {
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                                 </button>
                             </div>
+
                             <div className="flex items-center">
+                                {!loading && totalProducts > 0 && (
+                                    <span className="text-sm text-gray-500 mr-4">
+                                        Mostrando {(currentPage - 1) * productsPerPage + 1}-
+                                        {Math.min(currentPage * productsPerPage, totalProducts)} de {totalProducts} productos
+                                    </span>
+                                )}
+
                                 {/* Sort dropdown */}
                                 <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">Ordenar por:</label>
                                 <select
@@ -425,25 +488,94 @@ export default function Page() {
                             </div>
                         </div>
 
+                        {/* Loading state */}
+                        {loading && (
+                            <div className="flex justify-center items-center h-64">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                            </div>
+                        )}
+
+                        {/* Error state */}
+                        {error && (
+                            <div className="text-center text-red-500 my-8">
+                                <p>{error}</p>
+                            </div>
+                        )}
+
                         {/* Product List/Grid Container */}
-                        <motion.div
-                            layout
-                            className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col space-y-6'}`}
-                        >
-                            <AnimatePresence>
-                                {filteredAndSortedProducts.map((product) => (
-                                    <ProductCard
-                                        key={product.id}
-                                        product={product}
-                                        viewMode={viewMode}
-                                        onQuickViewClick={handleOpenQuickView}
-                                    />
-                                ))}
-                            </AnimatePresence>
-                        </motion.div>
+                        {!loading && !error && (
+                            <motion.div
+                                layout
+                                className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col space-y-6'}`}
+                            >
+                                <AnimatePresence>
+                                    {filteredAndSortedProducts.map((product) => (
+                                        <ProductCard
+                                            key={product.id}
+                                            product={product}
+                                            viewMode={viewMode}
+                                            onQuickViewClick={handleOpenQuickView}
+                                        />
+                                    ))}
+                                </AnimatePresence>
+                            </motion.div>
+                        )}
+
                         {/* No results message */}
-                        {filteredAndSortedProducts.length === 0 && (
+                        {!loading && !error && filteredAndSortedProducts.length === 0 && (
                             <p className="text-center text-gray-500 mt-8">No hay productos que coincidan con la categoría seleccionada.</p>
+                        )}
+
+                        {/* Pagination controls */}
+                        {!loading && !error && totalPages > 1 && (
+                            <div className="flex justify-center mt-10">
+                                <nav className="flex items-center space-x-1" aria-label="Pagination">
+                                    {/* Previous page button */}
+                                    <button
+                                        onClick={goToPreviousPage}
+                                        disabled={currentPage === 1}
+                                        className={`px-3 py-2 rounded-md ${currentPage === 1
+                                            ? 'text-gray-400 cursor-not-allowed'
+                                            : 'text-gray-700 hover:bg-gray-100'}`}
+                                    >
+                                        <span className="sr-only">Anterior</span>
+                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+
+                                    {/* Page numbers */}
+                                    {getPageNumbers().map((page, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => typeof page === 'number' ? goToPage(page) : null}
+                                            disabled={page === '...'}
+                                            className={`px-4 py-2 rounded-md ${page === currentPage
+                                                ? 'bg-[#00B0C8] text-white'
+                                                : page === '...'
+                                                    ? 'text-gray-500'
+                                                    : 'text-gray-700 hover:bg-gray-100'
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+
+                                    {/* Next page button */}
+                                    <button
+                                        onClick={goToNextPage}
+                                        disabled={currentPage === totalPages}
+                                        className={`px-3 py-2 rounded-md ${currentPage === totalPages
+                                            ? 'text-gray-400 cursor-not-allowed'
+                                            : 'text-gray-700 hover:bg-gray-100'}`}
+                                    >
+                                        <span className="sr-only">Siguiente</span>
+                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </nav>
+                            </div>
                         )}
                     </main>
                 </div>

@@ -58,7 +58,7 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                             src={currentImageUrl}
                             alt={product.name}
                             layout="fill"
-                            objectFit="cover"
+                            objectFit="contain"
                             className="transition-opacity duration-300 ease-in-out rounded-lg"
                         />
                         {/* Hover Overlay Buttons */}
@@ -100,7 +100,7 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                             src={currentImageUrl}
                             alt={product.name}
                             layout="fill"
-                            objectFit="cover"
+                            objectFit="contain"
                             className="transition-opacity duration-300 ease-in-out rounded-lg"
                         />
                         {/* Hover Overlay Buttons */}

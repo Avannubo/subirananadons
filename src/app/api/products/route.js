@@ -38,7 +38,19 @@ export async function GET(request) {
             // Individual field filters
             if (name) query.name = { $regex: name, $options: 'i' };
             if (reference) query.reference = { $regex: reference, $options: 'i' };
-            if (category) query.category = { $regex: category, $options: 'i' };
+
+            // Handle multiple categories separated by commas
+            if (category) {
+                const categoryList = category.split(',');
+                if (categoryList.length > 1) {
+                    // If multiple categories, use $in operator
+                    query.category = { $in: categoryList.map(cat => new RegExp(cat, 'i')) };
+                } else {
+                    // Single category uses regex for partial matching
+                    query.category = { $regex: category, $options: 'i' };
+                }
+            }
+
             if (brand) query.brand = { $regex: brand, $options: 'i' };
         }
 

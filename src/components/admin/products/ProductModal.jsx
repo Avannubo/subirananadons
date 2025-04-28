@@ -327,7 +327,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         return (
             <div key={category._id} className="category-item">
                 <div
-                    className={`px-3 py-1 hover:bg-gray-100 cursor-pointer flex items-center ${level > 0 ? 'border-l border-gray-200' : ''}`}
+                    className={`px-3  hover:bg-gray-100 cursor-pointer flex items-center ${level > 0 ? 'border-l border-gray-200' : ''}`}
                     onClick={() => handleCategorySelect(category.name, category._id)}
                 >
                     {level > 0 && (
