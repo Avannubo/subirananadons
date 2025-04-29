@@ -2,21 +2,53 @@
 import { Dialog } from '@headlessui/react';
 import { FiX, FiPackage, FiDollarSign, FiTag, FiBox, FiImage } from 'react-icons/fi';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 export default function ProductViewModal({ isOpen, onClose, product }) {
     if (!product) return null;
-    // Sample gallery images - in production, these would come from product data
-    const [galleryImages] = useState([
-        product.image || '/assets/images/product-placeholder.jpg',
-        '/assets/images/joie.png'
-    ]);
-    const [selectedImage, setSelectedImage] = useState(galleryImages[0]);
+
+    // Get all product images for the gallery
+    const [galleryImages, setGalleryImages] = useState([]);
+    const [selectedImage, setSelectedImage] = useState('');
+
+    // Update images when product changes
+    useEffect(() => {
+        if (product) {
+            const images = [];
+
+            // Add main image
+            if (product.image) {
+                images.push(product.image);
+            }
+
+            // Add hover image if it exists and is different
+            if (product.imageHover && product.imageHover !== product.image) {
+                images.push(product.imageHover);
+            }
+
+            // Add additional images if they exist
+            if (product.additionalImages && Array.isArray(product.additionalImages) && product.additionalImages.length > 0) {
+                images.push(...product.additionalImages);
+            }
+
+            // If no images, add placeholder
+            if (images.length === 0) {
+                images.push('/assets/images/product-placeholder.jpg');
+            }
+
+            setGalleryImages(images);
+            setSelectedImage(images[0]);
+        }
+    }, [product]);
+
     // Format price with 2 decimal places and € symbol
     const formatPrice = (price) => {
         return `${parseFloat(price).toFixed(2)} €`;
     };
+
     // Calculate available stock
-    const availableStock = (product.stock?.physical || 0) - (product.stock?.reserved || 0);
+    const availableStock = product.stock?.available || 0;
+
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -45,36 +77,48 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                             src={selectedImage}
                                             alt={product.name}
                                             fill
-                                            style={{ objectFit: 'cover' }}
+                                            style={{ objectFit: 'contain' }}
                                             className="rounded-md"
                                         />
                                     </div>
                                 </div>
                                 {/* Product Gallery */}
-                                <div className="w-full mt-3">
-                                    <h4 className="text-xs font-medium text-gray-500 uppercase mb-2 flex items-center">
-                                        <FiImage className="mr-1 text-[#00B0C8]" /> Galería
-                                    </h4>
-                                    <div className="flex space-x-2 overflow-x-auto pb-2">
-                                        {galleryImages.map((img, index) => (
-                                            <button
-                                                key={index}
-                                                onClick={() => setSelectedImage(img)}
-                                                className={`flex-shrink-0 w-14 h-14 relative rounded border ${selectedImage === img
-                                                    ? 'border-[#00B0C8] ring-2 ring-[#00B0C8]/30'
-                                                    : 'border-gray-200 hover:border-gray-300'}`}
-                                            >
-                                                <Image
-                                                    src={img}
-                                                    alt={`Thumbnail ${index + 1}`}
-                                                    fill
-                                                    style={{ objectFit: 'cover' }}
-                                                    className="rounded"
-                                                />
-                                            </button>
-                                        ))}
+                                {galleryImages.length > 1 && (
+                                    <div className="w-full mt-3">
+                                        <h4 className="text-xs font-medium text-gray-500 uppercase mb-2 flex items-center">
+                                            <FiImage className="mr-1 text-[#00B0C8]" /> Galería ({galleryImages.length} imágenes)
+                                        </h4>
+                                        <div className="flex space-x-2 overflow-x-auto pb-2">
+                                            {galleryImages.map((img, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => setSelectedImage(img)}
+                                                    className={`flex-shrink-0 w-14 h-14 relative rounded border ${selectedImage === img
+                                                        ? 'border-[#00B0C8] ring-2 ring-[#00B0C8]/30'
+                                                        : 'border-gray-200 hover:border-gray-300'}`}
+                                                >
+                                                    <Image
+                                                        src={img}
+                                                        alt={`Thumbnail ${index + 1}`}
+                                                        fill
+                                                        style={{ objectFit: 'contain' }}
+                                                        className="rounded"
+                                                    />
+                                                    {index === 0 && (
+                                                        <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-[8px] px-1">
+                                                            Principal
+                                                        </div>
+                                                    )}
+                                                    {index === 1 && product.imageHover && (
+                                                        <div className="absolute top-0 left-0 bg-indigo-500 text-white text-[8px] px-1">
+                                                            Hover
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                                 {/* Status indicators */}
                                 <div className="flex flex-wrap gap-2 justify-center mt-4">
                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${product.status === 'active' ? 'bg-green-100 text-green-800' :

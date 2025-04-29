@@ -199,13 +199,13 @@ export default function AuthModal() {
                 {session ? (
                     <div className="relative">
                         <button onClick={toggleMenu} className="flex items-center space-x-2">
-                            <Image
+                            {/* <Image
                                 src={getUserImage()}
                                 alt="Profile Picture"
                                 width={500}
                                 height={500}
                                 className="rounded-full h-10 w-10 object-cover"
-                            />
+                            /> */}
                         </button>
                         {isMenuOpen && (
                             <div ref={menuRef} className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden">

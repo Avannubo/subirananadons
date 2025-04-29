@@ -125,6 +125,8 @@ export async function POST(request) {
             price_excl_tax: parseFloat(body.price_excl_tax),
             price_incl_tax: parseFloat(body.price_incl_tax),
             image: body.image || '/assets/images/default-product.png',
+            imageHover: body.imageHover || '',
+            additionalImages: body.additionalImages || [],
             stock: {
                 available: parseInt(body.stock?.available || 0),
                 minStock: parseInt(body.stock?.minStock || 5)

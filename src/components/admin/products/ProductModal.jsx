@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle } from '@headlessui/react';
-import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus, FiPackage } from 'react-icons/fi';
+import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus, FiPackage, FiTrash2, FiMove, FiPlus } from 'react-icons/fi';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { useStats } from '@/contexts/StatsContext';
@@ -18,17 +18,19 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         price_excl_tax: '',
         price_incl_tax: '',
         image: '',
+        imageHover: '',
+        additionalImages: [],
         stock: {
             available: '',
             minStock: 5
         },
-        status: 'active',   
+        status: 'active',
         featured: false,
     });
-
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [imagePreview, setImagePreview] = useState('');
     const [isUploading, setIsUploading] = useState(false);
     const [categories, setCategories] = useState([]);
@@ -38,6 +40,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [loadingBrands, setLoadingBrands] = useState(false);
     const [showBrandDropdown, setShowBrandDropdown] = useState(false);
     const [brandSearchTerm, setBrandSearchTerm] = useState('');
+    const [productImages, setProductImages] = useState([]);
     const stats = useStats();
 
     // Fetch all categories and brands when modal opens
@@ -53,11 +56,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         try {
             setLoadingCategories(true);
             const response = await fetch('/api/categories?flat=true');
-
             if (!response.ok) {
                 throw new Error('Failed to fetch categories');
             }
-
             const data = await response.json();
             setCategories(data);
         } catch (error) {
@@ -74,11 +75,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setLoadingBrands(true);
             // Fetch all brands without pagination to get the complete list
             const response = await fetch('/api/brands?limit=100&enabled=true');
-
             if (!response.ok) {
                 throw new Error('Failed to fetch brands');
             }
-
             const data = await response.json();
             // Handle both data formats (array or object with brands array)
             const brandsArray = data.brands || data || [];
@@ -95,7 +94,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const organizeCategories = (allCategories) => {
         const categoriesMap = {};
         const rootCategories = [];
-
         // First pass: create a map of all categories by ID
         allCategories.forEach(category => {
             categoriesMap[category._id] = {
@@ -103,7 +101,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 children: []
             };
         });
-
         // Second pass: build the hierarchy
         allCategories.forEach(category => {
             if (category.parent && categoriesMap[category.parent]) {
@@ -114,7 +111,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 rootCategories.push(categoriesMap[category._id]);
             }
         });
-
         return rootCategories;
     };
 
@@ -124,6 +120,31 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     // Load product data when editing
     useEffect(() => {
         if (isEditing && product) {
+            // Format all images into a single array for the UI
+            const allImages = [];
+
+            // Add main image
+            if (product.image) {
+                allImages.push(product.image);
+            }
+
+            // Add hover image if different from main image
+            if (product.imageHover && product.imageHover !== product.image) {
+                allImages.push(product.imageHover);
+            }
+
+            // Add additional images
+            if (product.additionalImages && Array.isArray(product.additionalImages)) {
+                allImages.push(...product.additionalImages);
+            }
+
+            setProductImages(allImages);
+
+            if (allImages.length > 0) {
+                setImagePreview(allImages[0]);
+                setSelectedImageIndex(0);
+            }
+
             setFormData({
                 name: product.name || '',
                 reference: product.reference || '',
@@ -135,6 +156,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 price_excl_tax: product.price_excl_tax || '',
                 price_incl_tax: product.price_incl_tax || '',
                 image: product.image || '',
+                imageHover: product.imageHover || '',
+                additionalImages: product.additionalImages || [],
                 stock: {
                     available: product.stock?.available || '',
                     minStock: product.stock?.minStock || 5
@@ -142,14 +165,17 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 status: product.status || 'active',
                 featured: product.featured || false,
             });
-            setImagePreview(product.image || '');
+        } else {
+            // Reset for new product
+            setProductImages([]);
+            setSelectedImageIndex(-1);
+            setImagePreview('');
         }
     }, [isEditing, product]);
 
     // Handle form input changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-
         if (name === 'available' || name === 'minStock') {
             setFormData(prev => ({
                 ...prev,
@@ -188,32 +214,222 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
 
     // Handle image selection
     const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedImage(file);
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            setSelectedImage(files);
+
+            // Show preview of the first file
             const fileReader = new FileReader();
             fileReader.onload = () => {
                 setImagePreview(fileReader.result);
             };
-            fileReader.readAsDataURL(file);
+            fileReader.readAsDataURL(files[0]);
+
+            // If multiple files selected, upload them immediately
+            if (files.length > 1) {
+                handleAddImage();
+            }
         }
     };
 
-    // Upload image to Cloudinary
+    // Add image to product images array
+    const handleAddImage = async () => {
+        if (!selectedImage && !formData.image) {
+            toast.error('Por favor seleccione una imagen o proporcione una URL');
+            return;
+        }
+
+        // If URL provided, add it directly
+        if (formData.image && !selectedImage) {
+            // Check if this URL already exists in the product images
+            if (productImages.includes(formData.image)) {
+                toast.error('Esta imagen ya ha sido añadida');
+                return;
+            }
+
+            const newImages = [...productImages, formData.image];
+            setProductImages(newImages);
+
+            // Clear inputs for next image
+            setSelectedImage(null);
+            setImagePreview('');
+            setFormData(prev => ({
+                ...prev,
+                image: ''
+            }));
+
+            toast.success('Imagen añadida correctamente');
+            return;
+        }
+
+        // Handle multiple files upload
+        if (selectedImage && selectedImage.length) {
+            setIsUploading(true);
+            const toastId = toast.loading(`Subiendo ${selectedImage.length} imágenes...`);
+
+            try {
+                const uploadPromises = [];
+                const filesArray = Array.from(selectedImage);
+
+                // Process each file for upload
+                for (const file of filesArray) {
+                    uploadPromises.push(
+                        new Promise(async (resolve) => {
+                            try {
+                                // Convert image to base64
+                                const base64Image = await new Promise((resolveBase64) => {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => resolveBase64(reader.result);
+                                    reader.readAsDataURL(file);
+                                });
+
+                                // Upload to server
+                                const response = await fetch('/api/upload', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ image: base64Image })
+                                });
+
+                                if (!response.ok) {
+                                    const errorData = await response.json();
+                                    throw new Error(errorData.error || `Error al subir la imagen ${file.name}`);
+                                }
+
+                                const data = await response.json();
+                                resolve(data.url);
+                            } catch (error) {
+                                console.error('Error uploading image:', error);
+                                resolve(null); // Return null for failed uploads
+                            }
+                        })
+                    );
+                }
+
+                // Wait for all uploads to complete
+                const uploadedUrls = await Promise.all(uploadPromises);
+                const validUrls = uploadedUrls.filter(url => url !== null);
+
+                if (validUrls.length > 0) {
+                    // Filter out any URLs that already exist in the product images
+                    const newUrls = validUrls.filter(url => !productImages.includes(url));
+
+                    if (newUrls.length === 0) {
+                        toast.warning('Todas las imágenes ya han sido añadidas', { id: toastId });
+                    } else {
+                        setProductImages(prev => [...prev, ...newUrls]);
+                        toast.success(`${newUrls.length} de ${filesArray.length} imágenes añadidas`, { id: toastId });
+                    }
+                } else {
+                    toast.error('Error al subir las imágenes', { id: toastId });
+                }
+
+                // Clear inputs for next upload
+                setSelectedImage(null);
+                setImagePreview('');
+
+            } catch (error) {
+                console.error('Error uploading images:', error);
+                toast.error('Error al subir las imágenes', { id: toastId });
+            } finally {
+                setIsUploading(false);
+            }
+            return;
+        }
+
+        // Handle single file upload (legacy path)
+        if (selectedImage) {
+            const imageUrl = await uploadImage();
+            if (imageUrl) {
+                // Check if this URL already exists
+                if (productImages.includes(imageUrl)) {
+                    toast.error('Esta imagen ya ha sido añadida');
+                    return;
+                }
+
+                // Add the new image to the array
+                const newImages = [...productImages, imageUrl];
+                setProductImages(newImages);
+
+                // Clear inputs for next image
+                setSelectedImage(null);
+                setImagePreview('');
+
+                toast.success('Imagen añadida correctamente');
+            }
+        }
+    };
+
+    // Remove an image
+    const handleRemoveImage = (index) => {
+        const newImages = [...productImages];
+        newImages.splice(index, 1);
+        setProductImages(newImages);
+
+        // Update selected image if needed
+        if (selectedImageIndex >= newImages.length) {
+            setSelectedImageIndex(Math.max(0, newImages.length - 1));
+            setImagePreview(newImages.length > 0 ? newImages[Math.max(0, newImages.length - 1)] : '');
+        }
+    };
+
+    // Move image up in the list
+    const handleMoveImageUp = (index) => {
+        if (index <= 0) return;
+
+        const newImages = [...productImages];
+        const temp = newImages[index];
+        newImages[index] = newImages[index - 1];
+        newImages[index - 1] = temp;
+
+        setProductImages(newImages);
+
+        // Update selected image index if it was moved
+        if (selectedImageIndex === index) {
+            setSelectedImageIndex(index - 1);
+        } else if (selectedImageIndex === index - 1) {
+            setSelectedImageIndex(index);
+        }
+    };
+
+    // Move image down in the list
+    const handleMoveImageDown = (index) => {
+        if (index >= productImages.length - 1) return;
+
+        const newImages = [...productImages];
+        const temp = newImages[index];
+        newImages[index] = newImages[index + 1];
+        newImages[index + 1] = temp;
+
+        setProductImages(newImages);
+
+        // Update selected image index if it was moved
+        if (selectedImageIndex === index) {
+            setSelectedImageIndex(index + 1);
+        } else if (selectedImageIndex === index + 1) {
+            setSelectedImageIndex(index);
+        }
+    };
+
+    // Select an image to view
+    const handleSelectImage = (index) => {
+        setSelectedImageIndex(index);
+        setImagePreview(productImages[index]);
+    };
+
+    // Upload image to Cloudinary (legacy method for single image, kept for compatibility)
     const uploadImage = async () => {
         if (!selectedImage) return formData.image;
-
         setIsUploading(true);
         const toastId = toast.loading('Subiendo imagen...');
-
         try {
             // Convert image to base64
             const base64Image = await new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(selectedImage);
+                reader.readAsDataURL(selectedImage instanceof FileList ? selectedImage[0] : selectedImage);
             });
-
             // Upload to server
             const response = await fetch('/api/upload', {
                 method: 'POST',
@@ -222,12 +438,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 },
                 body: JSON.stringify({ image: base64Image })
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Error al subir la imagen');
             }
-
             const data = await response.json();
             toast.success('Imagen subida correctamente', { id: toastId });
             return data.url;
@@ -243,30 +457,24 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     // Form validation
     const validateForm = () => {
         const newErrors = {};
-
         if (!formData.name) newErrors.name = 'El nombre es obligatorio';
         if (!formData.reference) newErrors.reference = 'La referencia es obligatoria';
         if (!formData.category) newErrors.category = 'La categoría es obligatoria';
         if (!formData.price_excl_tax) newErrors.price_excl_tax = 'El precio sin impuestos es obligatorio';
         if (!formData.price_incl_tax) newErrors.price_incl_tax = 'El precio con impuestos es obligatorio';
-
         // Validate numeric fields
         if (formData.price_excl_tax && isNaN(parseFloat(formData.price_excl_tax))) {
             newErrors.price_excl_tax = 'Debe ser un número válido';
         }
-
         if (formData.price_incl_tax && isNaN(parseFloat(formData.price_incl_tax))) {
             newErrors.price_incl_tax = 'Debe ser un número válido';
         }
-
         if (formData.stock.available && isNaN(parseInt(formData.stock.available))) {
             newErrors.ava = 'Debe ser un número entero';
         }
-
         if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
             newErrors.minStock = 'Debe ser un número entero';
         }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -274,22 +482,33 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validateForm()) return;
-
         setLoading(true);
 
         try {
-            // Upload image if selected
-            let imageUrl = formData.image;
-            if (selectedImage) {
-                imageUrl = await uploadImage();
+            // Prepare images for submission
+            let mainImage = '';
+            let hoverImage = '';
+            let additionalImages = [];
+
+            if (productImages.length > 0) {
+                mainImage = productImages[0];
+
+                if (productImages.length > 1) {
+                    hoverImage = productImages[1];
+
+                    if (productImages.length > 2) {
+                        additionalImages = productImages.slice(2);
+                    }
+                }
             }
 
             // Convert string values to numbers
             const processedData = {
                 ...formData,
-                image: imageUrl,
+                image: mainImage,
+                imageHover: hoverImage,
+                additionalImages: additionalImages,
                 price_excl_tax: parseFloat(formData.price_excl_tax),
                 price_incl_tax: parseFloat(formData.price_incl_tax),
                 brandId: formData.brandId || '',
@@ -323,7 +542,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         const currentPrefix = level === 0 ? '' : isLast ? `${prefix}└─ ` : `${prefix}├─ `;
         // Determine the prefix for child categories
         const childPrefix = level === 0 ? '' : isLast ? `${prefix}   ` : `${prefix}│  `;
-
         return (
             <div key={category._id} className="category-item">
                 <div
@@ -338,7 +556,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         <span className={`${level === 0 ? 'font-medium' : ''} text-sm`}>{category.name}</span>
                     </div>
                 </div>
-
                 {category.children && category.children.length > 0 && (
                     <div className="subcategory-group">
                         {category.children.map((child, index) =>
@@ -379,9 +596,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-
             <div className="fixed inset-0 flex items-center justify-center p-4">
-                <Dialog.Panel className="w-full max-w-6xl bg-white rounded-lg shadow-xl overflow-hidden">
+                <Dialog.Panel className="w-full max-w-7xl bg-white rounded-lg shadow-xl overflow-hidden">
                     <div className="flex justify-between items-center p-4 border-b border-gray-300">
                         <DialogTitle className="text-lg font-medium">
                             {isEditing ? 'Editar Producto' : 'Añadir Nuevo Producto'}
@@ -393,13 +609,11 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                             <FiX className="h-5 w-5" />
                         </button>
                     </div>
-
                     <form onSubmit={handleSubmit} className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Left Column */}
                             <div className="space-y-6 md:col-span-2">
                                 <h3 className="text-md font-medium">Información Básica</h3>
-
                                 <div>
                                     <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                                         Nombre *
@@ -417,7 +631,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <p className="mt-1 text-sm text-red-600">{errors.name}</p>
                                     )}
                                 </div>
-
                                 <div>
                                     <label htmlFor="reference" className="block text-sm font-medium text-gray-700">
                                         Referencia *
@@ -435,7 +648,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <p className="mt-1 text-sm text-red-600">{errors.reference}</p>
                                     )}
                                 </div>
-
                                 <div>
                                     <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                                         Descripción
@@ -449,7 +661,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                     />
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="category" className="block text-sm font-medium text-gray-700">
@@ -463,7 +674,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 <span className="truncate">{formData.category || 'Seleccionar categoría'}</span>
                                                 <FiChevronRight className={`transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
                                             </div>
-
                                             {showCategoryDropdown && (
                                                 <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md overflow-auto border border-gray-300">
                                                     {loadingCategories ? (
@@ -501,7 +711,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             <p className="mt-1 text-sm text-red-600">{errors.category}</p>
                                         )}
                                     </div>
-
                                     <div>
                                         <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
                                             Marca
@@ -544,7 +753,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 )}
                                                 <FiChevronRight className={`transition-transform ${showBrandDropdown ? 'rotate-90' : ''}`} />
                                             </div>
-
                                             {showBrandDropdown && (
                                                 <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-80 rounded-md overflow-hidden border border-gray-300 flex flex-col">
                                                     {/* Search input */}
@@ -558,7 +766,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             onClick={(e) => e.stopPropagation()}
                                                         />
                                                     </div>
-
                                                     {/* Results container */}
                                                     <div className="overflow-auto max-h-60">
                                                         {loadingBrands ? (
@@ -620,7 +827,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         )}
                                     </div>
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="price_excl_tax" className="block text-sm font-medium text-gray-700">
@@ -639,7 +845,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             <p className="mt-1 text-sm text-red-600">{errors.price_excl_tax}</p>
                                         )}
                                     </div>
-
                                     <div>
                                         <label htmlFor="price_incl_tax" className="block text-sm font-medium text-gray-700">
                                             Precio con Impuestos (€) *
@@ -658,7 +863,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         )}
                                     </div>
                                 </div>
-
                                 <h3 className="text-md font-medium mt-6">Inventario</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -679,7 +883,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             <p className="mt-1 text-sm text-red-600">{errors.ava}</p>
                                         )}
                                     </div>
-
                                     <div>
                                         <label htmlFor="minStock" className="block text-sm font-medium text-gray-700">
                                             Stock Mínimo
@@ -698,7 +901,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         )}
                                     </div>
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="status" className="block text-sm font-medium text-gray-700">
@@ -716,7 +918,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             <option value="discontinued">Descontinuado</option>
                                         </select>
                                     </div>
-
                                     <div className="flex items-center h-full pt-6">
                                         <input
                                             type="checkbox"
@@ -732,11 +933,74 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Right Column - Image Upload */}
+                            {/* Right Column - Multiple Image Upload */}
                             <div className="space-y-6">
-                                <h3 className="text-md font-medium">Imagen del Producto</h3>
+                                <h3 className="text-md font-medium">Imágenes del Producto</h3>
 
+                                {/* Current Images */}
+                                {productImages.length > 0 && (
+                                    <div className="mb-6">
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Imágenes Actuales</h4>
+                                        <p className="text-xs text-gray-500 mb-2">
+                                            La primera imagen será la principal, la segunda será la de hover (opcional).
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {productImages.map((img, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`relative border border-gray-200 rounded-md overflow-hidden 
+                                                        ${selectedImageIndex === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}`}
+                                                >
+                                                    <div className="relative h-24 cursor-pointer" onClick={() => handleSelectImage(index)}>
+                                                        <Image
+                                                            src={img}
+                                                            alt={`Imagen de producto ${index + 1}`}
+                                                            fill
+                                                            className="object-contain"
+                                                        />
+                                                        {index === 0 && (
+                                                            <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1">
+                                                                Principal
+                                                            </div>
+                                                        )}
+                                                        {index === 1 && (
+                                                            <div className="absolute top-0 left-0 bg-indigo-500 text-white text-xs px-2 py-1">
+                                                                Hover
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex justify-between bg-gray-50 p-1">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleMoveImageUp(index)}
+                                                            disabled={index === 0}
+                                                            className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            <FiChevronRight className="transform rotate-180" size={16} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveImage(index)}
+                                                            className="text-red-500 p-1 rounded hover:bg-gray-200"
+                                                        >
+                                                            <FiTrash2 size={16} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleMoveImageDown(index)}
+                                                            disabled={index === productImages.length - 1}
+                                                            className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            <FiChevronRight size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Image Upload */}
                                 <div className="flex flex-col items-center space-y-4">
                                     <div className="w-full p-2 h-64 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
                                         {isUploading && (
@@ -750,53 +1014,87 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 alt="Vista previa"
                                                 width={1000}
                                                 height={1000}
-                                                className="w-full h-full object-cover rounded-lg"
+                                                className="w-full h-full object-contain rounded-lg"
                                             />
                                         ) : (
                                             <div className="flex flex-col items-center justify-center h-full">
                                                 <FiUpload className="w-10 h-10 text-gray-400" />
                                                 <p className="mt-2 text-sm text-gray-500">No hay imagen seleccionada</p>
+                                                <p className="mt-1 text-xs text-gray-400">
+                                                    {productImages.length === 0
+                                                        ? "Añada al menos una imagen principal"
+                                                        : "Añada más imágenes (opcional)"}
+                                                </p>
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="w-full">
-                                        <label
-                                            htmlFor="productImage"
-                                            className={`block w-full px-4 py-2 text-center text-white rounded-md ${isUploading
+                                    <div className="w-full grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label
+                                                htmlFor="productImage"
+                                                className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading
+                                                    ? 'bg-gray-400 cursor-not-allowed'
+                                                    : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
+                                                    }`}
+                                            >
+                                                {isUploading ? 'Subiendo...' : 'Seleccionar imágenes'}
+                                            </label>
+                                            <input
+                                                type="file"
+                                                id="productImage"
+                                                accept="image/*"
+                                                onChange={handleImageChange}
+                                                disabled={isUploading}
+                                                className="hidden"
+                                                multiple
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleAddImage}
+                                            disabled={isUploading || (!selectedImage && !formData.image)}
+                                            className={`w-full px-4 py-2 text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (!selectedImage && !formData.image)
                                                 ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
+                                                : 'bg-green-600 hover:bg-green-700'
                                                 }`}
                                         >
-                                            {isUploading ? 'Subiendo...' : 'Seleccionar imagen'}
-                                        </label>
-                                        <input
-                                            type="file"
-                                            id="productImage"
-                                            accept="image/*"
-                                            onChange={handleImageChange}
-                                            disabled={isUploading}
-                                            className="hidden"
-                                        />
-                                        <p className="mt-2 text-xs text-gray-500 text-center">
-                                            Formatos: JPG, PNG. Max: 5MB
-                                        </p>
+                                            <FiPlus size={16} />
+                                            <span>Añadir a Galería</span>
+                                        </button>
                                     </div>
+
+                                    <p className="mt-1 text-xs text-gray-500 text-center">
+                                        Formatos: JPG, PNG. Max: 5MB
+                                    </p>
 
                                     {/* Manual URL input */}
                                     <div className="w-full mt-4">
                                         <label htmlFor="image" className="block text-sm font-medium text-gray-700">
                                             URL de Imagen (opcional)
                                         </label>
-                                        <input
-                                            type="text"
-                                            id="image"
-                                            name="image"
-                                            value={formData.image}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                            placeholder="https://ejemplo.com/imagen.jpg"
-                                        />
+                                        <div className="flex mt-1">
+                                            <input
+                                                type="text"
+                                                id="image"
+                                                name="image"
+                                                value={formData.image}
+                                                onChange={handleChange}
+                                                className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                placeholder="https://ejemplo.com/imagen.jpg"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (formData.image) {
+                                                        setImagePreview(formData.image);
+                                                    }
+                                                }}
+                                                className="text-nowrap bg-gray-200 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-300"
+                                            >
+                                                Vista previa
+                                            </button>
+                                        </div>
                                         <p className="mt-1 text-xs text-gray-500">
                                             O pegue la URL directamente aquí
                                         </p>

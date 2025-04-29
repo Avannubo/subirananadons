@@ -67,10 +67,12 @@ export async function PUT(request, { params }) {
         if (body.price_excl_tax !== undefined) product.price_excl_tax = parseFloat(body.price_excl_tax);
         if (body.price_incl_tax !== undefined) product.price_incl_tax = parseFloat(body.price_incl_tax);
         if (body.image) product.image = body.image;
+        if (body.imageHover !== undefined) product.imageHover = body.imageHover;
+        if (body.additionalImages !== undefined) product.additionalImages = body.additionalImages;
 
         // Update stock if provided
         if (body.stock) {
-            if (body.stock.physical !== undefined) product.stock.physical = parseInt(body.stock.physical);
+            if (body.stock.available !== undefined) product.stock.available = parseInt(body.stock.available);
             if (body.stock.minStock !== undefined) product.stock.minStock = parseInt(body.stock.minStock);
         }
 

@@ -37,6 +37,14 @@ const productSchema = new mongoose.Schema({
         type: String,
         default: '/assets/images/default-product.png'
     },
+    imageHover: {
+        type: String,
+        default: ''
+    },
+    additionalImages: {
+        type: [String],
+        default: []
+    },
     stock: {
         available: {
             type: Number,

@@ -37,7 +37,11 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
     };
 
     // Generate the product URL based on category and name
-    const productUrl = `/products/${encodeURIComponent(product.category.toLowerCase().replace(/\s+/g, '-'))}/${encodeURIComponent(product.name.toLowerCase().replace(/\s+/g, '-'))}`;
+    const productUrl = `/products/${encodeURIComponent(
+        product.category?.toLowerCase().replace(/\s+/g, '-') || 'category'
+    )}/${encodeURIComponent(
+        product.name.toLowerCase().replace(/\s+/g, '-')
+    )}-${product.id}`;
 
     if (viewMode === 'grid') {
         // Grid View Layout
