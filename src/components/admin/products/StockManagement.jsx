@@ -16,7 +16,7 @@ export default function StockManagement() {
         currentPage: 1,
         totalPages: 1,
         totalItems: 0,
-        limit: 10
+        limit: 5
     });
     const [confirmModal, setConfirmModal] = useState({
         isOpen: false,
@@ -224,7 +224,7 @@ export default function StockManagement() {
             {/* Header with title and actions */}
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 className="text-lg font-semibold">Gestión de stock</h2>
-                <div className="flex space-x-2">
+                {/* <div className="flex space-x-2">
                     <button
                         className="flex items-center px-3 py-1 border border-gray-300 rounded hover:bg-gray-50"
                         onClick={handleExportStock}
@@ -232,7 +232,7 @@ export default function StockManagement() {
                         <FiDownload className="mr-2" />
                         Exportar
                     </button>
-                </div>
+                </div> */}
             </div>
 
             {/* Search and filters */}

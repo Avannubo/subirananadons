@@ -70,45 +70,57 @@ export default function ProductSlider({
                         </button>
                     </div>
                 </div>
-                <Swiper
-                    onBeforeInit={(swiper) => {
-                        swiperRef.current = swiper;
-                    }}
-                    spaceBetween={30}
-                    pagination={{
-                        clickable: true,
-                        dynamicBullets: true
-                    }}
-                    modules={[Pagination, Navigation]}
-                    breakpoints={{
-                        320: { slidesPerView: slidesPerView.mobile || 2 },
-                        768: { slidesPerView: slidesPerView.tablet || 3 },
-                        1024: { slidesPerView: slidesPerView.desktop || 4 },
-                    }}
-                    loop={true}
-                    grabCursor={true}
-                    draggable={true}
-                    navigation={{
-                        enabled: true,
-                        prevEl: '.swiper-button-prev',
-                        nextEl: '.swiper-button-next',
-                    }}
-                    className="pb-12 relative"
-                >
-                    {products.map((product) => (
-                        <SwiperSlide key={product.id}>
-                            <ProductCard
-                                product={product}
-                                onQuickViewClick={() => handleQuickView(product)}
-                                onAddToCartClick={() => handleAddToCart(product)}
-                                isHovered={hoveredProduct === product.id}
-                                setIsHovered={setHoveredProduct}
-                            />
-                        </SwiperSlide>
-                    ))}
-                    <div className="swiper-button-prev !hidden"></div>
-                    <div className="swiper-button-next !hidden"></div>
-                </Swiper>
+
+                <div className="relative">
+                    <Swiper
+                        onBeforeInit={(swiper) => {
+                            swiperRef.current = swiper;
+                        }}
+                        spaceBetween={30}
+                        pagination={{
+                            clickable: true,
+                            el: '.custom-pagination',
+                            type: 'bullets',
+                            bulletClass: 'custom-bullet',
+                            bulletActiveClass: 'custom-bullet-active',
+                            renderBullet: function (index, className) {
+                                return `<span class="${className}"></span>`;
+                            }
+                        }}
+                        modules={[Pagination, Navigation]}
+                        breakpoints={{
+                            320: { slidesPerView: slidesPerView.mobile || 2 },
+                            768: { slidesPerView: slidesPerView.tablet || 3 },
+                            1024: { slidesPerView: slidesPerView.desktop || 4 },
+                        }}
+                        loop={true}
+                        grabCursor={true}
+                        draggable={true}
+                        navigation={{
+                            enabled: true,
+                            prevEl: '.swiper-button-prev',
+                            nextEl: '.swiper-button-next',
+                        }}
+                        className="relative"
+                    >
+                        {products.map((product) => (
+                            <SwiperSlide key={product.id}>
+                                <ProductCard
+                                    product={product}
+                                    onQuickViewClick={() => handleQuickView(product)}
+                                    onAddToCartClick={() => handleAddToCart(product)}
+                                    isHovered={hoveredProduct === product.id}
+                                    setIsHovered={setHoveredProduct}
+                                />
+                            </SwiperSlide>
+                        ))}
+                        <div className="swiper-button-prev !hidden"></div>
+                        <div className="swiper-button-next !hidden"></div>
+                    </Swiper>
+
+                    {/* Custom Pagination */}
+                    <div className="custom-pagination flex justify-center items-center mt-8"></div>
+                </div>
             </div>
 
             {/* Quick View Modal */}
@@ -119,6 +131,26 @@ export default function ProductSlider({
                     onClose={handleCloseQuickView}
                 />
             )}
+
+            {/* Add custom styles for pagination bullets */}
+            <style jsx global>{`
+                .custom-bullet {
+                    width: 8px;
+                    height: 8px;
+                    display: inline-block;
+                    border-radius: 50%;
+                    background: #D9D9D9;
+                    margin: 0 5px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                }
+                
+                .custom-bullet-active {
+                    background: #0096FF;
+                    width: 10px;
+                    height: 10px;
+                }
+            `}</style>
         </div>
     );
 }

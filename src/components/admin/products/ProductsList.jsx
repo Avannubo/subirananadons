@@ -4,7 +4,7 @@ import { FiEdit2, FiTrash2, FiEye } from 'react-icons/fi';
 import ProductModal from './ProductModal';
 import ProductViewModal from './ProductViewModal';
 import DeleteConfirmationModal from '../DeleteConfirmationModal';
-import { fetchProducts, deleteProduct } from '@/services/productService';
+import { fetchProducts, deleteProduct } from '@/services/ProductService';
 import { toast } from 'react-hot-toast';
 
 export default function ProductsList() {
@@ -44,7 +44,9 @@ export default function ProductsList() {
     const loadProducts = async () => {
         setLoading(true);
         try {
-            const data = await fetchProducts();
+            // When loading fresh products, don't prevent sorting
+            // This ensures new products appear at the top
+            const data = await fetchProducts({ preventSort: false });
             setProducts(data);
             setFilteredProducts(data);
         } catch (error) {
@@ -75,17 +77,24 @@ export default function ProductsList() {
             await deleteProduct(currentProduct.id);
             toast.success('Producto eliminado con éxito');
             setIsDeleteModalOpen(false);
-            loadProducts();
+            loadProducts(); // Reload all products after deletion
         } catch (error) {
             console.error('Error deleting product:', error);
             toast.error('Error al eliminar el producto');
         }
     };
 
-    const handleSave = () => {
-        loadProducts();
-        setIsAddModalOpen(false);
-        setIsEditModalOpen(false);
+    // Update a single product in the list without changing order
+    const updateProductInList = (updatedProduct) => {
+        setProducts(currentProducts => {
+            // Create a new array with the updated product in the same position
+            const updatedProducts = currentProducts.map(product =>
+                (product.id === updatedProduct.id || product._id === updatedProduct._id)
+                    ? { ...updatedProduct, updatedAt: product.updatedAt } // Preserve the original updatedAt to maintain order
+                    : product
+            );
+            return updatedProducts;
+        });
     };
 
     // Format price with 2 decimal places and € symbol
@@ -170,7 +179,7 @@ export default function ProductsList() {
                         ) : (
                             filteredProducts.map((product) => {
                                 const { color, text } = getStatusDisplay(product.status);
-                                const availableStock = (product.stock?.physical || 0) - (product.stock?.reserved || 0);
+                                const availableStock = product.stock?.available || 0;
 
                                 return (
                                     <tr key={product.id}>
@@ -193,10 +202,10 @@ export default function ProductsList() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900">
-                                                Físico: {product.stock?.physical || 0}
+                                                Stock: {availableStock}
                                             </div>
-                                            <div className={`text-xs ${availableStock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                                Disponible: {availableStock}
+                                            <div className={`text-xs ${availableStock >= (product.stock?.minStock || 5) ? 'text-green-600' : 'text-red-600'}`}>
+                                                Mínimo: {product.stock?.minStock || 5}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -241,15 +250,63 @@ export default function ProductsList() {
             <ProductModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
-                onSave={handleSave}
+                onSave={async (productData) => {
+                    try {
+                        // For new products, we reload the whole list to get the newly created product at the top
+                        await loadProducts();
+                        setIsAddModalOpen(false);
+                        return null;
+                    } catch (error) {
+                        console.error("Error adding product:", error);
+                        toast.error("Error adding product");
+                        return null;
+                    }
+                }}
             />
 
             {/* Edit Product Modal */}
             <ProductModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
-                onSave={handleSave}
+                onSave={async (productData) => {
+                    try {
+                        // Make API call to update the product
+                        const response = await fetch(`/api/products/${currentProduct.id || currentProduct._id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(productData),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Failed to update product: ${response.status}`);
+                        }
+
+                        const updatedProduct = await response.json();
+
+                        // Preserve the createdAt and updatedAt from the current product
+                        // to maintain the same order in the list
+                        const preservedProduct = {
+                            ...updatedProduct,
+                            createdAt: currentProduct.createdAt,
+                            updatedAt: currentProduct.updatedAt
+                        };
+
+                        // Update the product in the list without changing order
+                        updateProductInList(preservedProduct);
+                        setIsEditModalOpen(false);
+
+                        toast.success('Producto actualizado correctamente');
+                        return updatedProduct;
+                    } catch (error) {
+                        console.error("Error updating product:", error);
+                        toast.error("Error updating product");
+                        return null;
+                    }
+                }}
                 product={currentProduct}
+                isEditing={true}
             />
 
             {/* View Product Modal */}

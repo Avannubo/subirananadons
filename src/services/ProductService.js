@@ -12,6 +12,7 @@
  * @param {string} options.search - Search term
  * @param {string} options.brand - Brand filter
  * @param {boolean} options.lowStock - Whether to filter for low stock products
+ * @param {boolean} options.preventSort - Whether to prevent sorting by updatedAt
  * @returns {Promise<Object>} - Products and pagination info
  */
 export async function fetchProducts(options = {}) {
@@ -23,7 +24,8 @@ export async function fetchProducts(options = {}) {
             status = 'active',
             search,
             brand,
-            lowStock
+            lowStock,
+            preventSort = false
         } = options;
 
         // Build query string from options
@@ -36,6 +38,7 @@ export async function fetchProducts(options = {}) {
         if (search) params.append('search', search);
         if (brand) params.append('brand', brand);
         if (lowStock) params.append('lowStock', lowStock);
+        if (preventSort) params.append('preventSort', 'true');
 
         // Make API request
         const response = await fetch(`/api/products?${params.toString()}`);
@@ -46,7 +49,13 @@ export async function fetchProducts(options = {}) {
 
         const data = await response.json();
 
-        return data;
+        // If a raw products array, return that directly
+        if (Array.isArray(data)) {
+            return data;
+        }
+
+        // Return products array from paginated response
+        return data.products || data;
     } catch (error) {
         console.error('ProductService fetchProducts error:', error);
         throw error;

@@ -73,9 +73,32 @@ export async function POST(request) {
             );
         }
 
+        // Connect to database
+        const { db } = await connectToDatabase();
+
+        // Generate slug if not provided
+        let slug = data.slug || '';
+        if (!slug && data.name) {
+            slug = data.name
+                .toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/[\s_-]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
+        // Check if the slug is unique
+        if (slug) {
+            const existingBrand = await db.collection('brands').findOne({ slug });
+            if (existingBrand) {
+                // Append a timestamp to make the slug unique
+                slug = `${slug}-${Date.now()}`;
+            }
+        }
+
         // Prepare brand document
         const brand = {
             name: data.name,
+            slug: slug,
             logo: data.logo || '',
             description: data.description || '',
             website: data.website || '',
@@ -86,9 +109,6 @@ export async function POST(request) {
             updatedAt: new Date()
         };
 
-        // Connect to database
-        const { db } = await connectToDatabase();
-
         // Insert brand
         const result = await db.collection('brands').insertOne(brand);
 
@@ -96,6 +116,13 @@ export async function POST(request) {
         const createdBrand = await db
             .collection('brands')
             .findOne({ _id: result.insertedId });
+
+        if (!createdBrand) {
+            return NextResponse.json(
+                { error: 'Failed to create brand - could not retrieve the created document' },
+                { status: 500 }
+            );
+        }
 
         return NextResponse.json(createdBrand, { status: 201 });
     } catch (error) {

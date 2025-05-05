@@ -19,12 +19,12 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                 <div className="p-4">
                     <div className="flex flex-col md:flex-row gap-4">
                         {/* Logo Section */}
-                        <div className="md:w-1/3 flex flex-col items-center">
+                        <div className="  flex flex-col items-center">
                             {brand.logo ? (
                                 <img
                                     src={brand.logo}
                                     alt={brand.name}
-                                    className="w-32 h-32 object-cover border border-gray-300 rounded p-2"
+                                    className="w-64 h-64 object-contain border border-gray-300 rounded p-2"
                                     onError={(e) => { e.target.src = '/placeholder.png'; }}
                                 />
                             ) : (
@@ -32,15 +32,10 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                     <span className="text-gray-400 text-sm">No hay logotipo</span>
                                 </div>
                             )}
-                            <div className="mt-3 text-center">
-                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${brand.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'
-                                    }`}>
-                                    {brand.enabled ? 'Activado' : 'Desactivado'}
-                                </span>
-                            </div>
+                           
                         </div>
                         {/* Details Section */}
-                        <div className="md:w-2/3">
+                        <div className="md:w-1/2">
                             <div className="space-y-3">
                                 <div>
                                     <h4 className="text-sm text-gray-500">ID</h4>
@@ -76,10 +71,16 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                         </a>
                                     </div>
                                 )}
-                                <div>
+                                <div className="mt-3 text-start">
+                                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${brand.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'
+                                        }`}>
+                                        {brand.enabled ? 'Activado' : 'Desactivado'}
+                                    </span>
+                                </div>
+                                {/* <div>
                                     <h4 className="text-sm text-gray-500">Productos</h4>
                                     <p>{brand.products || 0}</p>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>

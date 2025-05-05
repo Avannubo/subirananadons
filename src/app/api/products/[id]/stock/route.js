@@ -32,20 +32,25 @@ export async function PUT(request, { params }) {
         }
 
         // Update stock with the received stock object
-        if (stock && typeof stock.physical === 'number') {
-            // Update all stock properties
-            product.stock.physical = stock.physical;
-            product.stock.minStock = stock.minStock || stock.reserved || 5;
-            product.stock.available = stock.physical; // Available is set to physical via pre-save hook
+        if (stock) {
+            // Update stock properties with validation
+            if (typeof stock.available === 'number' || typeof stock.available === 'string') {
+                product.stock.available = parseInt(stock.available);
+            }
+
+            if (typeof stock.minStock === 'number' || typeof stock.minStock === 'string') {
+                product.stock.minStock = parseInt(stock.minStock || 5);
+            } else if (!product.stock.minStock) {
+                product.stock.minStock = 5; // Default value
+            }
 
             // Log stock update if stockHistory exists
             if (product.stockHistory) {
                 product.stockHistory.push({
                     date: new Date(),
                     type: 'manual',
-                    physical: stock.physical,
+                    available: product.stock.available,
                     minStock: product.stock.minStock,
-                    available: stock.physical,
                     userId: session.user.id,
                     userName: session.user.name || 'Admin user'
                 });

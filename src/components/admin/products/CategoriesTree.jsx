@@ -1,10 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FiChevronRight, FiChevronDown, FiPlus, FiEdit, FiTrash2, FiFolder, FiFolderPlus, FiMinusSquare, FiPlusSquare } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import CategoryModal from './CategoryModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
-
 export default function CategoriesTree() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,17 +13,51 @@ export default function CategoriesTree() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [parentCategory, setParentCategory] = useState(null);
-
+    const [lastModifiedCategoryId, setLastModifiedCategoryId] = useState(null);
+    const treeContainerRef = useRef(null);
+    // Load expanded state from localStorage on initial render
+    useEffect(() => {
+        try {
+            const savedExpandedState = localStorage.getItem('expandedCategories');
+            if (savedExpandedState) {
+                setExpandedCategories(JSON.parse(savedExpandedState));
+            }
+        } catch (error) {
+            console.error('Error loading expanded state from localStorage:', error);
+        }
+    }, []);
+    // Save expanded state to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            localStorage.setItem('expandedCategories', JSON.stringify(expandedCategories));
+        } catch (error) {
+            console.error('Error saving expanded state to localStorage:', error);
+        }
+    }, [expandedCategories]);
+    // Scroll to the last modified category when it changes
+    useEffect(() => {
+        if (lastModifiedCategoryId && treeContainerRef.current) {
+            setTimeout(() => {
+                const categoryElement = treeContainerRef.current.querySelector(`[data-id="${lastModifiedCategoryId}"]`);
+                if (categoryElement) {
+                    categoryElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Highlight the element briefly
+                    categoryElement.classList.add('bg-blue-50');
+                    setTimeout(() => {
+                        categoryElement.classList.remove('bg-blue-50');
+                    }, 1500);
+                }
+            }, 300);
+        }
+    }, [lastModifiedCategoryId, categories]);
     // Fetch root categories on mount
     useEffect(() => {
         fetchCategories();
     }, []);
-
     // Function to organize categories into a proper hierarchy
     const organizeCategories = (allCategories) => {
         const categoriesMap = {};
         const rootCategories = [];
-
         // First pass: create a map of all categories by ID
         allCategories.forEach(category => {
             // Ensure category has an empty children array
@@ -33,7 +66,6 @@ export default function CategoriesTree() {
                 children: []
             };
         });
-
         // Second pass: build the hierarchy
         allCategories.forEach(category => {
             if (category.parent && categoriesMap[category.parent]) {
@@ -44,44 +76,25 @@ export default function CategoriesTree() {
                 rootCategories.push(categoriesMap[category._id]);
             }
         });
-
         return rootCategories;
     };
-
     const fetchCategories = async (parentId = null) => {
         try {
             setLoading(true);
             // Get all categories (flat list) to properly build the hierarchy
             const url = '/api/categories?flat=true';
-
             const response = await fetch(url);
-
             if (!response.ok) {
                 throw new Error('Failed to fetch categories');
             }
-
             const data = await response.json();
             console.log('Fetched categories (raw):', data);
-
             // Organize into proper hierarchy
             const organizedCategories = organizeCategories(data);
             console.log('Organized categories:', organizedCategories);
-
             setCategories(organizedCategories);
-
-            // Automatically expand categories with children
-            const expandedState = {};
-            const expandCategoriesWithChildren = (cats) => {
-                cats.forEach(cat => {
-                    if (cat.children && cat.children.length > 0) {
-                        expandedState[cat._id] = true;
-                        expandCategoriesWithChildren(cat.children);
-                    }
-                });
-            };
-
-            expandCategoriesWithChildren(organizedCategories);
-            setExpandedCategories(expandedState);
+            // Don't automatically overwrite expanded state here to preserve 
+            // user's previous choices from localStorage
         } catch (error) {
             console.error('Error fetching categories:', error);
             toast.error('Error loading categories');
@@ -89,11 +102,9 @@ export default function CategoriesTree() {
             setLoading(false);
         }
     };
-
     // Expand or collapse all categories
     const toggleAllCategories = (expand = true) => {
         const newExpandedState = {};
-
         const processCategories = (cats) => {
             cats.forEach(cat => {
                 if (cat.children && cat.children.length > 0) {
@@ -102,11 +113,9 @@ export default function CategoriesTree() {
                 }
             });
         };
-
         processCategories(categories);
         setExpandedCategories(newExpandedState);
     };
-
     const toggleCategory = (categoryId, e) => {
         if (e) e.stopPropagation();
         setExpandedCategories(prev => ({
@@ -114,32 +123,27 @@ export default function CategoriesTree() {
             [categoryId]: !prev[categoryId]
         }));
     };
-
     const handleAddCategory = (parentCat = null, e) => {
         if (e) e.stopPropagation();
         setParentCategory(parentCat);
         setShowAddModal(true);
     };
-
     const handleEditCategory = (category, e) => {
         if (e) e.stopPropagation();
         setSelectedCategory(category);
         setShowEditModal(true);
     };
-
     const handleDeleteCategory = (category, e) => {
         if (e) e.stopPropagation();
         setSelectedCategory(category);
         setShowDeleteModal(true);
     };
-
     const saveCategory = async (categoryData) => {
         try {
             const isEditing = !!categoryData._id;
             const url = isEditing
                 ? `/api/categories/${categoryData._id}`
                 : '/api/categories';
-
             const response = await fetch(url, {
                 method: isEditing ? 'PUT' : 'POST',
                 headers: {
@@ -147,16 +151,14 @@ export default function CategoriesTree() {
                 },
                 body: JSON.stringify(categoryData),
             });
-
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.error || 'Error saving category');
             }
-
+            const savedCategory = await response.json();
             toast.success(isEditing ? 'Category updated' : 'Category created');
             setShowAddModal(false);
             setShowEditModal(false);
-
             // Auto-expand the parent category when a subcategory is added
             if (!isEditing && categoryData.parent) {
                 setExpandedCategories(prev => ({
@@ -164,7 +166,8 @@ export default function CategoriesTree() {
                     [categoryData.parent]: true
                 }));
             }
-
+            // Set the last modified category ID for scrolling
+            setLastModifiedCategoryId(savedCategory._id || categoryData._id);
             // Fetch the full tree again to update the view
             fetchCategories();
         } catch (error) {
@@ -172,40 +175,45 @@ export default function CategoriesTree() {
             toast.error(error.message || 'Error saving category');
         }
     };
-
     const deleteCategory = async () => {
         if (!selectedCategory) return;
-
         try {
+            // Store the parent ID before deleting
+            const parentId = selectedCategory.parent;
             const response = await fetch(`/api/categories/${selectedCategory._id}`, {
                 method: 'DELETE',
             });
-
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.error || 'Error deleting category');
             }
-
             toast.success('Category deleted');
             setShowDeleteModal(false);
+            // Set the parent category as the last modified for scrolling
+            if (parentId) {
+                setLastModifiedCategoryId(parentId);
+            }
             fetchCategories(); // Refresh categories
         } catch (error) {
             console.error('Error deleting category:', error);
             toast.error(error.message || 'Error deleting category');
         }
     };
-
     // Recursive component to render a category and its children
     const CategoryItem = ({ category, level = 0 }) => {
         const hasChildren = category.children && category.children.length > 0;
         const isExpanded = expandedCategories[category._id];
-
+        const isLastModified = category._id === lastModifiedCategoryId;
         return (
-            <div className="category-item" data-id={category._id} data-level={level}>
+            <div
+                className={`category-item transition-colors duration-500 ${isLastModified ? 'bg-blue-50' : ''}`}
+                data-id={category._id}
+                data-level={level}
+            >
                 <div
                     className={`flex items-center py-2 pr-2 hover:bg-gray-100 group relative`}
                     style={{ paddingLeft: `${level * 16 + 8}px` }}
-                    onClick={(e) => handleEditCategory(category, e)}
+                    // onClick={(e) => handleEditCategory(category, e)}
                 >
                     {hasChildren ? (
                         <button
@@ -220,16 +228,13 @@ export default function CategoriesTree() {
                     ) : (
                         <span className="mr-1 w-5"></span>
                     )}
-
                     <FiFolder className="mr-2 text-gray-400" />
-
                     <span className="flex-grow font-medium text-lg cursor-pointer">
                         {category.name}
                         <span className="ml-2 text-xs text-gray-400">
                             {level > 0 ? `(Nivel ${level + 1})` : ''}
                         </span>
                     </span>
-
                     <div className="flex items-center space-x-1 invisible group-hover:visible transition-all absolute right-2">
                         <button
                             className="p-1 text-[#00abc2] hover:text-[#00B0C8] rounded"
@@ -254,7 +259,6 @@ export default function CategoriesTree() {
                         </button>
                     </div>
                 </div>
-
                 {hasChildren && isExpanded && (
                     <div>
                         {category.children.map(child => (
@@ -269,7 +273,6 @@ export default function CategoriesTree() {
             </div>
         );
     };
-
     return (
         <div className="categories-tree bg-white rounded-lg shadow">
             {/* Header */}
@@ -300,9 +303,8 @@ export default function CategoriesTree() {
                     </button>
                 </div>
             </div>
-
             {/* Tree View */}
-            <div className="p-4 max-h-[550px] overflow-y-auto">
+            <div ref={treeContainerRef} className="p-4 max-h-[550px] overflow-y-auto">
                 {loading ? (
                     <div className="flex justify-center my-4">
                         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
@@ -319,7 +321,6 @@ export default function CategoriesTree() {
                     </div>
                 )}
             </div>
-
             {/* Category Modals */}
             {showAddModal && (
                 <CategoryModal
@@ -329,7 +330,6 @@ export default function CategoriesTree() {
                     parent={parentCategory}
                 />
             )}
-
             {showEditModal && selectedCategory && (
                 <CategoryModal
                     isOpen={showEditModal}
@@ -339,7 +339,6 @@ export default function CategoriesTree() {
                     isEditing
                 />
             )}
-
             {showDeleteModal && (
                 <ConfirmModal
                     isOpen={showDeleteModal}

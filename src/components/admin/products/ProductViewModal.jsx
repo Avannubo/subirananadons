@@ -9,7 +9,7 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
 
     // Get all product images for the gallery
     const [galleryImages, setGalleryImages] = useState([]);
-    const [selectedImage, setSelectedImage] = useState('');
+    const [selectedImage, setSelectedImage] = useState('/assets/images/product-placeholder.jpg');
 
     // Update images when product changes
     useEffect(() => {
@@ -37,7 +37,12 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
             }
 
             setGalleryImages(images);
-            setSelectedImage(images[0]);
+            // Make sure we never set an empty string
+            if (images.length > 0 && images[0]) {
+                setSelectedImage(images[0]);
+            } else {
+                setSelectedImage('/assets/images/product-placeholder.jpg');
+            }
         }
     }, [product]);
 
@@ -70,12 +75,12 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                     <div className="p-6 max-h-[80vh] overflow-y-auto">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Left column - Product Image */}
-                            <div className="md:col-span-1 flex flex-col items-center">
+                            <div className="md:col-span-1 flex flex-col items-start">
                                 <div className="bg-gray-50 p-1 rounded-lg border border-gray-200 w-full">
                                     <div className="relative h-56 w-full">
                                         <Image
-                                            src={selectedImage}
-                                            alt={product.name}
+                                            src={selectedImage || '/assets/images/product-placeholder.jpg'}
+                                            alt={product.name || 'Product image'}
                                             fill
                                             style={{ objectFit: 'contain' }}
                                             className="rounded-md"
@@ -98,7 +103,7 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                                         : 'border-gray-200 hover:border-gray-300'}`}
                                                 >
                                                     <Image
-                                                        src={img}
+                                                        src={img || '/assets/images/product-placeholder.jpg'}
                                                         alt={`Thumbnail ${index + 1}`}
                                                         fill
                                                         style={{ objectFit: 'contain' }}
@@ -111,7 +116,7 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                                     )}
                                                     {index === 1 && product.imageHover && (
                                                         <div className="absolute top-0 left-0 bg-indigo-500 text-white text-[8px] px-1">
-                                                            Hover
+                                                            Secundaria
                                                         </div>
                                                     )}
                                                 </button>
@@ -120,7 +125,7 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                     </div>
                                 )}
                                 {/* Status indicators */}
-                                <div className="flex flex-wrap gap-2 justify-center mt-4">
+                                <div className="flex flex-wrap gap-2 justify-start items-center mt-4">
                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${product.status === 'active' ? 'bg-green-100 text-green-800' :
                                         product.status === 'inactive' ? 'bg-yellow-100 text-yellow-800' :
                                             'bg-red-100 text-red-800'
@@ -137,48 +142,58 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                 </div>
                             </div>
                             {/* Right column - Product Details */}
-                            <div className="md:col-span-2 space-y-6">
+                            <div className="md:col-span-2 space-y-6 space-x-0">
                                 {/* Basic Information */}
-                                <section className="border-b border-gray-200 pb-4">
+                                <section className="border-b border-gray-200 pb-4 space-y-2">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
                                         <FiTag className="mr-2 text-[#00B0C8]" /> Información Básica
                                     </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="space-y-2">
-                                            <div>
+                                            <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">Referencia:</span>
                                                 <p className="text-sm text-gray-700">{product.reference || 'N/A'}</p>
                                             </div>
-                                            <div>
+                                            <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">Categoría:</span>
                                                 <p className="text-sm text-gray-700">{product.category || 'N/A'}</p>
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <div>
+                                            <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">Marca:</span>
                                                 <p className="text-sm text-gray-700">{product.brand || 'N/A'}</p>
                                             </div>
-                                            <div>
+                                            <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">ID:</span>
                                                 <p className="text-sm text-gray-700">{product._id || product.id || 'N/A'}</p>
                                             </div>
                                         </div>
                                     </div>
+                                    {product.description && (
+                                        <section>
+                                            <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
+                                                <h3 className="text-sm font-medium text-gray-500">Descripción:</h3>
+                                                <p className="text-sm text-gray-700">
+                                                    {product.description}
+                                                </p>
+                                            </div>
+                                        </section>
+                                    )}
                                 </section>
                                 {/* Pricing Information */}
                                 <section className="border-b border-gray-200 pb-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
                                         <FiDollarSign className="mr-2 text-[#00B0C8]" /> Precios
                                     </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="bg-gray-50 p-3 rounded">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                             <span className="text-sm font-medium text-gray-500">Precio (sin IVA):</span>
                                             <p className="text-base font-medium text-gray-800">
                                                 {product.price_excl_tax ? formatPrice(product.price_excl_tax) : 'N/A'}
                                             </p>
                                         </div>
-                                        <div className="bg-gray-50 p-3 rounded">
+                                        <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                             <span className="text-sm font-medium text-gray-500">Precio (con IVA):</span>
                                             <p className="text-base font-medium text-gray-800">
                                                 {product.price_incl_tax ? formatPrice(product.price_incl_tax) : 'N/A'}
@@ -187,36 +202,26 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                     </div>
                                 </section>
                                 {/* Inventory Information */}
-                                <section className="border-b border-gray-200 pb-4">
+                                <section className="  border-gray-200 pb-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
                                         <FiBox className="mr-2 text-[#00B0C8]" /> Inventario
                                     </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="bg-gray-50 p-3 rounded">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                             <span className="text-sm font-medium text-gray-500">Stock Disponible:</span>
                                             <p className={`text-base font-medium ${availableStock >= (product.stock?.minStock || 5) ? 'text-green-600' : 'text-red-600'}`}>
                                                 {availableStock}
                                             </p>
                                         </div>
-                                        <div className="bg-gray-50 p-3 rounded">
+                                        <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                             <span className="text-sm font-medium text-gray-500">Stock Mínimo:</span>
                                             <p className="text-base font-medium text-gray-800">
                                                 {product.stock?.minStock !== undefined ? product.stock.minStock : '0'}
                                             </p>
                                         </div>
                                     </div>
-                                </section>
-                                {/* Description if available */}
-                                {product.description && (
-                                    <section>
-                                        <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3">Descripción</h3>
-                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                            <p className="text-sm text-gray-600 whitespace-pre-line">
-                                                {product.description}
-                                            </p>
-                                        </div>
-                                    </section>
-                                )}
+                                </section> 
+                               
                             </div>
                         </div>
                     </div>

@@ -73,9 +73,27 @@ export async function PUT(request, { params }) {
             );
         }
 
+        // First, check if the brand exists
+        let existingBrand;
+        if (ObjectId.isValid(id)) {
+            existingBrand = await db.collection('brands').findOne({ _id: new ObjectId(id) });
+        }
+
+        if (!existingBrand) {
+            existingBrand = await db.collection('brands').findOne({ id: parseInt(id) });
+        }
+
+        if (!existingBrand) {
+            return NextResponse.json(
+                { error: 'Brand not found' },
+                { status: 404 }
+            );
+        }
+
         // Prepare update data
         const updateData = {
             name: data.name,
+            slug: data.slug || '',
             logo: data.logo || '',
             description: data.description || '',
             website: data.website || '',
@@ -85,34 +103,23 @@ export async function PUT(request, { params }) {
             updatedAt: new Date()
         };
 
-        // Find and update brand
+        // Update based on the found document's ID
         let result;
-        if (ObjectId.isValid(id)) {
-            result = await db.collection('brands').findOneAndUpdate(
-                { _id: new ObjectId(id) },
-                { $set: updateData },
-                { returnDocument: 'after' }
+        if (ObjectId.isValid(existingBrand._id)) {
+            await db.collection('brands').updateOne(
+                { _id: existingBrand._id },
+                { $set: updateData }
             );
+            result = await db.collection('brands').findOne({ _id: existingBrand._id });
+        } else {
+            await db.collection('brands').updateOne(
+                { id: existingBrand.id },
+                { $set: updateData }
+            );
+            result = await db.collection('brands').findOne({ id: existingBrand.id });
         }
 
-        // If not found by ObjectId, try to update by numeric ID
-        if (!result?.value) {
-            result = await db.collection('brands').findOneAndUpdate(
-                { id: parseInt(id) },
-                { $set: updateData },
-                { returnDocument: 'after' }
-            );
-        }
-
-        // If still not found, return 404
-        if (!result?.value) {
-            return NextResponse.json(
-                { error: 'Brand not found' },
-                { status: 404 }
-            );
-        }
-
-        return NextResponse.json(result.value);
+        return NextResponse.json(result);
     } catch (error) {
         console.error('Error updating brand:', error);
         return NextResponse.json(

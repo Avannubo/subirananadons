@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
@@ -7,7 +6,6 @@ import Image from 'next/image';
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import { useUser } from '@/contexts/UserContext';
-
 export default function Page() {
     const { data: session, update: updateSession } = useSession();
     const { user: globalUser, updateUser, refreshUser } = useUser();
@@ -27,7 +25,6 @@ export default function Page() {
     const [imagePreview, setImagePreview] = useState('');
     const [isUpdating, setIsUpdating] = useState(false);
     const [lastUpdate, setLastUpdate] = useState(null);
-
     useEffect(() => {
         if (session?.user) {
             const nameParts = session.user.name?.split(' ') || ['', ''];
@@ -42,7 +39,6 @@ export default function Page() {
             });
         }
     }, [session]);
-
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -54,7 +50,6 @@ export default function Page() {
             fileReader.readAsDataURL(file);
         }
     };
-
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setUserData({
@@ -62,16 +57,12 @@ export default function Page() {
             [name]: type === 'checkbox' ? checked : value
         });
     };
-
     const uploadImage = async () => {
         if (!selectedImage) return null;
-
         // Create a loading toast that can be updated
         const toastId = toast.loading('Processing image...');
-
         // Set updating state to show loading UI
         setIsUpdating(true);
-
         try {
             // First, convert the selected image to base64
             const base64Image = await new Promise((resolve) => {
@@ -79,9 +70,7 @@ export default function Page() {
                 reader.onloadend = () => resolve(reader.result);
                 reader.readAsDataURL(selectedImage);
             });
-
             console.log('Image converted to base64, uploading to server...');
-
             // Upload using our server API endpoint (which handles Cloudinary authentication)
             const response = await fetch('/api/upload', {
                 method: 'POST',
@@ -90,7 +79,6 @@ export default function Page() {
                 },
                 body: JSON.stringify({ image: base64Image })
             });
-
             if (!response.ok) {
                 // Get the error message
                 let errorMessage = 'Failed to upload image';
@@ -101,9 +89,7 @@ export default function Page() {
                     const errorText = await response.text();
                     console.error('Server error response (non-JSON):', errorText);
                 }
-
                 console.error('Server upload failed:', errorMessage);
-
                 // When server-side upload fails, fall back to using the base64 image directly
                 // but only in development to avoid database bloat in production
                 if (process.env.NODE_ENV === 'development') {
@@ -117,54 +103,43 @@ export default function Page() {
                     return null;
                 }
             }
-
             // If the request was successful, parse the response
             const data = await response.json();
             console.log('Server upload successful, Cloudinary URL:', data.url);
             toast.success('Image uploaded successfully!', { id: toastId });
-
             // Set the image preview directly from the Cloudinary URL to update UI immediately
             setImagePreview(data.url);
-
             // Record the time of the last update
             setLastUpdate(new Date().toISOString());
-
             // Return the secure URL from Cloudinary
             setIsUpdating(false);
             return data.url;
         } catch (error) {
             console.error('Error in image upload process:', error);
             toast.error('Image upload failed', { id: toastId });
-
             // In development, use the base64 image as fallback
             if (process.env.NODE_ENV === 'development') {
                 console.log('Using base64 image as fallback due to error');
                 setIsUpdating(false);
                 return imagePreview;
             }
-
             setIsUpdating(false);
             return null;
         }
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setIsUpdating(true);
-
         try {
             let imageUrl = userData.image;
-
             // Only attempt to upload if a new image is selected
             if (selectedImage) {
                 const uploadedImageUrl = await uploadImage();
-
                 // Only update the image URL if upload was successful
                 if (uploadedImageUrl) {
                     console.log('Using uploaded image URL:', uploadedImageUrl);
                     imageUrl = uploadedImageUrl;
-
                     // Update image in userData immediately for UI update
                     setUserData(prev => ({
                         ...prev,
@@ -174,7 +149,6 @@ export default function Page() {
                     console.log('Upload failed, keeping existing image:', imageUrl);
                 }
             }
-
             // Prepare user data
             const updatedUserData = {
                 name: `${userData.firstName} ${userData.lastName}`.trim(),
@@ -184,14 +158,11 @@ export default function Page() {
                 newsletter: userData.newsletter,
                 partnerOffers: userData.partnerOffers
             };
-
             console.log('Updating user profile with data:', updatedUserData);
-
             // Add password if being changed
             if (showPasswordChange && newPassword) {
                 updatedUserData.password = newPassword;
             }
-
             // Update user profile
             const response = await fetch('/api/user/profile', {
                 method: 'PUT',
@@ -200,7 +171,6 @@ export default function Page() {
                 },
                 body: JSON.stringify(updatedUserData)
             });
-
             let responseData;
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
@@ -210,13 +180,10 @@ export default function Page() {
                 console.error('Non-JSON response:', text);
                 throw new Error('Server returned non-JSON response');
             }
-
             if (!response.ok) {
                 throw new Error(responseData.message || 'Failed to update profile');
             }
-
             console.log('Profile update successful:', responseData);
-
             // Update session to keep that in sync
             await updateSession({
                 ...session,
@@ -226,28 +193,22 @@ export default function Page() {
                     image: imageUrl
                 }
             });
-
             // Update the global user context
             updateUser({
                 name: updatedUserData.name,
                 image: imageUrl
             });
-
             // Record time of last update
             setLastUpdate(new Date().toISOString());
-
             toast.success('Profile updated successfully');
-
             // Reset state after successful update
             if (showPasswordChange && newPassword) {
                 setNewPassword('');
                 setShowPasswordChange(false);
             }
-
             // Clear selected image after successful upload
             setSelectedImage(null);
             // Don't clear the image preview so the user can see their new image
-
             // Manually trigger a refresh of the user data across the application
             refreshUser();
         } catch (error) {
@@ -258,7 +219,6 @@ export default function Page() {
             setIsUpdating(false);
         }
     };
-
     return (
         <AuthCheck>
             <AdminLayout>
@@ -266,11 +226,10 @@ export default function Page() {
                     <h1 className="text-2xl font-bold mb-6">Mi Cuenta</h1>
                     <div className="bg-white rounded-lg p-6">
                         <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Tu información personal</h2>
-
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             {/* Profile Image */}
-                            <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 mb-6">
-                                <div className="w-32 h-32 relative rounded-full overflow-hidden border-2 border-gray-200">
+                            {/* <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 mb-6">
+                                 <div className="w-32 h-32 relative rounded-full overflow-hidden border-2 border-gray-200">
                                     {isUpdating && (
                                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
                                             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
@@ -283,7 +242,7 @@ export default function Page() {
                                         height={128}
                                         className="object-cover w-full h-full"
                                     />
-                                </div>
+                                </div>  
                                 <div className="flex flex-col justify-center">
                                     <label
                                         htmlFor="profileImage"
@@ -306,8 +265,7 @@ export default function Page() {
                                         Formatos recomendados: JPG, PNG. Máximo 5MB.
                                     </p>
                                 </div>
-                            </div>
-
+                            </div> */}
                             {/* Nombre */}
                             <div>
                                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -325,7 +283,6 @@ export default function Page() {
                                     Solo se permiten caracteres alfabéticos (letras) y el punto (.), seguidos de un espacio.
                                 </p>
                             </div>
-
                             {/* Apellidos */}
                             <div>
                                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -343,7 +300,6 @@ export default function Page() {
                                     Solo se permiten caracteres alfabéticos (letras) y el punto (.), seguidos de un espacio.
                                 </p>
                             </div>
-
                             {/* Email */}
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -358,7 +314,6 @@ export default function Page() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                 />
                             </div>
-
                             {/* Current Password */}
                             <div>
                                 <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
@@ -381,7 +336,6 @@ export default function Page() {
                                     </button>
                                 </div>
                             </div>
-
                             {/* New Password */}
                             {showPasswordChange && (
                                 <div>
@@ -402,7 +356,6 @@ export default function Page() {
                                     </p>
                                 </div>
                             )}
-
                             {/* Birth Date */}
                             <div>
                                 <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
@@ -419,7 +372,6 @@ export default function Page() {
                                 />
                                 <p className="mt-1 text-xs text-gray-500">Opcional</p>
                             </div>
-
                             {/* Privacy Section */}
                             <div className="pt-4 border-t border-gray-200">
                                 <div className="flex items-start mb-4">
@@ -462,7 +414,6 @@ export default function Page() {
                                     </label>
                                 </div>
                             </div>
-
                             {/* Submit Button */}
                             <div className="pt-4">
                                 <button
@@ -475,7 +426,6 @@ export default function Page() {
                                 </button>
                             </div>
                         </form>
-
                         {/* Add last update information if available */}
                         {lastUpdate && (
                             <p className="text-xs text-gray-500 mt-2">

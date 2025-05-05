@@ -52,7 +52,12 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
-                className="overflow-hidden flex flex-col items-center text-center h-full group hover:text-[#00B0C8]"
+                style={{
+                    boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
+                    borderRadius: '10px',
+                    padding: '10px',
+                }}
+                className="m-2 flex flex-col items-center text-center h-full group hover:text-[#00B0C8]"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
@@ -62,7 +67,7 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                             src={currentImageUrl}
                             alt={product.name}
                             layout="fill"
-                            objectFit="contain"
+                            objectFit="cover"
                             className="transition-opacity duration-300 ease-in-out rounded-lg"
                         />
                         {/* Hover Overlay Buttons */}

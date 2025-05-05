@@ -54,7 +54,7 @@ export default function Menu() {
                                 onClick={() => toggleSubmenu(currentPath)}
                                 className="w-full text-left py-2 hover:bg-gray-200 px-2 rounded flex justify-between items-center uppercase"
                             >
-                                <span className="font-medium">{item.label.toUpperCase()}</span>
+                                    <span className="font-medium active:text-[#00B0C8]">{item.label.toUpperCase()}</span>
                                 <svg
                                     className={`w-4 h-4 transition-transform ${openSubmenus[currentPath] ? 'rotate-90' : ''}`}
                                     fill="none"
@@ -112,7 +112,7 @@ export default function Menu() {
                             className="mb-4 mt-2"
                         /></Link>
                     <nav className="flex-1 overflow-y-scroll " style={{ scrollbarWidth: 'none' }}>
-                        <ul className=" ">
+                        <ul className="">
                             {renderMenuItems(menuData.items)}
                         </ul>
                     </nav>

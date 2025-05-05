@@ -206,9 +206,10 @@ export default function AuthModal() {
                                 height={500}
                                 className="rounded-full h-10 w-10 object-cover"
                             /> */}
+                            <UserRound className="m-2" />
                         </button>
                         {isMenuOpen && (
-                            <div ref={menuRef} className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden">
+                            <div ref={menuRef} className="absolute right-0 mt-2 w-28 bg-white rounded-md shadow-lg overflow-hidden">
                                 <button
                                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                     onClick={() => {
@@ -217,16 +218,7 @@ export default function AuthModal() {
                                     }}
                                 >
                                     Profile
-                                </button>
-                                <button
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    onClick={() => {
-                                        refreshUser();
-                                        setIsMenuOpen(false);
-                                    }}
-                                >
-                                    Refresh User Data
-                                </button>
+                                </button> 
                                 <button
                                     onClick={() => signOut({ callbackUrl: '/' })}
                                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

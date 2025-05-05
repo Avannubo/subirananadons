@@ -15,6 +15,7 @@ export async function GET(request) {
         const brand = searchParams.get('brand');
         const lowStock = searchParams.get('lowStock');
         const search = searchParams.get('search');
+        const preventSort = searchParams.get('preventSort') === 'true';
 
         // Pagination parameters
         const page = parseInt(searchParams.get('page')) || 1;
@@ -70,11 +71,19 @@ export async function GET(request) {
         // Get total count for pagination
         const totalItems = await Product.countDocuments(query);
 
-        // Get products with pagination
-        const products = await Product.find(query)
-            .sort({ updatedAt: -1 })
-            .skip(skip)
-            .limit(limit);
+        // Build the query with optional sorting
+        let productsQuery = Product.find(query);
+
+        // Only sort by updatedAt if preventSort is false
+        if (!preventSort) {
+            productsQuery = productsQuery.sort({ updatedAt: -1 });
+        }
+
+        // Apply pagination
+        productsQuery = productsQuery.skip(skip).limit(limit);
+
+        // Execute the query
+        const products = await productsQuery;
 
         // Calculate pagination info
         const totalPages = Math.ceil(totalItems / limit);

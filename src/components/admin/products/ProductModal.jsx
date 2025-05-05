@@ -470,7 +470,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             newErrors.price_incl_tax = 'Debe ser un número válido';
         }
         if (formData.stock.available && isNaN(parseInt(formData.stock.available))) {
-            newErrors.ava = 'Debe ser un número entero';
+            newErrors.available = 'Debe ser un número entero';
         }
         if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
             newErrors.minStock = 'Debe ser un número entero';
@@ -513,13 +513,13 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 price_incl_tax: parseFloat(formData.price_incl_tax),
                 brandId: formData.brandId || '',
                 stock: {
-                    ava: parseInt(formData.stock.ava || 0),
+                    available: parseInt(formData.stock.available || 0),
                     minStock: parseInt(formData.stock.minStock || 5)
                 }
             };
 
-            // Save the product
-            await onSave(processedData);
+            // Save the product and get the saved product
+            const savedProduct = await onSave(processedData);
 
             // Notify stats context about the change
             if (stats.notifyChange) {
@@ -866,21 +866,21 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <h3 className="text-md font-medium mt-6">Inventario</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="ava" className="block text-sm font-medium text-gray-700">
-                                            Stock Físico
+                                        <label htmlFor="available" className="block text-sm font-medium text-gray-700">
+                                            Stock
                                         </label>
                                         <input
                                             type="number"
-                                            id="ava"
-                                            name="ava"
-                                            value={formData.stock.ava}
+                                            id="available"
+                                            name="available"
+                                            value={formData.stock.available}
                                             onChange={handleChange}
                                             min="0"
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.ava ? 'border-red-300' : 'border-gray-300'
+                                            className={`mt-1 block w-full px-3 py-2 border ${errors.available ? 'border-red-300' : 'border-gray-300'
                                                 } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
                                         />
-                                        {errors.ava && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.ava}</p>
+                                        {errors.available && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.available}</p>
                                         )}
                                     </div>
                                     <div>
@@ -944,19 +944,20 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <p className="text-xs text-gray-500 mb-2">
                                             La primera imagen será la principal, la segunda será la de hover (opcional).
                                         </p>
-                                        <div className="grid grid-cols-2 gap-2">
+                                        <div className="flex overflow-x-auto p-1 space-x-4">
                                             {productImages.map((img, index) => (
                                                 <div
                                                     key={index}
-                                                    className={`relative border border-gray-200 rounded-md overflow-hidden 
+                                                    className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden 
                                                         ${selectedImageIndex === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}`}
                                                 >
-                                                    <div className="relative h-24 cursor-pointer" onClick={() => handleSelectImage(index)}>
+                                                    <div className="relative cursor-pointer" onClick={() => handleSelectImage(index)}>
                                                         <Image
-                                                            src={img}
+                                                            src={img || '/assets/images/product-placeholder.jpg'}
                                                             alt={`Imagen de producto ${index + 1}`}
-                                                            fill
-                                                            className="object-contain"
+                                                            width={500}
+                                                            height={500}
+                                                            className="h-28 w-28 object-cover"
                                                         />
                                                         {index === 0 && (
                                                             <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1">
@@ -965,16 +966,17 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         )}
                                                         {index === 1 && (
                                                             <div className="absolute top-0 left-0 bg-indigo-500 text-white text-xs px-2 py-1">
-                                                                Hover
+                                                                Secundaria
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <div className="flex justify-between bg-gray-50 p-1">
+                                                    <div className="flex justify-between bg-gray-50 p-1 gap-1">
                                                         <button
                                                             type="button"
                                                             onClick={() => handleMoveImageUp(index)}
                                                             disabled={index === 0}
                                                             className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                            title="Mover a la izquierda"
                                                         >
                                                             <FiChevronRight className="transform rotate-180" size={16} />
                                                         </button>
@@ -982,6 +984,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             type="button"
                                                             onClick={() => handleRemoveImage(index)}
                                                             className="text-red-500 p-1 rounded hover:bg-gray-200"
+                                                            title="Eliminar imagen"
                                                         >
                                                             <FiTrash2 size={16} />
                                                         </button>
@@ -990,6 +993,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             onClick={() => handleMoveImageDown(index)}
                                                             disabled={index === productImages.length - 1}
                                                             className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                            title="Mover a la derecha"
                                                         >
                                                             <FiChevronRight size={16} />
                                                         </button>
@@ -1002,7 +1006,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
 
                                 {/* Image Upload */}
                                 <div className="flex flex-col items-center space-y-4">
-                                    <div className="w-full p-2 h-64 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
+                                    <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
                                         {isUploading && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
                                                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
@@ -1010,7 +1014,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         )}
                                         {imagePreview ? (
                                             <Image
-                                                src={imagePreview}
+                                                src={imagePreview || '/assets/images/product-placeholder.jpg'}
                                                 alt="Vista previa"
                                                 width={1000}
                                                 height={1000}
