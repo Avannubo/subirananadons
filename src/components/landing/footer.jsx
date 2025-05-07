@@ -21,14 +21,14 @@ export default function Footer() {
                             </div>
 
                             <div className="flex space-x-4 mt-6">
-                                <Link href="https://instagram.com" aria-label="Instagram" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                                    <InstagramIcon size={22} />
+                                <Link href="https://instagram.com" aria-label="Instagram" className="text-[#333] hover:text-[#00B0C8] transition-colors cursor-pointer">
+                                    <InstagramIcon size={34} />
                                 </Link>
-                                <Link href="https://youtube.com" aria-label="YouTube" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                                    <YoutubeIcon size={22} />
+                                <Link href="https://youtube.com" aria-label="YouTube" className="text-[#333] hover:text-[#00B0C8] transition-colors cursor-pointer">
+                                    <YoutubeIcon size={34} />
                                 </Link>
-                                <Link href="https://linkedin.com" aria-label="LinkedIn" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                                    <LinkedinIcon size={22} />
+                                <Link href="https://linkedin.com" aria-label="LinkedIn" className="text-[#333] hover:text-[#00B0C8] transition-colors cursor-pointer">
+                                    <LinkedinIcon size={34} />
                                 </Link>
                             </div>
                             <p className="text-sm mt-4">Copyright © 2025 Subirana</p>
@@ -37,9 +37,9 @@ export default function Footer() {
                         {/* Middle Links Column */}
                         <div className="flex flex-row justify-center">
                             <ul className="space-y-3">
-                                <li><Link href="/privacy" className="hover:text-[#00B0C8] transition-colors">POLÍTICA DE PRIVACIDAD</Link></li>
-                                <li><Link href="/cookies" className="hover:text-[#00B0C8] transition-colors">POLÍTICA DE COOKIES</Link></li>
-                                <li><Link href="/legal" className="hover:text-[#00B0C8] transition-colors">AVISO LEGAL</Link></li>
+                                <li><Link href="/privacy" className="hover:text-[#00B0C8] transition-colors cursor-pointer">POLÍTICA DE PRIVACIDAD</Link></li>
+                                <li><Link href="/cookies" className="hover:text-[#00B0C8] transition-colors cursor-pointer">POLÍTICA DE COOKIES</Link></li>
+                                <li><Link href="/legal" className="hover:text-[#00B0C8] transition-colors cursor-pointer">AVISO LEGAL</Link></li>
                             </ul>
                         </div>
 
@@ -49,15 +49,15 @@ export default function Footer() {
                             <ul className="space-y-3 mt-6">
                                 <li className="flex items-center gap-2">
                                     <Phone size={18} className="text-[#00B0C8]" />
-                                    <span className="hover:text-[#00B0C8] transition-colors">+34 93 243 25 10</span>
+                                    <span className="hover:text-[#00B0C8] transition-colors cursor-pointer">+34 93 243 25 10</span>
                                 </li>
                                 <li className="flex items-center gap-2 mt-4">
                                     <Mail size={18} className="text-[#00B0C8]" />
-                                    <Link href="mailto:info@example.com" className="hover:text-[#00B0C8] transition-colors">info@example.com</Link>
+                                    <Link href="mailto:info@example.com" className="hover:text-[#00B0C8] transition-colors cursor-pointer">info@example.com</Link>
                                 </li>
                                 <li className="flex items-center gap-2 mt-4">
                                     <ExternalLink size={18} className="text-[#00B0C8]" />
-                                    <Link href="/contact" className="hover:text-[#00B0C8] transition-colors">PONTE EN CONTACTO</Link>
+                                    <Link href="/contact" className="hover:text-[#00B0C8] transition-colors cursor-pointer">PONTE EN CONTACTO</Link>
                                 </li>
                             </ul>
                         </div>

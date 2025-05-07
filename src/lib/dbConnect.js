@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = "mongodb+srv://arjunsingh:2LKnqF4ZpQVxZvvh@cluster0.zzuehnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGODB_URI = "mongodb://localhost:27017/test";
+//"mongodb+srv://arjunsingh:2LKnqF4ZpQVxZvvh@cluster0.zzuehnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 if (!MONGODB_URI) {
     throw new Error('Please define the MONGODB_URI environment variable inside .env');
@@ -25,17 +26,15 @@ async function dbConnect() {
 
     if (!cached.promise) {
         const opts = {
-            bufferCommands: false,
             maxPoolSize: 10,
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
-            family: 4
         };
 
-        console.log('Connecting to MongoDB...');
+        console.log('Connecting to MongoDB at:', MONGODB_URI);
         cached.promise = mongoose.connect(MONGODB_URI, opts)
             .then((mongoose) => {
-                console.log('MongoDB connected successfully');
+                console.log('MongoDB connected successfully to:', MONGODB_URI);
                 return mongoose;
             })
             .catch((error) => {

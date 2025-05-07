@@ -5,10 +5,11 @@ import UserAuth from "@/components/ui/UserAuthModal";
 import Link from "next/link";
 import { useSession } from 'next-auth/react';
 import { ShoppingCart, Search } from 'lucide-react';
-
-export default function Page() {
-    const { data: session } = useSession();
-
+import { useCart } from '@/contexts/CartContext';
+export default function Page() { 
+    const { cartItems } = useCart();
+    // Calculate total quantity of items in cart
+    const cartItemsCount = cartItems ? cartItems.reduce((total, item) => total + item.quantity, 0) : 0;
     return (
         <div className="fixed top-0 z-50 w-full bg-white shadow-md p-5">
             <div className="flex flex-col justify-center ">
@@ -32,12 +33,15 @@ export default function Page() {
                         <Link href="/search" className="p-2 flex justify-center items-center">
                             <Search />
                         </Link>
-
-                        {/* Cart Icon */}
-                        <Link href="/cart" className="p-2 text-sm text-gray-700">
+                        {/* Cart Icon with Counter */}
+                        <Link href="/cart" className="p-2 text-sm text-gray-700 relative">
                             <ShoppingCart />
+                            {cartItemsCount > 0 && (
+                                <span className="absolute top-1 -right-1 bg-[#00B0C8] text-white text-[10px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center">
+                                    {cartItemsCount}
+                                </span>
+                            )}
                         </Link>
-
                         {/* Account Icon */}
                         <UserAuth />
                     </div>

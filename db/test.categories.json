@@ -1,0 +1,1766 @@
+[{
+  "_id": {
+    "$oid": "680a29313ca38baf336fda76"
+  },
+  "name": "Alimentación",
+  "slug": "alimentacin",
+  "parent": null,
+  "level": 1,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:09.582Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:09.582Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29313ca38baf336fda77"
+  },
+  "name": "Tronas de viaje",
+  "slug": "tronas-de-viaje",
+  "parent": {
+    "$oid": "680a29313ca38baf336fda76"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:09.681Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:09.681Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29313ca38baf336fda78"
+  },
+  "name": "Robots de cocina",
+  "slug": "robots-de-cocina",
+  "parent": {
+    "$oid": "680a29313ca38baf336fda76"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:09.757Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:09.757Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29313ca38baf336fda79"
+  },
+  "name": "Platos y cubiertos",
+  "slug": "platos-y-cubiertos",
+  "parent": {
+    "$oid": "680a29313ca38baf336fda76"
+  },
+  "level": 2,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:09.832Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:09.832Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29313ca38baf336fda7a"
+  },
+  "name": "Botellas y vasos",
+  "slug": "botellas-y-vasos",
+  "parent": {
+    "$oid": "680a29313ca38baf336fda76"
+  },
+  "level": 2,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:09.908Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:09.908Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda7b"
+  },
+  "name": "Baberos",
+  "slug": "baberos",
+  "parent": {
+    "$oid": "680a29313ca38baf336fda76"
+  },
+  "level": 2,
+  "order": 4,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:09.983Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:09.983Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda7c"
+  },
+  "name": "Botes y fiambreras",
+  "slug": "botes-y-fiambreras",
+  "parent": {
+    "$oid": "680a29313ca38baf336fda76"
+  },
+  "level": 2,
+  "order": 5,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.057Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.057Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda7d"
+  },
+  "name": "Termos",
+  "slug": "termos",
+  "parent": {
+    "$oid": "680a29313ca38baf336fda76"
+  },
+  "level": 2,
+  "order": 6,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.131Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.131Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda7e"
+  },
+  "name": "Lactancia",
+  "slug": "lactancia",
+  "parent": {
+    "$oid": "680a29313ca38baf336fda76"
+  },
+  "level": 2,
+  "order": 7,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.208Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.208Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda7f"
+  },
+  "name": "Baño",
+  "slug": "bao",
+  "parent": null,
+  "level": 1,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.285Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.285Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda80"
+  },
+  "name": "Accesorios baño",
+  "slug": "accesorios-bao",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7f"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.360Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.360Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda81"
+  },
+  "name": "Kits higiene y cosmética",
+  "slug": "kits-higiene-y-cosmtica",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7f"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.434Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.434Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda82"
+  },
+  "name": "Cajas toallitas",
+  "slug": "cajas-toallitas",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7f"
+  },
+  "level": 2,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.508Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.508Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda83"
+  },
+  "name": "Pañales y contenedores pañales",
+  "slug": "paales-y-contenedores-paales",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7f"
+  },
+  "level": 2,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.582Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.582Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda84"
+  },
+  "name": "Orinales y reductores WC",
+  "slug": "orinales-y-reductores-wc",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7f"
+  },
+  "level": 2,
+  "order": 4,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.657Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.657Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda85"
+  },
+  "name": "Casa",
+  "slug": "casa",
+  "parent": null,
+  "level": 1,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.731Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.731Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda86"
+  },
+  "name": "Intercomunicadores",
+  "slug": "intercomunicadores",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda85"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.806Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.806Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda87"
+  },
+  "name": "Tronas",
+  "slug": "tronas",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda85"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.880Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.880Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29323ca38baf336fda88"
+  },
+  "name": "Barandillas de escalera",
+  "slug": "barandillas-de-escalera",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda85"
+  },
+  "level": 2,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:10.953Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:10.953Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda89"
+  },
+  "name": "Hamacas",
+  "slug": "hamacas",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda85"
+  },
+  "level": 2,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.026Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.026Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda8a"
+  },
+  "name": "Habitación",
+  "slug": "habitacin",
+  "parent": null,
+  "level": 1,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.098Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.098Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda8b"
+  },
+  "name": "Cuna, colecho y moisés",
+  "slug": "cuna-colecho-y-moiss",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8a"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.174Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.174Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda8c"
+  },
+  "name": "Mobiliario",
+  "slug": "mobiliario",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8a"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.248Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.248Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda8d"
+  },
+  "name": "Colchones y protectores",
+  "slug": "colchones-y-protectores",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8a"
+  },
+  "level": 2,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.321Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.321Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda8e"
+  },
+  "name": "Téxtil",
+  "slug": "txtil",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8a"
+  },
+  "level": 2,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.394Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.394Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda8f"
+  },
+  "name": "Cambiadores y fundas",
+  "slug": "cambiadores-y-fundas",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8a"
+  },
+  "level": 2,
+  "order": 4,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.467Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.467Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda90"
+  },
+  "name": "Luces y decoración",
+  "slug": "luces-y-decoracin",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8a"
+  },
+  "level": 2,
+  "order": 5,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.541Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.541Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda91"
+  },
+  "name": "Barreras cama",
+  "slug": "barreras-cama",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8a"
+  },
+  "level": 2,
+  "order": 6,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.614Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.614Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda92"
+  },
+  "name": "Gemelos",
+  "slug": "gemelos",
+  "parent": null,
+  "level": 1,
+  "order": 4,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.687Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.687Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda93"
+  },
+  "name": "Madres",
+  "slug": "madres",
+  "parent": null,
+  "level": 1,
+  "order": 5,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.760Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.760Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda94"
+  },
+  "name": "Ropa embarazo y porteo",
+  "slug": "ropa-embarazo-y-porteo",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda93"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.834Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.834Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29333ca38baf336fda95"
+  },
+  "name": "Sujetadores embarazo i lactancia",
+  "slug": "sujetadores-embarazo-i-lactancia",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda93"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.905Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.905Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda96"
+  },
+  "name": "Basicos embarazo",
+  "slug": "basicos-embarazo",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda93"
+  },
+  "level": 2,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:11.990Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:11.990Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda97"
+  },
+  "name": "Basicos hospital",
+  "slug": "basicos-hospital",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda93"
+  },
+  "level": 2,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.064Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.064Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda98"
+  },
+  "name": "Cochecitos",
+  "slug": "cochecitos",
+  "parent": null,
+  "level": 1,
+  "order": 6,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.141Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.141Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda99"
+  },
+  "name": "Sillas de paseo",
+  "slug": "sillas-de-paseo",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda98"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.216Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.216Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda9a"
+  },
+  "name": "Accesorios cochecito",
+  "slug": "accesorios-cochecito",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda98"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.290Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.290Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda9b"
+  },
+  "name": "Entretenimientos",
+  "slug": "entretenimientos",
+  "parent": null,
+  "level": 1,
+  "order": 7,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.364Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.364Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda9c"
+  },
+  "name": "Doudous y peluches",
+  "slug": "doudous-y-peluches",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9b"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.439Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.439Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda9d"
+  },
+  "name": "Botellas sensoriales",
+  "slug": "botellas-sensoriales",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9b"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.513Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.513Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda9e"
+  },
+  "name": "Alfombras de actividades",
+  "slug": "alfombras-de-actividades",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9b"
+  },
+  "level": 2,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.587Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.587Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fda9f"
+  },
+  "name": "Bolsa almacenaje",
+  "slug": "bolsa-almacenaje",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9b"
+  },
+  "level": 2,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.660Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.660Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fdaa0"
+  },
+  "name": "Mordedores",
+  "slug": "mordedores",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9b"
+  },
+  "level": 2,
+  "order": 4,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.734Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.734Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fdaa1"
+  },
+  "name": "Varios",
+  "slug": "varios",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9b"
+  },
+  "level": 2,
+  "order": 5,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.806Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.806Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fdaa2"
+  },
+  "name": "Salud",
+  "slug": "salud",
+  "parent": null,
+  "level": 1,
+  "order": 8,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.878Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.878Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29343ca38baf336fdaa3"
+  },
+  "name": "Aspirador nasal",
+  "slug": "aspirador-nasal",
+  "parent": {
+    "$oid": "680a29343ca38baf336fdaa2"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:12.952Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:12.952Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaa4"
+  },
+  "name": "Termómetros",
+  "slug": "termmetros",
+  "parent": {
+    "$oid": "680a29343ca38baf336fdaa2"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.025Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.025Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaa5"
+  },
+  "name": "Humidificadores",
+  "slug": "humidificadores",
+  "parent": {
+    "$oid": "680a29343ca38baf336fdaa2"
+  },
+  "level": 2,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.099Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.099Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaa6"
+  },
+  "name": "Cojines",
+  "slug": "cojines",
+  "parent": {
+    "$oid": "680a29343ca38baf336fdaa2"
+  },
+  "level": 2,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.172Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.172Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaa7"
+  },
+  "name": "Cojines cabeza plana",
+  "slug": "cojines-cabeza-plana",
+  "parent": {
+    "$oid": "680a29343ca38baf336fdaa2"
+  },
+  "level": 2,
+  "order": 4,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.246Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.246Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaa8"
+  },
+  "name": "Casco antiruido",
+  "slug": "casco-antiruido",
+  "parent": {
+    "$oid": "680a29343ca38baf336fdaa2"
+  },
+  "level": 2,
+  "order": 5,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.320Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.320Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaa9"
+  },
+  "name": "Sillas De Coche",
+  "slug": "sillas-de-coche",
+  "parent": null,
+  "level": 1,
+  "order": 9,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.392Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.392Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaaa"
+  },
+  "name": "Grupo 0+",
+  "slug": "grupo-0",
+  "parent": {
+    "$oid": "680a29353ca38baf336fdaa9"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.467Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.467Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaab"
+  },
+  "name": "Grupo 0-1",
+  "slug": "grupo-01",
+  "parent": {
+    "$oid": "680a29353ca38baf336fdaa9"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.540Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.540Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaac"
+  },
+  "name": "Grupo 0-1 - 2",
+  "slug": "grupo-01-2",
+  "parent": {
+    "$oid": "680a29353ca38baf336fdaa9"
+  },
+  "level": 2,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.613Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.613Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaad"
+  },
+  "name": "Grupo 0-1 - 2 - 3",
+  "slug": "grupo-01-2-3",
+  "parent": {
+    "$oid": "680a29353ca38baf336fdaa9"
+  },
+  "level": 2,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.692Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.692Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaae"
+  },
+  "name": "Grupo 2-3",
+  "slug": "grupo-23",
+  "parent": {
+    "$oid": "680a29353ca38baf336fdaa9"
+  },
+  "level": 2,
+  "order": 4,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.766Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.766Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdaaf"
+  },
+  "name": "Fundas silla",
+  "slug": "fundas-silla",
+  "parent": {
+    "$oid": "680a29353ca38baf336fdaa9"
+  },
+  "level": 2,
+  "order": 5,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.842Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.842Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29353ca38baf336fdab0"
+  },
+  "name": "Accesorios coche",
+  "slug": "accesorios-coche",
+  "parent": {
+    "$oid": "680a29353ca38baf336fdaa9"
+  },
+  "level": 2,
+  "order": 6,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.916Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.916Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "name": "Otros Productos",
+  "slug": "otros-productos",
+  "parent": null,
+  "level": 1,
+  "order": 10,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:13.998Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:13.998Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdab2"
+  },
+  "name": "Mochilas",
+  "slug": "mochilas",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 0,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.070Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.070Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdab3"
+  },
+  "name": "Fulares y bandoleras",
+  "slug": "fulares-y-bandoleras",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 1,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.146Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.146Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdab4"
+  },
+  "name": "Ropa porteo",
+  "slug": "ropa-porteo",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 2,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.219Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.219Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdab5"
+  },
+  "name": "Cunas de viaje",
+  "slug": "cunas-de-viaje",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 3,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.293Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.293Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdab6"
+  },
+  "name": "Ropa bebé",
+  "slug": "ropa-beb",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 4,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.367Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.367Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdab7"
+  },
+  "name": "Bolsas maternales",
+  "slug": "bolsas-maternales",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 5,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.441Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.441Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdab8"
+  },
+  "name": "Bolsas muda",
+  "slug": "bolsas-muda",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 6,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.516Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.516Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdab9"
+  },
+  "name": "Porta Documentos",
+  "slug": "porta-documentos",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 7,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.588Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.588Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdaba"
+  },
+  "name": "Mochilas infantiles",
+  "slug": "mochilas-infantiles",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 8,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.663Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.663Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdabb"
+  },
+  "name": "Arrullos",
+  "slug": "arrullos",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 9,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.736Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.736Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdabc"
+  },
+  "name": "Silla para bici",
+  "slug": "silla-para-bici",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 10,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.811Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.811Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a29363ca38baf336fdabd"
+  },
+  "name": "Cambiadores de viaje",
+  "slug": "cambiadores-de-viaje",
+  "parent": {
+    "$oid": "680a29363ca38baf336fdab1"
+  },
+  "level": 2,
+  "order": 11,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-04-24T12:06:14.887Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T12:06:14.887Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68107b7854b94e27aac73b73"
+  },
+  "name": "Cojines lactancia",
+  "slug": "cojines-lactancia",
+  "description": "",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:10:48.981Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:10:48.981Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107b8254b94e27aac73b7b"
+  },
+  "name": "Calienta biberones y esterilizadores",
+  "slug": "calienta-biberones-y-esterilizadores",
+  "description": "",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:10:58.048Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:10:58.048Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107b8954b94e27aac73b83"
+  },
+  "name": "Biberones y complementos",
+  "slug": "biberones-y-complementos",
+  "description": "",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:11:05.702Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:11:05.702Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107b9354b94e27aac73b8b"
+  },
+  "name": "Chupetes",
+  "slug": "chupetes",
+  "description": "",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:11:15.734Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:11:15.734Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107b9b54b94e27aac73b93"
+  },
+  "name": "Guarda chupetes",
+  "slug": "guarda-chupetes",
+  "description": "",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:11:23.213Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:11:23.213Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107ba354b94e27aac73b9b"
+  },
+  "name": "Clip chupete",
+  "slug": "clip-chupete",
+  "description": "",
+  "parent": {
+    "$oid": "680a29323ca38baf336fda7e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:11:31.629Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:11:31.629Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107bc854b94e27aac73ba9"
+  },
+  "name": "Funda nórdica",
+  "slug": "funda-nrdica",
+  "description": "",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:12:08.823Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:12:08.823Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107bd554b94e27aac73bb1"
+  },
+  "name": "Protectores",
+  "slug": "protectores",
+  "description": "",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:12:21.640Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:12:21.640Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107be454b94e27aac73bb9"
+  },
+  "name": "Sábanas",
+  "slug": "sbanas",
+  "description": "",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:12:36.502Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:12:36.502Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107bf154b94e27aac73bc1"
+  },
+  "name": "Colchas",
+  "slug": "colchas",
+  "description": "",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:12:49.236Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:12:49.236Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107c0154b94e27aac73bc9"
+  },
+  "name": "Mantas",
+  "slug": "mantas",
+  "description": "",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:13:05.430Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:13:05.430Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107c0a54b94e27aac73bd1"
+  },
+  "name": "Muselinas",
+  "slug": "muselinas",
+  "description": "",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:13:14.278Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:13:14.278Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107c1654b94e27aac73bd9"
+  },
+  "name": "Cojín nido",
+  "slug": "cojn-nido",
+  "description": "",
+  "parent": {
+    "$oid": "680a29333ca38baf336fda8e"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:13:26.421Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:13:26.421Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107d4854b94e27aac73bfb"
+  },
+  "name": "Colchonetas",
+  "slug": "colchonetas",
+  "description": "",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9a"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:18:32.624Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:18:32.624Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107d5c54b94e27aac73c05"
+  },
+  "name": "Sacos silla",
+  "slug": "sacos-silla",
+  "description": "",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9a"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:18:52.118Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:18:52.118Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107d7454b94e27aac73c0d"
+  },
+  "name": "Patinetes",
+  "slug": "patinetes",
+  "description": "",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9a"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:19:16.923Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:19:16.923Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107d8054b94e27aac73c15"
+  },
+  "name": "Capotas",
+  "slug": "capotas",
+  "description": "",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9a"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:19:28.006Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:19:28.006Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107d8654b94e27aac73c1d"
+  },
+  "name": "Bolsas",
+  "slug": "bolsas",
+  "description": "",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9a"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:19:34.359Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:19:34.359Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107da454b94e27aac73c2e"
+  },
+  "name": "Bajeras y sábanas de capazo",
+  "slug": "bajeras-y-sbanas-de-capazo",
+  "description": "",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9a"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:20:04.367Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:20:04.367Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68107db354b94e27aac73c36"
+  },
+  "name": "Varios Accesorios cochecito",
+  "slug": "varios-accesorios-cochecito",
+  "description": "",
+  "parent": {
+    "$oid": "680a29343ca38baf336fda9a"
+  },
+  "level": 3,
+  "isActive": true,
+  "order": 0,
+  "createdAt": {
+    "$date": "2025-04-29T07:20:19.591Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-29T07:20:19.591Z"
+  },
+  "__v": 0
+}]

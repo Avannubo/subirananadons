@@ -78,7 +78,7 @@ export default function AuthModal() {
 
             if (result?.error) {
                 let errorMessage = 'Error al iniciar sesión. ';
-                console.error('Login error:', result.error);
+                console.log('Login error:', result.error);
                 switch (result.error) {
                     case 'No user found with this email':
                         errorMessage += 'El correo electrónico no está registrado.';

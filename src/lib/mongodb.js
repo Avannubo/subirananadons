@@ -2,13 +2,10 @@ import { MongoClient } from 'mongodb';
 
 // Connection URL
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const MONGODB_DB = process.env.MONGODB_DB || 'your_database_name';
+const MONGODB_DB = process.env.MONGODB_DB || 'test';
 
 // Connection options
-const options = {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-};
+const options = {};
 
 // Global MongoDB client reference
 let cachedClient = null;
@@ -35,8 +32,14 @@ export async function connectToDatabase() {
 
     // Create new client if not cached
     if (!cachedClient) {
-        cachedClient = new MongoClient(MONGODB_URI, options);
-        await cachedClient.connect();
+        try {
+            cachedClient = new MongoClient(MONGODB_URI, options);
+            await cachedClient.connect();
+            console.log('Successfully connected to MongoDB');
+        } catch (error) {
+            console.error('Failed to connect to MongoDB:', error);
+            throw error;
+        }
     }
 
     // Get or create database

@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb'); 
+const { MongoClient } = require('mongodb');
 const bcrypt = require('bcryptjs');
 async function seedDatabase() {
     const uri = 'mongodb+srv://arjunsingh:2LKnqF4ZpQVxZvvh@cluster0.zzuehnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'; // Update with your MongoDB connection string
@@ -6,7 +6,7 @@ async function seedDatabase() {
 
     try {
         await client.connect();
-        const db = client.db('test'); // Replace with your database name
+        const db = client.db('Subirana'); // Replace with your database name
 
         // 1. Clear existing collections
         const collections = await db.listCollections().toArray();

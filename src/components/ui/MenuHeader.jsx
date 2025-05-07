@@ -17,17 +17,17 @@ export default function Menu() {
         items: [
             {
                 label: "Productos",
-                href: "/products", 
+                href: "/products",
             },
             { label: "Marcas", href: "/brands" },
             {
                 label: "Listas de nacimientos",
                 href: "/listas-de-nacimiento"
             },
-           // {
-          //      label: "Recomendaciones",
-          //      href: "/recomendations"
-          //  },
+            // {
+            //      label: "Recomendaciones",
+            //      href: "/recomendations"
+            //  },
             { label: "Contacto", href: "/contact" },
         ]
     };
@@ -54,7 +54,7 @@ export default function Menu() {
                                 onClick={() => toggleSubmenu(currentPath)}
                                 className="w-full text-left py-2 hover:bg-gray-200 px-2 rounded flex justify-between items-center uppercase"
                             >
-                                    <span className="font-medium active:text-[#00B0C8]">{item.label.toUpperCase()}</span>
+                                <span className="font-medium active:text-[#00B0C8]">{item.label.toUpperCase()}</span>
                                 <svg
                                     className={`w-4 h-4 transition-transform ${openSubmenus[currentPath] ? 'rotate-90' : ''}`}
                                     fill="none"

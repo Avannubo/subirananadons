@@ -1,6 +1,5 @@
 // components/ProductSlider.jsx
 'use client';
-
 import { useState, useRef } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Navigation } from 'swiper/modules';
@@ -11,10 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import ProductCard from "@/components/products/product-card";
 import ProductQuickView from '../products/product-quick-view';
-
 // Default products can be moved to a separate data file if needed
-
-
 export default function ProductSlider({
     title = "Productes",
     products = defaultProducts,
@@ -30,22 +26,18 @@ export default function ProductSlider({
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
     const swiperRef = useRef(null);
-
     const handleQuickView = (product) => {
         setQuickViewProduct(product);
         setIsQuickViewOpen(true);
     };
-
     const handleCloseQuickView = () => {
         setIsQuickViewOpen(false);
         setQuickViewProduct(null);
     };
-
     const handleAddToCart = (product) => {
         // Implement add to cart functionality
         console.log('Add to cart:', product);
     };
-
     return (
         <div className={`px-4 ${className}`}>
             <div className="container mx-auto">
@@ -70,7 +62,6 @@ export default function ProductSlider({
                         </button>
                     </div>
                 </div>
-
                 <div className="relative">
                     <Swiper
                         onBeforeInit={(swiper) => {
@@ -117,12 +108,10 @@ export default function ProductSlider({
                         <div className="swiper-button-prev !hidden"></div>
                         <div className="swiper-button-next !hidden"></div>
                     </Swiper>
-
                     {/* Custom Pagination */}
                     <div className="custom-pagination flex justify-center items-center mt-8"></div>
                 </div>
             </div>
-
             {/* Quick View Modal */}
             {isQuickViewOpen && quickViewProduct && (
                 <ProductQuickView
@@ -131,7 +120,6 @@ export default function ProductSlider({
                     onClose={handleCloseQuickView}
                 />
             )}
-
             {/* Add custom styles for pagination bullets */}
             <style jsx global>{`
                 .custom-bullet {
@@ -144,7 +132,6 @@ export default function ProductSlider({
                     cursor: pointer;
                     transition: all 0.3s ease;
                 }
-                
                 .custom-bullet-active {
                     background: #0096FF;
                     width: 10px;

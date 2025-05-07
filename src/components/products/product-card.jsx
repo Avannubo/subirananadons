@@ -5,16 +5,11 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'react-hot-toast';
-
 // Product Card Component - Handles both grid and list view with hover effect
 export default function ProductCard({ product, viewMode = "grid", onQuickViewClick }) {
     const [isHovered, setIsHovered] = useState(false);
-    const { addToCart } = useCart();
-
-    // Determine which image URL to use based on hover state
-    const currentImageUrl = isHovered && product.imageUrlHover ? product.imageUrlHover : product.imageUrl;
-
-    // Common button component (optional, for cleaner code)
+    const { addToCart } = useCart(); 
+    const currentImageUrl = isHovered && product.imageUrlHover ? product.imageUrlHover : product.imageUrl; 
     const HoverButton = ({ children, onClick }) => (
         <button
             className="bg-white rounded-full p-2 shadow text-gray-700 hover:bg-gray-100 transition duration-200 focus:outline-none"
@@ -23,7 +18,6 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
             {children}
         </button>
     );
-
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -35,14 +29,12 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
             console.error('Error adding to cart:', error);
         }
     };
-
     // Generate the product URL based on category and name
     const productUrl = `/products/${encodeURIComponent(
         product.category?.toLowerCase().replace(/\s+/g, '-') || 'category'
     )}/${encodeURIComponent(
         product.name.toLowerCase().replace(/\s+/g, '-')
     )}-${product.id}`;
-
     if (viewMode === 'grid') {
         // Grid View Layout
         return (
@@ -66,9 +58,9 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                         <Image
                             src={currentImageUrl}
                             alt={product.name}
-                            layout="fill"
-                            objectFit="cover"
-                            className="transition-opacity duration-300 ease-in-out rounded-lg"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            className="transition-opacity duration-300 ease-in-out rounded-lg object-cover"
                         />
                         {/* Hover Overlay Buttons */}
                         <div className="absolute bottom-2 left-2 flex items-center justify-center space-x-3 bg-opacity-0 group-hover:bg-opacity-70 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -76,7 +68,7 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                             </HoverButton>
                             <HoverButton onClick={(e) => {
-                                e.preventDefault(); // Prevent navigation
+                                e.preventDefault(); 
                                 e.stopPropagation();
                                 setIsHovered(false);
                                 onQuickViewClick(product);
@@ -104,16 +96,16 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                 onMouseLeave={() => setIsHovered(false)}
             >
                 <Link href={productUrl} className="flex flex-row w-full">
-                    <div className="relative w-1/3 h-40 mr-4 flex-shrink-0">
+                    <div className="relative w-1/4 h-40 mr-4 flex-shrink-0">
                         <Image
                             src={currentImageUrl}
                             alt={product.name}
-                            layout="fill"
-                            objectFit="contain"
-                            className="transition-opacity duration-300 ease-in-out rounded-lg"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 25vw"
+                            className="transition-opacity duration-300 ease-in-out rounded-lg object-cover"
                         />
                         {/* Hover Overlay Buttons */}
-                        <div className="absolute bottom-2 left-2 flex items-center justify-center space-x-3 bg-opacity-0 group-hover:bg-opacity-30 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                        <div className="absolute bottom-2 right-2 flex items-center justify-center space-x-3 bg-opacity-0 group-hover:bg-opacity-30 opacity-0 group-hover:opacity-100 transition-all duration-300">
                             <HoverButton onClick={handleAddToCart}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                             </HoverButton>
@@ -127,7 +119,7 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                             </HoverButton>
                         </div>
                     </div>
-                    <div className="flex flex-col justify-start w-2/3">
+                    <div className="flex flex-col justify-start  ">
                         <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
                         <p className="text-gray-700 text-lg mb-3">{product.price}</p>
                         <p className="text-gray-600 text-sm">{product.description}</p>
