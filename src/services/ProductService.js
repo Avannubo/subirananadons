@@ -49,16 +49,42 @@ export async function fetchProducts(options = {}) {
 
         const data = await response.json();
 
-        // If a raw products array, return that directly
+        // Handle different response formats with default values
         if (Array.isArray(data)) {
-            return data;
+            // If data is already an array of products, wrap it in the expected format
+            return {
+                products: data,
+                pagination: {
+                    totalPages: 1,
+                    totalItems: data.length,
+                    currentPage: 1,
+                    itemsPerPage: data.length
+                }
+            };
         }
 
-        // Return products array from paginated response
-        return data.products || data;
+        // Ensure we have a products array even if the API returns null/undefined
+        return {
+            products: data.products || [],
+            pagination: data.pagination || {
+                totalPages: 1,
+                totalItems: 0,
+                currentPage: page,
+                itemsPerPage: limit
+            }
+        };
     } catch (error) {
         console.error('ProductService fetchProducts error:', error);
-        throw error;
+        // Return default structure on error instead of throwing
+        return {
+            products: [],
+            pagination: {
+                totalPages: 1,
+                totalItems: 0,
+                currentPage: 1,
+                itemsPerPage: 10
+            }
+        };
     }
 }
 

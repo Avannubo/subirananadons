@@ -207,13 +207,29 @@ export default function Page() {
                 // Fetch products with category filtering
                 const data = await fetchProducts(options);
 
-                // Format the products for display
-                const formattedProducts = data.products.map(formatProduct);
+                // Safely access data properties with checks for undefined/null
+                if (data && data.products) {
+                    // Format the products for display
+                    const formattedProducts = data.products.map(product => formatProduct(product));
+                    setProducts(formattedProducts);
 
-                setProducts(formattedProducts);
-                setTotalPages(data.pagination.totalPages);
-                setTotalProducts(data.pagination.totalItems);
-                setError(null);
+                    // Safely access pagination data
+                    if (data.pagination) {
+                        setTotalPages(data.pagination.totalPages || 1);
+                        setTotalProducts(data.pagination.totalItems || 0);
+                    } else {
+                        setTotalPages(1);
+                        setTotalProducts(formattedProducts.length);
+                    }
+
+                    setError(null);
+                } else {
+                    // Handle case where data or data.products is undefined
+                    setProducts([]);
+                    setTotalPages(1);
+                    setTotalProducts(0);
+                    setError('No products found. Please try again later.');
+                }
             } catch (err) {
                 console.error('Error fetching products:', err);
                 setError('Failed to load products. Please try again later.');

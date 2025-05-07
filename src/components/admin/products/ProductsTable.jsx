@@ -21,7 +21,9 @@ export default function ProductsTable(props) {
     const [showViewModal, setShowViewModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [pagination, setPagination] = useState({
+    const [hoveredImage, setHoveredImage] = useState(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [pagination, setPagination] = useState({  
         currentPage: 1,
         totalPages: 1,
         totalItems: 0,
@@ -324,6 +326,32 @@ export default function ProductsTable(props) {
         }
     };
 
+    // Handle mouse over image
+    const handleImageMouseEnter = (imageUrl) => {
+        setHoveredImage(imageUrl);
+    };
+
+    // Handle mouse leave image
+    const handleImageMouseLeave = () => {
+        setHoveredImage(null);
+    };
+
+    // Handle mouse move to update tooltip position
+    const handleMouseMove = (e) => {
+        setMousePosition({
+            x: e.clientX,
+            y: e.clientY
+        });
+    };
+
+    // Setup global mouse move event
+    useEffect(() => {
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, []);
+
     // For debugging
     useEffect(() => {
         console.log("Current pagination state:", pagination);
@@ -492,11 +520,15 @@ export default function ProductsTable(props) {
                                             {index + 1}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <img
-                                                src={product.image}
-                                                alt={product.name}
-                                                className="h-10 w-10 rounded object-cover"
-                                            />
+                                            <div className="relative">
+                                                <img
+                                                    src={product.image}
+                                                    alt={product.name}
+                                                    className="h-10 w-10 rounded object-cover cursor-pointer"
+                                                    onMouseEnter={() => handleImageMouseEnter(product.image)}
+                                                    onMouseLeave={handleImageMouseLeave}
+                                                />
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-xs truncate" title={product.name}>
                                             {product.name}
@@ -567,6 +599,26 @@ export default function ProductsTable(props) {
                     </table>
                 )}
             </div>
+
+            {/* Image Preview Tooltip */}
+            {hoveredImage && (
+                <div
+                    className="fixed z-50 bg-white shadow-xl rounded-md border border-gray-200 p-1"
+                    style={{
+                        width: '250px',
+                        height: '250px',
+                        left: mousePosition.x + 20,
+                        top: mousePosition.y - 125,
+                        pointerEvents: 'none'
+                    }}
+                >
+                    <img
+                        src={hoveredImage}
+                        alt="Preview"
+                        className="w-full h-full object-contain"
+                    />
+                </div>
+            )}
 
             {/* Pagination */}
             {!loading && products.length > 0 && (
