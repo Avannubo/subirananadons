@@ -23,7 +23,7 @@ export default function ProductsTable(props) {
     const [isEditing, setIsEditing] = useState(false);
     const [hoveredImage, setHoveredImage] = useState(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const [pagination, setPagination] = useState({  
+    const [pagination, setPagination] = useState({
         currentPage: 1,
         totalPages: 1,
         totalItems: 0,

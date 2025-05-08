@@ -55,13 +55,7 @@ const getNavigationItems = (userRole) => [
         icon: Settings,
         label: "Configuraciones",
         roles: ['admin']
-    },
-    {
-        href: "/dashboard/admin/migrate",
-        icon: DatabaseIcon,
-        label: "Migrar Stock",
-        roles: ['admin']
-    }
+    } 
 ];
 
 export default function Sidebar() {

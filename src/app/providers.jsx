@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react'
 import { CartProvider } from '@/contexts/CartContext'
 import { UserProvider } from '@/contexts/UserContext'
 import { StatsProvider } from '@/contexts/StatsContext'
+import { ClientStatsProvider } from '@/contexts/ClientStatsContext'
 import { Toaster } from 'react-hot-toast'
 
 export function Providers({ children }) {
@@ -12,7 +13,9 @@ export function Providers({ children }) {
             <UserProvider>
                 <CartProvider>
                     <StatsProvider>
-                        {children}
+                        <ClientStatsProvider>
+                            {children}
+                        </ClientStatsProvider>
                     </StatsProvider>
                 </CartProvider>
             </UserProvider>

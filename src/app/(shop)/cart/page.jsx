@@ -6,43 +6,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
+import { useUser } from '@/contexts/UserContext';
+import { toast } from 'react-hot-toast';
 
-// Sample cart data
-const initialCartItems = [
-    {
-        id: 1,
-        name: "Tripp Trapp Natural",
-        price: "259,00 €",
-        priceValue: 259.00,
-        quantity: 1,
-        imageUrl: "/assets/images/screenshot_1.png",
-        brand: "Stokke",
-        category: "Habitación"
-    },
-    {
-        id: 2,
-        name: "Tripp Trapp Natural",
-        price: "259,00 €",
-        priceValue: 259.00,
-        quantity: 1,
-        imageUrl: "/assets/images/screenshot_1.png",
-        brand: "Stokke",
-        category: "Habitación"
-    },
-    {
-        id: 4,
-        name: "Stokke Xplory X Royal Blue",
-        price: "1099,00 €",
-        priceValue: 1099.00,
-        quantity: 1,
-        imageUrl: "/assets/images/screenshot_2.png",
-        brand: "Stokke",
-        category: "Cochecitos"
-    }
-];
 
 export default function CartPage() {
     const { cartItems, updateQuantity, removeItem } = useCart();
+    const { user, loading: userLoading } = useUser();
+
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
         name: '',
@@ -56,6 +27,65 @@ export default function CartPage() {
         country: 'España',
         notes: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [orderSuccess, setOrderSuccess] = useState(null);
+    const [orderError, setOrderError] = useState(null);
+
+    // Auto-fill user data when available
+    useEffect(() => {
+        if (user && !userLoading) {
+            // Split name into first name and last name
+            const nameParts = user.name ? user.name.split(' ') : ['', ''];
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
+            // Auto-fill the form with user data
+            setFormData(prev => ({
+                ...prev,
+                name: firstName,
+                lastName: lastName,
+                email: user.email || '',
+                // Use previous values for fields not in user profile
+                phone: prev.phone,
+                address: prev.address,
+                city: prev.city,
+                postalCode: prev.postalCode,
+                province: prev.province
+            }));
+
+            // Check if we have address data from previous orders
+            fetchUserAddressData();
+        }
+    }, [user, userLoading]);
+
+    // Fetch the user's last used shipping address
+    const fetchUserAddressData = async () => {
+        if (!user?.id) return;
+
+        try {
+            const response = await fetch('/api/orders?limit=1');
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (data.success && data.orders && data.orders.length > 0) {
+                const lastOrder = data.orders[0];
+
+                if (lastOrder.shippingAddress) {
+                    // Use the last order's shipping address to fill the form
+                    setFormData(prev => ({
+                        ...prev,
+                        phone: lastOrder.shippingAddress.phone || prev.phone,
+                        address: lastOrder.shippingAddress.address || prev.address,
+                        city: lastOrder.shippingAddress.city || prev.city,
+                        postalCode: lastOrder.shippingAddress.postalCode || prev.postalCode,
+                        province: lastOrder.shippingAddress.province || prev.province,
+                    }));
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching user address data:', error);
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -64,6 +94,13 @@ export default function CartPage() {
             [name]: value
         }));
     };
+
+    // Auto-recalculate shipping when cart items or delivery method changes
+    useEffect(() => {
+        // This will trigger a re-render with the correct shipping cost
+        const shipping = calculateShipping();
+        console.log(`Delivery method: ${deliveryMethod}, Subtotal: ${calculateSubtotal()}, Shipping: ${shipping}`);
+    }, [cartItems, deliveryMethod]);
 
     const handleDeliveryMethodChange = (method) => {
         setDeliveryMethod(method);
@@ -76,7 +113,7 @@ export default function CartPage() {
     const calculateShipping = () => {
         const subtotal = calculateSubtotal();
         if (deliveryMethod === 'pickup') return 0;
-        return subtotal > 60 ? 0 : 5.99;
+        return subtotal >= 60 ? 0 : 5.99;
     };
 
     const calculateTax = () => {
@@ -85,6 +122,127 @@ export default function CartPage() {
 
     const calculateTotal = () => {
         return calculateSubtotal() + calculateShipping() + calculateTax();
+    };
+
+    // Save user's address for future orders
+    const saveUserAddressPreferences = async () => {
+        if (!user?.id) return;
+
+        try {
+            // This could be a separate API endpoint to save user address preferences
+            // For now, we'll just log it
+            console.log('Saving user address preferences:', {
+                name: formData.name,
+                lastName: formData.lastName,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                postalCode: formData.postalCode,
+                province: formData.province,
+            });
+
+            // In a real implementation, you would save this data to the user profile
+            // await fetch('/api/user/address', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         address: formData.address,
+            //         city: formData.city,
+            //         postalCode: formData.postalCode,
+            //         province: formData.province,
+            //         phone: formData.phone,
+            //     }),
+            // });
+        } catch (error) {
+            console.error('Error saving address preferences:', error);
+        }
+    };
+
+    // Handle order submission
+    const handleSubmitOrder = async () => {
+        // Form validation
+        const requiredFields = ['name', 'lastName', 'email', 'phone', 'address', 'city', 'postalCode', 'province'];
+        const missingFields = requiredFields.filter(field => !formData[field]);
+
+        if (missingFields.length > 0) {
+            setOrderError('Por favor, completa todos los campos obligatorios');
+            return;
+        }
+
+        if (cartItems.length === 0) {
+            setOrderError('No hay productos en el carrito');
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+            setOrderError(null);
+
+            const orderData = {
+                items: cartItems,
+                shippingDetails: formData,
+                deliveryMethod: deliveryMethod,
+                totals: {
+                    subtotal: calculateSubtotal(),
+                    shipping: calculateShipping(),
+                    tax: calculateTax(),
+                    total: calculateTotal()
+                }
+            };
+
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al procesar el pedido');
+            }
+
+            // Save user address preferences for future orders
+            if (user?.id) {
+                await saveUserAddressPreferences();
+            }
+
+            // Order created successfully
+            setOrderSuccess({
+                orderNumber: data.order.orderNumber,
+                orderId: data.order.id
+            });
+
+            // Clear the cart
+            cartItems.forEach(item => removeItem(item.id));
+
+            // Reset form data
+            setFormData({
+                name: '',
+                lastName: '',
+                email: '',
+                phone: '',
+                address: '',
+                city: '',
+                postalCode: '',
+                province: '',
+                country: 'España',
+                notes: ''
+            });
+
+            // After 5 seconds, scroll to top and you could redirect
+            setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 5000);
+
+        } catch (error) {
+            console.error('Error creating order:', error);
+            setOrderError(error.message || 'Error al procesar el pedido');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -99,125 +257,144 @@ export default function CartPage() {
                             <div className="lg:w-1/2">
                                 <div className="bg-white rounded-lg shadow-sm p-6">
                                     <h2 className="text-xl font-bold mb-6">Datos de Envío</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="col-span-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Nombre
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="name"
-                                                value={formData.name}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                required
-                                            />
+                                    {userLoading ? (
+                                        <div className="flex items-center justify-center py-4">
+                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00B0C8]"></div>
+                                            <span className="ml-2 text-gray-600">Cargando tus datos...</span>
                                         </div>
-                                        <div className="col-span-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Apellidos
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="lastName"
-                                                value={formData.lastName}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Email
-                                            </label>
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                value={formData.email}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Teléfono
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                name="phone"
-                                                value={formData.phone}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Dirección
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="address"
-                                                value={formData.address}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Ciudad
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="city"
-                                                value={formData.city}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Código Postal
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="postalCode"
-                                                value={formData.postalCode}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Provincia
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="province"
-                                                value={formData.province}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Notas del pedido (opcional)
-                                            </label>
-                                            <textarea
-                                                name="notes"
-                                                value={formData.notes}
-                                                onChange={handleInputChange}
-                                                rows="4"
-                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                placeholder="Notas sobre tu pedido, por ejemplo, notas especiales para la entrega."
-                                            />
-                                        </div>
-                                    </div>
+                                    ) : (
+                                        <>
+                                            {user && (
+                                                <div className="mb-4 p-3 bg-blue-50 text-blue-600 rounded-md border border-blue-100">
+                                                    <p className="text-sm flex items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        Hemos rellenado automáticamente algunos campos con tus datos. Por favor, verifica y completa la información.
+                                                    </p>
+                                                </div>
+                                            )}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="col-span-1">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Nombre
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="name"
+                                                        value={formData.name}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-span-1">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Apellidos
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="lastName"
+                                                        value={formData.lastName}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Email
+                                                    </label>
+                                                    <input
+                                                        type="email"
+                                                        name="email"
+                                                        value={formData.email}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Teléfono
+                                                    </label>
+                                                    <input
+                                                        type="tel"
+                                                        name="phone"
+                                                        value={formData.phone}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Dirección
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="address"
+                                                        value={formData.address}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-span-1">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Ciudad
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="city"
+                                                        value={formData.city}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-span-1">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Código Postal
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="postalCode"
+                                                        value={formData.postalCode}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Provincia
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="province"
+                                                        value={formData.province}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Notas del pedido (opcional)
+                                                    </label>
+                                                    <textarea
+                                                        name="notes"
+                                                        value={formData.notes}
+                                                        onChange={handleInputChange}
+                                                        rows="4"
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                        placeholder="Notas sobre tu pedido, por ejemplo, notas especiales para la entrega."
+                                                    />
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -273,6 +450,22 @@ export default function CartPage() {
                                 {/* Delivery Method Selection */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
                                     <h2 className="text-xl font-bold mb-4">Método de entrega</h2>
+
+                                    {/* Free Shipping Progress */}
+                                    {calculateSubtotal() < 60 && deliveryMethod === 'delivery' && (
+                                        <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                            <p className="text-sm text-gray-700 mb-2">
+                                                ¡Añade <span className="font-bold text-[#00B0C8]">{(60 - calculateSubtotal()).toFixed(2)}€</span> más a tu pedido para conseguir envío gratis!
+                                            </p>
+                                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                                <div
+                                                    className="bg-[#00B0C8] h-2.5 rounded-full transition-all duration-500 ease-in-out"
+                                                    style={{ width: `${Math.min(100, (calculateSubtotal() / 60) * 100)}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="space-y-4">
                                         <div
                                             className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${deliveryMethod === 'delivery'
@@ -291,10 +484,13 @@ export default function CartPage() {
                                                 <div>
                                                     <p className="font-medium">Envío a domicilio</p>
                                                     <p className="text-sm text-gray-500">Entrega en 24-48 horas laborables</p>
+                                                    {calculateSubtotal() >= 60 && (
+                                                        <p className="text-xs text-green-600 font-medium mt-1">Envío gratis en pedidos superiores a 60€</p>
+                                                    )}
                                                 </div>
                                             </div>
                                             <span className="text-[#00B0C8] font-medium">
-                                                {calculateSubtotal() < 60 ? 'Gratis' : '5,99 €'}
+                                                {calculateSubtotal() >= 60 ? 'Gratis' : '5,99 €'}
                                             </span>
                                         </div>
 
@@ -331,9 +527,18 @@ export default function CartPage() {
                                                 <span>Subtotal</span>
                                                 <span>{calculateSubtotal().toFixed(2)} €</span>
                                             </div>
-                                            <div className="flex justify-between">
+                                            <div className="flex justify-between items-center">
                                                 <span>Envío</span>
-                                                <span>{calculateShipping().toFixed(2)} €</span>
+                                                {calculateSubtotal() >= 60 && deliveryMethod === 'delivery' ? (
+                                                    <span className="flex items-center text-green-600">
+                                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        Gratis
+                                                    </span>
+                                                ) : (
+                                                    <span>{calculateShipping().toFixed(2)} €</span>
+                                                )}
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>IVA (21%)</span>
@@ -347,9 +552,31 @@ export default function CartPage() {
                                             </div>
                                         </div>
                                         <div className="w-full">
-                                            <button className="w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#0090a8] transition-colors duration-300">
-                                                Finalizar compra
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handleSubmitOrder();
+                                                }}
+                                                type="button"
+                                                disabled={isSubmitting}
+                                                className={`w-full ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#0090a8]'} text-white py-3 px-6 rounded-md transition-colors duration-300`}
+                                            >
+                                                {isSubmitting ? 'Procesando...' : 'Finalizar compra'}
                                             </button>
+
+                                            {orderError && (
+                                                <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
+                                                    <p>{orderError}</p>
+                                                </div>
+                                            )}
+
+                                            {orderSuccess && (
+                                                <div className="mt-4 p-4 bg-green-50 border border-green-200 text-green-600 rounded-md">
+                                                    <h3 className="font-bold">¡Pedido realizado con éxito!</h3>
+                                                    <p className="mt-2">Número de pedido: {orderSuccess.orderNumber}</p>
+                                                    <p className="mt-1">Hemos enviado un correo con los detalles de tu compra.</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
