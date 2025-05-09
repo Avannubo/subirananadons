@@ -55,6 +55,10 @@ const userSchema = new mongoose.Schema({
         ref: 'Cart',
         default: null
     },
+    birthLists: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'BirthList'
+    }],
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     createdAt: {

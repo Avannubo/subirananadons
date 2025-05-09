@@ -15,7 +15,7 @@ const listProducts = [
         price: "259,00 €",
         image: "/assets/images/joie.png",
         category: "Habitación",
-        status: "available", 
+        status: "available",
         quantity: 1,
         reserved: false
     },
@@ -147,7 +147,7 @@ export default function BirthListPage({ params }) {
                     </div>
                 </div>
             </div>
-            <div className="container mx-auto px-4 py-8"> 
+            <div className="container mx-auto px-4 py-8">
                 <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                         <div className="w-full md:w-2/3 mb-4 md:mb-0">
@@ -175,7 +175,7 @@ export default function BirthListPage({ params }) {
                         </div>
                     </div>
                     <p className="text-gray-600 text-center italic">{list.message}</p>
-                </div> 
+                </div>
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8">
                     <div className="flex flex-wrap gap-2 mb-4 md:mb-0">
                         {categories.map((category) => (

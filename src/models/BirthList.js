@@ -12,6 +12,10 @@ const birthListSchema = new mongoose.Schema({
         required: true
     },
     description: String,
+    babyName: {
+        type: String,
+        required: true
+    },
     dueDate: Date,
     items: [{
         product: {
@@ -44,6 +48,11 @@ const birthListSchema = new mongoose.Schema({
     shippingAddress: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Address'
+    },
+    status: {
+        type: String,
+        enum: ['Activa', 'Completada', 'Cancelada'],
+        default: 'Activa'
     },
     contributors: [{
         user: {
