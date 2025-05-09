@@ -44,7 +44,7 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
     return (
         <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 z-50 flex justify-center items-center p-4">
             <div className="bg-white rounded-lg shadow-lg max-w-xl w-full">
-                <div className="flex justify-between items-center border-b p-4">
+                <div className="flex justify-between items-center border-b border-gray-200 p-4">
                     <h3 className="text-xl font-semibold">
                         Editar Pedido: {order.reference}
                     </h3>
@@ -67,7 +67,7 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                                 name="status"
                                 value={formData.status}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                 disabled={isLoading}
                                 required
                             >
@@ -88,7 +88,7 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                                 name="trackingNumber"
                                 value={formData.trackingNumber}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                 placeholder="Número de seguimiento (opcional)"
                                 disabled={isLoading}
                             />
@@ -104,33 +104,32 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                             value={formData.notes}
                             onChange={handleChange}
                             rows="3"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                             placeholder="Notas adicionales sobre el pedido"
                             disabled={isLoading}
                         />
                     </div>
 
-                    <div className="flex justify-between items-center mt-6 pt-4 border-t">
-                        <div className="text-sm text-gray-500">
-                            ID: {order.id}
-                            <span className="mx-2">•</span>
-                            Cliente: {order.customer}
+                    <div className="flex justify-between items-center mt-6 pt-4  ">
+                        <div className="flex flex-col text-sm text-gray-500">
+                            <p>ID: {order.id}</p>
+                            <p>Cliente: {order.customer}</p>
                         </div>
                         <div className="flex space-x-3">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
+                                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
                                 disabled={isLoading}
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] flex items-center"
+                                className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] flex items-center"
                                 disabled={isLoading}
                             >
-                                <FiSave className="mr-2" />
+                                <FiSave size={20} className="mr-2" />
                                 {isLoading ? 'Guardando...' : 'Guardar cambios'}
                             </button>
                         </div>

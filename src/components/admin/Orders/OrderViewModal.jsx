@@ -1,24 +1,37 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { FiX, FiPackage, FiMapPin, FiUser, FiCreditCard, FiTruck, FiCalendar, FiDollarSign, FiFileText, FiMessageSquare } from 'react-icons/fi';
+
 export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) {
     const [order, setOrder] = useState(null);
     const [error, setError] = useState(null);
     const [loadingOrder, setLoadingOrder] = useState(false);
+    const [products, setProducts] = useState({});
+
     useEffect(() => {
         const fetchOrderDetails = async () => {
             if (!orderId) return;
+
             setLoadingOrder(true);
             setError(null);
+
             try {
                 const response = await fetch(`/api/orders/${orderId}`);
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.message || 'Failed to fetch order details');
                 }
+
                 const data = await response.json();
+
                 if (data.success) {
                     setOrder(data.order);
+
+                    // If we have order items, fetch their product details
+                    if (data.order?.items?.length > 0) {
+                        await fetchProductDetails(data.order.items);
+                    }
                 } else {
                     throw new Error(data.message || 'Failed to fetch order details');
                 }
@@ -29,11 +42,55 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                 setLoadingOrder(false);
             }
         };
+
         if (isOpen && orderId) {
             fetchOrderDetails();
         }
     }, [isOpen, orderId]);
+
+    const fetchProductDetails = async (items) => {
+        try {
+            const productsMap = {};
+
+            // Extract product IDs from items
+            for (const item of items) {
+                if (item.product && !productsMap[item.product]) {
+                    try {
+                        // Direct fetch to products API with full URL
+                        const response = await fetch(`${window.location.origin}/api/products/${item.product}`);
+
+                        if (!response.ok) {
+                            console.error(`Failed to fetch product ${item.product}: ${response.status}`);
+                            continue;
+                        }
+
+                        const data = await response.json();
+                        console.log('Product API response:', data);
+
+                        if (data.product) {
+                            productsMap[item.product] = data.product;
+                        } else if (data.success && data.data) {
+                            // Alternative response format
+                            productsMap[item.product] = data.data;
+                        } else if (data) {
+                            // Direct product data
+                            productsMap[item.product] = data;
+                        }
+                    } catch (err) {
+                        console.error(`Error fetching product ${item.product}:`, err);
+                    }
+                }
+            }
+
+            console.log('Final products map:', productsMap);
+            setProducts(productsMap);
+        } catch (error) {
+            console.error("Error fetching product details:", error);
+        }
+    };
+
     if (!isOpen) return null;
+
     // Format date
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -45,6 +102,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             minute: '2-digit'
         }).format(date);
     };
+
     // Format price
     const formatPrice = (price) => {
         if (!price || parseFloat(price) === 0) {
@@ -52,6 +110,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         }
         return `${parseFloat(price).toFixed(2)} €`;
     };
+
     // Map status to Spanish
     const mapStatus = (status) => {
         const statusMap = {
@@ -63,6 +122,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         };
         return statusMap[status] || status;
     };
+
     // Get status color class
     const getStatusColorClass = (status) => {
         const colorMap = {
@@ -74,9 +134,15 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         };
         return colorMap[status] || 'bg-gray-100 text-gray-800';
     };
+
+    // Get product details
+    const getProductDetails = (productId) => {
+        return products[productId] || null;
+    };
+
     return (
         <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 z-50 flex justify-center items-center p-4">
-            <div className="bg-white rounded-lg shadow-lg   w-full max-h-[90vh] flex flex-col">
+            <div className="bg-white rounded-lg shadow-lg w-full max-h-[90vh] flex flex-col">
                 {/* Header */}
                 <div className='rounded-lg overflow-hidden'>
                     <div className="flex justify-between items-center border-b border-gray-300 p-4 sticky top-0 bg-white z-10">
@@ -92,6 +158,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                             <FiX size={24} />
                         </button>
                     </div>
+
                     {/* Content */}
                     <div className="flex-grow overflow-auto rounded-lg">
                         {loadingOrder ? (
@@ -254,43 +321,46 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                         </tr>
                                                     </thead>
                                                     <tbody className="bg-white divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
-                                                        {order.items.map((item, index) => (
-                                                            <tr key={index} className="hover:bg-gray-50">
-                                                                <td className="px-6 py-4">
-                                                                    <div className="flex items-center space-x-2">
-                                                                        <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
-                                                                            {item.product?.image ? (
-                                                                                <img
-                                                                                    src={item.product.image}
-                                                                                    alt={item.product?.name || `Producto ${index + 1}`}
-                                                                                    className="h-full w-full object-cover"
-                                                                                />
-                                                                            ) : (
-                                                                                <FiPackage className="text-gray-500" />
-                                                                            )}
-                                                                        </div>
-                                                                        <div className="ml-4">
-                                                                            <div className="text-sm font-medium text-gray-900">
-                                                                                {item.product?.name || `Producto ${index + 1}`}
+                                                        {order.items.map((item, index) => {
+                                                            const product = getProductDetails(item.product);
+                                                            return (
+                                                                <tr key={index} className="hover:bg-gray-50">
+                                                                    <td className="px-6 py-4">
+                                                                        <div className="flex items-center space-x-2">
+                                                                            <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
+                                                                                {product?.image ? (
+                                                                                    <img
+                                                                                        src={product.image}
+                                                                                        alt={product.name || `Producto ${index + 1}`}
+                                                                                        className="h-full w-full object-cover"
+                                                                                    />
+                                                                                ) : (
+                                                                                    <FiPackage className="text-gray-500" />
+                                                                                )}
                                                                             </div>
-                                                                            <div className="text-xs text-gray-500 flex flex-col">
-                                                                                <span>Ref: {item.product?.reference || item.reference || "N/A"}</span>
-                                                                                <span>ID: {item._id || item.product}</span>
+                                                                            <div className="ml-4">
+                                                                                <div className="text-sm font-medium text-gray-900">
+                                                                                    {product?.name || `Producto ${index + 1}`}
+                                                                                </div>
+                                                                                <div className="text-xs text-gray-500 flex flex-col">
+                                                                                    <span>Ref: {product?.reference || "N/A"}</span>
+                                                                                    <span>ID: {item.product || "N/A"}</span>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                                    {item.quantity}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                                                                    {formatPrice(item.price)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-                                                                    {formatPrice(item.price * item.quantity)}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                                        {item.quantity}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                                                        {formatPrice(item.price)}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                                                                        {formatPrice(item.price * item.quantity)}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
                                                     </tbody>
                                                 </table>
                                             </div>

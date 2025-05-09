@@ -88,7 +88,7 @@ export default function OrdersStats() {
             description: `Últimos ${period} días`,
             trend: statsData.pendingOrdersTrend,
             trendIcon: statsData.pendingOrdersTrend >= 0 ?
-                <FiTrendingUp className={statsData.pendingOrdersTrend > 0 ? "text-red-600" : "text-green-600"} /> :
+                <FiTrendingUp className={statsData.pendingOrdersTrend < 0 ? "text-red-600" : "text-green-600"} /> :
                 <FiTrendingDown className={statsData.pendingOrdersTrend < 0 ? "text-green-600" : "text-red-600"} />,
             bgColor: "bg-yellow-100"
         },

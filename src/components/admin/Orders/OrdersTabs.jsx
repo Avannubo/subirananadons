@@ -1,12 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
 import OrdersTable from '@/components/admin/orders/OrdersTable';
-import { FiDownload, FiRefreshCw } from 'react-icons/fi';
+import { FiDownload, FiRefreshCw, FiCalendar, FiChevronDown } from 'react-icons/fi';
 import { useOrders } from '@/hooks/useOrders';
 
 export default function OrdersTabs({ userRole = 'user' }) {
     const [activeTab, setActiveTab] = useState('Todos');
     const [isExporting, setIsExporting] = useState(false);
+    const [rangeDropdownOpen, setRangeDropdownOpen] = useState(false);
+    const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
     const [filters, setFilters] = useState({
         searchId: '',
         searchReference: '',
@@ -31,20 +33,239 @@ export default function OrdersTabs({ userRole = 'user' }) {
         setLimit
     } = useOrders(userRole);
 
+    // Initial fetch of all orders when component mounts
+    useEffect(() => {
+        fetchOrders(pagination.currentPage, pagination.limit, filters);
+    }, []);
+
+    // Fetch orders when filters change
+    useEffect(() => {
+        // We can add search parameters to the fetchOrders call
+        fetchOrders(pagination.currentPage, pagination.limit, filters);
+    }, [filters.dateFrom, filters.dateTo]); // Refresh when date filters change
+
     const handleRefresh = async () => {
-        await fetchOrders(pagination.currentPage, pagination.limit);
+        await fetchOrders(pagination.currentPage, pagination.limit, filters);
     };
 
     const handleExport = async (format) => {
         setIsExporting(true);
         try {
-            // In a real app, this would call an API endpoint to generate and download a file
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-            alert(`Exportando pedidos en formato ${format}`);
+            // Prepare data for export - use the same filtered data shown in the table
+            const exportData = filteredOrders.map((order, index) => {
+                // Get customer data safely with fallbacks
+                const customerName = order.customer && order.customer.name ? order.customer.name : 'N/A';
+                const customerEmail = order.customer && order.customer.email ? order.customer.email : 'N/A';
+
+                return {
+                    ID: index+1,
+                    Referencia: order.reference || 'N/A',
+                    Cliente: customerName,
+                    Email: customerEmail,
+                    Fecha: order.date || 'N/A',
+                    Total: order.total ? `${order.total}` : '0.00 €',
+                    Estado: order.status || 'N/A',
+                    'Método de Pago': order.payment_method || 'N/A'
+                };
+            });
+
+            // Helper function for Excel and PDF to format the table
+            const generateTableHtml = () => {
+                return `
+                    <style>
+                        table { 
+                            border-collapse: collapse; 
+                            width: 100%; 
+                            margin-top: 20px;
+                            font-family: Arial, sans-serif;
+                        }
+                        th, td { 
+                            border: 1px solid #ddd; 
+                            padding: 8px; 
+                            text-align: left;
+                        }
+                        th { 
+                            background-color: #00B0C8; 
+                            color: white; 
+                            font-weight: bold;
+                        }
+                        tr:nth-child(even) {
+                            background-color: #f9f9f9;
+                        }
+                        h1 { 
+                            color: #00B0C8; 
+                            font-family: Arial, sans-serif;
+                        }
+                    </style>
+                    <table>
+                        <thead>
+                            <tr>
+                                ${Object.keys(exportData[0]).map(key => `<th>${key}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${exportData.map(row => `
+                                <tr>
+                                    ${Object.values(row).map(value => `<td>${value}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            };
+
+            if (format === 'csv') {
+                // Create CSV string with proper escaping for values containing commas or quotes
+                const headers = Object.keys(exportData[0]);
+
+                // Function to escape CSV values
+                const escapeCSV = (value) => {
+                    if (value === null || value === undefined) return '';
+                    const str = String(value);
+                    // If the value contains commas, quotes, or newlines, wrap in quotes and escape any quotes
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return `"${str.replace(/"/g, '""')}"`;
+                    }
+                    return str;
+                };
+
+                const csvHeader = headers.map(escapeCSV).join(',');
+                const csvRows = exportData.map(row =>
+                    headers.map(header => escapeCSV(row[header])).join(',')
+                );
+
+                const csvContent = [csvHeader, ...csvRows].join('\n');
+
+                // Create download link
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                triggerDownload(url, 'pedidos.csv');
+            } else if (format === 'excel') {
+                // Simple HTML table export as alternative to xlsx library
+                const html = `
+                    <html>
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>Pedidos</title>
+                        </head>
+                        <body>
+                            <h1>Listado de Pedidos</h1>
+                            <p>Fecha de exportación: ${new Date().toLocaleDateString()}</p>
+                            ${generateTableHtml()}
+                        </body>
+                    </html>
+                `;
+
+                const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                triggerDownload(url, 'pedidos.xls');
+            } else if (format === 'pdf') {
+                // Create a hidden iframe to print PDF
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+
+                // Create PDF content as HTML
+                const html = `
+                    <html>
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>Pedidos</title>
+                            <style>
+                                body { 
+                                    font-family: Arial, sans-serif;
+                                    padding: 20px;
+                                }
+                                @media print {
+                                    body { 
+                                        margin: 0; 
+                                        padding: 15px; 
+                                    }
+                                    button { 
+                                        display: none; 
+                                    }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>Listado de Pedidos</h1>
+                            <p>Fecha de exportación: ${new Date().toLocaleDateString()}</p>
+                            ${generateTableHtml()}
+                            <div style="text-align: center; margin-top: 30px;">
+                                <button onclick="window.print(); window.close();" style="padding: 10px 20px; background-color: #00B0C8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Imprimir PDF
+                                </button>
+                            </div>
+                        </body>
+                    </html>
+                `;
+
+                // Write to iframe and trigger print
+                iframe.contentWindow.document.open();
+                iframe.contentWindow.document.write(html);
+                iframe.contentWindow.document.close();
+
+                // Once it's loaded, print it
+                iframe.onload = function () {
+                    setTimeout(() => {
+                        iframe.contentWindow.print();
+                        // Clean up iframe after printing dialog is closed
+                        setTimeout(() => {
+                            document.body.removeChild(iframe);
+                        }, 1000);
+                    }, 500);
+                };
+            }
         } catch (err) {
             console.error('Error exporting orders:', err);
+            alert('Error al exportar los pedidos: ' + err.message);
         } finally {
             setIsExporting(false);
+        }
+    };
+
+    // Helper function to trigger download
+    const triggerDownload = (url, filename) => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }, 100);
+    };
+
+    // Apply date range filter and automatically refresh
+    const applyDateRange = (days) => {
+        const today = new Date();
+        const fromDate = new Date();
+        fromDate.setDate(today.getDate() - days);
+
+        const newFilters = {
+            ...filters,
+            dateFrom: fromDate.toISOString().split('T')[0],
+            dateTo: today.toISOString().split('T')[0]
+        };
+
+        setFilters(newFilters);
+        setRangeDropdownOpen(false);
+
+        // Immediately refresh with new filters
+        fetchOrders(pagination.currentPage, pagination.limit, newFilters);
+    };
+
+    // Update filters and refresh table
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        const newFilters = { ...filters, [name]: value };
+        setFilters(newFilters);
+
+        // If it's a date filter, immediately update
+        if (name === 'dateFrom' || name === 'dateTo') {
+            fetchOrders(pagination.currentPage, pagination.limit, newFilters);
         }
     };
 
@@ -119,39 +340,109 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             {loading ? 'Actualizando...' : 'Actualizar'}
                         </button>
 
-                        <div className="relative inline-block group">
+                        <div className="relative inline-block">
                             <button
+                                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
                                 className="px-3 py-2 bg-[#00B0C8] hover:bg-[#008da0] text-white rounded-md flex items-center text-sm"
                                 disabled={isExporting || loading}
                             >
                                 <FiDownload className="mr-2" /> Exportar
                             </button>
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block">
-                                <button
-                                    onClick={() => handleExport('excel')}
-                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                    disabled={isExporting || loading}
-                                >
-                                    Exportar a Excel
-                                </button>
-                                <button
-                                    onClick={() => handleExport('pdf')}
-                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                    disabled={isExporting || loading}
-                                >
-                                    Exportar a PDF
-                                </button>
-                            </div>
+                            {exportDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                                    <button
+                                        onClick={() => {
+                                            handleExport('csv');
+                                            setExportDropdownOpen(false);
+                                        }}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                        disabled={isExporting || loading}
+                                    >
+                                        Exportar a CSV
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleExport('excel');
+                                            setExportDropdownOpen(false);
+                                        }}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                        disabled={isExporting || loading}
+                                    >
+                                        Exportar a Excel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleExport('pdf');
+                                            setExportDropdownOpen(false);
+                                        }}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                        disabled={isExporting || loading}
+                                    >
+                                        Exportar a PDF
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    <div className="flex space-x-4">
+                    <div className="flex space-x-4 items-center">
+                        {/* Range Selector Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setRangeDropdownOpen(!rangeDropdownOpen)}
+                                className="px-3 border border-gray-300 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm"
+                            >
+                                <FiCalendar className="mr-2" />
+                                Rango
+                                <FiChevronDown className="ml-2" />
+                            </button>
+
+                            {rangeDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                                    <button
+                                        onClick={() => {
+                                            setFilters({ ...filters, dateFrom: '', dateTo: '' });
+                                            fetchOrders(pagination.currentPage, pagination.limit, { ...filters, dateFrom: '', dateTo: '' });
+                                            setRangeDropdownOpen(false);
+                                        }}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                    >
+                                        Mostrar todos
+                                    </button>
+                                    <button
+                                        onClick={() => applyDateRange(1)}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                    >
+                                        Hoy
+                                    </button>
+                                    <button
+                                        onClick={() => applyDateRange(30)}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                    >
+                                        Último mes
+                                    </button>
+                                    <button
+                                        onClick={() => applyDateRange(180)}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                    >
+                                        Últimos 6 meses
+                                    </button>
+                                    <button
+                                        onClick={() => applyDateRange(365)}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                    >
+                                        Último año
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
                         <div>
                             <input
                                 type="date"
                                 name="dateFrom"
                                 value={filters.dateFrom}
-                                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                                onChange={handleFilterChange}
                                 className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                                 placeholder="Desde"
                             />
@@ -161,7 +452,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 type="date"
                                 name="dateTo"
                                 value={filters.dateTo}
-                                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                                onChange={handleFilterChange}
                                 className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                                 placeholder="Hasta"
                             />
@@ -188,7 +479,8 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
-                        {tab} ({tabCounts[tab]})
+                        {tab}
+
                     </button>
                 ))}
             </div>
