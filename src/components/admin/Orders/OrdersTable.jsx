@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2, FiEye, FiChevronLeft, FiChevronRight, FiCheck } from 'react-icons/fi';
 import OrderDeleteModal from './OrderDeleteModal';
 import OrderEditModal from './OrderEditModal';
 import OrderViewModal from './OrderViewModal';
+import Pagination from '@/components/admin/shared/Pagination';
 
 export default function OrdersTable({
     orders,
@@ -23,6 +24,12 @@ export default function OrdersTable({
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
+
+    // Log orders received for debugging
+    useEffect(() => {
+        console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
+        console.log('Orders data:', orders);
+    }, [orders, userRole]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -277,7 +284,7 @@ export default function OrdersTable({
                                             />
                                         </td>
                                     )}
-                                    <td className="px-6 py-4">{index}</td>
+                                    <td className="px-6 py-4">{index + 1}</td>
                                     <td className="px-6 py-4">{order.reference}</td>
                                     {userRole === 'admin' && <td className="px-6 py-4">{order.customer}</td>}
                                     <td className="px-6 py-4">{order.total}</td>
@@ -344,7 +351,7 @@ export default function OrdersTable({
                                             title="Ver detalles"
                                             onClick={() => handleViewOrder(order)}
                                         >
-                                            <FiEye size={20}  />
+                                            <FiEye size={20} />
                                         </button>
                                         {userRole === 'admin' && (
                                             <>
@@ -353,14 +360,14 @@ export default function OrdersTable({
                                                     title="Editar pedido"
                                                     onClick={() => handleEditOrder(order)}
                                                 >
-                                                    <FiEdit size={20}  />
+                                                    <FiEdit size={20} />
                                                 </button>
                                                 <button
                                                     className="text-red-600 hover:text-red-900 text-center"
                                                     title="Eliminar pedido"
                                                     onClick={() => handleDeleteOrder(order)}
                                                 >
-                                                    <FiTrash2 size={20}  />
+                                                    <FiTrash2 size={20} />
                                                 </button>
                                             </>
                                         )}
@@ -379,85 +386,20 @@ export default function OrdersTable({
             </div>
 
             {/* Pagination */}
-            {pagination && pagination.totalPages > 0 && (
-                <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                    <div className="flex-1 flex justify-between sm:hidden">
-                        <button
-                            onClick={() => onPageChange(pagination.currentPage - 1)}
-                            disabled={pagination.currentPage === 1}
-                            className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${pagination.currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
-                                }`}
-                        >
-                            Anterior
-                        </button>
-                        <button
-                            onClick={() => onPageChange(pagination.currentPage + 1)}
-                            disabled={pagination.currentPage === pagination.totalPages}
-                            className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${pagination.currentPage === pagination.totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
-                                }`}
-                        >
-                            Siguiente
-                        </button>
-                    </div>
-                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <p className="text-sm text-gray-700">
-                                Mostrando <span className="font-medium">{((pagination.currentPage - 1) * pagination.limit) + 1}</span> a{" "}
-                                <span className="font-medium">
-                                    {Math.min(pagination.currentPage * pagination.limit, pagination.totalItems)}
-                                </span>{" "}
-                                de <span className="font-medium">{pagination.totalItems}</span> resultados
-                            </p>
-                        </div>
-                        <div>
-                            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                <button
-                                    onClick={() => onPageChange(pagination.currentPage - 1)}
-                                    disabled={pagination.currentPage === 1}
-                                    className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${pagination.currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-500 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    <FiChevronLeft className="h-5 w-5" />
-                                </button>
-
-                                {Array.from({ length: Math.min(5, pagination.totalPages) }).map((_, index) => {
-                                    let pageNumber;
-
-                                    if (pagination.totalPages <= 5) {
-                                        pageNumber = index + 1;
-                                    } else if (pagination.currentPage <= 3) {
-                                        pageNumber = index + 1;
-                                    } else if (pagination.currentPage >= pagination.totalPages - 2) {
-                                        pageNumber = pagination.totalPages - 4 + index;
-                                    } else {
-                                        pageNumber = pagination.currentPage - 2 + index;
-                                    }
-
-                                    return (
-                                        <button
-                                            key={pageNumber}
-                                            onClick={() => onPageChange(pageNumber)}
-                                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${pagination.currentPage === pageNumber
-                                                ? 'z-10 bg-[#00B0C8] border-[#00B0C8] text-white'
-                                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                                                }`}
-                                        >
-                                            {pageNumber}
-                                        </button>
-                                    );
-                                })}
-
-                                <button
-                                    onClick={() => onPageChange(pagination.currentPage + 1)}
-                                    disabled={pagination.currentPage === pagination.totalPages}
-                                    className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${pagination.currentPage === pagination.totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-500 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    <FiChevronRight className="h-5 w-5" />
-                                </button>
-                            </nav>
-                        </div>
-                    </div>
+            {orders.length > 0 && (
+                <div className="px-4 py-3 border-t border-gray-200 sm:px-6">
+                    <Pagination
+                        currentPage={pagination.currentPage}
+                        totalPages={pagination.totalPages}
+                        totalItems={pagination.totalItems}
+                        itemsPerPage={pagination.limit}
+                        onPageChange={onPageChange}
+                        onItemsPerPageChange={onLimitChange || ((newLimit) => {
+                            console.log('Items per page changed to', newLimit);
+                            // If onLimitChange is not provided, just log the change
+                        })}
+                        showingText="Mostrando {} de {} pedidos"
+                    />
                 </div>
             )}
 

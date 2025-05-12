@@ -1,13 +1,18 @@
 'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function ProductQuickView({ product, onClose }) {
     console.log(product.description);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(product?.imageUrl); // State for main image
+    const { data: session } = useSession();
+    const router = useRouter();
     // Update selectedImage if the product changes (edge case)
     useEffect(() => {
         if (product) {
@@ -40,6 +45,16 @@ export default function ProductQuickView({ product, onClose }) {
     ].filter(Boolean).slice(0, 4); // Filter out falsy values and limit
     const handleThumbnailClick = (imageUrl) => {
         setSelectedImage(imageUrl);
+    };
+    // Function to handle add to wishlist
+    const handleAddToWishlist = () => {
+        // If not logged in, redirect to login page with a return URL
+        if (!session) {
+            router.push(`/api/auth/signin?callbackUrl=${encodeURIComponent('/dashboard/listas')}`);
+        } else {
+            // User is logged in, navigate to listas
+            router.push('/dashboard/listas');
+        }
     };
     return (
         <AnimatePresence>
@@ -130,7 +145,9 @@ export default function ProductQuickView({ product, onClose }) {
                                 <button className="w-full bg-black text-white uppercase py-3 rounded font-semibold hover:bg-gray-800 transition duration-200 mb-3">
                                     Comprar
                                 </button>
-                                <button className="w-full bg-gray-200 text-gray-700 uppercase py-3 rounded font-semibold hover:bg-gray-300 transition duration-200 flex items-center justify-center">
+                                <button
+                                    onClick={handleAddToWishlist}
+                                    className="w-full bg-gray-200 text-gray-700 uppercase py-3 rounded font-semibold hover:bg-gray-300 transition duration-200 flex items-center justify-center">
                                     <ShoppingBag className="h-5 w-5 mr-2" />
                                     Añadir a mi lista
                                 </button>

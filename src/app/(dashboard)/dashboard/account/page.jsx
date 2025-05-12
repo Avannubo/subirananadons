@@ -225,7 +225,7 @@ export default function Page() {
                 <div className="mx-auto p-6">
                     <h1 className="text-2xl font-bold mb-6">Mi Cuenta</h1>
                     <div className="bg-white rounded-lg p-6">
-                        <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Tu información personal</h2>
+                        <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Información personal</h2>
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             {/* Profile Image */}
                             {/* <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 mb-6">

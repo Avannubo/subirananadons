@@ -7,6 +7,8 @@ import ClientViewModal from '@/components/admin/clients/ClientViewModal';
 import ConfirmDeleteModal from '@/components/admin/clients/ConfirmDeleteModal';
 import { toast } from 'react-hot-toast';
 import { useClientStats } from '@/contexts/ClientStatsContext';
+import TabNavigation from '@/components/admin/shared/TabNavigation';
+import Pagination from '@/components/admin/shared/Pagination';
 
 export default function ClientsTabs() {
     const { refreshStats } = useClientStats();
@@ -31,7 +33,7 @@ export default function ClientsTabs() {
         currentPage: 1,
         totalPages: 1,
         totalItems: 0,
-        limit: 10
+        limit: 5
     });
 
     const tabs = ['Todos', 'Activos', 'Inactivos', 'Newsletter', 'Ofertas'];
@@ -90,7 +92,7 @@ export default function ClientsTabs() {
                     currentPage: 1,
                     totalPages: 1,
                     totalItems: data.clients?.length || 0,
-                    limit: 10
+                    limit: 5
                 });
             } else {
                 throw new Error(data.message || 'Failed to fetch clients');
@@ -285,20 +287,11 @@ export default function ClientsTabs() {
 
     return (
         <>
-            <div className="flex flex-wrap overflow-x-auto border-b border-gray-200">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === tab
-                            ? 'border-b-2 border-[#00B0C8] text-[#00B0C8] bg-blue-50'
-                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                            }`}
-                    >
-                        {tab}
-                    </button>
-                ))}
-            </div>
+            <TabNavigation
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+            />
 
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -415,43 +408,24 @@ export default function ClientsTabs() {
                         />
 
                         {/* Pagination */}
-                        {pagination.totalPages > 1 && (
-                            <div className="p-4 border-t border-gray-200 flex justify-center">
-                                <nav className="flex flex-wrap justify-center gap-2">
-                                    <button
-                                        onClick={() => handlePageChange(1)}
-                                        disabled={pagination.currentPage === 1}
-                                        className={`px-3 py-2 rounded ${pagination.currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-[#00B0C8] hover:bg-gray-100'}`}
-                                    >
-                                        Primera
-                                    </button>
-                                    <button
-                                        onClick={() => handlePageChange(pagination.currentPage - 1)}
-                                        disabled={pagination.currentPage === 1}
-                                        className={`px-3 py-2 rounded ${pagination.currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-[#00B0C8] hover:bg-gray-100'}`}
-                                    >
-                                        Anterior
-                                    </button>
-
-                                    <span className="px-3 py-2 bg-gray-50 rounded text-gray-700">
-                                        Página {pagination.currentPage} de {pagination.totalPages}
-                                    </span>
-
-                                    <button
-                                        onClick={() => handlePageChange(pagination.currentPage + 1)}
-                                        disabled={pagination.currentPage === pagination.totalPages}
-                                        className={`px-3 py-2 rounded ${pagination.currentPage === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-[#00B0C8] hover:bg-gray-100'}`}
-                                    >
-                                        Siguiente
-                                    </button>
-                                    <button
-                                        onClick={() => handlePageChange(pagination.totalPages)}
-                                        disabled={pagination.currentPage === pagination.totalPages}
-                                        className={`px-3 py-2 rounded ${pagination.currentPage === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-[#00B0C8] hover:bg-gray-100'}`}
-                                    >
-                                        Última
-                                    </button>
-                                </nav>
+                        {!isLoading && pagination.totalPages > 0 && (
+                            <div className="p-4 border-t border-gray-200">
+                                <Pagination
+                                    currentPage={pagination.currentPage}
+                                    totalPages={pagination.totalPages}
+                                    totalItems={pagination.totalItems}
+                                    itemsPerPage={pagination.limit}
+                                    onPageChange={handlePageChange}
+                                    onItemsPerPageChange={(newLimit) => {
+                                        setPagination(prev => ({
+                                            ...prev,
+                                            limit: newLimit,
+                                            currentPage: 1
+                                        }));
+                                        fetchClients();
+                                    }}
+                                    showingText="Mostrando {} de {} clientes"
+                                />
                             </div>
                         )}
                     </>

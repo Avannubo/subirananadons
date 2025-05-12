@@ -1,11 +1,24 @@
 'use client'
 
-import { SessionProvider } from 'next-auth/react'
+import { SessionProvider, useSession } from 'next-auth/react'
 import { CartProvider } from '@/contexts/CartContext'
 import { UserProvider } from '@/contexts/UserContext'
 import { StatsProvider } from '@/contexts/StatsContext'
 import { ClientStatsProvider } from '@/contexts/ClientStatsContext'
+import { ListStatsProvider } from '@/contexts/ListStatsContext'
 import { Toaster } from 'react-hot-toast'
+
+// Wrapper component that has access to session
+function ListStatsWithAuth({ children }) {
+    const { data: session } = useSession();
+    const userRole = session?.user?.role || 'user';
+
+    return (
+        <ListStatsProvider userRole={userRole}>
+            {children}
+        </ListStatsProvider>
+    );
+}
 
 export function Providers({ children }) {
     return (
@@ -14,7 +27,9 @@ export function Providers({ children }) {
                 <CartProvider>
                     <StatsProvider>
                         <ClientStatsProvider>
-                            {children}
+                            <ListStatsWithAuth>
+                                {children}
+                            </ListStatsWithAuth>
                         </ClientStatsProvider>
                     </StatsProvider>
                 </CartProvider>

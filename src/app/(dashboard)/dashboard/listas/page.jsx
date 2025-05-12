@@ -13,7 +13,7 @@ export default function ListasPage() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="container mx-auto px-4 py-8">
+                <div className="py-6 min-h-[90vh]">
                     <h1 className="text-2xl font-bold mb-6">
                         {userRole === 'admin' ? 'Gestión de Listas de Regalos' : 'Mis Listas de Regalos'}
                     </h1>

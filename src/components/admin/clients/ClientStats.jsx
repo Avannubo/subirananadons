@@ -1,6 +1,8 @@
 'use client';
-import { FiUser, FiCalendar, FiShoppingBag, FiMail, FiRefreshCw } from 'react-icons/fi';
+import { FiUser, FiCalendar, FiShoppingBag, FiMail } from 'react-icons/fi';
 import { useClientStats } from '@/contexts/ClientStatsContext';
+import StatsCard from '@/components/admin/shared/StatsCard';
+import StatsCardGrid from '@/components/admin/shared/StatsCardGrid';
 
 export default function ClientsStats() {
     const { stats, loading, refreshing, lastUpdated, refreshStats } = useClientStats();
@@ -49,37 +51,21 @@ export default function ClientsStats() {
     ];
 
     return (
-        <div className="space-y-3">
-            <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-500">
-                    {lastUpdated && (
-                        <span>Última actualización: {formatLastUpdated()}</span>
-                    )}
-                </div>
-                <button
-                    onClick={refreshStats}
-                    disabled={refreshing}
-                    className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                    <FiRefreshCw className={`${refreshing ? 'animate-spin' : ''}`} />
-                    <span>{refreshing ? 'Actualizando...' : 'Actualizar'}</span>
-                </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {displayStats.map((stat, index) => (
-                    <div key={index} className="bg-white p-4 rounded-lg shadow flex items-center">
-                        <div className={`${stat.bgColor} p-3 rounded-full mr-4`}>
-                            {stat.icon}
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">{stat.title}</p>
-                            <p className="text-xl font-bold">{stat.value}</p>
-                            <p className="text-xs text-gray-500">{stat.description}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+        <StatsCardGrid
+            lastUpdated={formatLastUpdated()}
+            refreshStats={refreshStats}
+            refreshing={refreshing}
+        >
+            {displayStats.map((stat, index) => (
+                <StatsCard
+                    key={index}
+                    icon={stat.icon}
+                    bgColor={stat.bgColor}
+                    title={stat.title}
+                    value={stat.value}
+                    description={stat.description}
+                />
+            ))}
+        </StatsCardGrid>
     );
 }

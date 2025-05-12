@@ -12,39 +12,43 @@ export function useOrders(userRole) {
         currentPage: 1,
         totalPages: 1,
         totalItems: 0,
-        limit: 10
+        limit: 5
     });
 
     // Fetch orders from the API
-    const fetchOrders = async (page = 1, limit = 10) => {
+    const fetchOrders = async (page = 1, limit = 5) => {
         setLoading(true);
         try {
+            console.log(`Fetching orders for role: ${userRole}, page: ${page}, limit: ${limit}`);
             const response = await fetch(`/api/orders?page=${page}&limit=${limit}`);
 
             if (!response.ok) {
                 const errorData = await response.json();
+                console.error('Error response from orders API:', errorData);
                 throw new Error(errorData.message || 'Failed to fetch orders');
             }
 
             const data = await response.json();
+            console.log('Orders API response:', data);
 
             if (data.success) {
                 // Map orders to match our UI format
                 const formattedOrders = data.orders.map(order => ({
                     id: order._id,
-                    reference: order.orderNumber,
+                    reference: order.orderNumber || 'No ref',
                     newCustomer: false, // This would need business logic to determine
-                    delivery: order.shippingAddress.country,
-                    customer: `${order.shippingAddress.name} ${order.shippingAddress.lastName}`,
-                    total: `${order.totalAmount.toFixed(2)} €`,
+                    delivery: order.shippingAddress?.country || 'España',
+                    customer: order.shippingAddress ? `${order.shippingAddress.name || ''} ${order.shippingAddress.lastName || ''}`.trim() : 'Cliente',
+                    total: order.totalAmount ? `${order.totalAmount.toFixed(2)} €` : '0.00 €',
                     payment: order.paymentMethod || 'Pending',
-                    status: mapOrderStatus(order.status),
-                    date: new Date(order.createdAt).toLocaleString('es-ES'),
-                    userId: order.user,
-                    trackingNumber: order.trackingNumber,
-                    notes: order.notes
+                    status: mapOrderStatus(order.status || 'pending'),
+                    date: order.createdAt ? new Date(order.createdAt).toLocaleString('es-ES') : new Date().toLocaleString('es-ES'),
+                    userId: order.user || '',
+                    trackingNumber: order.trackingNumber || '',
+                    notes: order.notes || ''
                 }));
 
+                console.log(`Formatted ${formattedOrders.length} orders for display`);
                 setOrders(formattedOrders);
                 setPagination(data.pagination);
             } else {

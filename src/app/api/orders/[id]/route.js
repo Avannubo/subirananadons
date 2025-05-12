@@ -9,7 +9,11 @@ import mongoose from 'mongoose';
 export async function GET(request, { params }) {
     try {
         const session = await getServerSession(authOptions);
+        console.log('Order Detail API - Session:', session);
+        console.log('Order Detail API - Request Params:', params);
+
         if (!session?.user?.id) {
+            console.error('Order Detail API - No user ID in session');
             return NextResponse.json({
                 success: false,
                 message: 'Unauthorized'
@@ -20,6 +24,7 @@ export async function GET(request, { params }) {
         const { id } = params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            console.error('Order Detail API - Invalid order ID:', id);
             return NextResponse.json({
                 success: false,
                 message: 'Invalid order ID'
@@ -27,9 +32,11 @@ export async function GET(request, { params }) {
         }
 
         const order = await Order.findById(id).populate('user', 'name email');
+        console.log('Order Detail API - Order found:', order ? 'Yes' : 'No');
 
         // Check if order exists
         if (!order) {
+            console.error('Order Detail API - Order not found:', id);
             return NextResponse.json({
                 success: false,
                 message: 'Order not found'
@@ -39,8 +46,10 @@ export async function GET(request, { params }) {
         // Check if user is authorized to view this order
         const isAdmin = session.user.role === 'admin';
         const isOrderOwner = order.user?._id.toString() === session.user.id;
+        console.log('Order Detail API - Auth check:', { isAdmin, isOrderOwner, userId: session.user.id, orderUserId: order.user?._id.toString() });
 
         if (!isAdmin && !isOrderOwner) {
+            console.error('Order Detail API - User not authorized to view order');
             return NextResponse.json({
                 success: false,
                 message: 'You are not authorized to view this order'

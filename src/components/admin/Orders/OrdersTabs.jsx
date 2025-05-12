@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import OrdersTable from '@/components/admin/orders/OrdersTable';
-import { FiDownload, FiRefreshCw, FiCalendar, FiChevronDown } from 'react-icons/fi';
+import { FiDownload, FiRefreshCw, FiCalendar, FiChevronDown, FiFilter, FiSearch, FiPlus } from 'react-icons/fi';
 import { useOrders } from '@/hooks/useOrders';
+import TabNavigation from '@/components/admin/shared/TabNavigation';
+import { toast } from 'react-hot-toast';
 
 export default function OrdersTabs({ userRole = 'user' }) {
     const [activeTab, setActiveTab] = useState('Todos');
@@ -33,10 +35,13 @@ export default function OrdersTabs({ userRole = 'user' }) {
         setLimit
     } = useOrders(userRole);
 
+    const tabs = ['Todos', 'Pendientes', 'Procesando', 'Completados', 'Cancelados'];
+
     // Initial fetch of all orders when component mounts
     useEffect(() => {
-        fetchOrders(pagination.currentPage, pagination.limit, filters);
-    }, []);
+        console.log(`OrdersTabs mounted with userRole: ${userRole}`);
+        fetchOrders(pagination.currentPage, pagination.limit);
+    }, [userRole]); // Adding userRole as a dependency to ensure re-fetch if user role changes
 
     // Fetch orders when filters change
     useEffect(() => {
@@ -46,6 +51,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
 
     const handleRefresh = async () => {
         await fetchOrders(pagination.currentPage, pagination.limit, filters);
+        toast.success('Datos actualizados correctamente');
     };
 
     const handleExport = async (format) => {
@@ -58,7 +64,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 const customerEmail = order.customer && order.customer.email ? order.customer.email : 'N/A';
 
                 return {
-                    ID: index+1,
+                    ID: index + 1,
                     Referencia: order.reference || 'N/A',
                     Cliente: customerName,
                     Email: customerEmail,
@@ -262,257 +268,191 @@ export default function OrdersTabs({ userRole = 'user' }) {
         const { name, value } = e.target;
         const newFilters = { ...filters, [name]: value };
         setFilters(newFilters);
-
-        // If it's a date filter, immediately update
-        if (name === 'dateFrom' || name === 'dateTo') {
-            fetchOrders(pagination.currentPage, pagination.limit, newFilters);
-        }
     };
 
-    // Filter orders based on active tab and search filters
-    const filteredOrders = orders.filter((order) => {
-        // Basic tab filtering
-        if (activeTab !== 'Todos') {
-            if (activeTab === 'Pendientes' && order.status !== 'Pendiente de pago') return false;
-            if (activeTab === 'Pagados' && order.status !== 'Pago aceptado') return false;
-            if (activeTab === 'Enviados' && order.status !== 'Enviado') return false;
-            if (activeTab === 'Devueltos' && order.status !== 'Devuelto') return false;
-        }
+    // Apply filters
+    const applyFilters = () => {
+        setPagination(prev => ({ ...prev, currentPage: 1 })); // Reset to first page
+        fetchOrders(pagination.currentPage, pagination.limit, filters);
+    };
 
-        // Date filtering
-        if (filters.dateFrom || filters.dateTo) {
-            const orderDate = new Date(order.date.split(' ')[0].split('/').reverse().join('-'));
+    // Clear all filters
+    const clearFilters = () => {
+        setFilters({
+            searchId: '',
+            searchReference: '',
+            searchCustomer: '',
+            searchTotal: '',
+            searchPayment: '',
+            dateFrom: '',
+            dateTo: ''
+        });
 
-            if (filters.dateFrom) {
-                const fromDate = new Date(filters.dateFrom);
-                if (orderDate < fromDate) return false;
-            }
+        // Reset page and fetch
+        setPagination(prev => ({ ...prev, currentPage: 1 }));
+        fetchOrders(pagination.currentPage, pagination.limit, {
+            searchId: '',
+            searchReference: '',
+            searchCustomer: '',
+            searchTotal: '',
+            searchPayment: '',
+            dateFrom: '',
+            dateTo: ''
+        });
+    };
 
-            if (filters.dateTo) {
-                const toDate = new Date(filters.dateTo);
-                if (orderDate > toDate) return false;
-            }
-        }
-
-        return true;
+    // Filter orders based on active tab
+    const filteredOrders = orders.filter(order => {
+        console.log(`Filtering order with status: "${order.status}" against active tab: "${activeTab}"`);
+        if (activeTab === 'Todos') return true;
+        if (activeTab === 'Pendientes') return order.status === 'Pendiente de pago';
+        if (activeTab === 'Procesando') return order.status === 'Pago aceptado';
+        if (activeTab === 'Completados') return order.status === 'Enviado' || order.status === 'Entregado';
+        if (activeTab === 'Cancelados') return order.status === 'Cancelado';
+        return false;
     });
 
-    // Calculate tab counts
-    const tabCounts = {
+    // Prepare counts for the TabNavigation component
+    const orderCounts = {
         'Todos': orders.length,
         'Pendientes': orders.filter(order => order.status === 'Pendiente de pago').length,
-        'Pagados': orders.filter(order => order.status === 'Pago aceptado').length,
-        'Enviados': orders.filter(order => order.status === 'Enviado').length,
-        'Devueltos': orders.filter(order => order.status === 'Devuelto').length
+        'Procesando': orders.filter(order => order.status === 'Pago aceptado').length,
+        'Completados': orders.filter(order => (order.status === 'Enviado' || order.status === 'Entregado')).length,
+        'Cancelados': orders.filter(order => order.status === 'Cancelado').length
     };
 
-    // Define tabs
-    const tabs = ['Todos', 'Pendientes', 'Pagados', 'Enviados', 'Devueltos'];
-
-    // Handle order status change from the table
-    const handleStatusChange = async (orderId, newStatus) => {
-        if (typeof newStatus === 'object') {
-            // This is from the edit modal with full form data
-            return await updateOrderDetails(orderId, newStatus);
-        } else {
-            // This is just a status change
-            return await updateOrderStatus(orderId, newStatus);
-        }
-    };
-
-    // Handle order deletion from the table
-    const handleOrderDelete = async (orderId) => {
-        return await deleteOrder(orderId);
-    };
+    console.log('Order tab counts:', orderCounts);
 
     return (
-        <div>
-            {/* Header with actions */}
-            {userRole === 'admin' && (
-                <div className="flex flex-col md:flex-row justify-between mb-4">
-                    <div className="flex space-x-4 mb-4 md:mb-0">
+        <>
+            <TabNavigation
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                counts={orderCounts}
+            />
+
+            <div className="bg-white rounded-lg shadow">
+                <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div className="flex items-center">
+                        <h2 className="text-lg font-medium">Gestión de Pedidos ({pagination.totalItems || filteredOrders.length})</h2>
                         <button
+                            className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
                             onClick={handleRefresh}
-                            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm"
                             disabled={loading}
+                            title="Actualizar datos"
                         >
-                            <FiRefreshCw className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
-                            {loading ? 'Actualizando...' : 'Actualizar'}
+                            <FiRefreshCw className={loading ? 'animate-spin' : ''} />
                         </button>
-
-                        <div className="relative inline-block">
-                            <button
-                                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
-                                className="px-3 py-2 bg-[#00B0C8] hover:bg-[#008da0] text-white rounded-md flex items-center text-sm"
-                                disabled={isExporting || loading}
-                            >
-                                <FiDownload className="mr-2" /> Exportar
-                            </button>
-                            {exportDropdownOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                                    <button
-                                        onClick={() => {
-                                            handleExport('csv');
-                                            setExportDropdownOpen(false);
-                                        }}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                        disabled={isExporting || loading}
-                                    >
-                                        Exportar a CSV
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            handleExport('excel');
-                                            setExportDropdownOpen(false);
-                                        }}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                        disabled={isExporting || loading}
-                                    >
-                                        Exportar a Excel
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            handleExport('pdf');
-                                            setExportDropdownOpen(false);
-                                        }}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                        disabled={isExporting || loading}
-                                    >
-                                        Exportar a PDF
-                                    </button>
-                                </div>
-                            )}
-                        </div>
                     </div>
+                    <div className="flex space-x-2">
+                        <button
+                            className="flex items-center px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors"
+                            onClick={() => handleExport('csv')}
+                            disabled={isExporting || loading}
+                            title="Exportar a CSV"
+                        >
+                            <FiDownload className="mr-1" /> Exportar
+                        </button>
+                        <button
+                            className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
+                            onClick={() => {/* Handle new order */ }}
+                            title="Añadir nuevo pedido"
+                        >
+                            <FiPlus className="mr-1" /> Nuevo Pedido
+                        </button>
+                    </div>
+                </div>
 
-                    <div className="flex space-x-4 items-center">
-                        {/* Range Selector Dropdown */}
+                {/* Search and Filters */}
+                <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
+                    <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="relative">
-                            <button
-                                onClick={() => setRangeDropdownOpen(!rangeDropdownOpen)}
-                                className="px-3 border border-gray-300 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center text-sm"
-                            >
-                                <FiCalendar className="mr-2" />
-                                Rango
-                                <FiChevronDown className="ml-2" />
-                            </button>
-
-                            {rangeDropdownOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                                    <button
-                                        onClick={() => {
-                                            setFilters({ ...filters, dateFrom: '', dateTo: '' });
-                                            fetchOrders(pagination.currentPage, pagination.limit, { ...filters, dateFrom: '', dateTo: '' });
-                                            setRangeDropdownOpen(false);
-                                        }}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                    >
-                                        Mostrar todos
-                                    </button>
-                                    <button
-                                        onClick={() => applyDateRange(1)}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                    >
-                                        Hoy
-                                    </button>
-                                    <button
-                                        onClick={() => applyDateRange(30)}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                    >
-                                        Último mes
-                                    </button>
-                                    <button
-                                        onClick={() => applyDateRange(180)}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                    >
-                                        Últimos 6 meses
-                                    </button>
-                                    <button
-                                        onClick={() => applyDateRange(365)}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                    >
-                                        Último año
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        <div>
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
-                                type="date"
-                                name="dateFrom"
-                                value={filters.dateFrom}
+                                type="text"
+                                placeholder="Buscar ID"
+                                name="searchId"
+                                value={filters.searchId}
                                 onChange={handleFilterChange}
-                                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                placeholder="Desde"
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                        <div>
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
-                                type="date"
-                                name="dateTo"
-                                value={filters.dateTo}
+                                type="text"
+                                placeholder="Buscar Referencia"
+                                name="searchReference"
+                                value={filters.searchReference}
                                 onChange={handleFilterChange}
-                                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                                placeholder="Hasta"
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                            />
+                        </div>
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar Cliente"
+                                name="searchCustomer"
+                                value={filters.searchCustomer}
+                                onChange={handleFilterChange}
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                            />
+                        </div>
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar Total"
+                                name="searchTotal"
+                                value={filters.searchTotal}
+                                onChange={handleFilterChange}
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
                     </div>
+
+                    <div className="flex sm:flex-row flex-col justify-start gap-2">
+                        <button
+                            className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]"
+                            onClick={applyFilters}
+                            title="Aplicar filtros"
+                        >
+                            <FiFilter className="mr-2" />
+                            Filtrar
+                        </button>
+                        <button
+                            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                            onClick={clearFilters}
+                            title="Limpiar filtros"
+                        >
+                            Limpiar
+                        </button>
+                    </div>
                 </div>
-            )}
 
-            {/* Error message */}
-            {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    <p>{error}</p>
-                </div>
-            )}
-
-            {/* Tabs Navigation */}
-            <div className="flex border-b border-b-gray-200 border-gray-200 mb-6 overflow-x-auto">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${activeTab === tab
-                            ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
-                            : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        {tab}
-
-                    </button>
-                ))}
+                {/* Order data table */}
+                {loading ? (
+                    <div className="py-20 text-center">
+                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
+                        <p className="mt-3 text-gray-600">Cargando pedidos...</p>
+                    </div>
+                ) : (
+                    <OrdersTable
+                        orders={filteredOrders}
+                        filters={filters}
+                        setFilters={setFilters}
+                        userRole={userRole}
+                        isLoading={loading}
+                        onStatusChange={updateOrderStatus}
+                        onDelete={deleteOrder}
+                        pagination={pagination}
+                        onPageChange={setCurrentPage}
+                        onLimitChange={setLimit}
+                    />
+                )}
             </div>
-
-            {/* Loading indicator */}
-            {loading && (
-                <div className="flex justify-center items-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00B0C8]"></div>
-                </div>
-            )}
-
-            {/* Orders Table */}
-            {!loading && (
-                <OrdersTable
-                    orders={filteredOrders}
-                    filters={filters}
-                    setFilters={setFilters}
-                    userRole={userRole}
-                    onStatusChange={handleStatusChange}
-                    onDelete={handleOrderDelete}
-                    pagination={pagination}
-                    onPageChange={setCurrentPage}
-                    onLimitChange={setLimit}
-                />
-            )}
-
-            {/* No orders message */}
-            {!loading && orders.length === 0 && (
-                <div className="text-center py-8">
-                    <p className="text-gray-500">No tienes pedidos en este momento.</p>
-                </div>
-            )}
-        </div>
+        </>
     );
 }

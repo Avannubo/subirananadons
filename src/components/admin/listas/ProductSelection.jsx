@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { fetchProducts } from '@/services/ProductService';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
-
 export default function ProductSelection({ onProductSelect, selectedProducts = [] }) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -12,9 +11,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
     const [totalPages, setTotalPages] = useState(1);
     const [selectedItems, setSelectedItems] = useState(
         Array.isArray(selectedProducts) ? selectedProducts : []
-    );
-
-    // Load products
+    ); 
     useEffect(() => {
         const loadProducts = async () => {
             try {
@@ -25,7 +22,6 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                     status: 'active',
                     search: search || undefined
                 });
-
                 setProducts(result.products || []);
                 setTotalPages(result.pagination?.totalPages || 1);
             } catch (error) {
@@ -35,22 +31,15 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                 setLoading(false);
             }
         };
-
         loadProducts();
-    }, [currentPage, search]);
-
-    // Handle selecting a product
-    const handleSelectProduct = (product) => {
-        // Check if product is already selected
+    }, [currentPage, search]); 
+    const handleSelectProduct = (product) => { 
         const existingIndex = selectedItems.findIndex(item => item.product._id === product._id);
-
-        if (existingIndex >= 0) {
-            // Update quantity if already selected
+        if (existingIndex >= 0) { 
             const updatedItems = [...selectedItems];
             updatedItems[existingIndex].quantity += 1;
             setSelectedItems(updatedItems);
-        } else {
-            // Add new product with quantity 1
+        } else { 
             setSelectedItems([
                 ...selectedItems,
                 {
@@ -60,9 +49,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                     priority: 2
                 }
             ]);
-        }
-
-        // Notify parent component
+        } 
         if (onProductSelect) {
             onProductSelect([
                 ...selectedItems,
@@ -74,45 +61,31 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                 }
             ]);
         }
-
         toast.success(`${product.name} añadido a la lista`);
-    };
-
-    // Handle removing a product
+    }; 
     const handleRemoveProduct = (productId) => {
         const updatedItems = selectedItems.filter(item => item.product._id !== productId);
-        setSelectedItems(updatedItems);
-
-        // Notify parent component
+        setSelectedItems(updatedItems); 
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
-
         toast.success('Producto eliminado de la lista');
-    };
-
-    // Handle changing quantity
+    }; 
     const handleQuantityChange = (productId, newQuantity) => {
         if (newQuantity < 1) return;
-
         const updatedItems = selectedItems.map(item => {
             if (item.product._id === productId) {
                 return { ...item, quantity: newQuantity };
             }
             return item;
         });
-
-        setSelectedItems(updatedItems);
-
-        // Notify parent component
+        setSelectedItems(updatedItems); 
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
     };
-
     return (
-        <div> 
-            {/* Selected Products Summary */}
+        <div>  
             {selectedItems.length > 0 && (
                 <div className="mb-6   bg-gray-50 rounded-lg h-scree">
                     <h3 className="font-medium text-gray-900 mb-2">Productos seleccionados ({selectedItems.length})</h3>
@@ -185,16 +158,12 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                     </button>
                 </div>
             </div>
-
-            
-
             {/* Loading State */}
             {loading && (
                 <div className="flex justify-center items-center py-10">
                     <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
                 </div>
             )}
-
             {/* Products Grid */}
             {!loading && (
                 <>
@@ -231,7 +200,6 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                             ))}
                         </div>
                     )}
-
                     {/* Pagination */}
                     {totalPages > 1 && (
                         <div className="flex justify-center mt-6">
@@ -246,7 +214,6 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                 >
                                     Anterior
                                 </button>
-
                                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                                     // Show 5 pages max, centered around current page
                                     const pageNum = Math.min(
@@ -254,7 +221,6 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                         totalPages
                                     );
                                     if (pageNum > totalPages) return null;
-
                                     return (
                                         <button
                                             key={pageNum}
@@ -268,7 +234,6 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                         </button>
                                     );
                                 })}
-
                                 <button
                                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                                     disabled={currentPage === totalPages}

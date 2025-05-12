@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import BillsTable from '@/components/admin/bills/BillsTable';
+import TabNavigation from '@/components/admin/shared/TabNavigation';
 
 const bills = [
     {
@@ -78,24 +79,17 @@ export default function BillsTabs() {
     return (
         <div>
             {/* Tabs Navigation */}
-            <div className="flex border-b border-b-gray-200 border-gray-200 mb-6">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 font-medium text-sm ${activeTab === tab
-                            ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
-                            : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        {tab} {tab === 'Todas' ? `(${bills.length})` : `(${bills.filter(bill => {
-                            if (tab === 'Pendientes') return bill.status === 'Pendiente';
-                            if (tab === 'Pagadas') return bill.status === 'Pagada';
-                            return false;
-                        }).length})`}
-                    </button>
-                ))}
-            </div>
+            <TabNavigation
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                counts={{
+                    'Todas': bills.length,
+                    'Pendientes': bills.filter(bill => bill.status === 'Pendiente').length,
+                    'Pagadas': bills.filter(bill => bill.status === 'Pagada').length
+                }}
+            />
+
             {/* Bills Table */}
             <BillsTable bills={filteredBills} filters={filters} setFilters={setFilters} />
         </div>

@@ -17,7 +17,7 @@ const getNavigationItems = (userRole) => [
     {
         href: "/dashboard/account",
         icon: CircleUserRound,
-        label: "My Account",
+        label: "Mi Cuenta",
         roles: ['user', 'admin']
     },
     {
@@ -29,7 +29,7 @@ const getNavigationItems = (userRole) => [
     {
         href: "/dashboard/pedidos",
         icon: ClipboardList,
-        label: "Pedidos",
+        label: userRole === 'admin' ? "Pedidos" : "Mis Pedidos",
         roles: ['user', 'admin']
     },
     {

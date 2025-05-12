@@ -2,10 +2,11 @@
 import { useState, useEffect, useRef } from 'react';
 import ListasTable from '@/components/admin/listas/ListasTable';
 import { toast } from 'react-hot-toast';
-import { FiX, FiPlus } from 'react-icons/fi';
+import { FiX, FiPlus, FiRefreshCw, FiSearch, FiFilter } from 'react-icons/fi';
 import { useSession } from 'next-auth/react';
 import { fetchBirthLists, createBirthList, formatBirthList } from '@/services/BirthListService';
 import ProductSelection from '@/components/admin/listas/ProductSelection';
+import TabNavigation from '@/components/admin/shared/TabNavigation';
 
 export default function ListasTabs({ userRole = 'user' }) {
     const [activeTab, setActiveTab] = useState('Todos');
@@ -23,7 +24,6 @@ export default function ListasTabs({ userRole = 'user' }) {
     const modalRef = useRef(null);
     const { data: session } = useSession();
     const [currentStep, setCurrentStep] = useState(1);
-
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -32,17 +32,14 @@ export default function ListasTabs({ userRole = 'user' }) {
         isPublic: true,
         items: []
     });
-
     // Determine which lists to show based on user role
     // Admin sees all lists, regular users only see their own
     const [displayLists, setDisplayLists] = useState([]);
-
     // Fetch birth lists from API
     const loadBirthLists = async () => {
         try {
             setIsLoading(true);
             const result = await fetchBirthLists();
-
             if (result.success) {
                 // Transform data for display using the format function
                 const formattedLists = result.data.map(list => formatBirthList(list));
@@ -57,14 +54,11 @@ export default function ListasTabs({ userRole = 'user' }) {
             setIsLoading(false);
         }
     };
-
     useEffect(() => {
         // Fetch lists from API
         loadBirthLists();
     }, [userRole]);
-
     const tabs = ['Todos', 'Activas', 'Completadas', 'Canceladas'];
-
     const filteredLists = displayLists.filter((list) => {
         if (activeTab === 'Todos') return true;
         if (activeTab === 'Activas') return list.status === 'Activa';
@@ -72,6 +66,40 @@ export default function ListasTabs({ userRole = 'user' }) {
         if (activeTab === 'Canceladas') return list.status === 'Cancelada';
         return false;
     });
+
+    // Handle filter changes
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // Apply filters
+    const applyFilters = () => {
+        // In a real scenario, we would fetch data with filters
+        toast.success('Filtros aplicados');
+    };
+
+    // Clear filters
+    const clearFilters = () => {
+        setFilters({
+            searchId: '',
+            searchReference: '',
+            searchName: '',
+            searchCreator: '',
+            dateFrom: '',
+            dateTo: ''
+        });
+        toast.success('Filtros limpiados');
+    };
+
+    // Refresh data
+    const refreshData = async () => {
+        await loadBirthLists();
+        toast.success('Datos actualizados correctamente');
+    };
 
     // Handle modal form input changes
     const handleChange = (e) => {
@@ -85,7 +113,6 @@ export default function ListasTabs({ userRole = 'user' }) {
     // Handle next step
     const handleNextStep = (e) => {
         e.preventDefault();
-
         // Validate current step
         if (currentStep === 1) {
             if (!formData.title || !formData.babyName || !formData.dueDate) {
@@ -109,15 +136,12 @@ export default function ListasTabs({ userRole = 'user' }) {
     // Handle form submission (final step)
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!formData.title || !formData.babyName || !formData.dueDate) {
             toast.error('Por favor complete todos los campos obligatorios');
             return;
         }
-
         try {
             setLoading(true);
-
             // Prepare items array - transform products to match API format
             const formattedItems = formData.items.map(item => ({
                 product: item.product._id,
@@ -125,7 +149,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                 reserved: item.reserved || 0,
                 priority: item.priority || 2
             }));
-
             // Create the birth list in the database
             const birthListData = {
                 user: session?.user?.id, // User ID from the session
@@ -138,16 +161,12 @@ export default function ListasTabs({ userRole = 'user' }) {
                 theme: 'default', // Default theme
                 status: 'Activa' // Active status
             };
-
             // Create the birth list using the service
             const result = await createBirthList(birthListData);
-
             if (result.success) {
                 // Refresh the list of birth lists
                 await loadBirthLists();
-
                 toast.success('Lista de nacimiento creada con éxito');
-
                 // Reset form and close modal
                 setFormData({
                     title: '',
@@ -177,99 +196,143 @@ export default function ListasTabs({ userRole = 'user' }) {
                 setShowCreateModal(false);
             }
         };
-
         if (showCreateModal) {
             document.addEventListener('mousedown', handleClickOutside);
         }
-
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showCreateModal]);
 
     return (
-        <div>
-            {/* Add New List Button - Always Visible at Top */}
-            <div className="flex justify-end mb-6">
-                <button
-                    onClick={() => {
-                        setShowCreateModal(true);
-                        setCurrentStep(1);
-                    }}
-                    className="flex items-center px-5 py-3 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors shadow-md font-medium"
-                >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Nueva Lista
-                </button>
-            </div>
+        <>
+            <TabNavigation
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                counts={{
+                    'Todos': displayLists.length,
+                    'Activas': displayLists.filter(list => list.status === 'Activa').length,
+                    'Completadas': displayLists.filter(list => list.status === 'Completada').length,
+                    'Canceladas': displayLists.filter(list => list.status === 'Cancelada').length
+                }}
+            />
 
-            {/* Header with Tabs */}
-            <div className="flex justify-between items-center mb-6">
-                {/* Tabs Navigation */}
-                <div className="flex border-b border-b-gray-200 border-gray-200">
-                    {tabs.map((tab) => (
+            <div className="bg-white rounded-lg shadow">
+                <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div className="flex items-center">
+                        <h2 className="text-lg font-medium">Gestión de Listas de Regalos ({displayLists.length})</h2>
                         <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 font-medium text-sm ${activeTab === tab
-                                ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
-                                : 'text-gray-500 hover:text-gray-700'
-                                }`}
+                            className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                            onClick={refreshData}
+                            disabled={isLoading}
+                            title="Actualizar datos"
                         >
-                            {tab} {tab === 'Todos' ? `(${displayLists.length})` : `(${displayLists.filter(list => {
-                                if (tab === 'Activas') return list.status === 'Activa';
-                                if (tab === 'Completadas') return list.status === 'Completada';
-                                if (tab === 'Canceladas') return list.status === 'Cancelada';
-                                return false;
-                            }).length})`}
+                            <FiRefreshCw className={isLoading ? 'animate-spin' : ''} />
                         </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Loading Indicator */}
-            {isLoading && (
-                <div className="flex justify-center items-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                </div>
-            )}
-
-            {/* Lists Table - Only show if not loading */}
-            {!isLoading && (
-                <ListasTable
-                    lists={filteredLists}
-                    filters={filters}
-                    setFilters={setFilters}
-                    userRole={userRole}
-                    onUpdate={loadBirthLists}
-                />
-            )}
-
-            {/* Empty State - Only show if not loading and no lists */}
-            {!isLoading && displayLists.length === 0 && (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <h3 className="mt-2 text-lg font-medium text-gray-900">No tienes listas de regalos</h3>
-                    <p className="mt-1 text-gray-500">Comienza creando tu primera lista de nacimiento para recibir regalos de tus seres queridos.</p>
-                    <div className="mt-6">
+                    </div>
+                    <div className="flex space-x-2">
                         <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none"
+                            onClick={() => {
+                                setShowCreateModal(true);
+                                setCurrentStep(1);
+                            }}
+                            className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
                         >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Crear Mi Primera Lista
+                            <FiPlus className="mr-1" /> Nueva Lista
                         </button>
                     </div>
                 </div>
-            )}
 
-            {/* Create List Modal */}
+                {/* Search and Filters */}
+                <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
+                    <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar ID"
+                                name="searchId"
+                                value={filters.searchId}
+                                onChange={handleFilterChange}
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                            />
+                        </div>
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar Referencia"
+                                name="searchReference"
+                                value={filters.searchReference}
+                                onChange={handleFilterChange}
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                            />
+                        </div>
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar Nombre"
+                                name="searchName"
+                                value={filters.searchName}
+                                onChange={handleFilterChange}
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                            />
+                        </div>
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar Creador"
+                                name="searchCreator"
+                                value={filters.searchCreator}
+                                onChange={handleFilterChange}
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex sm:flex-row flex-col justify-start gap-2">
+                        <button
+                            className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]"
+                            onClick={applyFilters}
+                            title="Aplicar filtros"
+                        >
+                            <FiFilter className="mr-2" />
+                            Filtrar
+                        </button>
+                        <button
+                            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                            onClick={clearFilters}
+                            title="Limpiar filtros"
+                        >
+                            Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                {/* Loading Indicator */}
+                {isLoading ? (
+                    <div className="py-20 text-center">
+                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
+                        <p className="mt-3 text-gray-600">Cargando listas...</p>
+                    </div>
+                ) : (
+                    /* Lists Table - Only show if not loading */
+                    <div>
+                        <ListasTable
+                            lists={filteredLists}
+                            filters={filters}
+                            setFilters={setFilters}
+                            userRole={userRole}
+                            onUpdate={loadBirthLists}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {/* Create List Modal - kept as is */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
                     <div
@@ -286,7 +349,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                     <FiX size={24} />
                                 </button>
                             </div>
-
                             {/* Step Indicator */}
                             <div className="mb-8">
                                 <div className="flex items-center justify-between">
@@ -318,7 +380,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                     </div>
                                 </div>
                             </div>
-
                             {/* Step 1: Basic Information */}
                             {currentStep === 1 && (
                                 <form onSubmit={handleNextStep} className="space-y-6">
@@ -338,7 +399,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             required
                                         />
                                     </div>
-
                                     {/* Baby Name */}
                                     <div>
                                         <label htmlFor="babyName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -355,7 +415,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             required
                                         />
                                     </div>
-
                                     {/* Description */}
                                     <div>
                                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
@@ -371,7 +430,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             rows={4}
                                         />
                                     </div>
-
                                     {/* Due Date */}
                                     <div>
                                         <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
@@ -387,7 +445,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             required
                                         />
                                     </div>
-
                                     {/* Privacy */}
                                     <div className="flex items-center">
                                         <input
@@ -402,7 +459,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             Lista Pública (Visible para cualquier persona con el enlace)
                                         </label>
                                     </div>
-
                                     <div className="flex justify-end space-x-4 pt-4">
                                         <button
                                             type="button"
@@ -420,7 +476,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                     </div>
                                 </form>
                             )}
-
                             {/* Step 2: Add Products */}
                             {currentStep === 2 && (
                                 <div className="space-y-6">
@@ -429,7 +484,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         <p className="text-gray-600">
                                             Selecciona los productos que necesitas para tu bebé. Puedes añadir más productos después de crear la lista.
                                         </p>
-
                                         <ProductSelection
                                             selectedProducts={formData.items}
                                             onProductSelect={(selectedProducts) => {
@@ -440,7 +494,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             }}
                                         />
                                     </div>
-
                                     <div className="flex justify-between space-x-4 pt-4">
                                         <button
                                             type="button"
@@ -459,7 +512,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                     </div>
                                 </div>
                             )}
-
                             {/* Step 3: Share */}
                             {currentStep === 3 && (
                                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -468,7 +520,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         <p className="text-gray-600 mb-4">
                                             Tu lista estará disponible para compartir después de crearla. Podrás enviar el enlace a familiares y amigos.
                                         </p>
-
                                         <div className="text-center p-4">
                                             <svg className="w-20 h-20 mx-auto text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -478,7 +529,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             </p>
                                         </div>
                                     </div>
-
                                     <div className="flex justify-between space-x-4 pt-4">
                                         <button
                                             type="button"
@@ -501,6 +551,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 } 
