@@ -3,15 +3,12 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { InstagramIcon, YoutubeIcon, LinkedinIcon, ShoppingBag, TagIcon, Gift, Mail } from "lucide-react";
-
 export default function Menu() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [openSubmenus, setOpenSubmenus] = useState({});
-
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
-
     // Dynamic menu data from JSON
     const menuData = {
         logo: "/assets/logo-header.svg",
@@ -42,19 +39,16 @@ export default function Menu() {
             },
         ]
     };
-
     const toggleSubmenu = (path) => {
         setOpenSubmenus(prev => ({
             ...prev,
             [path]: !prev[path]
         }));
     };
-
     const renderMenuItems = (items, parentPath = '') => {
         return items.map((item, index) => {
             const currentPath = parentPath ? `${parentPath}.${index}` : `${index}`;
             const IconComponent = item.icon;
-
             return (
                 <li key={currentPath} className="relative">
                     {!item.submenu ? (
@@ -93,7 +87,6 @@ export default function Menu() {
             );
         });
     };
-
     return (
         <div className={`absolute ${isMenuOpen ? 'overflow-hidden h-screen' : ''}`}>
             {isMenuOpen && (
@@ -108,13 +101,13 @@ export default function Menu() {
                     onClick={toggleMenu}
                 >
                     <svg width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 6H20M4 12H20M4 18H20" stroke="#353535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+                        <path d="M4 6H20M4 12H20M4 18H20" stroke="#353535" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
                     </svg>
-                    <span className="text-[#353535] font-medium">MENÚ</span>
+                    {/* <span className="text-[#353535] font-medium">MENÚ</span> */}
                 </button>
             </header>
             <div
-                className={`fixed top-0 left-0 w-[320px] h-full bg-white text-[#353535] z-20 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 w-[320px] h-full bg-white text-[#333] z-20 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="p-6 h-full flex flex-col">
@@ -137,13 +130,11 @@ export default function Menu() {
                             </svg>
                         </button>
                     </div>
-
                     <nav className="flex-1 overflow-y-auto scrollbar-hide">
                         <ul className="space-y-1">
                             {renderMenuItems(menuData.items)}
                         </ul>
                     </nav>
-
                     {/* Social Media Section */}
                     <div className="mt-auto pt-6 border-t border-gray-200">
                         <div className="flex space-x-5 justify-center my-4">

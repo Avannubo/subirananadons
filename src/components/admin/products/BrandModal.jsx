@@ -304,7 +304,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                         </div>
                     </div>
 
-                    <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                    <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-300">
                         <button
                             type="button"
                             onClick={onClose}

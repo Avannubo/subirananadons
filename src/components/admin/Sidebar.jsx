@@ -8,7 +8,7 @@ import {
     GiftIcon,
     Settings,
     CircleUserRound,
-    DatabaseIcon
+    TagIcon
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
@@ -24,6 +24,12 @@ const getNavigationItems = (userRole) => [
         href: "/dashboard/productos",
         icon: ShoppingBag,
         label: "Productos",
+        roles: ['admin']
+    },
+    {
+        href: "/dashboard/brands",
+        icon: TagIcon,
+        label: "Marcas",
         roles: ['admin']
     },
     {
@@ -55,7 +61,7 @@ const getNavigationItems = (userRole) => [
         icon: Settings,
         label: "Configuraciones",
         roles: ['admin']
-    } 
+    }
 ];
 
 export default function Sidebar() {
