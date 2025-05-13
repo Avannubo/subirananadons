@@ -124,13 +124,25 @@ export const fetchBirthListItems = async (id) => {
         const response = await fetch(`/api/birthlists/${id}/items`);
 
         if (!response.ok) {
-            throw new Error('Failed to fetch birth list items');
+            const errorData = await response.json().catch(() => ({}));
+            return {
+                success: false,
+                message: errorData.message || 'Failed to fetch birth list items'
+            };
         }
 
-        return await response.json();
+        const data = await response.json();
+        return {
+            success: true,
+            data: data.data || []
+        };
     } catch (error) {
         console.error(`Error fetching items for birth list ${id}:`, error);
-        throw error;
+        return {
+            success: false,
+            message: 'Error fetching birth list items',
+            error: error.message
+        };
     }
 };
 

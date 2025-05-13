@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
+import Product from '@/models/Product';
 import mongoose from 'mongoose';
 
 // Helper function to check if a MongoDB ObjectId is valid
@@ -18,7 +19,9 @@ const hasAccess = (birthList, userId, role) => {
 // GET: Retrieve items from a birth list
 export async function GET(request, { params }) {
     try {
-        const { id } = params;
+        // Ensure params is properly awaited
+        const resolvedParams = await Promise.resolve(params);
+        const { id } = resolvedParams;
 
         // Validate ID format
         if (!isValidObjectId(id)) {
@@ -58,7 +61,9 @@ export async function GET(request, { params }) {
 // POST: Add a new product to the birth list
 export async function POST(request, { params }) {
     try {
-        const { id } = params;
+        // Ensure params is properly awaited
+        const resolvedParams = await Promise.resolve(params);
+        const { id } = resolvedParams;
 
         // Check authentication
         const session = await getServerSession(authOptions);
@@ -151,7 +156,9 @@ export async function POST(request, { params }) {
 // PUT: Update multiple items in the birth list at once
 export async function PUT(request, { params }) {
     try {
-        const { id } = params;
+        // Ensure params is properly awaited
+        const resolvedParams = await Promise.resolve(params);
+        const { id } = resolvedParams;
 
         // Check authentication
         const session = await getServerSession(authOptions);
@@ -233,7 +240,9 @@ export async function PUT(request, { params }) {
 // DELETE: Remove a product from the birth list
 export async function DELETE(request, { params }) {
     try {
-        const { id } = params;
+        // Ensure params is properly awaited
+        const resolvedParams = await Promise.resolve(params);
+        const { id } = resolvedParams;
         const { searchParams } = new URL(request.url);
         const productId = searchParams.get('productId');
 

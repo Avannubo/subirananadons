@@ -1,6 +1,5 @@
 import Sidebar from '@/components/admin/Sidebar';
 import Header from '@/components/landing/header';
-
 export default function AdminLayout({ children }) {
     return (
         <div className="flex flex-col ">

@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-
 /**
  * Hook to fetch and manage orders
  */
@@ -14,23 +13,19 @@ export function useOrders(userRole) {
         totalItems: 0,
         limit: 5
     });
-
     // Fetch orders from the API
     const fetchOrders = async (page = 1, limit = 5) => {
         setLoading(true);
         try {
             console.log(`Fetching orders for role: ${userRole}, page: ${page}, limit: ${limit}`);
             const response = await fetch(`/api/orders?page=${page}&limit=${limit}`);
-
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Error response from orders API:', errorData);
                 throw new Error(errorData.message || 'Failed to fetch orders');
             }
-
             const data = await response.json();
             console.log('Orders API response:', data);
-
             if (data.success) {
                 // Map orders to match our UI format
                 const formattedOrders = data.orders.map(order => ({
@@ -47,7 +42,6 @@ export function useOrders(userRole) {
                     trackingNumber: order.trackingNumber || '',
                     notes: order.notes || ''
                 }));
-
                 console.log(`Formatted ${formattedOrders.length} orders for display`);
                 setOrders(formattedOrders);
                 setPagination(data.pagination);
@@ -61,7 +55,6 @@ export function useOrders(userRole) {
             setLoading(false);
         }
     };
-
     // Map database status to UI status
     const mapOrderStatus = (status) => {
         const statusMap = {
@@ -73,7 +66,6 @@ export function useOrders(userRole) {
         };
         return statusMap[status] || status;
     };
-
     // Map UI status back to database status
     const mapStatusToDb = (uiStatus) => {
         const reverseStatusMap = {
@@ -85,7 +77,6 @@ export function useOrders(userRole) {
         };
         return reverseStatusMap[uiStatus] || 'pending';
     };
-
     // Update order status
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
@@ -95,7 +86,6 @@ export function useOrders(userRole) {
                 ['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus)
                     ? newStatus
                     : mapStatusToDb(newStatus);
-
             const response = await fetch(`/api/orders/${orderId}`, {
                 method: 'PATCH',
                 headers: {
@@ -103,12 +93,10 @@ export function useOrders(userRole) {
                 },
                 body: JSON.stringify({ status: dbStatus }),
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to update order status');
             }
-
             // Update the local state
             setOrders(prevOrders =>
                 prevOrders.map(order =>
@@ -122,7 +110,6 @@ export function useOrders(userRole) {
                         : order
                 )
             );
-
             return true;
         } catch (err) {
             console.error('Error updating order status:', err);
@@ -130,7 +117,6 @@ export function useOrders(userRole) {
             return false;
         }
     };
-
     // Update order details
     const updateOrderDetails = async (orderId, data) => {
         try {
@@ -141,14 +127,11 @@ export function useOrders(userRole) {
                 },
                 body: JSON.stringify(data),
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to update order');
             }
-
             const responseData = await response.json();
-
             // Update the local state
             setOrders(prevOrders =>
                 prevOrders.map(order =>
@@ -162,7 +145,6 @@ export function useOrders(userRole) {
                         : order
                 )
             );
-
             return true;
         } catch (err) {
             console.error('Error updating order:', err);
@@ -170,19 +152,16 @@ export function useOrders(userRole) {
             return false;
         }
     };
-
     // Delete an order
     const deleteOrder = async (orderId) => {
         try {
             const response = await fetch(`/api/orders/${orderId}`, {
                 method: 'DELETE',
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to delete order');
             }
-
             // Remove from local state
             setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
             setPagination(prev => ({
@@ -190,7 +169,6 @@ export function useOrders(userRole) {
                 totalItems: prev.totalItems - 1,
                 totalPages: Math.ceil((prev.totalItems - 1) / prev.limit)
             }));
-
             return true;
         } catch (err) {
             console.error('Error deleting order:', err);
@@ -198,12 +176,10 @@ export function useOrders(userRole) {
             return false;
         }
     };
-
     // Fetch orders on mount and when pagination changes
     useEffect(() => {
         fetchOrders(pagination.currentPage, pagination.limit);
     }, [pagination.currentPage, pagination.limit]);
-
     return {
         orders,
         loading,

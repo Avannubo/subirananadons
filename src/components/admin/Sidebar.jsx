@@ -27,7 +27,7 @@ const getNavigationItems = (userRole) => [
         roles: ['admin']
     },
     {
-        href: "/dashboard/pedidos",
+        href: "/dashboard/orders",
         icon: ClipboardList,
         label: userRole === 'admin' ? "Pedidos" : "Mis Pedidos",
         roles: ['user', 'admin']
