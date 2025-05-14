@@ -46,6 +46,10 @@ export default function ProductsTable(props) {
             // Add the category filter from props if it exists
             if (props.categoryFilter) queryParams.append('categoryId', props.categoryFilter);
 
+            // IMPORTANT: Always prevent server sorting to ensure consistent ordering 
+            // We'll handle sorting client-side to maintain stable order
+            queryParams.append('preventSort', 'true');
+
             // For server-side pagination
             if (!useClientPagination) {
                 // Add pagination parameters
@@ -74,7 +78,14 @@ export default function ProductsTable(props) {
                 if (data.pagination) {
                     // Server pagination is working
                     setUseClientPagination(false);
-                    setProducts(data.products);
+
+                    // Sort products by _id to ensure stable order
+                    const sortedProducts = [...data.products].sort((a, b) => {
+                        // Sort by _id which is tied to creation time and immutable
+                        return a._id > b._id ? -1 : 1;
+                    });
+
+                    setProducts(sortedProducts);
                     setPagination({
                         currentPage: data.pagination.currentPage || page,
                         totalPages: data.pagination.totalPages || Math.ceil(data.products.length / limit) || 1,
@@ -105,6 +116,14 @@ export default function ProductsTable(props) {
 
     // Apply client-side pagination
     const applyClientPagination = (productsArray, page, limit) => {
+        // Sort products by MongoDB _id to maintain a stable order
+        // MongoDB ObjectIDs have a timestamp component that's tied to creation time
+        // This ensures products stay in the same position even after edits
+        productsArray.sort((a, b) => {
+            // Sort by _id which is tied to creation time and immutable
+            return a._id > b._id ? -1 : 1;
+        });
+
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const paginatedProducts = productsArray.slice(startIndex, endIndex);

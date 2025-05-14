@@ -131,13 +131,50 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 saveButtonRef.current.disabled = true;
             }
 
+            // Handle image upload if there is a new image file
+            let imageUrl = selectedList.image;
+            if (editForm.image && typeof editForm.image === 'object') {
+                const toastId = toast.loading('Subiendo imagen...');
+                try {
+                    // Convert image to base64
+                    const base64Image = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(editForm.image);
+                    });
+
+                    // Upload to server
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ image: base64Image })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Error al subir la imagen');
+                    }
+
+                    const data = await response.json();
+                    toast.success('Imagen subida correctamente', { id: toastId });
+                    imageUrl = data.url;
+                } catch (uploadError) {
+                    console.error('Error uploading image:', uploadError);
+                    toast.error('Error al subir la imagen. Se guardará la lista sin la nueva imagen.', { id: toastId });
+                }
+            }
+
             const updateData = {
                 title: editForm.title,
                 babyName: editForm.babyName,
                 description: editForm.description,
                 dueDate: new Date(editForm.dueDate),
-                isPublic: editForm.isPublic
+                isPublic: editForm.isPublic,
+                image: imageUrl
             };
+
             const result = await updateBirthList(selectedList.id, updateData);
             if (result.success) {
                 toast.success('Lista actualizada con éxito');

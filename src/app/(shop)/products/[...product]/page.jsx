@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import ProductSlider from '@/components/landing/ProductSlider';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'react-hot-toast';
@@ -18,9 +18,20 @@ export default function Page() {
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('DETALLES DEL PRODUCTO');
     const { addToCart } = useCart();
+    const [dragConstraints, setDragConstraints] = useState({ right: 0, left: 0 });
 
     // Reference for scrollable container
     const scrollContainerRef = useRef(null);
+
+    // Update drag constraints when container is available or product images change
+    useEffect(() => {
+        if (scrollContainerRef.current && product?.images?.length > 0) {
+            const containerWidth = scrollContainerRef.current.clientWidth;
+            const totalContentWidth = product.images.length * 180 + (product.images.length - 1) * 16; // width + gap
+            const leftConstraint = Math.min(0, containerWidth - totalContentWidth);
+            setDragConstraints({ right: 0, left: leftConstraint });
+        }
+    }, [product?.images?.length, scrollContainerRef.current]);
 
     // Custom scroll handler for thumbnail navigation
     const scrollThumbnails = (direction) => {
@@ -163,8 +174,85 @@ export default function Page() {
     if (loading) {
         return (
             <ShopLayout>
-                <div className="container mx-auto px-4 py-8 mt-22 flex justify-center items-center h-[60vh]">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                <div className="container mx-auto px-4 py-8 mt-22">
+                    {/* Skeleton Breadcrumb */}
+                    <div className="mb-8">
+                        <div className="flex items-center space-x-2">
+                            <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-4 w-40 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Skeleton Product Image */}
+                        <div className="space-y-4">
+                            <div className="relative w-full h-[600px] rounded-lg bg-gray-200 animate-pulse"></div>
+
+                            {/* Skeleton Thumbnails */}
+                            <div className="flex space-x-4 overflow-hidden">
+                                {[...Array(4)].map((_, index) => (
+                                    <div key={index} className="w-[180px] h-44 bg-gray-200 rounded-md animate-pulse"></div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Skeleton Product Info */}
+                        <div className="space-y-6">
+                            <div className="h-8 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-7 w-32 bg-gray-200 rounded animate-pulse"></div>
+
+                            <div className="space-y-4">
+                                <div className="h-20 bg-gray-200 rounded animate-pulse"></div>
+
+                                <div className="py-4 space-y-3">
+                                    <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
+                                    {[...Array(4)].map((_, index) => (
+                                        <div key={index} className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                                    ))}
+                                </div>
+
+                                {/* Skeleton Quantity Selector */}
+                                <div className="flex items-center space-x-4">
+                                    <div className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
+                                    <div className="h-10 w-32 bg-gray-200 rounded animate-pulse"></div>
+                                </div>
+
+                                {/* Skeleton Buttons */}
+                                <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Skeleton Tabs */}
+                    <div className="mt-16">
+                        <div className="border-b border-gray-200">
+                            <div className="flex space-x-8">
+                                <div className="h-6 w-28 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="h-6 w-28 bg-gray-200 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div className="mt-6 pb-16 border-b border-gray-200">
+                            <div className="space-y-2">
+                                {[...Array(3)].map((_, index) => (
+                                    <div key={index} className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Skeleton Related Products */}
+                    <div className="mt-16">
+                        <div className="h-8 w-44 bg-gray-200 rounded animate-pulse mb-8"></div>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            {[...Array(4)].map((_, index) => (
+                                <div key={index} className="bg-gray-200 rounded-lg h-64 animate-pulse"></div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </ShopLayout>
         );
@@ -218,8 +306,7 @@ export default function Page() {
 
                         {/* Imágenes del Producto */}
                         {product.images.length > 1 && (
-                            <div className="space-y-2"> 
-
+                            <div className="space-y-2">
                                 <div className="relative">
                                     <div
                                         ref={scrollContainerRef}
@@ -231,7 +318,13 @@ export default function Page() {
                                             scrollBehavior: 'smooth'
                                         }}
                                     >
-                                        <div className="inline-flex space-x-4 py-2 px-1">
+                                        <motion.div
+                                            className="inline-flex space-x-4 py-2 px-1 cursor-grab active:cursor-grabbing"
+                                            drag="x"
+                                            dragConstraints={dragConstraints}
+                                            whileTap={{ cursor: "grabbing" }}
+                                            dragElastic={0.1}
+                                        >
                                             {product.images.map((image, index) => (
                                                 <div
                                                     key={index}
@@ -248,12 +341,13 @@ export default function Page() {
                                                             alt={`${product.name} ${index + 1}`}
                                                             fill
                                                             className="object-contain"
-                                                        /> 
+                                                            draggable={false}
+                                                        />
                                                     </div>
                                                 </div>
                                             ))}
-                                        </div>
-                                    </div> 
+                                        </motion.div>
+                                    </div>
                                 </div>
                             </div>
                         )}

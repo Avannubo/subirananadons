@@ -43,6 +43,15 @@ export default function ListasTabs({ userRole = 'user' }) {
             if (result.success) {
                 // Transform data for display using the format function
                 const formattedLists = result.data.map(list => formatBirthList(list));
+
+                // Sort by MongoDB _id to maintain a stable order
+                // MongoDB ObjectIDs have a timestamp component that's tied to creation time
+                // This ensures lists stay in the same position even after edits
+                formattedLists.sort((a, b) => {
+                    // Sort by _id which is tied to creation time and immutable
+                    return a.id > b.id ? -1 : 1;
+                });
+
                 setDisplayLists(formattedLists);
             } else {
                 toast.error('Error al cargar las listas');

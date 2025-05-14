@@ -45,8 +45,8 @@ export default function Footer() {
 
                         {/* Right Links & Contact Column */}
                         <div className=" ">
-                            <p className="mb-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.</p>
-                            <ul className="space-y-3 mt-6">
+                            {/* <p className="mb-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.</p> */}
+                            <ul className="space-y-3">
                                 <li className="flex items-center gap-2">
                                     <Phone size={18} className="text-[#00B0C8]" />
                                     <span className="hover:text-[#00B0C8] transition-colors cursor-pointer">+34 93 243 25 10</span>

@@ -1,6 +1,5 @@
 'use client';
 import ProductSlider from "@/components/landing/ProductSlider";
-
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
@@ -11,7 +10,6 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { FiX, FiPlus } from 'react-icons/fi';
 import { createBirthList } from '@/services/BirthListService';
-
 const featuredProducts = [
     {
         id: 1,
@@ -78,36 +76,6 @@ const featuredProducts = [
         category: "Habitación"
     }
 ];
-// Sample birth lists data
-const birthLists = [
-    {
-        id: 1,
-        babyName: "Lucas García",
-        parents: "María y Juan García",
-        dueDate: "2024-06-15",
-        image: "/assets/images/Screenshot_1.png",
-        status: "active",
-        progress: 65 // percentage of items purchased
-    },
-    {
-        id: 2,
-        babyName: "Emma Martínez",
-        parents: "Ana y Pedro Martínez",
-        dueDate: "2024-07-20",
-        image: "/assets/images/Screenshot_2.png",
-        status: "active",
-        progress: 30
-    },
-    {
-        id: 3,
-        babyName: "Pablo Rodríguez",
-        parents: "Laura y Carlos Rodríguez",
-        dueDate: "2024-05-10",
-        image: "/assets/images/Screenshot_3.png",
-        status: "active",
-        progress: 85
-    }
-];
 export default function BirthListsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [hoveredProduct, setHoveredProduct] = useState(null);
@@ -115,9 +83,10 @@ export default function BirthListsPage() {
     const { data: session, status } = useSession();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [birthLists, setBirthLists] = useState([]);
+    const [isLoadingLists, setIsLoadingLists] = useState(true);
     const modalRef = useRef(null);
     const [currentStep, setCurrentStep] = useState(1);
-
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -126,27 +95,68 @@ export default function BirthListsPage() {
         isPublic: true,
         items: []
     });
-
+    // Fetch birth lists when component mounts
+    useEffect(() => {
+        const fetchBirthLists = async () => {
+            try {
+                setIsLoadingLists(true);
+                const response = await fetch('/api/birthlists/public');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch birth lists');
+                }
+                const data = await response.json();
+                if (data.success && data.data) {
+                    setBirthLists(data.data);
+                } else {
+                    console.error('Error in data format:', data);
+                    setBirthLists([]);
+                }
+            } catch (error) {
+                console.error('Error fetching birth lists:', error);
+                toast.error('Error al cargar las listas de nacimiento');
+                setBirthLists([]);
+            } finally {
+                setIsLoadingLists(false);
+            }
+        };
+        fetchBirthLists();
+    }, []);
+    // Calculate progress for a birth list based on reserved items
+    const calculateProgress = (list) => {
+        if (!list.items || list.items.length === 0) return 0;
+        let reservedTotal = 0;
+        let quantityTotal = 0;
+        list.items.forEach(item => {
+            reservedTotal += item.reserved || 0;
+            quantityTotal += item.quantity || 0;
+        });
+        if (quantityTotal === 0) return 0;
+        return Math.round((reservedTotal / quantityTotal) * 100);
+    };
     // Filter birth lists based on search term
     const filteredLists = birthLists.filter(list =>
-        list.babyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        list.parents.toLowerCase().includes(searchTerm.toLowerCase())
+        list.babyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        list.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        list.user?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
+    // Format date function
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES');
+    };
     // Handle create list button click
     const handleCreateListClick = (e) => {
         e.preventDefault();
-
         if (session) {
             // User is logged in, show the modal
             setShowCreateModal(true);
             setCurrentStep(1);
         } else {
-            // User is not logged in, trigger the login flow
-            signIn();
+            // User is not logged in, trigger the login flow with callbackUrl
+            signIn(undefined, { callbackUrl: '/listas-de-nacimiento' });
         }
     };
-
     // Handle modal form input changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -155,11 +165,9 @@ export default function BirthListsPage() {
             [name]: type === 'checkbox' ? checked : value
         }));
     };
-
     // Handle next step
     const handleNextStep = (e) => {
         e.preventDefault();
-
         // Validate current step
         if (currentStep === 1) {
             if (!formData.title || !formData.babyName || !formData.dueDate) {
@@ -172,26 +180,21 @@ export default function BirthListsPage() {
             setCurrentStep(3);
         }
     };
-
     // Handle previous step
     const handlePrevStep = () => {
         if (currentStep > 1) {
             setCurrentStep(currentStep - 1);
         }
     };
-
     // Handle form submission (final step)
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!formData.title || !formData.babyName || !formData.dueDate) {
             toast.error('Por favor complete todos los campos obligatorios');
             return;
         }
-
         try {
             setLoading(true);
-
             // Create the birth list in the database
             const birthListData = {
                 user: session?.user?.id, // User ID from the session
@@ -204,13 +207,10 @@ export default function BirthListsPage() {
                 theme: 'default', // Default theme
                 status: 'Activa' // Active status
             };
-
             // Create the birth list using the service
             const result = await createBirthList(birthListData);
-
             if (result.success) {
                 toast.success('Lista de nacimiento creada con éxito');
-
                 // Reset form and close modal
                 setFormData({
                     title: '',
@@ -222,7 +222,6 @@ export default function BirthListsPage() {
                 });
                 setShowCreateModal(false);
                 setCurrentStep(1);
-
                 // Redirect to dashboard lists page to see the created list
                 router.push('/dashboard/listas');
             } else {
@@ -235,7 +234,6 @@ export default function BirthListsPage() {
             setLoading(false);
         }
     };
-
     // Close modal if clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -243,16 +241,13 @@ export default function BirthListsPage() {
                 setShowCreateModal(false);
             }
         };
-
         if (showCreateModal) {
             document.addEventListener('mousedown', handleClickOutside);
         }
-
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showCreateModal]);
-
     return (
         <ShopLayout>
             {/* Hero Section */}
@@ -287,7 +282,7 @@ export default function BirthListsPage() {
                             <div className="relative">
                                 <input
                                     type="text"
-                                    placeholder="Buscar por ID de la lista, nombre del bebé o padres..."
+                                    placeholder="Buscar por nombre del bebé, título o creador..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-full px-6 py-4 rounded-full border-2 border-white bg-white/90 focus:bg-white focus:border-[#00B0C8] focus:outline-none text-lg"
@@ -302,53 +297,60 @@ export default function BirthListsPage() {
                     </div>
                 </div>
             </motion.div>
-
             <div className="container mx-auto px-4 py-12">
                 <div className="mb-16">
-                    {filteredLists.length > 0 ? (
+                    {isLoadingLists ? (
+                        // Loading state
+                        <div className="flex justify-center items-center h-64">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                        </div>
+                    ) : filteredLists.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredLists.map((list) => (
-                                <motion.div
-                                    key={list.id}
-                                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    whileHover={{ y: -5 }}
-                                >
-                                    <Link href={`/listas-de-nacimiento/${list.id}`}>
-                                        <div className="relative h-48">
-                                            <Image
-                                                src={list.image}
-                                                alt={list.babyName}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </div>
-                                        <div className="p-6">
-                                            <h3 className="text-xl font-semibold mb-2">{list.babyName}</h3>
-                                            <p className="text-gray-600 mb-4">{list.parents}</p>
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between text-sm">
-                                                    <span className="text-gray-500">Fecha prevista:</span>
-                                                    <span className="font-medium">{new Date(list.dueDate).toLocaleDateString('es-ES')}</span>
-                                                </div>
-                                                <div className="space-y-2">
+                            {filteredLists.map((list) => {
+                                const progress = calculateProgress(list);
+                                return (
+                                    <motion.div
+                                        key={list._id}
+                                        className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        whileHover={{ y: -5 }}
+                                    >
+                                        <Link href={`/listas-de-nacimiento/${list._id}`}>
+                                            <div className="relative h-48">
+                                                <Image
+                                                    src={list.image || '/assets/images/default-birthlist.jpg'}
+                                                    alt={list.babyName}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                            <div className="p-6">
+                                                <h3 className="text-xl font-semibold mb-2">{list.babyName}</h3>
+                                                <p className="text-gray-600 mb-4">{list.title}</p>
+                                                <div className="space-y-3">
                                                     <div className="flex justify-between text-sm">
-                                                        <span className="text-gray-500">Progreso:</span>
-                                                        <span className="font-medium">{list.progress}%</span>
+                                                        <span className="text-gray-500">Fecha prevista:</span>
+                                                        <span className="font-medium">{formatDate(list.dueDate)}</span>
                                                     </div>
-                                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                                        <div
-                                                            className="bg-[#00B0C8] h-2 rounded-full"
-                                                            style={{ width: `${list.progress}%` }}
-                                                        />
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between text-sm">
+                                                            <span className="text-gray-500">Progreso:</span>
+                                                            <span className="font-medium">{progress}%</span>
+                                                        </div>
+                                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                                            <div
+                                                                className="bg-[#00B0C8] h-2 rounded-full"
+                                                                style={{ width: `${progress}%` }}
+                                                            />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </Link>
-                                </motion.div>
-                            ))}
+                                        </Link>
+                                    </motion.div>
+                                );
+                            })}
                         </div>
                     ) : (
                         <motion.div
@@ -380,7 +382,6 @@ export default function BirthListsPage() {
                             </button>
                         </div>
                     </motion.div>
-
                     <motion.div
                         className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
                         initial={{ opacity: 0, y: 20 }}
@@ -463,7 +464,6 @@ export default function BirthListsPage() {
                     </div>
                 </motion.div>
             </div>
-
             {/* Create List Modal */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
@@ -481,7 +481,6 @@ export default function BirthListsPage() {
                                     <FiX size={24} />
                                 </button>
                             </div>
-
                             {/* Step Indicator */}
                             <div className="mb-8">
                                 <div className="flex items-center justify-between">
@@ -513,7 +512,6 @@ export default function BirthListsPage() {
                                     </div>
                                 </div>
                             </div>
-
                             {/* Step 1: Basic Information */}
                             {currentStep === 1 && (
                                 <form onSubmit={handleNextStep} className="space-y-6">
@@ -533,7 +531,6 @@ export default function BirthListsPage() {
                                             required
                                         />
                                     </div>
-
                                     {/* Baby Name */}
                                     <div>
                                         <label htmlFor="babyName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -550,7 +547,6 @@ export default function BirthListsPage() {
                                             required
                                         />
                                     </div>
-
                                     {/* Description */}
                                     <div>
                                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
@@ -566,7 +562,6 @@ export default function BirthListsPage() {
                                             rows={4}
                                         />
                                     </div>
-
                                     {/* Due Date */}
                                     <div>
                                         <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
@@ -582,7 +577,6 @@ export default function BirthListsPage() {
                                             required
                                         />
                                     </div>
-
                                     {/* Privacy */}
                                     <div className="flex items-center">
                                         <input
@@ -597,7 +591,6 @@ export default function BirthListsPage() {
                                             Lista Pública (Visible para cualquier persona con el enlace)
                                         </label>
                                     </div>
-
                                     <div className="flex justify-end space-x-4 pt-4">
                                         <button
                                             type="button"
@@ -615,7 +608,6 @@ export default function BirthListsPage() {
                                     </div>
                                 </form>
                             )}
-
                             {/* Step 2: Add Products */}
                             {currentStep === 2 && (
                                 <div className="space-y-6">
@@ -624,7 +616,6 @@ export default function BirthListsPage() {
                                         <p className="text-gray-600 mb-4">
                                             Selecciona los productos que necesitas para tu bebé. Puedes añadir más productos después de crear la lista.
                                         </p>
-
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                                             {/* This would be populated from your products database */}
                                             <div className="text-center p-8">
@@ -634,7 +625,6 @@ export default function BirthListsPage() {
                                             </div>
                                         </div>
                                     </div>
-
                                     <div className="flex justify-between space-x-4 pt-4">
                                         <button
                                             type="button"
@@ -653,7 +643,6 @@ export default function BirthListsPage() {
                                     </div>
                                 </div>
                             )}
-
                             {/* Step 3: Share */}
                             {currentStep === 3 && (
                                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -662,7 +651,6 @@ export default function BirthListsPage() {
                                         <p className="text-gray-600 mb-4">
                                             Tu lista estará disponible para compartir después de crearla. Podrás enviar el enlace a familiares y amigos.
                                         </p>
-
                                         <div className="text-center p-4">
                                             <svg className="w-20 h-20 mx-auto text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -672,7 +660,6 @@ export default function BirthListsPage() {
                                             </p>
                                         </div>
                                     </div>
-
                                     <div className="flex justify-between space-x-4 pt-4">
                                         <button
                                             type="button"

@@ -128,4 +128,25 @@ export async function fetchProductById(id) {
         console.error('ProductService fetchProductById error:', error);
         throw error;
     }
+}
+
+/**
+ * Fetch featured products
+ * @param {number} limit - Maximum number of products to fetch
+ * @returns {Promise<Array>} - Array of formatted featured products
+ */
+export async function fetchFeaturedProducts(limit = 8) {
+    try {
+        const response = await fetch(`/api/products/featured?limit=${limit}`);
+
+        if (!response.ok) {
+            throw new Error(`Error fetching featured products: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.products || [];
+    } catch (error) {
+        console.error('ProductService fetchFeaturedProducts error:', error);
+        return [];
+    }
 } 

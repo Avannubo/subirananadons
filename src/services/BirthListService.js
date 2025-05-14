@@ -8,7 +8,8 @@
  */
 export const fetchBirthLists = async () => {
     try {
-        const response = await fetch('/api/birthlists');
+        // Add preventSort=true to ensure stable ordering managed by the client
+        const response = await fetch('/api/birthlists?preventSort=true');
 
         if (!response.ok) {
             throw new Error('Failed to fetch birth lists');

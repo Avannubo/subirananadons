@@ -34,6 +34,9 @@ export default function BrandsTable() {
             setLoading(true);
             const queryParams = new URLSearchParams();
 
+            // Add preventSort=true to ensure server doesn't apply its own sorting
+            queryParams.append('preventSort', 'true');
+
             // Add pagination parameters for server-side pagination
             if (!useClientPagination) {
                 queryParams.append('page', page);
@@ -55,7 +58,14 @@ export default function BrandsTable() {
             } else if (data.brands && Array.isArray(data.brands)) {
                 if (data.pagination) {
                     setUseClientPagination(false);
-                    setBrands(data.brands);
+
+                    // Sort brands by _id to ensure stable order
+                    const sortedBrands = [...data.brands].sort((a, b) => {
+                        // Sort by _id which is tied to creation time and immutable
+                        return a._id > b._id ? -1 : 1;
+                    });
+
+                    setBrands(sortedBrands);
                     setPagination({
                         currentPage: data.pagination.currentPage || page,
                         totalPages: data.pagination.totalPages || Math.ceil(data.brands.length / limit) || 1,
@@ -92,18 +102,12 @@ export default function BrandsTable() {
 
     // Apply client-side pagination
     const applyClientPagination = (brandsArray, page, limit) => {
-        // Sort brands by updatedAt and createdAt in descending order
+        // Sort brands by MongoDB _id to maintain a stable order
+        // MongoDB ObjectIDs have a timestamp component that's tied to creation time
+        // This ensures brands stay in the same position even after edits
         brandsArray.sort((a, b) => {
-            // First try to sort by updatedAt
-            if (a.updatedAt && b.updatedAt) {
-                return new Date(b.updatedAt) - new Date(a.updatedAt);
-            }
-            // Then try to sort by createdAt
-            if (a.createdAt && b.createdAt) {
-                return new Date(b.createdAt) - new Date(a.createdAt);
-            }
-            // Fallback to ID (higher IDs are usually newer)
-            return (b.id || 0) - (a.id || 0);
+            // Sort by _id which is tied to creation time and immutable
+            return a._id > b._id ? -1 : 1;
         });
 
         const filteredBrands = brandsArray.filter((brand) => {

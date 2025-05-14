@@ -5,32 +5,32 @@ const ImageGallery = () => {
     const galleryItems = [
         {
             id: 1,
-            // title: 'Premium Collection',
-            // description: 'Explore our exclusive designs',
+            title: 'Joolz',
+            description: 'Descubre nuestros productos Joolz',
             imageUrl: '/assets/images/joolz.png',
             width: 60,
             href: "/brands"
         },
         {
             id: 2,
-            // title: 'Summer Edition',
-            // description: 'New arrivals just for you',
+            title: 'Stokke',
+            description: 'Explora la colección Stokke',
             imageUrl: '/assets/images/stokke.png',
             width: 40,
             href: "/brands"
         },
         {
             id: 3,
-            // title: 'Limited Offers',
-            // description: 'Special discounts available',
+            title: 'Bugaboo',
+            description: 'Los mejores productos Bugaboo',
             imageUrl: '/assets/images/bugaboo.jpg',
             width: 40,
             href: "/brands"
         },
         {
             id: 4,
-            // title: 'Baby Essentials',
-            // description: 'Everything you need',
+            title: 'Joie',
+            description: 'Colección completa de Joie',
             imageUrl: '/assets/images/joie.png',
             width: 60,
             href: "/brands"
@@ -52,11 +52,11 @@ const ImageGallery = () => {
                             <div className="relative w-full h-full group  ">
                                 <Image
                                     src={item.imageUrl}
-                                    alt="img"
+                                    alt={item.title}
                                     fill
-                                    className="object-cover  transition-transform duration-500 group-hover:scale-105"
+                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0  flex items-end   p-6 transition-colors duration-300">
+                                <div className="absolute inset-0 bg-black/20 flex items-end p-6 transition-colors duration-300 group-hover:bg-black/30">
                                     <div className="text-white">
                                         <h3 className="text-2xl font-bold mb-1">{item.title}</h3>
                                         <p className="text-white/90">{item.description}</p>
@@ -79,7 +79,7 @@ const ImageGallery = () => {
                             <div className="relative w-full h-full group">
                                 <Image
                                     src={item.imageUrl}
-                                    alt="img"
+                                    alt={item.title}
                                     fill
                                     className="object-cover rounded-lg transition-transform duration-500 group-hover:scale-105"
                                 />

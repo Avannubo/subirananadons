@@ -17,6 +17,10 @@ const birthListSchema = new mongoose.Schema({
         required: true
     },
     dueDate: Date,
+    image: {
+        type: String,
+        default: '/assets/images/default-birthlist.jpg'
+    },
     items: [{
         product: {
             type: mongoose.Schema.Types.ObjectId,

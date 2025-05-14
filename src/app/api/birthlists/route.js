@@ -18,6 +18,9 @@ export async function GET(request) {
 
         await dbConnect();
 
+        const { searchParams } = new URL(request.url);
+        const preventSort = searchParams.get('preventSort') === 'true';
+
         // If admin, return all birth lists
         // Otherwise, return only the user's birth lists
         let query = {};
@@ -25,10 +28,17 @@ export async function GET(request) {
             query.user = session.user.id;
         }
 
-        const birthLists = await BirthList.find(query)
-            .sort({ createdAt: -1 })
-            .populate('user', 'name email')
-            .lean();
+        // Build the query with optional sorting
+        let birthListsQuery = BirthList.find(query)
+            .populate('user', 'name email');
+
+        // Apply sorting only if preventSort is false
+        if (!preventSort) {
+            birthListsQuery = birthListsQuery.sort({ createdAt: -1 });
+        }
+
+        // Execute the query
+        const birthLists = await birthListsQuery.lean();
 
         return NextResponse.json({ success: true, data: birthLists });
     } catch (error) {

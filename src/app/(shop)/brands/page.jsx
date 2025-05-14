@@ -20,7 +20,8 @@ export default function BrandsPage() {
     const [sortBy, setSortBy] = useState('default');
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [quickViewProduct, setQuickViewProduct] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [brandsLoading, setBrandsLoading] = useState(true);
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -30,6 +31,7 @@ export default function BrandsPage() {
     useEffect(() => {
         const fetchBrands = async () => {
             try {
+                setBrandsLoading(true);
                 const response = await fetch('/api/brands?limit=100&enabled=true');
                 const data = await response.json();
                 if (data.brands && data.brands.length > 0) {
@@ -38,6 +40,8 @@ export default function BrandsPage() {
                 }
             } catch (error) {
                 console.error('Error fetching brands:', error);
+            } finally {
+                setBrandsLoading(false);
             }
         };
         fetchBrands();
@@ -208,15 +212,40 @@ export default function BrandsPage() {
 
         return pages;
     };
-    if (loading && brands.length === 0) {
-        return (
-            <ShopLayout>
-                <div className="container mx-auto px-4 py-20 flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00B0C8]"></div>
+    // BrandSkeleton component for the sidebar
+    const BrandSkeleton = () => (
+        <div className="flex items-center gap-3 px-4 py-2 animate-pulse">
+            <div className="w-10 h-10 rounded-lg bg-gray-200"></div>
+            <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </div>
+    );
+
+    // ProductSkeleton component for the grid or list view
+    const ProductSkeleton = ({ viewMode }) => {
+        if (viewMode === 'grid') {
+            return (
+                <div className="w-full flex flex-col items-center animate-pulse bg-white p-4 rounded-lg shadow-sm">
+                    <div className="w-full h-64 bg-gray-200 rounded-lg mb-4"></div>
+                    <div className="w-2/3 h-5 bg-gray-200 rounded mb-2 self-start"></div>
+                    <div className="w-1/3 h-4 bg-gray-200 rounded self-start"></div>
                 </div>
-            </ShopLayout>
-        );
-    }
+            );
+        } else {
+            return (
+                <div className="w-full flex items-start animate-pulse bg-white p-4 rounded-lg shadow-sm">
+                    <div className="w-1/4 h-40 bg-gray-200 rounded-lg mr-4"></div>
+                    <div className="flex-1">
+                        <div className="w-2/3 h-6 bg-gray-200 rounded mb-3"></div>
+                        <div className="w-1/4 h-5 bg-gray-200 rounded mb-4"></div>
+                        <div className="w-full h-4 bg-gray-200 rounded mb-2"></div>
+                        <div className="w-full h-4 bg-gray-200 rounded mb-2"></div>
+                        <div className="w-2/3 h-4 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            );
+        }
+    };
+
     return (
         <ShopLayout>
             {/* Header Image */}
@@ -256,64 +285,77 @@ export default function BrandsPage() {
                             <h2 className="font-medium text-lg mb-4 px-4">Marcas</h2>
                             <div className="max-h-[calc(100vh-450px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                 <ul className="space-y-1">
-                                    {/* All Products option */}
-                                    <motion.li
-                                        key="all-products"
-                                        className='hover:font-bold text-zinc-700 transition-all duration-300'
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.05, duration: 0.5 }}
-                                    >
-                                        <button
-                                            onClick={() => setSelectedBrand('all')}
-                                            className={`w-full text-left px-4 py-2 transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-3 ${selectedBrand === 'all'
-                                                ? 'bg-gray-50 font-medium text-[#00B0C8]'
-                                                : ''
-                                                }`}
-                                        >
-                                            <div className="relative">
-                                                <div className="w-10 h-10 rounded-lg bg-gray-100 bg-opacity-10 flex items-center justify-center">
-                                                    <span className="text-gray-500 text-xs">ALL</span>
-                                                </div>
-                                            </div>
-                                            <span className="hover:text-[#00B0C8] transition-colors active:font-bold">Todas las marcas</span>
-                                        </button>
-                                    </motion.li>
-                                    {/* Existing brands */}
-                                    {brands.map((brand, index) => (
+                                    {/* All Products option - always show this */}
+                                    {!brandsLoading ? (
                                         <motion.li
-                                            key={brand._id}
+                                            key="all-products"
                                             className='hover:font-bold text-zinc-700 transition-all duration-300'
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.1 * index, duration: 0.5 }}
+                                            transition={{ delay: 0.05, duration: 0.5 }}
                                         >
                                             <button
-                                                onClick={() => setSelectedBrand(brand.name)}
-                                                className={`w-full text-left px-4 py-2 transition-colors hover:bg-gray-50 flex items-center gap-3 ${selectedBrand === brand.name
+                                                onClick={() => setSelectedBrand('all')}
+                                                className={`w-full text-left px-4 py-2 transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-3 ${selectedBrand === 'all'
                                                     ? 'bg-gray-50 font-medium text-[#00B0C8]'
                                                     : ''
                                                     }`}
                                             >
                                                 <div className="relative">
-                                                    {brand.logo ? (
-                                                        <Image
-                                                            src={brand.logo}
-                                                            alt={brand.name}
-                                                            width={100}
-                                                            height={100}
-                                                            className="object-contain overflow-hidden w-10 h-10 rounded-lg"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center">
-                                                            <span className="text-gray-500 text-xs">{brand.name.substring(0, 2).toUpperCase()}</span>
-                                                        </div>
-                                                    )}
+                                                    <div className="w-10 h-10 rounded-lg bg-gray-100 bg-opacity-10 flex items-center justify-center">
+                                                        <span className="text-gray-500 text-xs">ALL</span>
+                                                    </div>
                                                 </div>
-                                                <span className="hover:text-[#00B0C8] transition-colors active:font-bold">{brand.name}</span>
+                                                <span className="hover:text-[#00B0C8] transition-colors active:font-bold">Todas las marcas</span>
                                             </button>
                                         </motion.li>
-                                    ))}
+                                    ) : (
+                                        <BrandSkeleton key="all-skeleton" />
+                                    )}
+
+                                    {/* Brands list or skeleton */}
+                                    {brandsLoading ? (
+                                        // Show brand skeletons while loading
+                                        Array(10).fill(0).map((_, index) => (
+                                            <BrandSkeleton key={`brand-skeleton-${index}`} />
+                                        ))
+                                    ) : (
+                                        // Show actual brands when loaded
+                                        brands.map((brand, index) => (
+                                            <motion.li
+                                                key={brand._id}
+                                                className='hover:font-bold text-zinc-700 transition-all duration-300'
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.1 * index, duration: 0.5 }}
+                                            >
+                                                <button
+                                                    onClick={() => setSelectedBrand(brand.name)}
+                                                    className={`w-full text-left px-4 py-2 transition-colors hover:bg-gray-50 flex items-center gap-3 ${selectedBrand === brand.name
+                                                        ? 'bg-gray-50 font-medium text-[#00B0C8]'
+                                                        : ''
+                                                        }`}
+                                                >
+                                                    <div className="relative">
+                                                        {brand.logo ? (
+                                                            <Image
+                                                                src={brand.logo}
+                                                                alt={brand.name}
+                                                                width={100}
+                                                                height={100}
+                                                                className="object-contain overflow-hidden w-10 h-10 rounded-lg"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center">
+                                                                <span className="text-gray-500 text-xs">{brand.name.substring(0, 2).toUpperCase()}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <span className="hover:text-[#00B0C8] transition-colors active:font-bold">{brand.name}</span>
+                                                </button>
+                                            </motion.li>
+                                        ))
+                                    )}
                                 </ul>
                             </div>
                         </div>
@@ -351,55 +393,95 @@ export default function BrandsPage() {
                                 </button>
                             </div>
                             <div className="flex items-center">
-                                <span className="mr-2 text-sm text-gray-500">Ordenar por:</span>
-                                <select
-                                    className="border rounded-md py-1 px-2 text-sm"
-                                    onChange={handleSortChange}
-                                    value={sortBy}
-                                >
-                                    <option value="default">Por defecto</option>
-                                    <option value="price-asc">Precio: menor a mayor</option>
-                                    <option value="price-desc">Precio: mayor a menor</option>
-                                    <option value="name-asc">Nombre</option>
-                                    <option value="newest">Más nuevos</option>
-                                </select>
+                                {loading ? (
+                                    <div className="flex items-center animate-pulse">
+                                        <div className="h-4 w-28 bg-gray-200 rounded mr-2"></div>
+                                        <div className="h-8 w-36 bg-gray-200 rounded"></div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <span className="mr-2 text-sm text-gray-500">Ordenar por:</span>
+                                        <select
+                                            className="border rounded-md py-1 px-2 text-sm"
+                                            onChange={handleSortChange}
+                                            value={sortBy}
+                                        >
+                                            <option value="default">Por defecto</option>
+                                            <option value="price-asc">Precio: menor a mayor</option>
+                                            <option value="price-desc">Precio: mayor a menor</option>
+                                            <option value="name-asc">Nombre</option>
+                                            <option value="newest">Más nuevos</option>
+                                        </select>
+                                    </>
+                                )}
                             </div>
                         </motion.div>
-                        {/* Products count */}
-                        <p className="text-sm text-gray-500 mb-4">
-                            Mostrando {filteredProducts.length} productos de {totalItems}
-                            {selectedBrand !== 'all' ? ` de ${selectedBrand}` : ''}
-                        </p>
-                        {/* No products message */}
-                        {filteredProducts.length === 0 && (
-                            <div className="py-12 text-center">
-                                <p className="text-gray-500">
-                                    {loading
-                                        ? 'Cargando productos...'
-                                        : 'No hay productos disponibles para esta marca.'}
-                                </p>
-                            </div>
+                        {/* Products count - show skeleton if loading */}
+                        {loading ? (
+                            <div className="h-5 w-40 bg-gray-200 rounded animate-pulse mb-4"></div>
+                        ) : (
+                            <p className="text-sm text-gray-500 mb-4">
+                                Mostrando {filteredProducts.length} productos de {totalItems}
+                                {selectedBrand !== 'all' ? ` de ${selectedBrand}` : ''}
+                            </p>
                         )}
-                        {/* Products Grid */}
-                        <motion.div
-                            layout
-                            className={`${viewMode === 'grid'
-                                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
-                                : 'space-y-6'
-                                }`}
-                        >
-                            {filteredProducts.map((product, index) => (
-                                <ProductCard
-                                    key={product.id}
-                                    product={product}
-                                    index={index}
-                                    viewMode={viewMode}
-                                    onQuickViewClick={handleOpenQuickView}
-                                />
-                            ))}
-                        </motion.div>
-                        {/* Pagination */}
-                        {totalPages > 1 && (
+
+                        {/* Products Grid/List - Show skeleton or content */}
+                        {loading ? (
+                            <motion.div
+                                layout
+                                className={`${viewMode === 'grid'
+                                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
+                                    : 'space-y-6'
+                                    }`}
+                            >
+                                {/* Generate appropriate number of skeleton items based on view mode */}
+                                {Array(12).fill(0).map((_, index) => (
+                                    <ProductSkeleton key={`product-skeleton-${index}`} viewMode={viewMode} />
+                                ))}
+                            </motion.div>
+                        ) : (
+                            <>
+                                {/* No products message */}
+                                {filteredProducts.length === 0 && (
+                                    <div className="py-12 text-center">
+                                        <p className="text-gray-500">
+                                            No hay productos disponibles para esta marca.
+                                        </p>
+                                    </div>
+                                )}
+                                {/* Actual products grid/list */}
+                                <motion.div
+                                    layout
+                                    className={`${viewMode === 'grid'
+                                        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
+                                        : 'space-y-6'
+                                        }`}
+                                >
+                                    {filteredProducts.map((product, index) => (
+                                        <ProductCard
+                                            key={product.id}
+                                            product={product}
+                                            viewMode={viewMode}
+                                            onQuickViewClick={handleOpenQuickView}
+                                        />
+                                    ))}
+                                </motion.div>
+                            </>
+                        )}
+
+                        {/* Pagination - show skeleton when loading or actual pagination when loaded */}
+                        {loading ? (
+                            <div className="mt-10 flex justify-center">
+                                <div className="flex items-center space-x-2 animate-pulse">
+                                    <div className="w-8 h-8 bg-gray-200 rounded-md"></div>
+                                    {[...Array(5)].map((_, i) => (
+                                        <div key={i} className="w-10 h-8 bg-gray-200 rounded-md"></div>
+                                    ))}
+                                    <div className="w-8 h-8 bg-gray-200 rounded-md"></div>
+                                </div>
+                            </div>
+                        ) : totalPages > 1 && (
                             <div className="mt-10 flex justify-center">
                                 <nav className="flex items-center rounded-md overflow-hidden">
                                     <button

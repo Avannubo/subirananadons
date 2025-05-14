@@ -42,6 +42,18 @@ export function useOrders(userRole) {
                     trackingNumber: order.trackingNumber || '',
                     notes: order.notes || ''
                 }));
+
+                // Sort orders by creation date to maintain a stable order even after updates
+                // This ensures edited orders stay in the same position
+                formattedOrders.sort((a, b) => {
+                    // Extract dates from the formatted date strings or use default
+                    const dateA = a.date ? new Date(a.date.split(',')[0].split('/').reverse().join('-')) : new Date(0);
+                    const dateB = b.date ? new Date(b.date.split(',')[0].split('/').reverse().join('-')) : new Date(0);
+
+                    // Sort by date (newest first)
+                    return dateB - dateA;
+                });
+
                 console.log(`Formatted ${formattedOrders.length} orders for display`);
                 setOrders(formattedOrders);
                 setPagination(data.pagination);

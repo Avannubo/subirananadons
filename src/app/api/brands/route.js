@@ -6,42 +6,52 @@ import { ObjectId } from 'mongodb';
 export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);
+        const search = searchParams.get('search');
+        const status = searchParams.get('status');
+        const preventSort = searchParams.get('preventSort') === 'true';
+
+        // Pagination parameters
         const page = parseInt(searchParams.get('page')) || 1;
         const limit = parseInt(searchParams.get('limit')) || 5;
         const skip = (page - 1) * limit;
 
-        // Get filter parameters
-        const nameFilter = searchParams.get('name');
-        const enabledFilter = searchParams.get('enabled');
-
-        // Build filter object
-        const filter = {};
-
-        if (nameFilter) {
-            filter.name = { $regex: nameFilter, $options: 'i' }; // Case-insensitive name search
-        }
-
-        if (enabledFilter !== null) {
-            filter.enabled = enabledFilter === 'true';
-        }
-
         // Connect to database
         const { db } = await connectToDatabase();
 
-        // Count total items for pagination
-        const totalItems = await db.collection('brands').countDocuments(filter);
+        // Build query based on search parameters
+        const query = {};
+
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { website: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        if (status) {
+            query.enabled = status === 'enabled';
+        }
+
+        // Get total count for pagination
+        const totalItems = await db.collection('brands').countDocuments(query);
+
+        // Build the query with optional sorting
+        let brandsQuery = db.collection('brands').find(query);
+
+        // Apply sorting only if preventSort is false
+        if (!preventSort) {
+            brandsQuery = brandsQuery.sort({ updatedAt: -1 });
+        }
+
+        // Apply pagination
+        brandsQuery = brandsQuery.skip(skip).limit(limit);
+
+        // Execute the query
+        const brands = await brandsQuery.toArray();
+
+        // Calculate pagination info
         const totalPages = Math.ceil(totalItems / limit);
 
-        // Get paginated brands
-        const brands = await db
-            .collection('brands')
-            .find(filter)
-            .sort({ updatedAt: -1, createdAt: -1 }) // Sort by updated time first, then created time, descending order
-            .skip(skip)
-            .limit(limit)
-            .toArray();
-
-        // Return paginated response
         return NextResponse.json({
             brands,
             pagination: {
@@ -53,10 +63,7 @@ export async function GET(request) {
         });
     } catch (error) {
         console.error('Error fetching brands:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch brands' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to fetch brands' }, { status: 500 });
     }
 }
 
