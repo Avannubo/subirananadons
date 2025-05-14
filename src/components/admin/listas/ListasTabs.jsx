@@ -7,7 +7,6 @@ import { useSession } from 'next-auth/react';
 import { fetchBirthLists, createBirthList, formatBirthList } from '@/services/BirthListService';
 import ProductSelection from '@/components/admin/listas/ProductSelection';
 import TabNavigation from '@/components/admin/shared/TabNavigation';
-
 export default function ListasTabs({ userRole = 'user' }) {
     const [activeTab, setActiveTab] = useState('Todos');
     const [filters, setFilters] = useState({
@@ -43,7 +42,6 @@ export default function ListasTabs({ userRole = 'user' }) {
             if (result.success) {
                 // Transform data for display using the format function
                 const formattedLists = result.data.map(list => formatBirthList(list));
-
                 // Sort by MongoDB _id to maintain a stable order
                 // MongoDB ObjectIDs have a timestamp component that's tied to creation time
                 // This ensures lists stay in the same position even after edits
@@ -51,7 +49,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                     // Sort by _id which is tied to creation time and immutable
                     return a.id > b.id ? -1 : 1;
                 });
-
                 setDisplayLists(formattedLists);
             } else {
                 toast.error('Error al cargar las listas');
@@ -75,7 +72,6 @@ export default function ListasTabs({ userRole = 'user' }) {
         if (activeTab === 'Canceladas') return list.status === 'Cancelada';
         return false;
     });
-
     // Handle filter changes
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -84,13 +80,11 @@ export default function ListasTabs({ userRole = 'user' }) {
             [name]: value
         }));
     };
-
     // Apply filters
     const applyFilters = () => {
         // In a real scenario, we would fetch data with filters
         toast.success('Filtros aplicados');
     };
-
     // Clear filters
     const clearFilters = () => {
         setFilters({
@@ -103,13 +97,11 @@ export default function ListasTabs({ userRole = 'user' }) {
         });
         toast.success('Filtros limpiados');
     };
-
     // Refresh data
     const refreshData = async () => {
         await loadBirthLists();
         toast.success('Datos actualizados correctamente');
     };
-
     // Handle modal form input changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -118,7 +110,6 @@ export default function ListasTabs({ userRole = 'user' }) {
             [name]: type === 'checkbox' ? checked : value
         }));
     };
-
     // Handle next step
     const handleNextStep = (e) => {
         e.preventDefault();
@@ -134,14 +125,12 @@ export default function ListasTabs({ userRole = 'user' }) {
             setCurrentStep(3);
         }
     };
-
     // Handle previous step
     const handlePrevStep = () => {
         if (currentStep > 1) {
             setCurrentStep(currentStep - 1);
         }
     };
-
     // Handle form submission (final step)
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -197,7 +186,6 @@ export default function ListasTabs({ userRole = 'user' }) {
             setLoading(false);
         }
     };
-
     // Close modal if clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -212,7 +200,6 @@ export default function ListasTabs({ userRole = 'user' }) {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showCreateModal]);
-
     return (
         <>
             <TabNavigation
@@ -226,7 +213,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                     'Canceladas': displayLists.filter(list => list.status === 'Cancelada').length
                 }}
             />
-
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">
@@ -252,7 +238,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                         </button>
                     </div>
                 </div>
-
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
@@ -301,7 +286,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                             />
                         </div>
                     </div>
-
                     <div className="flex sm:flex-row flex-col justify-start gap-2">
                         <button
                             className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]"
@@ -320,7 +304,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                         </button>
                     </div>
                 </div>
-
                 {/* Loading Indicator */}
                 {isLoading ? (
                     <div className="py-20 text-center">
@@ -340,7 +323,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                     </div>
                 )}
             </div>
-
             {/* Create List Modal - kept as is */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">

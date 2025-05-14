@@ -38,29 +38,33 @@ export default function ProductSlider({
         // Implement add to cart functionality
         console.log('Add to cart:', product);
     };
+    // Determine if we should show navigation arrows (for 5 or more products)
+    const showNavigation = products.length >= 5;
     return (
         <div className={`px-4 ${className}`}>
             <div className="container mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     {title && <h2 className="text-3xl text-black font-bold">{title}</h2>}
-                    <div className="flex space-x-4">
-                        <button
-                            onClick={() => swiperRef.current?.slidePrev()}
-                            className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={() => swiperRef.current?.slideNext()}
-                            className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    </div>
+                    {showNavigation && (
+                        <div className="flex space-x-4">
+                            <button
+                                onClick={() => swiperRef.current?.slidePrev()}
+                                className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => swiperRef.current?.slideNext()}
+                                className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
                 </div>
                 <div className="relative">
                     <Swiper
@@ -84,11 +88,11 @@ export default function ProductSlider({
                             768: { slidesPerView: slidesPerView.tablet || 3 },
                             1024: { slidesPerView: slidesPerView.desktop || 4 },
                         }}
-                        loop={true}
+                        loop={products.length >= slidesPerView.desktop}
                         grabCursor={true}
                         draggable={true}
                         navigation={{
-                            enabled: true,
+                            enabled: showNavigation,
                             prevEl: '.swiper-button-prev',
                             nextEl: '.swiper-button-next',
                         }}

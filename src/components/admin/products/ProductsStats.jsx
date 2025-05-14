@@ -27,14 +27,14 @@ export default function ProductsStats() {
             bgColor: "bg-blue-100"
         },
         {
-            icon: <FiTag className="text-green-600 text-xl" />,
+            icon: <FiPackage  className="text-green-600 text-xl" />,
             title: "Categorías",
             value: loading ? "Cargando..." : stats.totalCategories.toString(),
             description: "Total de categorías",
             bgColor: "bg-green-100"
         },
         {
-            icon: <FiPackage className="text-yellow-600 text-xl" />,
+            icon: <FiTag className="text-yellow-600 text-xl" />,
             title: "Marcas",
             value: loading ? "Cargando..." : stats.totalBrands.toString(),
             description: "Total de marcas",

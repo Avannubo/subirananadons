@@ -86,25 +86,28 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         setShowStatusModal(true);
     };
 
-    const updateListStatus = async (listId, newStatus) => {
+    const updateListStatus = async (listId, newStatus, isPublic) => {
         try {
             setLoading(true);
-            const updateData = { status: newStatus };
+            const updateData = {
+                status: newStatus,
+                isPublic: isPublic
+            };
             const result = await updateBirthList(listId, updateData);
 
             if (result.success) {
-                toast.success('Estado de la lista actualizado con éxito');
+                toast.success('Lista actualizada con éxito');
                 setShowStatusModal(false);
                 // Refresh the list after update
                 if (onUpdate) {
                     onUpdate();
                 }
             } else {
-                toast.error('Error al actualizar el estado de la lista: ' + result.message);
+                toast.error('Error al actualizar la lista: ' + result.message);
             }
         } catch (error) {
-            console.error('Error updating birth list status:', error);
-            toast.error('Error al actualizar el estado de la lista: ' + (error.message || 'Error desconocido'));
+            console.error('Error updating birth list:', error);
+            toast.error('Error al actualizar la lista: ' + (error.message || 'Error desconocido'));
         } finally {
             setLoading(false);
         }
@@ -224,7 +227,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
     return (
         <div className="bg-white rounded-lg shadow overflow-hidden ">
             {/* Search Filters for Admin Users */}
-            {userRole === 'admin' && (
+            {/* {userRole === 'admin' && (
                 <div className="p-4 bg-gray-50 border-b border-gray-200">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
@@ -269,7 +272,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
             {/* Lists Table */}
             <div className="overflow-x-auto ">
                 <table className="w-full whitespace-nowrap">
@@ -281,7 +284,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                             {userRole === 'admin' && <th className="px-6 py-3 text-left">Creador</th>}
                             <th className="px-6 py-3 text-left">Fecha Creación</th>
                             <th className="px-6 py-3 text-left">Fecha Prevista</th>
-                            <th className="px-6 py-3 text-left">Progreso</th>
+                            <th className="px-6 py-3 text-left">Privacidad</th>
                             <th className="px-6 py-3 text-left">Estado</th>
                             <th className="px-6 py-3 text-left">Acciones</th>
                         </tr>
@@ -297,19 +300,9 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                     <td className="px-6 py-4">{list.creationDate}</td>
                                     <td className="px-6 py-4">{list.dueDate}</td>
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center">
-                                            <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
-                                                <div
-                                                    className={`h-2 rounded-full ${list.progress >= 100 ? 'bg-green-500' :
-                                                        list.progress >= 75 ? 'bg-[#00B0C8]' :
-                                                            list.progress >= 50 ? 'bg-yellow-500' :
-                                                                'bg-red-500'
-                                                        }`}
-                                                    style={{ width: `${list.progress}%` }}
-                                                />
-                                            </div>
-                                            <span className="text-xs">{list.progress}%</span>
-                                        </div>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.isPublic ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'}`}>
+                                            {list.isPublic ? 'Pública' : 'Privada'}
+                                        </span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span

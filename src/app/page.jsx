@@ -1,58 +1,18 @@
 import FadeSlider from "@/components/landing/FadeSlider";
 import ImageGallery from "@/components/landing/ImageGalaryHome";
-import ProductSlider from "@/components/landing/ProductSlider";
+import FeaturedProducts from "@/components/landing/FeaturedProducts";
 import ShopLayout from "../components/Layouts/shop-layout";
-import Product from '@/models/Product';
-import dbConnect from '@/lib/dbConnect';
 
-// Fetch featured products from database server-side
-async function getFeaturedProducts() {
-  try {
-    await dbConnect();
-
-    // Find products with featured=true and status=active
-    const products = await Product.find({
-      featured: true,
-      status: 'active'
-    }).limit(8);
-
-    // Format products for the ProductSlider component
-    return products.map(product => ({
-      id: product._id.toString(),
-      name: product.name,
-      price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
-      imageUrl: product.image || '/assets/images/default-product.png',
-      imageUrlHover: product.imageHover || product.image || '/assets/images/default-product.png',
-      category: product.category
-    }));
-  } catch (error) {
-    console.error('Error fetching featured products:', error);
-    // Return empty array if there's an error
-    return [];
-  }
-}
-
-export default async function Home() {
-  // Fetch featured products
-  const featuredProducts = await getFeaturedProducts();
+export default function Home() {
+  // Enable debug mode in development environment
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <ShopLayout>
       <div className="w-full h-full flex flex-col justify-start items-start">
         <FadeSlider />
         <ImageGallery />
-        <div className="w-full py-8">
-          <ProductSlider
-            title="Productos Destacados"
-            products={featuredProducts}
-            className="w-full"
-            slidesPerView={{
-              mobile: 2,
-              tablet: 3,
-              desktop: 4
-            }}
-          />
-        </div>
+        <FeaturedProducts debug={isDevelopment} />
         {/* New Section with Background */}
         <div
           className="w-[100%] overflow-hidden h-[80vh] py-20 px-4 bg-gradient-to-r from-blue-50 to-purple-50"

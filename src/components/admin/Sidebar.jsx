@@ -8,7 +8,8 @@ import {
     GiftIcon,
     Settings,
     CircleUserRound,
-    TagIcon
+    TagIcon,
+    Star
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
@@ -26,6 +27,12 @@ const getNavigationItems = (userRole) => [
         label: "Productos",
         roles: ['admin']
     },
+    // {
+    //     href: "/dashboard/featured-products",
+    //     icon: Star,
+    //     label: "Destacados",
+    //     roles: ['admin']
+    // },
     {
         href: "/dashboard/brands",
         icon: TagIcon,

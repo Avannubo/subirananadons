@@ -1,5 +1,6 @@
 'use client';
 import ProductSlider from "@/components/landing/ProductSlider";
+import FeaturedProducts from "@/components/landing/FeaturedProducts";
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
@@ -10,72 +11,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { FiX, FiPlus } from 'react-icons/fi';
 import { createBirthList } from '@/services/BirthListService';
-const featuredProducts = [
-    {
-        id: 1,
-        name: "Peck 2 Pints Silicon",
-        price: "23,95 €",
-        imageUrl: "/assets/images/Screenshot_4.png",
-        imageUrlHover: "/assets/images/Screenshot_1.png",
-        category: "Alimentación"
-    },
-    {
-        id: 2,
-        name: "Sac Cobés Bùba Paper Boat",
-        price: "78,00 €",
-        imageUrl: "/assets/images/Screenshot_3.png",
-        imageUrlHover: "/assets/images/Screenshot_2.png",
-        category: "Habitación"
-    },
-    {
-        id: 3,
-        name: "Robot De Cuina Chefy6",
-        price: "119,00 €",
-        imageUrl: "/assets/images/Screenshot_2.png",
-        imageUrlHover: "/assets/images/Screenshot_3.png",
-        category: "Alimentación"
-    },
-    {
-        id: 4,
-        name: "Trona De Viaje Arlo",
-        price: "49,90 €",
-        imageUrl: "/assets/images/Screenshot_1.png",
-        imageUrlHover: "/assets/images/Screenshot_4.png",
-        category: "Alimentación"
-    },
-    {
-        id: 5,
-        name: "Tripp Trapp Natural",
-        price: "259,00 €",
-        imageUrl: "/assets/images/Screenshot_4.png",
-        imageUrlHover: "/assets/images/Screenshot_1.png",
-        category: "Habitación"
-    },
-    {
-        id: 6,
-        name: "Termo papillero",
-        price: "24,90 €",
-        imageUrl: "/assets/images/Screenshot_3.png",
-        imageUrlHover: "/assets/images/Screenshot_2.png",
-        category: "Alimentación"
-    },
-    {
-        id: 7,
-        name: "Biberón aprendizaje",
-        price: "12,90 €",
-        imageUrl: "/assets/images/Screenshot_2.png",
-        imageUrlHover: "/assets/images/Screenshot_3.png",
-        category: "Alimentación"
-    },
-    {
-        id: 8,
-        name: "Newborn Set Tripp Trapp",
-        price: "99,00 €",
-        imageUrl: "/assets/images/Screenshot_1.png",
-        imageUrlHover: "/assets/images/Screenshot_4.png",
-        category: "Habitación"
-    }
-];
+
 export default function BirthListsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [hoveredProduct, setHoveredProduct] = useState(null);
@@ -262,6 +198,8 @@ export default function BirthListsPage() {
                     alt="Birth Lists Header"
                     fill
                     className="object-cover"
+                    placeholder="blur"
+                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAEDQIHq4C7sgAAAABJRU5ErkJggg=="
                 />
                 <div className="absolute inset-0 text-zinc-900 mt-20">
                     <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
@@ -285,7 +223,7 @@ export default function BirthListsPage() {
                                     placeholder="Buscar por nombre del bebé, título o creador..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full px-6 py-4 rounded-full border-2 border-white bg-white/90 focus:bg-white focus:border-[#00B0C8] focus:outline-none text-lg"
+                                    className="w-full px-6 py-4 rounded-full border-2 border-white bg-white/90 focus:bg-white focus:border-[#00B0C8] focus:outline-none text-lg shadow-sm"
                                 />
                                 <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
                                     <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,9 +238,30 @@ export default function BirthListsPage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="mb-16">
                     {isLoadingLists ? (
-                        // Loading state
-                        <div className="flex justify-center items-center h-64">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                        // Skeleton loading UI
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[...Array(6)].map((_, index) => (
+                                <div key={index} className="bg-white rounded-lg overflow-hidden shadow animate-pulse">
+                                    <div className="relative h-48 bg-gray-200"></div>
+                                    <div className="p-6 space-y-4">
+                                        <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between">
+                                                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                                                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between">
+                                                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                                                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : filteredLists.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -354,115 +313,179 @@ export default function BirthListsPage() {
                         </div>
                     ) : (
                         <motion.div
-                            className="text-center py-12"
+                            className="py-16 text-center"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                         >
-                            <p className="text-gray-500 text-lg">No se encontraron listas que coincidan con tu búsqueda.</p>
+                            <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
+                                <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <h3 className="text-xl font-semibold text-gray-700 mb-2">No se encontraron listas</h3>
+                                <p className="text-gray-500 mb-6">No se encontraron listas que coincidan con tu búsqueda.</p>
+                                <div className="flex justify-center">
+                                    <button
+                                        onClick={() => setSearchTerm('')}
+                                        className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors"
+                                    >
+                                        Limpiar búsqueda
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
                     )}
                 </div>
                 <div className='flex flex-row space-x-4'>
-                    <motion.div
-                        className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, duration: 0.5 }}
-                    >
-                        <div className="flex flex-col  items-start justify-start space-y-4">
-                            <div>
-                                <h2 className="text-2xl font-bold mb-2">¿Esperando un bebé?</h2>
-                                <p className="text-white/90">Crea tu propia lista de nacimiento y compártela con tus seres queridos. Es fácil, rápido y te ayudará a organizar todo lo que necesitas para la llegada de tu bebé.</p>
+                    {isLoadingLists ? (
+                        // Skeleton for promo sections
+                        <>
+                            <div className="flex-1 rounded-lg p-8 mb-12 bg-gray-100 animate-pulse">
+                                <div className="flex flex-col space-y-4">
+                                    <div className="h-7 bg-gray-200 rounded w-3/4"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                                    <div className="h-10 bg-gray-200 rounded-full w-1/3 mt-2"></div>
+                                </div>
                             </div>
-                            <button
-                                onClick={handleCreateListClick}
-                                className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
-                            >
-                                Crear Lista
-                            </button>
-                        </div>
-                    </motion.div>
-                    <motion.div
-                        className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, duration: 0.5 }}
-                    >
-                        <div className="flex flex-col  items-start justify-start space-y-4">
-                            <div>
-                                <h2 className="text-2xl font-bold mb-2">¿No sabes qué comprar?</h2>
-                                <p className="text-white/90">Mira los productos esenciales y más comprados para un primer comprador en nuestra página de recomendaciones. Encuentra inspiración y asegúrate de elegir lo mejor para el bebé.</p>
+                            <div className="flex-1 rounded-lg p-8 mb-12 bg-gray-100 animate-pulse">
+                                <div className="flex flex-col space-y-4">
+                                    <div className="h-7 bg-gray-200 rounded w-3/4"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                                    <div className="h-10 bg-gray-200 rounded-full w-1/3 mt-2"></div>
+                                </div>
                             </div>
-                            <Link
-                                href="/recomendations"
-                                className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
+                        </>
+                    ) : (
+                        <>
+                            <motion.div
+                                className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5, duration: 0.5 }}
                             >
-                                Ver Recomendaciones
-                            </Link>
-                        </div>
-                    </motion.div>
+                                <div className="flex flex-col  items-start justify-start space-y-4">
+                                    <div>
+                                        <h2 className="text-2xl font-bold mb-2">¿Esperando un bebé?</h2>
+                                        <p className="text-white/90">Crea tu propia lista de nacimiento y compártela con tus seres queridos. Es fácil, rápido y te ayudará a organizar todo lo que necesitas para la llegada de tu bebé.</p>
+                                    </div>
+                                    <button
+                                        onClick={handleCreateListClick}
+                                        className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
+                                    >
+                                        Crear Lista
+                                    </button>
+                                </div>
+                            </motion.div>
+                            <motion.div
+                                className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5, duration: 0.5 }}
+                            >
+                                <div className="flex flex-col  items-start justify-start space-y-4">
+                                    <div>
+                                        <h2 className="text-2xl font-bold mb-2">¿No sabes qué comprar?</h2>
+                                        <p className="text-white/90">Mira los productos esenciales y más comprados para un primer comprador en nuestra página de recomendaciones. Encuentra inspiración y asegúrate de elegir lo mejor para el bebé.</p>
+                                    </div>
+                                    <Link
+                                        href="/recomendations"
+                                        className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
+                                    >
+                                        Ver Recomendaciones
+                                    </Link>
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
                 </div>
                 <div className="w-full py-8">
-                    <ProductSlider
-                        title="Productos Destacados"
-                        products={featuredProducts}
-                        className="w-full"
-                        slidesPerView={{
-                            mobile: 2,
-                            tablet: 3,
-                            desktop: 4
-                        }}
-                    />
+                    {isLoadingLists ? (
+                        <div className="py-8">
+                            <div className="h-8 bg-gray-200 rounded w-64 mb-8"></div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                {[...Array(4)].map((_, index) => (
+                                    <div key={index} className="bg-white rounded-lg overflow-hidden shadow animate-pulse">
+                                        <div className="h-48 bg-gray-200"></div>
+                                        <div className="p-4 space-y-3">
+                                            <div className="h-5 bg-gray-200 rounded"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <FeaturedProducts />
+                    )}
                 </div>
                 {/* How It Works Section */}
-                <motion.div
-                    className="mt-16 py-12 bg-gray-50 rounded-lg"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                >
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-2xl font-bold text-center mb-12">¿Cómo Funciona?</h2>
-                        <div className="flex flex-row space-x-4">
-                            <div className="flex-1 text-center">
-                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-semibold mb-2">Iniciar Sesión</h3>
-                                <p className="text-gray-600">Regístrate o inicia sesión para empezar tu lista</p>
-                            </div>
-                            <div className="flex-1 text-center">
-                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-semibold mb-2">Crea tu Lista</h3>
-                                <p className="text-gray-600">Añade los productos que necesitas para el bebé</p>
-                            </div>
-                            <div className="flex-1 text-center">
-                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-semibold mb-2">Comparte</h3>
-                                <p className="text-gray-600">Envía tu lista a familiares y amigos</p>
-                            </div>
-                            <div className="flex-1 text-center">
-                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8 4-8-4V5l8 4 8-4v2zM4 13.8V7.2l8 4 8-4v6.6" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-semibold mb-2">Recibe los Regalos</h3>
-                                <p className="text-gray-600">Gestiona tu lista y recibe notificaciones de las compras</p>
+                {isLoadingLists ? (
+                    <div className="mt-16 py-12 bg-gray-50 rounded-lg animate-pulse">
+                        <div className="container mx-auto px-4">
+                            <div className="h-8 bg-gray-200 rounded w-48 mx-auto mb-12"></div>
+                            <div className="flex flex-row space-x-4">
+                                {[...Array(4)].map((_, index) => (
+                                    <div key={index} className="flex-1 text-center">
+                                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-200"></div>
+                                        <div className="h-5 bg-gray-200 rounded w-24 mx-auto mb-3"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                ) : (
+                    <motion.div
+                        className="mt-16 py-12 bg-gray-50 rounded-lg"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                    >
+                        <div className="container mx-auto px-4">
+                            <h2 className="text-2xl font-bold text-center mb-12">¿Cómo Funciona?</h2>
+                            <div className="flex flex-row space-x-4">
+                                <div className="flex-1 text-center">
+                                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
+                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2">Iniciar Sesión</h3>
+                                    <p className="text-gray-600">Regístrate o inicia sesión para empezar tu lista</p>
+                                </div>
+                                <div className="flex-1 text-center">
+                                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
+                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2">Crea tu Lista</h3>
+                                    <p className="text-gray-600">Añade los productos que necesitas para el bebé</p>
+                                </div>
+                                <div className="flex-1 text-center">
+                                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
+                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2">Comparte</h3>
+                                    <p className="text-gray-600">Envía tu lista a familiares y amigos</p>
+                                </div>
+                                <div className="flex-1 text-center">
+                                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
+                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8 4-8-4V5l8 4 8-4v2zM4 13.8V7.2l8 4 8-4v6.6" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2">Recibe los Regalos</h3>
+                                    <p className="text-gray-600">Gestiona tu lista y recibe notificaciones de las compras</p>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
             </div>
             {/* Create List Modal */}
             {showCreateModal && (
