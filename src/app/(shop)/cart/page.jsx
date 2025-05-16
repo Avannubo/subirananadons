@@ -1,6 +1,5 @@
 'use client';
-
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,12 +7,9 @@ import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
-
-
 export default function CartPage() {
-    const { cartItems, updateQuantity, removeItem } = useCart();
+    const { cartItems, updateQuantity, removeFromCart } = useCart();
     const { user, loading: userLoading } = useUser();
-
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
         name: '',
@@ -30,7 +26,20 @@ export default function CartPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
-
+    // Check if cart has any gift items
+    const hasGiftItems = useMemo(() => {
+        return cartItems.some(item => item.isGift);
+    }, [cartItems]);
+    // Check if cart has only gift items
+    const hasOnlyGiftItems = useMemo(() => {
+        return cartItems.length > 0 && cartItems.every(item => item.isGift);
+    }, [cartItems]);
+    // Force pickup method if cart has gift items
+    useEffect(() => {
+        if (hasGiftItems) {
+            setDeliveryMethod('pickup');
+        }
+    }, [hasGiftItems]);
     // Auto-fill user data when available
     useEffect(() => {
         if (user && !userLoading) {
@@ -38,7 +47,6 @@ export default function CartPage() {
             const nameParts = user.name ? user.name.split(' ') : ['', ''];
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
-
             // Auto-fill the form with user data
             setFormData(prev => ({
                 ...prev,
@@ -52,24 +60,21 @@ export default function CartPage() {
                 postalCode: prev.postalCode,
                 province: prev.province
             }));
-
-            // Check if we have address data from previous orders
-            fetchUserAddressData();
+            // Only fetch address data if not gift-only order
+            if (!hasOnlyGiftItems) {
+                fetchUserAddressData();
+            }
         }
-    }, [user, userLoading]);
-
+    }, [user, userLoading, hasOnlyGiftItems]);
     // Fetch the user's last used shipping address
     const fetchUserAddressData = async () => {
         if (!user?.id) return;
-
         try {
             const response = await fetch('/api/orders?limit=1');
             if (!response.ok) return;
-
             const data = await response.json();
             if (data.success && data.orders && data.orders.length > 0) {
                 const lastOrder = data.orders[0];
-
                 if (lastOrder.shippingAddress) {
                     // Use the last order's shipping address to fill the form
                     setFormData(prev => ({
@@ -86,7 +91,6 @@ export default function CartPage() {
             console.error('Error fetching user address data:', error);
         }
     };
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -94,40 +98,45 @@ export default function CartPage() {
             [name]: value
         }));
     };
-
     // Auto-recalculate shipping when cart items or delivery method changes
     useEffect(() => {
         // This will trigger a re-render with the correct shipping cost
         const shipping = calculateShipping();
         console.log(`Delivery method: ${deliveryMethod}, Subtotal: ${calculateSubtotal()}, Shipping: ${shipping}`);
     }, [cartItems, deliveryMethod]);
-
     const handleDeliveryMethodChange = (method) => {
+        // Only allow changing to 'pickup' if cart has gift items
+        if (hasGiftItems && method === 'delivery') {
+            toast.error('Los regalos deben recogerse en tienda');
+            return;
+        }
         setDeliveryMethod(method);
     };
-
     const calculateSubtotal = () => {
-        return cartItems.reduce((sum, item) => sum + (item.priceValue * item.quantity), 0);
+        return cartItems.reduce((sum, item) => {
+            // Get the numerical price value, handling different formats
+            const price = typeof item.priceValue === 'number'
+                ? item.priceValue
+                : (typeof item.price === 'number'
+                    ? item.price
+                    : parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
+            return sum + (price * (item.quantity || 1));
+        }, 0);
     };
-
     const calculateShipping = () => {
         const subtotal = calculateSubtotal();
         if (deliveryMethod === 'pickup') return 0;
         return subtotal >= 60 ? 0 : 5.99;
     };
-
     const calculateTax = () => {
         return calculateSubtotal() * 0.21;
     };
-
     const calculateTotal = () => {
         return calculateSubtotal() + calculateShipping() + calculateTax();
     };
-
     // Save user's address for future orders
     const saveUserAddressPreferences = async () => {
         if (!user?.id) return;
-
         try {
             // This could be a separate API endpoint to save user address preferences
             // For now, we'll just log it
@@ -140,7 +149,6 @@ export default function CartPage() {
                 postalCode: formData.postalCode,
                 province: formData.province,
             });
-
             // In a real implementation, you would save this data to the user profile
             // await fetch('/api/user/address', {
             //     method: 'POST',
@@ -157,31 +165,42 @@ export default function CartPage() {
             console.error('Error saving address preferences:', error);
         }
     };
-
     // Handle order submission
     const handleSubmitOrder = async () => {
-        // Form validation
-        const requiredFields = ['name', 'lastName', 'email', 'phone', 'address', 'city', 'postalCode', 'province'];
+        // Determine which fields are required based on delivery method and cart contents
+        let requiredFields = ['name', 'lastName', 'email', 'phone'];
+        // Add address fields only if delivery method is 'delivery' or not all items are gifts
+        if (deliveryMethod === 'delivery' && !hasOnlyGiftItems) {
+            requiredFields = [...requiredFields, 'address', 'city', 'postalCode', 'province'];
+        }
         const missingFields = requiredFields.filter(field => !formData[field]);
-
         if (missingFields.length > 0) {
             setOrderError('Por favor, completa todos los campos obligatorios');
             return;
         }
-
         if (cartItems.length === 0) {
             setOrderError('No hay productos en el carrito');
             return;
         }
-
         try {
             setIsSubmitting(true);
             setOrderError(null);
-
+            // Prepare the buyer information for gift items
+            const buyerInfo = {
+                name: `${formData.name} ${formData.lastName}`.trim(),
+                email: formData.email,
+                phone: formData.phone
+            };
             const orderData = {
-                items: cartItems,
+                items: cartItems.map(item => ({
+                    ...item,
+                    // Add buyer information to gift items
+                    buyerInfo: item.isGift ? buyerInfo : undefined
+                })),
                 shippingDetails: formData,
                 deliveryMethod: deliveryMethod,
+                hasGiftItems: hasGiftItems,
+                isGiftOnly: hasOnlyGiftItems,
                 totals: {
                     subtotal: calculateSubtotal(),
                     shipping: calculateShipping(),
@@ -189,7 +208,6 @@ export default function CartPage() {
                     total: calculateTotal()
                 }
             };
-
             const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: {
@@ -197,27 +215,29 @@ export default function CartPage() {
                 },
                 body: JSON.stringify(orderData),
             });
-
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.message || 'Error al procesar el pedido');
             }
-
             // Save user address preferences for future orders
             if (user?.id) {
                 await saveUserAddressPreferences();
             }
-
-            // Order created successfully
+            // Order created successfully - include more detailed information
             setOrderSuccess({
                 orderNumber: data.order.orderNumber,
-                orderId: data.order.id
+                orderId: data.order.id,
+                totalAmount: calculateTotal().toFixed(2),
+                items: cartItems,
+                giftItems: cartItems.filter(item => item.isGift),
+                hasGiftItems: hasGiftItems,
+                buyerDetails: {
+                    name: `${formData.name} ${formData.lastName}`.trim(),
+                    email: formData.email
+                }
             });
-
             // Clear the cart
-            cartItems.forEach(item => removeItem(item.id));
-
+            cartItems.forEach(item => removeFromCart(item.id));
             // Reset form data
             setFormData({
                 name: '',
@@ -231,12 +251,10 @@ export default function CartPage() {
                 country: 'España',
                 notes: ''
             });
-
-            // After 5 seconds, scroll to top and you could redirect
+            // After 5 seconds, scroll to top
             setTimeout(() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 5000);
-
+            }, 1000);
         } catch (error) {
             console.error('Error creating order:', error);
             setOrderError(error.message || 'Error al procesar el pedido');
@@ -244,19 +262,41 @@ export default function CartPage() {
             setIsSubmitting(false);
         }
     };
+    // Handle invoice download
+    const handleDownloadInvoice = () => {
+        if (!orderSuccess) return;
 
+        // In a real implementation, you would call an API to generate a PDF invoice
+        toast.success('Descargando factura...');
+
+        // Simulating download delay
+        setTimeout(() => {
+            toast.success('Factura descargada correctamente');
+        }, 1500);
+    };
+    // Handle sending email with receipt
+    const handleSendEmail = () => {
+        if (!orderSuccess) return;
+
+        toast.success(`Enviando email a ${orderSuccess.buyerDetails.email}...`);
+
+        // Simulating email sending
+        setTimeout(() => {
+            toast.success('Email enviado correctamente');
+        }, 1500);
+    };
     return (
         <ShopLayout>
             <div className="container mx-auto px-4 py-8 mt-24 ">
                 <h1 className="text-3xl font-bold mb-8 text-zinc-900">Carrito de compra</h1>
-
-                {cartItems.length > 0 ? (
+                {/* Start Content */}
+                {cartItems && cartItems.length > 0 ? (
                     <>
                         <div className="flex flex-col lg:flex-row gap-8">
                             {/* Left Column - User Information */}
                             <div className="lg:w-1/2">
                                 <div className="bg-white rounded-lg shadow-sm p-6">
-                                    <h2 className="text-xl font-bold mb-6">Datos de Envío</h2>
+                                    <h2 className="text-xl font-bold mb-6">Datos de {deliveryMethod === 'pickup' ? 'Contacto' : 'Envío'}</h2>
                                     {userLoading ? (
                                         <div className="flex items-center justify-center py-4">
                                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00B0C8]"></div>
@@ -264,6 +304,16 @@ export default function CartPage() {
                                         </div>
                                     ) : (
                                         <>
+                                            {hasGiftItems && (
+                                                <div className="mb-4 p-3 bg-pink-50 text-pink-700 rounded-md border border-pink-200">
+                                                    <p className="text-sm flex items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista. Por favor, proporciona tus datos de contacto.
+                                                    </p>
+                                                </div>
+                                            )}
                                             {user && (
                                                 <div className="mb-4 p-3 bg-blue-50 text-blue-600 rounded-md border border-blue-100">
                                                     <p className="text-sm flex items-center">
@@ -327,77 +377,68 @@ export default function CartPage() {
                                                         required
                                                     />
                                                 </div>
-                                                <div className="col-span-2">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Dirección
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="address"
-                                                        value={formData.address}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="col-span-1">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Ciudad
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="city"
-                                                        value={formData.city}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="col-span-1">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Código Postal
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="postalCode"
-                                                        value={formData.postalCode}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Provincia
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="province"
-                                                        value={formData.province}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Notas del pedido (opcional)
-                                                    </label>
-                                                    <textarea
-                                                        name="notes"
-                                                        value={formData.notes}
-                                                        onChange={handleInputChange}
-                                                        rows="4"
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                        placeholder="Notas sobre tu pedido, por ejemplo, notas especiales para la entrega."
-                                                    />
-                                                </div>
+                                                {/* Only show address fields if not gift-only or delivery method is not pickup */}
+                                                {(!hasOnlyGiftItems || deliveryMethod === 'delivery') && (
+                                                    <>
+                                                        <div className="col-span-2">
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                Dirección
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="address"
+                                                                value={formData.address}
+                                                                onChange={handleInputChange}
+                                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                required={deliveryMethod === 'delivery'}
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                Ciudad
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="city"
+                                                                value={formData.city}
+                                                                onChange={handleInputChange}
+                                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                required={deliveryMethod === 'delivery'}
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                Código Postal
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="postalCode"
+                                                                value={formData.postalCode}
+                                                                onChange={handleInputChange}
+                                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                required={deliveryMethod === 'delivery'}
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-2">
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                Provincia
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="province"
+                                                                value={formData.province}
+                                                                onChange={handleInputChange}
+                                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                required={deliveryMethod === 'delivery'}
+                                                            />
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         </>
                                     )}
                                 </div>
                             </div>
-
                             {/* Right Column - Products */}
                             <div className="lg:w-1/2 flex flex-col">
                                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -409,16 +450,30 @@ export default function CartPage() {
                                         >
                                             <div className="relative w-20 h-20">
                                                 <Image
-                                                    src={item.imageUrl}
-                                                    alt={item.name}
+                                                    src={item.image || item.imageUrl || '/assets/images/default-product.png'}
+                                                    alt={item.name || 'Producto'}
                                                     fill
                                                     className="object-cover rounded-md"
+                                                    onError={(e) => {
+                                                        e.target.src = '/assets/images/default-product.png';
+                                                    }}
                                                 />
+                                                {item.isGift && (
+                                                    <div className="absolute top-0 right-0 bg-pink-500 text-white text-xs px-1 rounded-bl rounded-tr">
+                                                        Regalo
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="flex-grow">
                                                 <h3 className="font-medium">{item.name}</h3>
                                                 <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
                                                 <p className="text-[#00B0C8] font-medium">{item.price}</p>
+                                                {item.isGift && item.listOwner && (
+                                                    <p className="text-xs text-pink-600 mt-1">
+                                                        Lista de regalo: {item.listOwner}
+                                                        <span className="ml-2 bg-green-100 text-green-700 px-1 rounded text-xs">Será marcado como comprado</span>
+                                                    </p>
+                                                )}
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <button
@@ -436,7 +491,7 @@ export default function CartPage() {
                                                 </button>
                                             </div>
                                             <button
-                                                onClick={() => removeItem(item.id)}
+                                                onClick={() => removeFromCart(item.id)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -446,13 +501,25 @@ export default function CartPage() {
                                         </div>
                                     ))}
                                 </div>
-
                                 {/* Delivery Method Selection */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
                                     <h2 className="text-xl font-bold mb-4">Método de entrega</h2>
-
+                                    {/* Gift Items Notice */}
+                                    {hasGiftItems && (
+                                        <div className="mb-4 p-3 bg-pink-50 border border-pink-200 rounded-lg">
+                                            <p className="text-sm text-pink-700 flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                                                </svg>
+                                                {hasOnlyGiftItems
+                                                    ? 'Tu carrito contiene solo productos de regalo que deben ser recogidos en tienda por el propietario de la lista. Al comprar estos artículos, serán marcados como comprados en la lista de regalo.'
+                                                    : 'Este pedido incluye artículos de regalo (recogida en tienda obligatoria por el propietario de la lista). Por ello, todo el pedido se configurará para recoger en tienda. Si deseas envío a domicilio para los otros artículos, por favor sepáralos en un pedido diferente. Los artículos de regalo serán marcados como comprados en la lista.'
+                                                }
+                                            </p>
+                                        </div>
+                                    )}
                                     {/* Free Shipping Progress */}
-                                    {calculateSubtotal() < 60 && deliveryMethod === 'delivery' && (
+                                    {calculateSubtotal() < 60 && deliveryMethod === 'delivery' && !hasGiftItems && (
                                         <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                                             <p className="text-sm text-gray-700 mb-2">
                                                 ¡Añade <span className="font-bold text-[#00B0C8]">{(60 - calculateSubtotal()).toFixed(2)}€</span> más a tu pedido para conseguir envío gratis!
@@ -465,35 +532,40 @@ export default function CartPage() {
                                             </div>
                                         </div>
                                     )}
-
                                     <div className="space-y-4">
                                         <div
-                                            className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${deliveryMethod === 'delivery'
-                                                ? 'border-[#00B0C8] bg-[#00B0C8]/5'
-                                                : 'border-gray-200 hover:border-[#00B0C8]'
+                                            className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${hasGiftItems
+                                                ? 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-60'
+                                                : deliveryMethod === 'delivery'
+                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5 cursor-pointer'
+                                                    : 'border-gray-200 hover:border-[#00B0C8] cursor-pointer'
                                                 }`}
-                                            onClick={() => handleDeliveryMethodChange('delivery')}
+                                            onClick={() => !hasGiftItems && handleDeliveryMethodChange('delivery')}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${deliveryMethod === 'delivery' ? 'border-[#00B0C8]' : 'border-gray-400'
+                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${hasGiftItems
+                                                    ? 'border-gray-400'
+                                                    : deliveryMethod === 'delivery' ? 'border-[#00B0C8]' : 'border-gray-400'
                                                     }`}>
-                                                    {deliveryMethod === 'delivery' && (
+                                                    {deliveryMethod === 'delivery' && !hasGiftItems && (
                                                         <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
                                                     )}
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">Envío a domicilio</p>
                                                     <p className="text-sm text-gray-500">Entrega en 24-48 horas laborables</p>
-                                                    {calculateSubtotal() >= 60 && (
+                                                    {calculateSubtotal() >= 60 && !hasGiftItems && (
                                                         <p className="text-xs text-green-600 font-medium mt-1">Envío gratis en pedidos superiores a 60€</p>
+                                                    )}
+                                                    {hasGiftItems && (
+                                                        <p className="text-xs text-red-600 font-medium mt-1">No disponible para productos de regalo</p>
                                                     )}
                                                 </div>
                                             </div>
                                             <span className="text-[#00B0C8] font-medium">
-                                                {calculateSubtotal() >= 60 ? 'Gratis' : '5,99 €'}
+                                                {calculateSubtotal() >= 60 || hasGiftItems ? 'Gratis' : '5,99 €'}
                                             </span>
                                         </div>
-
                                         <div
                                             className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${deliveryMethod === 'pickup'
                                                 ? 'border-[#00B0C8] bg-[#00B0C8]/5'
@@ -511,13 +583,15 @@ export default function CartPage() {
                                                 <div>
                                                     <p className="font-medium">Recoger en tienda</p>
                                                     <p className="text-sm text-gray-500">Disponible en 2-4 horas</p>
+                                                    {hasGiftItems && (
+                                                        <p className="text-xs text-pink-600 font-medium mt-1">Obligatorio para productos de regalo — Solo el propietario de la lista puede recogerlos</p>
+                                                    )}
                                                 </div>
                                             </div>
                                             <span className="text-[#00B0C8] font-medium">Gratis</span>
                                         </div>
                                     </div>
                                 </div>
-
                                 {/* Order Summary */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
                                     <h2 className="text-xl font-bold mb-4">Resumen del pedido</h2>
@@ -563,18 +637,73 @@ export default function CartPage() {
                                             >
                                                 {isSubmitting ? 'Procesando...' : 'Finalizar compra'}
                                             </button>
-
                                             {orderError && (
                                                 <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
                                                     <p>{orderError}</p>
                                                 </div>
                                             )}
-
                                             {orderSuccess && (
-                                                <div className="mt-4 p-4 bg-green-50 border border-green-200 text-green-600 rounded-md">
-                                                    <h3 className="font-bold">¡Pedido realizado con éxito!</h3>
-                                                    <p className="mt-2">Número de pedido: {orderSuccess.orderNumber}</p>
-                                                    <p className="mt-1">Hemos enviado un correo con los detalles de tu compra.</p>
+                                                <div className="mt-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md">
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <h3 className="text-xl font-bold">¡Pedido realizado con éxito!</h3>
+                                                        <span className="text-sm bg-green-200 text-green-800 py-1 px-3 rounded-full">
+                                                            #{orderSuccess.orderNumber}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="mt-3 mb-4">
+                                                        <p className="mb-1">Hemos enviado un correo con los detalles de tu compra a <strong>{orderSuccess.buyerDetails.email}</strong></p>
+                                                        <p className="text-lg font-semibold">Total: {orderSuccess.totalAmount} €</p>
+                                                    </div>
+
+                                                    {orderSuccess.hasGiftItems && (
+                                                        <div className="mb-4 p-3 bg-pink-50 text-pink-700 rounded-md border border-pink-200">
+                                                            <p className="text-sm flex items-center font-semibold mb-2">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                                                                </svg>
+                                                                Compra de regalo realizada
+                                                            </p>
+                                                            <ul className="text-sm ml-7 list-disc">
+                                                                <li>Los artículos de regalo han sido marcados como comprados</li>
+                                                                <li>El propietario de la lista será notificado</li>
+                                                                <li>Recuerda que estos artículos deben ser recogidos en tienda</li>
+                                                            </ul>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="grid grid-cols-2 gap-3 mt-4">
+                                                        <button
+                                                            onClick={handleDownloadInvoice}
+                                                            className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                            </svg>
+                                                            Descargar Factura
+                                                        </button>
+                                                        <button
+                                                            onClick={handleSendEmail}
+                                                            className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                            </svg>
+                                                            Enviar por Email
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="mt-4 pt-3 border-t border-gray-200">
+                                                        <Link
+                                                            href="/products"
+                                                            className="text-[#00B0C8] hover:underline flex items-center justify-center gap-2"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                                            </svg>
+                                                            Continuar comprando
+                                                        </Link>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>

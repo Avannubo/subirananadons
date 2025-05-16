@@ -126,7 +126,6 @@ export default function ListProductsManager({ listId, onUpdate }) {
                 if (result.success) {
                     toast.success('Productos añadidos a la lista');
                     setItems(result.data || []);
-                    setShowAddProducts(false);
                     if (onUpdate) onUpdate();
                 } else {
                     toast.error('Error al añadir productos a la lista');
@@ -146,7 +145,11 @@ export default function ListProductsManager({ listId, onUpdate }) {
                     {showAddProducts ? 'Seleccionar Productos' : `Productos (${items.length})`}
                 </h4>
                 <button
-                    onClick={() => setShowAddProducts(!showAddProducts)}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowAddProducts(!showAddProducts);
+                    }}
                     className="flex items-center px-3 py-1 text-sm bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0]"
                 >
                     {showAddProducts ? (
@@ -178,7 +181,11 @@ export default function ListProductsManager({ listId, onUpdate }) {
                         <div className="text-center py-10 bg-gray-50 rounded-lg">
                             <p className="text-gray-500 mb-4">No hay productos en esta lista.</p>
                             <button
-                                onClick={() => setShowAddProducts(true)}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowAddProducts(true);
+                                }}
                                 className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0]"
                             >
                                 Añadir Productos

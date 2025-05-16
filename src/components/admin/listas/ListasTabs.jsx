@@ -79,24 +79,7 @@ export default function ListasTabs({ userRole = 'user' }) {
             ...prev,
             [name]: value
         }));
-    };
-    // Apply filters
-    const applyFilters = () => {
-        // In a real scenario, we would fetch data with filters
-        toast.success('Filtros aplicados');
-    };
-    // Clear filters
-    const clearFilters = () => {
-        setFilters({
-            searchId: '',
-            searchReference: '',
-            searchName: '',
-            searchCreator: '',
-            dateFrom: '',
-            dateTo: ''
-        });
-        toast.success('Filtros limpiados');
-    };
+    }; 
     // Refresh data
     const refreshData = async () => {
         await loadBirthLists();
@@ -286,7 +269,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                             />
                         </div>
                     </div>
-                    <div className="flex sm:flex-row flex-col justify-start gap-2">
+                    {/* <div className="flex sm:flex-row flex-col justify-start gap-2">
                         <button
                             className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]"
                             onClick={applyFilters}
@@ -302,7 +285,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                         >
                             Limpiar
                         </button>
-                    </div>
+                    </div> */}
                 </div>
                 {/* Loading Indicator */}
                 {isLoading ? (

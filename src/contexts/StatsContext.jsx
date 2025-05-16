@@ -15,9 +15,37 @@ export function StatsProvider({ children, refreshInterval = 30000 }) {
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [isAdminPage, setIsAdminPage] = useState(false);
+
+    // Check if we're in an admin page that actually uses these stats
+    useEffect(() => {
+        const checkIfAdminPage = () => {
+            const path = window.location.pathname;
+            const isAdmin = path.includes('/admin') && path.includes('/products');
+            setIsAdminPage(isAdmin);
+        };
+
+        checkIfAdminPage();
+
+        // Listen for route changes
+        const handleRouteChange = () => checkIfAdminPage();
+        window.addEventListener('popstate', handleRouteChange);
+
+        return () => {
+            window.removeEventListener('popstate', handleRouteChange);
+        };
+    }, []);
 
     // Fetch stats from the API
     const fetchStats = useCallback(async (showLoading = true, showToast = true) => {
+        // Skip stats fetching if not on admin product page
+        if (!isAdminPage) {
+            if (showLoading) {
+                setLoading(false);
+            }
+            return false;
+        }
+
         try {
             if (showLoading) {
                 setRefreshing(true);
@@ -25,7 +53,18 @@ export function StatsProvider({ children, refreshInterval = 30000 }) {
 
             const response = await fetch('/api/stats/products');
             if (!response.ok) {
-                throw new Error('Failed to fetch stats data');
+                // Provide default data instead of throwing error
+                console.warn('Stats API not available, using fallback data');
+                const fallbackData = {
+                    totalProducts: 0,
+                    totalCategories: 0,
+                    totalBrands: 0,
+                    lowStockProducts: 0
+                };
+
+                setStats(fallbackData);
+                setLastUpdated(new Date());
+                return false;
             }
 
             const data = await response.json();
@@ -53,7 +92,7 @@ export function StatsProvider({ children, refreshInterval = 30000 }) {
                 setLoading(false);
             }
         }
-    }, [stats]);
+    }, [stats, isAdminPage]);
 
     // Initial load
     useEffect(() => {

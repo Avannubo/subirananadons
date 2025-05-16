@@ -166,7 +166,7 @@ export default function Page() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalProducts, setTotalProducts] = useState(0);
-    const productsPerPage = 12;
+    const productsPerPage = 6;
     // Access query parameters
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -501,7 +501,7 @@ export default function Page() {
                 </nav>
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Category/Subcategory List Sidebar */}
-                    <aside className="w-full md:w-1/4 lg:w-1/5 flex-shrink-0">
+                    <aside className="w-full md:w-1/4 lg:w-1/5 flex-shrink-0 ">
                         {/*   <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
                             {currentCategoryLabel === productMenuTree.label ? "Categorías" : `Subcategorías de ${categoryPath[categoryPath.length - 2] || "Productos"}`}
                         </h3> */}
@@ -572,7 +572,7 @@ export default function Page() {
                                 <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">Ordenar por:</label>
                                 <select
                                     id="sort-by"
-                                    className="border rounded p-2 text-gray-600"
+                                    className="border border-gray-300 rounded p-2 text-gray-600"
                                     value={sortOrder}
                                     onChange={handleSortChange}
                                 >

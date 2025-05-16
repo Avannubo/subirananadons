@@ -20,11 +20,31 @@ export function ListStatsProvider({ children, refreshInterval = 30000, userRole 
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [isListsAdminPage, setIsListsAdminPage] = useState(false);
+
+    // Check if we're in an admin page that actually uses these stats
+    useEffect(() => {
+        const checkIfListsAdminPage = () => {
+            const path = window.location.pathname;
+            const isListsAdmin = path.includes('/admin') && path.includes('/birthlists');
+            setIsListsAdminPage(isListsAdmin);
+        };
+
+        checkIfListsAdminPage();
+
+        // Listen for route changes
+        const handleRouteChange = () => checkIfListsAdminPage();
+        window.addEventListener('popstate', handleRouteChange);
+
+        return () => {
+            window.removeEventListener('popstate', handleRouteChange);
+        };
+    }, []);
 
     // Fetch stats from the API
     const fetchStats = useCallback(async (showLoading = true, showToast = true) => {
-        // Skip API call if user is not admin
-        if (userRole !== 'admin') {
+        // Skip API call if user is not admin or not on the lists admin page
+        if (userRole !== 'admin' || !isListsAdminPage) {
             setLoading(false);
             return false;
         }
@@ -39,16 +59,45 @@ export function ListStatsProvider({ children, refreshInterval = 30000, userRole 
 
             const response = await fetch('/api/birthlists/stats');
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                const errorMessage = errorData.message || `Failed to fetch list statistics: Server returned ${response.status}`;
-                console.error('List stats API error:', response.status, errorData);
-                throw new Error(errorMessage);
+                // Use default values instead of throwing error
+                console.warn('List stats API not available or returned an error, using fallback data');
+
+                const fallbackData = {
+                    totalLists: 0,
+                    activeLists: 0,
+                    completedLists: 0,
+                    canceledLists: 0,
+                    listsThisMonth: 0,
+                    activeListsThisMonth: 0,
+                    completedListsThisMonth: 0,
+                    canceledListsThisMonth: 0
+                };
+
+                setStats(fallbackData);
+                setLastUpdated(new Date());
+                return false;
             }
 
             const data = await response.json();
 
             if (!data.success) {
-                throw new Error(data.message || 'Failed to fetch list statistics');
+                // Use default values instead of throwing error
+                console.warn('List stats API returned unsuccessful response, using fallback data');
+
+                const fallbackData = {
+                    totalLists: 0,
+                    activeLists: 0,
+                    completedLists: 0,
+                    canceledLists: 0,
+                    listsThisMonth: 0,
+                    activeListsThisMonth: 0,
+                    completedListsThisMonth: 0,
+                    canceledListsThisMonth: 0
+                };
+
+                setStats(fallbackData);
+                setLastUpdated(new Date());
+                return false;
             }
 
             // Check if data has changed
@@ -76,7 +125,7 @@ export function ListStatsProvider({ children, refreshInterval = 30000, userRole 
                 setLoading(false);
             }
         }
-    }, [stats, userRole]);
+    }, [stats, userRole, isListsAdminPage]);
 
     // Initial load
     useEffect(() => {

@@ -278,14 +278,14 @@ export default function BirthListsPage() {
                                         <Link href={`/listas-de-nacimiento/${list._id}`}>
                                             <div className="relative h-48">
                                                 <Image
-                                                    src={list.image || '/assets/images/default-birthlist.jpg'}
+                                                    src={list.image || '/assets/images/screenshot-4.png'}
                                                     alt={list.babyName}
                                                     fill
                                                     className="object-cover"
                                                 />
                                             </div>
                                             <div className="p-6">
-                                                <h3 className="text-xl font-semibold mb-2">{list.babyName}</h3>
+                                                <h3 className="text-xl font-semibold mb-2">Lista de {list.babyName}</h3>
                                                 <p className="text-gray-600 mb-4">{list.title}</p>
                                                 <div className="space-y-3">
                                                     <div className="flex justify-between text-sm">
@@ -635,7 +635,7 @@ export default function BirthListsPage() {
                             {currentStep === 2 && (
                                 <div className="space-y-6">
                                     <div className="bg-gray-50 p-6 rounded-lg">
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4">Añadir Productos a tu Lista</h3>
+                                        <h3 className="text-lg font-medium text-gray-900 mb-4">Añadir Productos al Carrito</h3>
                                         <p className="text-gray-600 mb-4">
                                             Selecciona los productos que necesitas para tu bebé. Puedes añadir más productos después de crear la lista.
                                         </p>
@@ -707,4 +707,4 @@ export default function BirthListsPage() {
             )}
         </ShopLayout>
     );
-} 
+}

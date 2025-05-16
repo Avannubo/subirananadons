@@ -1,5 +1,18 @@
 import mongoose from 'mongoose';
 
+// Schema for gift info
+const giftInfoSchema = new mongoose.Schema({
+    listId: {
+        type: String
+    },
+    itemId: {
+        type: String
+    },
+    babyName: {
+        type: String
+    }
+}, { _id: false });
+
 const cartSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -20,7 +33,12 @@ const cartSchema = new mongoose.Schema({
             type: Number,
             required: true,
             min: 0
-        }
+        },
+        isGift: {
+            type: Boolean,
+            default: false
+        },
+        giftInfo: giftInfoSchema
     }],
     lastUpdated: {
         type: Date,

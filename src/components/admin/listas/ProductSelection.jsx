@@ -11,7 +11,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
     const [totalPages, setTotalPages] = useState(1);
     const [selectedItems, setSelectedItems] = useState(
         Array.isArray(selectedProducts) ? selectedProducts : []
-    ); 
+    );
     useEffect(() => {
         const loadProducts = async () => {
             try {
@@ -32,15 +32,17 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             }
         };
         loadProducts();
-    }, [currentPage, search]); 
-    const handleSelectProduct = (product) => { 
+    }, [currentPage, search]);
+    const handleSelectProduct = (product) => {
         const existingIndex = selectedItems.findIndex(item => item.product._id === product._id);
-        if (existingIndex >= 0) { 
-            const updatedItems = [...selectedItems];
+        let updatedItems;
+
+        if (existingIndex >= 0) {
+            updatedItems = [...selectedItems];
             updatedItems[existingIndex].quantity += 1;
             setSelectedItems(updatedItems);
-        } else { 
-            setSelectedItems([
+        } else {
+            updatedItems = [
                 ...selectedItems,
                 {
                     product,
@@ -48,29 +50,25 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                     reserved: 0,
                     priority: 2
                 }
-            ]);
-        } 
-        if (onProductSelect) {
-            onProductSelect([
-                ...selectedItems,
-                {
-                    product,
-                    quantity: 1,
-                    reserved: 0,
-                    priority: 2
-                }
-            ]);
+            ];
+            setSelectedItems(updatedItems);
         }
+
+        // Call onProductSelect only with the updated items to prevent unnecessary rerenders
+        if (onProductSelect) {
+            onProductSelect(updatedItems);
+        }
+
         toast.success(`${product.name} añadido a la lista`);
-    }; 
+    };
     const handleRemoveProduct = (productId) => {
         const updatedItems = selectedItems.filter(item => item.product._id !== productId);
-        setSelectedItems(updatedItems); 
+        setSelectedItems(updatedItems);
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
         toast.success('Producto eliminado de la lista');
-    }; 
+    };
     const handleQuantityChange = (productId, newQuantity) => {
         if (newQuantity < 1) return;
         const updatedItems = selectedItems.map(item => {
@@ -79,13 +77,13 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             }
             return item;
         });
-        setSelectedItems(updatedItems); 
+        setSelectedItems(updatedItems);
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
     };
     return (
-        <div>  
+        <div>
             {selectedItems.length > 0 && (
                 <div className="mb-6   bg-gray-50 rounded-lg h-scree">
                     <h3 className="font-medium text-gray-900 mb-2">Productos seleccionados ({selectedItems.length})</h3>
@@ -109,21 +107,33 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                 <div className="flex items-center space-x-3">
                                     <div className="flex items-center border border-gray-300  rounded-md">
                                         <button
-                                            onClick={() => handleQuantityChange(item.product._id, item.quantity - 1)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleQuantityChange(item.product._id, item.quantity - 1);
+                                            }}
                                             className="px-2 py-1 text-gray-500 hover:bg-gray-100"
                                         >
                                             -
                                         </button>
                                         <span className="px-2 py-1 text-sm">{item.quantity}</span>
                                         <button
-                                            onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleQuantityChange(item.product._id, item.quantity + 1);
+                                            }}
                                             className="px-2 py-1 text-gray-500 hover:bg-gray-100"
                                         >
                                             +
                                         </button>
                                     </div>
                                     <button
-                                        onClick={() => handleRemoveProduct(item.product._id)}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleRemoveProduct(item.product._id);
+                                        }}
                                         className="text-red-500 hover:text-red-700"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,7 +158,11 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                     />
                     <button
                         className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
-                        onClick={() => setSearch('')}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setSearch('');
+                        }}
                     >
                         {search && (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -177,7 +191,11 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                 <div
                                     key={product._id}
                                     className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col"
-                                    onClick={() => handleSelectProduct(product)}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleSelectProduct(product);
+                                    }}
                                 >
                                     <div className="flex-1">
                                         {product.image && (
@@ -205,7 +223,11 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                         <div className="flex justify-center mt-6">
                             <div className="flex space-x-1">
                                 <button
-                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setCurrentPage(Math.max(1, currentPage - 1));
+                                    }}
                                     disabled={currentPage === 1}
                                     className={`px-3 py-1 rounded-md ${currentPage === 1
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
@@ -224,7 +246,11 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                     return (
                                         <button
                                             key={pageNum}
-                                            onClick={() => setCurrentPage(pageNum)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setCurrentPage(pageNum);
+                                            }}
                                             className={`px-3 py-1 rounded-md ${currentPage === pageNum
                                                 ? 'bg-[#00B0C8] text-white'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -235,7 +261,11 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                     );
                                 })}
                                 <button
-                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setCurrentPage(Math.min(totalPages, currentPage + 1));
+                                    }}
                                     disabled={currentPage === totalPages}
                                     className={`px-3 py-1 rounded-md ${currentPage === totalPages
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
