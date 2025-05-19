@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,6 +15,8 @@ const parsePrice = (price) => {
     return price;
 };
 export default function BrandsPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [brands, setBrands] = useState([]);
     const [selectedBrand, setSelectedBrand] = useState('');
     const [viewMode, setViewMode] = useState('grid');
@@ -36,7 +39,13 @@ export default function BrandsPage() {
                 const data = await response.json();
                 if (data.brands && data.brands.length > 0) {
                     setBrands(data.brands);
-                    setSelectedBrand('all'); // Default to showing all products
+                    // Get brand from URL parameters
+                    const urlBrand = searchParams.get('brand');
+                    if (urlBrand) {
+                        setSelectedBrand(urlBrand);
+                    } else {
+                        setSelectedBrand('all');
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching brands:', error);
@@ -45,23 +54,20 @@ export default function BrandsPage() {
             }
         };
         fetchBrands();
-    }, []);
+    }, [searchParams]);
     // Fetch products for selected brand
     useEffect(() => {
         const fetchProducts = async () => {
             if (!selectedBrand) return;
-
             try {
                 setLoading(true);
                 // If 'all' is selected, don't filter by brand
                 const endpoint = selectedBrand === 'all'
                     ? `/api/products?limit=${productsPerPage}&page=${currentPage}&status=active`
                     : `/api/products?brand=${selectedBrand}&limit=${productsPerPage}&page=${currentPage}&status=active`;
-
                 const response = await fetch(endpoint);
                 const data = await response.json();
                 let products = data.products || [];
-
                 // Format products to match the expected structure
                 products = products.map(product => ({
                     id: product._id,
@@ -75,15 +81,12 @@ export default function BrandsPage() {
                     brand: product.brand,
                     description: product.description || ''
                 }));
-
                 // Update pagination information
                 if (data.pagination) {
                     setTotalPages(data.pagination.totalPages);
                     setTotalItems(data.pagination.totalItems);
                 }
-
                 sortProducts(products);
-
                 // Scroll to top when brand or page changes
                 window.scrollTo({
                     top: 0,
@@ -96,23 +99,34 @@ export default function BrandsPage() {
                 setLoading(false);
             }
         };
-
         fetchProducts();
     }, [selectedBrand, currentPage, productsPerPage]);
-
     // Reset to page 1 when changing brands
     useEffect(() => {
         if (selectedBrand) {
             setCurrentPage(1);
         }
     }, [selectedBrand]);
-
     // Sort products when sortBy changes
     useEffect(() => {
         if (filteredProducts.length > 0) {
             sortProducts(filteredProducts);
         }
     }, [sortBy]);
+    // Scroll to selected brand in sidebar
+    useEffect(() => {
+        if (selectedBrand && !brandsLoading) {
+            // Find the selected brand button element
+            const selectedBrandElement = document.querySelector(`button[data-brand="${selectedBrand}"]`);
+            if (selectedBrandElement) {
+                // Scroll the brand into view with smooth behavior
+                selectedBrandElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        }
+    }, [selectedBrand, brandsLoading]);
     const sortProducts = (products) => {
         let sorted = [...products];
         switch (sortBy) {
@@ -143,6 +157,16 @@ export default function BrandsPage() {
     const handleSortChange = (e) => {
         setSortBy(e.target.value);
     };
+    const handleBrandSelect = (brandName) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (brandName === 'all') {
+            params.delete('brand');
+        } else {
+            params.set('brand', brandName);
+        }
+        router.replace(`/brands?${params.toString()}`);
+        setSelectedBrand(brandName);
+    };
     // Go to previous page
     const handlePrevPage = () => {
         if (currentPage > 1) {
@@ -165,7 +189,6 @@ export default function BrandsPage() {
     const getPaginationNumbers = () => {
         const pages = [];
         const maxPagesToShow = 5;
-
         if (totalPages <= maxPagesToShow) {
             // Show all pages if there are fewer than maxPagesToShow
             for (let i = 1; i <= totalPages; i++) {
@@ -174,42 +197,34 @@ export default function BrandsPage() {
         } else {
             // Always show first page
             pages.push(1);
-
             // Calculate start and end of page numbers around current page
             let startPage = Math.max(2, currentPage - 2);
             let endPage = Math.min(totalPages - 1, currentPage + 2);
-
             // Adjust if we're near the start
             if (currentPage <= 3) {
                 endPage = Math.min(totalPages - 1, 5);
             }
-
             // Adjust if we're near the end
             if (currentPage >= totalPages - 2) {
                 startPage = Math.max(2, totalPages - 4);
             }
-
             // Add ellipsis if there's a gap after first page
             if (startPage > 2) {
                 pages.push('...');
             }
-
             // Add middle pages
             for (let i = startPage; i <= endPage; i++) {
                 pages.push(i);
             }
-
             // Add ellipsis if there's a gap before last page
             if (endPage < totalPages - 1) {
                 pages.push('...');
             }
-
             // Always show last page
             if (totalPages > 1) {
                 pages.push(totalPages);
             }
         }
-
         return pages;
     };
     // BrandSkeleton component for the sidebar
@@ -219,7 +234,6 @@ export default function BrandsPage() {
             <div className="h-4 w-24 bg-gray-200 rounded"></div>
         </div>
     );
-
     // ProductSkeleton component for the grid or list view
     const ProductSkeleton = ({ viewMode }) => {
         if (viewMode === 'grid') {
@@ -245,7 +259,6 @@ export default function BrandsPage() {
             );
         }
     };
-
     return (
         <ShopLayout>
             {/* Header Image */}
@@ -295,7 +308,8 @@ export default function BrandsPage() {
                                             transition={{ delay: 0.05, duration: 0.5 }}
                                         >
                                             <button
-                                                onClick={() => setSelectedBrand('all')}
+                                                onClick={() => handleBrandSelect('all')}
+                                                data-brand="all"
                                                 className={`w-full text-left px-4 py-2 transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-3 ${selectedBrand === 'all'
                                                     ? 'bg-gray-50 font-medium text-[#00B0C8]'
                                                     : ''
@@ -312,7 +326,6 @@ export default function BrandsPage() {
                                     ) : (
                                         <BrandSkeleton key="all-skeleton" />
                                     )}
-
                                     {/* Brands list or skeleton */}
                                     {brandsLoading ? (
                                         // Show brand skeletons while loading
@@ -330,7 +343,8 @@ export default function BrandsPage() {
                                                 transition={{ delay: 0.1 * index, duration: 0.5 }}
                                             >
                                                 <button
-                                                    onClick={() => setSelectedBrand(brand.name)}
+                                                    onClick={() => handleBrandSelect(brand.name)}
+                                                    data-brand={brand.name}
                                                     className={`w-full text-left px-4 py-2 transition-colors hover:bg-gray-50 flex items-center gap-3 ${selectedBrand === brand.name
                                                         ? 'bg-gray-50 font-medium text-[#00B0C8]'
                                                         : ''
@@ -425,7 +439,6 @@ export default function BrandsPage() {
                                 {selectedBrand !== 'all' ? ` de ${selectedBrand}` : ''}
                             </p>
                         )}
-
                         {/* Products Grid/List - Show skeleton or content */}
                         {loading ? (
                             <motion.div
@@ -469,7 +482,6 @@ export default function BrandsPage() {
                                 </motion.div>
                             </>
                         )}
-
                         {/* Pagination - show skeleton when loading or actual pagination when loaded */}
                         {loading ? (
                             <div className="mt-10 flex justify-center">
@@ -525,8 +537,7 @@ export default function BrandsPage() {
                         )}
                     </motion.div>
                 </div>
-            </div>
-            {/* Quick View Modal */}
+            </div> 
             {quickViewProduct && (
                 <ProductQuickView
                     product={quickViewProduct}
@@ -536,5 +547,3 @@ export default function BrandsPage() {
         </ShopLayout>
     );
 }
-
-

@@ -180,7 +180,7 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
                     </p>
                 </div>
             )}
-            {debug && (
+            {/* {debug && (
                 <div className="container mx-auto mt-4 p-4 bg-gray-100 rounded">
                     <h3 className="text-sm font-bold mb-2">Debug Information:</h3>
                     <ul className="text-xs space-y-1">
@@ -190,7 +190,7 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
                         {error && <li className="text-red-500">Error: {error}</li>}
                     </ul>
                 </div>
-            )}
+            )} */}
         </div>
     );
 } 

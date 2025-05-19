@@ -27,10 +27,8 @@ export default function BirthListPage({ params }) {
     const [availableCategories, setAvailableCategories] = useState(["Todos"]);
     const router = useRouter();
     const { addToCart } = useCart();
-
     // Remove or simplify unused states related to the modal
     const [selectedProduct, setSelectedProduct] = useState(null);
-
     // Calculate progress percentage based on reserved/purchased items
     const calculateProgress = (items) => {
         if (!items || items.length === 0) return 0;
@@ -77,7 +75,7 @@ export default function BirthListPage({ params }) {
                         name: item.product.name,
                         price: `${item.product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
                         priceValue: item.product.price_incl_tax,
-                        image: item.product.image || '/assets/images/default-product.png',
+                        image: item.product.image || '/assets/images/Screenshot_4.png',
                         category: item.product.category,
                         status: item.reserved >= item.quantity ? 'purchased' : 'available',
                         quantity: item.quantity,
@@ -85,7 +83,6 @@ export default function BirthListPage({ params }) {
                         priority: item.priority
                     }))
                 });
-
                 // Extract unique categories from products
                 const uniqueCategories = ['Todos'];
                 birthListData.items.forEach(item => {
@@ -201,7 +198,6 @@ export default function BirthListPage({ params }) {
     const handleReserveClick = async (product) => {
         try {
             console.log('Product data:', product);
-
             // Format product object to ensure correct ID format
             const productForCart = {
                 id: product.productId,
@@ -210,9 +206,7 @@ export default function BirthListPage({ params }) {
                 price: product.priceValue,
                 image: product.image
             };
-
             console.log('Formatted product for cart:', productForCart);
-
             // Use the CartContext to add the gift to cart
             const success = await addToCart(productForCart, 1, {
                 isGift: true,
@@ -222,7 +216,6 @@ export default function BirthListPage({ params }) {
                     babyName: list.babyName
                 }
             });
-
             if (success) {
                 // Navigate to cart
                 router.push('/cart');

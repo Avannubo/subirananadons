@@ -9,7 +9,7 @@ const ImageGallery = () => {
             description: 'Descubre nuestros productos Joolz',
             imageUrl: '/assets/images/joolz.png',
             width: 60,
-            href: "/brands"
+            href: "/brands?brand=Joolz"
         },
         {
             id: 2,
@@ -17,7 +17,7 @@ const ImageGallery = () => {
             description: 'Explora la colección Stokke',
             imageUrl: '/assets/images/stokke.png',
             width: 40,
-            href: "/brands"
+            href: "/brands?brand=Stokke"
         },
         {
             id: 3,
@@ -25,7 +25,7 @@ const ImageGallery = () => {
             description: 'Los mejores productos Bugaboo',
             imageUrl: '/assets/images/bugaboo.jpg',
             width: 40,
-            href: "/brands"
+            href: "/brands?brand=Bugaboo"
         },
         {
             id: 4,
@@ -33,7 +33,7 @@ const ImageGallery = () => {
             description: 'Colección completa de Joie',
             imageUrl: '/assets/images/joie.png',
             width: 60,
-            href: "/brands"
+            href: "/brands?brand=Joie"
         }
     ];
 

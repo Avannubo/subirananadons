@@ -35,7 +35,7 @@ const productSchema = new mongoose.Schema({
     },
     image: {
         type: String,
-        default: '/assets/images/default-product.png'
+        default: '/assets/images/Screenshot_4.png'
     },
     imageHover: {
         type: String,

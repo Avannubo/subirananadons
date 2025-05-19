@@ -288,7 +288,7 @@ export default function CartPage() {
     return (
         <ShopLayout>
             <div className="container mx-auto px-4 py-8 mt-24 ">
-                <h1 className="text-3xl font-bold mb-8 text-zinc-900">Carrito de compra</h1>
+                {/*<h1 className="text-3xl font-bold mb-8 text-zinc-900">Carrito de compra</h1>*/}
                 {/* Start Content */}
                 {cartItems && cartItems.length > 0 ? (
                     <>
@@ -443,19 +443,19 @@ export default function CartPage() {
                             <div className="lg:w-1/2 flex flex-col">
                                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                                     <h2 className="text-xl font-bold p-6 border-b border-gray-200">Tu pedido</h2>
-                                    {cartItems.map((item) => (
+                                    {cartItems.map((item, index) => (
                                         <div
-                                            key={item.id}
+                                            key={index}
                                             className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0"
                                         >
                                             <div className="relative w-20 h-20">
                                                 <Image
-                                                    src={item.image || item.imageUrl || '/assets/images/default-product.png'}
+                                                    src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
                                                     alt={item.name || 'Producto'}
                                                     fill
                                                     className="object-cover rounded-md"
                                                     onError={(e) => {
-                                                        e.target.src = '/assets/images/default-product.png';
+                                                        e.target.src = '/assets/images/Screenshot_4.png';
                                                     }}
                                                 />
                                                 {item.isGift && (

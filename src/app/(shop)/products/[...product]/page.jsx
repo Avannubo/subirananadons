@@ -127,7 +127,7 @@ export default function Page() {
 
                 // Ensure we have at least one image
                 if (formattedProduct.images.length === 0) {
-                    formattedProduct.images.push('/assets/images/default-product.png');
+                    formattedProduct.images.push('/assets/images/Screenshot_4.png');
                 }
                 setProduct(formattedProduct);
                 // Fetch related products in the same category

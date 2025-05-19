@@ -133,7 +133,7 @@ export async function POST(request) {
             brandId: body.brandId || '',
             price_excl_tax: parseFloat(body.price_excl_tax),
             price_incl_tax: parseFloat(body.price_incl_tax),
-            image: body.image || '/assets/images/default-product.png',
+            image: body.image || '/assets/images/Screenshot_4.png',
             imageHover: body.imageHover || '',
             additionalImages: body.additionalImages || [],
             stock: {

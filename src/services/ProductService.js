@@ -101,8 +101,8 @@ export function formatProduct(product) {
         price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
         priceValue: product.price_incl_tax,
         salesCount: product.salesCount || 0,
-        imageUrl: product.image || '/assets/images/default-product.png',
-        imageUrlHover: product.imageHover || product.image || '/assets/images/default-product.png',
+        imageUrl: product.image || '/assets/images/Screenshot_4.png',
+        imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
         description: product.description || '',
         reference: product.reference,
         brand: product.brand || ''
