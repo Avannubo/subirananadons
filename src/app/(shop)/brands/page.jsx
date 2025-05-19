@@ -537,7 +537,7 @@ export default function BrandsPage() {
                         )}
                     </motion.div>
                 </div>
-            </div> 
+            </div>
             {quickViewProduct && (
                 <ProductQuickView
                     product={quickViewProduct}

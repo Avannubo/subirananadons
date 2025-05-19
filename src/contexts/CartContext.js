@@ -1,25 +1,19 @@
 'use client';
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
-
 const CartContext = createContext();
-
 const handleApiResponse = async (response) => {
     try {
         const contentType = response.headers.get('content-type');
-
         // If the response is not OK, handle the error
         if (!response.ok) {
             console.error(`API error: ${response.status} ${response.statusText}`);
-
             // If we have JSON content, try to parse the error details
             if (contentType && contentType.includes('application/json')) {
                 try {
                     const errorData = await response.json();
                     console.error('Error details:', errorData);
-
                     // Extract the error message or use a default message
                     const errorMessage = errorData.message || errorData.error || `Error ${response.status}: ${response.statusText}`;
                     throw new Error(errorMessage);
@@ -35,27 +29,23 @@ const handleApiResponse = async (response) => {
                 throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
             }
         }
-
         // For successful responses, verify we have JSON and return it
         if (!contentType || !contentType.includes('application/json')) {
             const text = await response.text();
             console.error('Invalid response format - expected JSON but got:', text.substring(0, 200));
             throw new Error('Server returned an invalid response format - expected JSON');
         }
-
         return response.json();
     } catch (error) {
         console.error('Error handling API response:', error);
         throw error; // Re-throw the error after logging
     }
 };
-
 export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState([]);
     const [cartId, setCartId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const { data: session, status } = useSession();
-
     // Load cart data from local storage or database
     useEffect(() => {
         const loadCart = async () => {
@@ -63,7 +53,6 @@ export function CartProvider({ children }) {
                 setIsLoading(true);
                 // Always check local storage first
                 const localCart = localStorage.getItem('cart');
-
                 if (localCart) {
                     try {
                         const parsedCart = JSON.parse(localCart);
@@ -75,13 +64,11 @@ export function CartProvider({ children }) {
                         localStorage.removeItem('cart');
                     }
                 }
-
                 // If user is authenticated, try to get their cart from the server
                 if (session?.user) {
                     try {
                         const response = await fetch('/api/cart');
                         const data = await handleApiResponse(response);
-
                         // If server has cart data, update local state
                         if (data && data.items && data.items.length > 0) {
                             setCartItems(data.items);
@@ -104,17 +91,14 @@ export function CartProvider({ children }) {
                 setIsLoading(false);
             }
         };
-
         loadCart();
     }, [session, status]);
-
     const saveCart = async (items, id = cartId) => {
         try {
             // Always save to localStorage
             localStorage.setItem('cart', JSON.stringify({ items, id }));
             setCartItems(items);
             setCartId(id);
-
             // If user is authenticated and we have a cart ID, save to the database
             if (session?.user && id) {
                 try {
@@ -131,7 +115,6 @@ export function CartProvider({ children }) {
                     // Don't show error toast here as we still have local cart data
                 }
             }
-
             return true;
         } catch (error) {
             console.error('Error saving cart:', error);
@@ -139,13 +122,10 @@ export function CartProvider({ children }) {
             return false;
         }
     };
-
     const addToCart = async (product, quantity = 1, options = {}) => {
         try {
             if (isLoading) return false;
-
             const { isGift, giftInfo } = options;
-
             // Use the dedicated add endpoint for gifts
             if (isGift && giftInfo) {
                 try {
@@ -154,23 +134,19 @@ export function CartProvider({ children }) {
                         quantity,
                         giftInfo
                     });
-
                     // Ensure we have the correct productId format
                     const productId = product.productId || product.id;
-
                     if (!productId) {
                         console.error('Invalid product ID:', product);
                         toast.error('Error: ID de producto inválido');
                         return false;
                     }
-
                     // Validate gift info before sending to API
                     if (!giftInfo.listId) {
                         console.error('Missing list ID in gift info:', giftInfo);
                         toast.error('Error: Falta información de la lista de regalo');
                         return false;
                     }
-
                     // Format request data
                     const requestData = {
                         productId,
@@ -178,9 +154,7 @@ export function CartProvider({ children }) {
                         isGift,
                         giftInfo
                     };
-
                     console.log('Sending request to API:', requestData);
-
                     try {
                         const response = await fetch('/api/cart/add', {
                             method: 'POST',
@@ -189,13 +163,10 @@ export function CartProvider({ children }) {
                             },
                             body: JSON.stringify(requestData)
                         });
-
                         // Log response status for debugging
                         console.log(`API response status: ${response.status} ${response.statusText}`);
-
                         const data = await handleApiResponse(response);
                         console.log('API response data:', data);
-
                         if (data.success) {
                             // Update local cart
                             if (data.cart && data.cart.items) {
@@ -223,11 +194,9 @@ export function CartProvider({ children }) {
                     return false;
                 }
             }
-
             // Regular (non-gift) product handling
             const existingItem = cartItems.find(item => item.id === product.id);
             let newItems;
-
             if (existingItem) {
                 newItems = cartItems.map(item =>
                     item.id === product.id
@@ -237,7 +206,6 @@ export function CartProvider({ children }) {
             } else {
                 newItems = [...cartItems, { ...product, quantity }];
             }
-
             const result = await saveCart(newItems);
             if (result) {
                 toast.success('Añadido al carrito');
@@ -249,11 +217,9 @@ export function CartProvider({ children }) {
             return false;
         }
     };
-
     const removeFromCart = async (productId) => {
         try {
             if (isLoading) return;
-
             const newItems = cartItems.filter(item => item.id !== productId);
             const result = await saveCart(newItems);
             if (result) {
@@ -266,15 +232,12 @@ export function CartProvider({ children }) {
             return false;
         }
     };
-
     const updateQuantity = async (productId, quantity) => {
         try {
             if (isLoading) return;
-
             if (quantity <= 0) {
                 return removeFromCart(productId);
             }
-
             const newItems = cartItems.map(item =>
                 item.id === productId ? { ...item, quantity } : item
             );
@@ -285,15 +248,12 @@ export function CartProvider({ children }) {
             return false;
         }
     };
-
     const clearCart = async () => {
         try {
             if (isLoading) return;
-
             localStorage.removeItem('cart');
             setCartItems([]);
             setCartId(null);
-
             if (session?.user && cartId) {
                 try {
                     await fetch('/api/cart', {
@@ -307,7 +267,6 @@ export function CartProvider({ children }) {
                     console.error('Failed to delete cart from server:', error);
                 }
             }
-
             toast.success('Carrito vaciado');
             return true;
         } catch (error) {
@@ -316,18 +275,15 @@ export function CartProvider({ children }) {
             return false;
         }
     };
-
     const getCartTotal = () => {
         return cartItems.reduce((total, item) => {
             const price = parseFloat(item.priceValue || item.price || 0);
             return total + price * item.quantity;
         }, 0);
     };
-
     const getCartCount = () => {
         return cartItems.reduce((count, item) => count + item.quantity, 0);
     };
-
     return (
         <CartContext.Provider
             value={{
@@ -345,7 +301,6 @@ export function CartProvider({ children }) {
         </CartContext.Provider>
     );
 }
-
 export function useCart() {
     return useContext(CartContext);
 } 

@@ -26,6 +26,8 @@ export default function CartPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
+    const regularItems = cartItems.filter(item => !item.isGift);
+    const giftItems = cartItems.filter(item => item.isGift);
     // Check if cart has any gift items
     const hasGiftItems = useMemo(() => {
         return cartItems.some(item => item.isGift);
@@ -105,9 +107,9 @@ export default function CartPage() {
         console.log(`Delivery method: ${deliveryMethod}, Subtotal: ${calculateSubtotal()}, Shipping: ${shipping}`);
     }, [cartItems, deliveryMethod]);
     const handleDeliveryMethodChange = (method) => {
-        // Only allow changing to 'pickup' if cart has gift items
-        if (hasGiftItems && method === 'delivery') {
-            toast.error('Los regalos deben recogerse en tienda');
+        // Only allow changing to 'delivery' if there are regular items
+        if (method === 'delivery' && regularItems.length === 0) {
+            toast.error('Necesitas productos normales en el carrito para envío a domicilio');
             return;
         }
         setDeliveryMethod(method);
@@ -132,7 +134,7 @@ export default function CartPage() {
         return calculateSubtotal() * 0.21;
     };
     const calculateTotal = () => {
-        return calculateSubtotal() + calculateShipping() + calculateTax();
+        return calculateSubtotal() + calculateShipping();// + calculateTax();
     };
     // Save user's address for future orders
     const saveUserAddressPreferences = async () => {
@@ -265,10 +267,8 @@ export default function CartPage() {
     // Handle invoice download
     const handleDownloadInvoice = () => {
         if (!orderSuccess) return;
-
         // In a real implementation, you would call an API to generate a PDF invoice
         toast.success('Descargando factura...');
-
         // Simulating download delay
         setTimeout(() => {
             toast.success('Factura descargada correctamente');
@@ -277,9 +277,7 @@ export default function CartPage() {
     // Handle sending email with receipt
     const handleSendEmail = () => {
         if (!orderSuccess) return;
-
         toast.success(`Enviando email a ${orderSuccess.buyerDetails.email}...`);
-
         // Simulating email sending
         setTimeout(() => {
             toast.success('Email enviado correctamente');
@@ -294,8 +292,8 @@ export default function CartPage() {
                     <>
                         <div className="flex flex-col lg:flex-row gap-8">
                             {/* Left Column - User Information */}
-                            <div className="lg:w-1/2">
-                                <div className="bg-white rounded-lg shadow-sm p-6">
+                            <div className="lg:w-1/2  ">
+                                <div className="bg-white rounded-lg shadow-sm p-6 sticky top-[120px]">
                                     <h2 className="text-xl font-bold mb-6">Datos de {deliveryMethod === 'pickup' ? 'Contacto' : 'Envío'}</h2>
                                     {userLoading ? (
                                         <div className="flex items-center justify-center py-4">
@@ -307,7 +305,7 @@ export default function CartPage() {
                                             {hasGiftItems && (
                                                 <div className="mb-4 p-3 bg-pink-50 text-pink-700 rounded-md border border-pink-200">
                                                     <p className="text-sm flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                         </svg>
                                                         Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista. Por favor, proporciona tus datos de contacto.
@@ -317,7 +315,7 @@ export default function CartPage() {
                                             {user && (
                                                 <div className="mb-4 p-3 bg-blue-50 text-blue-600 rounded-md border border-blue-100">
                                                     <p className="text-sm flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                         </svg>
                                                         Hemos rellenado automáticamente algunos campos con tus datos. Por favor, verifica y completa la información.
@@ -441,66 +439,132 @@ export default function CartPage() {
                             </div>
                             {/* Right Column - Products */}
                             <div className="lg:w-1/2 flex flex-col">
-                                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                                    <h2 className="text-xl font-bold p-6 border-b border-gray-200">Tu pedido</h2>
-                                    {cartItems.map((item, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0"
-                                        >
-                                            <div className="relative w-20 h-20">
-                                                <Image
-                                                    src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
-                                                    alt={item.name || 'Producto'}
-                                                    fill
-                                                    className="object-cover rounded-md"
-                                                    onError={(e) => {
-                                                        e.target.src = '/assets/images/Screenshot_4.png';
-                                                    }}
-                                                />
-                                                {item.isGift && (
-                                                    <div className="absolute top-0 right-0 bg-pink-500 text-white text-xs px-1 rounded-bl rounded-tr">
-                                                        Regalo
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-grow">
-                                                <h3 className="font-medium">{item.name}</h3>
-                                                <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
-                                                <p className="text-[#00B0C8] font-medium">{item.price}</p>
-                                                {item.isGift && item.listOwner && (
-                                                    <p className="text-xs text-pink-600 mt-1">
-                                                        Lista de regalo: {item.listOwner}
-                                                        <span className="ml-2 bg-green-100 text-green-700 px-1 rounded text-xs">Será marcado como comprado</span>
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2">
+                                {/* First, separate the cart items */}
+                                {/* Regular Items Section */}
+                                {regularItems.length > 0 && (
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                                        <h2 className="text-xl font-bold p-6 border-b border-gray-200">Tu pedido</h2>
+                                        {regularItems.map((item, index) => (
+                                            <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
+                                                <div className="relative w-20 h-20">
+                                                    <Image
+                                                        src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
+                                                        alt={item.name || 'Producto'}
+                                                        fill
+                                                        className="object-contain rounded-md"
+                                                        onError={(e) => {
+                                                            e.target.src = '/assets/images/Screenshot_4.png';
+                                                        }}
+                                                    />
+                                                    {item.isGift && (
+                                                        <div className="absolute top-0 right-0 bg-pink-500 text-white text-xs px-1 rounded-bl rounded-tr">
+                                                            Regalo
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <h3 className="font-medium">{item.name}</h3>
+                                                    <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
+                                                    <p className="text-[#00B0C8] font-medium">{item.price}</p>
+                                                    {item.isGift && item.listOwner && (
+                                                        <p className="text-xs text-pink-600 mt-1">
+                                                            Lista de regalo: {item.listOwner}
+                                                            <span className="ml-2 bg-green-100 text-green-700 px-1 rounded text-xs">Será marcado como comprado</span>
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
+                                                        disabled={item.quantity <= 1}
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <span className="w-8 text-center">{item.quantity}</span>
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, Math.min(99, item.quantity + 1))}
+                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
+                                                        disabled={item.quantity >= 99}
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
                                                 <button
-                                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                    className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
+                                                    onClick={() => removeFromCart(item.id)}
+                                                    className="text-red-500 hover:text-red-700"
                                                 >
-                                                    -
-                                                </button>
-                                                <span className="w-8 text-center">{item.quantity}</span>
-                                                <button
-                                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                    className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
-                                                >
-                                                    +
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
                                                 </button>
                                             </div>
-                                            <button
-                                                onClick={() => removeFromCart(item.id)}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
+                                        ))}
+                                        {regularItems.length === 0 && (
+                                            <p className="text-gray-500 text-center py-4">No hay productos en tu pedido</p>
+                                        )}
+                                    </div>
+                                )}
+                                {/* Gift Items Section - Only show if there are gift items */}
+                                {giftItems.length > 0 && (
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-4">
+                                        <h2 className="text-xl font-bold p-6 border-b border-gray-200">Regalos de Compra</h2>
+                                        {giftItems.map((item, index) => (
+                                            <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
+                                                <div className="relative w-20 h-20">
+                                                    <Image
+                                                        src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
+                                                        alt={item.name || 'Producto'}
+                                                        fill
+                                                        className="object-contain rounded-md"
+                                                        onError={(e) => {
+                                                            e.target.src = '/assets/images/Screenshot_4.png';
+                                                        }}
+                                                    />
+                                                    {item.isGift && (
+                                                        <div className="absolute top-0 right-0 bg-pink-500 text-white text-xs px-1 rounded-bl rounded-tr">
+                                                            Regalo
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <h3 className="font-medium">{item.name}</h3>
+                                                    <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
+                                                    <p className="text-[#00B0C8] font-medium">{item.price}</p>
+                                                    {item.isGift && item.listOwner && (
+                                                        <p className="text-xs text-pink-600 mt-1">
+                                                            Lista de regalo: {item.listOwner}
+                                                            <span className="ml-2 bg-green-100 text-green-700 px-1 rounded text-xs">Será marcado como comprado</span>
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <span className="w-8 text-center">{item.quantity}</span>
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
+                                                <button
+                                                    onClick={() => removeFromCart(item.id)}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                                 {/* Delivery Method Selection */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
                                     <h2 className="text-xl font-bold mb-4">Método de entrega</h2>
@@ -508,7 +572,7 @@ export default function CartPage() {
                                     {hasGiftItems && (
                                         <div className="mb-4 p-3 bg-pink-50 border border-pink-200 rounded-lg">
                                             <p className="text-sm text-pink-700 flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-15 w-15 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                                                 </svg>
                                                 {hasOnlyGiftItems
@@ -563,7 +627,7 @@ export default function CartPage() {
                                                 </div>
                                             </div>
                                             <span className="text-[#00B0C8] font-medium">
-                                                {calculateSubtotal() >= 60 || hasGiftItems ? 'Gratis' : '5,99 €'}
+                                                {calculateSubtotal() >= 60 || regularItems.length === 0 ? 'Gratis' : '5,99 €'}
                                             </span>
                                         </div>
                                         <div
@@ -614,10 +678,10 @@ export default function CartPage() {
                                                     <span>{calculateShipping().toFixed(2)} €</span>
                                                 )}
                                             </div>
-                                            <div className="flex justify-between">
+                                            {/* <div className="flex justify-between">
                                                 <span>IVA (21%)</span>
                                                 <span>{calculateTax().toFixed(2)} €</span>
-                                            </div>
+                                            </div> */}
                                             <div className="border-t border-gray-200 pt-3 mt-3">
                                                 <div className="flex justify-between font-bold">
                                                     <span>Total</span>
@@ -640,70 +704,6 @@ export default function CartPage() {
                                             {orderError && (
                                                 <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
                                                     <p>{orderError}</p>
-                                                </div>
-                                            )}
-                                            {orderSuccess && (
-                                                <div className="mt-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md">
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <h3 className="text-xl font-bold">¡Pedido realizado con éxito!</h3>
-                                                        <span className="text-sm bg-green-200 text-green-800 py-1 px-3 rounded-full">
-                                                            #{orderSuccess.orderNumber}
-                                                        </span>
-                                                    </div>
-
-                                                    <div className="mt-3 mb-4">
-                                                        <p className="mb-1">Hemos enviado un correo con los detalles de tu compra a <strong>{orderSuccess.buyerDetails.email}</strong></p>
-                                                        <p className="text-lg font-semibold">Total: {orderSuccess.totalAmount} €</p>
-                                                    </div>
-
-                                                    {orderSuccess.hasGiftItems && (
-                                                        <div className="mb-4 p-3 bg-pink-50 text-pink-700 rounded-md border border-pink-200">
-                                                            <p className="text-sm flex items-center font-semibold mb-2">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                                                                </svg>
-                                                                Compra de regalo realizada
-                                                            </p>
-                                                            <ul className="text-sm ml-7 list-disc">
-                                                                <li>Los artículos de regalo han sido marcados como comprados</li>
-                                                                <li>El propietario de la lista será notificado</li>
-                                                                <li>Recuerda que estos artículos deben ser recogidos en tienda</li>
-                                                            </ul>
-                                                        </div>
-                                                    )}
-
-                                                    <div className="grid grid-cols-2 gap-3 mt-4">
-                                                        <button
-                                                            onClick={handleDownloadInvoice}
-                                                            className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                            </svg>
-                                                            Descargar Factura
-                                                        </button>
-                                                        <button
-                                                            onClick={handleSendEmail}
-                                                            className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                            </svg>
-                                                            Enviar por Email
-                                                        </button>
-                                                    </div>
-
-                                                    <div className="mt-4 pt-3 border-t border-gray-200">
-                                                        <Link
-                                                            href="/products"
-                                                            className="text-[#00B0C8] hover:underline flex items-center justify-center gap-2"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                                            </svg>
-                                                            Continuar comprando
-                                                        </Link>
-                                                    </div>
                                                 </div>
                                             )}
                                         </div>
@@ -729,6 +729,80 @@ export default function CartPage() {
                     </motion.div>
                 )}
             </div>
+            {orderSuccess && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000050] bg-opacity-40">
+                    <div className="relative bg-green-50 border border-green-200 text-green-700 rounded-md shadow-lg max-w-2xl w-full mx-4 p-10">
+                        <button
+                            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                            onClick={() => setOrderSuccess(null)}
+                            aria-label="Cerrar"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-xl font-bold">¡Pedido realizado con éxito!</h3>
+                            <span className="text-sm bg-green-200 text-green-800 py-1 px-3 rounded-full">
+                                #{orderSuccess.orderNumber}
+                            </span>
+                        </div>
+                        <div className="mt-3 mb-4">
+                            <p className="mb-1">
+                                Hemos enviado un correo con los detalles de tu compra a <strong>{orderSuccess.buyerDetails.email}</strong>
+                            </p>
+                            <p className="text-lg font-semibold">Total: {orderSuccess.totalAmount} €</p>
+                        </div>
+                        {orderSuccess.hasGiftItems && (
+                            <div className="mb-4 p-3 bg-pink-50 text-pink-700 rounded-md border border-pink-200">
+                                <p className="text-sm flex items-center font-semibold mb-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                                    </svg>
+                                    Compra de regalo realizada
+                                </p>
+                                <ul className="text-sm ml-7 list-disc">
+                                    <li>Los artículos de regalo han sido marcados como comprados</li>
+                                    <li>El propietario de la lista será notificado</li>
+                                    <li>Recuerda que estos artículos deben ser recogidos en tienda</li>
+                                </ul>
+                            </div>
+                        )}
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                            <button
+                                onClick={handleDownloadInvoice}
+                                className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Descargar Factura
+                            </button>
+                            <button
+                                onClick={handleSendEmail}
+                                className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Enviar por Email
+                            </button>
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-gray-200">
+                            <Link
+                                href="/products"
+                                className="text-[#00B0C8] hover:underline flex items-center justify-center gap-2"
+                                onClick={() => setOrderSuccess(null)}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                                Continuar comprando
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </ShopLayout>
     );
-} 
+}

@@ -17,13 +17,6 @@ function generateOrderNumber() {
 export async function POST(request) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user?.id) {
-            return NextResponse.json({
-                success: false,
-                message: 'Unauthorized - Please log in to place an order'
-            }, { status: 401 });
-        }
-
         await dbConnect();
 
         const data = await request.json();
@@ -36,12 +29,10 @@ export async function POST(request) {
             }, { status: 400 });
         }
 
-        // Create shipping address in the order itself for simplicity
+        // Prepare order data
         const orderData = {
-            user: session.user.id,
             orderNumber: generateOrderNumber(),
             items: items.map(item => {
-                // Handle string and number IDs
                 const productId = typeof item.id === 'string' && /^[0-9a-fA-F]{24}$/.test(item.id)
                     ? item.id
                     : item.id.toString();
@@ -71,6 +62,11 @@ export async function POST(request) {
             shippingCost: totals.shipping,
             notes: shippingDetails.notes || ''
         };
+
+        // If user is logged in, link the order to the user
+        if (session?.user?.id) {
+            orderData.user = session.user.id;
+        }
 
         // Create the order
         const order = await Order.create(orderData);
@@ -148,4 +144,4 @@ export async function GET(request) {
             error: error.message
         }, { status: 500 });
     }
-} 
+}
