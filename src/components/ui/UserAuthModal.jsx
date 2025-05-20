@@ -2,11 +2,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { LogOut, UserRound } from 'lucide-react';
-import Image from 'next/image';
+import { LogOut, UserRound } from 'lucide-react'; 
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
-
 export default function AuthModal() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeView, setActiveView] = useState('login');
@@ -17,7 +15,6 @@ export default function AuthModal() {
     const { user, loading: userLoading, refreshUser } = useUser();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
-
     const openLogin = () => {
         if (session) {
             router.push("/dashboard");
@@ -35,7 +32,6 @@ export default function AuthModal() {
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
-
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -65,17 +61,13 @@ export default function AuthModal() {
             const formData = new FormData(e.currentTarget);
             const email = formData.get('email');
             const password = formData.get('password');
-
             console.log('Attempting login with email:', email);
-
             const result = await signIn('credentials', {
                 redirect: false,
                 email,
                 password,
             });
-
             console.log('Login result:', result);
-
             if (result?.error) {
                 let errorMessage = 'Error al iniciar sesión. ';
                 console.log('Login error:', result.error);
@@ -92,15 +84,12 @@ export default function AuthModal() {
                 toast.error(errorMessage);
                 return;
             }
-
             toast.success('¡Inicio de sesión exitoso!');
             console.log('Login successful, redirecting to dashboard...');
-
             setTimeout(() => {
                 closeModal();
                 router.push('/dashboard');
             }, 1000);
-
         } catch (error) {
             console.error('Login error:', error);
             toast.error('Error al iniciar sesión. Por favor intenta nuevamente.');
@@ -114,15 +103,12 @@ export default function AuthModal() {
             const email = formData.get('email');
             const password = formData.get('password');
             const confirmPassword = formData.get('confirmPassword');
-
             console.log('Attempting registration with:', { name, email });
-
             if (password !== confirmPassword) {
                 console.log('Password mismatch');
                 toast.error('Las contraseñas no coinciden');
                 return;
             }
-
             console.log('Sending registration request...');
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
@@ -131,58 +117,47 @@ export default function AuthModal() {
                 },
                 body: JSON.stringify({ name, email, password }),
             });
-
             const data = await response.json();
             console.log('Registration response:', data);
-
             if (!response.ok) {
                 console.error('Registration failed:', data);
                 toast.error(data.message || 'Error en el registro. Por favor intenta nuevamente.');
                 return;
             }
-
             toast.success('¡Registro exitoso! Iniciando sesión...');
-
             console.log('Registration successful, attempting automatic login...');
             const signInResult = await signIn('credentials', {
                 redirect: false,
                 email,
                 password,
             });
-
             console.log('Auto-login result:', signInResult);
-
             if (signInResult?.error) {
                 console.error('Auto-login failed:', signInResult.error);
                 toast.error('Registro exitoso pero error al iniciar sesión. Por favor inicia sesión manualmente.');
                 return;
             }
-
             console.log('Auto-login successful, redirecting to dashboard...');
             setTimeout(() => {
                 closeModal();
-                router.push('/dashboard');
+                // router.push('/dashboard');
             }, 1000);
-
         } catch (error) {
             console.error('Registration error:', error);
             toast.error('Error en el registro. Por favor intenta nuevamente.');
         }
     };
-
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setIsMenuOpen(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
-
     const getUserImage = () => {
         if (user?.image) {
             return user.image;
@@ -192,7 +167,6 @@ export default function AuthModal() {
         }
         return '/assets/images/joie.png';
     };
-
     return (
         <div className="flex">
             <div className="flex">
@@ -231,13 +205,13 @@ export default function AuthModal() {
                 ) : (
                     <button
                         onClick={openLogin}
-                        className="flex flex-row items-center space-x-2  py-2 text-sm text-gray-700 rounded-md transition-colors"
+                            className="flex flex-row items-center space-x-2   text-sm text-gray-700 rounded-md transition-colors" //py-2
                     >
                         <UserRound />
                     </button>
                 )}
                 {isOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="fixed inset-0  flex items-center justify-center" >
                         <div
                             ref={backdropRef}
                             className="fixed inset-0 bg-[#00000050] bg-opacity-50 transition-opacity duration-800 opacity-0"

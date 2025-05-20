@@ -5,7 +5,6 @@ import { FiDownload, FiRefreshCw, FiCalendar, FiChevronDown, FiFilter, FiSearch,
 import { useOrders } from '@/hooks/useOrders';
 import TabNavigation from '@/components/admin/shared/TabNavigation';
 import { toast } from 'react-hot-toast';
-
 export default function OrdersTabs({ userRole = 'user' }) {
     const [activeTab, setActiveTab] = useState('Todos');
     const [isExporting, setIsExporting] = useState(false);
@@ -20,7 +19,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
         dateFrom: '',
         dateTo: ''
     });
-
     // Use our orders hook to fetch and manage orders
     const {
         orders,
@@ -34,26 +32,21 @@ export default function OrdersTabs({ userRole = 'user' }) {
         setCurrentPage,
         setLimit
     } = useOrders(userRole);
-
     const tabs = ['Todos', 'Pendientes', 'Procesando', 'Completados', 'Cancelados'];
-
     // Initial fetch of all orders when component mounts
     useEffect(() => {
         console.log(`OrdersTabs mounted with userRole: ${userRole}`);
         fetchOrders(pagination.currentPage, pagination.limit);
     }, [userRole]); // Adding userRole as a dependency to ensure re-fetch if user role changes
-
     // Fetch orders when filters change
     useEffect(() => {
         // We can add search parameters to the fetchOrders call
         fetchOrders(pagination.currentPage, pagination.limit, filters);
     }, [filters.dateFrom, filters.dateTo]); // Refresh when date filters change
-
     const handleRefresh = async () => {
         await fetchOrders(pagination.currentPage, pagination.limit, filters);
         toast.success('Datos actualizados correctamente');
     };
-
     const handleExport = async (format) => {
         setIsExporting(true);
         try {
@@ -62,7 +55,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 // Get customer data safely with fallbacks
                 const customerName = order.customer && order.customer.name ? order.customer.name : 'N/A';
                 const customerEmail = order.customer && order.customer.email ? order.customer.email : 'N/A';
-
                 return {
                     ID: index + 1,
                     Referencia: order.reference || 'N/A',
@@ -74,7 +66,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
                     'Método de Pago': order.payment_method || 'N/A'
                 };
             });
-
             // Helper function for Excel and PDF to format the table
             const generateTableHtml = () => {
                 return `
@@ -119,11 +110,9 @@ export default function OrdersTabs({ userRole = 'user' }) {
                     </table>
                 `;
             };
-
             if (format === 'csv') {
                 // Create CSV string with proper escaping for values containing commas or quotes
                 const headers = Object.keys(exportData[0]);
-
                 // Function to escape CSV values
                 const escapeCSV = (value) => {
                     if (value === null || value === undefined) return '';
@@ -134,14 +123,11 @@ export default function OrdersTabs({ userRole = 'user' }) {
                     }
                     return str;
                 };
-
                 const csvHeader = headers.map(escapeCSV).join(',');
                 const csvRows = exportData.map(row =>
                     headers.map(header => escapeCSV(row[header])).join(',')
                 );
-
                 const csvContent = [csvHeader, ...csvRows].join('\n');
-
                 // Create download link
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
@@ -161,7 +147,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
                         </body>
                     </html>
                 `;
-
                 const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 triggerDownload(url, 'pedidos.xls');
@@ -170,7 +155,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 const iframe = document.createElement('iframe');
                 iframe.style.display = 'none';
                 document.body.appendChild(iframe);
-
                 // Create PDF content as HTML
                 const html = `
                     <html>
@@ -205,12 +189,10 @@ export default function OrdersTabs({ userRole = 'user' }) {
                         </body>
                     </html>
                 `;
-
                 // Write to iframe and trigger print
                 iframe.contentWindow.document.open();
                 iframe.contentWindow.document.write(html);
                 iframe.contentWindow.document.close();
-
                 // Once it's loaded, print it
                 iframe.onload = function () {
                     setTimeout(() => {
@@ -229,7 +211,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
             setIsExporting(false);
         }
     };
-
     // Helper function to trigger download
     const triggerDownload = (url, filename) => {
         const link = document.createElement('a');
@@ -243,39 +224,17 @@ export default function OrdersTabs({ userRole = 'user' }) {
             URL.revokeObjectURL(url);
         }, 100);
     };
-
-    // Apply date range filter and automatically refresh
-    const applyDateRange = (days) => {
-        const today = new Date();
-        const fromDate = new Date();
-        fromDate.setDate(today.getDate() - days);
-
-        const newFilters = {
-            ...filters,
-            dateFrom: fromDate.toISOString().split('T')[0],
-            dateTo: today.toISOString().split('T')[0]
-        };
-
-        setFilters(newFilters);
-        setRangeDropdownOpen(false);
-
-        // Immediately refresh with new filters
-        fetchOrders(pagination.currentPage, pagination.limit, newFilters);
-    };
-
     // Update filters and refresh table
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         const newFilters = { ...filters, [name]: value };
         setFilters(newFilters);
     };
-
     // Apply filters
     const applyFilters = () => {
         setPagination(prev => ({ ...prev, currentPage: 1 })); // Reset to first page
         fetchOrders(pagination.currentPage, pagination.limit, filters);
     };
-
     // Clear all filters
     const clearFilters = () => {
         setFilters({
@@ -287,7 +246,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
             dateFrom: '',
             dateTo: ''
         });
-
         // Reset page and fetch
         setPagination(prev => ({ ...prev, currentPage: 1 }));
         fetchOrders(pagination.currentPage, pagination.limit, {
@@ -300,7 +258,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
             dateTo: ''
         });
     };
-
     // Filter orders based on active tab
     const filteredOrders = orders.filter(order => {
         console.log(`Filtering order with status: "${order.status}" against active tab: "${activeTab}"`);
@@ -311,7 +268,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
         if (activeTab === 'Cancelados') return order.status === 'Cancelado';
         return false;
     });
-
     // Prepare counts for the TabNavigation component
     const orderCounts = {
         'Todos': orders.length,
@@ -320,9 +276,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
         'Completados': orders.filter(order => (order.status === 'Enviado' || order.status === 'Entregado')).length,
         'Cancelados': orders.filter(order => order.status === 'Cancelado').length
     };
-
     console.log('Order tab counts:', orderCounts);
-
     return (
         <>
             <TabNavigation
@@ -331,7 +285,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 setActiveTab={setActiveTab}
                 counts={orderCounts}
             />
-
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">
@@ -348,22 +301,22 @@ export default function OrdersTabs({ userRole = 'user' }) {
                     <div className="flex space-x-2">
                         <button
                             className="flex items-center px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors"
-                            onClick={() => handleExport('csv')}
+                            onClick={() => handleExport('pdf')}
                             disabled={isExporting || loading}
                             title="Exportar a CSV"
                         >
                             <FiDownload className="mr-1" /> Exportar
                         </button>
-                        <button
-                            className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
-                            onClick={() => {/* Handle new order */ }}
-                            title="Añadir nuevo pedido"
-                        >
-                            <FiPlus className="mr-1" /> Nuevo Pedido
-                        </button>
+                        {userRole === 'admin' && (
+                            <button
+                                className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
+                                onClick={() => {/* Handle new order */ }}
+                                title="Añadir nuevo pedido"
+                            >
+                                <FiPlus className="mr-1" /> Nuevo Pedido
+                            </button>)}
                     </div>
                 </div>
-
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
@@ -412,26 +365,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             />
                         </div>
                     </div>
-
-                    <div className="flex sm:flex-row flex-col justify-start gap-2">
-                        <button
-                            className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]"
-                            onClick={applyFilters}
-                            title="Aplicar filtros"
-                        >
-                            <FiFilter className="mr-2" />
-                            Filtrar
-                        </button>
-                        <button
-                            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                            onClick={clearFilters}
-                            title="Limpiar filtros"
-                        >
-                            Limpiar
-                        </button>
-                    </div>
                 </div>
-
                 {/* Order data table */}
                 {loading ? (
                     <div className="py-20 text-center">

@@ -208,7 +208,7 @@ export function CartProvider({ children }) {
             }
             const result = await saveCart(newItems);
             if (result) {
-                toast.success('Añadido al carrito');
+                // toast.success('Añadido al carrito');
             }
             return result;
         } catch (error) {
@@ -223,7 +223,7 @@ export function CartProvider({ children }) {
             const newItems = cartItems.filter(item => item.id !== productId);
             const result = await saveCart(newItems);
             if (result) {
-                toast.success('Eliminado del carrito');
+                //toast.success('Eliminado del carrito');
             }
             return result;
         } catch (error) {

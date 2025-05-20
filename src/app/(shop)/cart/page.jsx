@@ -4,6 +4,7 @@ import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
+import UserAuth from "@/components/ui/UserAuthModal";
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
@@ -26,6 +27,7 @@ export default function CartPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
+    const [userType, setUserType] = useState('guest'); // 'guest' or 'register'
     const regularItems = cartItems.filter(item => !item.isGift);
     const giftItems = cartItems.filter(item => item.isGift);
     // Check if cart has any gift items
@@ -187,6 +189,34 @@ export default function CartPage() {
         try {
             setIsSubmitting(true);
             setOrderError(null);
+            // Handle user registration if selected
+            if (userType === 'register' && !user) {
+                // Validate passwords match
+                if (formData.password !== formData.confirmPassword) {
+                    setOrderError('Las contraseñas no coinciden');
+                    return;
+                }
+                try {
+                    // Call your registration API
+                    const registerResponse = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: `${formData.name} ${formData.lastName}`,
+                            email: formData.email,
+                            password: formData.password
+                        })
+                    });
+                    if (!registerResponse.ok) {
+                        throw new Error('Error al crear la cuenta');
+                    }
+                    // Optionally sign in the user automatically
+                    // This depends on your auth implementation
+                } catch (error) {
+                    setOrderError('Error al crear la cuenta: ' + error.message);
+                    return;
+                }
+            }
             // Prepare the buyer information for gift items
             const buyerInfo = {
                 name: `${formData.name} ${formData.lastName}`.trim(),
@@ -265,14 +295,30 @@ export default function CartPage() {
         }
     };
     // Handle invoice download
-    const handleDownloadInvoice = () => {
+    const handleDownloadInvoice = async () => {
         if (!orderSuccess) return;
-        // In a real implementation, you would call an API to generate a PDF invoice
-        toast.success('Descargando factura...');
-        // Simulating download delay
-        setTimeout(() => {
+        toast.success('Generando factura...');
+        try {
+            // Call API to generate/download invoice PDF
+            const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/pdf' }
+            });
+            if (!res.ok) throw new Error('No se pudo generar la factura');
+            const blob = await res.blob();
+            // Create a link to download the PDF
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Factura-${orderSuccess.orderNumber}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
             toast.success('Factura descargada correctamente');
-        }, 1500);
+        } catch (err) {
+            toast.error('Error al descargar la factura');
+        }
     };
     // Handle sending email with receipt
     const handleSendEmail = () => {
@@ -293,148 +339,264 @@ export default function CartPage() {
                         <div className="flex flex-col lg:flex-row gap-8">
                             {/* Left Column - User Information */}
                             <div className="lg:w-1/2  ">
-                                <div className="bg-white rounded-lg shadow-sm p-6 sticky top-[120px]">
-                                    <h2 className="text-xl font-bold mb-6">Datos de {deliveryMethod === 'pickup' ? 'Contacto' : 'Envío'}</h2>
-                                    {userLoading ? (
-                                        <div className="flex items-center justify-center py-4">
-                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00B0C8]"></div>
-                                            <span className="ml-2 text-gray-600">Cargando tus datos...</span>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            {hasGiftItems && (
-                                                <div className="mb-4 p-3 bg-pink-50 text-pink-700 rounded-md border border-pink-200">
-                                                    <p className="text-sm flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista. Por favor, proporciona tus datos de contacto.
-                                                    </p>
-                                                </div>
-                                            )}
-                                            {user && (
-                                                <div className="mb-4 p-3 bg-blue-50 text-blue-600 rounded-md border border-blue-100">
-                                                    <p className="text-sm flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        Hemos rellenado automáticamente algunos campos con tus datos. Por favor, verifica y completa la información.
-                                                    </p>
-                                                </div>
-                                            )}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="col-span-1">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Nombre
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="name"
-                                                        value={formData.name}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="col-span-1">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Apellidos
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="lastName"
-                                                        value={formData.lastName}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Email
-                                                    </label>
-                                                    <input
-                                                        type="email"
-                                                        name="email"
-                                                        value={formData.email}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Teléfono
-                                                    </label>
-                                                    <input
-                                                        type="tel"
-                                                        name="phone"
-                                                        value={formData.phone}
-                                                        onChange={handleInputChange}
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                        required
-                                                    />
-                                                </div>
-                                                {/* Only show address fields if not gift-only or delivery method is not pickup */}
-                                                {(!hasOnlyGiftItems || deliveryMethod === 'delivery') && (
-                                                    <>
-                                                        <div className="col-span-2">
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                Dirección
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                name="address"
-                                                                value={formData.address}
-                                                                onChange={handleInputChange}
-                                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                                required={deliveryMethod === 'delivery'}
-                                                            />
+                                <div className="sticky top-[120px] space-y-4">
+                                    {/* User Type Selection - Only for guests */}
+                                    <div className='bg-white rounded-lg shadow-sm p-6'>
+                                        <div className="flex items-start space-x-4 justify-start ">
+                                            <h2 className="text-xl font-bold mb-6">Datos del usuario</h2>
+                                            {/* <UserAuth /> */}
+                                        </div> 
+                                        {!user ? (
+                                            <>
+                                                <div className="space-y-4">
+                                                    <div className="flex flex-col   gap-4">
+                                                        <div className='flex flex-row gap-4 space-x-2'>
+                                                            <div
+                                                                className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'login'
+                                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5'
+                                                                    : 'border-gray-200 hover:border-[#00B0C8]'
+                                                                    }`}
+                                                                onClick={() => setUserType('login')}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${userType === 'login' ? 'border-[#00B0C8]' : 'border-gray-400'}`}>
+                                                                        {userType === 'login' && (
+                                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
+                                                                        )}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="font-medium">Login</p>
+                                                                        <p className="text-sm text-gray-500"> Gestiona tus pedidos fácilmente</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div
+                                                                className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'register'
+                                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5'
+                                                                    : 'border-gray-200 hover:border-[#00B0C8]'
+                                                                    }`}
+                                                                onClick={() => setUserType('register')}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${userType === 'register' ? 'border-[#00B0C8]' : 'border-gray-400'}`}>
+                                                                        {userType === 'register' && (
+                                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
+                                                                        )}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="font-medium">Registrar</p>
+                                                                        <p className="text-sm text-gray-500">Crear una nueva cuenta</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>  
+                                                        <div className='flex-1 flex-row gap-4 space-x-2'>
+                                                            <div
+                                                                className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'guest'
+                                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5'
+                                                                    : 'border-gray-200 hover:border-[#00B0C8]'
+                                                                    }`}
+                                                                onClick={() => setUserType('guest')}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${userType === 'guest' ? 'border-[#00B0C8]' : 'border-gray-400'}`}>
+                                                                        {userType === 'guest' && (
+                                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
+                                                                        )}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="font-medium">Comprar como invitado</p>
+                                                                        <p className="text-sm text-gray-500">Continuar sin crear una cuenta</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div className="col-span-1">
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                Ciudad
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                name="city"
-                                                                value={formData.city}
-                                                                onChange={handleInputChange}
-                                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                                required={deliveryMethod === 'delivery'}
-                                                            />
-                                                        </div>
-                                                        <div className="col-span-1">
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                Código Postal
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                name="postalCode"
-                                                                value={formData.postalCode}
-                                                                onChange={handleInputChange}
-                                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                                required={deliveryMethod === 'delivery'}
-                                                            />
-                                                        </div>
-                                                        <div className="col-span-2">
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                Provincia
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                name="province"
-                                                                value={formData.province}
-                                                                onChange={handleInputChange}
-                                                                className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                                required={deliveryMethod === 'delivery'}
-                                                            />
-                                                        </div>
-                                                    </>
-                                                )}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                                                <p className="text-sm flex items-center text-blue-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    Comprando como {user.email}
+                                                </p>
                                             </div>
-                                        </>
-                                    )}
+                                        )}
+                                    </div>
+                                    <div className='bg-white rounded-lg shadow-sm p-6 '>
+                                        <h2 className="text-xl font-bold mb-6">Datos de {deliveryMethod === 'pickup' ? 'Contacto' : 'Envío'}</h2>
+                                        {userLoading ? (
+                                            <div className="flex items-center justify-center py-4">
+                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00B0C8]"></div>
+                                                <span className="ml-2 text-gray-600">Cargando tus datos...</span>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {hasGiftItems && (
+                                                    <div className="mb-4 p-3 bg-pink-50 text-pink-700 rounded-md border border-pink-200">
+                                                        <p className="text-sm flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista. Por favor, proporciona tus datos de contacto.
+                                                        </p>
+                                                    </div>
+                                                )}
+                                                {user && (
+                                                    <div className="mb-4 p-3 bg-blue-50 text-blue-600 rounded-md border border-blue-100">
+                                                        <p className="text-sm flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            Hemos rellenado automáticamente algunos campos con tus datos. Por favor, verifica y completa la información.
+                                                        </p>
+                                                    </div>
+                                                )}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="col-span-1">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            Nombre
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="name"
+                                                            value={formData.name}
+                                                            onChange={handleInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-1">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            Apellidos
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="lastName"
+                                                            value={formData.lastName}
+                                                            onChange={handleInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-2">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            Email
+                                                        </label>
+                                                        <input
+                                                            type="email"
+                                                            name="email"
+                                                            value={formData.email}
+                                                            onChange={handleInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    {userType === 'register' && (
+                                                        <div className="col-span-2">
+                                                            <h3 className="font-medium mb-4">Contraseña para la cuenta</h3>
+                                                            <div className="space-y-4">
+                                                                <div>
+                                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                        Contraseña
+                                                                    </label>
+                                                                    <input
+                                                                        type="password"
+                                                                        name="password"
+                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                        required={userType === 'register'}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                        Confirmar contraseña
+                                                                    </label>
+                                                                    <input
+                                                                        type="password"
+                                                                        name="confirmPassword"
+                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                        required={userType === 'register'}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    <div className="col-span-2">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            Teléfono
+                                                        </label>
+                                                        <input
+                                                            type="tel"
+                                                            name="phone"
+                                                            value={formData.phone}
+                                                            onChange={handleInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    {/* Only show address fields if not gift-only or delivery method is not pickup */}
+                                                    {(!hasOnlyGiftItems || deliveryMethod === 'delivery') && (
+                                                        <>
+                                                            <div className="col-span-2">
+                                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                    Dirección
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    name="address"
+                                                                    value={formData.address}
+                                                                    onChange={handleInputChange}
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    required={deliveryMethod === 'delivery'}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-1">
+                                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                    Ciudad
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    name="city"
+                                                                    value={formData.city}
+                                                                    onChange={handleInputChange}
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    required={deliveryMethod === 'delivery'}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-1">
+                                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                    Código Postal
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    name="postalCode"
+                                                                    value={formData.postalCode}
+                                                                    onChange={handleInputChange}
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    required={deliveryMethod === 'delivery'}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                    Provincia
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    name="province"
+                                                                    value={formData.province}
+                                                                    onChange={handleInputChange}
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    required={deliveryMethod === 'delivery'}
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             {/* Right Column - Products */}
@@ -451,7 +613,7 @@ export default function CartPage() {
                                                         src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
                                                         alt={item.name || 'Producto'}
                                                         fill
-                                                        className="object-contain rounded-md"
+                                                        className="object-contain rounded-md z-0"
                                                         onError={(e) => {
                                                             e.target.src = '/assets/images/Screenshot_4.png';
                                                         }}

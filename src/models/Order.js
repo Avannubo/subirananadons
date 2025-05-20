@@ -33,10 +33,10 @@ const orderSchema = new mongoose.Schema({
         lastName: { type: String, required: true },
         email: { type: String, required: true },
         phone: { type: String, required: true },
-        address: { type: String, required: true },
-        city: { type: String, required: true },
-        postalCode: { type: String, required: true },
-        province: { type: String, required: true },
+        address: { type: String, required: false },
+        city: { type: String, required: false },
+        postalCode: { type: String, required: false },
+        province: { type: String, required: false },
         country: { type: String, default: 'España' }
     },
     deliveryMethod: {
@@ -74,12 +74,15 @@ const orderSchema = new mongoose.Schema({
         default: 'pending'
     },
     trackingNumber: String,
-    notes: String,
-    paymentDetails: {
+    notes: String, paymentDetails: {
         transactionId: String,
         status: String,
         method: String
-    }
+    },
+    invoices: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Invoice'
+    }]
 }, { timestamps: true });
 
 // Add order to user's orders array when created

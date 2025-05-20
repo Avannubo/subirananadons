@@ -5,7 +5,6 @@ import OrderDeleteModal from './OrderDeleteModal';
 import OrderEditModal from './OrderEditModal';
 import OrderViewModal from './OrderViewModal';
 import Pagination from '@/components/admin/shared/Pagination';
-
 export default function OrdersTable({
     orders,
     filters,
@@ -24,18 +23,15 @@ export default function OrdersTable({
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
-
     // Log orders received for debugging
     useEffect(() => {
         console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
         console.log('Orders data:', orders);
     }, [orders, userRole]);
-
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value }));
     };
-
     // Filter the orders based on search criteria
     const filteredOrders = orders.filter((order) => {
         return (
@@ -46,7 +42,6 @@ export default function OrdersTable({
             (order.payment?.toLowerCase() || '').includes(filters.searchPayment.toLowerCase())
         );
     });
-
     const handleSelectAll = (e) => {
         if (e.target.checked) {
             setSelectedOrders(filteredOrders.map(order => order.id));
@@ -54,7 +49,6 @@ export default function OrdersTable({
             setSelectedOrders([]);
         }
     };
-
     const handleSelectOrder = (id) => {
         if (selectedOrders.includes(id)) {
             setSelectedOrders(selectedOrders.filter(orderId => orderId !== id));
@@ -62,13 +56,11 @@ export default function OrdersTable({
             setSelectedOrders([...selectedOrders, id]);
         }
     };
-
     const handleBulkAction = (action) => {
         if (selectedOrders.length === 0) {
             alert('Por favor, selecciona al menos un pedido');
             return;
         }
-
         if (action === 'eliminar') {
             if (window.confirm(`¿Estás seguro de que deseas eliminar ${selectedOrders.length} pedidos? Esta acción no se puede deshacer.`)) {
                 // Call the API to delete multiple orders
@@ -86,7 +78,6 @@ export default function OrdersTable({
             setSelectedOrders([]);
         }
     };
-
     const toggleStatusDropdown = (id) => {
         if (statusDropdown === id) {
             setStatusDropdown(null);
@@ -94,30 +85,25 @@ export default function OrdersTable({
             setStatusDropdown(id);
         }
     };
-
     const changeOrderStatus = (id, newStatus) => {
         onStatusChange(id, newStatus);
         setStatusDropdown(null);
     };
-
     // View order details
     const handleViewOrder = (order) => {
         setSelectedOrder(order);
         setViewModalOpen(true);
     };
-
     // Edit order
     const handleEditOrder = (order) => {
         setSelectedOrder(order);
         setEditModalOpen(true);
     };
-
     // Delete order
     const handleDeleteOrder = (order) => {
         setSelectedOrder(order);
         setDeleteModalOpen(true);
     };
-
     // Handle edit save
     const handleSaveEdit = async (orderId, formData) => {
         setIsActionLoading(true);
@@ -125,7 +111,6 @@ export default function OrdersTable({
             // Convert UI status to DB status using the mapStatusToDb function
             // We expect this is implemented in the parent component
             const success = await onStatusChange(orderId, formData.status);
-
             if (success) {
                 setEditModalOpen(false);
                 setSelectedOrder(null);
@@ -139,15 +124,12 @@ export default function OrdersTable({
             setIsActionLoading(false);
         }
     };
-
     // Handle delete confirm
     const handleConfirmDelete = async () => {
         if (!selectedOrder) return;
-
         setIsActionLoading(true);
         try {
             const success = await onDelete(selectedOrder.id);
-
             if (success) {
                 setDeleteModalOpen(false);
                 setSelectedOrder(null);
@@ -161,67 +143,8 @@ export default function OrdersTable({
             setIsActionLoading(false);
         }
     };
-
     return (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-            {/* Search Filters for Admin Users */}
-            {userRole === 'admin' && (
-                <div className="p-4 bg-gray-50 border-b border-gray-200">
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        <div>
-                            <input
-                                type="text"
-                                name="searchId"
-                                value={filters.searchId}
-                                onChange={handleFilterChange}
-                                placeholder="Buscar por ID"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="text"
-                                name="searchReference"
-                                value={filters.searchReference}
-                                onChange={handleFilterChange}
-                                placeholder="Buscar por referencia"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="text"
-                                name="searchCustomer"
-                                value={filters.searchCustomer}
-                                onChange={handleFilterChange}
-                                placeholder="Buscar por cliente"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="text"
-                                name="searchTotal"
-                                value={filters.searchTotal}
-                                onChange={handleFilterChange}
-                                placeholder="Buscar por total"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="text"
-                                name="searchPayment"
-                                value={filters.searchPayment}
-                                onChange={handleFilterChange}
-                                placeholder="Buscar por método de pago"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-
+        <div className="bg-white rounded-lg shadow overflow-hidden"> 
             {/* Bulk Actions (Admin only) */}
             {userRole === 'admin' && selectedOrders.length > 0 && (
                 <div className="bg-gray-100 p-3 flex items-center">
@@ -246,7 +169,6 @@ export default function OrdersTable({
                     </button>
                 </div>
             )}
-
             {/* Orders Table */}
             <div className="overflow-x-auto">
                 <table className="w-full whitespace-nowrap">
@@ -302,7 +224,6 @@ export default function OrdersTable({
                                                 >
                                                     {order.status}
                                                 </button>
-
                                                 {statusDropdown === order.id && (
                                                     <div className="absolute z-10 mt-1 w-48 bg-white rounded-md shadow-lg py-1">
                                                         <button
@@ -384,7 +305,6 @@ export default function OrdersTable({
                     </tbody>
                 </table>
             </div>
-
             {/* Pagination */}
             {orders.length > 0 && (
                 <div className="px-4 py-3 border-t border-gray-200 sm:px-6">
@@ -402,14 +322,12 @@ export default function OrdersTable({
                     />
                 </div>
             )}
-
             {/* Modals */}
             <OrderViewModal
                 isOpen={viewModalOpen}
                 onClose={() => setViewModalOpen(false)}
                 orderId={selectedOrder?.id}
             />
-
             <OrderEditModal
                 isOpen={editModalOpen}
                 onClose={() => setEditModalOpen(false)}
@@ -417,7 +335,6 @@ export default function OrdersTable({
                 order={selectedOrder}
                 isLoading={isActionLoading}
             />
-
             <OrderDeleteModal
                 isOpen={deleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
