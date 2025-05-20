@@ -1,0 +1,69 @@
+[{
+  "_id": {
+    "$oid": "680775bd4028c5f34b3781d2"
+  },
+  "name": "testUser000",
+  "email": "arjun.singh@avannubo.com",
+  "password": "$2b$10$krpnLQ7njvimcm1JBK9nXuItuOhBCMmCXcMflgwNTCLDuA7fNGmNy",
+  "image": "https://res.cloudinary.com/dmv3sqzfp/image/upload/v1745410983/user_profiles/user_680775bd4028c5f34b3781d2_1745410981457.jpg",
+  "emailVerified": null,
+  "provider": "credentials",
+  "role": "admin",
+  "lastLogin": {
+    "$date": "2025-04-22T12:10:40.766Z"
+  },
+  "createdAt": {
+    "$date": "2025-04-22T10:55:57.461Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-23T12:23:05.222Z"
+  },
+  "__v": 0,
+  "birthDate": "",
+  "newsletter": false,
+  "partnerOffers": false
+},
+{
+  "_id": {
+    "$oid": "6808dd2ce8d7c9fdf352f191"
+  },
+  "name": "test user",
+  "email": "test@gmail.com",
+  "password": "$2b$10$rJewyDUEEw0qMiMG2Q2/4.hUz4zMNFQa5wnkPfCuqX0weRJVSTiGe",
+  "image": "https://res.cloudinary.com/dmv3sqzfp/image/upload/v1745412967/user_profiles/user_6808dd2ce8d7c9fdf352f191_1745412966187.png",
+  "birthDate": "",
+  "role": "user",
+  "newsletter": false,
+  "partnerOffers": false,
+  "emailVerified": null,
+  "cart": null,
+  "createdAt": {
+    "$date": "2025-04-23T12:29:32.448Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-23T12:56:08.008Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6809dd02528e62c84ccd37db"
+  },
+  "name": "123qwe",
+  "email": "web.avancemgrup@gmail.com",
+  "password": "$2b$10$b17rQ5zm2/ZaM5y7gxhS2uYxEZal4/cvE.TmId4cDChx7gFCz9Gc2",
+  "image": "",
+  "birthDate": "",
+  "role": "user",
+  "newsletter": false,
+  "partnerOffers": false,
+  "emailVerified": null,
+  "cart": null,
+  "createdAt": {
+    "$date": "2025-04-24T06:41:06.915Z"
+  },
+  "updatedAt": {
+    "$date": "2025-04-24T06:41:06.915Z"
+  },
+  "__v": 0
+}]

@@ -1,17 +1,12 @@
 'use client';
-
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import ProductCard from "@/components/products/product-card";
 import ProductQuickView from "@/components/products/product-quick-view";
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// Helper function to parse price string to number
-const parsePrice = (priceString) => {
-    return parseFloat(priceString.replace(" €", "").replace(",", "."));
-};
-
+import { fetchProducts, formatProduct } from '@/services/ProductService';
+import { useSearchParams, useRouter } from 'next/navigation';
 // Nested Menu Structure for Productos
 const productMenuTree = {
     label: "Productos",
@@ -129,77 +124,6 @@ const productMenuTree = {
         }
     ]
 };
-
-// Sample product data with MORE SPECIFIC categories assigned
-const products = [
-    {
-        id: 1,
-        name: "Robot De Cuina Chefy6",
-        category: "Robots de cocina", // Specific category
-        price: "119,00 €",
-        priceValue: parsePrice("119,00 €"),
-        salesCount: 50,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "¡ Nuevo modelo! chefy 6 es un completo robot de cocina para bebés multifuncional 6 en 1, de diseño compacto y con grandes prestaciones. Además,..."
-    },
-    {
-        id: 2,
-        name: "Bolso Trona De Viaje Arlo...",
-        category: "Tronas de viaje", // Specific category
-        price: "49,90 €",
-        priceValue: parsePrice("49,90 €"),
-        salesCount: 75,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "Arlo es un asiento elevador ultra ligero. Perfecto para cualquier situación ya que se puede usar como elevador y bolso/mochila de viaje,..."
-    },
-    {
-        id: 3,
-        name: "Tripp Trapp Natural",
-        category: "Tronas", // Specific category
-        price: "259,00 €",
-        priceValue: parsePrice("259,00 €"),
-        salesCount: 30,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "La trona que crece con el niño. Desde el nacimiento. Tripp Trapp® es una ingeniosa trona que revolucionó la categoría infantil en 1972,..."
-    },
-    {
-        id: 4,
-        name: "Termo papillero",
-        category: "Termos", // Specific category
-        price: "24,90 €",
-        priceValue: parsePrice("24,90 €"),
-        salesCount: 120,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "Termo para alimentos sólidos de acero inoxidable, ideal para llevar la comida del bebé. Mantiene la temperatura durante horas."
-    },
-    {
-        id: 5,
-        name: "Biberón aprendizaje",
-        category: "Botellas y vasos", // Specific category
-        price: "12,90 €",
-        priceValue: parsePrice("12,90 €"),
-        salesCount: 90,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "Biberón con asas y boquilla de silicona suave, diseñado para facilitar la transición del biberón al vaso."
-    },
-    {
-        id: 6,
-        name: "Newborn Set para Tripp Trapp",
-        category: "Tronas", // Specific category (Accessory for Tronas)
-        price: "99,00 €",
-        priceValue: parsePrice("99,00 €"),
-        salesCount: 45,
-        imageUrl: "/assets/images/screenshot_3.png",
-        imageUrlHover: "/assets/images/screenshot_2.png",
-        description: "Permite usar la trona Tripp Trapp® desde el nacimiento. Acogedor y ergonómico para el recién nacido."
-    }
-];
-
 // Helper function to find a category node and its path by label
 function findCategoryAndPath(node, labelToFind, currentPath = []) {
     const pathIncludingSelf = [...currentPath, node.label]; // Build path first
@@ -215,7 +139,6 @@ function findCategoryAndPath(node, labelToFind, currentPath = []) {
     }
     return null;
 }
-
 // Helper function to get all LEAF category labels under a given node
 function getAllLeafCategoryLabels(node) {
     let labels = [];
@@ -230,34 +153,171 @@ function getAllLeafCategoryLabels(node) {
     }
     return labels;
 }
-
 export default function Page() {
     const [viewMode, setViewMode] = useState('grid');
     const [sortOrder, setSortOrder] = useState('sales-desc');
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     // Initialize with the root label from the tree
     const [categoryPath, setCategoryPath] = useState([productMenuTree.label]);
-
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalProducts, setTotalProducts] = useState(0);
+    const productsPerPage = 6;
+    // Access query parameters
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    // Track if a brand filter is active
+    const [activeBrandFilter, setActiveBrandFilter] = useState(null);
     // Get the current category node based on the last item in the path
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
     // Start search from the root of the tree
     const currentCategoryData = useMemo(() => findCategoryAndPath(productMenuTree, currentCategoryLabel), [currentCategoryLabel]);
     const currentSubcategories = currentCategoryData?.node?.submenu || [];
-
+    // Effect to handle URL parameters when the component mounts
+    useEffect(() => {
+        const categoryParam = searchParams.get('category');
+        const brandParam = searchParams.get('brand');
+        console.log('URL Parameters:', { category: categoryParam, brand: brandParam });
+        if (categoryParam) {
+            // Find the category path for the specified category
+            const categoryNode = findCategoryInTree(productMenuTree, categoryParam);
+            if (categoryNode) {
+                console.log('Found category path:', categoryNode.path);
+                setCategoryPath(categoryNode.path);
+            } else {
+                console.log('Category not found in tree:', categoryParam);
+                // Try to match by case-insensitive partial match
+                const normalizedCategory = categoryParam.toLowerCase().trim();
+                const matchResult = findCategoryByPartialMatch(productMenuTree, normalizedCategory);
+                if (matchResult) {
+                    console.log('Found category by partial match:', matchResult.path);
+                    setCategoryPath(matchResult.path);
+                }
+            }
+        }
+        if (brandParam) {
+            // Store the active brand filter for UI indication
+            setActiveBrandFilter(brandParam);
+            console.log('Filtering by brand:', brandParam);
+        }
+        // Only run this effect when the component mounts, not on every searchParams change
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    // Helper function to find a category in the category tree
+    function findCategoryInTree(rootNode, categoryToFind) {
+        // First try direct lookup
+        const result = findCategoryAndPath(rootNode, categoryToFind);
+        if (result) return result;
+        // If not found directly, try case-insensitive search or exact matches
+        function searchRecursively(node, target, currentPath = []) {
+            const targetLower = target.toLowerCase();
+            const pathWithCurrent = [...currentPath, node.label];
+            // Check if current node matches (case insensitive)
+            if (node.label.toLowerCase() === targetLower) {
+                return { node, path: pathWithCurrent };
+            }
+            // Check submenu
+            if (node.submenu) {
+                for (const child of node.submenu) {
+                    const result = searchRecursively(child, target, pathWithCurrent);
+                    if (result) return result;
+                }
+            }
+            return null;
+        }
+        return searchRecursively(rootNode, categoryToFind);
+    }
+    // Helper function to find a category by partial match (case insensitive)
+    function findCategoryByPartialMatch(rootNode, partialName) {
+        function searchNodeRecursively(node, search, currentPath = []) {
+            const nodePath = [...currentPath, node.label];
+            // Check if current node contains the search term
+            if (node.label.toLowerCase().includes(search)) {
+                return { node, path: nodePath };
+            }
+            // Search in submenu
+            if (node.submenu) {
+                for (const subNode of node.submenu) {
+                    const result = searchNodeRecursively(subNode, search, nodePath);
+                    if (result) return result;
+                }
+            }
+            return null;
+        }
+        return searchNodeRecursively(rootNode, partialName);
+    }
+    // Fetch products from the database
+    useEffect(() => {
+        async function loadProducts() {
+            try {
+                setLoading(true);
+                // Define fetch options
+                const options = {
+                    page: currentPage,
+                    limit: productsPerPage,
+                    status: 'active'
+                };
+                // Get current leaf categories if we're in a specific category
+                if (currentCategoryData?.node && categoryPath.length > 1) {
+                    const leafCategories = getAllLeafCategoryLabels(currentCategoryData.node);
+                    if (leafCategories.length > 0) {
+                        options.category = leafCategories.join(',');
+                    }
+                }
+                // Add brand filter if present in URL
+                const brandParam = searchParams.get('brand');
+                if (brandParam) {
+                    options.brand = brandParam;
+                }
+                console.log('Fetching products with options:', options);
+                // Fetch products with category filtering
+                const data = await fetchProducts(options);
+                // Safely access data properties with checks for undefined/null
+                if (data && data.products) {
+                    // Format the products for display
+                    const formattedProducts = data.products.map(product => formatProduct(product));
+                    setProducts(formattedProducts);
+                    // Safely access pagination data
+                    if (data.pagination) {
+                        setTotalPages(data.pagination.totalPages || 1);
+                        setTotalProducts(data.pagination.totalItems || 0);
+                    } else {
+                        setTotalPages(1);
+                        setTotalProducts(formattedProducts.length);
+                    }
+                    setError(null);
+                } else {
+                    // Handle case where data or data.products is undefined
+                    setProducts([]);
+                    setTotalPages(1);
+                    setTotalProducts(0);
+                    setError('No products found. Please try again later.');
+                }
+            } catch (err) {
+                console.error('Error fetching products:', err);
+                setError('Failed to load products. Please try again later.');
+                setProducts([]);
+                setTotalPages(1);
+                setTotalProducts(0);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadProducts();
+    }, [categoryPath, currentCategoryData, currentPage, searchParams]);
+    // Reset to page 1 when category changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [categoryPath]);
     // Memoize filtered and sorted products
     const filteredAndSortedProducts = useMemo(() => {
-        let filtered = [...products];
-
-        // If a specific category (not just 'Productos') is selected
-        if (currentCategoryData?.node && categoryPath.length > 1) {
-            // Get all LEAF category labels under the selected node
-            const targetLeafLabels = getAllLeafCategoryLabels(currentCategoryData.node);
-            // Filter products whose specific category is within the target leaves
-            filtered = products.filter(product => targetLeafLabels.includes(product.category));
-        } // else, if path is just ['Productos'], show all products
-
-        // Then sort the filtered list
-        const sortableProducts = [...filtered];
+        if (loading) return [];
+        // Products are already filtered by the API call, we just need to sort them
+        const sortableProducts = [...products];
         switch (sortOrder) {
             case 'price-asc':
                 sortableProducts.sort((a, b) => a.priceValue - b.priceValue);
@@ -277,43 +337,117 @@ export default function Page() {
                 break;
         }
         return sortableProducts;
-    }, [sortOrder, categoryPath, currentCategoryData?.node]); // Update dependency
-
+    }, [products, sortOrder, loading]);
     const handleSortChange = (event) => {
         setSortOrder(event.target.value);
     };
-
     // Navigate down the category tree by adding the new label to the path
     const handleCategoryChange = (categoryLabel) => {
         // We don't need findCategoryAndPath here, just append if it's a valid subcategory
         const currentSubs = currentCategoryData?.node?.submenu || [];
         const nextCategory = currentSubs.find(sub => sub.label === categoryLabel);
         if (nextCategory) {
-            setCategoryPath([...categoryPath, categoryLabel]);
+            const newPath = [...categoryPath, categoryLabel];
+            setCategoryPath(newPath);
+            // Update URL parameters to reflect the category change
+            const newPathLast = newPath[newPath.length - 1];
+            // Create new URL with the updated category parameter
+            const params = new URLSearchParams(searchParams);
+            params.set('category', newPathLast);
+            router.push(`/products?${params.toString()}`);
         }
     };
-
     // Handle sibling category selection - replaces last item in path
     const handleSiblingCategoryChange = (siblingLabel) => {
         // Replace the last element in the path with the selected sibling
         const newPath = [...categoryPath.slice(0, -1), siblingLabel];
         setCategoryPath(newPath);
+        // Update URL parameters to reflect the category change
+        const newPathLast = newPath[newPath.length - 1];
+        const params = new URLSearchParams(searchParams);
+        params.set('category', newPathLast);
+        router.push(`/products?${params.toString()}`);
     };
-
     // Navigate back up using breadcrumbs
     const handleBreadcrumbClick = (index) => {
         // Slice the path up to and including the clicked index
-        setCategoryPath(categoryPath.slice(0, index + 1));
+        const newPath = categoryPath.slice(0, index + 1);
+        setCategoryPath(newPath);
+        // Update URL parameters or remove category parameter if we go back to root
+        const params = new URLSearchParams(searchParams);
+        if (index === 0) {
+            // If going back to root, remove the category parameter
+            params.delete('category');
+        } else {
+            // Otherwise, update to the new category
+            params.set('category', newPath[newPath.length - 1]);
+        }
+        router.push(`/products?${params.toString()}`);
     };
-
     const handleOpenQuickView = (product) => {
         setQuickViewProduct(product);
     };
-
     const handleCloseQuickView = () => {
         setQuickViewProduct(null);
     };
-
+    // Pagination handlers
+    const goToPage = (page) => {
+        setCurrentPage(page);
+        // Scroll to top when changing pages
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+            goToPage(currentPage - 1);
+        }
+    };
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+            goToPage(currentPage + 1);
+        }
+    };
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        let pages = [];
+        const maxPagesToShow = 5;
+        if (totalPages <= maxPagesToShow) {
+            // If we have fewer pages than the max, show all pages
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Calculate how many numbers to show on each side of current page
+            const sidesCount = Math.floor(maxPagesToShow / 2);
+            // Start with the current page in the center
+            let startPage = Math.max(2, currentPage - sidesCount);
+            let endPage = Math.min(totalPages - 1, currentPage + sidesCount);
+            // Adjust if we're near the start
+            if (currentPage - sidesCount < 2) {
+                endPage = Math.min(1 + maxPagesToShow - 1, totalPages - 1);
+            }
+            // Adjust if we're near the end
+            if (currentPage + sidesCount > totalPages - 1) {
+                startPage = Math.max(2, totalPages - maxPagesToShow + 1);
+            }
+            // Always add first page
+            pages.push(1);
+            // Add ellipsis after first page if needed
+            if (startPage > 2) {
+                pages.push('...');
+            }
+            // Add pages around current page
+            for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+            }
+            // Add ellipsis before last page if needed
+            if (endPage < totalPages - 1) {
+                pages.push('...');
+            }
+            // Always add last page
+            pages.push(totalPages);
+        }
+        return pages;
+    };
     return (
         <ShopLayout>
             <div className="relative w-full h-full flex flex-col justify-start items-start mt-20">
@@ -322,7 +456,30 @@ export default function Page() {
                     <h1 className="text-4xl text-zinc-800 font-bold">Tienda</h1>
                 </div>
             </div>
-            <div className="container w-[1500px] bg-white   px-4 py-8">
+            <div className="container w-[1500px] bg-white px-4 py-8">
+                {/* Active Brand Filter Indicator */}
+                {activeBrandFilter && (
+                    <div className="mb-4 bg-[#00B0C8]/10 px-4 py-3 rounded-lg flex items-center justify-between">
+                        <div className="flex items-center">
+                            <span className="mr-2 text-[#00B0C8]">Filtrando por marca:</span>
+                            <span className="font-medium">{activeBrandFilter}</span>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setActiveBrandFilter(null);
+                                // Remove the brand parameter and navigate to the products page
+                                const params = new URLSearchParams(searchParams);
+                                params.delete('brand');
+                                router.push(`/products${params.toString() ? `?${params.toString()}` : ''}`);
+                            }}
+                            className="text-gray-600 hover:text-gray-900"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
                 {/* Breadcrumbs */}
                 <nav aria-label="Breadcrumb" className="mb-6 pl-2">
                     <ol className="flex items-center space-x-1 text-md text-gray-500 flex-wrap">
@@ -342,14 +499,12 @@ export default function Page() {
                         ))}
                     </ol>
                 </nav>
-
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Category/Subcategory List Sidebar */}
-                    <aside className="w-full md:w-1/4 lg:w-1/5 flex-shrink-0">
+                    <aside className="w-full md:w-1/4 lg:w-1/5 flex-shrink-0 ">
                         {/*   <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
                             {currentCategoryLabel === productMenuTree.label ? "Categorías" : `Subcategorías de ${categoryPath[categoryPath.length - 2] || "Productos"}`}
                         </h3> */}
-
                         {/* Show subcategories if available, otherwise show siblings */}
                         {currentSubcategories.length > 0 ? (
                             <ul className="space-y-1">
@@ -388,7 +543,6 @@ export default function Page() {
                             )
                         )}
                     </aside>
-
                     {/* Product Grid Area */}
                     <main className="w-full flex-grow">
                         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
@@ -408,11 +562,17 @@ export default function Page() {
                                 </button>
                             </div>
                             <div className="flex items-center">
+                                {!loading && totalProducts > 0 && (
+                                    <span className="text-sm text-gray-500 mr-4">
+                                        Mostrando {(currentPage - 1) * productsPerPage + 1}-
+                                        {Math.min(currentPage * productsPerPage, totalProducts)} de {totalProducts} productos
+                                    </span>
+                                )}
                                 {/* Sort dropdown */}
                                 <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">Ordenar por:</label>
                                 <select
                                     id="sort-by"
-                                    className="border rounded p-2 text-gray-600"
+                                    className="border border-gray-300 rounded p-2 text-gray-600"
                                     value={sortOrder}
                                     onChange={handleSortChange}
                                 >
@@ -424,31 +584,92 @@ export default function Page() {
                                 </select>
                             </div>
                         </div>
-
+                        {/* Loading state */}
+                        {loading && (
+                            <div className="flex justify-center items-center h-64">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                            </div>
+                        )}
+                        {/* Error state */}
+                        {error && (
+                            <div className="text-center text-red-500 my-8">
+                                <p>{error}</p>
+                            </div>
+                        )}
                         {/* Product List/Grid Container */}
-                        <motion.div
-                            layout
-                            className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col space-y-6'}`}
-                        >
-                            <AnimatePresence>
-                                {filteredAndSortedProducts.map((product) => (
-                                    <ProductCard
-                                        key={product.id}
-                                        product={product}
-                                        viewMode={viewMode}
-                                        onQuickViewClick={handleOpenQuickView}
-                                    />
-                                ))}
-                            </AnimatePresence>
-                        </motion.div>
+                        {!loading && !error && (
+                            <motion.div
+                                layout
+                                className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col space-y-6'}`}
+                            >
+                                <AnimatePresence>
+                                    {filteredAndSortedProducts.map((product) => (
+                                        <ProductCard
+                                            key={product.id}
+                                            product={product}
+                                            viewMode={viewMode}
+                                            onQuickViewClick={handleOpenQuickView}
+                                        />
+                                    ))}
+                                </AnimatePresence>
+                            </motion.div>
+                        )}
                         {/* No results message */}
-                        {filteredAndSortedProducts.length === 0 && (
+                        {!loading && !error && filteredAndSortedProducts.length === 0 && (
                             <p className="text-center text-gray-500 mt-8">No hay productos que coincidan con la categoría seleccionada.</p>
+                        )}
+                        {/* Pagination controls */}
+                        {!loading && !error && totalPages > 1 && (
+                            <div className="flex justify-center mt-10">
+                                <nav className="flex items-center space-x-1" aria-label="Pagination">
+                                    {/* Previous page button */}
+                                    <button
+                                        onClick={goToPreviousPage}
+                                        disabled={currentPage === 1}
+                                        className={`px-3 py-2 rounded-md ${currentPage === 1
+                                            ? 'text-gray-400 cursor-not-allowed'
+                                            : 'text-gray-700 hover:bg-gray-100'}`}
+                                    >
+                                        <span className="sr-only">Anterior</span>
+                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    {/* Page numbers */}
+                                    {getPageNumbers().map((page, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => typeof page === 'number' ? goToPage(page) : null}
+                                            disabled={page === '...'}
+                                            className={`px-4 py-2 rounded-md ${page === currentPage
+                                                ? 'bg-[#00B0C8] text-white'
+                                                : page === '...'
+                                                    ? 'text-gray-500'
+                                                    : 'text-gray-700 hover:bg-gray-100'
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                    {/* Next page button */}
+                                    <button
+                                        onClick={goToNextPage}
+                                        disabled={currentPage === totalPages}
+                                        className={`px-3 py-2 rounded-md ${currentPage === totalPages
+                                            ? 'text-gray-400 cursor-not-allowed'
+                                            : 'text-gray-700 hover:bg-gray-100'}`}
+                                    >
+                                        <span className="sr-only">Siguiente</span>
+                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </nav>
+                            </div>
                         )}
                     </main>
                 </div>
             </div>
-
             {/* Render Quick View Modal */}
             {quickViewProduct && (
                 <ProductQuickView

@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import {
     ShoppingBag,
@@ -8,7 +7,9 @@ import {
     CreditCard,
     GiftIcon,
     Settings,
-    CircleUserRound
+    CircleUserRound,
+    TagIcon,
+    Star
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
@@ -17,7 +18,7 @@ const getNavigationItems = (userRole) => [
     {
         href: "/dashboard/account",
         icon: CircleUserRound,
-        label: "My Account",
+        label: "Mi Cuenta",
         roles: ['user', 'admin']
     },
     {
@@ -26,10 +27,22 @@ const getNavigationItems = (userRole) => [
         label: "Productos",
         roles: ['admin']
     },
+    // {
+    //     href: "/dashboard/featured-products",
+    //     icon: Star,
+    //     label: "Destacados",
+    //     roles: ['admin']
+    // },
     {
-        href: "/dashboard/pedidos",
+        href: "/dashboard/brands",
+        icon: TagIcon,
+        label: "Marcas",
+        roles: ['admin']
+    },
+    {
+        href: "/dashboard/orders",
         icon: ClipboardList,
-        label: "Pedidos",
+        label: userRole === 'admin' ? "Pedidos" : "Mis Pedidos",
         roles: ['user', 'admin']
     },
     {
@@ -47,7 +60,7 @@ const getNavigationItems = (userRole) => [
     {
         href: "/dashboard/listas",
         icon: GiftIcon,
-        label: userRole === 'admin' ? "Listas" : "Mi Listas",
+        label: userRole === 'admin' ? "Listas" : "Mis Listas",
         roles: ['user', 'admin']
     },
     {
@@ -64,7 +77,7 @@ export default function Sidebar() {
     const navigationItems = getNavigationItems(userRole);
 
     return (
-        <div className="w-64 h-screen bg-white shadow-md sticky">
+        <div className="w-64 h-[80vh] bg-white top-[100px] sticky">
             <div className="px-4 py-2">
                 <nav className="space-y-1">
                     <div className='flex items-center justify-center font-bold text-2xl border-b pb-2 border-gray-200'>

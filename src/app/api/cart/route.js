@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import Cart from '@/models/Cart';
 import dbConnect from '@/lib/dbConnect';
 
 // Create a new cart
 export async function POST(request) {
     try {
-        const session = await auth();
+        const session = await getServerSession(authOptions);
         console.log('Session:', JSON.stringify(session, null, 2));
 
         if (!session?.user?.id) {
@@ -60,7 +61,7 @@ export async function POST(request) {
 // Update cart
 export async function PUT(request) {
     try {
-        const session = await auth();
+        const session = await getServerSession(authOptions);
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized - No valid user ID' }, { status: 401 });
         }
@@ -106,7 +107,7 @@ export async function PUT(request) {
 // Delete cart
 export async function DELETE(request) {
     try {
-        const session = await auth();
+        const session = await getServerSession(authOptions);
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized - No valid user ID' }, { status: 401 });
         }
@@ -143,7 +144,7 @@ export async function DELETE(request) {
 // Get cart
 export async function GET(request) {
     try {
-        const session = await auth();
+        const session = await getServerSession(authOptions);
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized - No valid user ID' }, { status: 401 });
         }

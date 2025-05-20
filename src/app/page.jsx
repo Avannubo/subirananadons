@@ -1,92 +1,18 @@
 import FadeSlider from "@/components/landing/FadeSlider";
 import ImageGallery from "@/components/landing/ImageGalaryHome";
-import ProductSlider from "@/components/landing/ProductSlider";
+import FeaturedProducts from "@/components/landing/FeaturedProducts";
 import ShopLayout from "../components/Layouts/shop-layout";
-// Featured products data
-const featuredProducts = [
-  {
-    id: 1,
-    name: "Peck 2 Pints Silicon",
-    price: "23,95 €",
-    imageUrl: "/assets/images/Screenshot_4.png",
-    imageUrlHover: "/assets/images/Screenshot_1.png",
-    category: "Alimentación"
-  },
-  {
-    id: 2,
-    name: "Sac Cobés Bùba Paper Boat",
-    price: "78,00 €",
-    imageUrl: "/assets/images/Screenshot_3.png",
-    imageUrlHover: "/assets/images/Screenshot_2.png",
-    category: "Habitación"
-  },
-  {
-    id: 3,
-    name: "Robot De Cuina Chefy6",
-    price: "119,00 €",
-    imageUrl: "/assets/images/Screenshot_2.png",
-    imageUrlHover: "/assets/images/Screenshot_3.png",
-    category: "Alimentación"
-  },
-  {
-    id: 4,
-    name: "Trona De Viaje Arlo",
-    price: "49,90 €",
-    imageUrl: "/assets/images/Screenshot_1.png",
-    imageUrlHover: "/assets/images/Screenshot_4.png",
-    category: "Alimentación"
-  },
-  {
-    id: 5,
-    name: "Tripp Trapp Natural",
-    price: "259,00 €",
-    imageUrl: "/assets/images/Screenshot_4.png",
-    imageUrlHover: "/assets/images/Screenshot_1.png",
-    category: "Habitación"
-  },
-  {
-    id: 6,
-    name: "Termo papillero",
-    price: "24,90 €",
-    imageUrl: "/assets/images/Screenshot_3.png",
-    imageUrlHover: "/assets/images/Screenshot_2.png",
-    category: "Alimentación"
-  },
-  {
-    id: 7,
-    name: "Biberón aprendizaje",
-    price: "12,90 €",
-    imageUrl: "/assets/images/Screenshot_2.png",
-    imageUrlHover: "/assets/images/Screenshot_3.png",
-    category: "Alimentación"
-  },
-  {
-    id: 8,
-    name: "Newborn Set Tripp Trapp",
-    price: "99,00 €",
-    imageUrl: "/assets/images/Screenshot_1.png",
-    imageUrlHover: "/assets/images/Screenshot_4.png",
-    category: "Habitación"
-  }
-];
+
 export default function Home() {
+  // Enable debug mode in development environment
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   return (
     <ShopLayout>
       <div className="w-full h-full flex flex-col justify-start items-start">
         <FadeSlider />
         <ImageGallery />
-        <div className="w-full py-8">
-          <ProductSlider
-            title="Productos Destacados"
-            products={featuredProducts}
-            className="w-full"
-            slidesPerView={{
-              mobile: 2,
-              tablet: 3,
-              desktop: 4
-            }}
-          />
-        </div>
+        <FeaturedProducts debug={isDevelopment} />
         {/* New Section with Background */}
         <div
           className="w-[100%] overflow-hidden h-[80vh] py-20 px-4 bg-gradient-to-r from-blue-50 to-purple-50"

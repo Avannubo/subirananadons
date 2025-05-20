@@ -35,7 +35,7 @@ export const POST = async (request) => {
         return new Response(JSON.stringify({ message: 'Login successful' }), {
             status: 200,
             headers: {
-            'Set-Cookie': `token=${token}; HttpOnly; Path=/; Max-Age=100000;`
+                'Set-Cookie': `token=${token}; HttpOnly; Path=/; Max-Age=100000;`
             }
         });
     } catch (error) {

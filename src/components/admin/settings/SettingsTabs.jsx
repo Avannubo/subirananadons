@@ -8,6 +8,7 @@ import ProductosTab from "@/components/admin/settings/tabs/ProductosTab";
 import InformacionTab from "@/components/admin/settings/tabs/InformacionTab";
 import EmailTab from "@/components/admin/settings/tabs/EmailTab";
 import EquipoTab from "@/components/admin/settings/tabs/EquipoTab";
+import TabNavigation from "@/components/admin/shared/TabNavigation";
 
 export default function SettingsTabs() {
     const [activeTab, setActiveTab] = useState('transportistas');
@@ -27,32 +28,37 @@ export default function SettingsTabs() {
         { id: 'equipo', label: 'Equipo' }
     ];
 
+    // Format tabs for the TabNavigation component
+    const tabNavItems = tabs.map(tab => tab.label);
+
+    // Handle tab click for object-based tabs
+    const handleTabChange = (label) => {
+        const tab = tabs.find(t => t.label === label);
+        if (tab) {
+            setActiveTab(tab.id);
+        }
+    };
+
     return (
         <div className="bg-white rounded-lg shadow">
             {/* Tab Navigation */}
             <div className="border-b border-gray-200">
-                <nav className="flex overflow-x-auto">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`px-4 py-3 text-sm font-medium whitespace-nowrap ${activeTab === tab.id ? 'border-b-2 border-[#00B0C8] text-[#00a4b9]' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </nav>
+                <TabNavigation
+                    tabs={tabNavItems}
+                    activeTab={tabs.find(t => t.id === activeTab)?.label || ''}
+                    setActiveTab={handleTabChange}
+                />
             </div>
 
             {/* Tab Content */}
             <div className="p-6">
-                {activeTab === 'transportistas' && <TransportistasTab />} 
+                {activeTab === 'transportistas' && <TransportistasTab />}
                 {activeTab === 'pago' && <PagoTab />}
                 {activeTab === 'configuracion' && <ConfiguracionTab />}
                 {activeTab === 'pedidos' && <PedidosTab />}
                 {activeTab === 'productos' && <ProductosTab />}
-                {activeTab === 'informacion' && <InformacionTab />}  
-                {activeTab === 'email' && <EmailTab />} 
+                {activeTab === 'informacion' && <InformacionTab />}
+                {activeTab === 'email' && <EmailTab />}
                 {activeTab === 'equipo' && <EquipoTab />}
             </div>
         </div>

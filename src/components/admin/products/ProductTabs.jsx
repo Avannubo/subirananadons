@@ -3,12 +3,16 @@ import { useState } from 'react';
 import ProductsTable from '@/components/admin/products/ProductsTable';
 import StockManagement from '@/components/admin/products/StockManagement';
 import BrandsTable from '@/components/admin/products/BrandsTable';
+import CategoriesTree from '@/components/admin/products/CategoriesTree';
+import TabNavigation from '@/components/admin/shared/TabNavigation';
+
 const brands = [
     { id: 212, name: '7AM', products: 2 },
     { id: 196, name: 'Angelcare', products: 2 },
     { id: 257, name: 'Axkid', products: 5 },
     { id: 238, name: 'Baby Brezza', products: 3 },
 ];
+
 const products = [
     {
         id: 9256,
@@ -31,28 +35,23 @@ const products = [
         status: 'active'
     },
 ];
+
 export default function ProductTabs() {
     const [activeTab, setActiveTab] = useState('Productos');
-    const tabs = ['Productos', 'Stocks', 'Marcas']; //, 'Descuentos'
+    const tabs = ['Productos', 'Categorías', 'Stocks', 'Marcas']; //, 'Descuentos'
+
     return (
         <div>
             {/* Tabs Navigation */}
-            <div className="flex border-b border-gray-200 mb-6">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 font-medium text-sm ${activeTab === tab
-                            ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
-                            : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        {tab}
-                    </button>
-                ))}
-            </div>
+            <TabNavigation
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+            />
+
             {/* Content Switching */}
             {activeTab === 'Productos' && <ProductsTable products={products} />}
+            {activeTab === 'Categorías' && <CategoriesTree />}
             {activeTab === 'Stocks' && <StockManagement products={products} />}
             {activeTab === 'Marcas' && <BrandsTable brands={brands} />}
             {activeTab === 'Descuentos' && (
