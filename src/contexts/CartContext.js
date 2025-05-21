@@ -50,14 +50,44 @@ export function CartProvider({ children }) {
     useEffect(() => {
         const loadCart = async () => {
             try {
-                setIsLoading(true);
-                // Always check local storage first
+                setIsLoading(true);                // Always check local storage first
                 const localCart = localStorage.getItem('cart');
                 if (localCart) {
                     try {
                         const parsedCart = JSON.parse(localCart);
-                        setCartItems(parsedCart.items || []);
-                        setCartId(parsedCart.id || null);
+                        const MAX_CART_AGE = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+                        
+                        // Only use local cart data if it's less than 24 hours old
+                        if (parsedCart.timestamp && (Date.now() - parsedCart.timestamp) < MAX_CART_AGE) {
+                            // Validate each item has required fields and validate their values
+                            const validItems = (parsedCart.items || []).filter(item => {
+                                const isValid = item && 
+                                    item.id && 
+                                    item.name && 
+                                    (item.price || item.priceValue) &&
+                                    typeof item.quantity === 'number' &&
+                                    item.quantity > 0;
+
+                                // Log invalid items for debugging
+                                if (!isValid) {
+                                    console.warn('Invalid cart item:', item);
+                                }
+                                
+                                return isValid;
+                            });
+
+                            // Only update state if we have valid items
+                            if (validItems.length > 0) {
+                                setCartItems(validItems);
+                                setCartId(parsedCart.id || null);
+                            } else {
+                                console.log('No valid items in cart, clearing local storage');
+                                localStorage.removeItem('cart');
+                            }
+                        } else {
+                            console.log('Cart data expired or invalid, clearing local storage');
+                            localStorage.removeItem('cart');
+                        }
                     } catch (error) {
                         console.error('Error parsing local cart:', error);
                         // Clear invalid cart data
@@ -92,13 +122,30 @@ export function CartProvider({ children }) {
             }
         };
         loadCart();
-    }, [session, status]);
+    }, [session, status]);    // Debounced save to prevent too frequent localStorage updates
+    let saveTimeout;
     const saveCart = async (items, id = cartId) => {
         try {
-            // Always save to localStorage
-            localStorage.setItem('cart', JSON.stringify({ items, id }));
+            // Clear any pending save
+            if (saveTimeout) clearTimeout(saveTimeout);
+            
+            // Update state immediately
             setCartItems(items);
             setCartId(id);
+            
+            // Debounce localStorage save
+            saveTimeout = setTimeout(() => {
+                try {
+                    localStorage.setItem('cart', JSON.stringify({ 
+                        items,
+                        id,
+                        timestamp: Date.now() // Add timestamp for validation
+                    }));
+                } catch (error) {
+                    console.error('Error saving to localStorage:', error);
+                }
+            }, 500); // 500ms debounce
+
             // If user is authenticated and we have a cart ID, save to the database
             if (session?.user && id) {
                 try {
@@ -140,19 +187,33 @@ export function CartProvider({ children }) {
                         console.error('Invalid product ID:', product);
                         toast.error('Error: ID de producto inválido');
                         return false;
-                    }
-                    // Validate gift info before sending to API
-                    if (!giftInfo.listId) {
-                        console.error('Missing list ID in gift info:', giftInfo);
+                    }                    // Validate gift info before sending to API
+                    if (!giftInfo.listId || !giftInfo.itemId || !giftInfo.babyName) {
+                        console.error('Missing required gift info:', giftInfo);
                         toast.error('Error: Falta información de la lista de regalo');
                         return false;
+                    }                    // Ensure the giftInfo has all required fields
+                    const requiredFields = ['listId', 'itemId', 'listOwnerId', 'babyName'];
+                    const missingFields = requiredFields.filter(field => !giftInfo[field]);
+                    
+                    if (missingFields.length > 0) {
+                        console.error('Missing required gift info fields:', missingFields);
+                        console.error('Gift info received:', giftInfo);
+                        toast.error('Error: Información de lista de regalo incompleta');
+                        return false;
                     }
-                    // Format request data
+
+                    // Format request data with additional validation
                     const requestData = {
                         productId,
-                        quantity,
-                        isGift,
-                        giftInfo
+                        quantity: Math.max(1, parseInt(quantity) || 1),
+                        isGift: true,
+                        giftInfo: {
+                            ...giftInfo,
+                            listId: giftInfo.listId.toString(),
+                            listOwnerId: giftInfo.listOwnerId.toString(),
+                            addedAt: Date.now()
+                        }
                     };
                     console.log('Sending request to API:', requestData);
                     try {
@@ -166,11 +227,20 @@ export function CartProvider({ children }) {
                         // Log response status for debugging
                         console.log(`API response status: ${response.status} ${response.statusText}`);
                         const data = await handleApiResponse(response);
-                        console.log('API response data:', data);
-                        if (data.success) {
-                            // Update local cart
-                            if (data.cart && data.cart.items) {
-                                await saveCart(data.cart.items, cartId);
+                        console.log('API response data:', data);                        if (data.success) {
+                            // Validate and update local cart with gift item
+                            if (data.cart?.items) {
+                                // Ensure the gift item is properly formatted in the cart
+                                const validatedItems = data.cart.items.map(item => ({
+                                    ...item,
+                                    id: item.id || item.productId,
+                                    isGift: item.isGift === undefined ? true : item.isGift,
+                                    giftInfo: item.giftInfo || giftInfo,
+                                    quantity: Math.max(1, parseInt(item.quantity) || 1),
+                                    updatedAt: Date.now()
+                                }));
+                                
+                                await saveCart(validatedItems, data.cart._id || cartId);
                                 toast.success('Regalo añadido al carrito');
                                 return true;
                             } else {
@@ -193,18 +263,49 @@ export function CartProvider({ children }) {
                     toast.error(`Error al añadir el regalo: ${error.message || 'Se produjo un error desconocido'}`);
                     return false;
                 }
-            }
-            // Regular (non-gift) product handling
-            const existingItem = cartItems.find(item => item.id === product.id);
+            }            // Regular (non-gift) product handling
+            const productId = product.productId || product.id;
+            const existingItem = cartItems.find(item => (item.id === productId || item.productId === productId));
             let newItems;
             if (existingItem) {
                 newItems = cartItems.map(item =>
                     item.id === product.id
-                        ? { ...item, quantity: item.quantity + quantity }
+                        ? {
+                            ...item,
+                            quantity: item.quantity + quantity,
+                            // Always ensure we have the latest product data
+                            name: product.name || item.name,
+                            price: product.price || item.price,
+                            priceValue: product.priceValue || product.price || item.priceValue,
+                            image: product.image || product.imageUrl || item.image,
+                            brand: product.brand || item.brand,
+                            category: product.category || item.category
+                        }
                         : item
                 );
-            } else {
-                newItems = [...cartItems, { ...product, quantity }];
+            } else {                // Validate required product data
+                if (!product.id || !product.name || !(product.price || product.priceValue)) {
+                    console.error('Invalid product data:', product);
+                    toast.error('Error: Datos del producto inválidos');
+                    return false;
+                }
+
+                // Make sure we store all necessary product data with proper validation and defaults
+                const cartItem = {
+                    id: product.id,
+                    name: product.name.trim(),
+                    price: parseFloat(product.price) || 0,
+                    priceValue: parseFloat(product.priceValue || product.price) || 0,
+                    image: product.image || product.imageUrl || '',
+                    brand: (product.brand || '').trim(),
+                    category: (product.category || '').trim(),
+                    quantity: Math.max(1, parseInt(quantity) || 1),
+                    isGift: Boolean(product.isGift),
+                    giftInfo: product.giftInfo || null,
+                    listOwner: product.listOwner || null,
+                    updatedAt: Date.now() // Track when the item was last updated
+                };
+                newItems = [...cartItems, cartItem];
             }
             const result = await saveCart(newItems);
             if (result) {

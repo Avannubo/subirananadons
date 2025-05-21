@@ -47,6 +47,10 @@ export default function BillsTabs() {
             setLoading(false);
         }
     };
+    const handleBillDeleted = (deletedId) => {
+        setBills(prev => prev.filter(bill => bill.id !== deletedId));
+    };
+      
     // Fetch invoices when tab or filters change
     useEffect(() => {
         fetchInvoices();
@@ -78,6 +82,8 @@ export default function BillsTabs() {
                 filters={filters}
                 setFilters={setFilters}
                 loading={loading}
+                onBillDeleted={handleBillDeleted}
+
             />
         </div>
     );

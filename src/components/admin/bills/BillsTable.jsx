@@ -11,13 +11,13 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
 
     const closeDeleteModal = () => {
         setDeleteModal({ open: false, bill: null });
-    };
+    }; 
 
     const confirmDeleteBill = async () => {
         const billId = deleteModal.bill?.id;
         if (!billId) return;
         try {
-            const response = await fetch(`/api/invoices/${billId}`, {
+            const response = await fetch(`/api/orders/${billId}/invoice`, {
                 method: 'DELETE',
             });
             if (!response.ok) {
@@ -27,6 +27,7 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
             toast.success('Factura eliminada correctamente');
             if (onBillDeleted) {
                 onBillDeleted(billId);
+                
             }
         } catch (error) {
             console.error('Error deleting bill:', error);
@@ -247,7 +248,7 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
                                                 title="Eliminar factura"
                                             >
                                                 <FiTrash2 size={20} />
-                                            </button> 
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

@@ -59,6 +59,7 @@ export default function BirthListPage({ params }) {
                 const progress = calculateProgress(birthListData.items);
                 setList({
                     id: birthListData._id,
+                    userId: birthListData.user?._id, // Add user ID from the API response
                     babyName: birthListData.babyName,
                     parents: birthListData.user ? birthListData.user.name : 'Anónimo',
                     dueDate: birthListData.dueDate,
@@ -197,23 +198,35 @@ export default function BirthListPage({ params }) {
         });
     const handleReserveClick = async (product) => {
         try {
-            console.log('Product data:', product);
-            // Format product object to ensure correct ID format
+            console.log('Product data:', product);            // Format product object to match CartContext format
             const productForCart = {
                 id: product.productId,
                 productId: product.productId,
                 name: product.name,
                 price: product.priceValue,
-                image: product.image
+                priceValue: product.priceValue,
+                image: product.image,
+                brand: product.brand || '',
+                category: product.category || '',
+                status: product.status || 'available'
             };
-            console.log('Formatted product for cart:', productForCart);
-            // Use the CartContext to add the gift to cart
+            console.log('Formatted product for cart:', productForCart);            // Use the CartContext to add the gift to cart            // Validate required gift information
+            if (!list.userId) {
+                console.error('Missing list owner ID');
+                toast.error('Error: No se puede identificar el propietario de la lista');
+                return;
+            }
+
             const success = await addToCart(productForCart, 1, {
                 isGift: true,
                 giftInfo: {
                     listId: id,
                     itemId: product.id,
-                    babyName: list.babyName
+                    babyName: list.babyName,
+                    listOwnerId: list.userId,
+                    addedAt: Date.now(),
+                    quantity: product.quantity || 1,
+                    reserved: product.reserved || 0
                 }
             });
             if (success) {
