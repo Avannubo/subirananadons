@@ -1,38 +1,84 @@
 'use client';
+import { useState } from 'react';
 import { FiUser, FiCalendar, FiShoppingBag, FiMail } from 'react-icons/fi';
-
+import { useEffect } from 'react';
 export default function BillsStats() {
-    // These would likely come from props or API in a real app
-    const stats = [
+    const [stats, setStats] = useState([
         {
             icon: <FiUser className="text-[#00B0C8] text-xl" />,
             title: "Facturas emitidas",
-            value: "120",
+            value: "...",
             description: "Este mes",
             bgColor: "bg-blue-100"
         },
         {
             icon: <FiCalendar className="text-green-600 text-xl" />,
             title: "Facturas pagadas",
-            value: "95",
+            value: "...",
             description: "Este mes",
             bgColor: "bg-green-100"
         },
         {
             icon: <FiShoppingBag className="text-yellow-600 text-xl" />,
             title: "Facturas pendientes",
-            value: "25",
+            value: "...",
             description: "Este mes",
             bgColor: "bg-yellow-100"
         },
         {
             icon: <FiMail className="text-purple-600 text-xl" />,
             title: "Notificaciones enviadas",
-            value: "300",
+            value: "...",
             description: "Este mes",
             bgColor: "bg-purple-100"
         }
-    ];
+    ]);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await fetch('/api/stats/bills');
+                const data = await response.json();
+
+                if (data.success) {
+                    setStats([
+                        {
+                            icon: <FiUser className="text-[#00B0C8] text-xl" />,
+                            title: "Facturas emitidas",
+                            value: data.data.totalBills.toString(),
+                            description: "Este mes",
+                            bgColor: "bg-blue-100"
+                        },
+                        {
+                            icon: <FiCalendar className="text-green-600 text-xl" />,
+                            title: "Facturas pagadas",
+                            value: data.data.paidBills.toString(),
+                            description: "Este mes",
+                            bgColor: "bg-green-100"
+                        },
+                        {
+                            icon: <FiShoppingBag className="text-yellow-600 text-xl" />,
+                            title: "Facturas pendientes",
+                            value: data.data.pendingBills.toString(),
+                            description: "Este mes",
+                            bgColor: "bg-yellow-100"
+                        },
+                        {
+                            icon: <FiMail className="text-purple-600 text-xl" />,
+                            title: "Notificaciones enviadas",
+                            value: data.data.notificationsSent.toString(),
+                            description: "Este mes",
+                            bgColor: "bg-purple-100"
+                        }
+                    ]);
+                }
+            } catch (error) {
+                console.error('Error fetching billing stats:', error);
+            }
+        };
+
+        fetchStats();
+    }, []);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

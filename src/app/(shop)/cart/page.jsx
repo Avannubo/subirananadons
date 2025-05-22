@@ -8,6 +8,7 @@ import UserAuth from "@/components/ui/UserAuthModal";
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
+import { ShoppingBag } from 'lucide-react';
 export default function CartPage() {
     const { cartItems, updateQuantity, removeFromCart } = useCart();
     const { user, loading: userLoading } = useUser();
@@ -27,6 +28,8 @@ export default function CartPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
+    const [invoiceBlob, setInvoiceBlob] = useState(null);
+
     const [userType, setUserType] = useState('guest'); // 'guest' or 'register'
     const regularItems = cartItems.filter(item => !item.isGift);
     const giftItems = cartItems.filter(item => item.isGift);
@@ -295,30 +298,42 @@ export default function CartPage() {
         }
     };
     // Handle invoice download
-    const handleDownloadInvoice = async () => {
-        if (!orderSuccess) return;
-        toast.success('Generando factura...');
-        try {
-            // Call API to generate/download invoice PDF
-            const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
-                method: 'GET',
-                headers: { 'Accept': 'application/pdf' }
-            });
-            if (!res.ok) throw new Error('No se pudo generar la factura');
-            const blob = await res.blob();
-            // Create a link to download the PDF
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Factura-${orderSuccess.orderNumber}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-            toast.success('Factura descargada correctamente');
-        } catch (err) {
-            toast.error('Error al descargar la factura');
-        }
+    useEffect(() => {
+        const generateInvoice = async () => {
+            if (!orderSuccess) return;
+            // toast.success('Generando factura...');
+            try {
+                const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/pdf' }
+                });
+                if (!res.ok) throw new Error('No se pudo generar la factura');
+                const blob = await res.blob();
+                setInvoiceBlob(blob);
+                // toast.success('Factura generada correctamente');
+                //close the modal 
+            } catch (err) {
+                toast.error('Error al generar la factura');
+            }
+        };
+
+        generateInvoice();
+    }, [orderSuccess]);
+
+    const handleDownloadInvoice = () => {
+        if (!invoiceBlob || !orderSuccess) return;
+
+        const url = window.URL.createObjectURL(invoiceBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Factura-${orderSuccess.orderNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success('Factura descargada correctamente');
+        
+        
     };
     // Handle sending email with receipt
     const handleSendEmail = () => {
@@ -345,7 +360,7 @@ export default function CartPage() {
                                         <div className="flex items-start space-x-4 justify-start ">
                                             <h2 className="text-xl font-bold mb-6">Datos del usuario</h2>
                                             {/* <UserAuth /> */}
-                                        </div> 
+                                        </div>
                                         {!user ? (
                                             <>
                                                 <div className="space-y-4">
@@ -389,7 +404,7 @@ export default function CartPage() {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>  
+                                                        </div>
                                                         <div className='flex-1 flex-row gap-4 space-x-2'>
                                                             <div
                                                                 className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'guest'
@@ -876,10 +891,11 @@ export default function CartPage() {
                     </>
                 ) : (
                     <motion.div
-                        className="text-center py-16"
+                        className="text-center py-16 min-h-[50vh] flex flex-col items-center justify-center space-y-4"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                    >
+                        >
+                            <ShoppingBag className="text-gray-600" size={120} />
                         <h2 className="text-2xl font-bold mb-4">Tu carrito está vacío</h2>
                         <p className="text-gray-500 mb-8">¿No sabes qué comprar? ¡Miles de productos te esperan!</p>
                         <Link

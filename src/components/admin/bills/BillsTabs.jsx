@@ -50,7 +50,7 @@ export default function BillsTabs() {
     const handleBillDeleted = (deletedId) => {
         setBills(prev => prev.filter(bill => bill.id !== deletedId));
     };
-      
+
     // Fetch invoices when tab or filters change
     useEffect(() => {
         fetchInvoices();
