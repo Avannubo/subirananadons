@@ -1,41 +1,33 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import AuthCheck from '@/components/auth/AuthCheck';
 import { FiStar, FiXCircle, FiCheck, FiAlertCircle } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
-
 export default function FeaturedProductsPage() {
     const [allProducts, setAllProducts] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('featured'); // 'featured', 'all'
-
     // Fetch products on component mount
     useEffect(() => {
         fetchProducts();
     }, []);
-
     // Fetch all products from API
     const fetchProducts = async () => {
         try {
             setLoading(true);
             const response = await fetch('/api/products?preventSort=true');
-
             if (!response.ok) {
                 throw new Error(`Failed to fetch products: ${response.status}`);
             }
-
             const data = await response.json();
-
             if (data && Array.isArray(data.products)) {
                 // Sort products by name
                 const sortedProducts = data.products.sort((a, b) => {
                     return a.name.localeCompare(b.name);
                 });
-
                 setAllProducts(sortedProducts);
                 setFeaturedProducts(sortedProducts.filter(product => product.featured));
             } else {
@@ -48,12 +40,10 @@ export default function FeaturedProductsPage() {
             setLoading(false);
         }
     };
-
     // Toggle featured status of a product
     const toggleFeatured = async (productId) => {
         try {
             const toastId = toast.loading('Updating featured status...');
-
             const response = await fetch('/api/products/toggle-featured', {
                 method: 'POST',
                 headers: {
@@ -61,14 +51,11 @@ export default function FeaturedProductsPage() {
                 },
                 body: JSON.stringify({ productId }),
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to update featured status');
             }
-
             const data = await response.json();
-
             // Update local state
             setAllProducts(prevProducts =>
                 prevProducts.map(product =>
@@ -77,34 +64,29 @@ export default function FeaturedProductsPage() {
                         : product
                 )
             );
-
             // Update featured products list
             if (data.product.featured) {
                 setFeaturedProducts(prev => [...prev, allProducts.find(p => p._id === productId)]);
             } else {
                 setFeaturedProducts(prev => prev.filter(p => p._id !== productId));
             }
-
             toast.success(data.message, { id: toastId });
         } catch (error) {
             console.error('Error toggling featured status:', error);
             toast.error(`Error updating product: ${error.message}`);
         }
     };
-
     // Filter products based on search term and selected filter
     const filteredProducts = (filter === 'featured' ? featuredProducts : allProducts)
         .filter(product =>
             product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (product.reference && product.reference.toLowerCase().includes(searchTerm.toLowerCase()))
         );
-
     return (
         <AuthCheck>
             <AdminLayout>
                 <div className="py-6">
                     <h1 className="text-2xl font-bold mb-6">Gestión de Productos Destacados</h1>
-
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <p className="text-gray-600 mb-4">
                             Los productos destacados aparecen en la sección "Productos Destacados" en la página de inicio y otras secciones destacadas de la tienda.
@@ -151,7 +133,6 @@ export default function FeaturedProductsPage() {
                             </div>
                         </div>
                     </div>
-
                     {loading ? (
                         <div className="bg-white rounded-lg shadow p-8 flex justify-center items-center">
                             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00B0C8]"></div>

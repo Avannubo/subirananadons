@@ -9,12 +9,18 @@ import {
     Settings,
     CircleUserRound,
     TagIcon,
-    Star
+    Star,
+    ChartArea
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-
-// Navigation items configuration with role-based access
+import { InstagramIcon, YoutubeIcon, LinkedinIcon } from "lucide-react"; 
 const getNavigationItems = (userRole) => [
+    {
+        href: "/dashboard",
+        icon: ChartArea,
+        label: "Estadísticas",
+        roles: ['admin']//'user',
+    },
     {
         href: "/dashboard/account",
         icon: CircleUserRound,
@@ -27,12 +33,12 @@ const getNavigationItems = (userRole) => [
         label: "Productos",
         roles: ['admin']
     },
-    // {
-    //     href: "/dashboard/featured-products",
-    //     icon: Star,
-    //     label: "Destacados",
-    //     roles: ['admin']
-    // },
+    {
+        href: "/dashboard/featured-products",
+        icon: Star,
+        label: "Destacados",
+        roles: ['admin']
+    },
     {
         href: "/dashboard/brands",
         icon: TagIcon,
@@ -70,26 +76,21 @@ const getNavigationItems = (userRole) => [
         roles: ['admin']
     }
 ];
-
 export default function Sidebar() {
     const { data: session } = useSession();
     const userRole = session?.user?.role || 'user';
     const navigationItems = getNavigationItems(userRole);
-
     return (
         <div className="w-64 h-[80vh] bg-white top-[100px] sticky">
-            <div className="px-4 py-2">
+            <div className="px-4 py-2 min-h-[88vh] flex flex-col justify-between">
                 <nav className="space-y-1">
                     <div className='flex items-center justify-center font-bold text-2xl border-b pb-2 border-gray-200'>
-                        <span className="font-medium">Hi! {session?.user.name}</span>
+                        <span className="font-medium">Hola! {session?.user.name}</span>
                     </div>
-
-                    {navigationItems.map((item, index) => {
-                        // Only show items that the user has permission to see
+                    {navigationItems.map((item, index) => { 
                         if (!item.roles.includes(userRole)) {
                             return null;
                         }
-
                         const Icon = item.icon;
                         return (
                             <Link
@@ -103,6 +104,20 @@ export default function Sidebar() {
                         );
                     })}
                 </nav>
+                <div className="mt-auto pt-6 border-t border-gray-200">
+                    <div className="flex space-x-5 justify-center my-4">
+                        <Link href="https://instagram.com" aria-label="Instagram" className="text-[#333] hover:text-[#00B0C8] transition-colors">
+                            <InstagramIcon size={28} />
+                        </Link>
+                        <Link href="https://youtube.com" aria-label="YouTube" className="text-[#333] hover:text-[#00B0C8] transition-colors">
+                            <YoutubeIcon size={28} />
+                        </Link>
+                        <Link href="https://linkedin.com" aria-label="LinkedIn" className="text-[#333] hover:text-[#00B0C8] transition-colors">
+                            <LinkedinIcon size={28} />
+                        </Link>
+                    </div>
+                    <p className="text-sm text-center text-gray-500 mt-2">© 2025 Subirana</p>
+                </div>
             </div>
         </div>
     );

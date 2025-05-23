@@ -380,7 +380,7 @@ export default function BirthListPage({ params }) {
                                                 onClick={() => handleReserveClick(product)}
                                                 className="w-full bg-[#00B0C8] text-white py-1.5 text-sm rounded-md hover:bg-[#0090a8] transition-colors"
                                             >
-                                                añadir al carrito
+                                                Añadir al carrito
                                             </button>
                                         ) : (
                                             <div className="text-xs text-gray-500">

@@ -24,12 +24,11 @@ export default function CartPage() {
         province: '',
         country: 'España',
         notes: ''
-    });
+    }); 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
     const [invoiceBlob, setInvoiceBlob] = useState(null);
-
     const [userType, setUserType] = useState('guest'); // 'guest' or 'register'
     const regularItems = cartItems.filter(item => !item.isGift);
     const giftItems = cartItems.filter(item => item.isGift);
@@ -316,13 +315,10 @@ export default function CartPage() {
                 toast.error('Error al generar la factura');
             }
         };
-
         generateInvoice();
     }, [orderSuccess]);
-
     const handleDownloadInvoice = () => {
         if (!invoiceBlob || !orderSuccess) return;
-
         const url = window.URL.createObjectURL(invoiceBlob);
         const link = document.createElement('a');
         link.href = url;
@@ -332,8 +328,6 @@ export default function CartPage() {
         link.remove();
         window.URL.revokeObjectURL(url);
         toast.success('Factura descargada correctamente');
-        
-        
     };
     // Handle sending email with receipt
     const handleSendEmail = () => {
@@ -365,7 +359,7 @@ export default function CartPage() {
                                             <>
                                                 <div className="space-y-4">
                                                     <div className="flex flex-col   gap-4">
-                                                        <div className='flex flex-row gap-4 space-x-2'>
+                                                        {/* <div className='flex flex-row gap-4 space-x-2'>
                                                             <div
                                                                 className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'login'
                                                                     ? 'border-[#00B0C8] bg-[#00B0C8]/5'
@@ -404,7 +398,7 @@ export default function CartPage() {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                        </div> */}
                                                         <div className='flex-1 flex-row gap-4 space-x-2'>
                                                             <div
                                                                 className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'guest'
@@ -550,9 +544,8 @@ export default function CartPage() {
                                                             className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
                                                             required
                                                         />
-                                                    </div>
-                                                    {/* Only show address fields if not gift-only or delivery method is not pickup */}
-                                                    {(!hasOnlyGiftItems || deliveryMethod === 'delivery') && (
+                                                        </div> 
+                                                    {(deliveryMethod === 'delivery') && (
                                                         <>
                                                             <div className="col-span-2">
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">

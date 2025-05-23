@@ -56,26 +56,22 @@ export function CartProvider({ children }) {
                     try {
                         const parsedCart = JSON.parse(localCart);
                         const MAX_CART_AGE = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-                        
                         // Only use local cart data if it's less than 24 hours old
                         if (parsedCart.timestamp && (Date.now() - parsedCart.timestamp) < MAX_CART_AGE) {
                             // Validate each item has required fields and validate their values
                             const validItems = (parsedCart.items || []).filter(item => {
-                                const isValid = item && 
-                                    item.id && 
-                                    item.name && 
+                                const isValid = item &&
+                                    item.id &&
+                                    item.name &&
                                     (item.price || item.priceValue) &&
                                     typeof item.quantity === 'number' &&
                                     item.quantity > 0;
-
                                 // Log invalid items for debugging
                                 if (!isValid) {
                                     console.warn('Invalid cart item:', item);
                                 }
-                                
                                 return isValid;
                             });
-
                             // Only update state if we have valid items
                             if (validItems.length > 0) {
                                 setCartItems(validItems);
@@ -128,15 +124,13 @@ export function CartProvider({ children }) {
         try {
             // Clear any pending save
             if (saveTimeout) clearTimeout(saveTimeout);
-            
             // Update state immediately
             setCartItems(items);
             setCartId(id);
-            
             // Debounce localStorage save
             saveTimeout = setTimeout(() => {
                 try {
-                    localStorage.setItem('cart', JSON.stringify({ 
+                    localStorage.setItem('cart', JSON.stringify({
                         items,
                         id,
                         timestamp: Date.now() // Add timestamp for validation
@@ -145,7 +139,6 @@ export function CartProvider({ children }) {
                     console.error('Error saving to localStorage:', error);
                 }
             }, 500); // 500ms debounce
-
             // If user is authenticated and we have a cart ID, save to the database
             if (session?.user && id) {
                 try {
@@ -195,14 +188,12 @@ export function CartProvider({ children }) {
                     }                    // Ensure the giftInfo has all required fields
                     const requiredFields = ['listId', 'itemId', 'listOwnerId', 'babyName'];
                     const missingFields = requiredFields.filter(field => !giftInfo[field]);
-                    
                     if (missingFields.length > 0) {
                         console.error('Missing required gift info fields:', missingFields);
                         console.error('Gift info received:', giftInfo);
                         toast.error('Error: Información de lista de regalo incompleta');
                         return false;
                     }
-
                     // Format request data with additional validation
                     const requestData = {
                         productId,
@@ -227,7 +218,8 @@ export function CartProvider({ children }) {
                         // Log response status for debugging
                         console.log(`API response status: ${response.status} ${response.statusText}`);
                         const data = await handleApiResponse(response);
-                        console.log('API response data:', data);                        if (data.success) {
+                        console.log('API response data:', data);
+                        if (data.success) {
                             // Validate and update local cart with gift item
                             if (data.cart?.items) {
                                 // Ensure the gift item is properly formatted in the cart
@@ -239,7 +231,6 @@ export function CartProvider({ children }) {
                                     quantity: Math.max(1, parseInt(item.quantity) || 1),
                                     updatedAt: Date.now()
                                 }));
-                                
                                 await saveCart(validatedItems, data.cart._id || cartId);
                                 toast.success('Regalo añadido al carrito');
                                 return true;
@@ -289,7 +280,6 @@ export function CartProvider({ children }) {
                     toast.error('Error: Datos del producto inválidos');
                     return false;
                 }
-
                 // Make sure we store all necessary product data with proper validation and defaults
                 const cartItem = {
                     id: product.id,

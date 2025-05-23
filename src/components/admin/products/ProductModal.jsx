@@ -732,7 +732,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                             alt={selectedBrand.name}
                                                                             width={100}
                                                                             height={100}
-                                                                            className="object-cover w-full h-full"
+                                                                            className="object-contain w-full h-full"
                                                                         />
                                                                     </div>
                                                                 );
@@ -800,7 +800,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                                     alt={brand.name}
                                                                                     width={100}
                                                                                     height={100}
-                                                                                    className="object-cover w-full h-full"
+                                                                                    className="object-contain w-full h-full"
                                                                                 />
                                                                             </div>
                                                                         ) : (
