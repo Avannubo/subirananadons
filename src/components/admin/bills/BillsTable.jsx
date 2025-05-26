@@ -37,7 +37,9 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
     };
     const handleFilterChange = (field, value) => {
         setFilters({ ...filters, [field]: value });
-    }; const viewPdf = async (pdfUrl) => {
+    };
+    
+    const viewPdf = async (pdfUrl) => {
         if (!pdfUrl || pdfUrl === '#') {
             toast.error('PDF no disponible');
             return;

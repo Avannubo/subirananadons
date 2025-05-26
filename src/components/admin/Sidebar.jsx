@@ -57,12 +57,12 @@ const getNavigationItems = (userRole) => [
         label: "Clientes",
         roles: ['admin']
     },
-    {
-        href: "/dashboard/facturas",
-        icon: CreditCard,
-        label: "Facturas",
-        roles: ['admin']
-    },
+    // {
+    //     href: "/dashboard/facturas",
+    //     icon: CreditCard,
+    //     label: "Facturas",
+    //     roles: ['admin']
+    // },
     {
         href: "/dashboard/listas",
         icon: GiftIcon,

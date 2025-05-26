@@ -6,8 +6,31 @@ import puppeteer from 'puppeteer';
 import { join } from 'path';
 import { writeFile, mkdir } from 'fs/promises';
 export async function GET(request, { params }) {
-    try {        await dbConnect();
+    try {
+        await dbConnect();
         const { id } = params;
+        
+        // First check if an invoice already exists for this order
+        const existingInvoice = await Invoice.findOne({ order: id });
+        if (existingInvoice) {
+            // If invoice exists, read and return the existing PDF
+            const filePath = join(process.cwd(), 'public', existingInvoice.pdfUrl);
+            try {
+                const { readFile } = await import('fs/promises');
+                const pdf = await readFile(filePath);
+                return new NextResponse(pdf, {
+                    status: 200,
+                    headers: {
+                        'Content-Type': 'application/pdf',
+                        'Content-Disposition': `attachment; filename="Factura-${existingInvoice.invoiceNumber}.pdf"`
+                    }
+                });
+            } catch (error) {
+                console.error('Error reading existing PDF:', error);
+                // If we can't read the existing PDF, continue to generate a new one
+            }
+        }
+
         const order = await Order.findById(id)
             .populate({
                 path: 'items.product',
@@ -177,7 +200,7 @@ export async function GET(request, { params }) {
         await mkdir(uploadsDir, { recursive: true });
 
         // Generate unique filename
-        const fileName = `invoice-${order.orderNumber}-${Date.now()}.pdf`;
+        const fileName = `invoice-${order.orderNumber}.pdf`;
         const filePath = join(uploadsDir, fileName);
         const publicUrl = `/uploads/invoices/${fileName}`;
 

@@ -13,11 +13,10 @@ export async function GET(request) {
         const query = {
             isPublic: true,
             status: 'Activa'
-        };
-
-        // Build the query with optional sorting
+        };        // Build the query with optional sorting
         let birthListsQuery = BirthList.find(query)
-            .populate('user', 'name');
+            .populate('user', 'name')
+            .populate('items.product', 'name reference');  // Populate product data for each item
 
         // Apply sorting only if preventSort is false
         if (!preventSort) {

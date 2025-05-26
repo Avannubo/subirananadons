@@ -26,11 +26,10 @@ export async function GET(request) {
         let query = {};
         if (session.user.role !== 'admin') {
             query.user = session.user.id;
-        }
-
-        // Build the query with optional sorting
+        }        // Build the query with optional sorting
         let birthListsQuery = BirthList.find(query)
-            .populate('user', 'name email');
+            .populate('user', 'name email')
+            .populate('items.product', 'name reference'); // Populate product data for each item
 
         // Apply sorting only if preventSort is false
         if (!preventSort) {

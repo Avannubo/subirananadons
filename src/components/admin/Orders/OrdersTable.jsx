@@ -1,10 +1,13 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { FiEdit, FiTrash2, FiEye, FiChevronLeft, FiChevronRight, FiCheck } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiEye, FiDownload, FiTrash2, FiEdit } from 'react-icons/fi';
+import { FaRegFilePdf } from 'react-icons/fa';
+import { useState, useEffect, use } from 'react';
+import { toast } from 'react-hot-toast';
+import Pagination from '../shared/Pagination';
+
 import OrderDeleteModal from './OrderDeleteModal';
 import OrderEditModal from './OrderEditModal';
 import OrderViewModal from './OrderViewModal';
-import Pagination from '@/components/admin/shared/Pagination';
 export default function OrdersTable({
     orders,
     filters,
@@ -23,15 +26,48 @@ export default function OrdersTable({
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
-    // Log orders received for debugging
+
     useEffect(() => {
         console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
         console.log('Orders data:', orders);
     }, [orders, userRole]);
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters((prev) => ({ ...prev, [name]: value }));
+
+
+
+    const viewPdf = async (pdfUrl) => {
+        if (!pdfUrl || pdfUrl === '#') {
+            toast.error('PDF no disponible');
+            return;
+        }
+        try {
+            window.open(pdfUrl, '_blank');
+        } catch (error) {
+            console.error('Error viewing PDF:', error);
+            toast.error('Error al visualizar el PDF');
+        }
     };
+
+    // const downloadPdf = async (orderId) => {
+    //     try {
+    //         const response = await fetch(`/api/orders/${orderId}/invoice`);
+    //         if (!response.ok) throw new Error('Error downloading invoice');
+
+    //         const blob = await response.blob();
+    //         const url = window.URL.createObjectURL(blob);
+    //         const link = document.createElement('a');
+    //         link.href = url;
+    //         link.download = `factura.pdf`;
+    //         document.body.appendChild(link);
+    //         link.click();
+    //         link.remove();
+    //         window.URL.revokeObjectURL(url);
+    //         toast.success('Factura descargada correctamente');
+    //     } catch (error) {
+    //         console.error('Error downloading invoice:', error);
+    //         toast.error('Error al descargar la factura');
+    //     }
+    // };
+
     // Filter the orders based on search criteria
     const filteredOrders = orders.filter((order) => {
         return (
@@ -144,7 +180,7 @@ export default function OrdersTable({
         }
     };
     return (
-        <div className="bg-white rounded-lg shadow overflow-hidden"> 
+        <div className="bg-white rounded-lg shadow overflow-hidden">
             {/* Bulk Actions (Admin only) */}
             {userRole === 'admin' && selectedOrders.length > 0 && (
                 <div className="bg-gray-100 p-3 flex items-center">
@@ -183,7 +219,6 @@ export default function OrdersTable({
                                     />
                                 </th>
                             )}
-                            <th className="px-6 py-3 text-left">ID</th>
                             <th className="px-6 py-3 text-left">Referencia</th>
                             {userRole === 'admin' && <th className="px-6 py-3 text-left">Cliente</th>}
                             <th className="px-6 py-3 text-left">Total</th>
@@ -206,7 +241,7 @@ export default function OrdersTable({
                                             />
                                         </td>
                                     )}
-                                    <td className="px-6 py-4">{index + 1}</td>
+                                    {/* <td className="px-6 py-4">{index + 1}</td> */}
                                     <td className="px-6 py-4">{order.reference}</td>
                                     {userRole === 'admin' && <td className="px-6 py-4">{order.customer}</td>}
                                     <td className="px-6 py-4">{order.total}</td>
@@ -266,9 +301,16 @@ export default function OrdersTable({
                                         )}
                                     </td>
                                     <td className="px-6 py-4">{order.date}</td>
-                                    <td className="px-6 py-4 text-sm flex flex-row items-center justify-center">
+                                    <td className="px-6 py-4 text-sm flex flex-row items-center space-x-4 justify-center">
                                         <button
-                                            className="text-[#00B0C8] hover:text-[#008A9B] mr-2 text-center"
+                                            onClick={() => viewPdf("/uploads/invoices/invoice-" + order.reference + ".pdf")}
+                                            className="text-green-600 hover:text-green-800 flex items-center"
+                                            title="Ver Factura PDF"
+                                        >
+                                            <FaRegFilePdf size={20} />
+                                        </button>
+                                        <button
+                                            className="text-[#00B0C8] hover:text-[#008A9B] mr-4 text-center"
                                             title="Ver detalles"
                                             onClick={() => handleViewOrder(order)}
                                         >
@@ -277,7 +319,7 @@ export default function OrdersTable({
                                         {userRole === 'admin' && (
                                             <>
                                                 <button
-                                                    className="text-yellow-600 hover:text-yellow-900 mr-2 text-center"
+                                                    className="text-yellow-600 hover:text-yellow-900 mr-4 text-center"
                                                     title="Editar pedido"
                                                     onClick={() => handleEditOrder(order)}
                                                 >

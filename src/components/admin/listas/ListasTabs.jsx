@@ -8,12 +8,12 @@ import { fetchBirthLists, createBirthList, formatBirthList } from '@/services/Bi
 import ProductSelection from '@/components/admin/listas/ProductSelection';
 import TabNavigation from '@/components/admin/shared/TabNavigation';
 export default function ListasTabs({ userRole = 'user' }) {
-    const [activeTab, setActiveTab] = useState('Todos');
-    const [filters, setFilters] = useState({
+    const [activeTab, setActiveTab] = useState('Todos'); const [filters, setFilters] = useState({
         searchId: '',
         searchReference: '',
         searchName: '',
         searchCreator: '',
+        searchProduct: '',
         dateFrom: '',
         dateTo: ''
     });
@@ -79,7 +79,7 @@ export default function ListasTabs({ userRole = 'user' }) {
             ...prev,
             [name]: value
         }));
-    }; 
+    };
     // Refresh data
     const refreshData = async () => {
         await loadBirthLists();
@@ -224,17 +224,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="relative">
-                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Buscar ID"
-                                name="searchId"
-                                value={filters.searchId}
-                                onChange={handleFilterChange}
-                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                            />
-                        </div>
+
                         <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
@@ -264,6 +254,17 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 placeholder="Buscar Creador"
                                 name="searchCreator"
                                 value={filters.searchCreator}
+                                onChange={handleFilterChange}
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                            />
+                        </div>
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar por producto"
+                                name="searchProduct"
+                                value={filters.searchProduct}
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
