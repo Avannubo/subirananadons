@@ -54,7 +54,7 @@ export default function Pagination({
     };
 
     return (
-        <div className="flex justify-between items-center flex-wrap gap-3 mt-4 mb-2">
+        <div className="flex justify-between items-center flex-wrap gap-3 mt-4 mb-2 px-4">
             <div className="text-sm text-gray-600">
                 {formattedShowingText}
             </div>

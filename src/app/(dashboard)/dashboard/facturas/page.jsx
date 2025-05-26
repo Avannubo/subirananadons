@@ -7,9 +7,9 @@ export default async function FacturacionPage() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="py-6 min-h-[85vh]">
+                <div className="py-6 min-h-[100vh]">
                     <h1 className="text-2xl font-bold mb-6 ">Facturación</h1>
-                    <BillsStats />
+                    {/* <BillsStats /> */}
                     <BillTabs />
                 </div>
             </AdminLayout>

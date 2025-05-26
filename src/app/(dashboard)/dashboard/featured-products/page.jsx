@@ -85,7 +85,7 @@ export default function FeaturedProductsPage() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="py-6">
+                <div className="py-6 min-h-[100vh]">
                     <h1 className="text-2xl font-bold mb-6">Gestión de Productos Destacados</h1>
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <p className="text-gray-600 mb-4">

@@ -7,9 +7,9 @@ export default async function ProductosPage() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="py-6">
+                <div className="py-6 min-h-[100vh]">
                     <h1 className="text-2xl font-bold mb-6">Catálogo</h1>
-                    <ProductsStats />
+                    {/* <ProductsStats /> */}
                     <ProductTabs />
                 </div>
             </AdminLayout>

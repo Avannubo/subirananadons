@@ -6,19 +6,21 @@ import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { useClientStats } from '@/contexts/ClientStatsContext';
 export default function ClientModal({ isOpen, onClose, client, onSave }) {
-    const { notifyChange } = useClientStats();
-    const [formData, setFormData] = useState({
+    const { notifyChange } = useClientStats(); const [formData, setFormData] = useState({
         name: '',
         lastName: '',
         email: '',
         active: true,
         newsletter: false,
-        partnerOffers: false
+        partnerOffers: false,
+        password: '',
+        confirmPassword: ''
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     // Initialize form data when client is provided
+
     useEffect(() => {
         if (client) {
             setFormData({
@@ -27,7 +29,9 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                 email: client.email || '',
                 active: client.active !== undefined ? client.active : true,
                 newsletter: client.newsletter || false,
-                partnerOffers: client.partnerOffers || false
+                partnerOffers: client.partnerOffers || false,
+                password: '',
+                confirmPassword: ''
             });
             // Set image preview if client has an image
             if (client.image) {
@@ -35,19 +39,25 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             } else {
                 setImagePreview(null);
             }
-        } else {
-            // Reset form when adding new client
+        } else {            // Reset form when adding new client
             setFormData({
                 name: '',
                 lastName: '',
                 email: '',
                 active: true,
                 newsletter: false,
-                partnerOffers: false
+                partnerOffers: false,
+                password: '',
+                confirmPassword: ''
             });
             setImagePreview(null);
         }
+        // Reset errors when form is reset
+        setErrors({});
     }, [client]);
+
+
+
     // Handle form input changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -70,6 +80,17 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = 'El formato del email no es válido';
         }
+
+        // Only validate password if either password field is filled
+        if (formData.password || formData.confirmPassword) {
+            if (formData.password.length < 6) {
+                newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+            }
+            if (formData.password !== formData.confirmPassword) {
+                newErrors.confirmPassword = 'Las contraseñas no coinciden';
+            }
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -79,7 +100,24 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
         if (!validateForm()) return;
         setLoading(true);
         try {
+            // Save main client data
             await onSave(formData);
+            // If password was provided, update it separately
+            console.log('Client data saved:', client?._id);
+            if (formData.password && client?._id) {
+                const response = await fetch(`/api/users/${client._id}/password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password: formData.password }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update password');
+                }
+            }
+
             toast.success(client ? 'Cliente actualizado correctamente' : 'Cliente añadido correctamente');
             // Notify the stats context that changes have been made
             await notifyChange();
@@ -91,6 +129,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             setLoading(false);
         }
     };
+
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -172,7 +211,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="name"
                                                 value={formData.name}
                                                 onChange={handleChange}
-                                                className={`mt-1 block p-1 w-full rounded-md border-gray-300 border-2   focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.name ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block p-1 w-full rounded-md border-2 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.name ? 'border-red-500' : ''}`}
                                             />
                                             {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
                                         </div>
@@ -185,7 +224,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="lastName"
                                                 value={formData.lastName}
                                                 onChange={handleChange}
-                                                className={`mt-1 block p-1 w-full rounded-md border-gray-300 border-2 not-last:focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.lastName ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block p-1 w-full rounded-md border-2 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.lastName ? 'border-red-500' : ''}`}
                                             />
                                             {errors.lastName && <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>}
                                         </div>
@@ -200,11 +239,50 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className={`mt-1 block p-1  w-full rounded-md border-gray-300 border-2  focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.email ? 'border-red-500' : ''}`}
+                                            className={`mt-1 block p-1 w-full rounded-md border-2 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.email ? 'border-red-500' : ''}`}
                                         />
                                         {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                                    </div>                                </section>
+
+                                {/* Password Change Section */}
+                                <section className="space-y-4">
+                                    <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
+                                        <FiUser className="mr-2 text-[#00B0C8]" /> Cambiar Contraseña
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                                                Nueva Contraseña
+                                            </label>
+                                            <input
+                                                type="password"
+                                                id="password"
+                                                name="password"
+                                                value={formData.password || ''}
+                                                onChange={handleChange}
+                                                className={`mt-1 block w-full rounded-md border-gray-300 border-2 p-1 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.password ? 'border-red-500' : ''}`}
+                                                placeholder="Dejar en blanco para mantener la actual"
+                                            />
+                                            {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
+                                        </div>
+                                        <div>
+                                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                                                Confirmar Contraseña
+                                            </label>
+                                            <input
+                                                type="password"
+                                                id="confirmPassword"
+                                                name="confirmPassword"
+                                                value={formData.confirmPassword || ''}
+                                                onChange={handleChange}
+                                                className={`mt-1 block w-full rounded-md border-gray-300 border-2 p-1 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                                                placeholder="Dejar en blanco para mantener la actual"
+                                            />
+                                            {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
+                                        </div>
                                     </div>
                                 </section>
+
                                 {/* Preferences */}
                                 <section className="space-y-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">

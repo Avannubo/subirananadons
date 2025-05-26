@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-
 export default function ProductQuickView({ product, onClose }) {
     console.log(product.description);
     const [quantity, setQuantity] = useState(1);
@@ -142,15 +141,24 @@ export default function ProductQuickView({ product, onClose }) {
                                         </button>
                                     </div>
                                 </div>
-                                <button className="w-full bg-black text-white uppercase py-3 rounded font-semibold hover:bg-gray-800 transition duration-200 mb-3">
-                                    Comprar
-                                </button>
-                                <button
-                                    onClick={handleAddToWishlist}
-                                    className="w-full bg-gray-200 text-gray-700 uppercase py-3 rounded font-semibold hover:bg-gray-300 transition duration-200 flex items-center justify-center">
-                                    <ShoppingBag className="h-5 w-5 mr-2" />
-                                    Añadir a mi lista
-                                </button>
+                                <div className='flex flex-row  space-x-3'>
+                                    <button className="w-full bg-black text-white uppercase p-2 rounded font-semibold hover:bg-gray-800 transition duration-200 mb-3">
+                                        Ver detalles
+                                    </button>
+                                    <button
+                                        onClick={handleAddToWishlist}
+                                        className="w-full bg-gray-400 text-white uppercase p-2 rounded font-semibold transition duration-200 mb-3 hover:bg-gray-500"
+                                        >
+                                        Añadir a mi lista
+                                    </button> 
+                                </div>
+                                <div>
+                                    <button
+                                        className="w-full bg-black text-white uppercase py-3 rounded font-semibold hover:bg-gray-800 transition duration-200 mb-3"
+                                    >
+                                        Comprar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -158,4 +166,4 @@ export default function ProductQuickView({ product, onClose }) {
             </motion.div>
         </AnimatePresence>
     );
-} 
+}

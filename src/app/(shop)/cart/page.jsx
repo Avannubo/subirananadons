@@ -635,7 +635,7 @@ export default function CartPage() {
                                                 <div className="flex-grow">
                                                     <h3 className="font-medium">{item.name}</h3>
                                                     <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
-                                                    <p className="text-[#00B0C8] font-medium">{item.price}</p>
+                                                    <p className="text-[#00B0C8] font-medium">{item.price}€</p>
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
                                                             Lista de regalo: {item.listOwner}

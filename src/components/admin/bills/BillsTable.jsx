@@ -2,17 +2,17 @@
 import { FiSearch, FiFilter, FiEye, FiDownload, FiTrash2 } from 'react-icons/fi';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import Pagination from '../shared/Pagination';
 export default function BillsTable({ bills = [], filters, setFilters, loading = false, isAdmin = false, onBillDeleted }) {
     const [deleteModal, setDeleteModal] = useState({ open: false, bill: null });
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
     const openDeleteModal = (bill) => {
         setDeleteModal({ open: true, bill });
     };
-
     const closeDeleteModal = () => {
         setDeleteModal({ open: false, bill: null });
-    }; 
-
+    };
     const confirmDeleteBill = async () => {
         const billId = deleteModal.bill?.id;
         if (!billId) return;
@@ -27,11 +27,10 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
             toast.success('Factura eliminada correctamente');
             if (onBillDeleted) {
                 onBillDeleted(billId);
-                
             }
         } catch (error) {
             console.error('Error deleting bill:', error);
-            toast.error(error.message || 'Error al eliminar la factura');
+            toast.error(error.message || 'Error al eliminar la factura');10
         } finally {
             closeDeleteModal();
         }
@@ -96,6 +95,21 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
             (filters.issueDateTo === '' || new Date(bill.issueDate.split('/').reverse().join('-')) <= new Date(filters.issueDateTo));
         return idMatch && referenceMatch && customerMatch && totalMatch && paymentMatch && dateMatch;
     });
+    // Calculate pagination
+    const totalItems = filteredBills?.length || 0;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentBills = filteredBills.slice(startIndex, endIndex);
+    // Handle page change
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+    // Handle items per page change
+    const handleItemsPerPageChange = (value) => {
+        setItemsPerPage(value);
+        setCurrentPage(1); // Reset to first page when changing items per page
+    };
     return (
         <div className="bg-white rounded-lg shadow overflow-hidden">
             {/* Search and Filters */}
@@ -211,7 +225,7 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
                                 </td>
                             </tr>
                         ) : filteredBills.length > 0 ? (
-                            filteredBills.map((bill, index) => (
+                            currentBills.map((bill, index) => (
                                 <tr key={bill.id}>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{index + 1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{bill.reference}</td>
@@ -264,33 +278,15 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
                 </table>
             </div>
             {/* Pagination */}
-            {/* <div className="px-6 py-4 flex items-center justify-between border-t border-gray-200">
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
-                        <p className="text-sm text-gray-700">
-                            Mostrando <span className="font-medium">1</span> a <span className="font-medium">{filteredBills.length}</span> de <span className="font-medium">{filteredBills.length}</span> resultados
-                        </p>
-                    </div>
-                    <div>
-                        <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                            <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                <span className="sr-only">Anterior</span>
-                                &larr;
-                            </button>
-                            <button aria-current="page" className="z-10 bg-blue-50 border-[#00B0C8] text-[#00B0C8] relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                1
-                            </button>
-                            <button className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                2
-                            </button>
-                            <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                <span className="sr-only">Siguiente</span>
-                                &rarr;
-                            </button>
-                        </nav>
-                    </div>
-                </div>
-            </div> */}
+            <Pagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+                onItemsPerPageChange={handleItemsPerPageChange}
+                showingText="Mostrando {} de {} facturas"
+            />
             {/* Delete Confirmation Modal */}
             {deleteModal.open && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000050] bg-opacity-40">

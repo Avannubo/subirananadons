@@ -8,7 +8,7 @@ export default async function ClientesPage() {
             <AdminLayout>
                 <div className="py-6 min-h-[90vh]">
                     <h1 className="text-2xl font-bold mb-6">Clientes</h1>
-                    <ClientsStats />
+                    {/* <ClientsStats /> */}
                     <ClientsTabs />
                 </div>
             </AdminLayout>

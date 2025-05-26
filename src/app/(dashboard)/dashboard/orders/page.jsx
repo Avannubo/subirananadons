@@ -20,7 +20,7 @@ export default function PedidosPage() {
                     <h1 className="text-2xl font-bold mb-6">
                         {userRole === 'admin' ? 'Gestión de Pedidos' : 'Mis Pedidos'}
                     </h1>
-                    {userRole === 'admin' && <OrdersStats />}
+                    {/* {userRole === 'admin' && <OrdersStats />} */}
                     <OrdersTabs userRole={userRole} />
                 </div>
             </AdminLayout>
