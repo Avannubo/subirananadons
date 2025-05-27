@@ -307,6 +307,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                     </div>
                 )}
             </div>
+            
             {/* Create List Modal - kept as is */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">

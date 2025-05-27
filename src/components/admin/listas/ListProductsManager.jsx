@@ -31,7 +31,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
     };
     const handleRemoveProduct = async (productId) => {
         // First, update UI immediately by filtering out the product
-        const updatedItems = items.filter(item => item.product._id !== productId);
+        const updatedItems = items.filter(item => item._id !== productId);
         setItems(updatedItems);
 
         // Set updating state for this product
@@ -62,7 +62,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
 
         // Update local state immediately for better UX
         const updatedItems = items.map(item => {
-            if (item.product._id === productId) {
+            if (item._id === productId) {
                 return { ...item, quantity: newQuantity };
             }
             return item;
@@ -77,7 +77,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
         try {
             // Format items for API
             const formattedItems = updatedItems.map(item => ({
-                product: item.product._id,
+                product: item._id,
                 quantity: parseInt(item.quantity),
                 reserved: parseInt(item.reserved || 0),
                 priority: parseInt(item.priority || 2)
@@ -102,9 +102,9 @@ export default function ListProductsManager({ listId, onUpdate }) {
     };
     const handleAddProducts = (selectedProducts) => {
         // Get only the newly added products (not already in items)
-        const existingProductIds = items.map(item => item.product._id);
+        const existingProductIds = items.map(item => item._id);
         const newProductsOnly = selectedProducts.filter(
-            item => !existingProductIds.includes(item.product._id)
+            item => !existingProductIds.includes(item._id)
         );
         if (newProductsOnly.length === 0) {
             return;
@@ -115,7 +115,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
             ...newProductsOnly
         ];
         const formattedItems = updatedItems.map(item => ({
-            product: item.product._id,
+            product: item._id,
             quantity: parseInt(item.quantity),
             reserved: parseInt(item.reserved || 0),
             priority: parseInt(item.priority || 2)
@@ -192,18 +192,12 @@ export default function ListProductsManager({ listId, onUpdate }) {
                             </button>
                         </div>
                     ) : (
-                        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden max-h-[300px] overflow-y-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
+                        <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden w-full max-h-[300px] overflow-y-auto">
+                            <table className="flex-1 min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Producto
-                                        </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Cantidad
-                                        </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Reservados
                                         </th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Precio
@@ -214,75 +208,52 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {items.map((item) => (
-                                        <tr key={item.product._id}>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md overflow-hidden">
-                                                        {item.product.image && (
-                                                            <Image
-                                                                src={item.product.image}
-                                                                alt={item.product.name}
-                                                                width={40}
-                                                                height={40}
-                                                                className="object-cover w-full h-full"
-                                                            />
+                                    {items
+                                        .filter(item => item.state === 0)
+                                        .map((item) => (
+                                            <tr key={item._id}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md overflow-hidden">
+                                                            {item.product.image && (
+                                                                <Image
+                                                                    src={item.product.image}
+                                                                    alt={item.product.name}
+                                                                    width={40}
+                                                                    height={40}
+                                                                    className="object-cover w-full h-full"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <div className="ml-4">
+                                                            <div className="text-sm font-medium text-gray-900">
+                                                                {item.product.name}
+                                                            </div>
+                                                            <div className="text-sm text-gray-500">
+                                                                {item.product.brand}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {item.product.price_incl_tax?.toFixed(2).replace('.', ',')} €
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    <button
+                                                        onClick={() => handleRemoveProduct(item._id)}
+                                                        className="text-red-600 hover:text-red-900"
+                                                        disabled={updatingProductId === item._id}
+                                                    >
+                                                        {updatingProductId === item._id ? (
+                                                            <span className="inline-block w-5 h-5 border-2 border-t-transparent border-red-600 rounded-full animate-spin"></span>
+                                                        ) : (
+                                                            <FiTrash2 className="h-5 w-5" />
                                                         )}
-                                                    </div>
-                                                    <div className="ml-4">
-                                                        <div className="text-sm font-medium text-gray-900">
-                                                            {item.product.name}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500">
-                                                            {item.product.brand}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center border border-gray-300 rounded-md  ">
-                                                    <button
-                                                        onClick={() => handleQuantityChange(item.product._id, item.quantity - 1)}
-                                                        className="px-2 py-1 text-gray-500 hover:bg-gray-100"
-                                                        disabled={updatingProductId === item.product._id}
-                                                    >
-                                                        -
                                                     </button>
-                                                    <span className="px-2 py-1 text-sm">
-                                                        {updatingProductId === item.product._id ?
-                                                            <span className="inline-block w-4 h-4 border-2 border-t-transparent border-[#00B0C8] rounded-full animate-spin"></span> :
-                                                            item.quantity
-                                                        }
-                                                    </span>
-                                                    <button
-                                                        onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
-                                                        className="px-2 py-1 text-gray-500 hover:bg-gray-100"
-                                                        disabled={updatingProductId === item.product._id}
-                                                    >
-                                                        +
-                                                    </button>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {item.reserved || 0}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {item.product.price_incl_tax?.toFixed(2).replace('.', ',')} €
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <button
-                                                    onClick={() => handleRemoveProduct(item.product._id)}
-                                                    className="text-red-600 hover:text-red-900"
-                                                    disabled={updatingProductId === item.product._id}
-                                                >
-                                                    {updatingProductId === item.product._id ?
-                                                        <span className="inline-block w-5 h-5 border-2 border-t-transparent border-red-600 rounded-full animate-spin"></span> :
-                                                        <FiTrash2 className="h-5 w-5" />
-                                                    }
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                </td>
+                                            </tr>
+                                        ))}
+
                                 </tbody>
                             </table>
                         </div>

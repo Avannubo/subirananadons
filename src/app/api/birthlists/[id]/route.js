@@ -120,12 +120,12 @@ export async function PUT(request, { params }) {
         // Don't allow changing the user
         delete updates.user;
 
-        // Update the birth list
-        const updatedBirthList = await BirthList.findByIdAndUpdate(
-            id,
+        // Update the birth list        const updatedBirthList = await BirthList.findByIdAndUpdate(
+        id,
             { $set: updates },
-            { new: true, runValidators: true }
-        ).populate('user', 'name email');
+            { new: true, runValidators: true } 
+        .populate('user', 'name email')
+            .populate('items.product');
 
         return NextResponse.json({
             success: true,

@@ -1,11 +1,9 @@
 'use client';
-import { FiX } from 'react-icons/fi';
+import { FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Image from 'next/image';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useState, useCallback, useEffect } from 'react';
-import { updateBirthListItems } from '@/services/BirthListService';
+import { updateBirthListItems, fetchBirthListItems } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
-
 export default function ListViewModal({
     showModal,
     setShowModal,
@@ -15,164 +13,175 @@ export default function ListViewModal({
     openEditModal,
     openStatusModal
 }) {
-    // Split items by state
-    const [items, setItems] = useState([]);
-
-    useEffect(() => {
-        console.log('listItems updated:', listItems);
-        if (listItems?.length > 0) {
+    const [items, setItems] = useState([]);    useEffect(() => {
+        // Always update items when listItems changes, even if empty
+        // This ensures we get fresh data when modal reopens
+        if (Array.isArray(listItems)) {
             setItems(listItems);
         }
     }, [listItems]);
-
     const getPendingItems = useCallback(() =>
-        items.filter(item => !item.reserved || item.reserved === 0), [items]
+        items.filter(item => item.state === 0), [items]
     );
-
     const getReservedItems = useCallback(() =>
-        items.filter(item => item.reserved > 0 && item.reserved < item.quantity), [items]
+        items.filter(item => item.state === 1), [items]
     );
-
     const getBoughtItems = useCallback(() =>
-        items.filter(item => item.reserved >= item.quantity), [items]
-    );
-
-    const handleDragEnd = async (result) => {
-        if (!result.destination) return;
-
-        const sourceId = result.source.droppableId;
-        const destId = result.destination.droppableId;
-
-        if (sourceId === destId) return;
-
-        const itemToMove = items.find(item => item.product._id === result.draggableId);
-        if (!itemToMove) return;
-
-        const newItems = [...items];
-        const itemIndex = newItems.findIndex(item => item.product._id === itemToMove.product._id);
-
-        // Validate the move based on current state
-        let isValidMove = true;
-        let newReservedCount = itemToMove.reserved;
-
-        if (destId === 'reserved' && itemToMove.reserved === 0) {
-            newReservedCount = 1;
-        } else if (destId === 'bought') {
-            if (itemToMove.reserved < itemToMove.quantity) {
-                newReservedCount = itemToMove.quantity;
-            } else {
-                isValidMove = false;
-            }
-        } else if (destId === 'pending') {
-            newReservedCount = 0;
-        }
-
-        if (!isValidMove) {
-            toast.error('No se puede mover el producto a este estado');
+        items.filter(item => item.state === 2), [items]
+    ); const moveItem = async (itemId, direction) => {
+        const listId = selectedList.rawData?._id || selectedList._id;
+        if (!listId) {
+            toast.error('Error: ID de lista no encontrado');
             return;
         }
 
-        // Update the item's reserved count based on destination
-        newItems[itemIndex] = { ...itemToMove, reserved: newReservedCount };
+        // Find item by its unique _id
+        const itemToMove = items.find(item => item._id === itemId);
+        if (!itemToMove) {
+            toast.error('Error: Item no encontrado');
+            return;
+        }
 
-        try {
-            // Update in the database
-            const response = await updateBirthListItems(selectedList._id, newItems);
-            if (response.success) {
+        // Verify product data exists
+        if (!itemToMove.product?._id) {
+            toast.error('Error: Datos del producto no disponibles');
+            return;
+        }
+
+        const newItems = [...items];
+        const itemIndex = newItems.findIndex(item => item._id === itemId);
+        let newState = itemToMove.state;
+
+        if (direction === 'right') {
+            if (newState < 2) newState++;
+            else return toast.error('Ya está en el estado final');
+        } else if (direction === 'left') {
+            if (newState > 0) newState--;
+            else return toast.error('Ya está en el estado inicial');
+        }
+
+        // Deep clone the item to preserve all data
+        newItems[itemIndex] = {
+            ...itemToMove,
+            state: newState,
+            product: { ...itemToMove.product }
+        };        try {
+            const result = await updateBirthListItems(listId, newItems);
+            if (result.success) {
+                // Update local state immediately for better UX
                 setItems(newItems);
-                toast.success('Estado del producto actualizado');
+                toast.success('Estado del producto actualizado correctamente');
             } else {
-                toast.error('Error al actualizar el estado del producto');
+                throw new Error(result.message || 'Error updating items');
             }
         } catch (error) {
             console.error('Error updating item state:', error);
             toast.error('Error al actualizar el estado del producto');
-        }
-    };    const [activeDragId, setActiveDragId] = useState(null);
-
-    const onDragStart = (start) => {
-        setActiveDragId(start.draggableId);
-    };
-
-    const onDragEnd = (result) => {
-        setActiveDragId(null);
-        handleDragEnd(result);
-    };
-
-    const isDropDisabled = (dropId) => {
-        if (!activeDragId) return false;
-        
-        // Find the item being dragged
-        const item = items.find(i => i.product._id === activeDragId);
-        if (!item) return true;
-
-        // Rules for each drop zone
-        switch (dropId) {
-            case 'pending':
-                return false; // Can always move back to pending
-            case 'reserved':
-                return item.reserved > 0; // Can't reserve if already reserved
-            case 'bought':
-                return item.reserved >= item.quantity; // Can't mark as bought if already fully bought
-            default:
-                return true;
+            // If there's an error, revert to original items
+            setItems(items);
         }
     };
-
-    const getDroppableStyle = (isDraggingOver, isDropDisabled) => {
-        let style = "bg-white rounded-lg border border-gray-200 overflow-hidden transition-colors duration-200";
-        
-        if (isDraggingOver) {
-            if (isDropDisabled) {
-                style += " border-red-400 bg-red-50";
-            } else {
-                style += " border-green-400 bg-green-50";
-            }
+    const canMoveLeft = (item) => item.state > 0;
+    const canMoveRight = (item) => item.state < 2;
+    const renderStateLabel = (state) => {
+        switch (state) {
+            case 0: return "Pendiente";
+            case 1: return "Reservado";
+            case 2: return "Comprado";
+            default: return "Desconocido";
         }
-        
-        return style;
-    };
-
-    const renderProduct = (item, provided) => (
-        <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className="p-4 bg-white border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
-        >
-            <div className="flex items-start">
-                <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded-md overflow-hidden mr-3">
-                    {item.product.image && (
-                        <Image
-                            src={item.product.image}
-                            alt={item.product.name}
-                            width={64}
-                            height={64}
-                            className="object-cover w-full h-full"
-                        />
-                    )}
+    }; const renderProduct = (item, index) => {
+        // Safety check for missing or malformed data
+        if (!item?.product?._id) {
+            console.warn('Missing product data for item:', item);
+            return (
+                <div key={item?._id || `error-${index}`} className="p-4 bg-white border-b border-gray-200">
+                    <div className="flex items-start">
+                        <div className="flex-1">
+                            <p className="text-sm text-red-500">Error: Datos del producto no disponibles</p>
+                            <p className="text-xs text-gray-500">ID del artículo: {item?._id || 'Desconocido'}</p>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-900">{item.product.name}</h4>
-                    <p className="text-xs text-gray-500">Ref: {item.product.reference || '-'}</p>
-                    <p className="text-xs text-gray-500 mt-1">{item.product.brand}</p>
-                    <div className="flex justify-between items-center mt-2">
-                        <div className="flex space-x-2">
-                            <div className="px-2 py-1 bg-blue-50 rounded border border-blue-100">
-                                <span className="text-xs text-gray-500">Cant: <span className="font-medium text-blue-700">{item.quantity}</span></span>
+            );
+        } return (
+            <div key={item._id} className="p-4 bg-white border-b border-gray-200">
+                {/* last:border-b-0 */}
+                <div className="flex items-start">
+                    <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded-md overflow-hidden mr-3">
+                        {item.product?.image && (
+                            <Image
+                                src={item.product.image}
+                                alt={item.product.name}
+                                width={64}
+                                height={64}
+                                className="object-cover w-full h-full"
+                            />
+                        )}
+                    </div>
+                    <div className="flex-1">
+                        <div className='flex justify-between items-center'>
+                            <h4 className="text-sm font-medium text-gray-900">{item.product.name}</h4>
+                            <div className="flex items-center space-x-1">
+                                <button
+                                    onClick={() => moveItem(item._id, 'left')}
+                                    disabled={!canMoveLeft(item)}
+                                    className={`p-1 rounded ${canMoveLeft(item)
+                                        ? 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                                        : 'text-gray-300 cursor-not-allowed'
+                                        }`}
+                                    title="Mover a la izquierda"
+                                >
+                                    <FiChevronLeft size={16} />
+                                </button>
+                                <button
+                                    onClick={() => moveItem(item._id, 'right')}
+                                    disabled={!canMoveRight(item)}
+                                    className={`p-1 rounded ${canMoveRight(item)
+                                        ? 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                                        : 'text-gray-300 cursor-not-allowed'
+                                        }`}
+                                    title="Mover a la derecha"
+                                >
+                                    <FiChevronRight size={16} />
+                                </button>
                             </div>
-                            <div className="px-2 py-1 bg-green-50 rounded border border-green-100">
-                                <span className="text-xs text-gray-500">Recibidos: <span className="font-medium text-green-700">{item.reserved || 0}</span></span>
-                            </div>
+                        </div>
+                        <div className='grid grid-cols-3 gap-2 mt-1'>
+                            <p className="text-xs text-gray-500">Ref: {item.product.reference || '-'}</p>
+                            <p className="text-xs text-gray-500 mt-1">{item.product.brand}</p>
+                            <p className="text-xs mt-1">
+                                Estado:{" "}
+                                <span
+                                    className={`font-medium ${item.state === 0
+                                        ? "text-yellow-500"
+                                        : item.state === 1
+                                            ? "text-blue-500"
+                                            : item.state === 2
+                                                ? "text-green-600"
+                                                : "text-gray-500"
+                                        }`}
+                                >
+                                    {renderStateLabel(item.state)}
+                                </span>
+                            </p>
+                        </div>
+                        <div className="flex justify-between items-center mt-2">
+                            {/* <div className="flex space-x-2">
+                                <div className="px-2 py-1 bg-blue-50 rounded border border-blue-100">
+                                    <span className="text-xs text-gray-500">Cant: <span className="font-medium text-blue-700">{item.quantity}</span></span>
+                                </div>
+                                <div className="px-2 py-1 bg-green-50 rounded border border-green-100">
+                                    <span className="text-xs text-gray-500">Recibidos: <span className="font-medium text-green-700">{item.reserved || 0}</span></span>
+                                </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
-
+        );
+    };
     if (!showModal || !selectedList) return null;
-
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto">
@@ -292,148 +301,82 @@ export default function ListViewModal({
                                 </div>
                             </div>
                         </div>
-                    </div>                    <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
-                        <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <div className="flex items-center mb-4">
-                                    <span className="text-[#00B0C8] mr-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                        </svg>
-                                    </span>
-                                    <h3 className="text-md font-semibold text-gray-800">Productos Pendientes</h3>
+                    </div>
+                    {/* Products sections with arrow navigation */}
+                    <div className="grid grid-cols-3 gap-4">
+                        <div>
+                            <div className="flex items-center mb-4">
+                                <span className="text-[#00B0C8] mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                    </svg>
+                                </span>
+                                <h3 className="text-md font-semibold text-gray-800">Productos Pendientes</h3>
+                            </div>
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                {itemsLoading ? (
+                                    <div className="flex justify-center items-center py-10">
+                                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                    </div>
+                                ) : getPendingItems().length === 0 ? (
+                                    <div className="text-center py-10">
+                                        <p className="text-gray-500">No hay productos pendientes.</p>
+                                    </div>
+                                ) : (<div className="divide-y divide-gray-200 h-[300px] overflow-y-auto">
+                                    {getPendingItems().map((item, index) => renderProduct(item, index))}
                                 </div>
-                                <Droppable 
-                                    droppableId="pending"
-                                    isDropDisabled={isDropDisabled('pending')}
-                                >
-                                    {(provided, snapshot) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.droppableProps}
-                                            className={getDroppableStyle(snapshot.isDraggingOver, isDropDisabled('pending'))}
-                                        >
-                                            {itemsLoading ? (
-                                                <div className="flex justify-center items-center py-10">
-                                                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                                                </div>
-                                            ) : getPendingItems().length === 0 ? (
-                                                <div className="text-center py-10">
-                                                    <p className="text-gray-500">No hay productos pendientes.</p>
-                                                </div>
-                                            ) : (
-                                                <div className="divide-y divide-gray-200 h-[300px] overflow-y-auto">
-                                                    {getPendingItems().map((item, index) => (
-                                                        <Draggable
-                                                            key={item.product._id}
-                                                            draggableId={item.product._id}
-                                                            index={index}
-                                                        >
-                                                            {(provided) => renderProduct(item, provided)}
-                                                        </Draggable>
-                                                    ))}
-                                                    {provided.placeholder}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </Droppable>
-                            </div>
-                            <div>
-                                <div className="flex items-center mb-4">
-                                    <span className="text-[#00B0C8] mr-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                        </svg>
-                                    </span>                                    <h3 className="text-md font-semibold text-gray-800">Productos Reservados</h3>
-                                </div>                                <Droppable 
-                                    droppableId="reserved"
-                                    isDropDisabled={isDropDisabled('reserved')}
-                                >
-                                    {(provided, snapshot) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.droppableProps}
-                                            className={getDroppableStyle(
-                                                snapshot.isDraggingOver,
-                                                isDropDisabled('reserved')
-                                            )}
-                                        >
-                                            {itemsLoading ? (
-                                                <div className="flex justify-center items-center py-10">
-                                                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                                                </div>
-                                            ) : getReservedItems().length === 0 ? (
-                                                <div className="text-center py-10">
-                                                    <p className="text-gray-500">No hay productos reservados.</p>
-                                                </div>
-                                            ) : (
-                                                <div className="divide-y divide-gray-200 h-[300px] overflow-y-auto">
-                                                    {getReservedItems().map((item, index) => (
-                                                        <Draggable
-                                                            key={item.product._id}
-                                                            draggableId={item.product._id}
-                                                            index={index}
-                                                        >
-                                                            {(provided) => renderProduct(item, provided)}
-                                                        </Draggable>
-                                                    ))}
-                                                    {provided.placeholder}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </Droppable>
-                            </div>
-                            <div>
-                                <div className="flex items-center mb-4">
-                                    <span className="text-[#00B0C8] mr-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                        </svg>
-                                    </span>                                    <h3 className="text-md font-semibold text-gray-800">Productos Comprados</h3>
-                                </div>                                <Droppable 
-                                    droppableId="bought"
-                                    isDropDisabled={isDropDisabled('bought')}
-                                >
-                                    {(provided, snapshot) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.droppableProps}
-                                            className={getDroppableStyle(
-                                                snapshot.isDraggingOver,
-                                                isDropDisabled('bought')
-                                            )}
-                                        >
-                                            {itemsLoading ? (
-                                                <div className="flex justify-center items-center py-10">
-                                                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                                                </div>
-                                            ) : getBoughtItems().length === 0 ? (
-                                                <div className="text-center py-10">
-                                                    <p className="text-gray-500">No hay productos comprados.</p>
-                                                </div>
-                                            ) : (
-                                                <div className="divide-y divide-gray-200 h-[300px] overflow-y-auto">
-                                                    {getBoughtItems().map((item, index) => (
-                                                        <Draggable
-                                                            key={item.product._id}
-                                                            draggableId={item.product._id}
-                                                            index={index}
-                                                        >
-                                                            {(provided) => renderProduct(item, provided)}
-                                                        </Draggable>
-                                                    ))}
-                                                    {provided.placeholder}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </Droppable>
+                                )}
                             </div>
                         </div>
-                    </DragDropContext>
-
+                        <div>
+                            <div className="flex items-center mb-4">
+                                <span className="text-[#00B0C8] mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                    </svg>
+                                </span>
+                                <h3 className="text-md font-semibold text-gray-800">Productos Reservados</h3>
+                            </div>
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                {itemsLoading ? (
+                                    <div className="flex justify-center items-center py-10">
+                                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                    </div>
+                                ) : getReservedItems().length === 0 ? (
+                                    <div className="text-center py-10">
+                                        <p className="text-gray-500">No hay productos reservados.</p>
+                                    </div>
+                                ) : (<div className="divide-y divide-gray-200 h-[300px] overflow-y-auto">
+                                    {getReservedItems().map((item, index) => renderProduct(item, index))}
+                                </div>
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex items-center mb-4">
+                                <span className="text-[#00B0C8] mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                    </svg>
+                                </span>
+                                <h3 className="text-md font-semibold text-gray-800">Productos Comprados</h3>
+                            </div>
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                {itemsLoading ? (
+                                    <div className="flex justify-center items-center py-10">
+                                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                    </div>
+                                ) : getBoughtItems().length === 0 ? (
+                                    <div className="text-center py-10">
+                                        <p className="text-gray-500">No hay productos comprados.</p>
+                                    </div>
+                                ) : (<div className="divide-y divide-gray-200 h-[300px] overflow-y-auto">
+                                    {getBoughtItems().map((item, index) => renderProduct(item, index))}
+                                </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                     {/* Footer */}
                     <div className="border-t border-gray-200 mt-6 pt-4">
                         <div className="flex justify-end">

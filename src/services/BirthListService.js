@@ -122,7 +122,8 @@ export const deleteBirthList = async (id) => {
  */
 export const fetchBirthListItems = async (id) => {
     try {
-        const response = await fetch(`/api/birthlists/${id}/items`);
+        // Add populate=product to ensure product data is included
+        const response = await fetch(`/api/birthlists/${id}/items?populate=product`);
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
@@ -133,9 +134,15 @@ export const fetchBirthListItems = async (id) => {
         }
 
         const data = await response.json();
+        // Add safety check for missing product data
+        const validItems = (data.data || []).filter(item => item && item.product);
+        if (validItems.length !== (data.data || []).length) {
+            console.warn(`Some items had missing product data in birth list ${id}`);
+        }
+
         return {
             success: true,
-            data: data.data || []
+            data: validItems
         };
     } catch (error) {
         console.error(`Error fetching items for birth list ${id}:`, error);
@@ -187,12 +194,19 @@ export const addProductToBirthList = async (listId, productId, quantity = 1, pri
  */
 export const updateBirthListItems = async (listId, items) => {
     try {
+        // Validate and clean the items data before sending
+        const cleanedItems = items.map(item => ({
+            _id: item._id,
+            product: item.product._id,
+            state: item.state
+        }));
+
         const response = await fetch(`/api/birthlists/${listId}/items`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ items }),
+            body: JSON.stringify({ items: cleanedItems }),
         });
 
         if (!response.ok) {
@@ -257,4 +271,4 @@ export const formatBirthList = (list) => {
         isPublic: list.isPublic,
         rawData: list // Include the raw data for access to all fields
     };
-}; 
+};

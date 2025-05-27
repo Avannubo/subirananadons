@@ -116,65 +116,10 @@ export default function ListEditModal({
                         </button>
                     </div>
                     <form onSubmit={handleUpdateList} className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <div className='flex flex-row space-x-4'>
-                                    {/* Image Upload */}
-                                    <div className="mb-6 flex-1">
-                                        <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Imagen de portada
-                                        </label>
-                                        <div
-                                            className={`mt-1 flex flex-col items-center relative ${isDragging ? 'border-[#00B0C8] bg-blue-50' : 'border-gray-300'} border-2 border-dashed rounded-lg p-4 transition-colors`}
-                                            onDragOver={handleDragOver}
-                                            onDragLeave={handleDragLeave}
-                                            onDrop={handleDrop}
-                                        >
-                                            <div className="relative w-full h-56 mb-3 rounded-md overflow-hidden bg-gray-50">
-                                                <Image
-                                                    src={imagePreview}
-                                                    alt="Imagen de portada"
-                                                    fill
-                                                    className="object-contain"
-                                                />
-                                                {imagePreview !== '/assets/images/Screenshot_4.png' && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleRemoveImage}
-                                                        className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
-                                                    >
-                                                        <FiTrash2 size={16} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                            <input
-                                                type="file"
-                                                id="image"
-                                                ref={fileInputRef}
-                                                onChange={handleImageUpload}
-                                                accept="image/*"
-                                                className="hidden"
-                                            />
-                                            <div className="flex flex-col items-center">
-                                                <FiImage className="text-gray-400 mb-2" size={24} />
-                                                <p className="text-sm text-gray-500 mb-2 text-center">
-                                                    Arrastra una imagen aquí o haz clic para seleccionar
-                                                </p>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
-                                                >
-                                                    <FiUpload className="mr-2 -ml-1 h-5 w-5 text-gray-400" />
-                                                    Seleccionar imagen
-                                                </button>
-                                                <p className="mt-1 text-xs text-gray-400">
-                                                    La imagen se mostrará como portada de la lista. Max: 5MB.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className='flex-1'>
+                        <div className="flex flex-row space-x-6">
+                            <div className='flex flex-col space-y-6 '>
+                                <div className='flex flex-row space-x-4'> 
+                                    <div className='flex-1 '>
                                         <section className="border-b border-gray-200 pb-4 mb-4">
                                             <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
                                                 <FiEdit2 className="mr-2 text-[#00B0C8]" /> Información Básica
@@ -270,7 +215,7 @@ export default function ListEditModal({
                                 </div>
                             </div>
                             {/* Products Manager */}
-                            <div className="border-l border-gray-200 pl-6">
+                            <div className="flex-1 border-l border-gray-200 pl-6">
                                 <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
                                     <FiImage className="mr-2 text-[#00B0C8]" /> Productos en la Lista
                                 </h3>

@@ -33,47 +33,43 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
         };
         loadProducts();
     }, [currentPage, search]);
-    const handleSelectProduct = (product) => {
-        const existingIndex = selectedItems.findIndex(item => item.product._id === product._id);
-        let updatedItems;
+      const handleSelectProduct = (product) => {
+        // Check if product is already in the list
+        const isProductInList = selectedItems.some(item => item.product._id === product._id);
+        
+        // if (isProductInList) {
+        //     toast.error(`${product.name} ya está en la lista`);
+        //     return;
+        // }
 
-        if (existingIndex >= 0) {
-            updatedItems = [...selectedItems];
-            updatedItems[existingIndex].quantity += 1;
-            setSelectedItems(updatedItems);
-        } else {
-            updatedItems = [
-                ...selectedItems,
-                {
-                    product,
-                    quantity: 1,
-                    reserved: 0,
-                    priority: 2
-                }
-            ];
-            setSelectedItems(updatedItems);
-        }
+        const newItem = {
+            _id: crypto.randomUUID(), // Add a unique ID for each selected item
+            product,
+            quantity: 1,
+            state: 0 // default state: pending
+        };
 
-        // Call onProductSelect only with the updated items to prevent unnecessary rerenders
+        const updatedItems = [...selectedItems, newItem];
+        setSelectedItems(updatedItems);
+
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
 
         toast.success(`${product.name} añadido a la lista`);
     };
-    const handleRemoveProduct = (productId) => {
-        const updatedItems = selectedItems.filter(item => item.product._id !== productId);
+        const handleRemoveProduct = (itemId) => {
+        const updatedItems = selectedItems.filter(item => item._id !== itemId);
         setSelectedItems(updatedItems);
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
         toast.success('Producto eliminado de la lista');
     };
-    const handleQuantityChange = (productId, newQuantity) => {
-        if (newQuantity < 1) return;
+    const handleQuantityChange = (productId) => {
         const updatedItems = selectedItems.map(item => {
             if (item.product._id === productId) {
-                return { ...item, quantity: newQuantity };
+                return { ...item, quantity: 1 }; // force quantity to 1
             }
             return item;
         });
@@ -82,14 +78,30 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             onProductSelect(updatedItems);
         }
     };
+    
+    // const handleQuantityChange = (productId, newQuantity) => {
+    //     if (newQuantity < 1) return;
+    //     const updatedItems = selectedItems.map(item => {
+    //         if (item.product._id === productId) {
+    //             return { ...item, quantity: newQuantity };
+    //         }
+    //         return item;
+    //     });
+    //     setSelectedItems(updatedItems);
+    //     if (onProductSelect) {
+    //         onProductSelect(updatedItems);
+    //     }
+    // };
     return (
         <div>
             {selectedItems.length > 0 && (
-                <div className="mb-6   bg-gray-50 rounded-lg h-scree">
+                <div className="mb-6   bg-gray-50 rounded-lg min-w-[600px] p-4 shadow-md">
                     <h3 className="font-medium text-gray-900 mb-2">Productos seleccionados ({selectedItems.length})</h3>
                     <div className="space-y-2 max-h-[100px] overflow-y-auto">
-                        {selectedItems.map((item) => (
-                            <div key={item.product._id} className="flex items-center justify-between">
+                        {selectedItems
+                            .filter(item => item.state === 0)
+                            .map((item, index) => (
+                            <div key={item._id} className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden mr-3">
                                         {item.product.image && (
@@ -105,7 +117,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                     <span className="text-sm font-medium">{item.product.name}</span>
                                 </div>
                                 <div className="flex items-center space-x-3">
-                                    <div className="flex items-center border border-gray-300  rounded-md">
+                                    {/* <div className="flex items-center border border-gray-300  rounded-md">
                                         <button
                                             onClick={(e) => {
                                                 e.preventDefault();
@@ -127,12 +139,11 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                         >
                                             +
                                         </button>
-                                    </div>
-                                    <button
+                                    </div> */}                                    <button
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
-                                            handleRemoveProduct(item.product._id);
+                                            handleRemoveProduct(item._id);
                                         }}
                                         className="text-red-500 hover:text-red-700"
                                     >

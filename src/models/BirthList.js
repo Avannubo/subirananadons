@@ -22,26 +22,25 @@ const birthListSchema = new mongoose.Schema({
         default: '/assets/images/default-birthlist.jpg'
     },
     items: [{
+        _id: {
+            type: mongoose.Schema.Types.ObjectId,
+            auto: true // ensures a unique ID is generated
+        },
         product: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product',
             required: true
         },
-        quantity: {
-            type: Number,
-            required: true,
-            min: 1
-        },
-        reserved: {
+        // quantity: {
+        //     type: Number,
+        //     required: true,
+        //     min: 1
+        // },
+        state: {
             type: Number,
             default: 0,
-            min: 0
-        },
-        priority: {
-            type: Number,
-            min: 1,
-            max: 3,
-            default: 2
+            min: 0,
+            max: 2
         }
     }],
     isPublic: {

@@ -209,11 +209,11 @@ export async function PUT(request, { params }) {
 
         // Replace all items with the new list
         birthList.items = items.map(item => ({
-            product: item.product,
+            product: item._id,
             quantity: parseInt(item.quantity),
-            reserved: parseInt(item.reserved || 0),
-            priority: parseInt(item.priority || 2)
+            state: parseInt(item.state)
         }));
+        
 
         // Save the updated birth list
         await birthList.save();
