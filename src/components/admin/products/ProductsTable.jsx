@@ -527,7 +527,10 @@ export default function ProductsTable(props) {
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Categoría
-                                </th>
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Marca
+                                    </th>
                                 {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Precio (imp. excl.)
                                 </th> */}
@@ -568,6 +571,8 @@ export default function ProductsTable(props) {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.category}>
                                             {product.category}
+                                        </td>                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.brand}>
+                                            {product.brand}
                                         </td>
                                         {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {product.price_excl_tax.toFixed(2)} €
