@@ -13,13 +13,16 @@ export default function ListViewModal({
     openEditModal,
     openStatusModal
 }) {
-    const [items, setItems] = useState([]);    useEffect(() => {
-        // Always update items when listItems changes, even if empty
-        // This ensures we get fresh data when modal reopens
-        if (Array.isArray(listItems)) {
+    const [items, setItems] = useState([]); useEffect(() => {
+        // Reset items when modal opens/closes
+        if (!showModal) {
+            setItems([]);
+        }
+        // Update items when listItems changes and modal is open
+        else if (Array.isArray(listItems)) {
             setItems(listItems);
         }
-    }, [listItems]);
+    }, [listItems, showModal]);
     const getPendingItems = useCallback(() =>
         items.filter(item => item.state === 0), [items]
     );
@@ -65,11 +68,11 @@ export default function ListViewModal({
             ...itemToMove,
             state: newState,
             product: { ...itemToMove.product }
-        };        try {
+        }; try {
             const result = await updateBirthListItems(listId, newItems);
             if (result.success) {
-                // Update local state immediately for better UX
-                setItems(newItems);
+                // Update with the server response data to ensure consistency
+                setItems(result.data);
                 toast.success('Estado del producto actualizado correctamente');
             } else {
                 throw new Error(result.message || 'Error updating items');

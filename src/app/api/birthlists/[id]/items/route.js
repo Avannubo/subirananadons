@@ -36,7 +36,7 @@ export async function GET(request, { params }) {
         // Find the birth list
         const birthList = await BirthList.findById(id)
             .populate('items.product')
-            .select('items');
+        console.log(birthList);
 
         if (!birthList) {
             return NextResponse.json(
@@ -205,29 +205,41 @@ export async function PUT(request, { params }) {
                 { success: false, message: 'Invalid items format. Expected an array of items.' },
                 { status: 400 }
             );
-        }
-
-        // Replace all items with the new list
+        }        // Replace all items with the new list
         birthList.items = items.map(item => ({
-            product: item._id,
-            quantity: parseInt(item.quantity),
+            _id: item._id,
+            product: item.product._id,  // Use the product ID from the product object
+            quantity: parseInt(item.quantity || 1),
             state: parseInt(item.state)
         }));
-        
 
-        // Save the updated birth list
+        // Save the changes
         await birthList.save();
 
-        // Return the updated birth list with populated items
+        // Fetch the updated list with populated products
         const updatedBirthList = await BirthList.findById(id)
-            .populate('items.product')
-            .select('items');
+            .populate('items.product');
 
         return NextResponse.json({
             success: true,
-            message: 'Birth list items updated successfully',
+            message: 'Items updated successfully',
             data: updatedBirthList.items
         });
+
+
+        // // Save the updated birth list
+        // await birthList.save();
+
+        // // Return the updated birth list with populated items
+        // const updatedBirthList = await BirthList.findById(id)
+        //     .populate('items.product')
+        //     .select('items');
+
+        // return NextResponse.json({
+        //     success: true,
+        //     message: 'Birth list items updated successfully',
+        //     data: updatedBirthList.items
+        // });
     } catch (error) {
         console.error('Error updating birth list items:', error);
         return NextResponse.json(

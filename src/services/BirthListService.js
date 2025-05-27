@@ -197,7 +197,8 @@ export const updateBirthListItems = async (listId, items) => {
         // Validate and clean the items data before sending
         const cleanedItems = items.map(item => ({
             _id: item._id,
-            product: item.product._id,
+            product: item.product,  // Send the full product object
+            quantity: item.quantity || 1,
             state: item.state
         }));
 
