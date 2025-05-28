@@ -118,20 +118,40 @@ export async function PUT(request, { params }) {
         const updates = await request.json();
 
         // Don't allow changing the user
-        delete updates.user;
+        delete updates.user; try {
+            // Validate update data
+            if (!updates || typeof updates !== 'object') {
+                return NextResponse.json(
+                    { success: false, message: 'Invalid update data' },
+                    { status: 400 }
+                );
+            }
 
-        // Update the birth list        const updatedBirthList = await BirthList.findByIdAndUpdate(
-        id,
-            { $set: updates },
-            { new: true, runValidators: true } 
-        .populate('user', 'name email')
-            .populate('items.product');
+            // Update the birth list
+            const updatedBirthList = await BirthList.findByIdAndUpdate(
+                id,
+                { $set: updates },
+                { new: true, runValidators: true }
+            ).populate('user', 'name email')
+                .populate('items.product'); if (!updatedBirthList) {
+                    return NextResponse.json(
+                        { success: false, message: 'Failed to update birth list' },
+                        { status: 500 }
+                    );
+                }
 
-        return NextResponse.json({
-            success: true,
-            message: 'Birth list updated successfully',
-            data: updatedBirthList
-        });
+            return NextResponse.json({
+                success: true,
+                message: 'Birth list updated successfully',
+                data: updatedBirthList
+            });
+        } catch (updateError) {
+            console.error('Error during birth list update:', updateError);
+            return NextResponse.json(
+                { success: false, message: 'Error updating birth list', error: updateError.message },
+                { status: 500 }
+            );
+        }
     } catch (error) {
         console.error('Error updating birth list:', error);
         return NextResponse.json(

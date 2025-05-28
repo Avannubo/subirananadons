@@ -74,20 +74,44 @@ export const createBirthList = async (birthListData) => {
  */
 export const updateBirthList = async (id, updateData) => {
     try {
+        if (!id) {
+            throw new Error('Birth list ID is required');
+        }
+
+        if (!updateData) {
+            throw new Error('Update data is required');
+        }
+
+        // Clean up the updateData to only include valid fields
+        const cleanedData = {
+            title: updateData.title,
+            babyName: updateData.babyName,
+            description: updateData.description,
+            isPublic: updateData.isPublic,
+            dueDate: updateData.dueDate,
+            status: updateData.status
+        };
+
         const response = await fetch(`/api/birthlists/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(updateData),
+            body: JSON.stringify(cleanedData),
         });
 
+        const result = await response.json();
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to update birth list');
+            console.error('Server error:', result);
+            throw new Error(result.message || 'Failed to update birth list');
         }
 
-        return await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to update birth list');
+        }
+
+        return result;
     } catch (error) {
         console.error(`Error updating birth list ${id}:`, error);
         throw error;
@@ -194,13 +218,26 @@ export const addProductToBirthList = async (listId, productId, quantity = 1, pri
  */
 export const updateBirthListItems = async (listId, items) => {
     try {
+        if (!listId) {
+            throw new Error('List ID is required');
+        }
+
+        if (!Array.isArray(items)) {
+            throw new Error('Items must be an array');
+        }
+
         // Validate and clean the items data before sending
-        const cleanedItems = items.map(item => ({
-            _id: item._id,
-            product: item.product,  // Send the full product object
-            quantity: item.quantity || 1,
-            state: item.state
-        }));
+        const cleanedItems = items.map(item => {
+            if (!item._id || !item.product) {
+                throw new Error('Invalid item data: missing _id or product');
+            }
+            return {
+                _id: item._id,
+                product: item.product,
+                quantity: item.quantity || 1,
+                state: typeof item.state === 'number' ? item.state : 0
+            };
+        });
 
         const response = await fetch(`/api/birthlists/${listId}/items`, {
             method: 'PUT',
@@ -212,10 +249,15 @@ export const updateBirthListItems = async (listId, items) => {
 
         if (!response.ok) {
             const errorData = await response.json();
+            console.error('Server error:', errorData);
             throw new Error(errorData.message || 'Failed to update birth list items');
         }
 
-        return await response.json();
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to update items');
+        }
+        return result;
     } catch (error) {
         console.error(`Error updating items in birth list ${listId}:`, error);
         throw error;

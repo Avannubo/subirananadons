@@ -195,9 +195,7 @@ export async function PUT(request, { params }) {
                 { success: false, message: 'Forbidden: You do not have permission to update this birth list' },
                 { status: 403 }
             );
-        }
-
-        // Parse request body - expecting an array of items
+        }        // Parse request body - expecting an array of items
         const { items } = await request.json();
 
         if (!Array.isArray(items)) {
@@ -205,26 +203,40 @@ export async function PUT(request, { params }) {
                 { success: false, message: 'Invalid items format. Expected an array of items.' },
                 { status: 400 }
             );
-        }        // Replace all items with the new list
-        birthList.items = items.map(item => ({
-            _id: item._id,
-            product: item.product._id,  // Use the product ID from the product object
-            quantity: parseInt(item.quantity || 1),
-            state: parseInt(item.state)
-        }));
+        }
 
-        // Save the changes
-        await birthList.save();
+        try {
+            // Replace all items with the new list
+            birthList.items = items.map(item => ({
+                _id: item._id,
+                product: item.product?._id || item.product, // Handle both full product object and ID
+                quantity: parseInt(item.quantity || 1),
+                state: parseInt(item.state || 0)
+            }));
 
-        // Fetch the updated list with populated products
-        const updatedBirthList = await BirthList.findById(id)
-            .populate('items.product');
+            // Save the changes
+            await birthList.save();
 
-        return NextResponse.json({
-            success: true,
-            message: 'Items updated successfully',
-            data: updatedBirthList.items
-        });
+            // Fetch the updated list with populated products
+            const updatedBirthList = await BirthList.findById(id)
+                .populate('items.product');
+
+            if (!updatedBirthList) {
+                throw new Error('Failed to fetch updated birth list');
+            }
+
+            return NextResponse.json({
+                success: true,
+                message: 'Items updated successfully',
+                data: updatedBirthList.items
+            });
+        } catch (error) {
+            console.error('Error updating items:', error);
+            return NextResponse.json(
+                { success: false, message: 'Error updating items: ' + error.message },
+                { status: 500 }
+            );
+        }
 
 
         // // Save the updated birth list

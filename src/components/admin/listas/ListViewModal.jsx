@@ -69,18 +69,27 @@ export default function ListViewModal({
             state: newState,
             product: { ...itemToMove.product }
         }; try {
+            // Validate data before sending
+            if (!listId || !Array.isArray(newItems) || newItems.length === 0) {
+                throw new Error('Invalid data for update');
+            }
+
+            // Optimistically update UI
+            setItems(newItems);
+
             const result = await updateBirthListItems(listId, newItems);
-            if (result.success) {
-                // Update with the server response data to ensure consistency
+
+            if (result.success && Array.isArray(result.data)) {
+                // Confirm update with server data
                 setItems(result.data);
                 toast.success('Estado del producto actualizado correctamente');
             } else {
-                throw new Error(result.message || 'Error updating items');
+                throw new Error(result.message || 'Error al actualizar los productos');
             }
         } catch (error) {
             console.error('Error updating item state:', error);
-            toast.error('Error al actualizar el estado del producto');
-            // If there's an error, revert to original items
+            toast.error(error.message || 'Error al actualizar el estado del producto');
+            // Revert to original items on error
             setItems(items);
         }
     };
