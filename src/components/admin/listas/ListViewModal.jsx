@@ -14,10 +14,26 @@ export default function ListViewModal({
     openEditModal,
     openStatusModal
 }) {
-    const [loading, setLoading] = useState(false); const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [items, setItems] = useState([]);
     const [showDataModal, setShowDataModal] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [direction, setDirection] = useState(null);
+    const [userData, setUserData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        message: ''
+    });
+
+    const handleUserDataChange = (e) => {
+        const { name, value } = e.target;
+        setUserData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
     useEffect(() => {
         if (!showModal) {
             setItems([]);
@@ -553,8 +569,8 @@ export default function ListViewModal({
                             onClick={() => confirmStateChange()}
                             disabled={loading}
                             className={`px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white ${direction === 'reserve'
-                                    ? 'bg-blue-600 hover:bg-blue-700'
-                                    : 'bg-green-600 hover:bg-green-700'
+                                ? 'bg-blue-600 hover:bg-blue-700'
+                                : 'bg-green-600 hover:bg-green-700'
                                 } disabled:opacity-50`}
                         >
                             {direction === 'reserve' ? "Reservar" : "Comprar"}
