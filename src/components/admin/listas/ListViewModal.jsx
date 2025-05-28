@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState, useCallback, useEffect } from 'react';
 import { updateBirthListItems, fetchBirthListItems } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
+
 export default function ListViewModal({
     showModal,
     setShowModal,
@@ -13,12 +14,14 @@ export default function ListViewModal({
     openEditModal,
     openStatusModal
 }) {
-    const [items, setItems] = useState([]); useEffect(() => {
-        // Reset items when modal opens/closes
+    const [loading, setLoading] = useState(false); const [items, setItems] = useState([]);
+    const [showDataModal, setShowDataModal] = useState(false);
+    const [currentItem, setCurrentItem] = useState(null);
+    const [direction, setDirection] = useState(null);
+    useEffect(() => {
         if (!showModal) {
             setItems([]);
         }
-        // Update items when listItems changes and modal is open
         else if (Array.isArray(listItems)) {
             setItems(listItems);
         }
@@ -31,56 +34,51 @@ export default function ListViewModal({
     );
     const getBoughtItems = useCallback(() =>
         items.filter(item => item.state === 2), [items]
-    ); const moveItem = async (itemId, direction) => {
+    ); const confirmStateChange = async () => {
+        if (!currentItem) return;
         const listId = selectedList.rawData?._id || selectedList._id;
         if (!listId) {
             toast.error('Error: ID de lista no encontrado');
             return;
         }
-
-        // Find item by its unique _id
-        const itemToMove = items.find(item => item._id === itemId);
+        const itemToMove = items.find(item => item._id === currentItem._id);
         if (!itemToMove) {
             toast.error('Error: Item no encontrado');
             return;
         }
-
-        // Verify product data exists
-        if (!itemToMove.product?._id) {
-            toast.error('Error: Datos del producto no disponibles');
-            return;
-        }
-
         const newItems = [...items];
-        const itemIndex = newItems.findIndex(item => item._id === itemId);
+        const itemIndex = newItems.findIndex(item => item._id === currentItem._id);
         let newState = itemToMove.state;
 
-        if (direction === 'right') {
-            if (newState < 2) newState++;
-            else return toast.error('Ya está en el estado final');
-        } else if (direction === 'left') {
-            if (newState > 0) newState--;
-            else return toast.error('Ya está en el estado inicial');
+        // Handle different actions
+        switch (direction) {
+            case 'left':
+                if (newState > 0) newState--;
+                break;
+            case 'reserve':
+                newState = 1;
+                break;
+            case 'buy':
+                newState = 2;
+                break;
+            default:
+                return;
         }
 
-        // Deep clone the item to preserve all data
+        // Validate state change
+        if (newState === itemToMove.state) {
+            return toast.error('El producto ya está en este estado');
+        }
         newItems[itemIndex] = {
             ...itemToMove,
             state: newState,
-            product: { ...itemToMove.product }
-        }; try {
-            // Validate data before sending
-            if (!listId || !Array.isArray(newItems) || newItems.length === 0) {
-                throw new Error('Invalid data for update');
-            }
-
-            // Optimistically update UI
+            product: { ...itemToMove.product },
+            userData: newState > 0 ? userData : null // Save user data only when reserving or buying
+        };
+        try {
             setItems(newItems);
-
             const result = await updateBirthListItems(listId, newItems);
-
             if (result.success && Array.isArray(result.data)) {
-                // Confirm update with server data
                 setItems(result.data);
                 toast.success('Estado del producto actualizado correctamente');
             } else {
@@ -89,8 +87,46 @@ export default function ListViewModal({
         } catch (error) {
             console.error('Error updating item state:', error);
             toast.error(error.message || 'Error al actualizar el estado del producto');
-            // Revert to original items on error
             setItems(items);
+        } finally {
+            setShowDataModal(false);
+            setUserData({
+                name: '',
+                email: '',
+                phone: '',
+                message: ''
+            });
+        }
+    };
+    const moveItem = async (item, dir) => {
+        setCurrentItem(item);
+        setDirection(dir);
+        // If moving left (undoing reservation/purchase), don't ask for data
+        if (dir === 'left') {
+            const listId = selectedList.rawData?._id || selectedList._id;
+            const newItems = [...items];
+            const itemIndex = newItems.findIndex(i => i._id === item._id);
+            newItems[itemIndex] = {
+                ...item,
+                state: item.state - 1,
+                product: { ...item.product },
+                userData: null
+            };
+            try {
+                setItems(newItems);
+                const result = await updateBirthListItems(listId, newItems);
+                if (result.success && Array.isArray(result.data)) {
+                    setItems(result.data);
+                    toast.success('Estado del producto actualizado correctamente');
+                }
+            } catch (error) {
+                console.error('Error updating item state:', error);
+                toast.error(error.message || 'Error al actualizar el estado del producto');
+                setItems(items);
+            }
+        } else {
+            // If moving to reserved or bought state, show data modal
+            setShowDataModal(true);
         }
     };
     const canMoveLeft = (item) => item.state > 0;
@@ -102,8 +138,8 @@ export default function ListViewModal({
             case 2: return "Comprado";
             default: return "Desconocido";
         }
-    }; const renderProduct = (item, index) => {
-        // Safety check for missing or malformed data
+    };
+    const renderProduct = (item, index) => {
         if (!item?.product?._id) {
             console.warn('Missing product data for item:', item);
             return (
@@ -116,7 +152,8 @@ export default function ListViewModal({
                     </div>
                 </div>
             );
-        } return (
+        }
+        return (
             <div key={item._id} className="p-4 bg-white border-b border-gray-200">
                 {/* last:border-b-0 */}
                 <div className="flex items-start">
@@ -130,33 +167,58 @@ export default function ListViewModal({
                                 className="object-cover w-full h-full"
                             />
                         )}
-                    </div>
-                    <div className="flex-1">
+                    </div>                    <div className="flex-1">
                         <div className='flex justify-between items-center'>
                             <h4 className="text-sm font-medium text-gray-900">{item.product.name}</h4>
-                            <div className="flex items-center space-x-1">
-                                <button
-                                    onClick={() => moveItem(item._id, 'left')}
-                                    disabled={!canMoveLeft(item)}
-                                    className={`p-1 rounded ${canMoveLeft(item)
-                                        ? 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                                        : 'text-gray-300 cursor-not-allowed'
-                                        }`}
-                                    title="Mover a la izquierda"
-                                >
-                                    <FiChevronLeft size={16} />
-                                </button>
-                                <button
-                                    onClick={() => moveItem(item._id, 'right')}
-                                    disabled={!canMoveRight(item)}
-                                    className={`p-1 rounded ${canMoveRight(item)
-                                        ? 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                                        : 'text-gray-300 cursor-not-allowed'
-                                        }`}
-                                    title="Mover a la derecha"
-                                >
-                                    <FiChevronRight size={16} />
-                                </button>
+                            <div className="flex items-center space-x-2">
+                                {canMoveLeft(item) && (
+                                    <button
+                                        onClick={() => moveItem(item, 'left')}
+                                        className="px-3 py-1 text-sm rounded-md text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors duration-200"
+                                        title="Cancelar reserva o compra"
+                                    >
+                                        Cancelar
+                                    </button>
+                                )}
+                                {item.state === 0 && (
+                                    <>
+                                        <button
+                                            onClick={() => {
+                                                setCurrentItem(item);
+                                                setDirection('reserve');
+                                                setShowDataModal(true);
+                                            }}
+                                            className="px-3 py-1 text-sm rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-colors duration-200"
+                                            title="Reservar producto"
+                                        >
+                                            Reservar
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setCurrentItem(item);
+                                                setDirection('buy');
+                                                setShowDataModal(true);
+                                            }}
+                                            className="px-3 py-1 text-sm rounded-md bg-green-50 text-green-600 hover:bg-green-100 border border-green-200 transition-colors duration-200"
+                                            title="Comprar producto"
+                                        >
+                                            Comprar
+                                        </button>
+                                    </>
+                                )}
+                                {item.state === 1 && (
+                                    <button
+                                        onClick={() => {
+                                            setCurrentItem(item);
+                                            setDirection('buy');
+                                            setShowDataModal(true);
+                                        }}
+                                        className="px-3 py-1 text-sm rounded-md bg-green-50 text-green-600 hover:bg-green-100 border border-green-200 transition-colors duration-200"
+                                        title="Comprar producto"
+                                    >
+                                        Comprar
+                                    </button>
+                                )}
                             </div>
                         </div>
                         <div className='grid grid-cols-3 gap-2 mt-1'>
@@ -194,7 +256,7 @@ export default function ListViewModal({
         );
     };
     if (!showModal || !selectedList) return null;
-    return (
+    return (<>
         <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="p-6">
@@ -404,5 +466,104 @@ export default function ListViewModal({
                 </div>
             </div>
         </div>
+        {/* Data Collection Modal */}
+        {showDataModal && (
+            <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md">                    <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 className="text-lg font-medium text-gray-900">
+                                {direction === 'reserve' ? "Reservar Producto" : "Comprar Producto"}
+                            </h3>
+                            <p className="text-sm text-gray-500 mt-1">
+                                {currentItem?.product?.name}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setShowDataModal(false)}
+                            className="text-gray-500 hover:text-gray-700"
+                        >
+                            <FiX size={24} />
+                        </button>
+                    </div>
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                Nombre Completo*
+                            </label>
+                            <input
+                                type="text"
+                                name="name"
+                                id="name"
+                                required
+                                value={userData.name}
+                                onChange={handleUserDataChange}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                Email*
+                            </label>
+                            <input
+                                type="email"
+                                name="email"
+                                id="email"
+                                required
+                                value={userData.email}
+                                onChange={handleUserDataChange}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                                Teléfono
+                            </label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                id="phone"
+                                value={userData.phone}
+                                onChange={handleUserDataChange}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                                Mensaje (opcional)
+                            </label>
+                            <textarea
+                                name="message"
+                                id="message"
+                                rows={3}
+                                value={userData.message}
+                                onChange={handleUserDataChange}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                            />
+                        </div>
+                    </div>                    <div className="mt-6 flex justify-end space-x-3">
+                        <button
+                            type="button"
+                            onClick={() => setShowDataModal(false)}
+                            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                            Cancelar
+                        </button>                        <button
+                            type="button"
+                            onClick={() => confirmStateChange()}
+                            disabled={loading}
+                            className={`px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white ${direction === 'reserve'
+                                    ? 'bg-blue-600 hover:bg-blue-700'
+                                    : 'bg-green-600 hover:bg-green-700'
+                                } disabled:opacity-50`}
+                        >
+                            {direction === 'reserve' ? "Reservar" : "Comprar"}
+                        </button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        )}
+    </>
     );
 }
