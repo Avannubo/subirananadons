@@ -3,8 +3,8 @@ import { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogTitle } from '@headlessui/react';
 import { FiX, FiEdit2, FiUpload, FiImage, FiTrash2 } from 'react-icons/fi';
 import ListProductsManager from './ListProductsManager';
-import Image from 'next/image';
-import ProductSelection from './ProductSelection';
+import AddProductToList from './AddProductToList';
+import { toast } from 'react-hot-toast';
 
 export default function ListEditModal({
     showModal,
@@ -18,15 +18,9 @@ export default function ListEditModal({
 }) {
     const fileInputRef = useRef(null);
     const [imagePreview, setImagePreview] = useState('/assets/images/Screenshot_4.png');
-    const [isDragging, setIsDragging] = useState(false);
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        babyName: '',
-        dueDate: '',
-        isPublic: true,
-        items: []
-    });
+    const [isDragging, setIsDragging] = useState(false); const [selectedProducts, setSelectedProducts] = useState([]);
+    const [listProductsKey, setListProductsKey] = useState(0); // Force re-render of ListProductsManager
+    const [resetSelection, setResetSelection] = useState(false);
 
     // Update image preview when the modal is opened with a new list
     useEffect(() => {
@@ -35,9 +29,76 @@ export default function ListEditModal({
         } else {
             setImagePreview('/assets/images/Screenshot_4.png');
         }
-    }, [selectedList]);
+
+        // Reset selected products when modal opens/closes or list changes
+        setSelectedProducts([]);
+    }, [selectedList, showModal]);
 
     if (!showModal || !selectedList) return null;
+
+    // Handle product selection from AddProductToList component
+    const handleProductSelect = (products) => {
+        setSelectedProducts(products);
+    };    // Handle adding selected products to the list
+    const handleAddProductsToList = async () => {
+        if (selectedProducts.length === 0) {
+            toast.error('No hay productos seleccionados para agregar');
+            return;
+        }
+
+        try {
+            // Get current list items
+            const currentListResponse = await fetch(`/api/birthlists/${selectedList.id}/items`);
+            const currentListData = await currentListResponse.json();
+
+            if (!currentListData.success) {
+                throw new Error('Error al obtener los productos actuales');
+            }            // Combine current items with new ones
+            const currentItems = currentListData.data || [];
+
+            // Keep existing items and add new ones without _id field (let MongoDB generate it)
+            const newItems = [
+                ...currentItems.map(item => ({
+                    _id: item._id,
+                    product: item.product._id || item.product,
+                    quantity: item.quantity || 1,
+                    state: item.state || 0,
+                    reserved: item.reserved || 0,
+                    priority: item.priority || 2
+                })),
+                ...selectedProducts.map(item => ({
+                    product: item.product._id || item.product,
+                    quantity: item.quantity || 1,
+                    state: item.state || 0,
+                    reserved: 0,
+                    priority: item.priority || 2
+                }))
+            ];
+
+            // Update the list with all items
+            const response = await fetch(`/api/birthlists/${selectedList.id}/items`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    items: newItems
+                })
+            });
+
+            const result = await response.json(); if (result.success) {
+                toast.success(`${selectedProducts.length} producto(s) agregado(s) a la lista`);
+                setSelectedProducts([]); // Clear selected products
+                setResetSelection(prev => !prev); // Toggle to trigger useEffect in AddProductToList
+                setListProductsKey(prev => prev + 1); // Force refresh of ListProductsManager
+            } else {
+                throw new Error(result.message || 'Error al agregar productos');
+            }
+        } catch (error) {
+            console.error('Error adding products to list:', error);
+            toast.error('Error al agregar productos a la lista');
+        }
+    };
 
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
@@ -153,12 +214,6 @@ export default function ListEditModal({
 
                             {/* Basic Information Section */}
                             <div className="mb-4">
-                                {/* <div className="mb-6">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                        <FiEdit2 className="mr-2 text-[#00B0C8]" />
-                                        Información Básica
-                                    </h3>
-                                </div> */}
                                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6 '>
                                     {/* Form Fields Grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6  ">
@@ -229,29 +284,6 @@ export default function ListEditModal({
                                         />
                                     </div>
                                 </div>
-
-
-                                {/* Privacy Settings */}
-                                {/* <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <div className="flex items-start space-x-3">
-                                        <input
-                                            type="checkbox"
-                                            id="isPublic"
-                                            name="isPublic"
-                                            checked={editForm.isPublic}
-                                            onChange={handleEditChange}
-                                            className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 rounded mt-1"
-                                        />
-                                        <div>
-                                            <label htmlFor="isPublic" className="block text-sm font-medium text-gray-700">
-                                                Lista Pública
-                                            </label>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Marca esta opción si deseas que la lista sea visible para cualquier persona que tenga el enlace. Desmárcala para que sea privada.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div> */}
                             </div>
 
                             {/* Products Section */}
@@ -264,29 +296,41 @@ export default function ListEditModal({
                                 </div>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                    {/* Current Products */}                                    <div className="space-y-4">
+                                    {/* Current Products */}
+                                    <div className="space-y-4">
                                         <h4 className="text-md font-medium text-gray-700 border-b border-gray-200 pb-2">
                                             Productos Actuales
                                         </h4>
                                         <div className="bg-gray-50 p-4 rounded-lg min-h-[300px]">
                                             <ListProductsManager
+                                                key={listProductsKey} // Force re-render when products are added
                                                 listId={selectedList.id}
                                                 onUpdate={null}
-                                                // ref={listManagerRef}
                                             />
                                         </div>
                                     </div>
 
                                     {/* Add New Products */}
                                     <div className="space-y-4">
-                                        <h4 className="text-md font-medium text-gray-700 border-b border-gray-200 pb-2">
-                                            Agregar Productos
-                                        </h4>
-                                        <div className="bg-gray-50 p-4 rounded-lg min-h-[300px]">
-                                            <ProductSelection
-                                                selectedProducts={formData.items}
-                                                // onProductSelect={handleProductSelect}
-                                            />
+                                        <div className="flex items-center justify-between border-b border-gray-200 pb-2">
+                                            <h4 className="text-md font-medium text-gray-700">
+                                                Agregar Productos
+                                            </h4>
+                                            {selectedProducts.length > 0 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleAddProductsToList}
+                                                    className="px-3 py-1 bg-[#00B0C8] text-white text-sm rounded-md hover:bg-[#008da0] transition-colors"
+                                                >
+                                                    Agregar ({selectedProducts.length})
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="bg-gray-50 p-4 rounded-lg min-h-[300px]">                                            <AddProductToList
+                                            selectedProducts={selectedProducts}
+                                            onProductSelect={handleProductSelect}
+                                            resetSelection={resetSelection}
+                                        />
                                         </div>
                                     </div>
                                 </div>

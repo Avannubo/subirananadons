@@ -31,17 +31,74 @@ const birthListSchema = new mongoose.Schema({
             ref: 'Product',
             required: true
         },
-        // quantity: {
-        //     type: Number,
-        //     required: true,
-        //     min: 1
-        // },
+        quantity: {
+            type: Number,
+            required: true,
+            min: 1,
+            default: 1
+        },
         state: {
             type: Number,
             default: 0,
             min: 0,
-            max: 2
-        }
+            max: 2,
+            validate: {
+                validator: Number.isInteger,
+                message: 'State must be an integer'
+            }
+        },
+        reserved: {
+            type: Number,
+            default: 0,
+            min: 0,
+            validate: {
+                validator: function (v) {
+                    return v <= this.quantity;
+                },
+                message: 'Reserved quantity cannot exceed total quantity'
+            }
+        },
+        priority: {
+            type: Number,
+            default: 2,
+            min: 1,
+            max: 3,
+            validate: {
+                validator: Number.isInteger,
+                message: 'Priority must be an integer between 1 and 3'
+            }
+        },
+        purchases: [{
+            buyerName: {
+                type: String,
+                required: true
+            },
+            buyerEmail: {
+                type: String,
+                required: true
+            },
+            buyerPhone: String,
+            userId: mongoose.Schema.Types.ObjectId,
+            quantity: {
+                type: Number,
+                required: true,
+                min: 1
+            },
+            paymentMethod: {
+                type: String,
+                enum: ['store', 'online'],
+                default: 'store'
+            },
+            status: {
+                type: String,
+                enum: ['pending', 'completed', 'cancelled'],
+                default: 'pending'
+            },
+            purchaseDate: {
+                type: Date,
+                default: Date.now
+            }
+        }]
     }],
     isPublic: {
         type: Boolean,

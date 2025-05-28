@@ -103,7 +103,7 @@ export async function POST(request, { params }) {
         }
 
         // Parse request body
-        const { product, quantity = 1, priority = 2 } = await request.json();
+        const { product, quantity = 1, priority = 2, state = 0 } = await request.json();
 
         if (!product || !isValidObjectId(product)) {
             return NextResponse.json(
@@ -119,13 +119,15 @@ export async function POST(request, { params }) {
 
         if (existingItemIndex !== -1) {
             // Update quantity if product already exists
-            birthList.items[existingItemIndex].quantity += parseInt(quantity);
+            birthList.items[existingItemIndex].quantity = parseInt(quantity);
             birthList.items[existingItemIndex].priority = parseInt(priority);
+            birthList.items[existingItemIndex].state = parseInt(state);
         } else {
             // Add new product to the list
             birthList.items.push({
                 product,
                 quantity: parseInt(quantity),
+                state: parseInt(state),
                 reserved: 0,
                 priority: parseInt(priority)
             });
@@ -195,7 +197,9 @@ export async function PUT(request, { params }) {
                 { success: false, message: 'Forbidden: You do not have permission to update this birth list' },
                 { status: 403 }
             );
-        }        // Parse request body - expecting an array of items
+        }
+
+        // Parse request body - expecting an array of items
         const { items } = await request.json();
 
         if (!Array.isArray(items)) {
@@ -205,14 +209,36 @@ export async function PUT(request, { params }) {
             );
         }
 
-        try {
-            // Replace all items with the new list
-            birthList.items = items.map(item => ({
-                _id: item._id,
-                product: item.product?._id || item.product, // Handle both full product object and ID
-                quantity: parseInt(item.quantity || 1),
-                state: parseInt(item.state || 0)
-            }));
+        try {            // Replace all items with the new list
+            birthList.items = items.map(item => {
+                // For existing items, keep their _id and existing data
+                if (item._id) {
+                    const existingItem = birthList.items.find(i =>
+                        i._id.toString() === item._id.toString()
+                    );
+                    if (existingItem) {
+                        return {
+                            _id: existingItem._id,
+                            product: item.product?._id || item.product,
+                            quantity: parseInt(item.quantity || existingItem.quantity || 1),
+                            state: parseInt(item.state ?? existingItem.state ?? 0),
+                            reserved: parseInt(existingItem.reserved || 0),
+                            priority: parseInt(item.priority || existingItem.priority || 2),
+                            purchases: existingItem.purchases || []
+                        };
+                    }
+                }
+
+                // For new items, let MongoDB generate the _id
+                return {
+                    product: item.product?._id || item.product,
+                    quantity: parseInt(item.quantity || 1),
+                    state: parseInt(item.state || 0),
+                    reserved: 0,
+                    priority: parseInt(item.priority || 2),
+                    purchases: []
+                };
+            });
 
             // Save the changes
             await birthList.save();
@@ -237,21 +263,6 @@ export async function PUT(request, { params }) {
                 { status: 500 }
             );
         }
-
-
-        // // Save the updated birth list
-        // await birthList.save();
-
-        // // Return the updated birth list with populated items
-        // const updatedBirthList = await BirthList.findById(id)
-        //     .populate('items.product')
-        //     .select('items');
-
-        // return NextResponse.json({
-        //     success: true,
-        //     message: 'Birth list items updated successfully',
-        //     data: updatedBirthList.items
-        // });
     } catch (error) {
         console.error('Error updating birth list items:', error);
         return NextResponse.json(
@@ -348,4 +359,4 @@ export async function DELETE(request, { params }) {
             { status: 500 }
         );
     }
-} 
+}
