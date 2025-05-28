@@ -34,7 +34,7 @@ export function Providers({ children }) {
                     </StatsProvider>
                 </CartProvider>
             </UserProvider>
-            <Toaster position="bottom-left" />
+            <Toaster position="bottom-right" />
         </SessionProvider>
     )
 } 

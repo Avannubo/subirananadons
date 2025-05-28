@@ -158,7 +158,6 @@ export async function POST(request, { params }) {
 // PUT: Update multiple items in the birth list at once
 export async function PUT(request, { params }) {
     try {
-        // Ensure params is properly awaited
         const resolvedParams = await Promise.resolve(params);
         const { id } = resolvedParams;
 
@@ -209,7 +208,8 @@ export async function PUT(request, { params }) {
             );
         }
 
-        try {            // Replace all items with the new list
+        try {
+            // Replace all items with the new list
             birthList.items = items.map(item => {
                 // For existing items, keep their _id and existing data
                 if (item._id) {
@@ -222,9 +222,8 @@ export async function PUT(request, { params }) {
                             product: item.product?._id || item.product,
                             quantity: parseInt(item.quantity || existingItem.quantity || 1),
                             state: parseInt(item.state ?? existingItem.state ?? 0),
-                            reserved: parseInt(existingItem.reserved || 0),
-                            priority: parseInt(item.priority || existingItem.priority || 2),
-                            purchases: existingItem.purchases || []
+                            userData: item.userData || null,
+                            priority: parseInt(item.priority || existingItem.priority || 2)
                         };
                     }
                 }
@@ -234,9 +233,8 @@ export async function PUT(request, { params }) {
                     product: item.product?._id || item.product,
                     quantity: parseInt(item.quantity || 1),
                     state: parseInt(item.state || 0),
-                    reserved: 0,
-                    priority: parseInt(item.priority || 2),
-                    purchases: []
+                    userData: item.userData || null,
+                    priority: parseInt(item.priority || 2)
                 };
             });
 

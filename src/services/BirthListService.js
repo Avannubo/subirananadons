@@ -286,6 +286,44 @@ export const removeProductFromBirthList = async (listId, itemId) => {
 };
 
 /**
+ * Update a single item's state in a birth list
+ * @param {string} listId - The birth list ID
+ * @param {string} itemId - The item ID
+ * @param {number} state - New state (0: available, 1: reserved, 2: purchased)
+ * @param {Object} userData - User data for reserving/purchasing
+ */
+export const updateBirthListItemState = async (listId, itemId, state, userData = null) => {
+    try {
+        if (!listId || !itemId) {
+            throw new Error('List ID and Item ID are required');
+        }
+
+        const response = await fetch(`/api/birthlists/${listId}/items/${itemId}/state`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ state, userData }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update item state');
+        }
+
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to update item state');
+        }
+
+        return result;
+    } catch (error) {
+        console.error(`Error updating item state in birth list ${listId}:`, error);
+        throw error;
+    }
+};
+
+/**
  * Format a birth list for display in UI
  * @param {Object} list - The raw birth list data from API
  */

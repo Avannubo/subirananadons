@@ -2,7 +2,7 @@
 import { FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Image from 'next/image';
 import { useState, useCallback, useEffect } from 'react';
-import { updateBirthListItems, fetchBirthListItems } from '@/services/BirthListService';
+import { updateBirthListItems, fetchBirthListItems, updateBirthListItemState } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
 
 export default function ListViewModal({
@@ -25,6 +25,26 @@ export default function ListViewModal({
         phone: '',
         message: ''
     });
+
+    // Reset userData when modal closes or changes item
+    useEffect(() => {
+        if (!showModal || !currentItem) {
+            setUserData({
+                name: '',
+                email: '',
+                phone: '',
+                message: ''
+            });
+        } else if (currentItem.userData) {
+            // If editing an item that already has userData, populate the form
+            setUserData({
+                name: currentItem.userData.name || '',
+                email: currentItem.userData.email || '',
+                phone: currentItem.userData.phone || '',
+                message: currentItem.userData.message || ''
+            });
+        }
+    }, [showModal, currentItem]);
 
     const handleUserDataChange = (e) => {
         const { name, value } = e.target;
@@ -50,99 +70,91 @@ export default function ListViewModal({
     );
     const getBoughtItems = useCallback(() =>
         items.filter(item => item.state === 2), [items]
-    ); const confirmStateChange = async () => {
+    );
+
+    const confirmStateChange = async () => {
         if (!currentItem) return;
         const listId = selectedList.rawData?._id || selectedList._id;
+
         if (!listId) {
             toast.error('Error: ID de lista no encontrado');
             return;
         }
-        const itemToMove = items.find(item => item._id === currentItem._id);
-        if (!itemToMove) {
-            toast.error('Error: Item no encontrado');
-            return;
-        }
-        const newItems = [...items];
-        const itemIndex = newItems.findIndex(item => item._id === currentItem._id);
-        let newState = itemToMove.state;
 
-        // Handle different actions
-        switch (direction) {
-            case 'left':
-                if (newState > 0) newState--;
-                break;
-            case 'reserve':
-                newState = 1;
-                break;
-            case 'buy':
-                newState = 2;
-                break;
-            default:
-                return;
-        }
-
-        // Validate state change
-        if (newState === itemToMove.state) {
-            return toast.error('El producto ya está en este estado');
-        }
-        newItems[itemIndex] = {
-            ...itemToMove,
-            state: newState,
-            product: { ...itemToMove.product },
-            userData: newState > 0 ? userData : null // Save user data only when reserving or buying
-        };
         try {
-            setItems(newItems);
-            const result = await updateBirthListItems(listId, newItems);
-            if (result.success && Array.isArray(result.data)) {
-                setItems(result.data);
+            // Get the new state based on direction
+            let newState;
+            switch (direction) {
+                case 'left':
+                    newState = currentItem.state - 1;
+                    break;
+                case 'reserve':
+                    newState = 1;
+                    break;
+                case 'buy':
+                    newState = 2;
+                    break;
+                default:
+                    return;
+            }
+
+            // Validate state change
+            if (newState === currentItem.state) {
+                return toast.error('El producto ya está en este estado');
+            }
+
+            // Check required fields for reserve/buy actions
+            if ((direction === 'reserve' || direction === 'buy') && (!userData.name || !userData.email)) {
+                toast.error('Por favor complete los campos obligatorios (nombre y email)');
+                return;
+            }
+
+            setLoading(true);
+
+            // Update the item's state
+            const result = await updateBirthListItemState(listId, currentItem._id, newState, userData);
+
+            if (result.success) {
+                // Update the item in the local state
+                const updatedItems = items.map(item =>
+                    item._id === currentItem._id ? result.data : item
+                );
+                setItems(updatedItems);
+
                 toast.success('Estado del producto actualizado correctamente');
-            } else {
-                throw new Error(result.message || 'Error al actualizar los productos');
+                setShowDataModal(false);
+                setUserData({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    message: ''
+                });
             }
         } catch (error) {
             console.error('Error updating item state:', error);
             toast.error(error.message || 'Error al actualizar el estado del producto');
-            setItems(items);
         } finally {
-            setShowDataModal(false);
-            setUserData({
-                name: '',
-                email: '',
-                phone: '',
-                message: ''
-            });
+            setLoading(false);
         }
-    };
-    const moveItem = async (item, dir) => {
+    }; const moveItem = (item, dir) => {
         setCurrentItem(item);
         setDirection(dir);
-        // If moving left (undoing reservation/purchase), don't ask for data
+
+        // If moving left (undoing reservation/purchase), directly update the state
         if (dir === 'left') {
-            const listId = selectedList.rawData?._id || selectedList._id;
-            const newItems = [...items];
-            const itemIndex = newItems.findIndex(i => i._id === item._id);
-            newItems[itemIndex] = {
-                ...item,
-                state: item.state - 1,
-                product: { ...item.product },
-                userData: null
-            };
-            try {
-                setItems(newItems);
-                const result = await updateBirthListItems(listId, newItems);
-                if (result.success && Array.isArray(result.data)) {
-                    setItems(result.data);
-                    toast.success('Estado del producto actualizado correctamente');
-                }
-            } catch (error) {
-                console.error('Error updating item state:', error);
-                toast.error(error.message || 'Error al actualizar el estado del producto');
-                setItems(items);
-            }
+            confirmStateChange();
         } else {
             // If moving to reserved or bought state, show data modal
             setShowDataModal(true);
+            // If the item already has user data, populate the form
+            if (item.userData) {
+                setUserData({
+                    name: item.userData.name || '',
+                    email: item.userData.email || '',
+                    phone: item.userData.phone || '',
+                    message: item.userData.message || ''
+                });
+            }
         }
     };
     const canMoveLeft = (item) => item.state > 0;
@@ -234,8 +246,7 @@ export default function ListViewModal({
                                     >
                                         Comprar
                                     </button>
-                                )}
-                            </div>
+                                )}                            </div>
                         </div>
                         <div className='grid grid-cols-3 gap-2 mt-1'>
                             <p className="text-xs text-gray-500">Ref: {item.product.reference || '-'}</p>
@@ -256,6 +267,36 @@ export default function ListViewModal({
                                 </span>
                             </p>
                         </div>
+                        {item.userData && (item.state === 1 || item.state === 2) && (
+                            <div className="mt-2 bg-gray-50 p-2 rounded-md border border-gray-200">
+                                <div className="flex items-start space-x-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-500 mt-0.5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                    </svg>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-700">{item.userData.name}</p>
+                                        <p className="text-xs text-gray-500">{item.userData.email}</p>
+                                        {item.userData.phone && (
+                                            <p className="text-xs text-gray-500">{item.userData.phone}</p>
+                                        )}
+                                        {item.userData.message && (
+                                            <p className="text-xs text-gray-600 mt-1 bg-white p-1.5 rounded border border-gray-100">
+                                                {item.userData.message}
+                                            </p>
+                                        )}
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            {new Date(item.userData.date).toLocaleDateString('es-ES', {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <div className="flex justify-between items-center mt-2">
                             {/* <div className="flex space-x-2">
                                 <div className="px-2 py-1 bg-blue-50 rounded border border-blue-100">
@@ -332,7 +373,7 @@ export default function ListViewModal({
                                         <div className="flex items-center mb-2">
                                             <span className="text-gray-400 mr-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 00-2.25-2.25v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                                 </svg>
                                             </span>
                                             <h3 className="text-sm font-medium text-gray-500">Fecha</h3>
@@ -473,7 +514,7 @@ export default function ListViewModal({
                             <button
                                 type="button"
                                 onClick={() => setShowModal(false)}
-                                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                             >
                                 Cerrar
                             </button>
@@ -483,52 +524,45 @@ export default function ListViewModal({
             </div>
         </div>
         {/* Data Collection Modal */}
-        {showDataModal && (
-            <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg shadow-xl w-full max-w-md">                    <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 className="text-lg font-medium text-gray-900">
-                                {direction === 'reserve' ? "Reservar Producto" : "Comprar Producto"}
-                            </h3>
-                            <p className="text-sm text-gray-500 mt-1">
-                                {currentItem?.product?.name}
-                            </p>
-                        </div>
+        {showDataModal && currentItem && (
+            <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg w-full max-w-md">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium">Datos del comprador</h3>
                         <button
                             onClick={() => setShowDataModal(false)}
                             className="text-gray-500 hover:text-gray-700"
                         >
-                            <FiX size={24} />
+                            <FiX className="w-5 h-5" />
                         </button>
                     </div>
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                Nombre Completo*
+                                Nombre *
                             </label>
                             <input
                                 type="text"
-                                name="name"
                                 id="name"
-                                required
+                                name="name"
                                 value={userData.name}
                                 onChange={handleUserDataChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                className="mt-1 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                required
                             />
                         </div>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                Email*
+                                Email *
                             </label>
                             <input
                                 type="email"
-                                name="email"
                                 id="email"
-                                required
+                                name="email"
                                 value={userData.email}
                                 onChange={handleUserDataChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                className="mt-1 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                required
                             />
                         </div>
                         <div>
@@ -537,46 +571,41 @@ export default function ListViewModal({
                             </label>
                             <input
                                 type="tel"
-                                name="phone"
                                 id="phone"
+                                name="phone"
                                 value={userData.phone}
                                 onChange={handleUserDataChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                className="mt-1 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
                             />
                         </div>
                         <div>
                             <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                                Mensaje (opcional)
+                                Mensaje
                             </label>
                             <textarea
-                                name="message"
                                 id="message"
-                                rows={3}
+                                name="message"
                                 value={userData.message}
                                 onChange={handleUserDataChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                            />
+                                rows={3}
+                                className="mt-1 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                            ></textarea>
                         </div>
-                    </div>                    <div className="mt-6 flex justify-end space-x-3">
+                    </div>
+                    <div className="mt-6 flex justify-end space-x-3">
                         <button
-                            type="button"
                             onClick={() => setShowDataModal(false)}
-                            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                             Cancelar
-                        </button>                        <button
-                            type="button"
-                            onClick={() => confirmStateChange()}
-                            disabled={loading}
-                            className={`px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white ${direction === 'reserve'
-                                ? 'bg-blue-600 hover:bg-blue-700'
-                                : 'bg-green-600 hover:bg-green-700'
-                                } disabled:opacity-50`}
+                        </button>
+                        <button
+                            onClick={confirmStateChange}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                            {direction === 'reserve' ? "Reservar" : "Comprar"}
+                            Guardar
                         </button>
                     </div>
-                </div>
                 </div>
             </div>
         )}
