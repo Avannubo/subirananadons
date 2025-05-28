@@ -157,7 +157,8 @@ export default function ListViewModal({
             }
         }
     };
-    const canMoveLeft = (item) => item.state > 0;
+    // Only allow cancellation of reserved items (state=1)
+    const canMoveLeft = (item) => item.state === 1;  // Only allow canceling reserved items
     const canMoveRight = (item) => item.state < 2;
     const renderStateLabel = (state) => {
         switch (state) {
