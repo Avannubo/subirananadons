@@ -266,9 +266,9 @@ export async function DELETE(request, { params }) {
     try {
         // Ensure params is properly awaited
         const resolvedParams = await Promise.resolve(params);
-        const { id } = resolvedParams;
-        const { searchParams } = new URL(request.url);
+        const { id } = resolvedParams; const { searchParams } = new URL(request.url);
         const productId = searchParams.get('productId');
+        const itemId = searchParams.get('itemId');
 
         // Check authentication
         const session = await getServerSession(authOptions);
@@ -287,9 +287,16 @@ export async function DELETE(request, { params }) {
             );
         }
 
-        if (!productId || !isValidObjectId(productId)) {
+        if (!productId && !itemId) {
             return NextResponse.json(
-                { success: false, message: 'Invalid product ID' },
+                { success: false, message: 'Either product ID or item ID is required' },
+                { status: 400 }
+            );
+        }
+
+        if ((productId && !isValidObjectId(productId)) || (itemId && !isValidObjectId(itemId))) {
+            return NextResponse.json(
+                { success: false, message: 'Invalid ID format' },
                 { status: 400 }
             );
         }
@@ -312,12 +319,14 @@ export async function DELETE(request, { params }) {
                 { success: false, message: 'Forbidden: You do not have permission to update this birth list' },
                 { status: 403 }
             );
-        }
-
-        // Remove the product from the items array
-        birthList.items = birthList.items.filter(
-            item => item.product.toString() !== productId
-        );
+        }        // Remove the item from the items array
+        birthList.items = birthList.items.filter(item => {
+            if (itemId) {
+                return item._id.toString() !== itemId;
+            }
+            // Fall back to removing by product ID if no item ID is provided
+            return item.product.toString() !== productId;
+        });
 
         // Save the updated birth list
         await birthList.save();

@@ -5,6 +5,7 @@ import { FiTrash2, FiPlus } from 'react-icons/fi';
 import Image from 'next/image';
 import { fetchBirthListItems, updateBirthListItems, removeProductFromBirthList } from '@/services/BirthListService';
 import ProductSelection from './ProductSelection';
+import { Info, InfoIcon } from 'lucide-react';
 export default function ListProductsManager({ listId, onUpdate }) {
     const [loading, setLoading] = useState(true);
     const [items, setItems] = useState([]);
@@ -28,78 +29,36 @@ export default function ListProductsManager({ listId, onUpdate }) {
         } finally {
             setLoading(false);
         }
-    };
-    const handleRemoveProduct = async (productId) => {
-        // First, update UI immediately by filtering out the product
-        const updatedItems = items.filter(item => item._id !== productId);
-        setItems(updatedItems);
+    }; const handleRemoveProduct = async (productId) => {
+        if (!productId || !listId) {
+            toast.error('Error: Información del producto incompleta');
+            return;
+        }
 
         // Set updating state for this product
         setUpdatingProductId(productId);
 
         try {
-            // Call API without setting global loading state
+            // Call API to remove the product
             const result = await removeProductFromBirthList(listId, productId);
+
             if (result.success) {
+                // Only update UI after successful API call
+                setItems(prevItems => prevItems.filter(item => item._id !== productId));
                 toast.success('Producto eliminado de la lista');
+                // Notify parent component if callback exists
+                if (onUpdate) onUpdate();
             } else {
-                toast.error('Error al eliminar el producto de la lista');
-                // Reload items if there was an error
-                loadItems();
+                toast.error(result.message || 'Error al eliminar el producto de la lista');
             }
         } catch (error) {
             console.error('Error removing product from list:', error);
             toast.error('Error al eliminar el producto de la lista');
-            // Reload items if there was an error
-            loadItems();
         } finally {
-            // Clear updating state
             setUpdatingProductId(null);
         }
     };
-    const handleQuantityChange = async (productId, newQuantity) => {
-        if (newQuantity < 1) return;
 
-        // Update local state immediately for better UX
-        const updatedItems = items.map(item => {
-            if (item._id === productId) {
-                return { ...item, quantity: newQuantity };
-            }
-            return item;
-        });
-
-        // Update UI immediately without waiting for API
-        setItems(updatedItems);
-
-        // Set updating state for this product
-        setUpdatingProductId(productId);
-
-        try {
-            // Format items for API
-            const formattedItems = updatedItems.map(item => ({
-                product: item._id,
-                quantity: parseInt(item.quantity),
-                reserved: parseInt(item.reserved || 0),
-                priority: parseInt(item.priority || 2)
-            }));
-
-            // Call API without setting global loading state
-            const result = await updateBirthListItems(listId, formattedItems);
-            if (!result.success) {
-                toast.error('Error al actualizar la cantidad');
-                // Revert to original items if there was an error
-                loadItems();
-            }
-        } catch (error) {
-            console.error('Error updating quantity:', error);
-            toast.error('Error al actualizar la cantidad');
-            // Revert to original items if there was an error
-            loadItems();
-        } finally {
-            // Clear updating state
-            setUpdatingProductId(null);
-        }
-    };
     const handleAddProducts = (selectedProducts) => {
         // Get only the newly added products (not already in items)
         const existingProductIds = items.map(item => item._id);
@@ -137,14 +96,14 @@ export default function ListProductsManager({ listId, onUpdate }) {
             });
     };
     return (
-        <div className="mt-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Productos en la Lista</h3>
+        <div className=" ">
+            {/* <h3 className="text-lg font-medium text-gray-900 mb-4">Productos en la Lista</h3> */}
             {/* Toggle between product list and add products */}
-            <div className="flex justify-between items-center mb-4">
+            {/* <div className="flex justify-between items-center mb-4">
                 <h4 className="text-gray-700">
                     {showAddProducts ? 'Seleccionar Productos' : `Productos (${items.length})`}
                 </h4>
-                <button
+                {/* <button
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -159,40 +118,42 @@ export default function ListProductsManager({ listId, onUpdate }) {
                             <FiPlus className="mr-1" /> Añadir Productos
                         </>
                     )}
-                </button>
-            </div>
+                </button>  
+            </div> */}
             {/* Loading state */}
+
             {loading && !showAddProducts && (
                 <div className="flex justify-center items-center py-10">
                     <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
                 </div>
             )}
             {/* Product selection component */}
-            {showAddProducts && (
+            {/* {showAddProducts && (
                 <ProductSelection
                     selectedProducts={items}
                     onProductSelect={handleAddProducts}
                 />
-            )}
+            )} */}
             {/* Product list */}
             {!showAddProducts && !loading && (
                 <>
-                    {items.length === 0 ? (
+                    {items.filter(item => item.state === 0).length === 0 ? (
                         <div className="text-center py-10 bg-gray-50 rounded-lg">
-                            <p className="text-gray-500 mb-4">No hay productos en esta lista.</p>
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setShowAddProducts(true);
-                                }}
-                                className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0]"
-                            >
-                                Añadir Productos
-                            </button>
+                            <InfoIcon className="mx-auto mb-4 h-10 w-10 text-gray-400" />
+                            <p className="text-gray-500 mb-4">No hay productos pendientes en la lista actual.</p>
+                            {/* <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setShowAddProducts(true);
+                            }}
+                            className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0]"
+                        >
+                            Añadir Productos
+                        </button> */}
                         </div>
                     ) : (
-                        <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden w-full max-h-[300px] overflow-y-auto">
+                        <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden w-full max-h-[400px] overflow-y-auto">
                             <table className="flex-1 min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>

@@ -33,10 +33,10 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
         };
         loadProducts();
     }, [currentPage, search]);
-      const handleSelectProduct = (product) => {
+    const handleSelectProduct = (product) => {
         // Check if product is already in the list
         const isProductInList = selectedItems.some(item => item.product._id === product._id);
-        
+
         // if (isProductInList) {
         //     toast.error(`${product.name} ya está en la lista`);
         //     return;
@@ -58,7 +58,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
 
         toast.success(`${product.name} añadido a la lista`);
     };
-        const handleRemoveProduct = (itemId) => {
+    const handleRemoveProduct = (itemId) => {
         const updatedItems = selectedItems.filter(item => item._id !== itemId);
         setSelectedItems(updatedItems);
         if (onProductSelect) {
@@ -78,7 +78,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             onProductSelect(updatedItems);
         }
     };
-    
+
     // const handleQuantityChange = (productId, newQuantity) => {
     //     if (newQuantity < 1) return;
     //     const updatedItems = selectedItems.map(item => {
@@ -101,23 +101,23 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                         {selectedItems
                             .filter(item => item.state === 0)
                             .map((item, index) => (
-                            <div key={item._id} className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden mr-3">
-                                        {item.product.image && (
-                                            <Image
-                                                src={item.product.image}
-                                                alt={item.product.name}
-                                                width={40}
-                                                height={40}
-                                                className="object-cover"
-                                            />
-                                        )}
+                                <div key={item._id} className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden mr-3">
+                                            {item.product.image && (
+                                                <Image
+                                                    src={item.product.image}
+                                                    alt={item.product.name}
+                                                    width={40}
+                                                    height={40}
+                                                    className="object-cover"
+                                                />
+                                            )}
+                                        </div>
+                                        <span className="text-sm font-medium">{item.product.name}</span>
                                     </div>
-                                    <span className="text-sm font-medium">{item.product.name}</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    {/* <div className="flex items-center border border-gray-300  rounded-md">
+                                    <div className="flex items-center space-x-3">
+                                        {/* <div className="flex items-center border border-gray-300  rounded-md">
                                         <button
                                             onClick={(e) => {
                                                 e.preventDefault();
@@ -140,20 +140,20 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                             +
                                         </button>
                                     </div> */}                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            handleRemoveProduct(item._id);
-                                        }}
-                                        className="text-red-500 hover:text-red-700"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleRemoveProduct(item._id);
+                                            }}
+                                            className="text-red-500 hover:text-red-700"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
                     </div>
                 </div>
             )}

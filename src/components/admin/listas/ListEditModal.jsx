@@ -264,8 +264,7 @@ export default function ListEditModal({
                                 </div>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                    {/* Current Products */}
-                                    <div className="space-y-4">
+                                    {/* Current Products */}                                    <div className="space-y-4">
                                         <h4 className="text-md font-medium text-gray-700 border-b border-gray-200 pb-2">
                                             Productos Actuales
                                         </h4>
@@ -273,6 +272,7 @@ export default function ListEditModal({
                                             <ListProductsManager
                                                 listId={selectedList.id}
                                                 onUpdate={null}
+                                                // ref={listManagerRef}
                                             />
                                         </div>
                                     </div>
@@ -285,12 +285,7 @@ export default function ListEditModal({
                                         <div className="bg-gray-50 p-4 rounded-lg min-h-[300px]">
                                             <ProductSelection
                                                 selectedProducts={formData.items}
-                                                onProductSelect={(selectedProducts) => {
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        items: selectedProducts
-                                                    }));
-                                                }}
+                                                // onProductSelect={handleProductSelect}
                                             />
                                         </div>
                                     </div>

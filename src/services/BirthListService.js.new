@@ -271,19 +271,31 @@ export const updateBirthListItems = async (listId, items) => {
  */
 export const removeProductFromBirthList = async (listId, itemId) => {
     try {
-        const response = await fetch(`/api/birthlists/${listId}/items?itemId=${itemId}`, {
+        if (!listId || !itemId) {
+            throw new Error('List ID and Item ID are required');
+        }
+
+        const response = await fetch(`/api/birthlists/${listId}/items/${itemId}`, {
             method: 'DELETE',
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to remove product from birth list');
+            throw new Error(errorData.message || 'Failed to remove item from birth list');
         }
 
-        return await response.json();
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to remove item from birth list');
+        }
+
+        return result;
     } catch (error) {
-        console.error(`Error removing product from birth list ${listId}:`, error);
-        throw error;
+        console.error(`Error removing item from birth list ${listId}:`, error);
+        return {
+            success: false,
+            message: error.message || 'Error removing item from birth list'
+        };
     }
 };
 
