@@ -13,14 +13,19 @@ export default function FeaturedProductsPage() {
     const [filter, setFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
-    const [totalItems, setTotalItems] = useState(0);
-    const [totalFeaturedCount, setTotalFeaturedCount] = useState(0);    // Fetch all featured products count on mount
+    const [totalItems, setTotalItems] = useState(0); const [totalFeaturedCount, setTotalFeaturedCount] = useState(0);
+
+    // Fetch all featured products count on mount
     useEffect(() => {
         fetchFeaturedCount();
-    }, []);// Fetch products whenever page, items per page, or filter changes
+    }, []);
+
+    // Fetch products whenever page, items per page, or filter changes
     useEffect(() => {
         fetchProducts();
-    }, [currentPage, itemsPerPage, filter]);// Fetch total featured products count
+    }, [currentPage, itemsPerPage, filter]);
+
+    // Fetch total featured products count
     const fetchFeaturedCount = async () => {
         try {
             const response = await fetch('/api/products?limit=99999&preventSort=true');
@@ -32,101 +37,75 @@ export default function FeaturedProductsPage() {
             }
         } catch (error) {
             console.error('Error fetching featured count:', error);
-        }
-    };    // Fetch all products from API
-    const fetchProducts = async () => {
-        try {
-            setLoading(true);
-            // If filter is set to featured, get all products at once
-            const url = filter === 'featured'
-                ? '/api/products?limit=1000&preventSort=true'
-                : `/api/products?page=${currentPage}&limit=${itemsPerPage}&preventSort=true`;
-
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch products: ${response.status}`);
-            }
-            const data = await response.json();
-
-            if (data && Array.isArray(data.products)) {
-                // Sort products: featured first, then by name alphabetically
-                const sortedProducts = [...data.products].sort((a, b) => {
-                    // First priority: featured status (featured products come first)
-                    if (a.featured && !b.featured) return -1;
-                    if (!a.featured && b.featured) return 1;
-
-                    // Second priority: alphabetical by name
-                    return a.name.localeCompare(b.name);
-                });
-
-                setAllProducts(sortedProducts);
-                setFeaturedProducts(sortedProducts.filter(product => product.featured));
-                // Update total items from pagination data
-                if (data.pagination) {
-                    setTotalItems(data.pagination.totalItems);
-                    setItemsPerPage(data.pagination.limit);
-                }
-            } else {
-                toast.error('Error fetching products: Invalid data format');
-            }
-        } catch (error) {
-            console.error('Error fetching products:', error);
-            toast.error(`Error fetching products: ${error.message}`);
-        } finally {
-            setLoading(false);
+            throw error;
         }
     };
+
+    // Fetch all products from API    
+    const fetchProducts = async () => {
+        try {
+            const params = new URLSearchParams({
+                page: currentPage.toString(),
+                limit: itemsPerPage.toString(),
+                preventSort: 'true'
+            });
+            if (searchTerm) {
+                params.append('search', searchTerm);
+            }
+            if (filter === 'featured') {
+                params.append('featured', 'true');
+            }
+            const response = await fetch(`/api/products?${params}`);
+            if (!response.ok) throw new Error('Failed to fetch products');
+            const data = await response.json();
+            setAllProducts(data.products || []);
+            setTotalItems(data.total || 0);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            throw error;
+        }
+    };
+
     // Toggle featured status of a product
     const toggleFeatured = async (productId) => {
         try {
-            const toastId = toast.loading('Updating featured status...');
-            const response = await fetch('/api/products/toggle-featured', {
-                method: 'POST',
+            const product = allProducts.find(p => p._id === productId);
+            if (!product) throw new Error('Product not found');
+
+            const response = await fetch(`/api/products/${productId}`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ productId }),
+                body: JSON.stringify({ featured: !product.featured }),
             });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update featured status');
-            }
-            const data = await response.json();
-            // Update local state
-            setAllProducts(prevProducts =>
-                prevProducts.map(product =>
-                    product._id === productId
-                        ? { ...product, featured: !product.featured }
-                        : product
-                )
-            );
-            // Update featured products list
-            if (data.product.featured) {
-                setFeaturedProducts(prev => [...prev, allProducts.find(p => p._id === productId)]);
-            } else {
-                setFeaturedProducts(prev => prev.filter(p => p._id !== productId));
-            } toast.success(data.message, { id: toastId });
-            // Update the total featured count
-            fetchFeaturedCount();
+
+            if (!response.ok) throw new Error('Failed to update product');
+
+            await fetchProducts();
+            await fetchFeaturedCount();
         } catch (error) {
             console.error('Error toggling featured status:', error);
-            toast.error(`Error updating product: ${error.message}`);
+            throw error;
         }
     };
-    // Filter products based on search term and selected filter
-    const filteredProducts = (filter === 'featured' ? featuredProducts : allProducts)
-        .filter(product =>
-            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (product.reference && product.reference.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
+
+    // Effect to fetch products when search term changes
+    useEffect(() => {
+        if (searchTerm.length === 0 || searchTerm.length >= 2) {
+            fetchProducts();
+        }
+    }, [searchTerm]);
 
     // Handle items per page change
     const handleItemsPerPageChange = (newItemsPerPage) => {
         setItemsPerPage(newItemsPerPage);
         setCurrentPage(1); // Reset to first page when changing items per page
-    };    // Pagination logic
+    };
+
+    // Pagination logic    
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const paginatedProducts = filteredProducts;
+    const paginatedProducts = allProducts; // Use allProducts directly since server handles pagination
 
     return (
         <AuthCheck>
@@ -289,9 +268,8 @@ export default function FeaturedProductsPage() {
                                 </div>
                             )}                            <div className="px-6 py-4">
                                 <Pagination
-                                    currentPage={currentPage}
-                                    totalPages={totalPages}
-                                    totalItems={filteredProducts.length}
+                                    currentPage={currentPage} totalPages={totalPages}
+                                    totalItems={totalItems}
                                     itemsPerPage={itemsPerPage}
                                     onPageChange={setCurrentPage}
                                     onItemsPerPageChange={handleItemsPerPageChange}
