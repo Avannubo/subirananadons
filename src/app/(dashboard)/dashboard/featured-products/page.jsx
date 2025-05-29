@@ -13,10 +13,27 @@ export default function FeaturedProductsPage() {
     const [filter, setFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
-    const [totalItems, setTotalItems] = useState(0);    // Fetch products whenever page, items per page, or filter changes
+    const [totalItems, setTotalItems] = useState(0);
+    const [totalFeaturedCount, setTotalFeaturedCount] = useState(0);    // Fetch all featured products count on mount
+    useEffect(() => {
+        fetchFeaturedCount();
+    }, []);// Fetch products whenever page, items per page, or filter changes
     useEffect(() => {
         fetchProducts();
-    }, [currentPage, itemsPerPage, filter]);// Fetch all products from API
+    }, [currentPage, itemsPerPage, filter]);// Fetch total featured products count
+    const fetchFeaturedCount = async () => {
+        try {
+            const response = await fetch('/api/products?limit=99999&preventSort=true');
+            if (!response.ok) throw new Error('Failed to fetch featured count');
+            const data = await response.json();
+            if (data && Array.isArray(data.products)) {
+                const featuredCount = data.products.filter(p => p.featured).length;
+                setTotalFeaturedCount(featuredCount);
+            }
+        } catch (error) {
+            console.error('Error fetching featured count:', error);
+        }
+    };    // Fetch all products from API
     const fetchProducts = async () => {
         try {
             setLoading(true);
@@ -88,8 +105,9 @@ export default function FeaturedProductsPage() {
                 setFeaturedProducts(prev => [...prev, allProducts.find(p => p._id === productId)]);
             } else {
                 setFeaturedProducts(prev => prev.filter(p => p._id !== productId));
-            }
-            toast.success(data.message, { id: toastId });
+            } toast.success(data.message, { id: toastId });
+            // Update the total featured count
+            fetchFeaturedCount();
         } catch (error) {
             console.error('Error toggling featured status:', error);
             toast.error(`Error updating product: ${error.message}`);
@@ -120,11 +138,10 @@ export default function FeaturedProductsPage() {
                             Los productos destacados aparecen en la sección "Productos Destacados" en la página de inicio y otras secciones destacadas de la tienda.
                         </p>
                         <div className="flex justify-between items-center flex-wrap gap-4">
-                            <div className="flex items-center space-x-2">
-                                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium text-sm flex items-center">
-                                    <FiStar className="mr-1" />
-                                    <span>Productos Destacados: {featuredProducts.length}</span>
-                                </div>
+                            <div className="flex items-center space-x-2">                                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium text-sm flex items-center">
+                                <FiStar className="mr-1" />
+                                <span>Productos Destacados: {totalFeaturedCount}</span>
+                            </div>
                                 <button
                                     onClick={fetchProducts}
                                     className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full font-medium text-sm"
