@@ -5,6 +5,7 @@ import AuthCheck from '@/components/auth/AuthCheck';
 import { FiStar, FiXCircle, FiCheck, FiAlertCircle } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import Pagination from '@/components/admin/shared/Pagination';
+
 export default function FeaturedProductsPage() {
     const [allProducts, setAllProducts] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -13,7 +14,8 @@ export default function FeaturedProductsPage() {
     const [filter, setFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
-    const [totalItems, setTotalItems] = useState(0); const [totalFeaturedCount, setTotalFeaturedCount] = useState(0);
+    const [totalItems, setTotalItems] = useState(0);
+    const [totalFeaturedCount, setTotalFeaturedCount] = useState(0);
 
     // Fetch all featured products count on mount
     useEffect(() => {
@@ -37,56 +39,84 @@ export default function FeaturedProductsPage() {
             }
         } catch (error) {
             console.error('Error fetching featured count:', error);
-            throw error;
+            toast.error('Error fetching featured count');
         }
     };
 
     // Fetch all products from API    
     const fetchProducts = async () => {
         try {
+            setLoading(true);
             const params = new URLSearchParams({
                 page: currentPage.toString(),
                 limit: itemsPerPage.toString(),
                 preventSort: 'true'
             });
+
             if (searchTerm) {
                 params.append('search', searchTerm);
             }
+
             if (filter === 'featured') {
                 params.append('featured', 'true');
             }
+
             const response = await fetch(`/api/products?${params}`);
             if (!response.ok) throw new Error('Failed to fetch products');
             const data = await response.json();
-            setAllProducts(data.products || []);
-            setTotalItems(data.total || 0);
+
+            if (data && Array.isArray(data.products)) {
+                const sortedProducts = [...data.products].sort((a, b) => {
+                    if (a.featured && !b.featured) return -1;
+                    if (!a.featured && b.featured) return 1;
+                    return a.name.localeCompare(b.name);
+                });
+
+                setAllProducts(sortedProducts);
+                setTotalItems(data.total || sortedProducts.length);
+            } else {
+                toast.error('Error: Invalid data format');
+            }
         } catch (error) {
             console.error('Error fetching products:', error);
-            throw error;
+            toast.error(`Error: ${error.message}`);
+        } finally {
+            setLoading(false);
         }
     };
 
     // Toggle featured status of a product
     const toggleFeatured = async (productId) => {
         try {
-            const product = allProducts.find(p => p._id === productId);
-            if (!product) throw new Error('Product not found');
-
-            const response = await fetch(`/api/products/${productId}`, {
-                method: 'PATCH',
+            const toastId = toast.loading('Actualizando estado...');
+            const response = await fetch('/api/products/toggle-featured', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ featured: !product.featured }),
+                body: JSON.stringify({ productId }),
             });
 
-            if (!response.ok) throw new Error('Failed to update product');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al actualizar el estado');
+            }
 
-            await fetchProducts();
-            await fetchFeaturedCount();
+            const data = await response.json();
+
+            setAllProducts(prevProducts =>
+                prevProducts.map(product =>
+                    product._id === productId
+                        ? { ...product, featured: !product.featured }
+                        : product
+                )
+            );
+
+            fetchFeaturedCount();
+            toast.success(data.message || 'Estado actualizado correctamente', { id: toastId });
         } catch (error) {
             console.error('Error toggling featured status:', error);
-            throw error;
+            toast.error(`Error: ${error.message}`);
         }
     };
 
@@ -100,12 +130,12 @@ export default function FeaturedProductsPage() {
     // Handle items per page change
     const handleItemsPerPageChange = (newItemsPerPage) => {
         setItemsPerPage(newItemsPerPage);
-        setCurrentPage(1); // Reset to first page when changing items per page
+        setCurrentPage(1);
     };
 
     // Pagination logic    
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const paginatedProducts = allProducts; // Use allProducts directly since server handles pagination
+    const paginatedProducts = allProducts;
 
     return (
         <AuthCheck>
@@ -268,7 +298,8 @@ export default function FeaturedProductsPage() {
                                 </div>
                             )}                            <div className="px-6 py-4">
                                 <Pagination
-                                    currentPage={currentPage} totalPages={totalPages}
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
                                     totalItems={totalItems}
                                     itemsPerPage={itemsPerPage}
                                     onPageChange={setCurrentPage}
