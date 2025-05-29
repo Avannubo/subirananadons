@@ -76,6 +76,7 @@ const getNavigationItems = (userRole) => [
         roles: ['admin']
     }
 ];
+
 export default function Sidebar() {
     const { data: session } = useSession();
     const userRole = session?.user?.role || 'user';

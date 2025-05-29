@@ -66,28 +66,22 @@ export function useOrders(userRole) {
         } finally {
             setLoading(false);
         }
-    };
-    // Map database status to UI status
+    };    // Map database status to UI status
     const mapOrderStatus = (status) => {
         const statusMap = {
-            'pending': 'Pendiente de pago',
-            'processing': 'Pago aceptado',
-            'shipped': 'Enviado',
-            'delivered': 'Entregado',
-            'cancelled': 'Cancelado'
+            'processing': 'Acceptado',
+            'cancelled': 'Cancelados'
         };
         return statusMap[status] || status;
     };
+
     // Map UI status back to database status
     const mapStatusToDb = (uiStatus) => {
         const reverseStatusMap = {
-            'Pendiente de pago': 'pending',
-            'Pago aceptado': 'processing',
-            'Enviado': 'shipped',
-            'Entregado': 'delivered',
-            'Cancelado': 'cancelled'
+            'Acceptado': 'processing',
+            'Cancelados': 'cancelled'
         };
-        return reverseStatusMap[uiStatus] || 'pending';
+        return reverseStatusMap[uiStatus] || 'processing';
     };
     // Update order status
     const updateOrderStatus = async (orderId, newStatus) => {
@@ -206,4 +200,4 @@ export function useOrders(userRole) {
         setCurrentPage: (page) => setPagination(prev => ({ ...prev, currentPage: page })),
         setLimit: (limit) => setPagination(prev => ({ ...prev, limit }))
     };
-} 
+}

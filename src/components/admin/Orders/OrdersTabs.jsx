@@ -32,7 +32,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
         setCurrentPage,
         setLimit
     } = useOrders(userRole);
-    const tabs = ['Todos', 'Pendientes', 'Procesando', 'Completados', 'Cancelados'];
+    const tabs = ['Todos', 'Acceptado', 'Cancelados'];
     // Initial fetch of all orders when component mounts
     useEffect(() => {
         console.log(`OrdersTabs mounted with userRole: ${userRole}`);
@@ -211,6 +211,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
             setIsExporting(false);
         }
     };
+
     // Helper function to trigger download
     const triggerDownload = (url, filename) => {
         const link = document.createElement('a');
@@ -224,17 +225,20 @@ export default function OrdersTabs({ userRole = 'user' }) {
             URL.revokeObjectURL(url);
         }, 100);
     };
+
     // Update filters and refresh table
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         const newFilters = { ...filters, [name]: value };
         setFilters(newFilters);
     };
+
     // Apply filters
     const applyFilters = () => {
         setPagination(prev => ({ ...prev, currentPage: 1 })); // Reset to first page
         fetchOrders(pagination.currentPage, pagination.limit, filters);
     };
+
     // Clear all filters
     const clearFilters = () => {
         setFilters({
@@ -260,21 +264,17 @@ export default function OrdersTabs({ userRole = 'user' }) {
     };
     // Filter orders based on active tab
     const filteredOrders = orders.filter(order => {
-        console.log(`Filtering order with status: "${order.status}" against active tab: "${activeTab}"`);
         if (activeTab === 'Todos') return true;
-        if (activeTab === 'Pendientes') return order.status === 'Pendiente de pago';
-        if (activeTab === 'Procesando') return order.status === 'Pago aceptado';
-        if (activeTab === 'Completados') return order.status === 'Enviado' || order.status === 'Entregado';
-        if (activeTab === 'Cancelados') return order.status === 'Cancelado';
+        if (activeTab === 'Acceptado') return order.status === 'Acceptado';
+        if (activeTab === 'Cancelados') return order.status === 'Cancelados';
         return false;
     });
+
     // Prepare counts for the TabNavigation component
     const orderCounts = {
         'Todos': orders.length,
-        'Pendientes': orders.filter(order => order.status === 'Pendiente de pago').length,
-        'Procesando': orders.filter(order => order.status === 'Pago aceptado').length,
-        'Completados': orders.filter(order => (order.status === 'Enviado' || order.status === 'Entregado')).length,
-        'Cancelados': orders.filter(order => order.status === 'Cancelado').length
+        'Acceptado': orders.filter(order => order.status === 'Acceptado').length,
+        'Cancelados': orders.filter(order => order.status === 'Cancelados').length
     };
     console.log('Order tab counts:', orderCounts);
     return (

@@ -7,6 +7,8 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
     const [error, setError] = useState(null);
     const [loadingOrder, setLoadingOrder] = useState(false);
     const [products, setProducts] = useState({});
+    const [retryCount, setRetryCount] = useState(0);
+    const MAX_RETRIES = 3;
 
     useEffect(() => {
         const fetchOrderDetails = async () => {
@@ -16,28 +18,46 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             setError(null);
 
             try {
-                const response = await fetch(`/api/orders/${orderId}`);
+                const response = await fetch(`/api/orders/${orderId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to fetch order details');
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    console.error('Error parsing response:', parseError);
+                    throw new Error('Failed to parse server response');
                 }
 
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data?.message || `Failed to fetch order (Status: ${response.status})`);
+                }
 
-                if (data.success) {
+                if (data.success && data.order) {
                     setOrder(data.order);
+                    setError(null);
+                    setRetryCount(0);
 
-                    // If we have order items, fetch their product details
                     if (data.order?.items?.length > 0) {
                         await fetchProductDetails(data.order.items);
                     }
                 } else {
-                    throw new Error(data.message || 'Failed to fetch order details');
+                    throw new Error(data?.message || 'Invalid order data received');
                 }
             } catch (err) {
-                setError(err.message);
                 console.error('Error fetching order details:', err);
+                setError(err.message);
+
+                if (retryCount < MAX_RETRIES) {
+                    setRetryCount(prev => prev + 1);
+                    setTimeout(() => {
+                        fetchOrderDetails();
+                    }, 1000 * (retryCount + 1));
+                }
             } finally {
                 setLoadingOrder(false);
             }
@@ -46,17 +66,22 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         if (isOpen && orderId) {
             fetchOrderDetails();
         }
-    }, [isOpen, orderId]);
+
+        return () => {
+            setOrder(null);
+            setError(null);
+            setProducts({});
+            setRetryCount(0);
+        };
+    }, [isOpen, orderId, retryCount]);
 
     const fetchProductDetails = async (items) => {
         try {
             const productsMap = {};
 
-            // Extract product IDs from items
             for (const item of items) {
                 if (item.product && !productsMap[item.product]) {
                     try {
-                        // Direct fetch to products API with full URL
                         const response = await fetch(`${window.location.origin}/api/products/${item.product}`);
 
                         if (!response.ok) {
@@ -70,10 +95,8 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                         if (data.product) {
                             productsMap[item.product] = data.product;
                         } else if (data.success && data.data) {
-                            // Alternative response format
                             productsMap[item.product] = data.data;
                         } else if (data) {
-                            // Direct product data
                             productsMap[item.product] = data;
                         }
                     } catch (err) {
@@ -91,19 +114,21 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
 
     if (!isOpen) return null;
 
-    // Format date
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('es-ES', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).format(date);
+        try {
+            return new Date(dateString).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return dateString;
+        }
     };
 
-    // Format price
     const formatPrice = (price) => {
         if (!price || parseFloat(price) === 0) {
             return 'Gratis';
@@ -111,7 +136,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         return `${parseFloat(price).toFixed(2)} €`;
     };
 
-    // Map status to Spanish
     const mapStatus = (status) => {
         const statusMap = {
             'pending': 'Pendiente de pago',
@@ -123,7 +147,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         return statusMap[status] || status;
     };
 
-    // Get status color class
     const getStatusColorClass = (status) => {
         const colorMap = {
             'pending': 'bg-yellow-100 text-yellow-800',
@@ -135,7 +158,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         return colorMap[status] || 'bg-gray-100 text-gray-800';
     };
 
-    // Get product details
     const getProductDetails = (productId) => {
         return products[productId] || null;
     };
@@ -440,4 +462,4 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             </div>
         </div>
     );
-} 
+}

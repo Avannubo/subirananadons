@@ -29,25 +29,30 @@ const invoiceSchema = new mongoose.Schema({
         default: 'generated'
     },
     orderDetails: {
-        customerName: {
-            type: String,
+        items: [{
+            product: {
+                type: mongoose.Schema.Types.Mixed,
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true
+            },
+            price: {
+                type: Number,
+                required: true
+            }
+        }],
+        subtotal: {
+            type: Number,
             required: true
         },
-        customerEmail: {
-            type: String,
+        tax: {
+            type: Number,
             required: true
         },
-        orderNumber: {
-            type: String,
-            required: true
-        },
-        orderDate: {
-            type: Date,
-            required: true
-        },
-        deliveryMethod: {
-            type: String,
-            enum: ['delivery', 'pickup'],
+        shippingCost: {
+            type: Number,
             required: true
         }
     }
@@ -80,4 +85,10 @@ invoiceSchema.pre('save', async function (next) {
     next();
 });
 
-export default mongoose.models.Invoice || mongoose.model('Invoice', invoiceSchema);
+// Create indexes
+invoiceSchema.index({ order: 1 });
+invoiceSchema.index({ invoiceNumber: 1 }, { unique: true });
+
+// Export the model and schema
+const Invoice = mongoose.models.Invoice || mongoose.model('Invoice', invoiceSchema);
+export default Invoice;
