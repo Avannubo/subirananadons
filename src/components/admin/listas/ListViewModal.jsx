@@ -316,7 +316,7 @@ export default function ListViewModal({
     if (!showModal || !selectedList) return null;
     return (<>
         <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-xl w-full min-h-full overflow-y-auto">
                 <div className="p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
@@ -435,7 +435,7 @@ export default function ListViewModal({
                         </div>
                     </div>
                     {/* Products sections with arrow navigation */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-3 gap-4 h-[60vh]">
                         <div>
                             <div className="flex items-center mb-4">
                                 <span className="text-[#00B0C8] mr-2">
@@ -454,7 +454,7 @@ export default function ListViewModal({
                                     <div className="text-center py-10">
                                         <p className="text-gray-500">No hay productos pendientes.</p>
                                     </div>
-                                ) : (<div className="divide-y divide-gray-200 h-[300px] overflow-y-auto">
+                                ) : (<div className="divide-y divide-gray-200 h-full overflow-y-auto">
                                     {getPendingItems().map((item, index) => renderProduct(item, index))}
                                 </div>
                                 )}
@@ -478,7 +478,7 @@ export default function ListViewModal({
                                     <div className="text-center py-10">
                                         <p className="text-gray-500">No hay productos reservados.</p>
                                     </div>
-                                ) : (<div className="divide-y divide-gray-200 h-[300px] overflow-y-auto">
+                                ) : (<div className="divide-y divide-gray-200 h-full overflow-y-auto">
                                     {getReservedItems().map((item, index) => renderProduct(item, index))}
                                 </div>
                                 )}
