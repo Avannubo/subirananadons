@@ -4,32 +4,51 @@ import AdminLayout from '@/components/Layouts/admin-layout';
 import AuthCheck from '@/components/auth/AuthCheck';
 import { FiStar, FiXCircle, FiCheck, FiAlertCircle } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
+import Pagination from '@/components/admin/shared/Pagination';
 export default function FeaturedProductsPage() {
     const [allProducts, setAllProducts] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filter, setFilter] = useState('featured'); // 'featured', 'all'
-    // Fetch products on component mount
+    const [filter, setFilter] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [totalItems, setTotalItems] = useState(0);    // Fetch products whenever page, items per page, or filter changes
     useEffect(() => {
         fetchProducts();
-    }, []);
-    // Fetch all products from API
+    }, [currentPage, itemsPerPage, filter]);// Fetch all products from API
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/products?preventSort=true');
+            // If filter is set to featured, get all products at once
+            const url = filter === 'featured'
+                ? '/api/products?limit=1000&preventSort=true'
+                : `/api/products?page=${currentPage}&limit=${itemsPerPage}&preventSort=true`;
+
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`Failed to fetch products: ${response.status}`);
             }
             const data = await response.json();
+
             if (data && Array.isArray(data.products)) {
-                // Sort products by name
-                const sortedProducts = data.products.sort((a, b) => {
+                // Sort products: featured first, then by name alphabetically
+                const sortedProducts = [...data.products].sort((a, b) => {
+                    // First priority: featured status (featured products come first)
+                    if (a.featured && !b.featured) return -1;
+                    if (!a.featured && b.featured) return 1;
+
+                    // Second priority: alphabetical by name
                     return a.name.localeCompare(b.name);
                 });
+
                 setAllProducts(sortedProducts);
                 setFeaturedProducts(sortedProducts.filter(product => product.featured));
+                // Update total items from pagination data
+                if (data.pagination) {
+                    setTotalItems(data.pagination.totalItems);
+                    setItemsPerPage(data.pagination.limit);
+                }
             } else {
                 toast.error('Error fetching products: Invalid data format');
             }
@@ -82,6 +101,15 @@ export default function FeaturedProductsPage() {
             product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (product.reference && product.reference.toLowerCase().includes(searchTerm.toLowerCase()))
         );
+
+    // Handle items per page change
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1); // Reset to first page when changing items per page
+    };    // Pagination logic
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const paginatedProducts = filteredProducts;
+
     return (
         <AuthCheck>
             <AdminLayout>
@@ -127,8 +155,8 @@ export default function FeaturedProductsPage() {
                                     value={filter}
                                     onChange={(e) => setFilter(e.target.value)}
                                 >
-                                    <option value="featured">Solo destacados</option>
                                     <option value="all">Todos los productos</option>
+                                    <option value="featured">Solo destacados</option>
                                 </select>
                             </div>
                         </div>
@@ -139,7 +167,7 @@ export default function FeaturedProductsPage() {
                         </div>
                     ) : (
                         <div className="bg-white rounded-lg shadow overflow-hidden">
-                            {filteredProducts.length === 0 ? (
+                            {paginatedProducts.length === 0 ? (
                                 <div className="p-8 text-center">
                                     <FiAlertCircle className="mx-auto text-gray-400 text-4xl mb-4" />
                                     <p className="text-gray-500 mb-2">No se encontraron productos</p>
@@ -178,7 +206,7 @@ export default function FeaturedProductsPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {filteredProducts.map((product) => (
+                                            {paginatedProducts.map((product) => (
                                                 <tr key={product._id} className="hover:bg-gray-50">
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="h-10 w-10 rounded overflow-hidden bg-gray-100">
@@ -242,11 +270,21 @@ export default function FeaturedProductsPage() {
                                         </tbody>
                                     </table>
                                 </div>
-                            )}
+                            )}                            <div className="px-6 py-4">
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    totalItems={filteredProducts.length}
+                                    itemsPerPage={itemsPerPage}
+                                    onPageChange={setCurrentPage}
+                                    onItemsPerPageChange={handleItemsPerPageChange}
+                                    showingText="Mostrando {} de {} productos"
+                                />
+                            </div>
                         </div>
                     )}
                 </div>
             </AdminLayout>
         </AuthCheck>
     );
-} 
+}

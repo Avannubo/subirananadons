@@ -426,7 +426,7 @@ export default function ListViewModal({
                                                     ? 'Esta lista está disponible para recibir regalos'
                                                     : selectedList.status === 'Completada'
                                                         ? 'Todos los productos fueron recibidos'
-                                                        : 'Esta lista ha sido cancelada'}
+                                                        : 'Esta lista ha sido InActiva'}
                                             </p>
                                         </div>
                                     </div>

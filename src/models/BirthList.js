@@ -162,7 +162,7 @@ const birthListSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Activa', 'Completada', 'Cancelada'],
+        enum: ['Activa', 'Completada', 'InActiva'],
         default: 'Activa'
     },
     contributors: [{

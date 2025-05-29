@@ -30,7 +30,7 @@ export default withAuth(
 
         if (isAdminRoute && userRole !== 'admin') {
             console.log('Unauthorized admin access attempt - redirecting');
-            return NextResponse.redirect(new URL('/dashboard', req.url));
+            return NextResponse.redirect(new URL('/dashboard/orders', req.url));
         }
 
         console.log('Access granted');

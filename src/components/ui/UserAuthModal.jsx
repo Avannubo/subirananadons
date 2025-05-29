@@ -17,7 +17,7 @@ export default function AuthModal() {
     const menuRef = useRef(null);
     const openLogin = () => {
         if (session) {
-            router.push("/dashboard");
+            router.push("/dashboard/orders");
         } else {
             setActiveView('login');
             setIsOpen(true);
@@ -88,7 +88,7 @@ export default function AuthModal() {
             console.log('Login successful, redirecting to dashboard...');
             setTimeout(() => {
                 closeModal();
-                router.push('/dashboard');
+                router.push('/dashboard/orders');
             }, 1000);
         } catch (error) {
             console.error('Login error:', error);

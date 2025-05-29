@@ -64,12 +64,12 @@ export default function ListasTabs({ userRole = 'user' }) {
         // Fetch lists from API
         loadBirthLists();
     }, [userRole]);
-    const tabs = ['Todos', 'Activas', 'Completadas', 'Canceladas'];
+    const tabs = ['Todos', 'Activas', 'Completadas', 'InActivas'];
     const filteredLists = displayLists.filter((list) => {
         if (activeTab === 'Todos') return true;
         if (activeTab === 'Activas') return list.status === 'Activa';
         if (activeTab === 'Completadas') return list.status === 'Completada';
-        if (activeTab === 'Canceladas') return list.status === 'Cancelada';
+        if (activeTab === 'InActivas') return list.status === 'InActiva';
         return false;
     });
     // Handle filter changes
@@ -193,7 +193,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                     'Todos': displayLists.length,
                     'Activas': displayLists.filter(list => list.status === 'Activa').length,
                     'Completadas': displayLists.filter(list => list.status === 'Completada').length,
-                    'Canceladas': displayLists.filter(list => list.status === 'Cancelada').length
+                    'InActivas': displayLists.filter(list => list.status === 'InActiva').length
                 }}
             />
             <div className="bg-white rounded-lg shadow">
@@ -307,7 +307,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                     </div>
                 )}
             </div>
-            
+
             {/* Create List Modal - kept as is */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">

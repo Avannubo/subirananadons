@@ -4,7 +4,6 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
 import User from '@/models/User';
-import Product from '@/models/Product';  // Add Product model import
 
 export async function GET(request) {
     try {
@@ -116,4 +115,4 @@ export async function POST(request) {
             { status: 500 }
         );
     }
-}
+} 

@@ -15,12 +15,12 @@ import {
 import { useSession } from 'next-auth/react';
 import { InstagramIcon, YoutubeIcon, LinkedinIcon } from "lucide-react"; 
 const getNavigationItems = (userRole) => [
-    {
-        href: "/dashboard",
-        icon: ChartArea,
-        label: "Estadísticas",
-        roles: ['admin']//'user',
-    },
+    // {
+    //     href: "/dashboard",
+    //     icon: ChartArea,
+    //     label: "Estadísticas",
+    //     roles: ['admin']//'user',
+    // },
     {
         href: "/dashboard/account",
         icon: CircleUserRound,
