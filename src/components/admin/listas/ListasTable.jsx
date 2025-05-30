@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { FiEdit, FiTrash2, FiEye, FiGift, FiToggleLeft, FiDownload, FiPrinter } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiEye, FiGift, FiToggleLeft, FiDownload, FiPrinter, FiLink } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import { deleteBirthList, updateBirthList, fetchBirthListItems } from '@/services/BirthListService';
 import ListEditModal from './ListEditModal';
@@ -400,66 +400,77 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                             {list.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm">                                        <button
-                                        className="text-green-600 hover:text-green-900 mr-2"
+                                    <td className="px-6 py-4 text-sm space-x-2">                                        <button
+                                        className="text-green-600 hover:text-green-900 mr-3"
                                         onClick={() => handleDownloadPDF(list)}
                                         title="Descargar PDF"
                                     >
-                                        <FiDownload size={20} />
+                                        <FiDownload size={22} />
                                     </button>
                                         <button
-                                            className="text-blue-600 hover:text-blue-900 mr-2"
+                                            className="text-blue-600 hover:text-blue-900 mr-3"
                                             onClick={() => handlePrintPDF(list)}
                                             title="Imprimir lista"
                                         >
-                                            <FiPrinter size={20} />
+                                            <FiPrinter size={22} />
                                         </button>
                                         <button
-                                            className="text-[#00B0C8] hover:text-[#008da0] mr-2"
+                                            className="text-[#00B0C8] hover:text-[#008da0] mr-3"
                                             onClick={() => openViewModal(list)}
                                             title="Ver detalles"
                                         >
-                                            <FiEye size={20} />
+                                            <FiEye size={22} />
                                         </button>
                                         {userRole === 'admin' || list.userId === 'current_user_id' ? (
                                             <>
                                                 <button
-                                                    className="text-yellow-600 hover:text-yellow-900 mr-2"
+                                                    className="text-yellow-600 hover:text-yellow-900 mr-3"
                                                     onClick={() => openEditModal(list)}
                                                     title="Editar lista"
                                                 >
-                                                    <FiEdit size={20} />
+                                                    <FiEdit size={22} />
                                                 </button>
                                                 <button
-                                                    className="text-purple-600 hover:text-purple-900 mr-2"
+                                                    className="text-purple-600 hover:text-purple-900 mr-3"
                                                     onClick={() => openStatusModal(list)}
                                                     title="Cambiar estado"
                                                 >
-                                                    <FiToggleLeft size={20} />
+                                                    <FiToggleLeft size={22} />
                                                 </button>
                                             </>
                                         ) : (
                                             <button
-                                                className="text-yellow-600 hover:text-yellow-900 mr-2"
+                                                className="text-yellow-600 hover:text-yellow-900 mr-3"
                                                 title="Añadir regalo"
                                             >
-                                                <FiGift size={20} />
+                                                <FiGift size={22} />
                                             </button>
                                         )}
-
                                         <button
-                                            className="text-red-600 hover:text-red-900"
-                                            onClick={() => openDeleteModal(list)}
+                                            className="text-indigo-600 hover:text-indigo-900 mr-3"
+                                            onClick={() => {
+                                                const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`;
+                                                navigator.clipboard.writeText(url)
+                                                    .then(() => toast.success('Enlace copiado al portapapeles'))
+                                                    .catch(() => toast.error('Error al copiar el enlace'));
+                                            }}
+                                            title="Copiar enlace"
+                                        >
+                                            <FiLink size={22} />
+                                        </button>
+                                        <button
+                                            className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)}
                                             title="Eliminar lista"
                                         >
-                                            <FiTrash2 size={20} />
+                                            <FiTrash2 size={22} />
                                         </button>
+
                                         {/* <button
-                                            className="text-green-600 hover:text-green-900 mr-2"
+                                            className="text-green-600 hover:text-green-900 mr-3"
                                             onClick={() => handleDownloadPDF(list)}
                                             title="Descargar PDF"
                                         >
-                                            <FiDownload size={20} />
+                                            <FiDownload size={22} />
                                         </button> */}
                                     </td>
                                 </tr>
