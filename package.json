@@ -31,7 +31,7 @@
     "next": "15.2.4",
     "next-auth": "^4.24.11",
     "pdfkit": "^0.17.1",
-    "puppeteer": "^24.8.2",
+    "puppeteer": "^24.9.0",
     "react": "^19.0.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-chart.js": "^1.0.0",

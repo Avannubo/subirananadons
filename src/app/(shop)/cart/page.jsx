@@ -8,7 +8,6 @@ import UserAuth from "@/components/ui/UserAuthModal";
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
-import { ShoppingBag } from 'lucide-react';
 export default function CartPage() {
     const { cartItems, updateQuantity, removeFromCart } = useCart();
     const { user, loading: userLoading } = useUser();
@@ -28,7 +27,6 @@ export default function CartPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
-    const [invoiceBlob, setInvoiceBlob] = useState(null);
     const [userType, setUserType] = useState('guest'); // 'guest' or 'register'
     const regularItems = cartItems.filter(item => !item.isGift);
     const giftItems = cartItems.filter(item => item.isGift);
@@ -297,50 +295,30 @@ export default function CartPage() {
         }
     };
     // Handle invoice download
-    useEffect(() => {
-        const generateInvoice = async () => {
-            if (!orderSuccess) return;
-            
-            try {
-                const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/pdf' }
-                });
-                if (!res.ok) throw new Error('No se pudo generar el ticket');
-                
-                const blob = await res.blob();
-                setInvoiceBlob(blob);
-                
-                // Automatically trigger download
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `Ticket-${orderSuccess.orderNumber}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                window.URL.revokeObjectURL(url);
-            } catch (err) {
-                console.error('Error generating invoice:', err);
-                toast.error('Error al generar el ticket');
-            }
-        };
-
-        if (orderSuccess?.orderId) {
-            generateInvoice();
+    const handleDownloadInvoice = async () => {
+        if (!orderSuccess) return;
+        toast.success('Generando factura...');
+        try {
+            // Call API to generate/download invoice PDF
+            const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/pdf' }
+            });
+            if (!res.ok) throw new Error('No se pudo generar la factura');
+            const blob = await res.blob();
+            // Create a link to download the PDF
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Factura-${orderSuccess.orderNumber}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success('Factura descargada correctamente');
+        } catch (err) {
+            toast.error('Error al descargar la factura');
         }
-    }, [orderSuccess]);
-    const handleDownloadInvoice = () => {
-        if (!invoiceBlob || !orderSuccess) return;
-        const url = window.URL.createObjectURL(invoiceBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Ticket-${orderSuccess.orderNumber}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-        toast.success('Ticket descargada correctamente');
     };
     // Handle sending email with receipt
     const handleSendEmail = () => {
@@ -367,12 +345,12 @@ export default function CartPage() {
                                         <div className="flex items-start space-x-4 justify-start ">
                                             <h2 className="text-xl font-bold mb-6">Datos del usuario</h2>
                                             {/* <UserAuth /> */}
-                                        </div>
+                                        </div> 
                                         {!user ? (
                                             <>
                                                 <div className="space-y-4">
                                                     <div className="flex flex-col   gap-4">
-                                                        {/* <div className='flex flex-row gap-4 space-x-2'>
+                                                        <div className='flex flex-row gap-4 space-x-2'>
                                                             <div
                                                                 className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'login'
                                                                     ? 'border-[#00B0C8] bg-[#00B0C8]/5'
@@ -411,7 +389,7 @@ export default function CartPage() {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div> */}
+                                                        </div>  
                                                         <div className='flex-1 flex-row gap-4 space-x-2'>
                                                             <div
                                                                 className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'guest'
@@ -558,7 +536,8 @@ export default function CartPage() {
                                                             required
                                                         />
                                                     </div>
-                                                    {(deliveryMethod === 'delivery') && (
+                                                    {/* Only show address fields if not gift-only or delivery method is not pickup */}
+                                                    {(!hasOnlyGiftItems || deliveryMethod === 'delivery') && (
                                                         <>
                                                             <div className="col-span-2">
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -648,7 +627,7 @@ export default function CartPage() {
                                                 <div className="flex-grow">
                                                     <h3 className="font-medium">{item.name}</h3>
                                                     <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
-                                                    <p className="text-[#00B0C8] font-medium">{item.price}€</p>
+                                                    <p className="text-[#00B0C8] font-medium">{item.price}</p>
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
                                                             Lista de regalo: {item.listOwner}
@@ -897,11 +876,10 @@ export default function CartPage() {
                     </>
                 ) : (
                     <motion.div
-                        className="text-center py-16 min-h-[50vh] flex flex-col items-center justify-center space-y-4"
+                        className="text-center py-16"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                     >
-                        <ShoppingBag className="text-gray-600" size={120} />
                         <h2 className="text-2xl font-bold mb-4">Tu carrito está vacío</h2>
                         <p className="text-gray-500 mb-8">¿No sabes qué comprar? ¡Miles de productos te esperan!</p>
                         <Link
@@ -960,7 +938,7 @@ export default function CartPage() {
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Descargar Ticket
+                                Descargar Factura
                             </button>
                             <button
                                 onClick={handleSendEmail}
