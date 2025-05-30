@@ -368,11 +368,12 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                             <th className="px-6 py-3 text-left">Referencia</th>
                             <th className="px-6 py-3 text-left">Nombre</th>
                             {userRole === 'admin' && <th className="px-6 py-3 text-left">Creador</th>}
-                            <th className="px-6 py-3 text-left">Fecha Creación</th>
-                            <th className="px-6 py-3 text-left">Fecha Prevista</th>
+                            <th className="px-6 py-3 text-left">Fecha Creación</th>                            <th className="px-6 py-3 text-left">Fecha Prevista</th>
                             <th className="px-6 py-3 text-left">Privacidad</th>
                             <th className="px-6 py-3 text-left">Estado</th>
-                            <th className="px-6 py-3 text-left">Acciones</th>
+                            <th className="px-6 py-3 text-left">Ver/Compartir</th>
+                            <th className="px-6 py-3 text-left">Documentos</th>
+                            <th className="px-6 py-3 text-left">Acción</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -399,71 +400,80 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                         >
                                             {list.status}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm space-x-2">                                        <button
-                                        className="text-green-600 hover:text-green-900 mr-3"
-                                        onClick={() => handleDownloadPDF(list)}
-                                        title="Descargar PDF"
-                                    >
-                                        <FiDownload size={22} />
-                                    </button>
-                                        <button
-                                            className="text-blue-600 hover:text-blue-900 mr-3"
-                                            onClick={() => handlePrintPDF(list)}
-                                            title="Imprimir lista"
-                                        >
-                                            <FiPrinter size={22} />
-                                        </button>
-                                        <button
-                                            className="text-[#00B0C8] hover:text-[#008da0] mr-3"
-                                            onClick={() => openViewModal(list)}
-                                            title="Ver detalles"
-                                        >
-                                            <FiEye size={22} />
-                                        </button>
-                                        {userRole === 'admin' || list.userId === 'current_user_id' ? (
-                                            <>
+                                    </td>                                    {/* View/Share Actions Column */}
+                                    <td className="px-6 py-4 text-sm">
+                                        <div className="flex items-center justify-center space-x-3">
+                                            <button
+                                                className="text-[#00B0C8] hover:text-[#008da0]"
+                                                onClick={() => openViewModal(list)}
+                                                title="Ver detalles"
+                                            >
+                                                <FiEye size={22} />
+                                            </button>
+                                            <button
+                                                className="text-indigo-600 hover:text-indigo-900"
+                                                onClick={() => {
+                                                    const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`;
+                                                    navigator.clipboard.writeText(url)
+                                                        .then(() => toast.success('Enlace copiado al portapapeles'))
+                                                        .catch(() => toast.error('Error al copiar el enlace'));
+                                                }}
+                                                title="Copiar enlace"
+                                            >
+                                                <FiLink size={22} />
+                                            </button>
+                                            {!userRole === 'admin' && !list.userId === 'current_user_id' && (
                                                 <button
-                                                    className="text-yellow-600 hover:text-yellow-900 mr-3"
+                                                    className="text-yellow-600 hover:text-yellow-900"
+                                                    title="Añadir regalo"
+                                                >
+                                                    <FiGift size={22} />
+                                                </button>)}
+                                        </div>
+                                    </td>                                    {/* Download/Print Actions Column */}
+                                    <td className="px-6 py-4 text-sm">
+                                        <div className="flex items-center justify-center space-x-3">
+                                            <button
+                                                className="text-green-600 hover:text-green-900"
+                                                onClick={() => handleDownloadPDF(list)}
+                                                title="Descargar PDF"
+                                            >
+                                                <FiDownload size={22} />
+                                            </button>                                            <button
+                                                className="text-blue-600 hover:text-blue-900"
+                                                onClick={() => handlePrintPDF(list)}
+                                                title="Imprimir lista"
+                                            >
+                                                <FiPrinter size={22} />
+                                            </button>
+                                        </div>
+                                    </td>                                    {/* Modification Actions Column */}
+                                    <td className="px-6 py-4 text-sm">
+                                        {(userRole === 'admin' || list.userId === 'current_user_id') && (
+                                            <div className="flex items-center justify-center space-x-3">
+                                                <button
+                                                    className="text-yellow-600 hover:text-yellow-900"
                                                     onClick={() => openEditModal(list)}
                                                     title="Editar lista"
                                                 >
                                                     <FiEdit size={22} />
                                                 </button>
                                                 <button
-                                                    className="text-purple-600 hover:text-purple-900 mr-3"
+                                                    className="text-purple-600 hover:text-purple-900"
                                                     onClick={() => openStatusModal(list)}
                                                     title="Cambiar estado"
                                                 >
                                                     <FiToggleLeft size={22} />
                                                 </button>
-                                            </>
-                                        ) : (
-                                            <button
-                                                className="text-yellow-600 hover:text-yellow-900 mr-3"
-                                                title="Añadir regalo"
-                                            >
-                                                <FiGift size={22} />
-                                            </button>
+                                                <button
+                                                    className="text-red-600 hover:text-red-900"
+                                                    onClick={() => openDeleteModal(list)}
+                                                    title="Eliminar lista"
+                                                >
+                                                    <FiTrash2 size={22} />
+                                                </button>
+                                            </div>
                                         )}
-                                        <button
-                                            className="text-indigo-600 hover:text-indigo-900 mr-3"
-                                            onClick={() => {
-                                                const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`;
-                                                navigator.clipboard.writeText(url)
-                                                    .then(() => toast.success('Enlace copiado al portapapeles'))
-                                                    .catch(() => toast.error('Error al copiar el enlace'));
-                                            }}
-                                            title="Copiar enlace"
-                                        >
-                                            <FiLink size={22} />
-                                        </button>
-                                        <button
-                                            className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)}
-                                            title="Eliminar lista"
-                                        >
-                                            <FiTrash2 size={22} />
-                                        </button>
 
                                         {/* <button
                                             className="text-green-600 hover:text-green-900 mr-3"
@@ -472,12 +482,11 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                         >
                                             <FiDownload size={22} />
                                         </button> */}
-                                    </td>
-                                </tr>
+                                    </td>                                </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={userRole === 'admin' ? 9 : 8} className="px-6 py-4 text-center text-gray-500">
+                                <td colSpan={userRole === 'admin' ? 11 : 10} className="px-6 py-4 text-center text-gray-500">
                                     No se encontraron listas de regalos.
                                 </td>
                             </tr>
