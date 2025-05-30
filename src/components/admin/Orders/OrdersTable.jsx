@@ -56,15 +56,15 @@ export default function OrdersTable({
     //         const url = window.URL.createObjectURL(blob);
     //         const link = document.createElement('a');
     //         link.href = url;
-    //         link.download = `factura.pdf`;
+    //         link.download = `ticket.pdf`;
     //         document.body.appendChild(link);
     //         link.click();
     //         link.remove();
     //         window.URL.revokeObjectURL(url);
-    //         toast.success('Factura descargada correctamente');
+    //         toast.success('Ticket descargada correctamente');
     //     } catch (error) {
     //         console.error('Error downloading invoice:', error);
-    //         toast.error('Error al descargar la factura');
+    //         toast.error('Error al descargar la ticket');
     //     }
     // };
 
@@ -251,7 +251,7 @@ export default function OrdersTable({
                                                 <button
                                                     onClick={() => toggleStatusDropdown(order.id)}
                                                     className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'Acceptado' ? 'bg-green-100 text-green-800' :
-                                                            'bg-red-100 text-red-800'
+                                                        'bg-red-100 text-red-800'
                                                         } flex items-center`}
                                                 >
                                                     {order.status}
@@ -275,7 +275,7 @@ export default function OrdersTable({
                                             </div>
                                         ) : (<span
                                             className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'Acceptado' ? 'bg-green-100 text-green-800' :
-                                                    'bg-red-100 text-red-800'
+                                                'bg-red-100 text-red-800'
                                                 }`}
                                         >
                                             {order.status}
@@ -287,7 +287,7 @@ export default function OrdersTable({
                                         <button
                                             onClick={() => viewPdf("/uploads/invoices/invoice-" + order.reference + ".pdf")}
                                             className="text-green-600 hover:text-green-800 flex items-center"
-                                            title="Ver Factura PDF"
+                                            title="Ver Ticket PDF"
                                         >
                                             <FaRegFilePdf size={20} />
                                         </button>

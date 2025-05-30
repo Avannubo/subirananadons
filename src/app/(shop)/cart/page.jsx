@@ -24,7 +24,7 @@ export default function CartPage() {
         province: '',
         country: 'España',
         notes: ''
-    }); 
+    });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
@@ -300,34 +300,47 @@ export default function CartPage() {
     useEffect(() => {
         const generateInvoice = async () => {
             if (!orderSuccess) return;
-            // toast.success('Generando factura...');
+            
             try {
                 const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
                     method: 'GET',
                     headers: { 'Accept': 'application/pdf' }
                 });
-                if (!res.ok) throw new Error('No se pudo generar la factura');
+                if (!res.ok) throw new Error('No se pudo generar el ticket');
+                
                 const blob = await res.blob();
                 setInvoiceBlob(blob);
-                // toast.success('Factura generada correctamente');
-                //close the modal 
+                
+                // Automatically trigger download
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Ticket-${orderSuccess.orderNumber}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
             } catch (err) {
-                toast.error('Error al generar la factura');
+                console.error('Error generating invoice:', err);
+                toast.error('Error al generar el ticket');
             }
         };
-        generateInvoice();
+
+        if (orderSuccess?.orderId) {
+            generateInvoice();
+        }
     }, [orderSuccess]);
     const handleDownloadInvoice = () => {
         if (!invoiceBlob || !orderSuccess) return;
         const url = window.URL.createObjectURL(invoiceBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Factura-${orderSuccess.orderNumber}.pdf`;
+        link.download = `Ticket-${orderSuccess.orderNumber}.pdf`;
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
-        toast.success('Factura descargada correctamente');
+        toast.success('Ticket descargada correctamente');
     };
     // Handle sending email with receipt
     const handleSendEmail = () => {
@@ -544,7 +557,7 @@ export default function CartPage() {
                                                             className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
                                                             required
                                                         />
-                                                        </div> 
+                                                    </div>
                                                     {(deliveryMethod === 'delivery') && (
                                                         <>
                                                             <div className="col-span-2">
@@ -887,8 +900,8 @@ export default function CartPage() {
                         className="text-center py-16 min-h-[50vh] flex flex-col items-center justify-center space-y-4"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        >
-                            <ShoppingBag className="text-gray-600" size={120} />
+                    >
+                        <ShoppingBag className="text-gray-600" size={120} />
                         <h2 className="text-2xl font-bold mb-4">Tu carrito está vacío</h2>
                         <p className="text-gray-500 mb-8">¿No sabes qué comprar? ¡Miles de productos te esperan!</p>
                         <Link
@@ -947,7 +960,7 @@ export default function CartPage() {
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Descargar Factura
+                                Descargar Ticket
                             </button>
                             <button
                                 onClick={handleSendEmail}

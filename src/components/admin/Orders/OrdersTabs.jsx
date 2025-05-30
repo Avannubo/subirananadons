@@ -307,14 +307,14 @@ export default function OrdersTabs({ userRole = 'user' }) {
                         >
                             <FiDownload className="mr-1" /> Exportar
                         </button>
-                        {userRole === 'admin' && (
+                        {/* {userRole === 'admin' && (
                             <button
                                 className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
-                                onClick={() => {/* Handle new order */ }}
+                                onClick={() =>  }
                                 title="Añadir nuevo pedido"
                             >
                                 <FiPlus className="mr-1" /> Nuevo Pedido
-                            </button>)}
+                            </button>)} */}
                     </div>
                 </div>
                 {/* Search and Filters */}

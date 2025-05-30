@@ -9,7 +9,7 @@ export async function GET(request, { params }) {
     try {
         await dbConnect();
         const { id } = params;
-        
+
         // First check if an invoice already exists for this order
         const existingInvoice = await Invoice.findOne({ order: id });
         if (existingInvoice) {
@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
                     status: 200,
                     headers: {
                         'Content-Type': 'application/pdf',
-                        'Content-Disposition': `attachment; filename="Factura-${existingInvoice.invoiceNumber}.pdf"`
+                        'Content-Disposition': `attachment; filename="Ticket-${existingInvoice.invoiceNumber}.pdf"`
                     }
                 });
             } catch (error) {
@@ -38,7 +38,7 @@ export async function GET(request, { params }) {
                 select: 'name reference'
             })
             .lean();
-            
+
         console.log('Order:', order);
         if (!order) {
             return new NextResponse('Order not found', { status: 404 });
@@ -49,7 +49,7 @@ export async function GET(request, { params }) {
             <html>
             <head>
             <meta charset="UTF-8">
-            <title>Factura - ${order.orderNumber}</title>
+            <title>Ticket - ${order.orderNumber}</title>
             <style>
                 @page { size: A4; margin: 0; }
                 body { 
@@ -128,7 +128,7 @@ export async function GET(request, { params }) {
                 <div class="header">
                 <div class="logo">SUBIRANANADONS</div>
                 <div class="invoice-details">
-                    <h2>FACTURA</h2>
+                    <h2>TICKET</h2>
                     <div>Nº: ${order.orderNumber}</div>
                     <div>Fecha: ${new Date(order.createdAt).toLocaleDateString('es-ES')}</div>
                 </div>
@@ -190,7 +190,7 @@ export async function GET(request, { params }) {
                 </table>
                 <div class="footer">
                 <p>Gracias por su compra</p>
-                <small>Este documento sirve como factura simplificada según el Real Decreto 1619/2012</small>
+                <small>Este documento sirve como ticket simplificada según el Real Decreto 1619/2012</small>
                 </div>
             </div>
             </body>
@@ -249,7 +249,11 @@ export async function GET(request, { params }) {
                 customerEmail: order.shippingAddress.email,
                 orderNumber: order.orderNumber,
                 orderDate: order.createdAt,
-                deliveryMethod: order.deliveryMethod
+                deliveryMethod: order.deliveryMethod,
+                subtotal: order.subtotal,
+                tax: order.tax,
+                shippingCost: order.shippingCost,
+                totalAmount: order.totalAmount
             }
         });
 
@@ -263,7 +267,7 @@ export async function GET(request, { params }) {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="Factura-${invoice.invoiceNumber}.pdf"`
+                'Content-Disposition': `attachment; filename="Ticket-${invoice.invoiceNumber}.pdf"`
             }
         });
     } catch (error) {

@@ -22,15 +22,15 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
             });
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || 'Error al eliminar la factura');
+                throw new Error(data.error || 'Error al eliminar la ticket');
             }
-            toast.success('Factura eliminada correctamente');
+            toast.success('Ticket eliminada correctamente');
             if (onBillDeleted) {
                 onBillDeleted(billId);
             }
         } catch (error) {
             console.error('Error deleting bill:', error);
-            toast.error(error.message || 'Error al eliminar la factura');10
+            toast.error(error.message || 'Error al eliminar la ticket'); 10
         } finally {
             closeDeleteModal();
         }
@@ -38,7 +38,7 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
     const handleFilterChange = (field, value) => {
         setFilters({ ...filters, [field]: value });
     };
-    
+
     const viewPdf = async (pdfUrl) => {
         if (!pdfUrl || pdfUrl === '#') {
             toast.error('PDF no disponible');
@@ -63,12 +63,12 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `factura.pdf`;
+            link.download = `ticket.pdf`;
             document.body.appendChild(link);
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-            toast.success('Factura descargada correctamente');
+            toast.success('Ticket descargada correctamente');
         } catch (error) {
             console.error('Error downloading PDF:', error);
             toast.error('Error al descargar el PDF');
@@ -261,7 +261,7 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
                                             <button
                                                 onClick={() => openDeleteModal(bill)}
                                                 className="text-red-600 hover:text-red-900 flex items-center"
-                                                title="Eliminar factura"
+                                                title="Eliminar ticket"
                                             >
                                                 <FiTrash2 size={20} />
                                             </button>
@@ -280,7 +280,7 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
                 </table>
             </div>
             {/* Pagination */}
-            <Pagination 
+            <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 totalItems={totalItems}
@@ -293,8 +293,8 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
             {deleteModal.open && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000050] bg-opacity-40">
                     <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-                        <h2 className="text-lg font-semibold mb-4">¿Eliminar factura?</h2>
-                        <p className="mb-6">¿Estás seguro de que deseas eliminar la factura <span className="font-bold">{deleteModal.bill?.reference}</span>? Esta acción no se puede deshacer.</p>
+                        <h2 className="text-lg font-semibold mb-4">¿Eliminar ticket?</h2>
+                        <p className="mb-6">¿Estás seguro de que deseas eliminar la ticket <span className="font-bold">{deleteModal.bill?.reference}</span>? Esta acción no se puede deshacer.</p>
                         <div className="flex justify-end space-x-2">
                             <button
                                 className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
