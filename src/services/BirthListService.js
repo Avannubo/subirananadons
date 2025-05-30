@@ -230,11 +230,12 @@ export const updateBirthListItems = async (listId, items) => {
 
         // Validate and clean the items data before sending
         const cleanedItems = items.map(item => ({
-            _id: item._id || item,
+            _id: item._id,
             product: item.product?._id || item.product,
             quantity: item.quantity || 1,
             state: typeof item.state === 'number' ? item.state : 0,
-            priority: item.priority || 2
+            priority: item.priority || 2,
+            productSnapshot: item.productSnapshot || undefined // Preserve snapshot if it exists
         }));
 
         const response = await fetch(`/api/birthlists/${listId}/items`, {

@@ -59,28 +59,39 @@ export default function ListProductsManager({ listId, onUpdate }) {
         }
     };
 
+    // Handle adding new products to the birth list
     const handleAddProducts = (selectedProducts) => {
         // Get only the newly added products (not already in items)
-        const existingProductIds = items.map(item => item._id);
+        const existingProductIds = items.map(item => item.product._id);
         const newProductsOnly = selectedProducts.filter(
-            item => !existingProductIds.includes(item._id)
+            item => !existingProductIds.includes(item.product._id)
         );
+
         if (newProductsOnly.length === 0) {
             return;
         }
+
         // Format items for API
         const updatedItems = [
             ...items,
-            ...newProductsOnly
+            ...newProductsOnly.map(item => ({
+                product: item.product._id,
+                quantity: parseInt(item.quantity),
+                reserved: parseInt(item.reserved || 0),
+                priority: parseInt(item.priority || 2),
+                productSnapshot: {
+                    name: item.product.name,
+                    reference: item.product.reference,
+                    price: item.product.price_incl_tax,
+                    image: item.product.image,
+                    brand: item.product.brand,
+                    category: item.product.category
+                }
+            }))
         ];
-        const formattedItems = updatedItems.map(item => ({
-            product: item._id,
-            quantity: parseInt(item.quantity),
-            reserved: parseInt(item.reserved || 0),
-            priority: parseInt(item.priority || 2)
-        }));
+
         // Update the birth list with all items
-        updateBirthListItems(listId, formattedItems)
+        updateBirthListItems(listId, updatedItems)
             .then(result => {
                 if (result.success) {
                     toast.success('Productos añadidos a la lista');
@@ -91,7 +102,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                 }
             })
             .catch(error => {
-                console.error('Error adding products to list:', error);
+                console.error('Error updating birth list items:', error);
                 toast.error('Error al añadir productos a la lista');
             });
     };

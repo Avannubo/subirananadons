@@ -5,6 +5,7 @@ import Order from '@/models/Order';
 import User from '@/models/User';
 import dbConnect from '@/lib/dbConnect';
 import mongoose from 'mongoose';
+import BirthList from '@/models/BirthList';
 
 // Generate a unique order number
 function generateOrderNumber() {
@@ -40,7 +41,10 @@ export async function POST(request) {
                 return {
                     product: productId,
                     quantity: item.quantity,
-                    price: item.priceValue || parseFloat(item.price.replace(',', '.'))
+                    price: item.priceValue || parseFloat(item.price.replace(',', '.')),
+                    isGift: item.isGift || false,
+                    giftInfo: item.giftInfo,
+                    buyerInfo: item.buyerInfo
                 };
             }),
             shippingAddress: {
@@ -70,6 +74,37 @@ export async function POST(request) {
 
         // Create the order
         const order = await Order.create(orderData);
+
+        // For gift items, update the birth list items to mark them as purchased
+        const giftItems = items.filter(item => item.isGift && item.giftInfo);
+        if (giftItems.length > 0) {
+            for (const item of giftItems) {
+                if (!item.giftInfo.listId || !item.giftInfo.itemId) continue;
+
+                try {
+                    // Find the birth list
+                    const birthList = await BirthList.findById(item.giftInfo.listId);
+                    if (!birthList) {
+                        console.error(`Birth list not found: ${item.giftInfo.listId}`);
+                        continue;
+                    }
+
+                    // Find the specific item in the birth list
+                    const birthListItem = birthList.items.id(item.giftInfo.itemId);
+                    if (!birthListItem) {
+                        console.error(`Item not found in birth list: ${item.giftInfo.itemId}`);
+                        continue;
+                    }
+
+                    // Update the item's state to purchased (2)
+                    await birthList.updateItemState(item.giftInfo.itemId, 2, item.buyerInfo);
+
+                } catch (error) {
+                    console.error(`Error updating birth list item state: ${error.message}`);
+                    // Continue processing other items even if one fails
+                }
+            }
+        }
 
         // Return success response
         return NextResponse.json({

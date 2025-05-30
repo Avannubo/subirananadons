@@ -28,17 +28,12 @@ export default function BirthListPage({ params }) {
     const router = useRouter();
     const { addToCart } = useCart();
     // Remove or simplify unused states related to the modal
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    // Calculate progress percentage based on reserved/purchased items
+    const [selectedProduct, setSelectedProduct] = useState(null);    // Calculate progress percentage based on item states (2=purchased, 1=reserved, 0=available)
     const calculateProgress = (items) => {
         if (!items || items.length === 0) return 0;
-        let reservedTotal = 0;
-        let quantityTotal = 0;
-        items.forEach(item => {
-            reservedTotal += item.reserved || 0;
-            quantityTotal += item.quantity || 0;
-        });
-        return quantityTotal > 0 ? Math.round((reservedTotal / quantityTotal) * 100) : 0;
+        const purchasedCount = items.filter(item => item.state === 2).length;
+        const totalItems = items.length;
+        return totalItems > 0 ? Math.round((purchasedCount / totalItems) * 100) : 0;
     };
     // Fetch birth list data from API
     useEffect(() => {
@@ -59,7 +54,7 @@ export default function BirthListPage({ params }) {
                 const progress = calculateProgress(birthListData.items);
                 setList({
                     id: birthListData._id,
-                    userId: birthListData.user?._id, // Add user ID from the API response
+                    userId: birthListData.user?._id,
                     babyName: birthListData.babyName,
                     parents: birthListData.user ? birthListData.user.name : 'Anónimo',
                     dueDate: birthListData.dueDate,
@@ -73,14 +68,14 @@ export default function BirthListPage({ params }) {
                     products: birthListData.items.map(item => ({
                         id: item._id,
                         productId: item.product._id,
-                        name: item.product.name,
-                        price: `${item.product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
-                        priceValue: item.product.price_incl_tax,
-                        image: item.product.image || '/assets/images/Screenshot_4.png',
-                        category: item.product.category,
-                        status: item.reserved >= item.quantity ? 'purchased' : 'available',
-                        quantity: item.quantity,
-                        reserved: item.reserved,
+                        name: item.productSnapshot?.name || item.product.name,
+                        price: `${(item.productSnapshot?.price || item.product.price_incl_tax).toFixed(2).replace('.', ',')} €`,
+                        priceValue: item.productSnapshot?.price || item.product.price_incl_tax,
+                        image: item.productSnapshot?.image || item.product.image || '/assets/images/Screenshot_4.png',
+                        category: item.productSnapshot?.category || item.product.category,
+                        brand: item.productSnapshot?.brand || item.product.brand,
+                        reference: item.productSnapshot?.reference || item.product.reference, status: item.state === 2 ? 'purchased' : item.state === 1 ? 'reserved' : 'available',
+                        state: item.state || 0,
                         priority: item.priority
                     }))
                 });
@@ -149,7 +144,7 @@ export default function BirthListPage({ params }) {
     if (error) {
         return (
             <ShopLayout>
-                <div className="container mx-auto px-4 py-16">
+                <div className="container mx-auto px-4 py-36">
                     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 text-center">
                         <svg className="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -167,7 +162,7 @@ export default function BirthListPage({ params }) {
     if (!list) {
         return (
             <ShopLayout>
-                <div className="container mx-auto px-4 py-16">
+                <div className="container mx-auto px-4 py-36">
                     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 text-center">
                         <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -215,9 +210,7 @@ export default function BirthListPage({ params }) {
                 console.error('Missing list owner ID');
                 toast.error('Error: No se puede identificar el propietario de la lista');
                 return;
-            }
-
-            const success = await addToCart(productForCart, 1, {
+            } const success = await addToCart(productForCart, 1, {
                 isGift: true,
                 giftInfo: {
                     listId: id,
@@ -229,10 +222,9 @@ export default function BirthListPage({ params }) {
                     reserved: product.reserved || 0
                 }
             });
-            if (success) {
-                // Navigate to cart
-                router.push('/cart');
-            }
+            // if (success) {
+            //     toast.success('Regalo añadido al carrito');
+            // }
         } catch (error) {
             console.error('Error adding gift to cart:', error);
             toast.error('Error al añadir el regalo al carrito');
@@ -289,15 +281,15 @@ export default function BirthListPage({ params }) {
             <div className="container mx-auto px-4 py-8">
                 <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-                        <div className="w-full md:w-2/3 mb-4 md:mb-0">
-                            <div className="flex justify-between mb-2">
-                                <span className="text-gray-600">Progreso de la lista</span>
-                                <span className="font-medium">{list.progress}%</span>
-                            </div>
+                        <div className="w-full md:w-2/3 mb-4 md:mb-0">                <div className="flex justify-between mb-2">
+                            <span className="text-gray-600">Regalos comprados</span>
+                            <span className="font-medium">{list.progress}%</span>
+                        </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
                                     className="bg-[#00B0C8] h-2 rounded-full transition-all duration-500"
                                     style={{ width: `${list.progress}%` }}
+                                    title={`${list.progress}% de los regalos han sido comprados`}
                                 />
                             </div>
                         </div>
@@ -360,12 +352,13 @@ export default function BirthListPage({ params }) {
                                         alt={product.name}
                                         fill
                                         className="object-contain"
-                                    />
-                                    {product.status !== 'available' && (
-                                        <div className="absolute inset-0 bg-[#00000080] flex items-center justify-center">
-                                            <span className="text-white text-lg font-medium">
-                                                Comprado
-                                            </span>
+                                    />                                    {product.status !== 'available' && (
+                                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
+                                            <div className=" px-4 py-2 rounded-lg">
+                                                <span className="text-white text-lg font-medium uppercase tracking-wider">
+                                                    {product.status === 'purchased' ? 'Comprado' : 'Reservado'}
+                                                </span>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -383,8 +376,10 @@ export default function BirthListPage({ params }) {
                                                 Añadir al carrito
                                             </button>
                                         ) : (
-                                            <div className="text-xs text-gray-500">
-                                                Comprado ({product.reserved} de {product.quantity})
+                                            <div className="text-center py-1.5 bg-gray-100 rounded-md">
+                                                <span className="text-sm text-gray-600">
+                                                    {product.status === 'purchased' ? 'Comprado' : 'Reservado'}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
@@ -400,4 +395,4 @@ export default function BirthListPage({ params }) {
             </div>
         </ShopLayout>
     );
-} 
+}

@@ -9,7 +9,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 export default function CartPage() {
-    const { cartItems, updateQuantity, removeFromCart } = useCart();
+    const { cartItems, updateQuantity, removeFromCart, updateGiftNote } = useCart();
     const { user, loading: userLoading } = useUser();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
@@ -28,6 +28,8 @@ export default function CartPage() {
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
     const [userType, setUserType] = useState('guest'); // 'guest' or 'register'
+    const [giftNotes, setGiftNotes] = useState({});
+
     const regularItems = cartItems.filter(item => !item.isGift);
     const giftItems = cartItems.filter(item => item.isGift);
     // Check if cart has any gift items
@@ -226,8 +228,13 @@ export default function CartPage() {
             const orderData = {
                 items: cartItems.map(item => ({
                     ...item,
-                    // Add buyer information to gift items
-                    buyerInfo: item.isGift ? buyerInfo : undefined
+                    // Add buyer information and notes to gift items
+                    buyerInfo: item.isGift ? {
+                        ...buyerInfo,
+                        note: giftNotes[item.id] || ''
+                    } : undefined,
+                    // Ensure quantity is 1 for gift items
+                    quantity: item.isGift ? 1 : item.quantity
                 })),
                 shippingDetails: formData,
                 deliveryMethod: deliveryMethod,
@@ -328,6 +335,15 @@ export default function CartPage() {
         setTimeout(() => {
             toast.success('Email enviado correctamente');
         }, 1500);
+    }; const handleGiftNoteChange = async (itemId, note) => {
+        // Update local state immediately for UI responsiveness
+        setGiftNotes(prev => ({
+            ...prev,
+            [itemId]: note
+        }));
+
+        // Persist to cart state
+        await updateGiftNote(itemId, note);
     };
     return (
         <ShopLayout>
@@ -345,7 +361,7 @@ export default function CartPage() {
                                         <div className="flex items-start space-x-4 justify-start ">
                                             <h2 className="text-xl font-bold mb-6">Datos del usuario</h2>
                                             {/* <UserAuth /> */}
-                                        </div> 
+                                        </div>
                                         {!user ? (
                                             <>
                                                 <div className="space-y-4">
@@ -389,7 +405,7 @@ export default function CartPage() {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>  
+                                                        </div>
                                                         <div className='flex-1 flex-row gap-4 space-x-2'>
                                                             <div
                                                                 className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'guest'
@@ -692,37 +708,26 @@ export default function CartPage() {
                                                 <div className="flex-grow">
                                                     <h3 className="font-medium">{item.name}</h3>
                                                     <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
-                                                    <p className="text-[#00B0C8] font-medium">{item.price}</p>
+                                                    <p className="text-[#00B0C8] font-medium">{item.price}€</p>
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
                                                             Lista de regalo: {item.listOwner}
                                                             <span className="ml-2 bg-green-100 text-green-700 px-1 rounded text-xs">Será marcado como comprado</span>
                                                         </p>
                                                     )}
+                                                </div>                                        <div className="flex flex-col space-y-3 w-full mt-2">
+                                                    <div className="flex items-center justify-between">
+                                                        
+                                                        <div className="flex items-center space-x-2 justify-between">                                            <p className="text-sm text-gray-500">Cantidad: 1</p>
+                                                            <button
+                                                                onClick={() => removeFromCart(item.id)}
+                                                                className="text-sm text-red-600 hover:text-red-900"
+                                                            >
+                                                                Eliminar
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
-                                                    >
-                                                        -
-                                                    </button>
-                                                    <span className="w-8 text-center">{item.quantity}</span>
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
-                                                    >
-                                                        +
-                                                    </button>
-                                                </div>
-                                                <button
-                                                    onClick={() => removeFromCart(item.id)}
-                                                    className="text-red-500 hover:text-red-700"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
                                             </div>
                                         ))}
                                     </div>
@@ -808,7 +813,7 @@ export default function CartPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">Recoger en tienda</p>
-                                                    <p className="text-sm text-gray-500">Disponible en 2-4 horas</p>
+                                                    <p className="text-sm text-gray-500">Disponible in 2-4 horas</p>
                                                     {hasGiftItems && (
                                                         <p className="text-xs text-pink-600 font-medium mt-1">Obligatorio para productos de regalo — Solo el propietario de la lista puede recogerlos</p>
                                                     )}
@@ -818,6 +823,45 @@ export default function CartPage() {
                                         </div>
                                     </div>
                                 </div>
+                                {/* Gift Notes Section */}
+                                {giftItems.length > 0 && (
+                                    <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
+                                        <h2 className="text-xl font-bold mb-4">Notas para los regalos</h2>
+                                        <div className="space-y-6">
+                                            {giftItems.map((item) => (
+                                                <div key={`note-${item.id}`} className="space-y-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="relative w-16 h-16 overflow-hidden rounded-md border border-gray-200">
+                                                            <Image
+                                                                src={item.image}
+                                                                alt="img"
+                                                                fill
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-sm font-medium text-gray-900">{item.name}</h3>
+                                                            <p className="text-sm text-gray-500">{item.priceValue}€</p>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label htmlFor={`gift-note-${item.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                                                            Nota para el regalo
+                                                        </label>
+                                                        <textarea
+                                                            id={`gift-note-${item.id}`}
+                                                            value={giftNotes[item.id] || item.giftInfo?.note || ''}
+                                                            onChange={(e) => handleGiftNoteChange(item.id, e.target.value)}
+                                                            placeholder="Añade un mensaje personal para este regalo..."
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] text-sm"
+                                                            rows={3}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                                 {/* Order Summary */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
                                     <h2 className="text-xl font-bold mb-4">Resumen del pedido</h2>

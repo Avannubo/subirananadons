@@ -67,6 +67,8 @@ export async function PUT(request) {
         }
 
         await dbConnect();
+
+        // Update the cart with the new items, preserving giftInfo
         console.log('Connected to database');
 
         const { items, cartId } = await request.json();
@@ -74,15 +76,16 @@ export async function PUT(request) {
         console.log('With items:', items);
 
         const cart = await Cart.findOneAndUpdate(
-            { _id: cartId, user: session.user.id },
-            {
-                items: items.map(item => ({
-                    product: item.id.toString(),
-                    quantity: Number(item.quantity),
-                    price: Number(item.priceValue || item.price)
-                })),
-                lastUpdated: new Date()
-            },
+            { _id: cartId, user: session.user.id }, {
+            items: items.map(item => ({
+                product: item.id.toString(),
+                quantity: Number(item.quantity),
+                price: Number(item.priceValue || item.price),
+                isGift: item.isGift || false,
+                giftInfo: item.giftInfo
+            })),
+            lastUpdated: new Date()
+        },
             { new: true }
         );
 

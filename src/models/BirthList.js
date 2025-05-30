@@ -28,7 +28,16 @@ const birthListSchema = new mongoose.Schema({
         }, product: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product',
-            required: true
+            required: true,
+            immutable: true // Prevent product reference from being modified after creation
+        },
+        productSnapshot: { // Store essential product data at time of addition
+            name: String,
+            reference: String,
+            price: Number,
+            image: String,
+            brand: String,
+            category: String
         },
         quantity: {
             type: Number,

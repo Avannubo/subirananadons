@@ -45,7 +45,21 @@ export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState([]);
     const [cartId, setCartId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const { data: session, status } = useSession();
+    const { data: session, status } = useSession();    // Initialize gift notes from cart items
+    useEffect(() => {
+        if (!isLoading && cartItems.length > 0) {
+            const initialNotes = cartItems.reduce((acc, item) => {
+                if (item.isGift && item.giftInfo?.note) {
+                    acc[item.id] = item.giftInfo.note;
+                }
+                return acc;
+            }, {});
+            if (Object.keys(initialNotes).length > 0) {
+                localStorage.setItem('giftNotes', JSON.stringify(initialNotes));
+            }
+        }
+    }, [cartItems, isLoading]);
+
     // Load cart data from local storage or database
     useEffect(() => {
         const loadCart = async () => {
@@ -165,42 +179,26 @@ export function CartProvider({ children }) {
     const addToCart = async (product, quantity = 1, options = {}) => {
         try {
             if (isLoading) return false;
-            const { isGift, giftInfo } = options;
+            const { isGift, giftInfo, note } = options;
+
             // Use the dedicated add endpoint for gifts
             if (isGift && giftInfo) {
                 try {
                     console.log('Adding gift to cart with data:', {
                         product,
-                        quantity,
-                        giftInfo
+                        quantity: 1, // Force quantity to 1 for gifts
+                        giftInfo,
+                        note
                     });
-                    // Ensure we have the correct productId format
-                    const productId = product.productId || product.id;
-                    if (!productId) {
-                        console.error('Invalid product ID:', product);
-                        toast.error('Error: ID de producto inválido');
-                        return false;
-                    }                    // Validate gift info before sending to API
-                    if (!giftInfo.listId || !giftInfo.itemId || !giftInfo.babyName) {
-                        console.error('Missing required gift info:', giftInfo);
-                        toast.error('Error: Falta información de la lista de regalo');
-                        return false;
-                    }                    // Ensure the giftInfo has all required fields
-                    const requiredFields = ['listId', 'itemId', 'listOwnerId', 'babyName'];
-                    const missingFields = requiredFields.filter(field => !giftInfo[field]);
-                    if (missingFields.length > 0) {
-                        console.error('Missing required gift info fields:', missingFields);
-                        console.error('Gift info received:', giftInfo);
-                        toast.error('Error: Información de lista de regalo incompleta');
-                        return false;
-                    }
-                    // Format request data with additional validation
+
+                    // Ensure we have the correct productId format and note is passed
                     const requestData = {
-                        productId,
-                        quantity: Math.max(1, parseInt(quantity) || 1),
+                        productId: product.productId || product.id,
+                        quantity: 1,
                         isGift: true,
                         giftInfo: {
                             ...giftInfo,
+                            note: note || '',
                             listId: giftInfo.listId.toString(),
                             listOwnerId: giftInfo.listOwnerId.toString(),
                             addedAt: Date.now()
@@ -221,11 +219,10 @@ export function CartProvider({ children }) {
                         console.log('API response data:', data);
                         if (data.success) {
                             // Validate and update local cart with gift item
-                            if (data.cart?.items) {
-                                // Ensure the gift item is properly formatted in the cart
+                            if (data.cart?.items) {                                // Ensure each item is properly formatted in the cart
                                 const validatedItems = data.cart.items.map(item => ({
                                     ...item,
-                                    id: item.id || item.productId,
+                                    id: item.isGift ? `${item.product}-${Date.now()}` : (item.id || item.productId), // Unique ID for gift items
                                     isGift: item.isGift === undefined ? true : item.isGift,
                                     giftInfo: item.giftInfo || giftInfo,
                                     quantity: Math.max(1, parseInt(item.quantity) || 1),
@@ -326,16 +323,27 @@ export function CartProvider({ children }) {
     const updateQuantity = async (productId, quantity) => {
         try {
             if (isLoading) return;
+
+            // Get the item
+            const item = cartItems.find(i => i.id === productId);
+
+            // Prevent quantity changes for gift items
+            if (item && item.isGift) {
+                toast.error('No se puede modificar la cantidad de un regalo');
+                return false;
+            }
+
             if (quantity <= 0) {
                 return removeFromCart(productId);
             }
+
             const newItems = cartItems.map(item =>
                 item.id === productId ? { ...item, quantity } : item
             );
             return await saveCart(newItems);
         } catch (error) {
             console.error('Error updating quantity:', error);
-            toast.error('Failed to update quantity');
+            toast.error('Error al actualizar la cantidad');
             return false;
         }
     };
@@ -375,6 +383,35 @@ export function CartProvider({ children }) {
     const getCartCount = () => {
         return cartItems.reduce((count, item) => count + item.quantity, 0);
     };
+    const updateGiftNote = async (itemId, note) => {
+        try {
+            if (isLoading) return false;
+
+            // Find the gift item
+            const item = cartItems.find(i => i.id === itemId);
+            if (!item || !item.isGift) {
+                console.error('Item not found or not a gift item');
+                return false;
+            }
+
+            // Update the gift note in the item
+            const newItems = cartItems.map(item =>
+                item.id === itemId ? {
+                    ...item,
+                    giftInfo: {
+                        ...item.giftInfo,
+                        note
+                    }
+                } : item
+            );
+
+            // Save to local state and server
+            return await saveCart(newItems);
+        } catch (error) {
+            console.error('Error updating gift note:', error);
+            return false;
+        }
+    };
     return (
         <CartContext.Provider
             value={{
@@ -385,7 +422,8 @@ export function CartProvider({ children }) {
                 clearCart,
                 getCartTotal,
                 getCartCount,
-                isLoading
+                isLoading,
+                updateGiftNote
             }}
         >
             {children}
@@ -394,4 +432,4 @@ export function CartProvider({ children }) {
 }
 export function useCart() {
     return useContext(CartContext);
-} 
+}
