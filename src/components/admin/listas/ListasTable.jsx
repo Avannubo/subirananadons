@@ -359,9 +359,9 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                 <button className="text-indigo-600 hover:text-indigo-900" onClick={() => { const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`; navigator.clipboard.writeText(url).then(() => toast.success('Enlace copiado al portapapeles')).catch(() => toast.error('Error al copiar el enlace')); }} title="Copiar enlace">
                                     <FiLink size={22} />
                                 </button>
-                                {!userRole === 'admin' && !list.userId === 'current_user_id' && (
+                                {/* {!userRole === 'admin' && !list.userId === 'current_user_id' && (
                                     <button className="text-yellow-600 hover:text-yellow-900" title="Añadir regalo"><FiGift size={22} />
-                                    </button>)}
+                                    </button>)} */}
                             </div>
                         </td>
                         <td className="px-6 py-4 text-sm">

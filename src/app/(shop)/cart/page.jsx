@@ -178,6 +178,7 @@ export default function CartPage() {
     const handleSubmitOrder = async () => {
         // Clear any previous errors
         setOrderError(null);
+        
         // Determine which fields are required based on delivery method and cart contents
         let requiredFields = ['name', 'lastName', 'email', 'phone'];
         // Add address fields only if delivery method is 'delivery' or not all items are gifts
@@ -302,18 +303,22 @@ export default function CartPage() {
             setIsSubmitting(false);
         }
     };
+    
     // Handle invoice download
     const handleDownloadInvoice = async () => {
         if (!orderSuccess) return;
+        
         try {
             toast.loading('Generando factura...');
             const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
                 method: 'GET',
                 headers: { 'Accept': 'application/pdf' }
             });
+
             if (!res.ok) {
                 throw new Error('No se pudo generar la factura');
             }
+
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -329,9 +334,11 @@ export default function CartPage() {
             toast.error('Error al descargar la factura');
         }
     };
+
     // Handle sending email with receipt
     const handleSendEmail = async () => {
         if (!orderSuccess) return;
+        
         try {
             toast.loading('Enviando email...');
             const response = await fetch(`/api/orders/${orderSuccess.orderId}/send-email`, {
@@ -345,24 +352,29 @@ export default function CartPage() {
                     items: orderSuccess.items
                 })
             });
+
             if (!response.ok) {
                 throw new Error('Error al enviar el email');
             }
+
             toast.success('Email enviado correctamente');
         } catch (error) {
             console.error('Error sending email:', error);
             toast.error('Error al enviar el email');
         }
     };
+
     const handleGiftNoteChange = async (itemId, note) => {
         // Update local state immediately for UI responsiveness
         setGiftNotes(prev => ({
             ...prev,
             [itemId]: note
         }));
+
         // Persist to cart state
         await updateGiftNote(itemId, note);
     };
+    
     return (
         <ShopLayout>
             <div className="container mx-auto px-4 py-8 mt-24 ">
