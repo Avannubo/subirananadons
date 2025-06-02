@@ -40,6 +40,12 @@ export default function CartPage() {
     const hasOnlyGiftItems = useMemo(() => {
         return cartItems.length > 0 && cartItems.every(item => item.isGift);
     }, [cartItems]);
+
+    // Determine if we should show address fields
+    const showAddressFields = useMemo(() => {
+        return deliveryMethod === 'delivery' && !hasOnlyGiftItems;
+    }, [deliveryMethod, hasOnlyGiftItems]);
+
     // Force pickup method if cart has gift items
     useEffect(() => {
         if (hasGiftItems) {
@@ -552,8 +558,7 @@ export default function CartPage() {
                                                             required
                                                         />
                                                     </div>
-                                                    {/* Only show address fields if not gift-only or delivery method is not pickup */}
-                                                    {(!hasOnlyGiftItems || deliveryMethod === 'delivery') && (
+                                                    {/* Only show address fields if not gift-only or delivery method is not pickup */}                                    {showAddressFields && (
                                                         <>
                                                             <div className="col-span-2">
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
