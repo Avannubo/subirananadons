@@ -348,6 +348,24 @@ birthListSchema.virtual('availableItems').get(function () {
     return this.items.filter(item => item.state === 0);
 });
 
+// Pre-save hook to update list status based on item states
+birthListSchema.pre('save', function (next) {
+    // Only check for status update if there are items and status is not manually set to InActiva
+    if (this.items && this.items.length > 0 && this.status !== 'InActiva') {
+        // Check if all items are in purchased state (state = 2)
+        const totalItems = this.items.length;
+        const purchasedItems = this.items.filter(item => item.state === 2).length;
+
+        if (totalItems > 0 && totalItems === purchasedItems) {
+            this.status = 'Completada';
+        } else if (this.status !== 'Completada') {
+            // Keep status as Activa if not all items are purchased
+            this.status = 'Activa';
+        }
+    }
+    next();
+});
+
 // Add birth list to user's birthLists array when created
 birthListSchema.post('save', async function (doc) {
     try {

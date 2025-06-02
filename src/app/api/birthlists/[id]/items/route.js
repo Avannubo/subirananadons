@@ -137,8 +137,7 @@ export async function POST(request, { params }) {
             birthList.items[existingItemIndex].priority = parseInt(priority);
             birthList.items[existingItemIndex].state = parseInt(state);
             // Do not update product snapshot to preserve original data
-        } else {
-            // Add new product to the list with snapshot
+        } else {            // Add new product to the list with snapshot
             birthList.items.push({
                 product: productId,
                 productSnapshot,
@@ -147,9 +146,14 @@ export async function POST(request, { params }) {
                 reserved: 0,
                 priority: parseInt(priority)
             });
+
+            // If status is Completada and adding new item, change to Activa
+            if (birthList.status === 'Completada') {
+                birthList.status = 'Activa';
+            }
         }
 
-        // Save the updated birth list
+        // Save the updated birth list - status will be automatically checked by pre-save hook
         await birthList.save();
 
         // Return the updated birth list with populated items
@@ -243,9 +247,7 @@ export async function PUT(request, { params }) {
 
             // Handle new items (if any)
             const existingIds = birthList.items.map(item => item._id.toString());
-            const newItems = items.filter(item => !item._id || !existingIds.includes(item._id.toString()));
-
-            for (const newItem of newItems) {
+            const newItems = items.filter(item => !item._id || !existingIds.includes(item._id.toString())); for (const newItem of newItems) {
                 if (!newItem.product || !isValidObjectId(newItem.product)) continue;
 
                 // Fetch product details for new items
@@ -272,7 +274,12 @@ export async function PUT(request, { params }) {
                 });
             }
 
-            // Save the changes
+            // If status is Completada and adding new items, change to Activa
+            if (birthList.status === 'Completada' && newItems.length > 0) {
+                birthList.status = 'Activa';
+            }
+
+            // Save the changes - status will be automatically checked by pre-save hook
             await birthList.save();
 
             // Fetch the updated list with populated products (for backwards compatibility)

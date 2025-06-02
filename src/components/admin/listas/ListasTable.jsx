@@ -513,9 +513,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 selectedList={selectedList}
                 handleDeleteList={handleDeleteList}
                 loading={loading}
-            />
-
-            <ListViewModal
+            />            <ListViewModal
                 showModal={showViewModal}
                 setShowModal={setShowViewModal}
                 selectedList={selectedList}
@@ -523,6 +521,16 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 itemsLoading={itemsLoading}
                 openEditModal={openEditModal}
                 openStatusModal={openStatusModal}
+                onStatusChange={(newStatus) => {
+                    // Update the selected list status
+                    if (selectedList) {
+                        selectedList.status = newStatus;
+                        // Call onUpdate to refresh parent component
+                        if (onUpdate) {
+                            onUpdate();
+                        }
+                    }
+                }}
             />
 
             <ListStatusModal

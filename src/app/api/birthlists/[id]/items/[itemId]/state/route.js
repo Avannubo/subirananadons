@@ -77,9 +77,7 @@ export async function PUT(request, { params }) {
                 message: userData.message || '',
                 date: new Date().toISOString()
             } : null
-        };
-
-        // Save the changes
+        };        // The status will be automatically updated by the pre-save hook
         await birthList.save();
 
         // Fetch the updated list with populated products
