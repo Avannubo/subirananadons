@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useState, useCallback, useEffect } from 'react';
 import { updateBirthListItems, fetchBirthListItems, updateBirthListItemState, updateBirthList } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
-
 export default function ListViewModal({
     showModal,
     setShowModal,
@@ -26,7 +25,6 @@ export default function ListViewModal({
         phone: '',
         message: ''
     });
-
     // Reset userData when modal closes or changes item
     useEffect(() => {
         if (!showModal || !currentItem) {
@@ -46,7 +44,6 @@ export default function ListViewModal({
             });
         }
     }, [showModal, currentItem]);
-
     const handleUserDataChange = (e) => {
         const { name, value } = e.target;
         setUserData(prev => ({
@@ -54,7 +51,6 @@ export default function ListViewModal({
             [name]: value
         }));
     };
-
     useEffect(() => {
         if (!showModal) {
             setItems([]);
@@ -72,16 +68,13 @@ export default function ListViewModal({
     const getBoughtItems = useCallback(() =>
         items.filter(item => item.state === 2), [items]
     );
-
     const confirmStateChange = async () => {
         if (!currentItem) return;
         const listId = selectedList.rawData?._id || selectedList._id;
-
         if (!listId) {
             toast.error('Error: ID de lista no encontrado');
             return;
         }
-
         try {
             // Get the new state based on direction
             let newState;
@@ -98,30 +91,24 @@ export default function ListViewModal({
                 default:
                     return;
             }
-
             // Validate state change
             if (newState === currentItem.state) {
                 return toast.error('El producto ya está en este estado');
             }
-
             // Check required fields for reserve/buy actions
             if ((direction === 'reserve' || direction === 'buy') && (!userData.name || !userData.email)) {
                 toast.error('Por favor complete los campos obligatorios (nombre y email)');
                 return;
             }
-
             setLoading(true);
-
             // Update the item's state
             const result = await updateBirthListItemState(listId, currentItem._id, newState, userData);
-
             if (result.success) {
                 // Update the item in the local state
                 const updatedItems = items.map(item =>
                     item._id === currentItem._id ? result.data : item
                 );
                 setItems(updatedItems);
-
                 toast.success('Estado del producto actualizado correctamente');
                 setShowDataModal(false);
                 setUserData({
@@ -140,7 +127,6 @@ export default function ListViewModal({
     }; const moveItem = (item, dir) => {
         setCurrentItem(item);
         setDirection(dir);
-
         // If moving left (undoing reservation/purchase), directly update the state
         if (dir === 'left') {
             confirmStateChange();
@@ -175,13 +161,10 @@ export default function ListViewModal({
                 toast.error('Error: ID de lista no encontrado');
                 return;
             }
-
             setLoading(true);
-
             // Check if all items are in state 2 (bought)
             const allBought = items.every(item => item.state === 2);
             const newStatus = allBought ? 'Completada' : 'Activa';
-
             // Only update if status would change            if (selectedList.status !== newStatus) {
             const result = await updateBirthList(listId, { status: newStatus });
             if (result.success) {
@@ -192,7 +175,6 @@ export default function ListViewModal({
                     onStatusChange(newStatus);
                 }
                 toast.success(`Lista marcada como ${newStatus}`);
-
             } else {
                 toast.success('Lista guardada');
             }
@@ -204,7 +186,6 @@ export default function ListViewModal({
             setLoading(false);
         }
     };
-
     const renderProduct = (item, index) => {
         if (!item?.product?._id) {
             console.warn('Missing product data for item:', item);
@@ -365,7 +346,6 @@ export default function ListViewModal({
                             <h2 className="text-xl font-bold text-gray-800">Detalles de la Lista</h2>
                         </div>
                         <div className="flex items-center space-x-2">
-                            
                             <button
                                 onClick={() => setShowModal(false)}
                                 className="text-gray-500 hover:text-gray-700"

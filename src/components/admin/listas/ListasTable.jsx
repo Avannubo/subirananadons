@@ -7,7 +7,6 @@ import ListEditModal from './ListEditModal';
 import ListDeleteModal from './ListDeleteModal';
 import ListViewModal from './ListViewModal';
 import ListStatusModal from './ListStatusModal';
-
 export default function ListasTable({ lists, filters, setFilters, userRole = 'user', onUpdate }) {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -26,12 +25,10 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         items: []
     });
     const saveButtonRef = useRef(null);
-
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value }));
     };
-
     // Filter the lists based on search criteria
     const filteredLists = lists.filter((list) => {
         // Check for product match in list items
@@ -44,7 +41,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 return productName.toLowerCase().includes(searchTerm) ||
                     productRef.toLowerCase().includes(searchTerm);
             });
-
         return (
             list.id.toString().includes(filters.searchId || '') &&
             list.reference.toLowerCase().includes((filters.searchReference || '').toLowerCase()) &&
@@ -53,7 +49,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             hasMatchingProduct
         );
     });
-
     const openEditModal = (list) => {
         setSelectedList(list);
         setEditForm({
@@ -66,16 +61,13 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         });
         setShowEditModal(true);
     };
-
     const openDeleteModal = (list) => {
         setSelectedList(list);
         setShowDeleteModal(true);
     };
-
     const openViewModal = async (list) => {
         setSelectedList(list);
         setShowViewModal(true);
-
         // Fetch list items
         try {
             setItemsLoading(true);
@@ -92,12 +84,10 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             setItemsLoading(false);
         }
     };
-
     const openStatusModal = (list) => {
         setSelectedList(list);
         setShowStatusModal(true);
     };
-
     const updateListStatus = async (listId, newStatus, isPublic) => {
         try {
             setLoading(true);
@@ -106,7 +96,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 isPublic: isPublic
             };
             const result = await updateBirthList(listId, updateData);
-
             if (result.success) {
                 toast.success('Lista actualizada con éxito');
                 setShowStatusModal(false);
@@ -124,7 +113,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             setLoading(false);
         }
     };
-
     const handleEditChange = (e) => {
         const { name, value, type, checked } = e.target;
         setEditForm(prev => ({
@@ -132,7 +120,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             [name]: type === 'checkbox' ? checked : value
         }));
     };
-
     const handleUpdateList = async (e) => {
         e.preventDefault();
         if (!editForm.title || !editForm.babyName || !editForm.dueDate) {
@@ -145,7 +132,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             if (saveButtonRef.current) {
                 saveButtonRef.current.disabled = true;
             }
-
             // Handle image upload if there is a new image file
             let imageUrl = selectedList.image;
             if (editForm.image && typeof editForm.image === 'object') {
@@ -157,7 +143,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                         reader.onloadend = () => resolve(reader.result);
                         reader.readAsDataURL(editForm.image);
                     });
-
                     // Upload to server
                     const response = await fetch('/api/upload', {
                         method: 'POST',
@@ -166,12 +151,10 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                         },
                         body: JSON.stringify({ image: base64Image })
                     });
-
                     if (!response.ok) {
                         const errorData = await response.json();
                         throw new Error(errorData.error || 'Error al subir la imagen');
                     }
-
                     const data = await response.json();
                     toast.success('Imagen subida correctamente', { id: toastId });
                     imageUrl = data.url;
@@ -180,7 +163,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                     toast.error('Error al subir la imagen. Se guardará la lista sin la nueva imagen.', { id: toastId });
                 }
             }
-
             const updateData = {
                 title: editForm.title,
                 babyName: editForm.babyName,
@@ -189,7 +171,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 isPublic: editForm.isPublic,
                 image: imageUrl
             };
-
             const result = await updateBirthList(selectedList.id, updateData);
             if (result.success) {
                 toast.success('Lista actualizada con éxito');
@@ -213,7 +194,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             }
         }
     };
-
     const handleDeleteList = async () => {
         try {
             setLoading(true);
@@ -235,7 +215,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             setLoading(false);
         }
     };
-
     const generateListHTML = (list) => {
         return `
             <html>
@@ -302,19 +281,16 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             </html>
         `;
     };
-
     const handlePrintPDF = async (list) => {
         try {
             const html = generateListHTML(list);
             const blob = new Blob([html], { type: 'text/html' });
             const url = window.URL.createObjectURL(blob);
-
             // Create an iframe to print
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
             document.body.appendChild(iframe);
             iframe.src = url;
-
             iframe.onload = () => {
                 setTimeout(() => {
                     iframe.contentWindow.print();
@@ -335,11 +311,9 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                     'Accept': 'application/pdf'
                 }
             });
-
             if (!response.ok) {
                 throw new Error('Error al generar el PDF');
             }
-
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -355,12 +329,9 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             toast.error('Error al descargar el PDF');
         }
     };
-
     return (
-        <div className="bg-white rounded-lg shadow overflow-hidden ">
-
-            {/* Lists Table */}
-            <div className="overflow-x-auto ">
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
                 <table className="w-full whitespace-nowrap">
                     <thead className="bg-gray-50 text-gray-700 uppercasªe text-xs">
                         <tr>
@@ -368,134 +339,62 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                             <th className="px-6 py-3 text-left">Referencia</th>
                             <th className="px-6 py-3 text-left">Nombre</th>
                             {userRole === 'admin' && <th className="px-6 py-3 text-left">Creador</th>}
-                            <th className="px-6 py-3 text-left">Fecha Creación</th>                            <th className="px-6 py-3 text-left">Fecha Prevista</th>
+                            <th className="px-6 py-3 text-left">Fecha Creación</th>
+                            <th className="px-6 py-3 text-left">Fecha Prevista</th>
                             <th className="px-6 py-3 text-left">Privacidad</th>
                             <th className="px-6 py-3 text-left">Estado</th>
                             <th className="px-6 py-3 text-left">Ver/Compartir</th>
-                            <th className="px-6 py-3 text-left">Documentos</th>
-                            <th className="px-6 py-3 text-left">Acción</th>
+                            <th className="px-6 py-3 text-left">Documentos</th> 
+                                <th className="px-6 py-3 text-left">Acción</th> 
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {filteredLists.length > 0 ? (
-                            filteredLists.map((list, index) => (
-                                <tr key={index} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4">{index + 1}</td>
-                                    <td className="px-6 py-4">{list.reference}</td>
-                                    <td className="px-6 py-4">{list.name}</td>
-                                    {userRole === 'admin' && <td className="px-6 py-4">{list.creator}</td>}
-                                    <td className="px-6 py-4">{list.creationDate}</td>
-                                    <td className="px-6 py-4">{list.dueDate}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.isPublic ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'}`}>
-                                            {list.isPublic ? 'Pública' : 'Privada'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span
-                                            className={`px-2 py-1 rounded-full text-xs font-medium ${list.status === 'Activa' ? 'bg-green-100 text-green-800' :
-                                                list.status === 'Completada' ? 'bg-blue-100 text-blue-800' :
-                                                    'bg-red-100 text-red-800'
-                                                }`}
-                                        >
-                                            {list.status}
-                                        </span>
-                                    </td>                                    {/* View/Share Actions Column */}
-                                    <td className="px-6 py-4 text-sm">
-                                        <div className="flex items-center justify-center space-x-3">
-                                            <button
-                                                className="text-[#00B0C8] hover:text-[#008da0]"
-                                                onClick={() => openViewModal(list)}
-                                                title="Ver detalles"
-                                            >
-                                                <FiEye size={22} />
-                                            </button>
-                                            <button
-                                                className="text-indigo-600 hover:text-indigo-900"
-                                                onClick={() => {
-                                                    const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`;
-                                                    navigator.clipboard.writeText(url)
-                                                        .then(() => toast.success('Enlace copiado al portapapeles'))
-                                                        .catch(() => toast.error('Error al copiar el enlace'));
-                                                }}
-                                                title="Copiar enlace"
-                                            >
-                                                <FiLink size={22} />
-                                            </button>
-                                            {!userRole === 'admin' && !list.userId === 'current_user_id' && (
-                                                <button
-                                                    className="text-yellow-600 hover:text-yellow-900"
-                                                    title="Añadir regalo"
-                                                >
-                                                    <FiGift size={22} />
-                                                </button>)}
-                                        </div>
-                                    </td>                                    {/* Download/Print Actions Column */}
-                                    <td className="px-6 py-4 text-sm">
-                                        <div className="flex items-center justify-center space-x-3">
-                                            <button
-                                                className="text-green-600 hover:text-green-900"
-                                                onClick={() => handleDownloadPDF(list)}
-                                                title="Descargar PDF"
-                                            >
-                                                <FiDownload size={22} />
-                                            </button>                                            <button
-                                                className="text-blue-600 hover:text-blue-900"
-                                                onClick={() => handlePrintPDF(list)}
-                                                title="Imprimir lista"
-                                            >
-                                                <FiPrinter size={22} />
-                                            </button>
-                                        </div>
-                                    </td>                                    {/* Modification Actions Column */}
-                                    <td className="px-6 py-4 text-sm">
-                                        {(userRole === 'admin' || list.userId === 'current_user_id') && (
-                                            <div className="flex items-center justify-center space-x-3">
-                                                <button
-                                                    className="text-yellow-600 hover:text-yellow-900"
-                                                    onClick={() => openEditModal(list)}
-                                                    title="Editar lista"
-                                                >
-                                                    <FiEdit size={22} />
-                                                </button>
-                                                <button
-                                                    className="text-purple-600 hover:text-purple-900"
-                                                    onClick={() => openStatusModal(list)}
-                                                    title="Cambiar estado"
-                                                >
-                                                    <FiToggleLeft size={22} />
-                                                </button>
-                                                <button
-                                                    className="text-red-600 hover:text-red-900"
-                                                    onClick={() => openDeleteModal(list)}
-                                                    title="Eliminar lista"
-                                                >
-                                                    <FiTrash2 size={22} />
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {/* <button
-                                            className="text-green-600 hover:text-green-900 mr-3"
-                                            onClick={() => handleDownloadPDF(list)}
-                                            title="Descargar PDF"
-                                        >
-                                            <FiDownload size={22} />
-                                        </button> */}
-                                    </td>                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={userRole === 'admin' ? 11 : 10} className="px-6 py-4 text-center text-gray-500">
-                                    No se encontraron listas de regalos.
-                                </td>
-                            </tr>
-                        )}
+                    <tbody className="divide-y divide-gray-200">{filteredLists.length > 0 ? (filteredLists.map((list, index) => (<tr key={index} className="hover:bg-gray-50"><td className="px-6 py-4">{index + 1}</td><td className="px-6 py-4">{list.reference}</td><td className="px-6 py-4">{list.name}</td>{userRole === 'admin' &&
+                        <td className="px-6 py-4">{list.creator}</td>}
+                        <td className="px-6 py-4">{list.creationDate}</td>
+                        <td className="px-6 py-4">{list.dueDate}</td><td className="px-6 py-4"><span className={`px-2 py-1 rounded-full text-xs font-medium ${list.isPublic ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'}`}>{list.isPublic ? 'Pública' : 'Privada'}</span></td>
+                        <td className="px-6 py-4"><span className={`px-2 py-1 rounded-full text-xs font-medium ${list.status === 'Activa' ? 'bg-green-100 text-green-800' : list.status === 'Completada' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>{list.status}</span></td>
+                        <td className="px-6 py-4 text-sm">
+                            <div className="flex items-center justify-center space-x-3">
+                                <button className="text-[#00B0C8] hover:text-[#008da0]" onClick={() => openViewModal(list)} title="Ver detalles"><FiEye size={22} /></button>
+                                <button className="text-indigo-600 hover:text-indigo-900" onClick={() => { const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`; navigator.clipboard.writeText(url).then(() => toast.success('Enlace copiado al portapapeles')).catch(() => toast.error('Error al copiar el enlace')); }} title="Copiar enlace">
+                                    <FiLink size={22} />
+                                </button>
+                                {!userRole === 'admin' && !list.userId === 'current_user_id' && (
+                                    <button className="text-yellow-600 hover:text-yellow-900" title="Añadir regalo"><FiGift size={22} />
+                                    </button>)}
+                            </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                            <div className="flex items-center justify-center space-x-3">
+                                <button className="text-green-600 hover:text-green-900" onClick={() => handleDownloadPDF(list)} title="Descargar PDF">
+                                    <FiDownload size={22} />
+                                </button>
+                                <button className="text-blue-600 hover:text-blue-900" onClick={() => handlePrintPDF(list)} title="Imprimir lista">
+                                    <FiPrinter size={22} />
+                                </button>
+                            </div>
+                        </td> <td className="px-6 py-4 text-sm">
+                            <div className="flex items-center justify-center space-x-3">
+                                <button className="text-yellow-600 hover:text-yellow-900" onClick={() => openEditModal(list)} title="Editar lista">
+                                    <FiEdit size={22} />
+                                </button>
+                                <button className="text-purple-600 hover:text-purple-900" onClick={() => openStatusModal(list)} title="Cambiar estado">
+                                    <FiToggleLeft size={22} />
+                                </button>
+                                <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)} title="Eliminar lista">
+                                    <FiTrash2 size={22} />
+                                </button>
+                            </div>
+                        </td> 
+                    </tr>))) : (
+                        <tr>
+                            <td colSpan={userRole === 'admin' ? 11 : 10} className="px-6 py-4 text-center text-gray-500">
+                                No se encontraron listas de regalos.
+                            </td>
+                        </tr>)}
                     </tbody>
                 </table>
-            </div>
-
-            {/* Using modular components for modals */}
+            </div>{/* Using modular components for modals */}
             <ListEditModal
                 showModal={showEditModal}
                 setShowModal={setShowEditModal}
@@ -506,14 +405,14 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 loading={loading}
                 saveButtonRef={saveButtonRef}
             />
-
             <ListDeleteModal
                 showModal={showDeleteModal}
                 setShowModal={setShowDeleteModal}
                 selectedList={selectedList}
                 handleDeleteList={handleDeleteList}
                 loading={loading}
-            />            <ListViewModal
+            />
+            <ListViewModal
                 showModal={showViewModal}
                 setShowModal={setShowViewModal}
                 selectedList={selectedList}
@@ -532,7 +431,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                     }
                 }}
             />
-
             <ListStatusModal
                 showModal={showStatusModal}
                 setShowModal={setShowStatusModal}
@@ -542,6 +440,5 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             />
         </div>
     );
-
 }
 // Note: Ensure that the `ListEditModal`, `ListDeleteModal`, `ListViewModal`, and `ListStatusModal` components are properly implemented to handle their respective functionalities.
