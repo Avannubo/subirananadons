@@ -1,4 +1,4 @@
-'use client';
+'use client'
 import { useEffect, useState, useMemo } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
@@ -9,7 +9,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 export default function CartPage() {
-    const { cartItems, updateQuantity, removeFromCart, updateGiftNote } = useCart();
+    const { cartItems, updateQuantity, removeFromCart, updateGiftNote, clearCart } = useCart();
     const { user, loading: userLoading } = useUser();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
@@ -29,7 +29,6 @@ export default function CartPage() {
     const [orderError, setOrderError] = useState(null);
     const [userType, setUserType] = useState('guest'); // 'guest' or 'register'
     const [giftNotes, setGiftNotes] = useState({});
-
     const regularItems = cartItems.filter(item => !item.isGift);
     const giftItems = cartItems.filter(item => item.isGift);
     // Check if cart has any gift items
@@ -40,12 +39,10 @@ export default function CartPage() {
     const hasOnlyGiftItems = useMemo(() => {
         return cartItems.length > 0 && cartItems.every(item => item.isGift);
     }, [cartItems]);
-
     // Determine if we should show address fields
     const showAddressFields = useMemo(() => {
         return deliveryMethod === 'delivery' && !hasOnlyGiftItems;
     }, [deliveryMethod, hasOnlyGiftItems]);
-
     // Force pickup method if cart has gift items
     useEffect(() => {
         if (hasGiftItems) {
@@ -179,6 +176,8 @@ export default function CartPage() {
     };
     // Handle order submission
     const handleSubmitOrder = async () => {
+        // Clear any previous errors
+        setOrderError(null);
         // Determine which fields are required based on delivery method and cart contents
         let requiredFields = ['name', 'lastName', 'email', 'phone'];
         // Add address fields only if delivery method is 'delivery' or not all items are gifts
@@ -218,8 +217,6 @@ export default function CartPage() {
                     if (!registerResponse.ok) {
                         throw new Error('Error al crear la cuenta');
                     }
-                    // Optionally sign in the user automatically
-                    // This depends on your auth implementation
                 } catch (error) {
                     setOrderError('Error al crear la cuenta: ' + error.message);
                     return;
@@ -234,12 +231,10 @@ export default function CartPage() {
             const orderData = {
                 items: cartItems.map(item => ({
                     ...item,
-                    // Add buyer information and notes to gift items
                     buyerInfo: item.isGift ? {
                         ...buyerInfo,
                         note: giftNotes[item.id] || ''
                     } : undefined,
-                    // Ensure quantity is 1 for gift items
                     quantity: item.isGift ? 1 : item.quantity
                 })),
                 shippingDetails: formData,
@@ -281,8 +276,8 @@ export default function CartPage() {
                     email: formData.email
                 }
             });
-            // Clear the cart
-            cartItems.forEach(item => removeFromCart(item.id));
+            // Clear the cart in one go
+            clearCart();
             // Reset form data
             setFormData({
                 name: '',
@@ -310,16 +305,16 @@ export default function CartPage() {
     // Handle invoice download
     const handleDownloadInvoice = async () => {
         if (!orderSuccess) return;
-        toast.success('Generando factura...');
         try {
-            // Call API to generate/download invoice PDF
+            toast.loading('Generando factura...');
             const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
                 method: 'GET',
                 headers: { 'Accept': 'application/pdf' }
             });
-            if (!res.ok) throw new Error('No se pudo generar la factura');
+            if (!res.ok) {
+                throw new Error('No se pudo generar la factura');
+            }
             const blob = await res.blob();
-            // Create a link to download the PDF
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -329,25 +324,42 @@ export default function CartPage() {
             link.remove();
             window.URL.revokeObjectURL(url);
             toast.success('Factura descargada correctamente');
-        } catch (err) {
+        } catch (error) {
+            console.error('Error downloading invoice:', error);
             toast.error('Error al descargar la factura');
         }
     };
     // Handle sending email with receipt
-    const handleSendEmail = () => {
+    const handleSendEmail = async () => {
         if (!orderSuccess) return;
-        toast.success(`Enviando email a ${orderSuccess.buyerDetails.email}...`);
-        // Simulating email sending
-        setTimeout(() => {
+        try {
+            toast.loading('Enviando email...');
+            const response = await fetch(`/api/orders/${orderSuccess.orderId}/send-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: orderSuccess.buyerDetails.email,
+                    orderNumber: orderSuccess.orderNumber,
+                    items: orderSuccess.items
+                })
+            });
+            if (!response.ok) {
+                throw new Error('Error al enviar el email');
+            }
             toast.success('Email enviado correctamente');
-        }, 1500);
-    }; const handleGiftNoteChange = async (itemId, note) => {
+        } catch (error) {
+            console.error('Error sending email:', error);
+            toast.error('Error al enviar el email');
+        }
+    };
+    const handleGiftNoteChange = async (itemId, note) => {
         // Update local state immediately for UI responsiveness
         setGiftNotes(prev => ({
             ...prev,
             [itemId]: note
         }));
-
         // Persist to cart state
         await updateGiftNote(itemId, note);
     };
@@ -722,7 +734,6 @@ export default function CartPage() {
                                                     )}
                                                 </div>                                        <div className="flex flex-col space-y-3 w-full mt-2">
                                                     <div className="flex items-center justify-between">
-                                                        
                                                         <div className="flex items-center space-x-2 justify-between">                                            <p className="text-sm text-gray-500">Cantidad: 1</p>
                                                             <button
                                                                 onClick={() => removeFromCart(item.id)}
