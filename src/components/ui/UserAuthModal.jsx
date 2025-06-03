@@ -130,13 +130,29 @@ export default function AuthModal() {
             const email = formData.get('email');
             const password = formData.get('password');
             const confirmPassword = formData.get('confirmPassword');
-            console.log('Attempting registration with:', { name, email });
+            const terms = formData.get('terms');
+
+            // Input validation
+            if (!name || !email || !password || !confirmPassword) {
+                toast.error('Por favor, completa todos los campos');
+                return;
+            }
+
+            if (!terms) {
+                toast.error('Debes aceptar los términos y condiciones');
+                return;
+            }
+
             if (password !== confirmPassword) {
-                console.log('Password mismatch');
                 toast.error('Las contraseñas no coinciden');
                 return;
             }
-            console.log('Sending registration request...');
+
+            if (password.length < 6) {
+                toast.error('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
@@ -144,31 +160,36 @@ export default function AuthModal() {
                 },
                 body: JSON.stringify({ name, email, password }),
             });
+
             const data = await response.json();
-            console.log('Registration response:', data);
+
             if (!response.ok) {
-                console.error('Registration failed:', data);
-                toast.error(data.message || 'Error en el registro. Por favor intenta nuevamente.');
+                if (data.message.includes('duplicate key error')) {
+                    toast.error('Este correo electrónico ya está registrado');
+                } else {
+                    toast.error(data.message || 'Error en el registro');
+                }
                 return;
             }
+
             toast.success('¡Registro exitoso! Iniciando sesión...');
-            console.log('Registration successful, attempting automatic login...');
+
+            // Auto login after successful registration
             const signInResult = await signIn('credentials', {
                 redirect: false,
                 email,
                 password,
             });
-            console.log('Auto-login result:', signInResult);
+
             if (signInResult?.error) {
-                console.error('Auto-login failed:', signInResult.error);
                 toast.error('Registro exitoso pero error al iniciar sesión. Por favor inicia sesión manualmente.');
-                return;
+                toggleView('login');
+            } else {
+                setTimeout(() => {
+                    closeModal();
+                    router.push('/dashboard/account');
+                }, 1000);
             }
-            console.log('Auto-login successful, redirecting to dashboard...');
-            setTimeout(() => {
-                closeModal();
-                // router.push('/dashboard');
-            }, 1000);
         } catch (error) {
             console.error('Registration error:', error);
             toast.error('Error en el registro. Por favor intenta nuevamente.');
@@ -310,7 +331,7 @@ export default function AuthModal() {
                                                 ¿No tienes cuenta?{' '}
                                                 <button
                                                     type="button"
-                                                    onClick={toggleView}
+                                                    onClick={() => toggleView('register')}
                                                     className="text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
                                                 >
                                                     Cree uno aquí
@@ -430,14 +451,16 @@ export default function AuthModal() {
                                                 ¿Ya tienes cuenta?{' '}
                                                 <button
                                                     type="button"
-                                                    onClick={toggleView}
+                                                    onClick={() => toggleView('login')}
                                                     className="text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
                                                 >
                                                     Inicia sesión
                                                 </button>
                                             </p>
                                         </div>
-                                    </form>)}
+                                    </form>
+
+                                )}
                             </div>
                         </div>
                     </div>
