@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { LogOut, UserRound } from 'lucide-react'; 
+import { LogOut, UserRound } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 export default function AuthModal() {
@@ -25,9 +25,36 @@ export default function AuthModal() {
     };
     const closeModal = () => {
         setIsOpen(false);
+    }; const toggleView = (view) => {
+        setActiveView(view || (activeView === 'login' ? 'register' : 'login'));
     };
-    const toggleView = () => {
-        setActiveView(activeView === 'login' ? 'register' : 'login');
+
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        try {
+            const formData = new FormData(e.currentTarget);
+            const email = formData.get('email');
+
+            const response = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Error sending recovery email');
+            }
+
+            toast.success('Si el correo existe en nuestra base de datos, recibirás un email con instrucciones para restablecer tu contraseña', { duration: 5000 });
+            toggleView('login');
+        } catch (error) {
+            console.error('Forgot password error:', error);
+            toast.error(error.message || 'Error al enviar el email de recuperación');
+        }
     };
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -51,10 +78,10 @@ export default function AuthModal() {
             document.body.style.overflow = '';
         };
     }, [isOpen]);
-    useEffect(() => {
-        console.log('Session Status:', status);
-        console.log('Session Data:', session);
-    }, [session, status]);
+    // useEffect(() => {
+    //     console.log('Session Status:', status);
+    //     console.log('Session Data:', session);
+    // }, [session, status]);
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -158,15 +185,6 @@ export default function AuthModal() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
-    const getUserImage = () => {
-        if (user?.image) {
-            return user.image;
-        }
-        if (session?.user?.image) {
-            return session.user.image;
-        }
-        return '/assets/images/joie.png';
-    };
     return (
         <div className="flex">
             <div className="flex">
@@ -192,7 +210,7 @@ export default function AuthModal() {
                                     }}
                                 >
                                     Profile
-                                </button> 
+                                </button>
                                 <button
                                     onClick={() => signOut({ callbackUrl: '/' })}
                                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -205,7 +223,7 @@ export default function AuthModal() {
                 ) : (
                     <button
                         onClick={openLogin}
-                            className="flex flex-row items-center space-x-2   text-sm text-gray-700 rounded-md transition-colors" //py-2
+                        className="flex flex-row items-center space-x-2   text-sm text-gray-700 rounded-md transition-colors" //py-2
                     >
                         <UserRound />
                     </button>
@@ -273,10 +291,9 @@ export default function AuthModal() {
                                                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                                                     Recuérdame
                                                 </label>
-                                            </div>
-                                            <button
+                                            </div>                                            <button
                                                 type="button"
-                                                onClick={() => signIn('email')}
+                                                onClick={() => toggleView('recover')}
                                                 className="text-sm text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
                                             >
                                                 Se te olvidó tu contraseña
@@ -299,6 +316,38 @@ export default function AuthModal() {
                                                     Cree uno aquí
                                                 </button>
                                             </p>
+                                        </div>
+                                    </form>
+                                )}
+                                {activeView === 'recover' && (
+                                    <form className="space-y-4" onSubmit={handleForgotPassword}>
+                                        <div>
+                                            <label htmlFor="recovery-email" className="block text-sm font-medium text-gray-700 mb-1">
+                                                Dirección de correo electrónico
+                                            </label>
+                                            <input
+                                                type="email"
+                                                id="recovery-email"
+                                                name="email"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-transparent transition-all"
+                                                placeholder="Ingresa tu correo electrónico"
+                                                required
+                                            />
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-[#00B0C8] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
+                                        >
+                                            ENVIAR EMAIL DE RECUPERACIÓN
+                                        </button>
+                                        <div className="mt-4 text-center">
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleView('login')}
+                                                className="text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
+                                            >
+                                                Volver al inicio de sesión
+                                            </button>
                                         </div>
                                     </form>
                                 )}
@@ -388,8 +437,7 @@ export default function AuthModal() {
                                                 </button>
                                             </p>
                                         </div>
-                                    </form>
-                                )}
+                                    </form>)}
                             </div>
                         </div>
                     </div>
@@ -397,4 +445,4 @@ export default function AuthModal() {
             </div>
         </div>
     );
-} 
+}
