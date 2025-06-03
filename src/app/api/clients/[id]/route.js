@@ -97,6 +97,7 @@ export async function PUT(request, { params }) {
         // Get request body
         const data = await request.json();
         const { name, lastName, email, active, newsletter, partnerOffers } = data;
+        console.log('Updating client with data:', data);
 
         // Find the user
         const user = await User.findById(id);
@@ -176,13 +177,18 @@ export async function DELETE(request, { params }) {
                 { success: false, message: 'Unauthorized: Admin access required' },
                 { status: 403 }
             );
-        }
-
-        // Connect to database
+        }        // Connect to database
         await dbConnect();
 
-        // Get client ID from params
-        const { id } = params;
+        // Get and validate params
+        const resolvedParams = await Promise.resolve(params);
+        const id = resolvedParams.id;
+        if (!id) {
+            return NextResponse.json(
+                { success: false, message: 'Missing client ID' },
+                { status: 400 }
+            );
+        }
 
         // Find the user
         const user = await User.findById(id);

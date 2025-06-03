@@ -211,7 +211,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="name"
                                                 value={formData.name}
                                                 onChange={handleChange}
-                                                className={`mt-1 block p-1 w-full rounded-md border-2 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.name ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block p-2 w-full rounded-md border-1 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.name ? 'border-red-500' : ''}`}
                                             />
                                             {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
                                         </div>
@@ -224,7 +224,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="lastName"
                                                 value={formData.lastName}
                                                 onChange={handleChange}
-                                                className={`mt-1 block p-1 w-full rounded-md border-2 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.lastName ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block p-2 w-full rounded-md border-1 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.lastName ? 'border-red-500' : ''}`}
                                             />
                                             {errors.lastName && <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>}
                                         </div>
@@ -239,7 +239,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className={`mt-1 block p-1 w-full rounded-md border-2 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.email ? 'border-red-500' : ''}`}
+                                            className={`mt-1 block p-2 w-full rounded-md border-1 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.email ? 'border-red-500' : ''}`}
                                         />
                                         {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                                     </div>                                </section>
@@ -260,7 +260,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="password"
                                                 value={formData.password || ''}
                                                 onChange={handleChange}
-                                                className={`mt-1 block w-full rounded-md border-gray-300 border-2 p-1 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.password ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block w-full rounded-md border-gray-300 border-1 p-2 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.password ? 'border-red-500' : ''}`}
                                                 placeholder="Dejar en blanco para mantener la actual"
                                             />
                                             {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
@@ -275,7 +275,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="confirmPassword"
                                                 value={formData.confirmPassword || ''}
                                                 onChange={handleChange}
-                                                className={`mt-1 block w-full rounded-md border-gray-300 border-2 p-1 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block w-full rounded-md border-gray-300 border-1 p-2 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.confirmPassword ? 'border-red-500' : ''}`}
                                                 placeholder="Dejar en blanco para mantener la actual"
                                             />
                                             {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
@@ -296,7 +296,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 type="checkbox"
                                                 checked={formData.active}
                                                 onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-2  rounded"
+                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-1  rounded"
                                             />
                                             <label htmlFor="active" className="ml-2 block text-sm text-gray-700">
                                                 Cuenta activa
@@ -309,7 +309,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 type="checkbox"
                                                 checked={formData.newsletter}
                                                 onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-2  rounded"
+                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-1  rounded"
                                             />
                                             <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-700">
                                                 Suscrito al newsletter
@@ -322,7 +322,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 type="checkbox"
                                                 checked={formData.partnerOffers}
                                                 onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-2  rounded"
+                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-1  rounded"
                                             />
                                             <label htmlFor="partnerOffers" className="ml-2 block text-sm text-gray-700">
                                                 Recibir ofertas de socios
@@ -336,7 +336,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 border border-gray-300 border-2  rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
+                                className="px-4 py-2 border border-gray-300 border-1  rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
                             >
                                 Cancelar
                             </button>
