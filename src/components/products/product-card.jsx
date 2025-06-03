@@ -1,34 +1,79 @@
 "use client"
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
+import { useSession } from 'next-auth/react';
+import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
 // Product Card Component - Handles both grid and list view with hover effect
-export default function ProductCard({ product, viewMode = "grid", onQuickViewClick }) {
+export default function ProductCard({
+    product,
+    viewMode = "grid",
+    onQuickViewClick,
+    setShowAuthModal,  // Function to show/hide auth modal
+    setAuthModalData   // Function to set auth modal data (title, message, callback)
+}) {
     const [isHovered, setIsHovered] = useState(false);
+    const [isAddingToList, setIsAddingToList] = useState(false);
     const { addToCart } = useCart();
+    const { data: session } = useSession();
+    const router = useRouter();
     const currentImageUrl = isHovered && product.imageUrlHover ? product.imageUrlHover : product.imageUrl;
-    const HoverButton = ({ children, onClick }) => (
+    const HoverButton = ({ children, onClick, disabled }) => (
         <button
-            className="bg-white rounded-full p-2 shadow text-gray-700 hover:bg-gray-100 transition duration-200 focus:outline-none flex items-center justify-center"
+            className={`bg-white rounded-full p-2 shadow text-gray-700 hover:bg-gray-100 transition duration-200 focus:outline-none flex items-center justify-center ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={onClick}
+            disabled={disabled}
         >
             {children}
         </button>
-    );
-
-    const onAddToWishlist = async (e) => {  
+    ); const onAddToWishlist = async () => {
+        if (isAddingToList) return;
         try {
-            // await addToWishlist(product);
-            toast.success(`${product.name} añadido a la lista de deseos`);
+            setIsAddingToList(true);
+            // Case 1: Not logged in - Show AuthModal
+            if (!session) { 
+                    toast.error('Inicia sesión para añadir productos a las listas', { duration: 3000 });
+            }  
+            
+            // Get user's birth lists
+            const result = await fetchBirthLists();
+            if (!result.success) {
+                if (result.message.includes('Unauthorized')) {
+                    // Handle auth error specifically
+                    if (setShowAuthModal && setAuthModalData) {
+                        setAuthModalData({
+                            callback: () => onAddToWishlist(),
+                            message: 'Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.'
+                        });
+                        setShowAuthModal(true);
+                    } else {
+                        toast.success('Inicia sesión para añadir productos a las listas', { duration: 3000 });
+                    }
+                    return;
+                }
+                throw new Error(result.message);
+            }
+            const userLists = result.data;
+            // Case 2: No lists - Prompt to create list
+            if (!userLists || userLists.length === 0) {
+                router.push('/dashboard/listas');
+                toast.success('Crea tu primera lista para añadir productos', { duration: 5000 });
+                return;
+            }
+            // Case 3: Has lists - Go to lists page to select one
+            router.push('/dashboard/listas');
+            toast.success('Edita la lista para añadir productos', { duration: 5000 });
         } catch (error) {
-            toast.error('Error al añadir a la lista de deseos');
-            console.error('Error adding to wishlist:', error);
+            console.error('Error checking birth lists:', error);
+            toast.error(error.message || 'Error al comprobar las listas');
+        } finally {
+            setIsAddingToList(false);
         }
     };
-
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -38,6 +83,17 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
         } catch (error) {
             toast.error('Error al añadir al carrito');
             console.error('Error adding to cart:', error);
+        }
+    };
+    const handleAddToBirthList = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await addProductToBirthList(product.id);
+            toast.success(`${product.name} añadido a la lista de nacimiento`);
+        } catch (error) {
+            toast.error('Error al añadir a la lista de nacimiento');
+            console.error('Error adding to birth list:', error);
         }
     };
     // Generate the product URL based on category and name
@@ -159,4 +215,4 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
             </motion.div>
         );
     }
-} 
+}

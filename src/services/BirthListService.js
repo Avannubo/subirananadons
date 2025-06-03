@@ -11,14 +11,28 @@ export const fetchBirthLists = async () => {
         // Add preventSort=true to ensure stable ordering managed by the client
         const response = await fetch('/api/birthlists?preventSort=true');
 
+        const data = await response.json();
+
         if (!response.ok) {
-            throw new Error('Failed to fetch birth lists');
+            // Handle specific error cases
+            if (response.status === 401) {
+                throw new Error('Unauthorized: Please log in to view birth lists');
+            }
+            throw new Error(data.message || 'Failed to fetch birth lists');
         }
 
-        return await response.json();
+        return {
+            success: true,
+            data: data.data || [],
+            message: data.message
+        };
     } catch (error) {
         console.error('Error fetching birth lists:', error);
-        throw error;
+        return {
+            success: false,
+            data: [],
+            message: error.message || 'Error fetching birth lists'
+        };
     }
 };
 
