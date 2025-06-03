@@ -344,54 +344,59 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                             <th className="px-6 py-3 text-left">Privacidad</th>
                             <th className="px-6 py-3 text-left">Estado</th>
                             <th className="px-6 py-3 text-left">Ver/Compartir</th>
-                            <th className="px-6 py-3 text-left">Documentos</th> 
-                                <th className="px-6 py-3 text-left">Acción</th> 
+                            <th className="px-6 py-3 text-left">Documentos</th>
+                            <th className="px-6 py-3 text-left">Acción</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">{filteredLists.length > 0 ? (filteredLists.map((list, index) => (<tr key={index} className="hover:bg-gray-50"><td className="px-6 py-4">{index + 1}</td><td className="px-6 py-4">{list.reference}</td><td className="px-6 py-4">{list.name}</td>{userRole === 'admin' &&
-                        <td className="px-6 py-4">{list.creator}</td>}
-                        <td className="px-6 py-4">{list.creationDate}</td>
-                        <td className="px-6 py-4">{list.dueDate}</td><td className="px-6 py-4"><span className={`px-2 py-1 rounded-full text-xs font-medium ${list.isPublic ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'}`}>{list.isPublic ? 'Pública' : 'Privada'}</span></td>
-                        <td className="px-6 py-4"><span className={`px-2 py-1 rounded-full text-xs font-medium ${list.status === 'Activa' ? 'bg-green-100 text-green-800' : list.status === 'Completada' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>{list.status}</span></td>
-                        <td className="px-6 py-4 text-sm">
-                            <div className="flex items-center justify-center space-x-3">
-                                <button className="text-[#00B0C8] hover:text-[#008da0]" onClick={() => openViewModal(list)} title="Ver detalles"><FiEye size={22} /></button>
-                                <button className="text-indigo-600 hover:text-indigo-900" onClick={() => { const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`; navigator.clipboard.writeText(url).then(() => toast.success('Enlace copiado al portapapeles')).catch(() => toast.error('Error al copiar el enlace')); }} title="Copiar enlace">
-                                    <FiLink size={22} />
-                                </button>
-                                {/* {!userRole === 'admin' && !list.userId === 'current_user_id' && (
-                                    <button className="text-yellow-600 hover:text-yellow-900" title="Añadir regalo"><FiGift size={22} />
-                                    </button>)} */}
-                            </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                            <div className="flex items-center justify-center space-x-3">
-                                <button className="text-green-600 hover:text-green-900" onClick={() => handleDownloadPDF(list)} title="Descargar PDF">
-                                    <FiDownload size={22} />
-                                </button>
-                                <button className="text-blue-600 hover:text-blue-900" onClick={() => handlePrintPDF(list)} title="Imprimir lista">
-                                    <FiPrinter size={22} />
-                                </button>
-                            </div>
-                        </td> <td className="px-6 py-4 text-sm">
-                            <div className="flex items-center justify-center space-x-3">
-                                <button className="text-yellow-600 hover:text-yellow-900" onClick={() => openEditModal(list)} title="Editar lista">
-                                    <FiEdit size={22} />
-                                </button>
-                                <button className="text-purple-600 hover:text-purple-900" onClick={() => openStatusModal(list)} title="Cambiar estado">
-                                    <FiToggleLeft size={22} />
-                                </button>
-                                <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)} title="Eliminar lista">
-                                    <FiTrash2 size={22} />
-                                </button>
-                            </div>
-                        </td> 
-                    </tr>))) : (
-                        <tr>
-                            <td colSpan={userRole === 'admin' ? 11 : 10} className="px-6 py-4 text-center text-gray-500">
-                                No se encontraron listas de regalos.
-                            </td>
-                        </tr>)}
+                    <tbody className="divide-y divide-gray-200">
+                        {filteredLists.length > 0 ?
+                            (filteredLists.map((list, index) => (
+                                <tr key={index} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4">{index + 1}</td>
+                                    <td className="px-6 py-4">{list.reference}</td>
+                                    <td className="px-6 py-4">{list.name}</td>
+                                    {userRole === 'admin' && <td className="px-6 py-4">{list.creator}</td>}
+                                    <td className="px-6 py-4">{list.creationDate}</td>
+                                    <td className="px-6 py-4">{list.dueDate}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.isPublic ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'}`}>
+                                            {list.isPublic ? 'Pública' : 'Privada'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.status === 'Activa' ? 'bg-green-100 text-green-800' : list.status === 'Completada' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
+                                            {list.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <div className="flex items-center justify-center space-x-3">
+                                            <button className="text-[#00B0C8] hover:text-[#008da0]" onClick={() => openViewModal(list)} title="Ver detalles"><FiEye size={22} /></button>
+                                            <button className="text-indigo-600 hover:text-indigo-900" onClick={() => { const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`; navigator.clipboard.writeText(url).then(() => toast.success('Enlace copiado al portapapeles')).catch(() => toast.error('Error al copiar el enlace')); }} title="Copiar enlace"><FiLink size={22} /></button>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <div className="flex items-center justify-center space-x-3">
+                                            <button className="text-green-600 hover:text-green-900" onClick={() => handleDownloadPDF(list)} title="Descargar PDF"><FiDownload size={22} /></button>
+                                            <button className="text-blue-600 hover:text-blue-900" onClick={() => handlePrintPDF(list)} title="Imprimir lista"><FiPrinter size={22} /></button>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <div className="flex items-center justify-center space-x-3">
+                                            <button className="text-yellow-600 hover:text-yellow-900" onClick={() => openEditModal(list)} title="Editar lista"><FiEdit size={22} /></button>
+                                            <button className="text-purple-600 hover:text-purple-900" onClick={() => openStatusModal(list)} title="Cambiar estado"><FiToggleLeft size={22} /></button>
+                                            <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)} title="Eliminar lista"><FiTrash2 size={22} /></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                              
+                            )
+                            )
+                            ) : (
+                                <tr>
+                                    <td colSpan={userRole === 'admin' ? 11 : 10} className="px-6 py-4 text-center text-gray-500">
+                                        No se encontraron listas de regalos.
+                                    </td>
+                                </tr>)}
                     </tbody>
                 </table>
             </div>{/* Using modular components for modals */}
