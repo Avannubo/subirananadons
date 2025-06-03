@@ -99,25 +99,15 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
         e.preventDefault();
         if (!validateForm()) return;
         setLoading(true);
-        try {
-            // Save main client data
-            await onSave(formData);
-            // If password was provided, update it separately
-            console.log('Client data saved:', client?._id);
-            if (formData.password && client?._id) {
-                const response = await fetch(`/api/users/${client._id}/password`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ password: formData.password }),
-                });
+        try {            // Save all client data including password in a single request
+            const dataToSend = {
+                ...formData,
+                // Only include password if it's provided and not empty
+                ...(formData.password ? { password: formData.password } : {})
+            };
+            delete dataToSend.confirmPassword; // Remove confirmPassword as it's not needed by the API
 
-                if (!response.ok) {
-                    throw new Error('Failed to update password');
-                }
-            }
-
+            await onSave(dataToSend);
             toast.success(client ? 'Cliente actualizado correctamente' : 'Cliente añadido correctamente');
             // Notify the stats context that changes have been made
             await notifyChange();
