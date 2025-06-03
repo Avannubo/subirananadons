@@ -4,10 +4,10 @@ import { NextResponse } from 'next/server';
 export default withAuth(
     function middleware(req) {
         const path = req.nextUrl.pathname;
-        console.log('------- Middleware Debug -------');
-        console.log('Path:', path);
-        console.log('Token:', JSON.stringify(req.nextauth.token, null, 2));
-        console.log('User Role:', req.nextauth.token?.role);
+        // console.log('------- Middleware Debug -------');
+        // console.log('Path:', path);
+        // console.log('Token:', JSON.stringify(req.nextauth.token, null, 2));
+        // console.log('User Role:', req.nextauth.token?.role);
 
         // Allow access to dashboard for authenticated users
         if (path === '/dashboard') {
@@ -25,8 +25,8 @@ export default withAuth(
 
         const userRole = req.nextauth.token?.role || 'user';
 
-        console.log('Is Admin Route:', isAdminRoute);
-        console.log('User Role:', userRole);
+        // console.log('Is Admin Route:', isAdminRoute);
+        // console.log('User Role:', userRole);
 
         if (isAdminRoute && userRole !== 'admin') {
             console.log('Unauthorized admin access attempt - redirecting');
@@ -39,7 +39,7 @@ export default withAuth(
     {
         callbacks: {
             authorized: ({ token }) => {
-                console.log('Auth Check - Token present:', !!token);
+                // console.log('Auth Check - Token present:', !!token);
                 return !!token;
             },
         },

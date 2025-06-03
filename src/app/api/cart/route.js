@@ -159,7 +159,7 @@ export async function GET(request) {
         const cart = await Cart.findOne({ user: session.user.id });
 
         if (!cart) {
-            console.log('No cart found for user:', session.user.id);
+            // console.log('No cart found for user:', session.user.id);
             return NextResponse.json({ items: [] });
         }
 
