@@ -31,6 +31,8 @@ export default function CartPage() {
     const [giftNotes, setGiftNotes] = useState({});
     const regularItems = cartItems.filter(item => !item.isGift);
     const giftItems = cartItems.filter(item => item.isGift);
+    const [invoiceBlob, setInvoiceBlob] = useState(null);
+
     // Check if cart has any gift items
     const hasGiftItems = useMemo(() => {
         return cartItems.some(item => item.isGift);
@@ -178,7 +180,7 @@ export default function CartPage() {
     const handleSubmitOrder = async () => {
         // Clear any previous errors
         setOrderError(null);
-        
+
         // Determine which fields are required based on delivery method and cart contents
         let requiredFields = ['name', 'lastName', 'email', 'phone'];
         // Add address fields only if delivery method is 'delivery' or not all items are gifts
@@ -292,6 +294,7 @@ export default function CartPage() {
                 country: 'España',
                 notes: ''
             });
+ 
             // After 5 seconds, scroll to top
             setTimeout(() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -303,42 +306,45 @@ export default function CartPage() {
             setIsSubmitting(false);
         }
     };
-    
     // Handle invoice download
-    const handleDownloadInvoice = async () => {
-        if (!orderSuccess) return;
-        
-        try {
-            toast.loading('Generando factura...');
-            const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
-                method: 'GET',
-                headers: { 'Accept': 'application/pdf' }
-            });
-
-            if (!res.ok) {
-                throw new Error('No se pudo generar la factura');
+    useEffect(() => {
+        const generateInvoice = async () => {
+            if (!orderSuccess) return;
+            // toast.success('Generando factura...');
+            try {
+                const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/pdf' }
+                });
+                if (!res.ok) throw new Error('No se pudo generar la factura');
+                const blob = await res.blob();
+                setInvoiceBlob(blob);
+                // toast.success('Factura generada correctamente');
+                //close the modal 
+            } catch (err) {
+                toast.error('Error al generar la factura');
             }
+        };
+        generateInvoice();
+    }, [orderSuccess]);
 
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Factura-${orderSuccess.orderNumber}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-            toast.success('Factura descargada correctamente');
-        } catch (error) {
-            console.error('Error downloading invoice:', error);
-            toast.error('Error al descargar la factura');
-        }
+    const handleDownloadInvoice = () => {
+        if (!invoiceBlob || !orderSuccess) return;
+        const url = window.URL.createObjectURL(invoiceBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Factura-${orderSuccess.orderNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success('Factura descargada correctamente');
     };
 
     // Handle sending email with receipt
     const handleSendEmail = async () => {
         if (!orderSuccess) return;
-        
+
         try {
             toast.loading('Enviando email...');
             const response = await fetch(`/api/orders/${orderSuccess.orderId}/send-email`, {
@@ -374,7 +380,7 @@ export default function CartPage() {
         // Persist to cart state
         await updateGiftNote(itemId, note);
     };
-    
+
     return (
         <ShopLayout>
             <div className="container mx-auto px-4 py-8 mt-24 ">
@@ -1010,7 +1016,7 @@ export default function CartPage() {
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Descargar Factura
+                                Descargar Ticket
                             </button>
                             <button
                                 onClick={handleSendEmail}
