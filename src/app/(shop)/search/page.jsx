@@ -1,6 +1,5 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,216 +7,269 @@ import { motion } from 'framer-motion';
 import { Range } from 'react-range';
 import ProductCard from "@/components/products/product-card";
 import ProductQuickView from "@/components/products/product-quick-view";
-// Sample categories
-const categories = [
-    { id: 1, name: "Cochecitos", count: 24 },
-    { id: 2, name: "Habitación", count: 18 },
-    { id: 3, name: "Alimentación", count: 12 },
-    { id: 4, name: "Baño", count: 8 },
-    { id: 5, name: "Viaje", count: 15 },
-    { id: 6, name: "Seguridad", count: 10 },
-];
-
-const allProducts = [
-    {
-        id: 1,
-        name: "Tripp Trapp Natural",
-        priceValue: 259.00,
-        price: "259,00€",
-        imageUrl: "/assets/images/joie.png",
-        imageUrlHover: "/assets/images/Screenshot_1.png",
-        brand: "Stokke",
-        category: "Habitación"
-    },
-    {
-        id: 2,
-        name: "Robot De Cuina Chefy6",
-        priceValue: 119.00,
-        price: "119,00€",
-        imageUrl: "/assets/images/Screenshot_2.png",
-        imageUrlHover: "/assets/images/Screenshot_3.png",
-        brand: "Miniland",
-        category: "Alimentación"
-    },
-    {
-        id: 3,
-        name: "Trona De Viaje Arlo",
-        priceValue: 49.90,
-        price: "49,90€",
-        imageUrl: "/assets/images/Screenshot_1.png",
-        imageUrlHover: "/assets/images/Screenshot_4.png",
-        brand: "Joie",
-        category: "Viaje"
-    },
-    {
-        id: 4,
-        name: "Newborn Set Tripp Trapp",
-        priceValue: 99.00,
-        price: "99,00€",
-        imageUrl: "/assets/images/Screenshot_4.png",
-        imageUrlHover: "/assets/images/Screenshot_1.png",
-        brand: "Stokke",
-        category: "Habitación"
-    },
-    {
-        id: 5,
-        name: "Bañera Plegable Flexi Bath",
-        priceValue: 45.00,
-        price: "45,00€",
-        imageUrl: "/assets/images/Screenshot_3.png",
-        imageUrlHover: "/assets/images/Screenshot_2.png",
-        brand: "Stokke",
-        category: "Baño"
-    },
-    {
-        id: 6,
-        name: "Termo Papillero Premium",
-        priceValue: 24.90,
-        price: "24,90€",
-        imageUrl: "/assets/images/Screenshot_2.png",
-        imageUrlHover: "/assets/images/Screenshot_3.png",
-        brand: "Suavinex",
-        category: "Alimentación"
-    },
-    {
-        id: 7,
-        name: "Barrera de Seguridad Flex",
-        priceValue: 89.90,
-        price: "89,90€",
-        imageUrl: "/assets/images/Screenshot_1.png",
-        imageUrlHover: "/assets/images/Screenshot_4.png",
-        brand: "BabyDan",
-        category: "Seguridad"
-    },
-    {
-        id: 8,
-        name: "Cochecito Xplory X Royal",
-        priceValue: 1099.00,
-        price: "1.099,00€",
-        imageUrl: "/assets/images/Screenshot_4.png",
-        imageUrlHover: "/assets/images/Screenshot_1.png",
-        brand: "Stokke",
-        category: "Cochecitos"
-    },
-    {
-        id: 9,
-        name: "Set Babero Silicona",
-        priceValue: 15.90,
-        price: "15,90€",
-        imageUrl: "/assets/images/Screenshot_3.png",
-        imageUrlHover: "/assets/images/Screenshot_2.png",
-        brand: "Miniland",
-        category: "Alimentación"
-    },
-    {
-        id: 10,
-        name: "Monitor Bebé Digital",
-        priceValue: 159.00,
-        price: "159,00€",
-        imageUrl: "/assets/images/Screenshot_2.png",
-        imageUrlHover: "/assets/images/Screenshot_3.png",
-        brand: "Philips Avent",
-        category: "Seguridad"
-    },
-    {
-        id: 11,
-        name: "Cuna Colecho Side",
-        priceValue: 199.00,
-        price: "199,00€",
-        imageUrl: "/assets/images/Screenshot_1.png",
-        imageUrlHover: "/assets/images/Screenshot_4.png",
-        brand: "Chicco",
-        category: "Habitación"
-    },
-    {
-        id: 12,
-        name: "Mochila Portabebés Adapt",
-        priceValue: 179.00,
-        price: "179,00 €",
-        imageUrl: "/assets/images/Screenshot_4.png",
-        imageUrlHover: "/assets/images/Screenshot_1.png",
-        brand: "Ergobaby",
-        category: "Viaje"
-    }
-];
-
+import { toast } from 'react-hot-toast';
+import Pagination from "@/components/admin/shared/Pagination";
 export default function SearchPage() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategories, setSelectedCategories] = useState([]);
-    const [priceRange, setPriceRange] = useState([0, 1500]);
-    const [sortBy, setSortBy] = useState('default');
-    const [viewMode, setViewMode] = useState('grid');
-    const [hoveredProduct, setHoveredProduct] = useState(null);
-    const [filteredProducts, setFilteredProducts] = useState(allProducts);
-    const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+    const [allProducts, setAllProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedBrand, setSelectedBrand] = useState('');
+    const [stockStatus, setStockStatus] = useState('all'); // 'all', 'in-stock', 'out-of-stock'
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [priceRange, setPriceRange] = useState([0, 1000]);
+    const [sortBy, setSortBy] = useState('newest');
     const [quickViewProduct, setQuickViewProduct] = useState(null);
-
+    const [viewMode, setViewMode] = useState('grid'); // Add view mode state
+    const [isQuickViewOpen, setIsQuickViewOpen] = useState(false); // Add quick view modal state
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const [itemsPerPage, setItemsPerPage] = useState(12);
     const handleQuickView = (product) => {
         setQuickViewProduct(product);
         setIsQuickViewOpen(true);
     };
-
     const handleCloseQuickView = () => {
         setIsQuickViewOpen(false);
-        setQuickViewProduct(null);
+        setTimeout(() => setQuickViewProduct(null), 300); // Delay clearing product until animation finishes
     };
-
+    // Fetch products and categories on component mount
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                // Fetch categories with children
+                const catResponse = await fetch('/api/categories?includeChildren=true');
+                if (!catResponse.ok) throw new Error('Failed to fetch categories');
+                const catData = await catResponse.json();
+                // Transform category data to include count and handle hierarchy
+                const transformCategories = (categories, prefix = '') => {
+                    return categories.map(cat => ({
+                        id: cat._id,
+                        name: prefix ? `${prefix} > ${cat.name}` : cat.name,
+                        originalName: cat.name,
+                        count: 0,
+                        ...(cat.children?.length && {
+                            children: transformCategories(cat.children, cat.name)
+                        })
+                    }));
+                };
+                const transformedCategories = transformCategories(catData);
+                setCategories(transformedCategories);
+                // Fetch brands
+                const brandsResponse = await fetch('/api/brands?limit=100&enabled=true');
+                if (!brandsResponse.ok) throw new Error('Failed to fetch brands');
+                const brandsData = await brandsResponse.json();
+                setBrands(brandsData.brands || []);
+                // Fetch products with pagination
+                const queryParams = new URLSearchParams({
+                    page: currentPage.toString(),
+                    limit: itemsPerPage.toString(),
+                    status: 'active'
+                });
+                const prodResponse = await fetch(`/api/products?${queryParams.toString()}`);
+                if (!prodResponse.ok) throw new Error('Failed to fetch products');
+                const data = await prodResponse.json();
+                // Format products to include necessary fields
+                const formattedProducts = data.products.map(product => ({
+                    id: product._id,
+                    name: product.name,
+                    category: product.category,
+                    price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
+                    priceValue: product.price_incl_tax,
+                    imageUrl: product.image || '/assets/images/Screenshot_4.png',
+                    imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
+                    brand: product.brand || '',
+                    description: product.description || '',
+                    stock: {
+                        available: product.stock?.available || 0,
+                        minStock: product.stock?.minStock || 5
+                    }
+                }));
+                setAllProducts(formattedProducts);
+                // Update pagination information
+                if (data.pagination) {
+                    setTotalPages(data.pagination.totalPages);
+                    setTotalItems(data.pagination.totalItems);
+                } else {
+                    setTotalPages(Math.ceil(formattedProducts.length / itemsPerPage));
+                    setTotalItems(formattedProducts.length);
+                }
+                // Update category counts
+                const catCounts = {};
+                formattedProducts.forEach(product => {
+                    if (product.category) {
+                        catCounts[product.category] = (catCounts[product.category] || 0) + 1;
+                    }
+                });
+                // Helper function to update counts recursively
+                const updateCategoryCounts = (categories) => {
+                    return categories.map(cat => ({
+                        ...cat,
+                        count: catCounts[cat.originalName || cat.name] || 0,
+                        ...(cat.children && {
+                            children: updateCategoryCounts(cat.children)
+                        })
+                    }));
+                };
+                setCategories(prevCats => updateCategoryCounts(prevCats));
+                setFilteredProducts(formattedProducts);
+            } catch (err) {
+                console.error('Error fetching data:', err);
+                setError('Failed to load products and categories. Please try again later.');
+                toast.error('Error loading products and categories');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, [currentPage, itemsPerPage]);
     // Filter products based on search term, categories, and price range
     useEffect(() => {
-        let filtered = [...allProducts];
+        const fetchFilteredProducts = async () => {
+            setIsLoading(true);
+            try {
+                const queryParams = new URLSearchParams({
+                    page: currentPage.toString(),
+                    limit: itemsPerPage.toString(),
+                    status: 'active'
+                });
 
-        // Search term filter
-        if (searchTerm) {
-            filtered = filtered.filter(product =>
-                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.brand.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
+                // Add search filters
+                if (searchTerm) {
+                    queryParams.append('search', searchTerm);
+                }
+                if (selectedCategory) {
+                    queryParams.append('category', selectedCategory);
+                }
+                if (selectedBrand) {
+                    queryParams.append('brand', selectedBrand);
+                }
 
-        // Category filter
-        if (selectedCategories.length > 0) {
-            filtered = filtered.filter(product =>
-                selectedCategories.includes(product.category)
-            );
-        }
+                // Add stock status filter
+                if (stockStatus === 'in-stock') {
+                    queryParams.append('inStock', 'true');
+                } else if (stockStatus === 'out-of-stock') {
+                    queryParams.append('outOfStock', 'true');
+                }
 
-        // Price range filter
-        filtered = filtered.filter(product =>
-            product.priceValue >= priceRange[0] && product.priceValue <= priceRange[1]
-        );
+                // Add price range parameters
+                if (priceRange && priceRange.length === 2) {
+                    queryParams.append('minPrice', priceRange[0]);
+                    queryParams.append('maxPrice', priceRange[1]);
+                }
 
-        // Sort products
-        switch (sortBy) {
-            case 'price-asc':
-                filtered.sort((a, b) => a.priceValue - b.priceValue);
-                break;
-            case 'price-desc':
-                filtered.sort((a, b) => b.priceValue - a.priceValue);
-                break;
-            case 'name-asc':
-                filtered.sort((a, b) => a.name.localeCompare(b.name));
-                break;
-            case 'newest':
-                filtered.reverse();
-                break;
-        }
+                // Add sorting parameters
+                switch (sortBy) {
+                    case 'price-asc':
+                        queryParams.append('sort', 'price_incl_tax');
+                        queryParams.append('order', 'asc');
+                        break;
+                    case 'price-desc':
+                        queryParams.append('sort', 'price_incl_tax');
+                        queryParams.append('order', 'desc');
+                        break;
+                    case 'name-asc':
+                        queryParams.append('sort', 'name');
+                        queryParams.append('order', 'asc');
+                        break;
+                    case 'newest':
+                        queryParams.append('sort', 'createdAt');
+                        queryParams.append('order', 'desc');
+                        break;
+                    // default case will use the server's default sorting
+                }
 
-        setFilteredProducts(filtered);
-    }, [searchTerm, selectedCategories, priceRange, sortBy]);
-
-    const handleCategoryToggle = (category) => {
-        setSelectedCategories(prev =>
-            prev.includes(category)
-                ? prev.filter(c => c !== category)
-                : [...prev, category]
-        );
-    };
-
+                const response = await fetch(`/api/products?${queryParams.toString()}`);
+                if (!response.ok) throw new Error('Failed to fetch products');
+                const data = await response.json();
+                // Format products
+                const formattedProducts = data.products.map(product => ({
+                    id: product._id,
+                    name: product.name,
+                    category: product.category,
+                    price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
+                    priceValue: product.price_incl_tax,
+                    imageUrl: product.image || '/assets/images/Screenshot_4.png',
+                    imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
+                    brand: product.brand || '',
+                    description: product.description || '',
+                    stock: {
+                        available: product.stock?.available || 0,
+                        minStock: product.stock?.minStock || 5
+                    }
+                }));
+                // Update state with new data
+                setFilteredProducts(formattedProducts);
+                setTotalPages(data.pagination?.totalPages || 1);
+                setTotalItems(data.pagination?.totalItems || formattedProducts.length);
+            } catch (err) {
+                console.error('Error fetching filtered products:', err);
+                toast.error('Error al cargar los productos filtrados');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchFilteredProducts();
+    }, [searchTerm, selectedCategory, selectedBrand, stockStatus, priceRange, sortBy, currentPage, itemsPerPage]);
+    // Pagination logic
+    useEffect(() => {
+        const fetchPaginatedData = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                // Calculate the range of items to fetch based on the current page and items per page
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                // Fetch products with pagination
+                const prodResponse = await fetch(`/api/products?start=${start}&limit=${itemsPerPage}`);
+                if (!prodResponse.ok) throw new Error('Failed to fetch products');
+                const data = await prodResponse.json();
+                // Format products to include necessary fields
+                const formattedProducts = data.products.map(product => ({
+                    id: product._id,
+                    name: product.name,
+                    category: product.category,
+                    price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
+                    priceValue: product.price_incl_tax,
+                    imageUrl: product.image || '/assets/images/Screenshot_4.png',
+                    imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
+                    brand: product.brand || '',
+                    description: product.description || '',
+                    stock: {
+                        available: product.stock?.available || 0,
+                        minStock: product.stock?.minStock || 5
+                    }
+                }));
+                setAllProducts(formattedProducts);
+                // Update total items count for pagination
+                setTotalItems(data.totalCount || 0);
+                // Calculate total pages
+                setTotalPages(Math.ceil(totalItems / itemsPerPage));
+            } catch (err) {
+                console.error('Error fetching paginated data:', err);
+                setError('Failed to load products. Please try again later.');
+                toast.error('Error loading products');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchPaginatedData();
+    }, [currentPage, itemsPerPage]);
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedCategory, selectedBrand, stockStatus, priceRange, sortBy]);
     const handleAddToCart = (e, product) => {
         e.preventDefault();
         console.log('Add to cart:', product);
     };
-
     return (
         <ShopLayout>
             {/* Header with Search Bar */}
@@ -276,30 +328,61 @@ export default function SearchPage() {
                         transition={{ delay: 0.4, duration: 0.5 }}
                     >
                         <div className="sticky top-24 bg-white p-6 rounded-lg border border-gray-200">
-                            {/* Categories */}
                             <div className="mb-8">
-                                <h3 className="text-lg font-medium mb-4">Categorías</h3>
-                                <div className="space-y-2">
+                                <h3 className="text-lg font-medium mb-4">Categoría</h3>
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                >
+                                    <option value="">Todas las categorías</option>
                                     {categories.map((category) => (
-                                        <label
-                                            key={category.id}
-                                            className="flex items-center space-x-3 cursor-pointer group"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedCategories.includes(category.name)}
-                                                onChange={() => handleCategoryToggle(category.name)}
-                                                className="form-checkbox h-5 w-5 text-[#00B0C8] rounded border-gray-300 focus:ring-[#00B0C8]"
-                                            />
-                                            <span className="text-gray-700 group-hover:text-[#00B0C8] transition-colors">
-                                                {category.name}
-                                            </span>
-                                            <span className="text-gray-400 text-sm">({category.count})</span>
-                                        </label>
+                                        <React.Fragment key={category.id}>
+                                            <option value={category.originalName || category.name}>
+                                                {category.name} {category.count > 0 && `(${category.count})`}
+                                            </option>
+                                            {category.children?.map(child => (
+                                                <option
+                                                    key={child.id}
+                                                    value={child.originalName}
+                                                    className="pl-4"
+                                                >
+                                                    {child.name}
+                                                </option>
+                                            ))}
+                                        </React.Fragment>
                                     ))}
-                                </div>
+                                </select>
                             </div>
-
+                            {/* Brands Selector */}
+                            <div className="mb-8">
+                                <h3 className="text-lg font-medium mb-4">Marca</h3>
+                                <select
+                                    value={selectedBrand}
+                                    onChange={(e) => setSelectedBrand(e.target.value)}
+                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                >
+                                    <option value="">Todas las marcas</option>
+                                    {brands.map((brand) => (
+                                        <option key={brand._id} value={brand.name}>
+                                            {brand.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            {/* Stock Status Selector */}
+                            {/* <div className="mb-8">
+                                <h3 className="text-lg font-medium mb-4">Disponibilidad</h3>
+                                <select
+                                    value={stockStatus}
+                                    onChange={(e) => setStockStatus(e.target.value)}
+                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                >
+                                    <option value="all">Todos los productos</option>
+                                    <option value="in-stock">En stock</option>
+                                    <option value="out-of-stock">Agotado</option>
+                                </select>
+                            </div> */}
                             {/* Price Range */}
                             <div className="mb-8">
                                 <h3 className="text-lg font-medium mb-4">Precio</h3>
@@ -307,7 +390,7 @@ export default function SearchPage() {
                                     <Range
                                         step={10}
                                         min={0}
-                                        max={1500}
+                                        max={1000}
                                         values={priceRange}
                                         onChange={setPriceRange}
                                         renderTrack={({ props, children }) => {
@@ -321,8 +404,8 @@ export default function SearchPage() {
                                                     <div
                                                         className="h-1 bg-[#00B0C8]"
                                                         style={{
-                                                            width: `${((priceRange[1] - priceRange[0]) / 1500) * 100}%`,
-                                                            left: `${(priceRange[0] / 1500) * 100}%`
+                                                            width: `${((priceRange[1] - priceRange[0]) / 1000) * 100}%`,
+                                                            left: `${(priceRange[0] / 1000) * 100}%`
                                                         }}
                                                     />
                                                     {children}
@@ -348,7 +431,6 @@ export default function SearchPage() {
                             </div>
                         </div>
                     </motion.div>
-
                     {/* Products Section */}
                     <motion.div
                         className="w-full md:w-3/4"
@@ -396,7 +478,6 @@ export default function SearchPage() {
                                 </select>
                             </div>
                         </motion.div>
-
                         {/* Products Grid/List */}
                         <motion.div
                             layout
@@ -415,9 +496,8 @@ export default function SearchPage() {
                                 />
                             ))}
                         </motion.div>
-
                         {/* No Results Message */}
-                        {filteredProducts.length === 0 && (
+                        {filteredProducts.length === 0 && !isLoading && (
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -425,6 +505,35 @@ export default function SearchPage() {
                             >
                                 <p className="text-gray-500 text-lg">No se encontraron productos que coincidan con tu búsqueda.</p>
                             </motion.div>
+                        )}
+                        {/* Loading Skeleton */}
+                        {isLoading && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {[...Array(6)].map((_, index) => (
+                                    <div key={index} className="animate-pulse">
+                                        <div className="bg-gray-200 h-48 rounded-lg mb-2"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {/* Pagination */}
+                        {!isLoading && filteredProducts.length > 0 && (
+                            <div className="mt-8">
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    totalItems={totalItems}
+                                    itemsPerPage={itemsPerPage}
+                                    onPageChange={setCurrentPage}
+                                    onItemsPerPageChange={(value) => {
+                                        setItemsPerPage(value);
+                                        setCurrentPage(1);
+                                    }}
+                                    showingText="Mostrando {} de {} productos"
+                                />
+                            </div>
                         )}
                     </motion.div>
                 </div>
