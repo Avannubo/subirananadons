@@ -7,16 +7,7 @@ import Link from "next/link";
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/contexts/CartContext';
-// Categories for filtering
-const categories = [
-    "Todos",
-    "Habitación",
-    "Cochecitos",
-    "Alimentación",
-    "Baño",
-    "Esenciales"
-];
+
 export default function BirthListPage({ params }) {
     const id = use(params).id;
     const [selectedCategory, setSelectedCategory] = useState("Todos");
@@ -25,16 +16,15 @@ export default function BirthListPage({ params }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [availableCategories, setAvailableCategories] = useState(["Todos"]);
-    const router = useRouter();
-    const { addToCart } = useCart();
-    // Remove or simplify unused states related to the modal
-    const [selectedProduct, setSelectedProduct] = useState(null);    // Calculate progress percentage based on item states (2=purchased, 1=reserved, 0=available)
+
+    // Calculate progress percentage based on item states (2=purchased, 1=reserved, 0=available)
     const calculateProgress = (items) => {
         if (!items || items.length === 0) return 0;
         const purchasedCount = items.filter(item => item.state === 2).length;
         const totalItems = items.length;
         return totalItems > 0 ? Math.round((purchasedCount / totalItems) * 100) : 0;
     };
+
     // Fetch birth list data from API
     useEffect(() => {
         const fetchBirthList = async () => {
@@ -97,6 +87,7 @@ export default function BirthListPage({ params }) {
         };
         fetchBirthList();
     }, [id]);
+
     // Loading state
     if (loading) {
         return (
@@ -193,41 +184,36 @@ export default function BirthListPage({ params }) {
         });
     const handleReserveClick = async (product) => {
         try {
-            console.log('Product data:', product);            // Format product object to match CartContext format
-            const productForCart = {
-                id: product.productId,
-                productId: product.productId,
-                name: product.name,
-                price: product.priceValue,
-                priceValue: product.priceValue,
-                image: product.image,
-                brand: product.brand || '',
-                category: product.category || '',
-                status: product.status || 'available'
-            };
-            console.log('Formatted product for cart:', productForCart);            // Use the CartContext to add the gift to cart            // Validate required gift information
-            if (!list.userId) {
-                console.error('Missing list owner ID');
-                toast.error('Error: No se puede identificar el propietario de la lista');
-                return;
-            } const success = await addToCart(productForCart, 1, {
-                isGift: true,
-                giftInfo: {
-                    listId: id,
-                    itemId: product.id,
-                    babyName: list.babyName,
-                    listOwnerId: list.userId,
-                    addedAt: Date.now(),
-                    quantity: product.quantity || 1,
-                    reserved: product.reserved || 0
-                }
+            // Make API call to reserve the item
+            const response = await fetch(`/api/birthlists/${id}/reserve`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    itemId: product.id
+                })
             });
-            // if (success) {
-            //     toast.success('Regalo añadido al carrito');
-            // }
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update the local state to reflect the reservation
+                setList(prevList => ({
+                    ...prevList,
+                    products: prevList.products.map(p =>
+                        p.id === product.id
+                            ? { ...p, status: 'reserved', state: 1 }
+                            : p
+                    )
+                }));
+                toast.success('Producto reservado correctamente');
+            } else {
+                throw new Error(data.message || 'Error al reservar el producto');
+            }
         } catch (error) {
-            console.error('Error adding gift to cart:', error);
-            toast.error('Error al añadir el regalo al carrito');
+            console.error('Error reserving product:', error);
+            toast.error('Error al reservar el producto');
         }
     };
     const handleShareClick = async () => {
@@ -352,9 +338,10 @@ export default function BirthListPage({ params }) {
                                         alt={product.name}
                                         fill
                                         className="object-contain"
-                                    />                                    {product.status !== 'available' && (
+                                    />
+                                    {product.status !== 'available' && (
                                         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
-                                            <div className=" px-4 py-2 rounded-lg">
+                                            <div className="px-4 py-2 rounded-lg">
                                                 <span className="text-white text-lg font-medium uppercase tracking-wider">
                                                     {product.status === 'purchased' ? 'Comprado' : 'Reservado'}
                                                 </span>

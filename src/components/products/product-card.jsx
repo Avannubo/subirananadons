@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useCart } from '@/contexts/CartContext';
 import { useSession } from 'next-auth/react';
 import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
@@ -18,9 +17,8 @@ export default function ProductCard({
 }) {
     const [isHovered, setIsHovered] = useState(false);
     const [isAddingToList, setIsAddingToList] = useState(false);
-    const { addToCart } = useCart();
-    const { data: session } = useSession();
     const router = useRouter();
+    const { data: session } = useSession();
     const currentImageUrl = isHovered && product.imageUrlHover ? product.imageUrlHover : product.imageUrl;
     const HoverButton = ({ children, onClick, disabled }) => (
         <button
@@ -35,10 +33,10 @@ export default function ProductCard({
         try {
             setIsAddingToList(true);
             // Case 1: Not logged in - Show AuthModal
-            if (!session) { 
-                    toast.error('Inicia sesión para añadir productos a las listas', { duration: 3000 });
-            }  
-            
+            if (!session) {
+                toast.error('Inicia sesión para añadir productos a las listas', { duration: 3000 });
+            }
+
             // Get user's birth lists
             const result = await fetchBirthLists();
             if (!result.success) {
@@ -74,26 +72,36 @@ export default function ProductCard({
             setIsAddingToList(false);
         }
     };
-    const handleAddToCart = async (e) => {
+    const handleQuickView = (e) => {
         e.preventDefault();
-        e.stopPropagation();
-        try {
-            await addToCart(product, 1);
-            toast.success(`${product.name} añadido al carrito`);
-        } catch (error) {
-            toast.error('Error al añadir al carrito');
-            console.error('Error adding to cart:', error);
+        if (onQuickViewClick) {
+            onQuickViewClick(product);
         }
     };
-    const handleAddToBirthList = async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handleAddToList = async () => {
+        if (!session) {
+            setAuthModalData({
+                title: "Iniciar sesión requerido",
+                message: "Por favor, inicia sesión para añadir productos a tu lista de nacimiento",
+                callback: () => { } // No callback needed here
+            });
+            setShowAuthModal(true);
+            return;
+        }
+
+        setIsAddingToList(true);
         try {
-            await addProductToBirthList(product.id);
-            toast.success(`${product.name} añadido a la lista de nacimiento`);
+            const lists = await fetchBirthLists();
+            if (lists.length === 0) {
+                router.push('/listas-de-nacimiento/crear');
+                return;
+            }
+            router.push(`/listas-de-nacimiento/${lists[0]._id}?addProduct=${product._id}`);
         } catch (error) {
-            toast.error('Error al añadir a la lista de nacimiento');
-            console.error('Error adding to birth list:', error);
+            console.error('Error fetching birth lists:', error);
+            toast.error('Error al acceder a las listas de nacimiento');
+        } finally {
+            setIsAddingToList(false);
         }
     };
     // Generate the product URL based on category and name
@@ -131,9 +139,6 @@ export default function ProductCard({
                         />
                         {/* Hover Overlay Buttons - Grid View */}
                         <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 group-hover:bg-opacity-30 opacity-0 group-hover:opacity-100 transition-all duration-300 px-3 py-2 rounded-full">
-                            <HoverButton onClick={handleAddToCart}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                            </HoverButton>
                             <HoverButton onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -183,11 +188,8 @@ export default function ProductCard({
                         />
                         {/* Hover Overlay Buttons - List View */}
                         <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 group-hover:bg-opacity-30 opacity-0 group-hover:opacity-100 transition-all duration-300 px-3 py-2 rounded-full">
-                            <HoverButton onClick={handleAddToCart}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                            </HoverButton>
                             <HoverButton onClick={(e) => {
-                                e.preventDefault(); // Prevent navigation
+                                e.preventDefault();
                                 e.stopPropagation();
                                 setIsHovered(false);
                                 onQuickViewClick(product);

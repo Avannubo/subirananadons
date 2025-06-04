@@ -56,29 +56,49 @@ export async function POST(request) {
             const userId = session?.user?.id;
             // Format the cart item with product price
             const price = product.price_incl_tax || product.price || 0;
+
+            // Create the base cart item structure
+            const baseCartItem = {
+                id: product._id.toString(),
+                productId: product._id.toString(),
+                product: {
+                    id: product._id.toString(),
+                    name: product.name.trim(),
+                    price: parseFloat(price),
+                    priceValue: parseFloat(price),
+                    image: product.image || '',
+                    brand: (product.brand || '').trim(),
+                    category: (product.category || '').trim()
+                },
+                quantity: Number(quantity),
+                isGift: !!isGift
+            };
+
+            // Add gift info if it's a gift
+            if (isGift && giftInfo) {
+                baseCartItem.giftInfo = {
+                    listId: giftInfo.listId.toString(),
+                    listOwnerId: giftInfo.listOwnerId.toString(),
+                    itemId: giftInfo.itemId.toString(),
+                    babyName: giftInfo.babyName || '',
+                    note: giftInfo.note || '',
+                    addedAt: Date.now()
+                };
+            }
+
             // Create cart response for guest users if no session
             if (!userId) {
                 console.log('Guest user adding to cart - returning product info only');
-                const cartItem = {
-                    product: product._id.toString(),
-                    quantity: Number(quantity),
-                    price: price,
-                    isGift: !!isGift,
-                    giftInfo: isGift ? giftInfo : undefined,
-                    id: product._id.toString(), // Add this for client-side compatibility
-                    name: product.name,
-                    image: product.image,
-                    priceValue: price
-                };
                 return NextResponse.json({
                     success: true,
                     message: 'Product info retrieved for guest cart',
                     cart: {
-                        items: [cartItem]
+                        items: [baseCartItem]
                     },
-                    product: cartItem
+                    product: baseCartItem
                 });
             }
+
             // For authenticated users, process cart in database
             let cart = { items: [] };
             try {
@@ -90,9 +110,10 @@ export async function POST(request) {
                 console.error('Error finding user cart:', cartError);
                 // Continue with empty cart
             }
-            // Check if product already exists in cart            // For gift items, always add as new. For regular items, check for duplicates
+
+            // For gift items, always add as new. For regular items, check for duplicates
             const existingItemIndex = !isGift ? cart.items.findIndex(
-                item => item.product?.toString() === product._id.toString() && !item.isGift
+                item => item.productId === product._id.toString() && !item.isGift
             ) : -1;
 
             if (existingItemIndex > -1) {
@@ -100,14 +121,9 @@ export async function POST(request) {
                 cart.items[existingItemIndex].quantity += Number(quantity);
             } else {
                 // Add new item (gift items always go here)
-                cart.items.push({
-                    product: product._id.toString(),
-                    quantity: Number(quantity),
-                    price: price,
-                    isGift: !!isGift,
-                    giftInfo: isGift ? giftInfo : undefined
-                });
+                cart.items.push(baseCartItem);
             }
+
             // Save cart for authenticated users
             try {
                 if (cart._id) {
@@ -130,27 +146,16 @@ export async function POST(request) {
                     error: saveError.message
                 }, { status: 500 });
             }
-            // Format response to include extra product details for client-side
-            const formattedItems = cart.items.map(item => {
-                if (item.product.toString() === product._id.toString()) {
-                    return {
-                        ...item,
-                        id: product._id.toString(),
-                        name: product.name,
-                        image: product.image,
-                        priceValue: price
-                    };
-                }
-                return item;
-            });
+
             return NextResponse.json({
                 success: true,
                 message: 'Product added to cart',
                 cart: {
-                    items: formattedItems,
+                    items: cart.items,
                     _id: cart._id
                 }
             });
+
         } catch (dbError) {
             console.error('Database error:', dbError);
             return NextResponse.json({
@@ -169,4 +174,4 @@ export async function POST(request) {
             stack: error.stack
         }, { status: 500 });
     }
-} 
+}

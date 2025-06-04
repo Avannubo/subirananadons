@@ -3,13 +3,9 @@ import Image from "next/image";
 import MenuVertical from "@/components/ui/MenuHeader";
 import UserAuth from "@/components/ui/UserAuthModal";
 import Link from "next/link";
-import { useSession } from 'next-auth/react';
-import { ShoppingCart, Search } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
-export default function Page() { 
-    const { cartItems } = useCart();
-    // Calculate total quantity of items in cart
-    const cartItemsCount = cartItems ? cartItems.reduce((total, item) => total + item.quantity, 0) : 0;
+import { Search, ShoppingCart } from 'lucide-react';
+
+export default function Page() {
     return (
         <div className="fixed top-0 z-50 w-full bg-white shadow-md p-5">
             <div className="flex flex-col justify-center ">
@@ -19,30 +15,26 @@ export default function Page() {
                         <MenuVertical />
                     </div>
                     {/* Logo */}
-                    <Link href="/" className="flex justify-center items-center w-[300px]">
-                        <Image
-                            src="/assets/logo-header.svg"
-                            alt="logo"
-                            width={250}
-                            height={350}
-                        />
-                    </Link>
-                    {/* Icon stack for search, account, and cart icons */}
-                    <div className=" w-[300px] flex justify-end space-x-4 text-gray-700">
-                        {/* Search Icon */}
-                        <Link href="/search" className="p-2 flex justify-center items-center">
-                            <Search />
+                    <div className="flex-1 text-center">
+                        <Link href="/" className="inline-block">
+                            <Image
+                                src="/assets/logo-header.svg"
+                                alt="Subirana Nadons"
+                                width={200}
+                                height={50}
+                                className="max-h-12 w-auto"
+                                priority
+                            />
                         </Link>
-                        {/* Cart Icon with Counter */}
-                        <Link href="/cart" className="p-2 text-sm text-gray-700 relative">
-                            <ShoppingCart />
-                            {cartItemsCount > 0 && (
-                                <span className="absolute top-1 -right-1 bg-[#00B0C8] text-white text-[10px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center">
-                                    {cartItemsCount}
-                                </span>
-                            )}
+                    </div>
+                    {/* User menu */}
+                    <div className="flex items-center justify-end space-x-4 px-4 w-[300px]">
+                        <Link href="/search" className="hover:text-gray-600">
+                            <Search className="h-6 w-6" />
                         </Link>
-                        {/* Account Icon */}
+                        <Link href="/cart" className="hover:text-gray-600">
+                            <ShoppingCart className="h-6 w-6" />
+                        </Link>
                         <UserAuth />
                     </div>
                 </div>
