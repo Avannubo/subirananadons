@@ -7,7 +7,7 @@ import Link from "next/link";
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/contexts/CartContext.jsx';
 // Categories for filtering
 const categories = [
     "Todos",
@@ -190,46 +190,47 @@ export default function BirthListPage({ params }) {
                 default:
                     return 0;
             }
-        });
-    const handleReserveClick = async (product) => {
-        try {
-            console.log('Product data:', product);            // Format product object to match CartContext format
-            const productForCart = {
-                id: product.productId,
-                productId: product.productId,
-                name: product.name,
-                price: product.priceValue,
-                priceValue: product.priceValue,
-                image: product.image,
-                brand: product.brand || '',
-                category: product.category || '',
-                status: product.status || 'available'
-            };
-            console.log('Formatted product for cart:', productForCart);            // Use the CartContext to add the gift to cart            // Validate required gift information
-            if (!list.userId) {
-                console.error('Missing list owner ID');
-                toast.error('Error: No se puede identificar el propietario de la lista');
-                return;
-            } const success = await addToCart(productForCart, 1, {
-                isGift: true,
-                giftInfo: {
-                    listId: id,
-                    itemId: product.id,
-                    babyName: list.babyName,
-                    listOwnerId: list.userId,
-                    addedAt: Date.now(),
-                    quantity: product.quantity || 1,
-                    reserved: product.reserved || 0
+        }); const handleReserveClick = async (product) => {
+            try {
+                // Validate required gift information
+                if (!list.userId) {
+                    console.error('Missing list owner ID');
+                    toast.error('Error: No se puede identificar el propietario de la lista');
+                    return;
                 }
-            });
-            // if (success) {
-            //     toast.success('Regalo añadido al carrito');
-            // }
-        } catch (error) {
-            console.error('Error adding gift to cart:', error);
-            toast.error('Error al añadir el regalo al carrito');
-        }
-    };
+
+                // Format product for unified cart structure 
+                const productForCart = {
+                    id: product.productId,
+                    name: product.name,
+                    price: product.priceValue,
+                    image: product.image,
+                    brand: product.brand || '',
+                    category: product.category || '',
+                    type: 'gift',
+                    listInfo: {
+                        listId: id,
+                        itemId: product.id,
+                        babyName: list.babyName,
+                        listOwnerId: list.userId,
+                        status: 'reserved',
+                        state: 1, // 1 = reserved
+                        addedAt: new Date().toISOString(),
+                        price: product.priceValue,
+                        priority: product.priority || 0
+                    }
+                };
+
+                const success = await addToCart(productForCart, 1); if (success) {
+                    toast.success('Regalo añadido al carrito');
+                } else {
+                    toast.error('No se pudo añadir el regalo al carrito');
+                }
+            } catch (error) {
+                console.error('Error adding gift to cart:', error);
+                toast.error(error.message || 'Error al añadir el regalo al carrito');
+            }
+        };
     const handleShareClick = async () => {
         const listUrl = window.location.href;
         try {

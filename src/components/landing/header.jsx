@@ -5,8 +5,8 @@ import UserAuth from "@/components/ui/UserAuthModal";
 import Link from "next/link";
 import { useSession } from 'next-auth/react';
 import { ShoppingCart, Search } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
-export default function Page() { 
+import { useCart } from '@/contexts/CartContext.jsx';
+export default function Page() {
     const { cartItems } = useCart();
     // Calculate total quantity of items in cart
     const cartItemsCount = cartItems ? cartItems.reduce((total, item) => total + item.quantity, 0) : 0;

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/contexts/CartContext.jsx';
 import { useSession } from 'next-auth/react';
 import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
@@ -35,10 +35,10 @@ export default function ProductCard({
         try {
             setIsAddingToList(true);
             // Case 1: Not logged in - Show AuthModal
-            if (!session) { 
-                    toast.error('Inicia sesión para añadir productos a las listas', { duration: 3000 });
-            }  
-            
+            if (!session) {
+                toast.error('Inicia sesión para añadir productos a las listas', { duration: 3000 });
+            }
+
             // Get user's birth lists
             const result = await fetchBirthLists();
             if (!result.success) {

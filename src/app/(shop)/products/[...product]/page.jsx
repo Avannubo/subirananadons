@@ -5,7 +5,7 @@ import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import ProductSlider from '@/components/landing/ProductSlider';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/contexts/CartContext.jsx';
 import { toast } from 'react-hot-toast';
 import { fetchProductById, fetchProducts, formatProduct } from '@/services/ProductService';
 export default function Page() {

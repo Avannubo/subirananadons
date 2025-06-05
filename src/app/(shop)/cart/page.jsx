@@ -4,12 +4,12 @@ import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
-import UserAuth from "@/components/ui/UserAuthModal";
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/contexts/CartContext.jsx';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
+
 export default function CartPage() {
-    const { cartItems, updateQuantity, removeFromCart, updateGiftNote, clearCart } = useCart();
+    const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
     const { user, loading: userLoading } = useUser();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
@@ -28,18 +28,18 @@ export default function CartPage() {
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
     const [userType, setUserType] = useState('guest'); // 'guest' or 'register'
-    const [giftNotes, setGiftNotes] = useState({});
-    const regularItems = cartItems.filter(item => !item.isGift);
-    const giftItems = cartItems.filter(item => item.isGift);
     const [invoiceBlob, setInvoiceBlob] = useState(null);
 
-    // Check if cart has any gift items
+    // Separate regular and gift items once cartItems is available
+    const regularItems = useMemo(() => cartItems?.filter(item => item.type !== 'gift') ?? [], [cartItems]);
+    const giftItems = useMemo(() => cartItems?.filter(item => item.type === 'gift') ?? [], [cartItems]);    // Check if cart has any gift items
     const hasGiftItems = useMemo(() => {
-        return cartItems.some(item => item.isGift);
+        return cartItems?.some(item => item.type === 'gift') ?? false;
     }, [cartItems]);
+
     // Check if cart has only gift items
     const hasOnlyGiftItems = useMemo(() => {
-        return cartItems.length > 0 && cartItems.every(item => item.isGift);
+        return cartItems?.length > 0 && cartItems?.every(item => item.type === 'gift');
     }, [cartItems]);
     // Determine if we should show address fields
     const showAddressFields = useMemo(() => {
@@ -181,24 +181,31 @@ export default function CartPage() {
         // Clear any previous errors
         setOrderError(null);
 
-        // Determine which fields are required based on delivery method and cart contents
-        let requiredFields = ['name', 'lastName', 'email', 'phone'];
-        // Add address fields only if delivery method is 'delivery' or not all items are gifts
-        if (deliveryMethod === 'delivery' && !hasOnlyGiftItems) {
-            requiredFields = [...requiredFields, 'address', 'city', 'postalCode', 'province'];
+        // Validate cart contents
+        if (cartItems.length === 0) {
+            setOrderError('No hay productos en el carrito');
+            return;
         }
+
+        // Determine required fields based on order contents and delivery method
+        const needsShippingAddress = deliveryMethod === 'delivery' && regularItems.length > 0;
+        const requiredFields = ['name', 'lastName', 'email', 'phone'];
+
+        if (needsShippingAddress) {
+            requiredFields.push('address', 'city', 'postalCode', 'province');
+        }
+
+        // Validate required fields
         const missingFields = requiredFields.filter(field => !formData[field]);
         if (missingFields.length > 0) {
             setOrderError('Por favor, completa todos los campos obligatorios');
             return;
         }
-        if (cartItems.length === 0) {
-            setOrderError('No hay productos en el carrito');
-            return;
-        }
+
         try {
             setIsSubmitting(true);
             setOrderError(null);
+
             // Handle user registration if selected
             if (userType === 'register' && !user) {
                 // Validate passwords match
@@ -225,24 +232,35 @@ export default function CartPage() {
                     return;
                 }
             }
-            // Prepare the buyer information for gift items
+
+            // Prepare the buyer information for both regular and gift items
             const buyerInfo = {
                 name: `${formData.name} ${formData.lastName}`.trim(),
                 email: formData.email,
                 phone: formData.phone
             };
+
             const orderData = {
                 items: cartItems.map(item => ({
                     ...item,
-                    buyerInfo: item.isGift ? {
+                    buyerInfo: item.type === 'gift' ? {
                         ...buyerInfo,
-                        note: giftNotes[item.id] || ''
+                        ...(item.listInfo || {}),
                     } : undefined,
-                    quantity: item.isGift ? 1 : item.quantity
+                    quantity: item.type === 'gift' ? 1 : item.quantity
                 })),
-                shippingDetails: formData,
-                deliveryMethod: deliveryMethod,
-                hasGiftItems: hasGiftItems,
+                shippingDetails: {
+                    ...formData,
+                    // Only include address if there are regular items and delivery is selected
+                    ...(needsShippingAddress ? {} : {
+                        address: undefined,
+                        city: undefined,
+                        postalCode: undefined,
+                        province: undefined
+                    })
+                },
+                deliveryMethod,
+                hasGiftItems,
                 isGiftOnly: hasOnlyGiftItems,
                 totals: {
                     subtotal: calculateSubtotal(),
@@ -251,6 +269,7 @@ export default function CartPage() {
                     total: calculateTotal()
                 }
             };
+
             const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: {
@@ -294,7 +313,6 @@ export default function CartPage() {
                 country: 'España',
                 notes: ''
             });
- 
             // After 5 seconds, scroll to top
             setTimeout(() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -327,7 +345,6 @@ export default function CartPage() {
         };
         generateInvoice();
     }, [orderSuccess]);
-
     const handleDownloadInvoice = () => {
         if (!invoiceBlob || !orderSuccess) return;
         const url = window.URL.createObjectURL(invoiceBlob);
@@ -340,11 +357,9 @@ export default function CartPage() {
         window.URL.revokeObjectURL(url);
         toast.success('Factura descargada correctamente');
     };
-
     // Handle sending email with receipt
     const handleSendEmail = async () => {
         if (!orderSuccess) return;
-
         try {
             toast.loading('Enviando email...');
             const response = await fetch(`/api/orders/${orderSuccess.orderId}/send-email`, {
@@ -358,28 +373,24 @@ export default function CartPage() {
                     items: orderSuccess.items
                 })
             });
-
             if (!response.ok) {
                 throw new Error('Error al enviar el email');
             }
-
             toast.success('Email enviado correctamente');
         } catch (error) {
             console.error('Error sending email:', error);
             toast.error('Error al enviar el email');
         }
     };
-
-    const handleGiftNoteChange = async (itemId, note) => {
-        // Update local state immediately for UI responsiveness
-        setGiftNotes(prev => ({
-            ...prev,
-            [itemId]: note
-        }));
-
-        // Persist to cart state
-        await updateGiftNote(itemId, note);
-    };
+    // const handleGiftNoteChange = async (itemId, note) => {
+    //     // Update local state immediately for UI responsiveness
+    //     setGiftNotes(prev => ({
+    //         ...prev,
+    //         [itemId]: note
+    //     }));
+    //     // Persist to cart state
+    //     await updateGiftNote(itemId, note);
+    // };
 
     return (
         <ShopLayout>
@@ -858,7 +869,7 @@ export default function CartPage() {
                                     </div>
                                 </div>
                                 {/* Gift Notes Section */}
-                                {giftItems.length > 0 && (
+                                {/* {giftItems.length > 0 && (
                                     <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
                                         <h2 className="text-xl font-bold mb-4">Notas para los regalos</h2>
                                         <div className="space-y-6">
@@ -895,7 +906,7 @@ export default function CartPage() {
                                             ))}
                                         </div>
                                     </div>
-                                )}
+                                )} */}
                                 {/* Order Summary */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
                                     <h2 className="text-xl font-bold mb-4">Resumen del pedido</h2>
