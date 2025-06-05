@@ -25,7 +25,8 @@ export default function CartPage() {
         postalCode: '',
         province: '',
         country: 'España',
-        notes: ''
+        notes: '',
+        giftNote: '' // Add new field for gift-specific notes
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
@@ -73,7 +74,8 @@ export default function CartPage() {
                 city: prev.city,
                 postalCode: prev.postalCode,
                 province: prev.province,
-                notes: prev.notes || '' // Add notes field here
+                notes: prev.notes || '', // Add notes field here
+                giftNote: prev.giftNote || '' // Add notes field here
             }));
             // Only fetch address data if not gift-only order
             if (!hasOnlyGiftItems) {
@@ -250,9 +252,10 @@ export default function CartPage() {
                     buyerInfo: item.type === 'gift' ? {
                         ...buyerInfo,
                         ...(item.listInfo || {}),
+                        note: formData.giftNote // Add gift-specific note
                     } : undefined,
                     quantity: item.type === 'gift' ? 1 : item.quantity,
-                    notes: formData.notes // Add notes to each item
+                    notes: formData.notes // General notes still added to each item
                 })),
                 shippingDetails: {
                     ...formData,
@@ -267,7 +270,8 @@ export default function CartPage() {
                 deliveryMethod,
                 hasGiftItems,
                 isGiftOnly: hasOnlyGiftItems,
-                notes: formData.notes, // Add notes to the order level
+                notes: formData.notes, // General order notes
+                giftNote: hasGiftItems ? formData.giftNote : undefined, // Only include if there are gift items
                 totals: {
                     subtotal: calculateSubtotal(),
                     shipping: calculateShipping(),
@@ -317,7 +321,8 @@ export default function CartPage() {
                 postalCode: '',
                 province: '',
                 country: 'España',
-                notes: ''
+                notes: '',
+                giftNote: '' // Reset gift note
             });
             // After 5 seconds, scroll to top
             setTimeout(() => {
@@ -615,17 +620,37 @@ export default function CartPage() {
                                                     {/* Add note field */}
                                                     <div className="col-span-2">
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Notas
+                                                            Notas generales
                                                         </label>
                                                         <textarea
                                                             name="notes"
                                                             value={formData.notes}
                                                             onChange={handleInputChange}
-                                                            placeholder="Instrucciones especiales para la entrega, preferencias, notas para los regalos, etc."
+                                                            placeholder="Instrucciones especiales para la entrega, preferencias, etc."
                                                             rows={3}
                                                             className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] text-sm"
                                                         />
                                                     </div>
+
+                                                    {/* Add gift note field when there are gift items */}
+                                                    {hasGiftItems && (
+                                                        <div className="col-span-2">
+                                                            <label className="block text-sm font-medium text-pink-600 mb-1">
+                                                                Nota para los regalos
+                                                            </label>
+                                                            <textarea
+                                                                name="giftNote"
+                                                                value={formData.giftNote}
+                                                                onChange={handleInputChange}
+                                                                placeholder="Añade una nota especial para el propietario de la lista de regalos"
+                                                                rows={3}
+                                                                className="w-full px-3 py-2 border border-pink-200 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-400 text-sm bg-pink-50/30"
+                                                            />
+                                                            <p className="mt-1 text-xs text-pink-600">
+                                                                Esta nota será visible para el propietario de la lista cuando recoja los regalos
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </>
                                         )}
@@ -805,9 +830,6 @@ export default function CartPage() {
                                                     {calculateSubtotal() >= 60 && !hasOnlyGiftItems && (
                                                         <p className="text-xs text-green-600 font-medium mt-1">Envío gratis en pedidos superiores a 60€</p>
                                                     )}
-                                                    {hasOnlyGiftItems && (
-                                                        <p className="text-xs text-red-600 font-medium mt-1">No disponible para pedidos solo de regalo</p>
-                                                    )}
                                                     {hasGiftItems && !hasOnlyGiftItems && (
                                                         <p className="text-xs text-orange-600 font-medium mt-1">Los productos de regalo deberán recogerse en tienda</p>
                                                     )}
@@ -833,7 +855,7 @@ export default function CartPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">Recoger en tienda</p>
-                                                    <p className="text-sm text-gray-500">Disponible en 2-4 horas</p>
+                                                    <p className="text-sm text-gray-500">Disponible in 2-4 horas</p>
                                                     {hasGiftItems && (
                                                         <p className="text-xs text-pink-600 font-medium mt-1">
                                                             {hasOnlyGiftItems 

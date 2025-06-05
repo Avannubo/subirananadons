@@ -96,10 +96,22 @@ export async function GET(request, { params }) {
                 text-align: left;
                 border-bottom: 1px solid #eee;
                 white-space: nowrap;
-                }
-                th {
+                }                th {
                 background: #00B0C8;
                 color: white;
+                }
+                .gift-item {
+                    background-color: #FFF5F7;
+                }
+                .item-type {
+                    font-weight: 600;
+                    text-align: center;
+                }
+                .gift-type {
+                    color: #DB2777;
+                }
+                .personal-type {
+                    color: #00B0C8;
                 }
                 .totals {
                 margin-left: auto;
@@ -148,20 +160,24 @@ export async function GET(request, { params }) {
                     <div>Teléfono: ${order.shippingAddress.phone}</div>
                     <div>Método de entrega: ${order.deliveryMethod === 'delivery' ? 'Envío a domicilio' : 'Recogida en tienda'}</div>
                 </div>
-                </div>
+                </div>                
                 <table>
                 <thead>
                     <tr>
                     <th>Producto</th>
+                    <th>Tipo</th>
                     <th>Cantidad</th>
                     <th>Precio</th>
                     <th>Total</th>
                     </tr>
                 </thead>                        <tbody>
                     ${order.items.map(item => `
-                    <tr>
+                    <tr class="${item.isGift ? 'gift-item' : ''}">
                         <td>
                         ${item.product ? `${item.product.name}` : 'Producto'}
+                        </td>
+                        <td class="item-type ${item.isGift ? 'gift-type' : 'personal-type'}">
+                            ${item.isGift ? 'Regalo' : 'Personal'}
                         </td>
                         <td>${item.quantity}</td>
                         <td>${item.price.toFixed(2)}€</td>

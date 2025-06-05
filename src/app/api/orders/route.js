@@ -64,7 +64,8 @@ export async function POST(request) {
             subtotal: totals.subtotal,
             tax: totals.tax,
             shippingCost: totals.shipping,
-            notes: shippingDetails.notes || ''
+            notes: shippingDetails.notes || '',
+            giftNote: shippingDetails.giftNote || ''
         };
 
         // If user is logged in, link the order to the user
@@ -99,7 +100,7 @@ export async function POST(request) {
                     // Create buyer info with notes
                     const buyerInfoWithNote = {
                         ...item.buyerInfo,
-                        message: shippingDetails.notes || '', // This will be stored in both userData.message and messages.note
+                        message: shippingDetails.giftNote || '', // This will be stored in both userData.message and messages.note
                         quantity: item.quantity
                     };
 
