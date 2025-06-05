@@ -8,10 +8,12 @@ import { useCart } from '@/contexts/CartContext.jsx';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 import { ShoppingCart } from 'lucide-react';
+import UserAuthModal from '@/components/ui/UserAuthModal';
 
 export default function CartPage() {
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
     const { user, loading: userLoading } = useUser();
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
         name: '',
@@ -28,7 +30,7 @@ export default function CartPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
-    const [userType, setUserType] = useState('guest'); // 'guest' or 'register'
+    // Remove userType state since we're not using login options anymore
     const [invoiceBlob, setInvoiceBlob] = useState(null);
 
     // Separate regular and gift items once cartItems is available
@@ -70,7 +72,8 @@ export default function CartPage() {
                 address: prev.address,
                 city: prev.city,
                 postalCode: prev.postalCode,
-                province: prev.province
+                province: prev.province,
+                notes: prev.notes || '' // Add notes field here
             }));
             // Only fetch address data if not gift-only order
             if (!hasOnlyGiftItems) {
@@ -207,32 +210,32 @@ export default function CartPage() {
             setIsSubmitting(true);
             setOrderError(null);
 
-            // Handle user registration if selected
-            if (userType === 'register' && !user) {
-                // Validate passwords match
-                if (formData.password !== formData.confirmPassword) {
-                    setOrderError('Las contraseñas no coinciden');
-                    return;
-                }
-                try {
-                    // Call your registration API
-                    const registerResponse = await fetch('/api/auth/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            name: `${formData.name} ${formData.lastName}`,
-                            email: formData.email,
-                            password: formData.password
-                        })
-                    });
-                    if (!registerResponse.ok) {
-                        throw new Error('Error al crear la cuenta');
-                    }
-                } catch (error) {
-                    setOrderError('Error al crear la cuenta: ' + error.message);
-                    return;
-                }
-            }
+            // // Handle user registration if selected
+            // if (userType === 'register' && !user) {
+            //     // Validate passwords match
+            //     if (formData.password !== formData.confirmPassword) {
+            //         setOrderError('Las contraseñas no coinciden');
+            //         return;
+            //     }
+            //     try {
+            //         // Call your registration API
+            //         const registerResponse = await fetch('/api/auth/register', {
+            //             method: 'POST',
+            //             headers: { 'Content-Type': 'application/json' },
+            //             body: JSON.stringify({
+            //                 name: `${formData.name} ${formData.lastName}`,
+            //                 email: formData.email,
+            //                 password: formData.password
+            //             })
+            //         });
+            //         if (!registerResponse.ok) {
+            //             throw new Error('Error al crear la cuenta');
+            //         }
+            //     } catch (error) {
+            //         setOrderError('Error al crear la cuenta: ' + error.message);
+            //         return;
+            //     }
+            // }
 
             // Prepare the buyer information for both regular and gift items
             const buyerInfo = {
@@ -248,7 +251,8 @@ export default function CartPage() {
                         ...buyerInfo,
                         ...(item.listInfo || {}),
                     } : undefined,
-                    quantity: item.type === 'gift' ? 1 : item.quantity
+                    quantity: item.type === 'gift' ? 1 : item.quantity,
+                    notes: formData.notes // Add notes to each item
                 })),
                 shippingDetails: {
                     ...formData,
@@ -263,6 +267,7 @@ export default function CartPage() {
                 deliveryMethod,
                 hasGiftItems,
                 isGiftOnly: hasOnlyGiftItems,
+                notes: formData.notes, // Add notes to the order level
                 totals: {
                     subtotal: calculateSubtotal(),
                     shipping: calculateShipping(),
@@ -406,78 +411,29 @@ export default function CartPage() {
                                 <div className="sticky top-[120px] space-y-4">
                                     {/* User Type Selection - Only for guests */}
                                     <div className='bg-white rounded-lg shadow-sm p-6'>
-                                        <div className="flex items-start space-x-4 justify-start ">
-                                            <h2 className="text-xl font-bold mb-6">Datos del usuario</h2>
-                                            {/* <UserAuth /> */}
+                                        <div className="flex items-start justify-between">
+                                            {/* <h2 className="text-xl font-bold mb-6">Datos del usuario</h2> */}
+                                            {/* {!user && (
+                                                <button
+                                                    onClick={() => setIsAuthModalOpen(true)}
+                                                    className="text-[#00B0C8] text-sm hover:underline"
+                                                >
+                                                    Iniciar sesión
+                                                </button>
+                                            )} */}
                                         </div>
                                         {!user ? (
-                                            <>
-                                                <div className="space-y-4">
-                                                    <div className="flex flex-col   gap-4">
-                                                        <div className='flex flex-row gap-4 space-x-2'>
-                                                            <div
-                                                                className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'login'
-                                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5'
-                                                                    : 'border-gray-200 hover:border-[#00B0C8]'
-                                                                    }`}
-                                                                onClick={() => setUserType('login')}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${userType === 'login' ? 'border-[#00B0C8]' : 'border-gray-400'}`}>
-                                                                        {userType === 'login' && (
-                                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
-                                                                        )}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium">Login</p>
-                                                                        <p className="text-sm text-gray-500"> Gestiona tus pedidos fácilmente</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div
-                                                                className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'register'
-                                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5'
-                                                                    : 'border-gray-200 hover:border-[#00B0C8]'
-                                                                    }`}
-                                                                onClick={() => setUserType('register')}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${userType === 'register' ? 'border-[#00B0C8]' : 'border-gray-400'}`}>
-                                                                        {userType === 'register' && (
-                                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
-                                                                        )}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium">Registrar</p>
-                                                                        <p className="text-sm text-gray-500">Crear una nueva cuenta</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div className='flex-1 flex-row gap-4 space-x-2'>
-                                                            <div
-                                                                className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'guest'
-                                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5'
-                                                                    : 'border-gray-200 hover:border-[#00B0C8]'
-                                                                    }`}
-                                                                onClick={() => setUserType('guest')}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${userType === 'guest' ? 'border-[#00B0C8]' : 'border-gray-400'}`}>
-                                                                        {userType === 'guest' && (
-                                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
-                                                                        )}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium">Comprar como invitado</p>
-                                                                        <p className="text-sm text-gray-500">Continuar sin crear una cuenta</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </>
+                                            <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                                                <p className="text-sm text-blue-600 mb-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Comprando como invitado
+                                                </p>
+                                                <p className="text-xs text-gray-600">
+                                                    Inicia sesión para ver tus pedidos en el panel y crear listas de nacimiento
+                                                </p>
+                                            </div>
                                         ) : (
                                             <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
                                                 <p className="text-sm flex items-center text-blue-600">
@@ -504,7 +460,7 @@ export default function CartPage() {
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                            Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista. Por favor, proporciona tus datos de contacto.
+                                                            Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista.
                                                         </p>
                                                     </div>
                                                 )}
@@ -558,7 +514,7 @@ export default function CartPage() {
                                                             required
                                                         />
                                                     </div>
-                                                    {userType === 'register' && (
+                                                    {/* {userType === 'register' && (
                                                         <div className="col-span-2">
                                                             <h3 className="font-medium mb-4">Contraseña para la cuenta</h3>
                                                             <div className="space-y-4">
@@ -586,7 +542,7 @@ export default function CartPage() {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    )}
+                                                    )} */}
                                                     <div className="col-span-2">
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             Teléfono
@@ -656,6 +612,20 @@ export default function CartPage() {
                                                             </div>
                                                         </>
                                                     )}
+                                                    {/* Add note field */}
+                                                    <div className="col-span-2">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            Notas
+                                                        </label>
+                                                        <textarea
+                                                            name="notes"
+                                                            value={formData.notes}
+                                                            onChange={handleInputChange}
+                                                            placeholder="Instrucciones especiales para la entrega, preferencias, notas para los regalos, etc."
+                                                            rows={3}
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] text-sm"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </>
                                         )}
@@ -791,7 +761,7 @@ export default function CartPage() {
                                                 </svg>
                                                 {hasOnlyGiftItems
                                                     ? 'Tu carrito contiene solo productos de regalo que deben ser recogidos en tienda por el propietario de la lista. Al comprar estos artículos, serán marcados como comprados en la lista de regalo.'
-                                                    : 'Este pedido incluye artículos de regalo (recogida en tienda obligatoria por el propietario de la lista). Por ello, todo el pedido se configurará para recoger en tienda. Si deseas envío a domicilio para los otros artículos, por favor sepáralos en un pedido diferente. Los artículos de regalo serán marcados como comprados en la lista.'
+                                                    : 'Este pedido incluye artículos de regalo (recogida en tienda obligatoria por el propietario de la lista). Estos artículos no pueden ser enviados a domicilio.'
                                                 }
                                             </p>
                                         </div>
@@ -812,31 +782,34 @@ export default function CartPage() {
                                     )}
                                     <div className="space-y-4">
                                         <div
-                                            className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${hasGiftItems
+                                            className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${hasOnlyGiftItems
                                                 ? 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-60'
                                                 : deliveryMethod === 'delivery'
                                                     ? 'border-[#00B0C8] bg-[#00B0C8]/5 cursor-pointer'
                                                     : 'border-gray-200 hover:border-[#00B0C8] cursor-pointer'
                                                 }`}
-                                            onClick={() => !hasGiftItems && handleDeliveryMethodChange('delivery')}
+                                            onClick={() => !hasOnlyGiftItems && handleDeliveryMethodChange('delivery')}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${hasGiftItems
+                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${hasOnlyGiftItems
                                                     ? 'border-gray-400'
                                                     : deliveryMethod === 'delivery' ? 'border-[#00B0C8]' : 'border-gray-400'
                                                     }`}>
-                                                    {deliveryMethod === 'delivery' && !hasGiftItems && (
+                                                    {deliveryMethod === 'delivery' && !hasOnlyGiftItems && (
                                                         <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
                                                     )}
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">Envío a domicilio</p>
                                                     <p className="text-sm text-gray-500">Entrega en 24-48 horas laborables</p>
-                                                    {calculateSubtotal() >= 60 && !hasGiftItems && (
+                                                    {calculateSubtotal() >= 60 && !hasOnlyGiftItems && (
                                                         <p className="text-xs text-green-600 font-medium mt-1">Envío gratis en pedidos superiores a 60€</p>
                                                     )}
-                                                    {hasGiftItems && (
-                                                        <p className="text-xs text-red-600 font-medium mt-1">No disponible para productos de regalo</p>
+                                                    {hasOnlyGiftItems && (
+                                                        <p className="text-xs text-red-600 font-medium mt-1">No disponible para pedidos solo de regalo</p>
+                                                    )}
+                                                    {hasGiftItems && !hasOnlyGiftItems && (
+                                                        <p className="text-xs text-orange-600 font-medium mt-1">Los productos de regalo deberán recogerse en tienda</p>
                                                     )}
                                                 </div>
                                             </div>
@@ -860,9 +833,14 @@ export default function CartPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">Recoger en tienda</p>
-                                                    <p className="text-sm text-gray-500">Disponible in 2-4 horas</p>
+                                                    <p className="text-sm text-gray-500">Disponible en 2-4 horas</p>
                                                     {hasGiftItems && (
-                                                        <p className="text-xs text-pink-600 font-medium mt-1">Obligatorio para productos de regalo — Solo el propietario de la lista puede recogerlos</p>
+                                                        <p className="text-xs text-pink-600 font-medium mt-1">
+                                                            {hasOnlyGiftItems 
+                                                                ? 'Única opción disponible para pedidos de regalo'
+                                                                : 'Obligatorio para productos de regalo — Solo el propietario de la lista puede recogerlos'
+                                                            }
+                                                        </p>
                                                     )}
                                                 </div>
                                             </div>
@@ -967,7 +945,7 @@ export default function CartPage() {
                     </>
                 ) : (
                     <motion.div
-                        className="text-center py-16 min-h-[60vh] flex flex-col items-center justify-center space-y-4"  
+                        className="text-center py-16 min-h-[60vh] flex flex-col items-center justify-center space-y-4"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                     >
@@ -1057,6 +1035,7 @@ export default function CartPage() {
                     </div>
                 </div>
             )}
+            {/* <UserAuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} /> */}
         </ShopLayout>
     );
 }

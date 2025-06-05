@@ -42,8 +42,8 @@ export async function POST(request) {
                     product: productId,
                     quantity: item.quantity,
                     price: item.priceValue || parseFloat(item.price.replace(',', '.')),
-                    isGift: item.isGift || false,
-                    giftInfo: item.giftInfo,
+                    isGift: item.type === 'gift',
+                    giftInfo: item.type === 'gift' ? item.listInfo : undefined,
                     buyerInfo: item.buyerInfo
                 };
             }),
@@ -76,28 +76,39 @@ export async function POST(request) {
         const order = await Order.create(orderData);
 
         // For gift items, update the birth list items to mark them as purchased
-        const giftItems = items.filter(item => item.isGift && item.giftInfo);
+        const giftItems = items.filter(item => item.type === 'gift' && item.listInfo);
         if (giftItems.length > 0) {
             for (const item of giftItems) {
-                if (!item.giftInfo.listId || !item.giftInfo.itemId) continue;
+                if (!item.listInfo.listId || !item.listInfo.itemId) continue;
 
                 try {
                     // Find the birth list
-                    const birthList = await BirthList.findById(item.giftInfo.listId);
+                    const birthList = await BirthList.findById(item.listInfo.listId);
                     if (!birthList) {
-                        console.error(`Birth list not found: ${item.giftInfo.listId}`);
+                        console.error(`Birth list not found: ${item.listInfo.listId}`);
                         continue;
                     }
 
                     // Find the specific item in the birth list
-                    const birthListItem = birthList.items.id(item.giftInfo.itemId);
+                    const birthListItem = birthList.items.id(item.listInfo.itemId);
                     if (!birthListItem) {
-                        console.error(`Item not found in birth list: ${item.giftInfo.itemId}`);
+                        console.error(`Item not found in birth list: ${item.listInfo.itemId}`);
                         continue;
                     }
 
-                    // Update the item's state to purchased (2)
-                    await birthList.updateItemState(item.giftInfo.itemId, 2, item.buyerInfo);
+                    // Create buyer info with notes
+                    const buyerInfoWithNote = {
+                        ...item.buyerInfo,
+                        message: shippingDetails.notes || '', // This will be stored in both userData.message and messages.note
+                        quantity: item.quantity
+                    };
+
+                    if (session?.user?.id) {
+                        buyerInfoWithNote.userId = session.user.id;
+                    }
+
+                    // Update the item's state to purchased (2) and include buyer info with note
+                    await birthList.updateItemState(item.listInfo.itemId, 2, buyerInfoWithNote);
 
                 } catch (error) {
                     console.error(`Error updating birth list item state: ${error.message}`);
