@@ -11,8 +11,7 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true
-    },
-    items: [{
+    }, items: [{
         product: {
             type: mongoose.Schema.Types.Mixed,
             required: true
@@ -26,6 +25,26 @@ const orderSchema = new mongoose.Schema({
             type: Number,
             required: true,
             min: 0
+        },
+        type: {
+            type: String,
+            enum: ['regular', 'gift'],
+            default: 'regular'
+        },
+        giftInfo: {
+            listId: mongoose.Schema.Types.ObjectId,
+            itemId: mongoose.Schema.Types.ObjectId,
+            babyName: String,
+            listOwnerId: mongoose.Schema.Types.ObjectId,
+            status: String,
+            state: Number
+        },
+        buyerInfo: {
+            name: String,
+            email: String,
+            phone: String,
+            note: String,
+            userId: mongoose.Schema.Types.ObjectId
         }
     }],
     shippingAddress: {

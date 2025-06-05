@@ -36,16 +36,20 @@ export async function POST(request) {
             items: items.map(item => {
                 const productId = typeof item.id === 'string' && /^[0-9a-fA-F]{24}$/.test(item.id)
                     ? item.id
-                    : item.id.toString();
-
-                return {
-                    product: productId,
-                    quantity: item.quantity,
-                    price: item.priceValue || parseFloat(item.price.replace(',', '.')),
-                    isGift: item.type === 'gift',
-                    giftInfo: item.type === 'gift' ? item.listInfo : undefined,
-                    buyerInfo: item.buyerInfo
-                };
+                    : item.id.toString(); return {
+                        product: productId,
+                        quantity: item.quantity,
+                        price: item.priceValue || parseFloat(item.price.replace(',', '.')),
+                        type: item.type || 'regular',
+                        giftInfo: item.type === 'gift' ? item.listInfo : undefined,
+                        buyerInfo: item.type === 'gift' ? {
+                            name: shippingDetails.name,
+                            email: shippingDetails.email,
+                            phone: shippingDetails.phone,
+                            note: shippingDetails.giftNote || '',
+                            userId: session?.user?.id
+                        } : undefined
+                    };
             }),
             shippingAddress: {
                 name: shippingDetails.name,

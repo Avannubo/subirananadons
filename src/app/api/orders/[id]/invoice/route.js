@@ -106,12 +106,17 @@ export async function GET(request, { params }) {
                 .item-type {
                     font-weight: 600;
                     text-align: center;
-                }
-                .gift-type {
+                }                
+                    .gift-type {
                     color: #DB2777;
                 }
                 .personal-type {
                     color: #00B0C8;
+                }
+                .gift-info {
+                    color: #DB2777;
+                    font-size: 0.8em;
+                    font-style: italic;
                 }
                 .totals {
                 margin-left: auto;
@@ -160,8 +165,7 @@ export async function GET(request, { params }) {
                     <div>Teléfono: ${order.shippingAddress.phone}</div>
                     <div>Método de entrega: ${order.deliveryMethod === 'delivery' ? 'Envío a domicilio' : 'Recogida en tienda'}</div>
                 </div>
-                </div>                
-                <table>
+                </div>                  <table>
                 <thead>
                     <tr>
                     <th>Producto</th>
@@ -171,13 +175,13 @@ export async function GET(request, { params }) {
                     <th>Total</th>
                     </tr>
                 </thead>                        <tbody>
-                    ${order.items.map(item => `
-                    <tr class="${item.isGift ? 'gift-item' : ''}">
+                    ${order.items.map(item => `                    <tr class="${item.type === 'gift' ? 'gift-item' : ''}">
                         <td>
                         ${item.product ? `${item.product.name}` : 'Producto'}
+                        ${item.giftInfo ? `<br><small class="gift-info">(Lista: ${item.giftInfo.babyName})</small>` : ''}
                         </td>
-                        <td class="item-type ${item.isGift ? 'gift-type' : 'personal-type'}">
-                            ${item.isGift ? 'Regalo' : 'Personal'}
+                        <td class="item-type ${item.type === 'gift' ? 'gift-type' : 'personal-type'}">
+                            ${item.type === 'gift' ? 'Regalo' : 'Personal'}
                         </td>
                         <td>${item.quantity}</td>
                         <td>${item.price.toFixed(2)}€</td>

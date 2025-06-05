@@ -339,19 +339,19 @@ export default function CartPage() {
     useEffect(() => {
         const generateInvoice = async () => {
             if (!orderSuccess) return;
-            // toast.success('Generando factura...');
+            // toast.success('Generando Ticket...');
             try {
                 const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
                     method: 'GET',
                     headers: { 'Accept': 'application/pdf' }
                 });
-                if (!res.ok) throw new Error('No se pudo generar la factura');
+                if (!res.ok) throw new Error('No se pudo generar la Ticket');
                 const blob = await res.blob();
                 setInvoiceBlob(blob);
-                // toast.success('Factura generada correctamente');
+                // toast.success('Ticket generada correctamente');
                 //close the modal 
             } catch (err) {
-                toast.error('Error al generar la factura');
+                toast.error('Error al generar la Ticket');
             }
         };
         generateInvoice();
@@ -361,12 +361,12 @@ export default function CartPage() {
         const url = window.URL.createObjectURL(invoiceBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Factura-${orderSuccess.orderNumber}.pdf`;
+        link.download = `Ticket-${orderSuccess.orderNumber}.pdf`;
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
-        toast.success('Factura descargada correctamente');
+        toast.success('Ticket descargada correctamente');
     };
     // Handle sending email with receipt
     const handleSendEmail = async () => {
