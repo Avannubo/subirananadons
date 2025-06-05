@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
+import { ShoppingCart } from 'lucide-react';
 
 export default function CartPage() {
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
@@ -751,7 +752,7 @@ export default function CartPage() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="flex-grow">
+                                                <div className="flex-1">
                                                     <h3 className="font-medium">{item.name}</h3>
                                                     <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
                                                     <p className="text-[#00B0C8] font-medium">{item.price}€</p>
@@ -761,7 +762,8 @@ export default function CartPage() {
                                                             <span className="ml-2 bg-green-100 text-green-700 px-1 rounded text-xs">Será marcado como comprado</span>
                                                         </p>
                                                     )}
-                                                </div>                                        <div className="flex flex-col space-y-3 w-full mt-2">
+                                                </div>
+                                                <div className="flex-1 flex-col space-y-3 w-full mt-2">
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center space-x-2 justify-between">                                            <p className="text-sm text-gray-500">Cantidad: 1</p>
                                                             <button
@@ -965,11 +967,12 @@ export default function CartPage() {
                     </>
                 ) : (
                     <motion.div
-                        className="text-center py-16"
+                        className="text-center py-16 min-h-[60vh] flex flex-col items-center justify-center space-y-4"  
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                     >
-                        <h2 className="text-2xl font-bold mb-4">Tu carrito está vacío</h2>
+                        <ShoppingCart className='text-gray-600 w-40 h-40' />
+                        <h2 className="text-2xl text-gray-800 font-bold mb-4">Tu carrito está vacío</h2>
                         <p className="text-gray-500 mb-8">¿No sabes qué comprar? ¡Miles de productos te esperan!</p>
                         <Link
                             href="/products"

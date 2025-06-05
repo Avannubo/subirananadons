@@ -16,7 +16,8 @@ export function CartProvider({ children }) {
         items: [],
         total: 0,
         count: 0,
-        loading: true
+        loading: true,
+        generalNote: ''
     });
 
     // Helper functions
@@ -31,24 +32,37 @@ export function CartProvider({ children }) {
 
     const calculateCount = useCallback((items) => {
         return items.reduce((count, item) => count + item.quantity, 0);
-    }, []);    // Fetch cart data from localStorage
+    }, []);
+
+    // Helper function to clear all cart data from localStorage
+    const clearLocalCartData = useCallback(() => {
+        localStorage.removeItem('cart');
+        localStorage.removeItem('cartTimestamp');
+    }, []);
+
+    // Fetch cart data from localStorage
     const fetchCart = useCallback(async (showToast = false) => {
         try {
-            setCart(prev => ({ ...prev, loading: true }));
-
-            // Get cart from localStorage
+            setCart(prev => ({ ...prev, loading: true }));            // Get cart from localStorage
             const localCart = localStorage.getItem('cart');
-            let cartItems = [];
-
+            let cartItems = []; let generalNote = '';
             if (localCart) {
                 try {
                     const parsed = JSON.parse(localCart);
+                    // Check if cart has items
                     if (parsed?.items && Array.isArray(parsed.items)) {
-                        cartItems = parsed.items;
+                        // Check timestamp if it exists (24 hours)
+                        if (!parsed.timestamp || (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000)) {
+                            cartItems = parsed.items;
+                            generalNote = parsed.generalNote || '';
+                        } else {
+                            // Clear expired cart data
+                            clearLocalCartData();
+                        }
                     }
                 } catch (error) {
                     console.error('Error parsing local cart:', error);
-                    localStorage.removeItem('cart');
+                    clearLocalCartData();
                 }
             }
 
@@ -56,7 +70,8 @@ export function CartProvider({ children }) {
                 items: cartItems,
                 total: calculateTotal(cartItems),
                 count: calculateCount(cartItems),
-                loading: false
+                loading: false,
+                generalNote
             });
 
             if (showToast) {
@@ -72,12 +87,14 @@ export function CartProvider({ children }) {
             }
             return false;
         }
-    }, [calculateTotal, calculateCount]);
+    }, [calculateTotal, calculateCount, clearLocalCartData]);
 
     // Initialize cart
     useEffect(() => {
         fetchCart();
-    }, [fetchCart]);    // Add to cart
+    }, [fetchCart]);
+
+    // Add to cart
     const addToCart = useCallback(async (product, quantity = 1) => {
         try {
             if (cart.loading) return false;
@@ -109,30 +126,56 @@ export function CartProvider({ children }) {
                     updatedAt: new Date().toISOString(),
                 } : null,
                 updatedAt: Date.now()
-            };
+            };            // Check if the product already exists in cart
+            const existingItemIndex = items.findIndex(item =>
+                item.id === productData.id && item.type === productData.type
+            );
 
-            // For regular products, check if it exists and update quantity
-            // For gift products, always add as new item
-            const existingItemIndex = productData.type === 'regular' ?
-                items.findIndex(item => item.id === productData.id && !item.type === 'gift') : -1;
+            // For gift products, prevent adding if it already exists
+            if (productData.type === 'gift' && existingItemIndex > -1) {
+                toast.error('Este producto de regalo ya está en el carrito');
+                return false;
+            }            // Get current cart from localStorage to ensure we have the latest data
+            const currentCart = localStorage.getItem('cart');
+            let currentItems = [];
+
+            try {
+                if (currentCart) {
+                    const parsed = JSON.parse(currentCart);
+                    if (parsed?.items && Array.isArray(parsed.items)) {
+                        currentItems = parsed.items;
+                    }
+                }
+            } catch (error) {
+                console.error('Error parsing current cart:', error);
+            }
+
+            // Find existing item in the current cart items
+            const existingItemInCurrent = currentItems.findIndex(item =>
+                item.id === productData.id && item.type === productData.type
+            );
 
             let updatedItems;
-            if (existingItemIndex > -1) {
+            if (existingItemInCurrent > -1 && productData.type === 'regular') {
                 // Update existing regular item quantity
-                updatedItems = items.map((item, index) =>
-                    index === existingItemIndex
+                updatedItems = currentItems.map((item, index) =>
+                    index === existingItemInCurrent
                         ? { ...item, quantity: item.quantity + productData.quantity }
                         : item
                 );
             } else {
-                // Add as new item - for both new regular items and all gift items
-                updatedItems = [...items, productData];
+                // Add as new item while preserving existing items
+                updatedItems = [...currentItems];
+                if (existingItemInCurrent === -1) { // Only add if not exists
+                    updatedItems.push(productData);
+                }
             }
 
-            // Update local storage with timestamp
+            // Update local storage with timestamp           
             localStorage.setItem('cart', JSON.stringify({
                 items: updatedItems,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                generalNote: cart.generalNote
             }));
 
             // Update state
@@ -150,47 +193,32 @@ export function CartProvider({ children }) {
             toast.error('Error al añadir al carrito');
             return false;
         }
-    }, [cart, calculateTotal, calculateCount]);// Remove from cart
-    const removeFromCart = useCallback(async (productId) => {
-        try {
-            if (cart.loading) return false;
-
-            const updatedItems = cart.items.filter(item => item.id !== productId);
-
-            // Update local storage
-            localStorage.setItem('cart', JSON.stringify({
-                items: updatedItems,
-                timestamp: Date.now()
-            }));
-
-            // Update state
-            setCart(prev => ({
-                ...prev,
-                items: updatedItems,
-                total: calculateTotal(updatedItems),
-                count: calculateCount(updatedItems)
-            }));
-
-            toast.success('Producto eliminado del carrito');
-            return true;
-        } catch (error) {
-            console.error('Error removing from cart:', error); toast.error('Error al eliminar del carrito');
-            return false;
-        }
     }, [cart, calculateTotal, calculateCount]);
 
-    // Update quantity
-    const updateQuantity = useCallback(async (productId, quantity) => {
+    // Remove from cart    
+    const removeFromCart = useCallback(async (productId, itemIndex) => {
         try {
             if (cart.loading) return false;
+            // Remove specific item if index is provided, otherwise remove all items with the productId
+            const updatedItems = itemIndex !== undefined
+                ? cart.items.filter((_, index) => index !== itemIndex)
+                : cart.items.filter(item => item.id !== productId);
+            // If cart becomes empty, clear it completely
+            if (updatedItems.length === 0) {
+                localStorage.removeItem('cart');
+                localStorage.removeItem('cartTimestamp');
+                setCart({
+                    items: [],
+                    total: 0,
+                    count: 0,
+                    loading: false,
+                    generalNote: ''
+                });
+                toast.success('Carrito vaciado');
+                return true;
+            }
 
-            const updatedItems = cart.items.map(item =>
-                item.id === productId
-                    ? { ...item, quantity: Math.max(1, parseInt(quantity)) }
-                    : item
-            );
-
-            // Update local storage
+            // Update local storage with timestamp in the same object
             localStorage.setItem('cart', JSON.stringify({
                 items: updatedItems,
                 timestamp: Date.now()
@@ -202,89 +230,166 @@ export function CartProvider({ children }) {
                 items: updatedItems,
                 total: calculateTotal(updatedItems),
                 count: calculateCount(updatedItems)
-            })); toast.success('Cantidad actualizada');
-            return true;
-        } catch (error) {
-            console.error('Error updating quantity:', error); toast.error('Error al actualizar la cantidad');
-            return false;
-        }
-    }, [cart, calculateTotal, calculateCount]);// Clear cart
-    const clearCart = useCallback(async () => {
-        try {
-            if (cart.loading) return false;
-
-            // Clear local storage
-            localStorage.removeItem('cart');
-
-            // Update state
-            setCart(prev => ({
-                ...prev,
-                items: [],
-                total: 0,
-                count: 0
             }));
-
-            toast.success('Carrito vaciado');
+            toast.success('Producto eliminado del carrito');
             return true;
-        } catch (error) {
-            console.error('Error clearing cart:', error); toast.error('Error al vaciar el carrito');
-            return false;
-        }
-    }, [cart.loading]);
+         // Closing brace for the try block
+    } catch (error) {
+        console.error('Error removing from cart:', error);
+        toast.error('Error al eliminar del carrito');
+        return false;
+    }
+}, [cart, calculateTotal, calculateCount]);
 
-    // Update gift note
-    const updateItemNote = useCallback(async (itemId, note) => {
-        try {
-            if (cart.loading) return false;
+// Update quantity
 
-            const updatedItems = cart.items.map(item =>
-                item.id === itemId
-                    ? {
-                        ...item,
-                        listInfo: {
-                            ...(item.listInfo || {}),
-                            note
-                        }
+const updateQuantity = useCallback(async (productId, quantity) => {
+    try {
+        if (cart.loading) return false;
+
+        const updatedItems = cart.items.map(item =>
+            item.id === productId
+                ? { ...item, quantity: Math.max(1, parseInt(quantity)) }
+                : item
+        );
+
+        // Update local storage
+        localStorage.setItem('cart', JSON.stringify({
+            items: updatedItems,
+            timestamp: Date.now()
+        }));
+
+        // Update state
+        setCart(prev => ({
+            ...prev,
+            items: updatedItems,
+            total: calculateTotal(updatedItems),
+            count: calculateCount(updatedItems)
+        })); toast.success('Cantidad actualizada');
+        return true;
+    } catch (error) {
+        console.error('Error updating quantity:', error); toast.error('Error al actualizar la cantidad');
+        return false;
+    }
+}, [cart, calculateTotal, calculateCount]);    // Clear cart
+const clearCart = useCallback(async () => {
+    try {
+        if (cart.loading) return false;
+
+        // Clear all cart data from localStorage
+        clearLocalCartData();
+
+        // Reset state completely
+        setCart({
+            items: [],
+            total: 0,
+            count: 0,
+            loading: false,
+            generalNote: ''
+        });
+
+        toast.success('Carrito vaciado');
+        return true;
+    } catch (error) {
+        console.error('Error clearing cart:', error);
+        toast.error('Error al vaciar el carrito');
+        return false;
+    }
+}, [cart.loading, clearLocalCartData]);
+
+// Update gift note
+const updateItemNote = useCallback(async (itemId, note) => {
+    try {
+        if (cart.loading) return false;
+
+        const updatedItems = cart.items.map(item =>
+            item.id === itemId
+                ? {
+                    ...item,
+                    listInfo: {
+                        ...(item.listInfo || {}),
+                        note
                     }
-                    : item
-            );
+                }
+                : item
+        );
 
-            // Update local storage
-            localStorage.setItem('cart', JSON.stringify({
-                items: updatedItems,
-                timestamp: Date.now()
-            }));
+        // Update local storage
+        localStorage.setItem('cart', JSON.stringify({
+            items: updatedItems,
+            timestamp: Date.now()
+        }));
 
-            // Update state
-            setCart(prev => ({
-                ...prev,
-                items: updatedItems
-            })); toast.success('Nota actualizada');
-            return true;
-        } catch (error) {
-            console.error('Error updating note:', error); toast.error('Error al actualizar la nota');
-            return false;
-        }
-    }, [cart]);
+        // Update state
+        setCart(prev => ({
+            ...prev,
+            items: updatedItems
+        })); toast.success('Nota actualizada');
+        return true;
+    } catch (error) {
+        console.error('Error updating note:', error); toast.error('Error al actualizar la nota');
+        return false;
+    }
+}, [cart]);
 
-    const value = {
-        items: cart.items,
-        total: cart.total,
-        count: cart.count,
-        loading: cart.loading,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        updateItemNote,
-        refreshCart: fetchCart
-    };
+// Update general note for all cart items
+const updateGeneralNote = useCallback(async (note) => {
+    try {
+        if (cart.loading) return false;
 
-    return (
-        <CartContext.Provider value={value}>
-            {children}
-        </CartContext.Provider>
-    );
+        // Update cart state with new note
+        const updatedCart = {
+            ...cart,
+            generalNote: note
+        };
+
+        // Update local storage with all cart data
+        localStorage.setItem('cart', JSON.stringify({
+            items: cart.items,
+            timestamp: Date.now(),
+            generalNote: note
+        }));
+
+        // Update state
+        setCart(updatedCart);
+        toast.success('Nota general actualizada');
+        return true;
+    } catch (error) {
+        console.error('Error updating general note:', error);
+        toast.error('Error al actualizar la nota general');
+        return false;
+    }
+}, [cart]);
+
+// Helper function to save cart to localStorage
+const saveCartToStorage = useCallback((items, note = cart.generalNote) => {
+    localStorage.setItem('cart', JSON.stringify({
+        items,
+        timestamp: Date.now(),
+        generalNote: note
+    }));
+}, [cart.generalNote]);
+
+const value = {
+    items: cart.items,
+    total: cart.total,
+    count: cart.count,
+    loading: cart.loading,
+    generalNote: cart.generalNote,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    updateItemNote,
+    updateGeneralNote,
+    refreshCart: fetchCart
+};
+
+return (
+    <CartContext.Provider value={value}>
+        {children}
+    </CartContext.Provider>
+);
 }
 
 // Custom hook to use the cart context
