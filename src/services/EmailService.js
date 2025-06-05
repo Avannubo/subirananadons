@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-
 // Create nodemailer transporter
 const transporter = nodemailer.createTransport({
     service: 'outlook',
@@ -10,7 +9,6 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS || "Ton38060"
     }
 });
-
 class EmailService {
     static async sendOrderConfirmation(order) {
         try {
@@ -21,7 +19,6 @@ class EmailService {
                     <td>${item.price.toFixed(2)}€</td>
                 </tr>`
             ).join('');
-
             const mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: order.shippingAddress.email,
@@ -30,12 +27,10 @@ class EmailService {
                     <h1>¡Gracias por tu pedido!</h1>
                     <p>Hola ${order.shippingAddress.name},</p>
                     <p>Tu pedido ha sido confirmado con éxito.</p>
-                    
                     <h2>Detalles del pedido:</h2>
                     <p><strong>Número de pedido:</strong> ${order.orderNumber}</p>
                     <p><strong>Fecha:</strong> ${new Date(order.createdAt).toLocaleDateString('es-ES')}</p>
                     <p><strong>Método de entrega:</strong> ${order.deliveryMethod === 'delivery' ? 'Envío a domicilio' : 'Recogida en tienda'}</p>
-                    
                     <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
                         <thead>
                             <tr style="background-color: #f8f9fa;">
@@ -54,7 +49,6 @@ class EmailService {
                             </tr>
                         </tfoot>
                     </table>
-                    
                     ${order.deliveryMethod === 'delivery' ? `
                         <h2>Dirección de envío:</h2>
                         <p>${order.shippingAddress.address}<br>
@@ -64,18 +58,15 @@ class EmailService {
                         <h2>Recogida en tienda:</h2>
                         <p>Te notificaremos cuando tu pedido esté listo para recoger.</p>
                     `}
-                    
                     <p>Gracias por confiar en Subirana Nadons.</p>
                 `
             };
-
             await transporter.sendMail(mailOptions);
         } catch (error) {
             console.error('Error sending order confirmation email:', error);
             throw error;
         }
     }
-
     static async sendOrderFailedNotification(order, error) {
         try {
             const templateParams = {
@@ -84,7 +75,6 @@ class EmailService {
                 order_number: order.orderNumber,
                 error_message: error.message || 'Error desconocido'
             };
-
             await emailjs.send(
                 EMAILJS_SERVICE_ID,
                 TEMPLATES.ORDER_FAILED,
@@ -95,7 +85,6 @@ class EmailService {
             throw error;
         }
     }
-
     static async sendListCreationConfirmation(list, user) {
         try {
             const templateParams = {
@@ -106,7 +95,6 @@ class EmailService {
                 list_url: `${process.env.NEXT_PUBLIC_BASE_URL}/lists/${list._id}`,
                 due_date: list.dueDate ? new Date(list.dueDate).toLocaleDateString('es-ES') : 'No especificada'
             };
-
             await emailjs.send(
                 EMAILJS_SERVICE_ID,
                 TEMPLATES.LIST_CREATED,
@@ -117,7 +105,6 @@ class EmailService {
             throw error;
         }
     }
-
     static async sendContactFormEmail(formData) {
         try {
             const templateParams = {
@@ -127,7 +114,6 @@ class EmailService {
                 phone: formData.phone || 'No proporcionado',
                 subject: formData.subject || 'Consulta general'
             };
-
             await emailjs.send(
                 EMAILJS_SERVICE_ID,
                 TEMPLATES.CONTACT_FORM,
@@ -138,7 +124,6 @@ class EmailService {
             throw error;
         }
     }
-
     static async sendGiftPurchaseNotification(gift, buyer, listOwner) {
         try {
             const templateParams = {
@@ -150,7 +135,6 @@ class EmailService {
                 buyer_message: gift.buyerInfo?.note || 'Sin mensaje',
                 baby_name: gift.babyName
             };
-
             await emailjs.send(
                 EMAILJS_SERVICE_ID,
                 TEMPLATES.GIFT_PURCHASED,
@@ -161,13 +145,11 @@ class EmailService {
             throw error;
         }
     }
-    
     static async sendPasswordResetEmail(email, resetToken) {
         try {
-            const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${resetToken}`;
-            
+            const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
             const mailOptions = {
-                from: process.env.EMAIL_USER,
+                from: "info@subirananadons.com",
                 to: email,
                 subject: 'Restablecer contraseña - Subirana Nadons',
                 html: `
@@ -180,7 +162,6 @@ class EmailService {
                     <p>Saludos,<br>El equipo de Subirana Nadons</p>
                 `
             };
-
             // Send email
             await transporter.sendMail(mailOptions);
         } catch (error) {
@@ -189,5 +170,4 @@ class EmailService {
         }
     }
 }
-
 export default EmailService;
