@@ -15,6 +15,7 @@ export default function AuthModal() {
     const { user, loading: userLoading, refreshUser } = useUser();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
+    const [resetEmail, setResetEmail] = useState('');
     const openLogin = () => {
         if (session) {
             router.push("/dashboard/orders");
@@ -26,30 +27,37 @@ export default function AuthModal() {
     const closeModal = () => {
         setIsOpen(false);
     }; const toggleView = (view) => {
-        setActiveView(view || (activeView === 'login' ? 'register' : 'login'));
-    };
-
-    const handleForgotPassword = async (e) => {
+        if (view) {
+            setActiveView(view);
+        } else {
+            setActiveView(activeView === 'login' ? 'register' : 'login');
+        }
+        setResetEmail(''); // Clear reset email when switching views
+    }; const handleForgotPassword = async (e) => {
         e.preventDefault();
-        try {
-            const formData = new FormData(e.currentTarget);
-            const email = formData.get('email');
 
+        if (!resetEmail) {
+            toast.error('Por favor, introduce tu correo electrónico');
+            return;
+        }
+
+        try {
             const response = await fetch('/api/auth/forgot-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email: resetEmail }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Error sending recovery email');
+                throw new Error(data.message || 'Error al enviar el email de recuperación');
             }
 
             toast.success('Si el correo existe en nuestra base de datos, recibirás un email con instrucciones para restablecer tu contraseña', { duration: 5000 });
+            setResetEmail('');
             toggleView('login');
         } catch (error) {
             console.error('Forgot password error:', error);
@@ -259,20 +267,21 @@ export default function AuthModal() {
                             ref={modalRef}
                             className="relative bg-white rounded-lg w-full max-w-md mx-4 opacity-0 transform translate-y-4 transition-all duration-800"
                         >
-                            <div className="p-6">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-2xl font-bold">
-                                        {activeView === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
-                                    </h2>
-                                    <button
-                                        onClick={closeModal}
-                                        className="text-gray-500 hover:text-gray-700 transition-colors"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
+                            <div className="p-6">                                <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-bold">
+                                    {activeView === 'login' ? 'Iniciar Sesión' :
+                                        activeView === 'register' ? 'Crear Cuenta' :
+                                            'Recuperar Contraseña'}
+                                </h2>
+                                <button
+                                    onClick={closeModal}
+                                    className="text-gray-500 hover:text-gray-700 transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
                                 {activeView === 'login' && (
                                     <form className="space-y-4" onSubmit={handleLoginSubmit}>
                                         <div>
@@ -312,12 +321,13 @@ export default function AuthModal() {
                                                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                                                     Recuérdame
                                                 </label>
-                                            </div>                                            <button
+                                            </div>
+                                            <button
                                                 type="button"
                                                 onClick={() => toggleView('recover')}
                                                 className="text-sm text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
                                             >
-                                                Se te olvidó tu contraseña
+                                                ¿Olvidaste tu contraseña?
                                             </button>
                                         </div>
                                         <button
@@ -349,7 +359,8 @@ export default function AuthModal() {
                                             <input
                                                 type="email"
                                                 id="recovery-email"
-                                                name="email"
+                                                value={resetEmail}
+                                                onChange={(e) => setResetEmail(e.target.value)}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-transparent transition-all"
                                                 placeholder="Ingresa tu correo electrónico"
                                                 required

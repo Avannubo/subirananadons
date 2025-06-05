@@ -1,17 +1,22 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request) {
     try {
         const { token, password } = await request.json();
 
-        // Log the token being used for password reset
-        console.log('\x1b[36m%s\x1b[0m', '🔑 Password Reset Attempt with Token:', token);
-
         if (!token || !password) {
             return NextResponse.json(
                 { message: 'Token and password are required' },
+                { status: 400 }
+            );
+        }
+
+        if (password.length < 6) {
+            return NextResponse.json(
+                { message: 'Password must be at least 6 characters long' },
                 { status: 400 }
             );
         }
@@ -31,17 +36,17 @@ export async function POST(request) {
             );
         }
 
-        // Update password
-        user.password = password;
-        // Clear reset token and expiry
+        // Update password (it will be hashed by the User model pre-save hook)
+        user.password = password;        // Clear reset token and expiry
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
         user.markModified('password'); // Ensure mongoose knows the password was modified
 
+        // Save the updated user
         await user.save();
 
         return NextResponse.json({
-            message: 'Password has been reset successfully',
+            message: 'Password has been reset successfully'
         });
     } catch (error) {
         console.error('Password reset error:', error);
