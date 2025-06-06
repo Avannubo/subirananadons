@@ -15,10 +15,11 @@ class EmailService {
             console.log('Sending order confirmation email:', order);
             const items_list = order.items.map(item =>
                 `<tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.price.toFixed(2)}€</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${(item.quantity * item.price).toFixed(2)}€</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}${item.type === 'gift' && item.listInfo ? `<br><span style="color: #FF69B4; font-size: 0.9em">(Lista: ${item.listInfo.listTitle || 'Lista de nacimiento'})</span>` : ''}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;"><span style="display: inline-block; padding: 2px 8px; border-radius: 12px; background-color: ${item.type === 'gift' ? '#FFE4E1' : '#E8F5E9'}; color: ${item.type === 'gift' ? '#FF69B4' : '#2E7D32'}">${item.type === 'gift' ? 'Regalo' : 'Personal'}</span></td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)}€</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${(item.quantity * item.price).toFixed(2)}€</td>
                 </tr>`
             ).join('');
             const mailOptions = {
@@ -33,22 +34,33 @@ class EmailService {
                     <p><strong>Número de pedido:</strong> ${order.orderNumber}</p>
                     <p><strong>Fecha:</strong> ${new Date(order.createdAt).toLocaleDateString('es-ES')}</p>
                     <p><strong>Método de entrega:</strong> ${order.deliveryMethod === 'delivery' ? 'Envío a domicilio' : 'Recogida en tienda'}</p>
-                    <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
-                        <thead>
+                    <table style="width:100%; border-collapse: collapse; margin: 20px 0;">                        <thead>
                             <tr style="background-color: #f8f9fa;">
                                 <th style="padding: 10px; text-align: left;">Producto</th>
-                                <th style="padding: 10px; text-align: left;">Cantidad</th>
-                                <th style="padding: 10px; text-align: left;">Precio por unidad</th>
-                                <th style="padding: 10px; text-align: left;">Precio</th>
+                                <th style="padding: 10px; text-align: center;">Tipo</th>
+                                <th style="padding: 10px; text-align: center;">Cantidad</th>
+                                <th style="padding: 10px; text-align: right;">Precio por unidad</th>
+                                <th style="padding: 10px; text-align: right;">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${items_list}
-                        </tbody>
-                        <tfoot>
+                        </tbody>                        <tfoot>
                             <tr style="background-color: #f8f9fa;">
-                                <td colspan="2" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-                                <td style="padding: 10px;">${order.totalAmount.toFixed(2)}€</td>
+                                <td colspan="3" style="padding: 10px; text-align: right;"><strong>Subtotal:</strong></td>
+                                <td colspan="2" style="padding: 10px; text-align: right;">${order.subtotal.toFixed(2)}€</td>
+                            </tr>
+                            <tr style="background-color: #f8f9fa;">
+                                <td colspan="3" style="padding: 10px; text-align: right;"><strong>IVA (21%):</strong></td>
+                                <td colspan="2" style="padding: 10px; text-align: right;">${order.tax.toFixed(2)}€</td>
+                            </tr>
+                            <tr style="background-color: #f8f9fa;">
+                                <td colspan="3" style="padding: 10px; text-align: right;"><strong>Gastos de envío:</strong></td>
+                                <td colspan="2" style="padding: 10px; text-align: right;">${order.shippingCost.toFixed(2)}€</td>
+                            </tr>
+                            <tr style="background-color: #f8f9fa; font-weight: bold;">
+                                <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
+                                <td colspan="2" style="padding: 10px; text-align: right;">${order.totalAmount.toFixed(2)}€</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -70,6 +82,7 @@ class EmailService {
             throw error;
         }
     }
+
     static async sendOrderFailedNotification(order, error) {
         try {
             const templateParams = {
@@ -87,7 +100,9 @@ class EmailService {
             console.error('Error sending order failed email:', error);
             throw error;
         }
-    } static async sendListCreationConfirmation(list, user) {
+    }
+
+    static async sendListCreationConfirmation(list, user) {
         try {
             const items_list = list.items.map(item =>
                 `<tr>

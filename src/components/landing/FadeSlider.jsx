@@ -28,6 +28,12 @@ export default function FadeSlider() {
             image: '/assets/images/Screenshot_3.png',
             // title: 'Limited Offers',
             // subtitle: 'Special discounts available'
+        },
+        {
+            id: 4,
+            image: '/assets/images/listas.png',
+            // title: 'Limited Offers',
+            // subtitle: 'Special discounts available'
         }
     ];
 

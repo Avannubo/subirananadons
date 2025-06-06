@@ -1,6 +1,6 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
-import { FiEdit, FiTrash2, FiEye, FiGift, FiToggleLeft, FiDownload, FiPrinter, FiLink } from 'react-icons/fi';
+import { useState, useRef } from 'react';
+import { FiEdit, FiTrash2, FiEye, FiToggleLeft, FiDownload, FiPrinter, FiLink } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import { deleteBirthList, updateBirthList, fetchBirthListItems } from '@/services/BirthListService';
 import ListEditModal from './ListEditModal';
@@ -24,14 +24,8 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         isPublic: true,
         items: []
     });
-    const saveButtonRef = useRef(null);
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters((prev) => ({ ...prev, [name]: value }));
-    };
-    // Filter the lists based on search criteria
+    const saveButtonRef = useRef(null); 
     const filteredLists = lists.filter((list) => {
-        // Check for product match in list items
         const items = list.rawData?.items || [];
         const hasMatchingProduct = !filters.searchProduct ||
             items.some(item => {
@@ -351,7 +345,8 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                     <tbody className="divide-y divide-gray-200">
                         {filteredLists.length > 0 ?
                             (filteredLists.map((list, index) => (
-                                <tr key={index} className="hover:bg-gray-50">                                    <td className="px-6 py-4 w-[50px]">{index + 1}</td>
+                                <tr key={index} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 w-[50px]">{index + 1}</td>
                                     <td className="px-6 py-4 w-[100px] truncate">{list.reference}</td>
                                     <td className="px-6 py-4 max-w-[150px] truncate" title={list.name}>{list.name}</td>
                                     {userRole === 'admin' && <td className="px-6 py-4 w-[120px] truncate" title={list.creator}>{list.creator}</td>}
@@ -387,7 +382,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                         </div>
                                     </td>
                                 </tr>
-                              
                             )
                             )
                             ) : (
@@ -445,4 +439,3 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         </div>
     );
 }
-// Note: Ensure that the `ListEditModal`, `ListDeleteModal`, `ListViewModal`, and `ListStatusModal` components are properly implemented to handle their respective functionalities.
