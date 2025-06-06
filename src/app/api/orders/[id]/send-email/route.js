@@ -83,7 +83,8 @@ export async function POST(request, { params }) {
                     },
                     quantity: quantity,
                     price: price,
-                    subtotal: quantity * price
+                    subtotal: quantity * price,
+                    giftInfo: item.type
                 };
             }),
             shippingAddress: {

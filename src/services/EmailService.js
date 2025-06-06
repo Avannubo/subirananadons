@@ -15,8 +15,8 @@ class EmailService {
             console.log('Sending order confirmation email:', order);
             const items_list = order.items.map(item =>
                 `<tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}${item.type === 'gift' && item.listInfo ? `<br><span style="color: #FF69B4; font-size: 0.9em">(Lista: ${item.listInfo.listTitle || 'Lista de nacimiento'})</span>` : ''}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;"><span style="display: inline-block; padding: 2px 8px; border-radius: 12px; background-color: ${item.type === 'gift' ? '#FFE4E1' : '#E8F5E9'}; color: ${item.type === 'gift' ? '#FF69B4' : '#2E7D32'}">${item.type === 'gift' ? 'Regalo' : 'Personal'}</span></td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;"><span style="display: inline-block; padding: 2px 8px; border-radius: 12px; background-color: ${item.giftInfo === 'gift' ? '#FFE4E1' : '#E8F5E9'}; color: ${item.giftInfo === 'gift' ? '#FF69B4' : '#2E7D32'}">${item.giftInfo === 'gift' ? 'Regalo' : 'Personal'}</span></td>
                     <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
                     <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)}€</td>
                     <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${(item.quantity * item.price).toFixed(2)}€</td>
@@ -25,6 +25,7 @@ class EmailService {
             const mailOptions = {
                 from: "info@subirananadons.com",
                 to: order.shippingAddress.email,
+                cc: "info@subirananadons.com",
                 subject: `Confirmación de pedido #${order.orderNumber} - Subirana Nadons`,
                 html: `
                     <h1>¡Gracias por tu pedido!</h1>
@@ -45,11 +46,8 @@ class EmailService {
                         </thead>
                         <tbody>
                             ${items_list}
-                        </tbody>                        <tfoot>
-                            <tr style="background-color: #f8f9fa;">
-                                <td colspan="3" style="padding: 10px; text-align: right;"><strong>Subtotal:</strong></td>
-                                <td colspan="2" style="padding: 10px; text-align: right;">${order.subtotal.toFixed(2)}€</td>
-                            </tr>
+                        </tbody>                        
+                        <tfoot>    
                             <tr style="background-color: #f8f9fa;">
                                 <td colspan="3" style="padding: 10px; text-align: right;"><strong>IVA (21%):</strong></td>
                                 <td colspan="2" style="padding: 10px; text-align: right;">${order.tax.toFixed(2)}€</td>

@@ -8,6 +8,7 @@ import { EffectFade, Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
 import 'swiper/css/pagination';
+import { FiX, FiPlus, FiRefreshCw, FiSearch, FiFilter } from 'react-icons/fi';
 
 export default function FadeSlider() {
     const slides = [
@@ -73,6 +74,18 @@ export default function FadeSlider() {
                             priority
                             quality={100}
                         />
+                        <div className="absolute bottom-5 left-25 transform translate-x-25 z-20">
+                            <button
+                                onClick={() => {
+                                    setShowCreateModal(true);
+                                    setCurrentStep(1);
+                                }}
+                                className="flex items-center px-6 py-4 bg-[#00B0C8] text-white rounded-xl  hover:bg-[#62b7c2] transition-colors text-md"
+                            >
+                                Empieza ahora
+                            </button>
+                        </div>
+
                     </SwiperSlide>
                 ))}
             </Swiper>
