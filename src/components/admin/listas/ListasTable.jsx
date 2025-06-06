@@ -351,13 +351,12 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                     <tbody className="divide-y divide-gray-200">
                         {filteredLists.length > 0 ?
                             (filteredLists.map((list, index) => (
-                                <tr key={index} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4">{index + 1}</td>
-                                    <td className="px-6 py-4">{list.reference}</td>
-                                    <td className="px-6 py-4">{list.name}</td>
-                                    {userRole === 'admin' && <td className="px-6 py-4">{list.creator}</td>}
-                                    <td className="px-6 py-4">{list.creationDate}</td>
-                                    <td className="px-6 py-4">{list.dueDate}</td>
+                                <tr key={index} className="hover:bg-gray-50">                                    <td className="px-6 py-4 w-[50px]">{index + 1}</td>
+                                    <td className="px-6 py-4 w-[100px] truncate">{list.reference}</td>
+                                    <td className="px-6 py-4 max-w-[150px] truncate" title={list.name}>{list.name}</td>
+                                    {userRole === 'admin' && <td className="px-6 py-4 w-[120px] truncate" title={list.creator}>{list.creator}</td>}
+                                    <td className="px-6 py-4 w-[120px]">{list.creationDate}</td>
+                                    <td className="px-6 py-4 w-[120px]">{list.dueDate}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.isPublic ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'}`}>
                                             {list.isPublic ? 'Pública' : 'Privada'}

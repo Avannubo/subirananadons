@@ -126,13 +126,16 @@ export async function POST(request, { params }) {
         }
 
         // Check if the list is now complete
-        const isListComplete = birthList.items.every(item => item.reserved >= item.quantity);
-        if (isListComplete && birthList.status === 'Activa') {
+        const isListComplete = birthList.items.every(item => item.reserved >= item.quantity); if (isListComplete && birthList.status === 'Activa') {
             birthList.status = 'Completada';
 
-            // TODO: Send notification to list owner - this would be handled by a notification service
-            // For now, we'll just log it
-            console.log(`Birth list ${birthList._id} is now complete. Notifying owner: ${birthList.user.email}`);
+            // Send list completion notification
+            try {
+                await EmailService.sendListCompletedNotification(birthList, birthList.user);
+            } catch (emailError) {
+                console.error('Error sending list completion notification:', emailError);
+                // Continue with the purchase even if email fails
+            }
         }
 
         // Save the updated birth list

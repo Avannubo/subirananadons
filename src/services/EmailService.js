@@ -87,22 +87,58 @@ class EmailService {
             console.error('Error sending order failed email:', error);
             throw error;
         }
-    }
-    static async sendListCreationConfirmation(list, user) {
+    } static async sendListCreationConfirmation(list, user) {
         try {
-            const templateParams = {
-                to_email: user.email,
-                to_name: user.name,
-                list_title: list.title,
-                baby_name: list.babyName,
-                list_url: `${process.env.NEXT_PUBLIC_BASE_URL}/lists/${list._id}`,
-                due_date: list.dueDate ? new Date(list.dueDate).toLocaleDateString('es-ES') : 'No especificada'
+            const items_list = list.items.map(item =>
+                `<tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.priority === 1 ? 'Alta' : item.priority === 2 ? 'Media' : 'Baja'}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.reserved || 0}</td>
+                </tr>`
+            ).join('');
+            // Email to list owner
+            const userMailOptions = {
+                from: "info@subirananadons.com",
+                to: user.email,
+                subject: `Tu lista de nacimiento "${list.title}" ha sido creada - Subirana Nadons`,
+                html: `
+                    <h1>¡Tu lista de nacimiento ha sido creada con éxito!</h1>
+                    <p>Hola ${user.name},</p>
+                    <p>Tu lista de nacimiento ha sido creada y está lista para ser compartida.</p>
+                    <h2>Detalles de la lista:</h2>
+                    <p><strong>Título:</strong> ${list.title}</p>
+                    <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
+                    <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
+                    <p><strong>Estado:</strong> ${list.isPublic ? 'Pública' : 'Privada'}</p>
+                    <p><strong>URL de la lista:</strong> <a>/lists/${list._id}</a></p> 
+                    <p>Puedes compartir el enlace de tu lista con familiares y amigos para que puedan ver los productos que has seleccionado.</p>
+                    <p>Gracias por confiar en Subirana Nadons.</p>
+                `
             };
-            await emailjs.send(
-                EMAILJS_SERVICE_ID,
-                TEMPLATES.LIST_CREATED,
-                templateParams
-            );
+            // Email to admin
+            const adminMailOptions = {
+                from: "info@subirananadons.com",
+                to: "info@subirananadons.com",
+                subject: `Nueva lista de nacimiento creada - ${list.title}`,
+                html: `
+                    <h1>Nueva lista de nacimiento creada</h1>
+                    <p>Se ha creado una nueva lista de nacimiento en la tienda.</p>
+                    <h2>Detalles de la lista:</h2>
+                    <p><strong>Título:</strong> ${list.title}</p>
+                    <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
+                    <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
+                    <p><strong>Creada por:</strong> ${user.name} (${user.email})</p>
+                    <p><strong>Estado:</strong> ${list.isPublic ? 'Pública' : 'Privada'}</p>
+                    <p><strong>URL de la lista:</strong> <a>/lists/${list._id}</a></p>
+                `
+            };
+
+            // Send both emails
+            await Promise.all([
+                transporter.sendMail(userMailOptions),
+                transporter.sendMail(adminMailOptions)
+            ]);
         } catch (error) {
             console.error('Error sending list creation email:', error);
             throw error;

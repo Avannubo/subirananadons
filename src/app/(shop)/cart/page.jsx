@@ -7,12 +7,11 @@ import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Mail } from 'lucide-react';
 
 export default function CartPage() {
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
-    const { user, loading: userLoading } = useUser();
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const { user, loading: userLoading } = useUser(); 
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
         name: '',
@@ -35,7 +34,8 @@ export default function CartPage() {
 
     // Separate regular and gift items once cartItems is available
     const regularItems = useMemo(() => cartItems?.filter(item => item.type !== 'gift') ?? [], [cartItems]);
-    const giftItems = useMemo(() => cartItems?.filter(item => item.type === 'gift') ?? [], [cartItems]);    // Check if cart has any gift items
+    const giftItems = useMemo(() => cartItems?.filter(item => item.type === 'gift') ?? [], [cartItems]);
+    // Check if cart has any gift items
     const hasGiftItems = useMemo(() => {
         return cartItems?.some(item => item.type === 'gift') ?? false;
     }, [cartItems]);
@@ -1026,9 +1026,7 @@ export default function CartPage() {
                                 onClick={handleSendEmail}
                                 className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8xM5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
+                                <Mail />
                                 Enviar una copia de Email
                             </button>
                         </div>

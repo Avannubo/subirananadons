@@ -422,7 +422,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         />
                                     </div>
                                     {/* Privacy */}
-                                    <div className="flex items-center">
+                                    {/* <div className="flex items-center">
                                         <input
                                             type="checkbox"
                                             id="isPublic"
@@ -434,7 +434,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-700">
                                             Lista Pública (Visible para cualquier persona con el enlace)
                                         </label>
-                                    </div>
+                                    </div> */}
                                     <div className="flex justify-end space-x-4 pt-4">
                                         <button
                                             type="button"

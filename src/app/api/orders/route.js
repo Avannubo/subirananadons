@@ -6,6 +6,7 @@ import User from '@/models/User';
 import dbConnect from '@/lib/dbConnect';
 import mongoose from 'mongoose';
 import BirthList from '@/models/BirthList';
+import EmailService from '@/services/EmailService';
 
 // Generate a unique order number
 function generateOrderNumber() {
@@ -110,11 +111,25 @@ export async function POST(request) {
 
                     if (session?.user?.id) {
                         buyerInfoWithNote.userId = session.user.id;
-                    }
-
-                    // Update the item's state to purchased (2) and include buyer info with note
+                    }                    // Update the item's state to purchased (2) and include buyer info with note
                     await birthList.updateItemState(item.listInfo.itemId, 2, buyerInfoWithNote);
 
+                    // Check if the list is now complete after this item update
+                    if (birthList.status === 'Activa') {
+                        const isListComplete = birthList.items.every(item => item.state === 2);
+                        if (isListComplete) {
+                            birthList.status = 'Completada';
+                            await birthList.save();
+
+                            // Send notification email
+                            try {
+                                await EmailService.sendListCompletedNotification(birthList, await User.findById(birthList.user));
+                            } catch (emailError) {
+                                console.error('Error sending list completion notification:', emailError);
+                                // Continue with the order even if email fails
+                            }
+                        }
+                    }
                 } catch (error) {
                     console.error(`Error updating birth list item state: ${error.message}`);
                     // Continue processing other items even if one fails

@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
 import User from '@/models/User';
+import EmailService from '@/services/EmailService';
 
 export async function GET(request) {
     try {
@@ -93,10 +94,16 @@ export async function POST(request) {
             items: data.items || [],
             theme: data.theme || 'default',
             status: data.status || 'Activa'
-        };
-
-        // Create the birth list
+        };        // Create the birth list
         const birthList = await BirthList.create(birthListData);
+
+        // Send confirmation emails
+        try {
+            await EmailService.sendListCreationConfirmation(birthList, user);
+        } catch (emailError) {
+            console.error('Error sending creation confirmation email:', emailError);
+            // We don't want to fail the list creation if email sending fails
+        }
 
         // Return the created birth list
         return NextResponse.json(
