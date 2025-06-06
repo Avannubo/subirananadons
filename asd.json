@@ -1,0 +1,112 @@
+{
+    "shippingAddress": {
+        "name": "eerwqer",
+        "lastName": "user",
+        "email": "arjun.singh@avannubo.com",
+        "phone": "54324325",
+        "address": "",
+        "city": "",
+        "postalCode": "",
+        "province": "",
+        "country": "España"
+    },
+    "_id": "68428edaae69a576f299abfa",
+    "orderNumber": "ORD-92410987-9116",
+    "items": [
+        {
+            "__parentArray": [
+                {
+                    "product": "680b33b7720673b5c5fe8a50",
+                    "quantity": 1,
+                    "price": 13.95,
+                    "type": "regular",
+                    "_id": "68428edaae69a576f299abfb"
+                }
+            ],
+            "__index": 0,
+            "$__parent": {
+                "shippingAddress": {
+                    "name": "eerwqer",
+                    "lastName": "user",
+                    "email": "arjun.singh@avannubo.com",
+                    "phone": "54324325",
+                    "country": "España"
+                },
+                "_id": "68428edaae69a576f299abfa",
+                "orderNumber": "ORD-92410987-9116",
+                "items": [
+                    {
+                        "product": "680b33b7720673b5c5fe8a50",
+                        "quantity": 1,
+                        "price": 13.95,
+                        "type": "regular",
+                        "_id": "68428edaae69a576f299abfb"
+                    }
+                ],
+                "deliveryMethod": "pickup",
+                "status": "processing",
+                "totalAmount": 13.95,
+                "subtotal": 13.95,
+                "tax": 2.9294999999999995,
+                "shippingCost": 0,
+                "paymentMethod": "pending",
+                "notes": "ggg",
+                "createdAt": "2025-06-06T06:46:50.991Z",
+                "updatedAt": "2025-06-06T06:46:55.242Z"
+            },
+            "$__": {
+                "activePaths": {
+                    "paths": {
+                        "price": "init",
+                        "quantity": "init",
+                        "product": "init",
+                        "type": "init",
+                        "_id": "init"
+                    },
+                    "states": {
+                        "require": {},
+                        "default": {},
+                        "init": {
+                            "product": true,
+                            "quantity": true,
+                            "price": true,
+                            "type": true,
+                            "_id": true
+                        }
+                    }
+                }
+            },
+            "_doc": {
+                "giftInfo": {},
+                "buyerInfo": {},
+                "product": "680b33b7720673b5c5fe8a50",
+                "quantity": 1,
+                "price": 13.95,
+                "type": "regular",
+                "_id": "68428edaae69a576f299abfb"
+            },
+            "$isNew": false,
+            "product": {
+                "name": "Producto no disponible",
+                "description": "",
+                "image": "",
+                "brand": "",
+                "category": "",
+                "slug": ""
+            },
+            "quantity": 1,
+            "price": 13.95,
+            "subtotal": 13.95
+        }
+    ],
+    "deliveryMethod": "pickup",
+    "status": "processing",
+    "totalAmount": 13.95,
+    "subtotal": 13.95,
+    "tax": 2.9294999999999995,
+    "shippingCost": 0,
+    "paymentMethod": "pending",
+    "notes": "ggg",
+    "createdAt": "2025-06-06T06:46:50.991Z",
+    "updatedAt": "2025-06-06T06:46:55.242Z"
+}

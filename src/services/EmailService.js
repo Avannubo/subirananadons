@@ -12,15 +12,17 @@ const transporter = nodemailer.createTransport({
 class EmailService {
     static async sendOrderConfirmation(order) {
         try {
+            console.log('Sending order confirmation email:', order);
             const items_list = order.items.map(item =>
                 `<tr>
-                    <td>${item.product.name}</td>
-                    <td>${item.quantity}</td>
-                    <td>${item.price.toFixed(2)}€</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.price.toFixed(2)}€</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${(item.quantity * item.price).toFixed(2)}€</td>
                 </tr>`
             ).join('');
             const mailOptions = {
-                from: process.env.EMAIL_USER,
+                from: "info@subirananadons.com",
                 to: order.shippingAddress.email,
                 subject: `Confirmación de pedido #${order.orderNumber} - Subirana Nadons`,
                 html: `
@@ -36,6 +38,7 @@ class EmailService {
                             <tr style="background-color: #f8f9fa;">
                                 <th style="padding: 10px; text-align: left;">Producto</th>
                                 <th style="padding: 10px; text-align: left;">Cantidad</th>
+                                <th style="padding: 10px; text-align: left;">Precio por unidad</th>
                                 <th style="padding: 10px; text-align: left;">Precio</th>
                             </tr>
                         </thead>

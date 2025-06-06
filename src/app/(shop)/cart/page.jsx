@@ -8,7 +8,6 @@ import { useCart } from '@/contexts/CartContext.jsx';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 import { ShoppingCart } from 'lucide-react';
-import UserAuthModal from '@/components/ui/UserAuthModal';
 
 export default function CartPage() {
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
@@ -155,8 +154,6 @@ export default function CartPage() {
     const saveUserAddressPreferences = async () => {
         if (!user?.id) return;
         try {
-            // This could be a separate API endpoint to save user address preferences
-            // For now, we'll just log it
             console.log('Saving user address preferences:', {
                 name: formData.name,
                 lastName: formData.lastName,
@@ -166,18 +163,6 @@ export default function CartPage() {
                 postalCode: formData.postalCode,
                 province: formData.province,
             });
-            // In a real implementation, you would save this data to the user profile
-            // await fetch('/api/user/address', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({
-            //         address: formData.address,
-            //         city: formData.city,
-            //         postalCode: formData.postalCode,
-            //         province: formData.province,
-            //         phone: formData.phone,
-            //     }),
-            // });
         } catch (error) {
             console.error('Error saving address preferences:', error);
         }
@@ -211,35 +196,6 @@ export default function CartPage() {
         try {
             setIsSubmitting(true);
             setOrderError(null);
-
-            // // Handle user registration if selected
-            // if (userType === 'register' && !user) {
-            //     // Validate passwords match
-            //     if (formData.password !== formData.confirmPassword) {
-            //         setOrderError('Las contraseñas no coinciden');
-            //         return;
-            //     }
-            //     try {
-            //         // Call your registration API
-            //         const registerResponse = await fetch('/api/auth/register', {
-            //             method: 'POST',
-            //             headers: { 'Content-Type': 'application/json' },
-            //             body: JSON.stringify({
-            //                 name: `${formData.name} ${formData.lastName}`,
-            //                 email: formData.email,
-            //                 password: formData.password
-            //             })
-            //         });
-            //         if (!registerResponse.ok) {
-            //             throw new Error('Error al crear la cuenta');
-            //         }
-            //     } catch (error) {
-            //         setOrderError('Error al crear la cuenta: ' + error.message);
-            //         return;
-            //     }
-            // }
-
-            // Prepare the buyer information for both regular and gift items
             const buyerInfo = {
                 name: `${formData.name} ${formData.lastName}`.trim(),
                 email: formData.email,
@@ -252,10 +208,10 @@ export default function CartPage() {
                     buyerInfo: item.type === 'gift' ? {
                         ...buyerInfo,
                         ...(item.listInfo || {}),
-                        note: formData.giftNote // Add gift-specific note
+                        note: formData.giftNote
                     } : undefined,
                     quantity: item.type === 'gift' ? 1 : item.quantity,
-                    notes: formData.notes // General notes still added to each item
+                    notes: formData.notes
                 })),
                 shippingDetails: {
                     ...formData,
@@ -270,8 +226,8 @@ export default function CartPage() {
                 deliveryMethod,
                 hasGiftItems,
                 isGiftOnly: hasOnlyGiftItems,
-                notes: formData.notes, // General order notes
-                giftNote: hasGiftItems ? formData.giftNote : undefined, // Only include if there are gift items
+                notes: formData.notes,
+                giftNote: hasGiftItems ? formData.giftNote : undefined,
                 totals: {
                     subtotal: calculateSubtotal(),
                     shipping: calculateShipping(),
@@ -291,12 +247,14 @@ export default function CartPage() {
             if (!response.ok) {
                 throw new Error(data.message || 'Error al procesar el pedido');
             }
+
             // Save user address preferences for future orders
             if (user?.id) {
                 await saveUserAddressPreferences();
             }
+
             // Order created successfully - include more detailed information
-            setOrderSuccess({
+            const orderSuccess = {
                 orderNumber: data.order.orderNumber,
                 orderId: data.order.id,
                 totalAmount: calculateTotal().toFixed(2),
@@ -307,9 +265,31 @@ export default function CartPage() {
                     name: `${formData.name} ${formData.lastName}`.trim(),
                     email: formData.email
                 }
-            });
-            // Clear the cart in one go
+            };
+
+            setOrderSuccess(orderSuccess);
+
+            // Automatically send the confirmation email
+            try {
+                const emailResponse = await fetch(`/api/orders/${data.order.id}/send-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!emailResponse.ok) {
+                    console.error('Error sending automatic order confirmation email');
+                    // Don't throw error here, just log it - the order was still created successfully
+                }
+            } catch (emailError) {
+                console.error('Error in automatic email sending:', emailError);
+                // Don't throw error here, just log it - the order was still created successfully
+            }
+
+            // Clear the cart
             clearCart();
+
             // Reset form data
             setFormData({
                 name: '',
@@ -322,12 +302,14 @@ export default function CartPage() {
                 province: '',
                 country: 'España',
                 notes: '',
-                giftNote: '' // Reset gift note
+                giftNote: ''
             });
-            // After 5 seconds, scroll to top
+
+            // After successful order, scroll to top
             setTimeout(() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }, 1000);
+
         } catch (error) {
             console.error('Error creating order:', error);
             setOrderError(error.message || 'Error al procesar el pedido');
@@ -356,6 +338,8 @@ export default function CartPage() {
         };
         generateInvoice();
     }, [orderSuccess]);
+
+
     const handleDownloadInvoice = () => {
         if (!invoiceBlob || !orderSuccess) return;
         const url = window.URL.createObjectURL(invoiceBlob);
@@ -368,40 +352,46 @@ export default function CartPage() {
         window.URL.revokeObjectURL(url);
         toast.success('Ticket descargada correctamente');
     };
+
+
     // Handle sending email with receipt
     const handleSendEmail = async () => {
         if (!orderSuccess) return;
-        try {
-            toast.loading('Enviando email...');
-            const response = await fetch(`/api/orders/${orderSuccess.orderId}/send-email`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: orderSuccess.buyerDetails.email,
-                    orderNumber: orderSuccess.orderNumber,
-                    items: orderSuccess.items
-                })
-            });
-            if (!response.ok) {
-                throw new Error('Error al enviar el email');
+
+        // Create a loading toast that we can dismiss later
+        const loadingToastId = toast.loading('Enviando email...');
+
+        const sendEmail = async () => {
+            try {
+                const response = await fetch(`/api/orders/${orderSuccess.orderId}/send-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: orderSuccess.buyerDetails.email,
+                        orderNumber: orderSuccess.orderNumber,
+                        items: orderSuccess.items
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al enviar el email');
+                }
+
+                // Dismiss loading toast and show success
+                toast.dismiss(loadingToastId);
+                toast.success('Email enviado correctamente');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                // Dismiss loading toast and show error
+                toast.dismiss(loadingToastId);
+                toast.error('Error al enviar el email');
             }
-            toast.success('Email enviado correctamente');
-        } catch (error) {
-            console.error('Error sending email:', error);
-            toast.error('Error al enviar el email');
-        }
-    };
-    // const handleGiftNoteChange = async (itemId, note) => {
-    //     // Update local state immediately for UI responsiveness
-    //     setGiftNotes(prev => ({
-    //         ...prev,
-    //         [itemId]: note
-    //     }));
-    //     // Persist to cart state
-    //     await updateGiftNote(itemId, note);
-    // };
+        };
+
+        sendEmail();
+    }; 
 
     return (
         <ShopLayout>
@@ -858,7 +848,7 @@ export default function CartPage() {
                                                     <p className="text-sm text-gray-500">Disponible in 2-4 horas</p>
                                                     {hasGiftItems && (
                                                         <p className="text-xs text-pink-600 font-medium mt-1">
-                                                            {hasOnlyGiftItems 
+                                                            {hasOnlyGiftItems
                                                                 ? 'Única opción disponible para pedidos de regalo'
                                                                 : 'Obligatorio para productos de regalo — Solo el propietario de la lista puede recogerlos'
                                                             }
@@ -1037,9 +1027,9 @@ export default function CartPage() {
                                 className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8xM5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
-                                Enviar por Email
+                                Enviar una copia de Email
                             </button>
                         </div>
                         <div className="mt-4 pt-3 border-t border-gray-200">
