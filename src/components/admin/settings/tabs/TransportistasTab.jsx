@@ -315,9 +315,7 @@ export default function TransportistasTab() {
                         Guardar Preferencias
                     </button>
                 </div>
-            </div>
-
-
+            </div> 
 
             {/* Edit Modal */}
             {showEditModal && (

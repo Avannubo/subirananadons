@@ -16,8 +16,8 @@ export default function SettingsTabs() {
     const tabs = [
         { id: 'transportistas', label: 'Transportistas' },
         // { id: 'preferencias', label: 'Preferencias' },
-        { id: 'pago', label: 'Pago' },
         { id: 'configuracion', label: 'Configuración' },
+        { id: 'pago', label: 'Pago' },
         { id: 'pedidos', label: 'Configuración de Pedidos' },
         { id: 'productos', label: 'Configuración de Productos' },
         // { id: 'informacion', label: 'Información' },
@@ -53,8 +53,8 @@ export default function SettingsTabs() {
             {/* Tab Content */}
             <div className="p-6">
                 {activeTab === 'transportistas' && <TransportistasTab />}
-                {activeTab === 'pago' && <PagoTab />}
                 {activeTab === 'configuracion' && <ConfiguracionTab />}
+                {activeTab === 'pago' && <PagoTab />}
                 {activeTab === 'pedidos' && <PedidosTab />}
                 {activeTab === 'productos' && <ProductosTab />}
                 {activeTab === 'informacion' && <InformacionTab />}

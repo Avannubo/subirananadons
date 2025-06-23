@@ -11,32 +11,43 @@ import 'swiper/css/pagination';
 import { FiX, FiPlus, FiRefreshCw, FiSearch, FiFilter } from 'react-icons/fi';
 
 export default function FadeSlider() {
-    const slides = [
-        {
-            id: 1,
-            image: '/assets/images/Screenshot_1.png',
-            // title: 'Premium Collection',
-            // subtitle: 'Explore our exclusive designs'
-        },
-        {
-            id: 2,
-            image: '/assets/images/Screenshot_2.png',
-            // title: 'Summer Edition',
-            // subtitle: 'New arrivals just for you'
-        },
-        {
-            id: 3,
-            image: '/assets/images/Screenshot_3.png',
-            // title: 'Limited Offers',
-            // subtitle: 'Special discounts available'
-        },
-        {
-            id: 4,
-            image: '/assets/images/listas.png',
-            // title: 'Limited Offers',
-            // subtitle: 'Special discounts available'
-        }
-    ];
+    const [slides, setSlides] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/api/slider')
+            .then(res => res.json())
+            .then(data => {
+                setSlides(data);
+                setLoading(false);
+            });
+    }, []);
+    // const slides = [
+    //     {
+    //         id: 1,
+    //         image: '/assets/images/Screenshot_1.png',
+    //         // title: 'Premium Collection',
+    //         // subtitle: 'Explore our exclusive designs'
+    //     },
+    //     {
+    //         id: 2,
+    //         image: '/assets/images/Screenshot_2.png',
+    //         // title: 'Summer Edition',
+    //         // subtitle: 'New arrivals just for you'
+    //     },
+    //     {
+    //         id: 3,
+    //         image: '/assets/images/Screenshot_3.png',
+    //         // title: 'Limited Offers',
+    //         // subtitle: 'Special discounts available'
+    //     },
+    //     {
+    //         id: 4,
+    //         image: '/assets/images/listas.png',
+    //         // title: 'Limited Offers',
+    //         // subtitle: 'Special discounts available'
+    //     }
+    // ];
 
     return (
         <div className=" w-full h-screen">
@@ -67,7 +78,7 @@ export default function FadeSlider() {
                             </p>
                         </div>
                         <Image
-                            src={slide.image}
+                            src={slide.imageUrl}
                             alt="img"
                             fill
                             className="object-cover"
@@ -82,7 +93,7 @@ export default function FadeSlider() {
                                 }}
                                 className="flex items-center px-6 py-4 bg-[#00B0C8] text-white rounded-xl  hover:bg-[#62b7c2] transition-colors text-md"
                             >
-                                Empieza ahora
+                                {slide.btnText || 'Learn More'}
                             </button>
                         </div>
 
