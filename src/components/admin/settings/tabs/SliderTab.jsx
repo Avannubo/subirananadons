@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { FiUpload, FiPlus } from "react-icons/fi";
 import { toast } from "react-hot-toast";
-
 export default function ConfiguracionTab() {
     const [sliders, setSliders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,12 +13,10 @@ export default function ConfiguracionTab() {
     });
     const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState('');
-
     // Image upload states
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [isUploading, setIsUploading] = useState(false);
-
     // Fetch slider items
     useEffect(() => {
         fetch('/api/slider')
@@ -29,19 +26,16 @@ export default function ConfiguracionTab() {
                 setLoading(false);
             });
     }, []);
-
     // Handle form input
     const handleChange = e => {
         const { name, value, type, checked } = e.target;
         setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
     };
-
     // Handle image selection
     const handleImageChange = (e) => {
         const files = e.target.files;
         if (files && files.length > 0) {
             setSelectedImage(files[0]);
-
             // Show preview
             const fileReader = new FileReader();
             fileReader.onload = () => {
@@ -50,11 +44,9 @@ export default function ConfiguracionTab() {
             fileReader.readAsDataURL(files[0]);
         }
     };
-
     // Upload image to server
     const uploadImage = async () => {
         if (!selectedImage) return null;
-
         setIsUploading(true);
         try {
             // Convert image to base64
@@ -63,7 +55,6 @@ export default function ConfiguracionTab() {
                 reader.onloadend = () => resolve(reader.result);
                 reader.readAsDataURL(selectedImage);
             });
-
             // Upload to server
             const response = await fetch('/api/upload', {
                 method: 'POST',
@@ -72,12 +63,10 @@ export default function ConfiguracionTab() {
                 },
                 body: JSON.stringify({ image: base64Image })
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Error uploading image');
             }
-
             const data = await response.json();
             return data.url;
         } catch (error) {
@@ -88,12 +77,10 @@ export default function ConfiguracionTab() {
             setIsUploading(false);
         }
     };
-
     // Add or update slider
     const handleSubmit = async e => {
         e.preventDefault();
         setError('');
-
         try {
             // If there's a selected image, upload it first
             let imageUrl = form.imageUrl;
@@ -102,44 +89,37 @@ export default function ConfiguracionTab() {
                 if (!uploadedUrl) return;
                 imageUrl = uploadedUrl;
             }
-
             const method = editingId ? 'PUT' : 'POST';
             const body = {
                 ...form,
                 imageUrl: imageUrl || form.imageUrl,
                 _id: editingId
             };
-
             const res = await fetch('/api/slider', {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
-
             if (!res.ok) {
                 throw new Error('Error saving slider');
             }
-
             const data = await res.json();
             if (editingId) {
                 setSliders(sliders.map(s => s._id === editingId ? data : s));
             } else {
                 setSliders([...sliders, data]);
             }
-
             // Reset form
             setForm({ imageUrl: '', btnText: '', btnLink: '', order: 0, active: true });
             setEditingId(null);
             setSelectedImage(null);
             setImagePreview('');
-
             toast.success('Slider saved successfully');
         } catch (err) {
             setError(err.message);
             toast.error(err.message);
         }
     };
-
     // Edit slider
     const handleEdit = slider => {
         setForm({
@@ -152,7 +132,6 @@ export default function ConfiguracionTab() {
         setImagePreview(slider.imageUrl || '');
         setEditingId(slider._id);
     };
-
     // Delete slider
     const handleDelete = async id => {
         if (!window.confirm('Delete this slider?')) return;
@@ -170,12 +149,10 @@ export default function ConfiguracionTab() {
         }
         toast.success('Slider deleted successfully');
     };
-
     return (
         <div className="p-6 bg-white rounded-xl">
             <h2 className="font-bold mb-6 text-lg text-gray-800">Slider Images</h2>
             {error && <div className="text-red-500 mb-2">{error}</div>}
-
             <form onSubmit={handleSubmit} className="mb-8 space-y-6">
                 {/* Image Upload Section */}
                 <div className="flex flex-col items-center space-y-4">
@@ -198,7 +175,6 @@ export default function ConfiguracionTab() {
                             </div>
                         )}
                     </div>
-
                     <div className="w-full grid grid-cols-2 gap-2">
                         <div>
                             <label
@@ -236,11 +212,9 @@ export default function ConfiguracionTab() {
                             <span>Preview URL</span>
                         </button>
                     </div>
-
                     <p className="mt-1 text-xs text-gray-500 text-center">
                         Formats: JPG, PNG. Max: 5MB
                     </p>
-
                     {/* Manual URL input */}
                     <div className="w-full">
                         <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
@@ -273,7 +247,6 @@ export default function ConfiguracionTab() {
                         </p>
                     </div>
                 </div>
-
                 {/* Other form fields */}
                 <div className="flex flex-col md:flex-row gap-2">
                     <input
@@ -299,7 +272,6 @@ export default function ConfiguracionTab() {
                         className="border border-gray-300 p-2 rounded w-full bg-gray-50"
                     />
                 </div>
-
                 <label className="flex items-center gap-2">
                     <input
                         name="active"
@@ -309,7 +281,6 @@ export default function ConfiguracionTab() {
                     />
                     Active
                 </label>
-
                 <div className="flex gap-2">
                     <button
                         type="submit"
@@ -333,7 +304,6 @@ export default function ConfiguracionTab() {
                     )}
                 </div>
             </form>
-
             {loading ? <div>Loading...</div> : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm bg-white rounded-xl shadow border border-gray-200">
