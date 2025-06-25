@@ -61,7 +61,7 @@ export default function FadeSlider() {
                         <div className="absolute bottom-5 left-25 transform translate-x-25 z-20">
                             <Link 
                                 href={slide.btnLink}
-                                className="flex items-center px-6 py-4 bg-[#00B0C8] text-white rounded-xl  hover:bg-[#62b7c2] transition-colors text-md"
+                                className="flex items-center px-6 py-3 uppercase bg-[#00B0C8] text-white rounded-md  hover:bg-[#008da0dc] transition-colors text-md"
                             >
                                 {slide.btnText || 'Learn More'}
                             </Link>

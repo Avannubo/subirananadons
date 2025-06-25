@@ -1,55 +1,40 @@
+"use client";
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 const ImageGallery = () => {
-    const galleryItems = [
-        {
-            id: 1,
-            title: 'Joolz',
-            description: 'Descubre nuestros productos Joolz',
-            imageUrl: '/assets/images/joolz.png',
-            width: 60,
-            href: "/brands?brand=Joolz"
-        },
-        {
-            id: 2,
-            title: 'Stokke',
-            description: 'Explora la colección Stokke',
-            imageUrl: '/assets/images/stokke.png',
-            width: 40,
-            href: "/brands?brand=Stokke"
-        },
-        {
-            id: 3,
-            title: 'Bugaboo',
-            description: 'Los mejores productos Bugaboo',
-            imageUrl: '/assets/images/bugaboo.jpg',
-            width: 40,
-            href: "/brands?brand=Bugaboo"
-        },
-        {
-            id: 4,
-            title: 'Joie',
-            description: 'Colección completa de Joie',
-            imageUrl: '/assets/images/joie.png',
-            width: 60,
-            href: "/brands?brand=Joie"
-        }
-    ];
+    const [offers, setOffers] = useState([]);
+    const [brands, setBrands] = useState([]);
+    useEffect(() => {
+        fetch('/api/offers')
+            .then(res => res.json())
+            .then(data => setOffers(data));
+        fetch('/api/brands')
+            .then(res => res.json())
+            .then(data => setBrands(data));
+    }, []);
 
     return (
         <div className="w-full overflow-hidden bg-white">
-            <div className="container w-[1400px] mt-20 mx-auto py-12">
-                {/* First Row - 60/40 Split */}
+            <div className="container mx-auto mt-20 py-12 relative">
+                {/* Brand logo top left */}
+                {offers[0]?.brand && brands?.length > 0 && (() => {
+                    const matchedBrand = brands.find(b => b.name === offers[0].brand);
+                    return matchedBrand ? (
+                        <img src={matchedBrand.logo} alt={matchedBrand.name} className="w-10 h-10 object-contain" />
+                    ) : null;
+                })()}
+                <h2 className="text-3xl font-bold mb-8 text-gray-800">Ofertas</h2>
                 <div className="flex flex-col md:flex-row gap-6 mb-6">
-                    {galleryItems.slice(0, 2).map((item) => (
+                    {offers.slice(0, 2).map((item, idx) => (
                         <Link
-                            key={item.id}
-                            href={item.href}
-                            className={`relative rounded-lg overflow-hidden ${item.width === 60 ? 'md:w-3/5' : 'md:w-2/5'}`}
+                            key={item._id || idx}
+                            href={"/brands?brand=" + item.brand}
+                            className={`relative rounded-lg overflow-hidden ${idx === 0 ? 'md:w-3/5' : 'md:w-2/5'}`}
                             style={{ height: '420px' }}
                         >
-                            <div className="relative w-full h-full group  ">
+                            <div className="relative w-full h-full group">
                                 <Image
                                     src={item.imageUrl}
                                     alt={item.title}
@@ -66,14 +51,12 @@ const ImageGallery = () => {
                         </Link>
                     ))}
                 </div>
-
-                {/* Second Row - 40/60 Split (reversed) */}
                 <div className="flex flex-col md:flex-row gap-6">
-                    {galleryItems.slice(2, 4).map((item) => (
+                    {offers.slice(2, 4).map((item, idx) => (
                         <Link
-                            key={item.id}
-                            href={item.href}
-                            className={`relative rounded-lg overflow-hidden ${item.width === 60 ? 'md:w-3/5' : 'md:w-2/5'}`}
+                            key={item._id || idx}
+                            href={"/brands?brand=" + item.brand}
+                            className={`relative rounded-lg overflow-hidden ${idx === 1 ? 'md:w-3/5' : 'md:w-2/5'}`}
                             style={{ height: '400px' }}
                         >
                             <div className="relative w-full h-full group">

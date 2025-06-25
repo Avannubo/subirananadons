@@ -21,12 +21,18 @@ export default function OffersTab() {
     const maxOffers = 4;
 
     useEffect(() => {
-        fetch('/api/offers')
-            .then(res => res.json())
-            .then(data => {
+        async function fetchOffers() {
+            try {
+                const res = await fetch('/api/offers');
+                const data = await res.json();
                 setOffers(data);
+            } catch (err) {
+                toast.error('Error al cargar las ofertas');
+            } finally {
                 setLoading(false);
-            });
+            }
+        }
+        fetchOffers();
         // Fetch brands from API
         fetch('/api/brands?limit=1000')
             .then(res => res.json())
