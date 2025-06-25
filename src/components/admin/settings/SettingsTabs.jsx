@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import TransportistasTab from "@/components/admin/settings/tabs/TransportistasTab";
-import ImagesTab from "@/components/admin/settings/tabs/PagoTab";
+import OffersTab from "@/components/admin/settings/tabs/OffersTab";
 import SliderTab from "@/components/admin/settings/tabs/SliderTab";
 import PedidosTab from "@/components/admin/settings/tabs/PedidosTab";
 import ProductosTab from "@/components/admin/settings/tabs/ProductosTab";
@@ -44,11 +44,12 @@ export default function SettingsTabs() {
                     setActiveTab={handleTabChange}
                 />
             </div>
+            
             {/* Tab Content */}
             <div className="p-6">
                 {activeTab === 'transportistas' && <TransportistasTab />}
                 {activeTab === 'slider' && <SliderTab />}
-                {activeTab === 'images' && <ImagesTab />}
+                {activeTab === 'images' && <OffersTab />}
                 {/* 
                 {activeTab === 'pedidos' && <PedidosTab />}
                 {activeTab === 'productos' && <ProductosTab />}

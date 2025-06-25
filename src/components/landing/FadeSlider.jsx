@@ -7,8 +7,8 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectFade, Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
-import 'swiper/css/pagination';
-import { FiX, FiPlus, FiRefreshCw, FiSearch, FiFilter } from 'react-icons/fi';
+import 'swiper/css/pagination'; 
+import Link from 'next/link';
 
 export default function FadeSlider() {
     const [slides, setSlides] = useState([]);
@@ -21,34 +21,7 @@ export default function FadeSlider() {
                 setSlides(data);
                 setLoading(false);
             });
-    }, []);
-    // const slides = [
-    //     {
-    //         id: 1,
-    //         image: '/assets/images/Screenshot_1.png',
-    //         // title: 'Premium Collection',
-    //         // subtitle: 'Explore our exclusive designs'
-    //     },
-    //     {
-    //         id: 2,
-    //         image: '/assets/images/Screenshot_2.png',
-    //         // title: 'Summer Edition',
-    //         // subtitle: 'New arrivals just for you'
-    //     },
-    //     {
-    //         id: 3,
-    //         image: '/assets/images/Screenshot_3.png',
-    //         // title: 'Limited Offers',
-    //         // subtitle: 'Special discounts available'
-    //     },
-    //     {
-    //         id: 4,
-    //         image: '/assets/images/listas.png',
-    //         // title: 'Limited Offers',
-    //         // subtitle: 'Special discounts available'
-    //     }
-    // ];
-
+    }, []); 
     return (
         <div className=" w-full h-screen">
             <Swiper
@@ -56,7 +29,7 @@ export default function FadeSlider() {
                 effect="fade"
                 speed={1000}
                 autoplay={{
-                    delay: 5000,
+                    delay: 7000,
                     disableOnInteraction: false
                 }}
                 pagination={{
@@ -86,15 +59,12 @@ export default function FadeSlider() {
                             quality={100}
                         />
                         <div className="absolute bottom-5 left-25 transform translate-x-25 z-20">
-                            <button
-                                onClick={() => {
-                                    setShowCreateModal(true);
-                                    setCurrentStep(1);
-                                }}
+                            <Link 
+                                href={slide.btnLink}
                                 className="flex items-center px-6 py-4 bg-[#00B0C8] text-white rounded-xl  hover:bg-[#62b7c2] transition-colors text-md"
                             >
                                 {slide.btnText || 'Learn More'}
-                            </button>
+                            </Link>
                         </div>
 
                     </SwiperSlide>

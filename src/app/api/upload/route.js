@@ -42,10 +42,7 @@ export async function POST(request) {
                     folder: 'user_profiles',
                     // Add a unique identifier based on user ID to avoid duplicates
                     public_id: `user_${session.user.id}_${Date.now()}`,
-                    // Optimize image quality and size
-                    transformation: [
-                        { width: 500, height: 500, crop: 'limit', quality: 'auto' }
-                    ]
+                    // Remove transformation to keep original quality
                 },
                 (error, result) => {
                     if (error) {
@@ -71,4 +68,4 @@ export async function POST(request) {
             { status: 500 }
         );
     }
-} 
+}

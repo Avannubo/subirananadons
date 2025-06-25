@@ -107,7 +107,11 @@ export default function ConfiguracionTab() {
             if (editingId) {
                 setSliders(sliders.map(s => s._id === editingId ? data : s));
             } else {
-                setSliders([...sliders, data]);
+                setSliders(prev => {
+                    // Prevent duplicate if the API returns an existing slider (e.g. due to backend bug)
+                    if (prev.some(s => s._id === data._id)) return prev;
+                    return [...prev, data];
+                });
             }
             // Reset form
             setForm({ imageUrl: '', btnText: '', btnLink: '', order: 0, active: true });
