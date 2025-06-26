@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
-
 export default function BannerTab() {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState('');
@@ -9,21 +8,19 @@ export default function BannerTab() {
     const [uploadedUrl, setUploadedUrl] = useState('');
     const [showImageSelector, setShowImageSelector] = useState(false);
     const [selectedImageUrl, setSelectedImageUrl] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
     const [uploadedImages, setUploadedImages] = useState([]);
-
     useEffect(() => {
         fetch('/api/portimg')
             .then(res => res.json())
             .then(data => setUploadedImages(Array.isArray(data) ? data : []));
     }, [uploadedUrl]);
-
     // Handle when an image is selected from the ImageSelector
     useEffect(() => {
         if (selectedImageUrl) {
             setPreview(selectedImageUrl); // Show the selected image in the preview box
         }
     }, [selectedImageUrl]);
-
     const handleImageChange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
@@ -34,12 +31,37 @@ export default function BannerTab() {
             setSelectedImageUrl(''); // Clear any selected image URL when a new file is chosen
         }
     };
-
+    const uploadImage = async () => {
+        if (!image) return null; // <-- use 'image', not 'selectedImage'
+        setIsUploading(true);
+        try {
+            const base64Image = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(image); // <-- use 'image'
+            });
+            const response = await fetch('/api/cloudinary/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64Image })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error uploading image');
+            }
+            const data = await response.json();
+            return data.url;
+        } catch (error) {
+            toast.error('Error al subir la imagen');
+            return null;
+        } finally {
+            setIsUploading(false);
+        }
+    };
     const handleUpload = async () => {
         setIsUploading(true);
         try {
             let imageUrl = selectedImageUrl;
-
             // Only upload if a new file was selected (not using ImageSelector)
             if (image && !selectedImageUrl) {
                 const uploadedUrl = await uploadImage();
@@ -48,22 +70,18 @@ export default function BannerTab() {
                 }
                 imageUrl = uploadedUrl;
             }
-
             if (!imageUrl) {
                 throw new Error('No se ha seleccionado ninguna imagen');
             }
-
             // Save URL to DB
             const saveRes = await fetch('/api/portimg', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ imageUrl })
             });
-
             if (!saveRes.ok) {
                 throw new Error('No se pudo guardar la URL en la base de datos');
             }
-
             setUploadedUrl(imageUrl);
             setSelectedImageUrl(''); // Reset after saving
             setPreview(''); // Clear preview
@@ -75,7 +93,6 @@ export default function BannerTab() {
             setIsUploading(false);
         }
     };
-
     const setActivePortada = async (imgId) => {
         try {
             // Set all images to active: false, then set selected to true
@@ -129,13 +146,11 @@ export default function BannerTab() {
                         </div>
                     )}
                 </div>
-
                 <div className='flex flex-row items-center space-x-2 w-full max-w-md'>
                     <label htmlFor="portimg-upload" className={`block w-full px-4 py-2 text-center text-white rounded-md cursor-pointer ${isUploading ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'}`}>
                         {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
                     </label>
                     <input id="portimg-upload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" disabled={isUploading} />
-
                     <button
                         onClick={() => setShowImageSelector(true)}
                         disabled={isUploading}
@@ -144,7 +159,6 @@ export default function BannerTab() {
                         Seleccionar existente
                     </button>
                 </div>
-
                 <button
                     onClick={handleUpload}
                     disabled={(!image && !selectedImageUrl) || isUploading}
@@ -152,7 +166,6 @@ export default function BannerTab() {
                 >
                     {isUploading ? 'Guardando...' : 'Guardar Imagen'}
                 </button>
-
                 {showImageSelector && (
                     <ImageSelector
                         onSelect={(url) => {
@@ -162,7 +175,6 @@ export default function BannerTab() {
                         onClose={() => setShowImageSelector(false)}
                     />
                 )}
-
                 {/* Rest of your component remains the same */}
                 {uploadedImages.length > 0 && (
                     <div className="w-full mt-6">
@@ -180,7 +192,6 @@ export default function BannerTab() {
                                     </button>
                                     <div className='space-x-2'>
                                         <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="text-[#007d8d] break-all px-3 py-1 rounded text-xs bg-[#007d8d30] hover:bg-[#007d8d40] ">Ver</a>
-
                                         <button
                                             onClick={() => deleteImage(img._id)}
                                             className="px-3 py-1 mb-2 rounded text-xs bg-red-100 text-red-700 hover:bg-red-200"
@@ -188,7 +199,6 @@ export default function BannerTab() {
                                             Eliminar
                                         </button>
                                     </div>
-
                                 </div>
                             ))}
                         </div>

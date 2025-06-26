@@ -172,6 +172,8 @@ export default function Page() {
     const router = useRouter();
     // Track if a brand filter is active
     const [activeBrandFilter, setActiveBrandFilter] = useState(null);
+    // Add useState for banner image
+    const [bannerUrl, setBannerUrl] = useState(null);
     // Get the current category node based on the last item in the path
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
     // Start search from the root of the tree
@@ -206,6 +208,19 @@ export default function Page() {
         }
         // Only run this effect when the component mounts, not on every searchParams change
         // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    // Fetch active banner image on mount
+    useEffect(() => {
+        async function fetchBanner() {
+            try {
+                const res = await fetch('/api/portimg/active');
+                const data = await res.json();
+                setBannerUrl(data.imageUrl);
+            } catch (e) {
+                setBannerUrl(null);
+            }
+        }
+        fetchBanner();
     }, []);
     // Helper function to find a category in the category tree
     function findCategoryInTree(rootNode, categoryToFind) {
@@ -451,7 +466,12 @@ export default function Page() {
     return (
         <ShopLayout>
             <div className="relative w-full h-full flex flex-col justify-start items-start mt-20">
-                <Image src="/assets/images/bg-beagrumb.jpg" alt="logo" className="w-full h-[20vh] object-cover" width={2010} height={2010} />
+                {/* Banner image if available, else fallback */}
+                {bannerUrl ? (
+                    <Image src={bannerUrl} alt="banner" className="w-full h-[20vh] object-cover" width={2010} height={2010} />
+                ) : (
+                    <Image src="/assets/images/bg-beagrumb.jpg" alt="logo" className="w-full h-[20vh] object-cover" width={2010} height={2010} />
+                )}
                 <div className="absolute inset-0 flex items-center mt-14 justify-center">
                     <h1 className="text-4xl text-zinc-800 font-bold">Tienda</h1>
                 </div>
