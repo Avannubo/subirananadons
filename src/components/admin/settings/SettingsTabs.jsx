@@ -3,7 +3,7 @@ import { useState } from "react";
 import TransportistasTab from "@/components/admin/settings/tabs/TransportistasTab";
 import OffersTab from "@/components/admin/settings/tabs/OffersTab";
 import SliderTab from "@/components/admin/settings/tabs/SliderTab";
-import PedidosTab from "@/components/admin/settings/tabs/PedidosTab";
+import PortImgTab from "@/components/admin/settings/tabs/PortImgTab";
 import ProductosTab from "@/components/admin/settings/tabs/ProductosTab";
 import InformacionTab from "@/components/admin/settings/tabs/InformacionTab";
 import EmailTab from "@/components/admin/settings/tabs/EmailTab";
@@ -15,7 +15,7 @@ export default function SettingsTabs() {
         { id: 'transportistas', label: 'Transportistas' },
         { id: 'slider', label: 'Slider Conf.' },
         { id: 'images', label: 'Ofertas Conf.' },
-        // { id: 'preferencias', label: 'Preferencias' },
+        { id: 'headerimg', label: 'Portada Img.' },
         // { id: 'pago', label: 'Pago' },
         // { id: 'productos', label: 'Configuración de Productos' },
         // { id: 'informacion', label: 'Información' },
@@ -50,9 +50,8 @@ export default function SettingsTabs() {
                 {activeTab === 'transportistas' && <TransportistasTab />}
                 {activeTab === 'slider' && <SliderTab />}
                 {activeTab === 'images' && <OffersTab />}
-                {/* 
-                {activeTab === 'pedidos' && <PedidosTab />}
-                {activeTab === 'productos' && <ProductosTab />}
+                {activeTab === 'headerimg' && <PortImgTab />}
+                {/*  {activeTab === 'productos' && <ProductosTab />}
                 {activeTab === 'informacion' && <InformacionTab />}
                 {activeTab === 'email' && <EmailTab />}
                 {activeTab === 'equipo' && <EquipoTab />}
