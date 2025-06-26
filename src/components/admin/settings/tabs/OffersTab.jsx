@@ -212,9 +212,7 @@ export default function OffersTab() {
         <div className="p-6 bg-white rounded-xl">
             <h2 className="font-bold mb-6 text-lg text-gray-800">Ofertas Destacadas</h2>
             {error && <div className="text-red-500 mb-2">{error}</div>}
-            {offers.length >= maxOffers && !editingId && (
-                <div className="text-red-500 mb-4">Solo puedes agregar hasta 4 ofertas. Elimina una para agregar otra.</div>
-            )}
+          
             <form onSubmit={handleSubmit} className="mb-8 space-y-6">
                 <div className="flex flex-col items-center space-y-4">
                     <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
@@ -271,6 +269,9 @@ export default function OffersTab() {
                     <button type="submit" className="bg-[#00B0C8] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm" disabled={isUploading || (offers.length >= maxOffers && !editingId)}>{editingId ? 'Actualizar' : 'Agregar'} Oferta</button>
                     {editingId && (
                         <button type="button" onClick={() => { setEditingId(null); setForm({ imageUrl: '', title: '', description: '', brand: '', brandLogo: '', discount: '' }); setImagePreview(''); }} className="px-4 py-2 text-gray-700 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200">Cancelar</button>
+                    )}
+                    {offers.length >= maxOffers && !editingId && (
+                        <div className="text-red-500 text-center align-middle">*Solo puedes agregar hasta 4 ofertas. Elimina una para agregar otra.</div>
                     )}
                 </div>
             </form>

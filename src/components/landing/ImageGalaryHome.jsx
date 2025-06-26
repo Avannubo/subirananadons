@@ -34,7 +34,7 @@ const ImageGallery = () => {
                             <div className="relative w-full h-full group">
                                 {/* Brand logo at top left of the container */}
                                 {item.brandLogo && (
-                                    <div className='absolute top-2 left-2 p-2 w-30 h-30 flex items-center justify-center bg-white rounded-md z-10'>
+                                    <div className='absolute top-2 left-2 p-2 w-40 h-40 flex items-center justify-center bg-white rounded-md z-10'>
                                         <img
                                             src={item.brandLogo}
                                             alt={item.brand}
@@ -51,7 +51,7 @@ const ImageGallery = () => {
                                 />
                                 <div className="absolute inset-0 bg-black/20 flex items-end p-6 transition-colors duration-300 group-hover:bg-black/30">
                                     <div className="text-white">
-                                        <h3 className="text-2xl font-bold mb-1">{item.title}</h3>
+                                        <h3 className="text-4xl font-bold mb-1">{item.title}</h3>
                                         <p className="text-white/90">{item.description}</p>
                                     </div>
                                 </div>
@@ -71,7 +71,7 @@ const ImageGallery = () => {
                             <div className="relative w-full h-full group">
                                 {/* Brand logo at top left of the container */}
                                 {item.brandLogo && (
-                                    <div className='absolute top-2 left-2 w-30 h-30 p-2 flex items-center justify-center bg-white rounded-md z-10'>
+                                    <div className='absolute top-2 left-2 w-40 h-40 p-2 flex items-center justify-center bg-white rounded-md z-10'>
                                     <img
                                         src={item.brandLogo}
                                         alt={item.brand}
