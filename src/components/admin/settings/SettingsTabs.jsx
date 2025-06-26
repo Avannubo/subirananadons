@@ -14,7 +14,7 @@ export default function SettingsTabs() {
     const tabs = [
         { id: 'transportistas', label: 'Transportistas' },
         { id: 'slider', label: 'Slider Conf.' },
-        { id: 'images', label: 'Images' },
+        { id: 'images', label: 'Ofertas Conf.' },
         // { id: 'preferencias', label: 'Preferencias' },
         // { id: 'pago', label: 'Pago' },
         // { id: 'productos', label: 'Configuración de Productos' },
@@ -44,7 +44,7 @@ export default function SettingsTabs() {
                     setActiveTab={handleTabChange}
                 />
             </div>
-            
+
             {/* Tab Content */}
             <div className="p-6">
                 {activeTab === 'transportistas' && <TransportistasTab />}

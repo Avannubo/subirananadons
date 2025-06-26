@@ -10,6 +10,7 @@ export default function OffersTab() {
         title: '',
         description: '',
         brand: '', // brand name 
+        brandLogo: '', // brand logo URL
         discount: '' // discount %
     });
     const [editingId, setEditingId] = useState(null);
@@ -49,7 +50,17 @@ export default function OffersTab() {
 
     const handleChange = e => {
         const { name, value } = e.target;
-        setForm(f => ({ ...f, [name]: value }));
+        if (name === 'brand') {
+            // When brand changes, find the brand logo
+            const selectedBrand = brands.find(b => b.id === value || b.name === value);
+            setForm(f => ({
+                ...f,
+                [name]: value,
+                brandLogo: selectedBrand?.logo || ''
+            }));
+        } else {
+            setForm(f => ({ ...f, [name]: value }));
+        }
     };
 
     const handleImageChange = (e) => {
@@ -110,28 +121,31 @@ export default function OffersTab() {
                 imageUrl = uploadedUrl;
             }
 
-            // Build body without _id for POST, with _id for PUT
-            let body;
-            let method;
+            // Find the selected brand from the brands list
+            const selectedBrand = brands.find(b => b.id === form.brand || b.name === form.brand);
+            // Always use the logo from the selectedBrand if available
+            const brandLogo = selectedBrand && selectedBrand.logo ? selectedBrand.logo : '';
+            console.log('Selected brand:', selectedBrand);
+            console.log('Brand logo to save:', brandLogo);
+            // Prepare the offer data with brand information
+            const offerData = {
+                imageUrl: imageUrl || form.imageUrl,
+                title: form.title,
+                description: form.description,
+                discount: form.discount,
+                brand: selectedBrand?.name || form.brand, // Use the brand name
+                brandLogo // Always set brandLogo
+            };
+
+            // Add _id if editing
             if (editingId) {
-                method = 'PUT';
-                body = {
-                    ...form,
-                    imageUrl: imageUrl || form.imageUrl,
-                    _id: editingId
-                };
-            } else {
-                method = 'POST';
-                body = {
-                    ...form,
-                    imageUrl: imageUrl || form.imageUrl
-                };
+                offerData._id = editingId;
             }
 
             const res = await fetch('/api/offers', {
-                method,
+                method: editingId ? 'PUT' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body: JSON.stringify(offerData)
             });
 
             const data = await res.json();
@@ -146,7 +160,14 @@ export default function OffersTab() {
             }
 
             // Reset form
-            setForm({ imageUrl: '', title: '', description: '' });
+            setForm({
+                imageUrl: '',
+                title: '',
+                description: '',
+                brand: '',
+                brandLogo: '',
+                discount: ''
+            });
             setEditingId(null);
             setSelectedImage(null);
             setImagePreview('');
@@ -163,6 +184,7 @@ export default function OffersTab() {
             title: offer.title || '',
             description: offer.description || '',
             brand: offer.brand || '',
+            brandLogo: offer.brandLogo || '',
             discount: offer.discount || ''
         });
         setImagePreview(offer.imageUrl || '');
@@ -179,7 +201,7 @@ export default function OffersTab() {
         if (!res.ok) return setError('Error eliminando la oferta');
         setOffers(offers.filter(o => o._id !== id));
         if (editingId === id) {
-            setForm({ imageUrl: '', title: '', description: '' });
+            setForm({ imageUrl: '', title: '', description: '', brand: '', brandLogo: '', discount: '' });
             setEditingId(null);
             setImagePreview('');
         }
@@ -248,7 +270,7 @@ export default function OffersTab() {
                 <div className="flex gap-2">
                     <button type="submit" className="bg-[#00B0C8] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm" disabled={isUploading || (offers.length >= maxOffers && !editingId)}>{editingId ? 'Actualizar' : 'Agregar'} Oferta</button>
                     {editingId && (
-                        <button type="button" onClick={() => { setEditingId(null); setForm({ imageUrl: '', title: '', description: '', brand: '', discount: '' }); setImagePreview(''); }} className="px-4 py-2 text-gray-700 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200">Cancelar</button>
+                        <button type="button" onClick={() => { setEditingId(null); setForm({ imageUrl: '', title: '', description: '', brand: '', brandLogo: '', discount: '' }); setImagePreview(''); }} className="px-4 py-2 text-gray-700 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200">Cancelar</button>
                     )}
                 </div>
             </form>
