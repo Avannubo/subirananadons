@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
 
-export default function PortImgTab() {
+export default function BannerTab() {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState('');
     const [isUploading, setIsUploading] = useState(false);
@@ -75,7 +75,7 @@ export default function PortImgTab() {
             setIsUploading(false);
         }
     };
-    // Set active portada image
+
     const setActivePortada = async (imgId) => {
         try {
             // Set all images to active: false, then set selected to true
@@ -84,7 +84,7 @@ export default function PortImgTab() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ _id: imgId, active: true })
             });
-            if (!res.ok) throw new Error('No se pudo actualizar la portada');
+            if (!res.ok) throw new Error('No se pudo actualizar el banner');
             setUploadedImages(images => images.map(img => ({ ...img, active: img._id === imgId })));
             // alert('Portada actualizada');
             toast.success('Portada actualizada');
@@ -171,20 +171,24 @@ export default function PortImgTab() {
                             {uploadedImages.map(img => (
                                 <div key={img._id} className={`border border-gray-200 rounded-lg overflow-hidden bg-white shadow flex flex-col items-center ${img.active ? 'ring-2 ring-[#00B0C8]' : ''}`}>
                                     <img src={img.imageUrl} alt="uploaded" className="object-cover w-full h-32 mb-2" />
-                                    <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[#007d8d] underline break-all">Ver</a>
                                     <button
                                         onClick={() => setActivePortada(img._id)}
                                         className={`px-3 m-2 py-1 rounded text-xs ${img.active ? 'bg-[#00B0C8] text-white' : 'bg-gray-200 text-gray-700 hover:bg-[#00B0C8] hover:text-white'}`}
                                         disabled={img.active}
                                     >
-                                        {img.active ? 'Portada Activa' : 'Establecer como Portada'}
+                                        {img.active ? 'Banner Activa' : 'Establecer como Banner'}
                                     </button>
-                                    <button
-                                        onClick={() => deleteImage(img._id)}
-                                        className="px-3 py-1 mb-2 rounded text-xs bg-red-100 text-red-700 hover:bg-red-200"
-                                    >
-                                        Eliminar
-                                    </button>
+                                    <div className='space-x-2'>
+                                        <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="text-[#007d8d] break-all px-3 py-1 rounded text-xs bg-[#007d8d30] hover:bg-[#007d8d40] ">Ver</a>
+
+                                        <button
+                                            onClick={() => deleteImage(img._id)}
+                                            className="px-3 py-1 mb-2 rounded text-xs bg-red-100 text-red-700 hover:bg-red-200"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
+
                                 </div>
                             ))}
                         </div>
