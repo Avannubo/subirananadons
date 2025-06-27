@@ -88,68 +88,74 @@ export default function Menu() {
         });
     };
     return (
-        <div className={`absolute ${isMenuOpen ? 'overflow-hidden h-screen' : ''}`}>
-            {isMenuOpen && (
-                <div
-                    className="fixed inset-0 bg-[#00000080] z-10"
-                    onClick={toggleMenu}
-                ></div>
-            )}
+        <div className="relative">
+            {/* Hamburger icon always visible, not absolute */}
             <header className="bg-white flex justify-between items-center">
                 <button
-                    className="w-12 h-12 flex flex-row items-center justify-center  md:justify-start space-x-2"
+                    className="w-12 h-12 flex flex-row items-center justify-center md:justify-start space-x-2 focus:outline-none"
                     onClick={toggleMenu}
+                    aria-label="Abrir menú"
                 >
                     <svg width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 6H20M4 12H20M4 18H20" stroke="#353535" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
                     </svg>
                 </button>
             </header>
-            <div
-                className={`fixed top-0 left-0 w-[90vw]  h-full bg-white text-[#333] z-20 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
-            >
-                <div className="p-4 md:p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-center mb-4 md:mb-6">
-                        <Link href="/" className="flex items-center">
-                            <Image
-                                src="/assets/logo-header.svg"
-                                alt="logo"
-                                width={120}
-                                height={40}
-                                className="w-[100px] md:w-[180px] h-auto mt-2"
-                            />
-                        </Link>
-                        <button
-                            onClick={toggleMenu}
-                            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                        >
-                            <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M18 6L6 18M6 6l12 12" stroke="#353535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <nav className="flex-1 overflow-y-auto scrollbar-hide">
-                        <ul className="space-y-1">
-                            {renderMenuItems(menuData.items)}
-                        </ul>
-                    </nav>
-                    {/* Social Media Section */}
-                    <div className="mt-auto pt-4 md:pt-6 border-t border-gray-200">
-                        <div className="flex space-x-4 md:space-x-5 justify-center my-2 md:my-4">
-                            <Link href="https://instagram.com" aria-label="Instagram" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                                <InstagramIcon size={24} />
-                            </Link>
-                            <Link href="https://youtube.com" aria-label="YouTube" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                                <YoutubeIcon size={24} />
-                            </Link>
-                            <Link href="https://linkedin.com" aria-label="LinkedIn" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                                <LinkedinIcon size={24} />
-                            </Link>
+            {/* Overlay and Side Menu */}
+            {isMenuOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 bg-[#00000080] z-40 pointer-events-auto"
+                        onClick={toggleMenu}
+                    ></div>
+                    <div
+                        className="fixed top-0 left-0 w-[90vw] max-w-xs h-full bg-white text-[#333] z-50 transform transition-transform duration-300 ease-in-out translate-x-0 pointer-events-auto shadow-lg"
+                    >
+                        <div className="p-4 md:p-6 h-full flex flex-col">
+                            <div className="flex justify-between items-center mb-4 md:mb-6">
+                                <Link href="/" className="flex items-center" onClick={() => setIsMenuOpen(false)}>
+                                    <Image
+                                        src="/assets/logo-header.svg"
+                                        alt="logo"
+                                        width={120}
+                                        height={40}
+                                        className="w-[100px] md:w-[180px] h-auto mt-2"
+                                    />
+                                </Link>
+                                <button
+                                    onClick={toggleMenu}
+                                    className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                                    aria-label="Cerrar menú"
+                                >
+                                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M18 6L6 18M6 6l12 12" stroke="#353535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <nav className="flex-1 overflow-y-auto scrollbar-hide">
+                                <ul className="space-y-1">
+                                    {renderMenuItems(menuData.items)}
+                                </ul>
+                            </nav>
+                            {/* Social Media Section */}
+                            <div className="mt-auto pt-4 md:pt-6 border-t border-gray-200">
+                                <div className="flex space-x-4 md:space-x-5 justify-center my-2 md:my-4">
+                                    <Link href="https://instagram.com" aria-label="Instagram" className="text-[#333] hover:text-[#00B0C8] transition-colors">
+                                        <InstagramIcon size={24} />
+                                    </Link>
+                                    <Link href="https://youtube.com" aria-label="YouTube" className="text-[#333] hover:text-[#00B0C8] transition-colors">
+                                        <YoutubeIcon size={24} />
+                                    </Link>
+                                    <Link href="https://linkedin.com" aria-label="LinkedIn" className="text-[#333] hover:text-[#00B0C8] transition-colors">
+                                        <LinkedinIcon size={24} />
+                                    </Link>
+                                </div>
+                                <p className="text-xs md:text-sm text-center text-gray-500 mt-2">© 2025 Subirana</p>
+                            </div>
                         </div>
-                        <p className="text-xs md:text-sm text-center text-gray-500 mt-2">© 2025 Subirana</p>
                     </div>
-                </div>
-            </div>
+                </>
+            )}
         </div>
     );
 }
