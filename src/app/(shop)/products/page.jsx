@@ -424,7 +424,7 @@ export default function Page() {
     // Generate page numbers for pagination
     const getPageNumbers = () => {
         let pages = [];
-        const maxPagesToShow = 5;
+        const maxPagesToShow = 1;
         if (totalPages <= maxPagesToShow) {
             // If we have fewer pages than the max, show all pages
             for (let i = 1; i <= totalPages; i++) {
@@ -465,21 +465,25 @@ export default function Page() {
     };
     return (
         <ShopLayout>
-            <div className="relative w-full h-full flex flex-col justify-start items-start mt-20">
-                {/* Banner image if available, else fallback */}
-                {bannerUrl ? (
-                    <Image src={bannerUrl} alt="banner" className="w-full h-[20vh] object-cover" width={2010} height={2010} />
-                ) : (
-                    <Image src="/assets/images/bg-beagrumb.jpg" alt="logo" className="w-full h-[20vh] object-cover" width={2010} height={2010} />
-                )}
-                <div className="absolute inset-0 flex items-center mt-14 justify-center">
-                    <h1 className="text-4xl text-zinc-800 font-bold">Tienda</h1>
+            {/* Banner with overlay and white title, matching brands page */}
+            <div className="relative w-full h-[30vh] flex flex-col justify-center items-center">
+                <Image
+                    src={bannerUrl || "/assets/images/bg-beagrumb.jpg"}
+                    alt="banner"
+                    fill
+                    className="object-cover"
+                    priority
+                />
+                {/* Overlay for contrast */}
+                <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <h1 className="text-4xl font-bold text-white mt-20">Tienda</h1>
                 </div>
             </div>
-            <div className="container w-[1500px] bg-white px-4 py-8">
+            <div className="container w-full max-w-[1500px] bg-white px-2 sm:px-4 py-4 sm:py-8">
                 {/* Active Brand Filter Indicator */}
                 {activeBrandFilter && (
-                    <div className="mb-4 bg-[#00B0C8]/10 px-4 py-3 rounded-lg flex items-center justify-between">
+                    <div className="mb-4 bg-[#00B0C8]/10 px-4 py-3 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                         <div className="flex items-center">
                             <span className="mr-2 text-[#00B0C8]">Filtrando por marca:</span>
                             <span className="font-medium">{activeBrandFilter}</span>
@@ -501,8 +505,8 @@ export default function Page() {
                     </div>
                 )}
                 {/* Breadcrumbs */}
-                <nav aria-label="Breadcrumb" className="mb-6 pl-2">
-                    <ol className="flex items-center space-x-1 text-md text-gray-500 flex-wrap">
+                <nav aria-label="Breadcrumb" className="mb-6 pl-2 overflow-x-auto">
+                    <ol className="flex items-center space-x-1 text-md text-gray-500 flex-wrap min-w-[300px]">
                         {categoryPath.map((label, index) => (
                             <li key={index} className="flex items-center">
                                 {index > 0 && (
@@ -519,9 +523,9 @@ export default function Page() {
                         ))}
                     </ol>
                 </nav>
-                <div className="flex flex-col md:flex-row gap-8">
+                <div className="flex flex-col lg:flex-row gap-8">
                     {/* Category/Subcategory List Sidebar */}
-                    <aside className="w-full md:w-1/4 lg:w-1/5 flex-shrink-0 ">
+                    <aside className="w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 mb-6 lg:mb-0">
                         {/*   <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
                             {currentCategoryLabel === productMenuTree.label ? "Categorías" : `Subcategorías de ${categoryPath[categoryPath.length - 2] || "Productos"}`}
                         </h3> */}
@@ -565,7 +569,7 @@ export default function Page() {
                     </aside>
                     {/* Product Grid Area */}
                     <main className="w-full flex-grow">
-                        <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 flex-wrap gap-4">
                             <div className="flex items-center space-x-2">
                                 {/* Grid/List view toggle icons */}
                                 <button
@@ -581,9 +585,9 @@ export default function Page() {
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                                 </button>
                             </div>
-                            <div className="flex items-center">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto gap-2 sm:gap-0">
                                 {!loading && totalProducts > 0 && (
-                                    <span className="text-sm text-gray-500 mr-4">
+                                    <span className="text-sm text-gray-500 mr-0 sm:mr-4">
                                         Mostrando {(currentPage - 1) * productsPerPage + 1}-
                                         {Math.min(currentPage * productsPerPage, totalProducts)} de {totalProducts} productos
                                     </span>

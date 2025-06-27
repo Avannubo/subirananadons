@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FiX, FiUpload, FiImage } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
+import ImageSelector from '@/components/admin/shared/ImageSelector';
 
 export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }) {
     const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
     const [slug, setSlug] = useState('');
     const [imagePreview, setImagePreview] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [showImageSelector, setShowImageSelector] = useState(false);
     const fileInputRef = useRef(null);
 
     // Initialize form with brand data when editing
@@ -213,51 +215,70 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Logotipo
                             </label>
-                            <div
-                                className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer h-40 flex flex-col items-center justify-center ${isDragging
-                                    ? 'border-[#00B0C8] bg-blue-50'
-                                    : 'border-gray-300 hover:border-gray-400'
-                                    }`}
-                                onClick={handleImageClick}
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                                onDrop={handleDrop}
-                            >
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                />
+                            <div className="flex flex-col items-center gap-2">
+                                <div
+                                    className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer h-40 flex flex-col items-center justify-center ${isDragging
+                                        ? 'border-[#00B0C8] bg-blue-50'
+                                        : 'border-gray-300 hover:border-gray-400'
+                                        }`}
+                                    onClick={handleImageClick}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                >
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                    />
 
-                                {imagePreview ? (
-                                    <div className="relative h-full w-full flex items-center justify-center">
-                                        <img
-                                            src={imagePreview}
-                                            alt="Logo preview"
-                                            className="max-h-full max-w-full object-contain"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={handleRemoveImage}
-                                            className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                                        >
-                                            <FiX size={16} />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <FiImage className="w-10 h-10 text-gray-400 mb-2" />
-                                        <span className="text-sm text-gray-500">
-                                            Arrastra y suelta una imagen o haz clic para seleccionar
-                                        </span>
-                                        <span className="text-xs text-gray-400 mt-1">
-                                            PNG, JPG, GIF hasta 5MB
-                                        </span>
-                                    </>
-                                )}
+                                    {imagePreview ? (
+                                        <div className="relative h-full w-full flex items-center justify-center">
+                                            <img
+                                                src={imagePreview}
+                                                alt="Logo preview"
+                                                className="max-h-full max-w-full object-contain"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleRemoveImage}
+                                                className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                                            >
+                                                <FiX size={16} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <FiImage className="w-10 h-10 text-gray-400 mb-2" />
+                                            <span className="text-sm text-gray-500">
+                                                Arrastra y suelta una imagen o haz clic para seleccionar
+                                            </span>
+                                            <span className="text-xs text-gray-400 mt-1">
+                                                PNG, JPG, GIF hasta 5MB
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowImageSelector(true)}
+                                    className="w-full px-4 py-2 text-white text-sm rounded-md bg-[#00B0C8] hover:bg-[#008A9B]"
+                                >
+                                    Seleccionar existente
+                                </button>
                             </div>
+                            {showImageSelector && (
+                                <ImageSelector
+                                    onSelect={(url) => {
+                                        setFormData(prev => ({ ...prev, logo: url }));
+                                        setImagePreview(url);
+                                        setShowImageSelector(false);
+                                    }}
+                                    onClose={() => setShowImageSelector(false)}
+                                />
+                            )}
                         </div>
 
                         <div>
@@ -323,4 +344,4 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
             </div>
         </div>
     );
-} 
+}

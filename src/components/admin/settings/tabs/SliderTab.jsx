@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { FiUpload, FiPlus } from "react-icons/fi";
 import { toast } from "react-hot-toast";
+import ImageSelector from '@/components/admin/shared/ImageSelector';
+
 export default function ConfiguracionTab() {
     const [sliders, setSliders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -17,6 +19,7 @@ export default function ConfiguracionTab() {
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+    const [showImageSelector, setShowImageSelector] = useState(false);
     // Fetch slider items
     useEffect(() => {
         fetch('/api/slider')
@@ -215,6 +218,14 @@ export default function ConfiguracionTab() {
                             <FiPlus size={16} />
                             <span>Preview URL</span>
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowImageSelector(true)}
+                            disabled={isUploading}
+                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                        >
+                            Seleccionar existente
+                        </button>
                     </div>
                     <p className="mt-1 text-xs text-gray-500 text-center">
                         Formats: JPG, PNG. Max: 5MB
@@ -308,6 +319,16 @@ export default function ConfiguracionTab() {
                     )}
                 </div>
             </form>
+            {showImageSelector && (
+                <ImageSelector
+                    onSelect={(url) => {
+                        setForm(f => ({ ...f, imageUrl: url }));
+                        setImagePreview(url);
+                        setShowImageSelector(false);
+                    }}
+                    onClose={() => setShowImageSelector(false)}
+                />
+            )}
             {loading ? <div>Loading...</div> : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm bg-white rounded-xl shadow border border-gray-200">

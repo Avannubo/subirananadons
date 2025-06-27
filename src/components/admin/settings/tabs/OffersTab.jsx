@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FiUpload, FiPlus } from "react-icons/fi";
 import { toast } from "react-hot-toast";
+import ImageSelector from "@/components/admin/shared/ImageSelector"; // Adjust the import based on your file structure
 
 export default function OffersTab() {
     const [offers, setOffers] = useState([]);
@@ -19,6 +20,7 @@ export default function OffersTab() {
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState('');
     const [brands, setBrands] = useState([]);
+    const [showImageSelector, setShowImageSelector] = useState(false);
     const maxOffers = 4;
 
     useEffect(() => {
@@ -239,7 +241,25 @@ export default function OffersTab() {
                             <FiPlus size={16} />
                             <span>Vista previa URL</span>
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowImageSelector(true)}
+                            disabled={isUploading}
+                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                        >
+                            Seleccionar existente
+                        </button>
                     </div>
+                    {showImageSelector && (
+                        <ImageSelector
+                            onSelect={(url) => {
+                                setForm(f => ({ ...f, imageUrl: url }));
+                                setImagePreview(url);
+                                setShowImageSelector(false);
+                            }}
+                            onClose={() => setShowImageSelector(false)}
+                        />
+                    )}
                     <p className="mt-1 text-xs text-gray-500 text-center">Formatos: JPG, PNG. Máx: 5MB</p>
                     <div className="w-full">
                         <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">URL de la imagen (opcional)</label>

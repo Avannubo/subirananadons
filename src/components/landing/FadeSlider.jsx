@@ -7,7 +7,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectFade, Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
-import 'swiper/css/pagination'; 
+import 'swiper/css/pagination';
 import Link from 'next/link';
 
 export default function FadeSlider() {
@@ -21,9 +21,9 @@ export default function FadeSlider() {
                 setSlides(data);
                 setLoading(false);
             });
-    }, []); 
+    }, []);
     return (
-        <div className=" w-full h-screen">
+        <div className="w-full h-[45vw] min-h-[450px] max-h-[600px] md:h-[100vh] md:min-h-[350px] md:max-h-full relative">
             <Swiper
                 modules={[EffectFade, Autoplay, Pagination]}
                 effect="fade"
@@ -41,12 +41,12 @@ export default function FadeSlider() {
                 className="h-full w-full"
             >
                 {slides.map((slide) => (
-                    <SwiperSlide key={slide.id} className="relative">
-                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center">
-                            <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fadeIn">
+                    <SwiperSlide key={slide.id} className="relative w-full h-full">
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-2 md:px-0">
+                            <h2 className="text-2xl md:text-5xl font-bold text-white mb-2 md:mb-4 animate-fadeIn drop-shadow-lg">
                                 {slide.title}
                             </h2>
-                            <p className="text-xl md:text-2xl text-white/90 animate-fadeIn delay-100">
+                            <p className="text-base md:text-2xl text-white/90 animate-fadeIn delay-100 drop-shadow-md">
                                 {slide.subtitle}
                             </p>
                         </div>
@@ -54,19 +54,19 @@ export default function FadeSlider() {
                             src={slide.imageUrl}
                             alt="img"
                             fill
-                            className="object-cover"
+                            className="object-cover object-center"
                             priority
                             quality={100}
+                            sizes="100vw"
                         />
-                        <div className="absolute bottom-5 left-25 transform translate-x-25 z-20">
-                            <Link 
+                        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex justify-center w-full">
+                            <Link
                                 href={slide.btnLink}
-                                className="flex items-center px-6 py-3 uppercase bg-[#00B0C8] text-white rounded-md  hover:bg-[#008da0dc] transition-colors text-md"
+                                className="flex items-center px-4 py-2 md:px-6 md:py-3 uppercase bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0dc] transition-colors text-sm md:text-md shadow-lg"
                             >
                                 {slide.btnText || 'Learn More'}
                             </Link>
                         </div>
-
                     </SwiperSlide>
                 ))}
             </Swiper>

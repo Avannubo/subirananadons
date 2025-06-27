@@ -66,7 +66,12 @@ export default function ImageSelector({ onSelect, onClose }) {
 
                 {loading ? (
                     <div className="flex-1 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2  border-b-2 border-[#00b1c8] "></div>
+                        {/* Skeleton grid for loading */}
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 w-full p-4">
+                            {Array.from({ length: 24 }).map((_, idx) => (
+                                <div key={idx} className="animate-pulse bg-gray-200 rounded-lg h-32 w-full" />
+                            ))}
+                        </div>
                     </div>
                 ) : (
                     <div className="flex-1 overflow-y-auto p-4">

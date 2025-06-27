@@ -5,7 +5,7 @@ export default function Pagination({
     currentPage = 1,
     totalPages = 1,
     totalItems = 0,
-    itemsPerPage = 5,
+    itemsPerPage = 2,
     onPageChange,
     onItemsPerPageChange,
     showingText = "Mostrando {} de {} productos"
@@ -14,22 +14,12 @@ export default function Pagination({
     const getVisiblePages = () => {
         // Always show at least current page
         const pages = [currentPage];
-
-        // Add pages before current page
-        let before = currentPage - 1;
-        while (before > 0 && pages.length < 5) {
-            pages.unshift(before);
-            before--;
-        }
-
-        // Add pages after current page
-        let after = currentPage + 1;
-        while (after <= totalPages && pages.length < 5) {
-            pages.push(after);
-            after++;
-        }
-
-        return pages;
+        // Add one page before current page if possible
+        if (currentPage > 1) pages.unshift(currentPage - 1);
+        // Add one page after current page if possible
+        if (currentPage < totalPages) pages.push(currentPage + 1);
+        // Ensure only unique and sorted
+        return Array.from(new Set(pages)).sort((a, b) => a - b);
     };
 
     const visiblePages = getVisiblePages();
@@ -54,12 +44,11 @@ export default function Pagination({
     };
 
     return (
-        <div className="flex justify-between items-center flex-wrap gap-3 mt-4 mb-2 px-4">
+        <div className="flex flex-col items-center justify-center flex-wrap gap-3 mt-4 mb-2 px-4">
             <div className="text-sm text-gray-600">
                 {formattedShowingText}
             </div>
-
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center gap-4">
                 <div className="flex items-center">
                     <span className="text-sm text-gray-600 mr-2">Items por página:</span>
                     <select
@@ -75,16 +64,14 @@ export default function Pagination({
                         <option value={500}>500</option>
                     </select>
                 </div>
-
-                <div className="flex">
+                <div className="flex justify-center w-full">
                     <button
                         onClick={() => onPageChange(1)}
                         disabled={currentPage === 1}
                         className="border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
                     >
-                        Anterior
+                        ⇦
                     </button>
-
                     {visiblePages.map(page => (
                         <button
                             key={page}
@@ -97,7 +84,6 @@ export default function Pagination({
                             {page}
                         </button>
                     ))}
-
                     {totalPages > 5 && !visiblePages.includes(totalPages) && (
                         <>
                             <span className="border border-gray-300 px-4 py-2 text-sm">...</span>
@@ -109,16 +95,15 @@ export default function Pagination({
                             </button>
                         </>
                     )}
-
                     <button
                         onClick={() => onPageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
                         className="border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
                     >
-                        Siguiente
+                        ⇨
                     </button>
                 </div>
             </div>
         </div>
     );
-} 
+}

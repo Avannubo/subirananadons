@@ -97,28 +97,26 @@ export default function Menu() {
             )}
             <header className="bg-white flex justify-between items-center">
                 <button
-                    className="w-[300px] flex flex-row items-center space-x-2"
+                    className="w-12 h-12 flex flex-row items-center justify-center  md:justify-start space-x-2"
                     onClick={toggleMenu}
                 >
                     <svg width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 6H20M4 12H20M4 18H20" stroke="#353535" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
                     </svg>
-                    {/* <span className="text-[#353535] font-medium">MENÚ</span> */}
                 </button>
             </header>
             <div
-                className={`fixed top-0 left-0 w-[320px] h-full bg-white text-[#333] z-20 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
+                className={`fixed top-0 left-0 w-[90vw]  h-full bg-white text-[#333] z-20 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
-                <div className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="p-4 md:p-6 h-full flex flex-col">
+                    <div className="flex justify-between items-center mb-4 md:mb-6">
                         <Link href="/" className="flex items-center">
                             <Image
                                 src="/assets/logo-header.svg"
                                 alt="logo"
-                                width={180}
-                                height={60}
-                                className="mt-2"
+                                width={120}
+                                height={40}
+                                className="w-[100px] md:w-[180px] h-auto mt-2"
                             />
                         </Link>
                         <button
@@ -136,19 +134,19 @@ export default function Menu() {
                         </ul>
                     </nav>
                     {/* Social Media Section */}
-                    <div className="mt-auto pt-6 border-t border-gray-200">
-                        <div className="flex space-x-5 justify-center my-4">
+                    <div className="mt-auto pt-4 md:pt-6 border-t border-gray-200">
+                        <div className="flex space-x-4 md:space-x-5 justify-center my-2 md:my-4">
                             <Link href="https://instagram.com" aria-label="Instagram" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                                <InstagramIcon size={28} />
+                                <InstagramIcon size={24} />
                             </Link>
                             <Link href="https://youtube.com" aria-label="YouTube" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                                <YoutubeIcon size={28} />
+                                <YoutubeIcon size={24} />
                             </Link>
                             <Link href="https://linkedin.com" aria-label="LinkedIn" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                                <LinkedinIcon size={28} />
+                                <LinkedinIcon size={24} />
                             </Link>
                         </div>
-                        <p className="text-sm text-center text-gray-500 mt-2">© 2025 Subirana</p>
+                        <p className="text-xs md:text-sm text-center text-gray-500 mt-2">© 2025 Subirana</p>
                     </div>
                 </div>
             </div>

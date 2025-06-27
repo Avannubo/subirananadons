@@ -5,6 +5,7 @@ import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus, FiPackage, FiTra
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { useStats } from '@/contexts/StatsContext';
+import ImageSelector from '@/components/admin/shared/ImageSelector';
 
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
     const [formData, setFormData] = useState({
@@ -41,6 +42,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [showBrandDropdown, setShowBrandDropdown] = useState(false);
     const [brandSearchTerm, setBrandSearchTerm] = useState('');
     const [productImages, setProductImages] = useState([]);
+    const [showImageSelector, setShowImageSelector] = useState(false);
     const stats = useStats();
 
     // Fetch all categories and brands when modal opens
@@ -1066,8 +1068,25 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             <FiPlus size={16} />
                                             <span>Añadir a Galería</span>
                                         </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowImageSelector(true)}
+                                            disabled={isUploading}
+                                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                                        >
+                                            Seleccionar existente
+                                        </button>
                                     </div>
-
+                                    {showImageSelector && (
+                                        <ImageSelector
+                                            onSelect={(url) => {
+                                                setFormData(f => ({ ...f, image: url }));
+                                                setImagePreview(url);
+                                                setShowImageSelector(false);
+                                            }}
+                                            onClose={() => setShowImageSelector(false)}
+                                        />
+                                    )}
                                     <p className="mt-1 text-xs text-gray-500 text-center">
                                         Formatos: JPG, PNG. Max: 5MB
                                     </p>
@@ -1128,4 +1147,4 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             </div>
         </Dialog>
     );
-} 
+}

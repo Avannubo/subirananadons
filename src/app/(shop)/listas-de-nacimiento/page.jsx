@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
@@ -10,7 +10,24 @@ import Link from 'next/link';
 
 export default function BirthListsPage() {
     const [searchTerm, setSearchTerm] = useState('');
+    const [bannerImage, setBannerImage] = useState(null);
     const router = useRouter();
+
+    useEffect(() => {
+        const fetchBanner = async () => {
+            try {
+                const res = await fetch('/api/portimg/active');
+                if (!res.ok) throw new Error('Failed to fetch banner');
+                const data = await res.json();
+                if (data && (data.image || data.imageUrl)) {
+                    setBannerImage(data.image || data.imageUrl);
+                }
+            } catch (err) {
+                console.error('Error fetching banner:', err);
+            }
+        };
+        fetchBanner();
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -52,17 +69,19 @@ export default function BirthListsPage() {
                 transition={{ duration: 0.5 }}
             >
                 <Image
-                    src="/assets/images/bg-beagrumb.jpg"
+                    src={bannerImage || "/assets/images/bg-beagrumb.jpg"}
                     alt="Birth Lists Header"
                     fill
                     className="object-cover"
                     placeholder="blur"
                     blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAEDQIHq4C7sgAAAABJRU5ErkJggg=="
                 />
-                <div className="absolute inset-0 text-zinc-900 mt-20">
+                {/* Color overlay for better contrast */}
+                <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+                <div className="absolute inset-0 text-zinc-900 mt-20 z-20">
                     <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
                         <motion.h1
-                            className="text-4xl font-bold text-zinc-900 mb-4"
+                            className="text-4xl font-bold text-white mb-4"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2, duration: 0.5 }}
@@ -92,7 +111,7 @@ export default function BirthListsPage() {
                                     </svg>
                                 </button>
                             </form>
-                            <p className="mt-4 text-sm text-gray-600">
+                            <p className="mt-4 text-sm text-white">
                                 Ingresa el enlace completo o el ID de la lista de nacimiento para acceder a ella
                             </p>
                         </motion.div>
@@ -100,59 +119,57 @@ export default function BirthListsPage() {
                 </div>
             </motion.div>
             <div className="container mx-auto px-4 py-12">
-                <div className="flex flex-row  gap-6 mb-12">
-                    
-                      <motion.div
-                    className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                >
-                    <div className="flex flex-col  items-start justify-start space-y-4">
-                        <div>
-                            <h2 className="text-2xl font-bold mb-2">¿Esperando un bebé?</h2>
-                            <p className="text-white/90">Crea tu propia lista de nacimiento y compártela con tus seres queridos. Es fácil, rápido y te ayudará a organizar todo lo que necesitas para la llegada de tu bebé.</p>
+                <div className="flex flex-col md:flex-row gap-6 mb-12">
+                    <motion.div
+                        className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-6 md:mb-12 text-white"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.5 }}
+                    >
+                        <div className="flex flex-col items-start justify-start space-y-4">
+                            <div>
+                                <h2 className="text-2xl font-bold mb-2">¿Esperando un bebé?</h2>
+                                <p className="text-white/90">Crea tu propia lista de nacimiento y compártela con tus seres queridos. Es fácil, rápido y te ayudará a organizar todo lo que necesitas para la llegada de tu bebé.</p>
+                            </div>
+                            <button
+                                onClick={() => router.push('/dashboard/listas')}
+                                className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
+                            >
+                                Crear Lista
+                            </button>
                         </div>
-                        <button
-                            onClick={() => router.push('/dashboard/listas')}
-                            className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
-                        >
-                            Crear Lista
-                        </button>
-                    </div>
-                </motion.div>
-                <motion.div
-                    className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-12 text-white"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                >
-                    <div className="flex flex-col  items-start justify-start space-y-4">
-                        <div>
-                            <h2 className="text-2xl font-bold mb-2">¿No sabes qué comprar?</h2>
-                            <p className="text-white/90">Mira los productos esenciales y más comprados para un primer comprador en nuestra página de recomendaciones. Encuentra inspiración y asegúrate de elegir lo mejor para el bebé.</p>
+                    </motion.div>
+                    <motion.div
+                        className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-6 md:mb-12 text-white"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.5 }}
+                    >
+                        <div className="flex flex-col items-start justify-start space-y-4">
+                            <div>
+                                <h2 className="text-2xl font-bold mb-2">¿No sabes qué comprar?</h2>
+                                <p className="text-white/90">Mira los productos esenciales y más comprados para un primer comprador en nuestra página de recomendaciones. Encuentra inspiración y asegúrate de elegir lo mejor para el bebé.</p>
+                            </div>
+                            <Link
+                                href="/recomendations"
+                                className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
+                            >
+                                Ver Recomendaciones
+                            </Link>
                         </div>
-                        <Link 
-                            href="/recomendations"
-                            className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
-                        >
-                            Ver Recomendaciones
-                        </Link>
-                    </div>
-                </motion.div>
-</div>
-              
+                    </motion.div>
+                </div>
                 {/* How It Works Section */}
                 <motion.div
-                    className="mt-16 py-12 bg-gray-50 rounded-lg"
+                    className="mt-8 md:mt-16 py-8 md:py-12 bg-gray-50 rounded-lg"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6 }}
                 >
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-2xl font-bold text-center mb-12">¿Cómo Funciona?</h2>
-                        <div className="flex flex-row space-x-4">
-                            <div className="flex-1 text-center">
+                    <div className="container mx-auto px-2 md:px-4">
+                        <h2 className="text-2xl font-bold text-center mb-8 md:mb-12">¿Cómo Funciona?</h2>
+                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-8 md:space-y-0 overflow-x-auto">
+                            <div className="flex-1 min-w-[220px] text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
                                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -161,7 +178,7 @@ export default function BirthListsPage() {
                                 <h3 className="text-lg font-semibold mb-2">Iniciar Sesión</h3>
                                 <p className="text-gray-600">Regístrate o inicia sesión para empezar tu lista</p>
                             </div>
-                            <div className="flex-1 text-center">
+                            <div className="flex-1 min-w-[220px] text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
                                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -170,7 +187,7 @@ export default function BirthListsPage() {
                                 <h3 className="text-lg font-semibold mb-2">Crea tu Lista</h3>
                                 <p className="text-gray-600">Añade los productos que necesitas para el bebé</p>
                             </div>
-                            <div className="flex-1 text-center">
+                            <div className="flex-1 min-w-[220px] text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
                                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -179,7 +196,7 @@ export default function BirthListsPage() {
                                 <h3 className="text-lg font-semibold mb-2">Comparte</h3>
                                 <p className="text-gray-600">Envía tu lista a familiares y amigos</p>
                             </div>
-                            <div className="flex-1 text-center">
+                            <div className="flex-1 min-w-[220px] text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
                                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8 4-8-4V5l8 4 8-4v2zM4 13.8V7.2l8 4 8-4v6.6" />
