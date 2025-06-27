@@ -56,7 +56,7 @@ export default function ContactPage() {
                 />
                 {/* Overlay for contrast */}
                 <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
-                <div className="absolute inset-0 flex items-center justify-center z-20 mt-20">
+                <div className="absolute inset-0 flex items-center justify-center z-20 mt-30">
                     <motion.h1
                         className="text-4xl font-bold text-white mb-6"
                         initial={{ y: 20, opacity: 0 }}

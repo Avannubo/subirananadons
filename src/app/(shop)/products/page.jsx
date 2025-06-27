@@ -466,7 +466,7 @@ export default function Page() {
     return (
         <ShopLayout>
             {/* Banner with overlay and white title, matching brands page */}
-            <div className="relative w-full h-[30vh] flex flex-col justify-center items-center">
+            <div className="relative w-full h-[40vh] flex flex-col justify-center items-center">
                 <Image
                     src={bannerUrl || "/assets/images/bg-beagrumb.jpg"}
                     alt="banner"
@@ -477,7 +477,7 @@ export default function Page() {
                 {/* Overlay for contrast */}
                 <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
                 <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <h1 className="text-4xl font-bold text-white mt-20">Tienda</h1>
+                    <h1 className="text-4xl font-bold text-white mt-30">Tienda</h1>
                 </div>
             </div>
             <div className="container w-full max-w-[1500px] bg-white px-2 sm:px-4 py-4 sm:py-8">

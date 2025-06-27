@@ -280,7 +280,7 @@ export default function BrandsPage() {
         <ShopLayout>
             {/* Header Image */}
             <motion.div
-                className="relative w-full h-[30vh] bg-gray-100"
+                className="relative w-full h-[40vh] bg-gray-100"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -295,7 +295,7 @@ export default function BrandsPage() {
                 <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
                 <div className="absolute inset-0 flex items-center justify-center z-20">
                     <motion.h1
-                        className="text-4xl font-bold text-white mt-20"
+                        className="text-4xl font-bold text-white mt-30"
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}

@@ -12,10 +12,10 @@ export default function Home() {
         <FeaturedProducts />
         {/* New Section with Background */}
         <div
-          className="w-full overflow-hidden h-[32vw] min-h-[180px] max-h-[320px] md:h-[40vh] md:min-h-[250px] md:max-h-[400px] py-10 md:py-20 px-2 md:px-4 bg-gradient-to-r from-blue-50 to-purple-50"
+          className="w-full  h-[40vw] py-10 bg-no-repeat md:py-20 px-2 md:px-4 bg-gradient-to-r from-blue-50 to-purple-50"
           style={{
             backgroundImage: "url('/assets/images/Screenshot_4.png')",
-            backgroundSize: "cover",
+            backgroundSize: "contain",
             backgroundPosition: "center",
           }}
         >

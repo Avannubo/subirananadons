@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 const ImageGallery = () => {
     const [offers, setOffers] = useState([]);
-    useEffect(() => {
+    useEffect(() => { 
         fetch('/api/offers')
             .then(res => res.json())
             .then(data => {

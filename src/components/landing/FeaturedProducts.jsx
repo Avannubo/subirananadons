@@ -85,7 +85,7 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
     const [loading, setLoading] = useState(true);
     const [usingSampleData, setUsingSampleData] = useState(false);
     const [error, setError] = useState(null);
-
+ 
     useEffect(() => {
         const getProducts = async () => {
             try {

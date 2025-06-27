@@ -63,7 +63,7 @@ export default function BirthListsPage() {
     return (
         <ShopLayout>
             <motion.div
-                className="relative w-full h-[35vh] bg-gray-100"
+                className="relative w-full h-[40vh] bg-gray-100"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -78,7 +78,7 @@ export default function BirthListsPage() {
                 />
                 {/* Color overlay for better contrast */}
                 <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
-                <div className="absolute inset-0 text-zinc-900 mt-20 z-20">
+                <div className="absolute inset-0 text-zinc-900 mt-30 z-20">
                     <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
                         <motion.h1
                             className="text-4xl font-bold text-white mb-4"

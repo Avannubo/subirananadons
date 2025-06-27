@@ -275,22 +275,22 @@ export default function Page() {
     }
     return (
         <ShopLayout>
-            <div className="container mx-auto px-4 py-8 mt-22">
+            <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 mt-20">
                 {/* Breadcrumb */}
-                <nav className="mb-8">
-                    <ol className="flex items-center space-x-2 text-sm text-gray-500">
+                <nav className="mb-6 sm:mb-8 overflow-x-auto">
+                    <ol className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
                         <li><a href="/products" className="hover:text-gray-700">Productos</a></li>
                         <li><span className="mx-2">/</span></li>
                         <li><a href={`/products?category=${encodeURIComponent(product.category)}`} className="hover:text-gray-700">{product.category}</a></li>
                         <li><span className="mx-2">/</span></li>
-                        <li className="text-gray-900 font-medium">{product.name}</li>
+                        <li className="text-gray-900 font-medium whitespace-nowrap">{product.name}</li>
                     </ol>
                 </nav>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                     {/* Product Images */}
                     <div className="space-y-4">
                         <motion.div
-                            className="relative w-full h-[600px] overflow-hidden rounded-lg bg-white"
+                            className="relative w-full h-[320px] xs:h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden rounded-lg bg-white"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.3 }}
@@ -304,7 +304,7 @@ export default function Page() {
                             />
                         </motion.div>
 
-                        {/* Imágenes del Producto */}
+                        {/* Thumbnails */}
                         {product.images.length > 1 && (
                             <div className="space-y-2">
                                 <div className="relative">
@@ -319,7 +319,7 @@ export default function Page() {
                                         }}
                                     >
                                         <motion.div
-                                            className="inline-flex space-x-4 py-2 px-1 cursor-grab active:cursor-grabbing"
+                                            className="inline-flex space-x-2 sm:space-x-4 py-2 px-1 cursor-grab active:cursor-grabbing"
                                             drag="x"
                                             dragConstraints={dragConstraints}
                                             whileTap={{ cursor: "grabbing" }}
@@ -328,12 +328,12 @@ export default function Page() {
                                             {product.images.map((image, index) => (
                                                 <div
                                                     key={index}
-                                                    className={`relative border border-gray-200 rounded-md overflow-hidden 
-                                                        ${selectedImage === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}
-                                                        w-[180px] flex-shrink-0`}
+                                                    className={`relative border border-gray-200 rounded-md overflow-hidden \
+                                                        ${selectedImage === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}\
+                                                        w-[90px] xs:w-[120px] sm:w-[140px] md:w-[180px] flex-shrink-0`}
                                                 >
                                                     <div
-                                                        className="relative h-44 cursor-pointer"
+                                                        className="relative h-20 xs:h-28 sm:h-32 md:h-44 cursor-pointer"
                                                         onClick={() => setSelectedImage(index)}
                                                     >
                                                         <Image
@@ -354,10 +354,10 @@ export default function Page() {
                     </div>
                     {/* Product Info */}
                     <div className="space-y-6">
-                        <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-                        <p className="text-2xl font-semibold text-gray-900">{product.price}</p>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{product.name}</h1>
+                        <p className="text-xl sm:text-2xl font-semibold text-gray-900">{product.price}</p>
                         <div className="space-y-4">
-                            <p className="text-gray-600">{product.description}</p>
+                            <p className="text-gray-600 break-words">{product.description}</p>
                             <div className="py-4">
                                 <h3 className="font-bold text-gray-900 mb-2">Detalles del producto</h3>
                                 <ul className="list-disc list-inside space-y-1 text-gray-600">
@@ -376,9 +376,9 @@ export default function Page() {
                                 </ul>
                             </div>
                             {/* Quantity Selector */}
-                            <div className="flex items-center space-x-4 ">
+                            <div className="flex flex-wrap items-center space-x-4 ">
                                 <span className="text-gray-700">Cantidad:</span>
-                                <div className="flex items-center border border-gray-300 rounded-md">
+                                <div className="flex items-center border border-gray-300 rounded-md mt-2 sm:mt-0">
                                     <button
                                         onClick={() => handleQuantityChange(-1)}
                                         className="px-3 py-1 text-gray-600"
@@ -397,12 +397,12 @@ export default function Page() {
                             {/* Add to Cart Button */}
                             <button
                                 onClick={handleAddToCart}
-                                className="w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200"
+                                className="w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200 mt-2"
                             >
                                 Añadir al carrito
                             </button>
                             {/* Wishlist Button */}
-                            <button className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-2">
+                            <button className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-2 mt-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
@@ -412,14 +412,14 @@ export default function Page() {
                     </div>
                 </div>
                 {/* Product Details Tabs */}
-                <div className="mt-16">
+                <div className="mt-10 sm:mt-16">
                     <div className="border-b border-gray-200">
-                        <nav className="-mb-px flex space-x-8">
+                        <nav className="-mb-px flex flex-wrap space-x-4 sm:space-x-8 overflow-x-auto">
                             {['DESCRIPCIÓN', 'DETALLES DEL PRODUCTO'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`pb-4 px-1 text-sm font-medium ${activeTab === tab
+                                    className={`pb-4 px-1 text-xs sm:text-sm font-medium ${activeTab === tab
                                         ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
                                         : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
@@ -429,7 +429,7 @@ export default function Page() {
                             ))}
                         </nav>
                     </div>
-                    <div className="mt-6 pb-16 border-b border-gray-200">
+                    <div className="mt-4 sm:mt-6 pb-10 sm:pb-16 border-b border-gray-200">
                         {activeTab === 'DESCRIPCIÓN' && (
                             <div className="prose max-w-none">
                                 <p className="text-gray-600">{product.description}</p>
@@ -457,7 +457,7 @@ export default function Page() {
                 </div>
                 {/* Related Products */}
                 {relatedProducts.length > 0 && (
-                    <div className="mt-16">
+                    <div className="mt-10 sm:mt-16">
                         <ProductSlider
                             title="PRODUCTOS RELACIONADOS"
                             products={relatedProducts}

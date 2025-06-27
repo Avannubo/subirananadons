@@ -44,7 +44,7 @@ export default function ProductSlider({
         <div className={`px-2 md:px-4 ${className}`}>
             <div className="container mx-auto">
                 <div className="flex flex-row justify-between items-center mb-4 md:mb-8 gap-2 md:gap-0">
-                    {title && <h2 className="text-xl md:text-3xl text-black font-bold">{title}</h2>}
+                    {title && <h2 className="text-2xl md:text-4xl text-black font-bold">{title}</h2>}
                     {showNavigation && (
                         <div className="flex space-x-2 md:space-x-4">
                             <button

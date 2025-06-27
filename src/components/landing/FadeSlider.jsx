@@ -59,10 +59,10 @@ export default function FadeSlider() {
                             quality={100}
                             sizes="100vw"
                         />
-                        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex justify-center w-full">
+                        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex justify-center w-full md:w-auto  md:left-50 md:translate-x-0 md:justify-center md:items-center">
                             <Link
                                 href={slide.btnLink}
-                                className="flex items-center px-4 py-2 md:px-6 md:py-3 uppercase bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0dc] transition-colors text-sm md:text-md shadow-lg"
+                                className="flex items-center px-4 py-2 md:px-6 md:py-3 uppercase bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0dc] transition-colors text-sm md:text-md shadow-lg mx-auto"
                             >
                                 {slide.btnText || 'Learn More'}
                             </Link>
