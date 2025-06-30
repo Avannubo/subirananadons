@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from 'framer-motion';
 import ProductCard from "@/components/products/product-card";
 import ProductQuickView from "@/components/products/product-quick-view";
@@ -438,9 +437,9 @@ export default function BrandsPage() {
                                             value={sortBy}
                                         >
                                             <option value="default">Por defecto</option>
-                                                <option value="price-asc">Precio ↑</option>
-                                                <option value="price-desc">Precio ↓</option>
-                                                <option value="name-asc">Nombre A-Z</option>
+                                            <option value="price-asc">Precio ↑</option>
+                                            <option value="price-desc">Precio ↓</option>
+                                            <option value="name-asc">Nombre A-Z</option>
                                             <option value="newest">Más nuevos</option>
                                         </select>
                                     </>

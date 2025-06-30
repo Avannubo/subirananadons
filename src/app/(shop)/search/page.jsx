@@ -292,7 +292,7 @@ export default function SearchPage() {
         <ShopLayout>
             {/* Header with Search Bar */}
             <motion.div
-                className="relative w-full h-[300px] bg-gray-100"
+                className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -303,49 +303,47 @@ export default function SearchPage() {
                     fill
                     className="object-cover"
                 />
-                <div className="absolute inset-0 flex flex-col mt-14 items-center justify-center space-y-6">
-                    {/* <motion.h1
-                        className="text-4xl font-bold text-zinc-900"
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <motion.h1
+                        className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg"
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
                     >
-                        Buscar Productos
-                    </motion.h1> */}
-                    <motion.div
-                        className="w-full max-w-2xl px-4"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.3, duration: 0.5 }}
-                    >
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Buscar productos..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full focus:bg-white px-6 bg-[#FFFFFF50] py-4 rounded-full border-2 border-gray-200 focus:border-[#00B0C8] focus:outline-none text-lg"
-                            />
-                            <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </motion.div>
+                        Buscar
+                    </motion.h1>
                 </div>
             </motion.div>
-            <div className="container mx-auto px-4 py-8">
-                {/* Filter Button for mobile */}
-                <div className="md:hidden flex justify-end mb-4">
-                    <button
-                        className="px-4 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition"
-                        onClick={() => setIsFilterModalOpen(true)}
-                    >
-                        Filtrar
-                    </button>
+            <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-4 sm:py-8 rounded-t-2xl shadow-sm mx-auto">
+                {/* Search bar and filter button row */}
+                <div className="flex  flex-row sm:items-center gap-2 mb-4">
+                    <div className="relative flex-1">
+                        <input
+                            type="text"
+                            placeholder="Buscar productos..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full focus:bg-white p-2 bg-[#FFFFFF80] rounded-xl border border-gray-200 focus:border-[#00B0C8] focus:outline-none text-base sm:text-lg shadow-sm"
+                        />
+                        <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                    {/* Filter Button for mobile */}
+                    <div className="md:hidden flex justify-end">
+                        <button
+                            className="px-4 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition"
+                            onClick={() => setIsFilterModalOpen(true)}
+                        >
+                            Filtrar
+                        </button>
+                    </div>
                 </div>
-                <div className="flex flex-col md:flex-row gap-8">
+                {/* Main content: sidebar + products */}
+                <div className="flex flex-col md:flex-row gap-4 sm:gap-8">
                     {/* Filters Sidebar (desktop) */}
                     <motion.div
                         className="hidden md:block w-full md:w-1/4"
@@ -575,12 +573,12 @@ export default function SearchPage() {
                     >
                         {/* Controls */}
                         <motion.div
-                            className="flex justify-between items-center mb-6"
+                            className="flex justify-between items-center mb-2"
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5, duration: 0.5 }}
                         >
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 ${viewMode === 'grid' ? 'text-[#00B0C8]' : 'text-gray-400'}`}
@@ -599,16 +597,16 @@ export default function SearchPage() {
                                 </button>
                             </div>
                             <div className="flex items-center">
-                                <span className="mr-2 text-sm text-gray-500">Ordenar por:</span>
+                                <span className="mr-2 text-sm text-gray-800">Ordenar por:</span>
                                 <select
-                                    className="border rounded-md py-1 px-2 text-sm"
+                                    className="border border-gray-600 rounded-md py-1 px-2 text-sm"
                                     onChange={(e) => setSortBy(e.target.value)}
                                     value={sortBy}
-                                >
+                                > 
                                     <option value="default">Por defecto</option>
-                                    <option value="price-asc">Precio: menor a mayor</option>
-                                    <option value="price-desc">Precio: mayor a menor</option>
-                                    <option value="name-asc">Nombre</option>
+                                    <option value="price-asc">Precio ↑</option>
+                                    <option value="price-desc">Precio ↓</option>
+                                    <option value="name-asc">Nombre A-Z</option>
                                     <option value="newest">Más nuevos</option>
                                 </select>
                             </div>

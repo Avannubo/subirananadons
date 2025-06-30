@@ -1,12 +1,12 @@
 'use client';
-import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
-import ProductCard from "@/components/products/product-card";
-import ProductQuickView from "@/components/products/product-quick-view";
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchProducts, formatProduct } from '@/services/ProductService';
+import ShopLayout from "@/components/Layouts/shop-layout";
+import ProductCard from "@/components/products/product-card";
 import { useSearchParams, useRouter } from 'next/navigation';
+import ProductQuickView from "@/components/products/product-quick-view";
+import { fetchProducts, formatProduct } from '@/services/ProductService';
 // Nested Menu Structure for Productos
 const productMenuTree = {
     label: "Productos",

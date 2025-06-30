@@ -42,7 +42,7 @@ export default function ContactPage() {
         <ShopLayout>
             {/* Hero Section */}
             <motion.div
-                className="relative w-full h-[40vh] bg-gray-100"
+                className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -55,10 +55,10 @@ export default function ContactPage() {
                     priority
                 />
                 {/* Overlay for contrast */}
-                <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
-                <div className="absolute inset-0 flex items-center justify-center z-20 mt-30">
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                <div className="absolute inset-0 flex items-center justify-center z-20">
                     <motion.h1
-                        className="text-4xl font-bold text-white mb-6"
+                        className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg"
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
