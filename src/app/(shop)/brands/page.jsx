@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import ProductCard from "@/components/products/product-card";
-import ProductQuickView from "@/components/products/product-quick-view"; 
+import ProductQuickView from "@/components/products/product-quick-view";
 // Helper function to parse price
 const parsePrice = (price) => {
     if (typeof price === 'string') {
@@ -205,40 +205,24 @@ export default function BrandsPage() {
     // Generate pagination numbers
     const getPaginationNumbers = () => {
         const pages = [];
-        const maxPagesToShow = 5;
+        const maxPagesToShow = 2; // Show 1 or 2 page numbers only
         if (totalPages <= maxPagesToShow) {
-            // Show all pages if there are fewer than maxPagesToShow
             for (let i = 1; i <= totalPages; i++) {
                 pages.push(i);
             }
         } else {
             // Always show first page
             pages.push(1);
-            // Calculate start and end of page numbers around current page
-            let startPage = Math.max(2, currentPage - 2);
-            let endPage = Math.min(totalPages - 1, currentPage + 2);
-            // Adjust if we're near the start
-            if (currentPage <= 3) {
-                endPage = Math.min(totalPages - 1, 5);
-            }
-            // Adjust if we're near the end
-            if (currentPage >= totalPages - 2) {
-                startPage = Math.max(2, totalPages - 4);
-            }
-            // Add ellipsis if there's a gap after first page
-            if (startPage > 2) {
+            // Show current page if not first or last
+            if (currentPage > 2 && currentPage < totalPages) {
                 pages.push('...');
-            }
-            // Add middle pages
-            for (let i = startPage; i <= endPage; i++) {
-                pages.push(i);
-            }
-            // Add ellipsis if there's a gap before last page
-            if (endPage < totalPages - 1) {
-                pages.push('...');
+                pages.push(currentPage);
+            } else if (currentPage === 2) {
+                pages.push(2);
             }
             // Always show last page
             if (totalPages > 1) {
+                if (currentPage < totalPages - 1) pages.push('...');
                 pages.push(totalPages);
             }
         }
@@ -264,7 +248,7 @@ export default function BrandsPage() {
         } else {
             return (
                 <div className="w-full flex items-start animate-pulse bg-white p-4 rounded-lg shadow-sm">
-                    <div className="w-1/4 h-40 bg-gray-200 rounded-lg mr-4"></div>
+                    <div className="w-1/4 lg:max-h-[65vh] bg-gray-200 rounded-lg mr-4"></div>
                     <div className="flex-1">
                         <div className="w-2/3 h-6 bg-gray-200 rounded mb-3"></div>
                         <div className="w-1/4 h-5 bg-gray-200 rounded mb-4"></div>
@@ -280,7 +264,7 @@ export default function BrandsPage() {
         <ShopLayout>
             {/* Header Image */}
             <motion.div
-                className="relative w-full h-[40vh] bg-gray-100"
+                className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -292,10 +276,10 @@ export default function BrandsPage() {
                     className="object-cover"
                 />
                 {/* Overlay for text contrast */}
-                <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
                 <div className="absolute inset-0 flex items-center justify-center z-20">
                     <motion.h1
-                        className="text-4xl font-bold text-white mt-30"
+                        className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg"
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
@@ -304,18 +288,18 @@ export default function BrandsPage() {
                     </motion.h1>
                 </div>
             </motion.div>
-            <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
-                <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+            <div className="container mx-auto px-2 sm:px-4 py-4 ">
+                <div className="flex flex-col lg:flex-row gap-2  ">
                     {/* Brands Sidebar */}
                     <motion.div
-                        className="w-full md:w-1/4 lg:w-1/6 mb-6 md:mb-0"
+                        className="w-full lg:w-1/6 mb-2 md:mb-0"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
                     >
                         <div className="sticky top-24 bg-white">
-                            <h2 className="font-medium text-lg mb-4 px-4">Marcas</h2>
-                            <div className="max-h-[calc(100vh-650px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                            <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">Marcas</h2>
+                            <div className="hidden lg:block max-h-[calc(100vh-650px)] lg:max-h-[65vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                 <ul className="space-y-1">
                                     {/* All Products option - always show this */}
                                     {!brandsLoading ? (
@@ -391,23 +375,37 @@ export default function BrandsPage() {
                                     )}
                                 </ul>
                             </div>
+                            {/* Brand selection dropdown for mobile and tablet (up to lg) */}
+                            <div className="block lg:hidden w-full">
+                                <select
+                                    className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition"
+                                    value={selectedBrand || 'all'}
+                                    onChange={e => handleBrandSelect(e.target.value)}
+                                    disabled={brandsLoading}
+                                >
+                                    <option value="all">Todas las marcas</option>
+                                    {brands.map((brand) => (
+                                        <option key={brand._id} value={brand.name}>{brand.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </motion.div>
                     {/* Products Section */}
                     <motion.div
-                        className="w-full md:w-3/4 lg:w-5/6"
+                        className="w-full  lg:w-5/6"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
                     >
                         {/* Controls */}
                         <motion.div
-                            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
+                            className="flex flex-row justify-between gap-2"
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5, duration: 0.5 }}
                         >
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center">
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 ${viewMode === 'grid' ? 'text-[#00B0C8]' : 'text-gray-400'}`}
@@ -425,7 +423,7 @@ export default function BrandsPage() {
                                     </svg>
                                 </button>
                             </div>
-                            <div className="flex items-center w-full sm:w-auto">
+                            <div className="flex flex-row justify-end items-center w-full">
                                 {loading ? (
                                     <div className="flex items-center animate-pulse">
                                         <div className="h-4 w-28 bg-gray-200 rounded mr-2"></div>
@@ -440,9 +438,9 @@ export default function BrandsPage() {
                                             value={sortBy}
                                         >
                                             <option value="default">Por defecto</option>
-                                            <option value="price-asc">Precio: menor a mayor</option>
-                                            <option value="price-desc">Precio: mayor a menor</option>
-                                            <option value="name-asc">Nombre</option>
+                                                <option value="price-asc">Precio ↑</option>
+                                                <option value="price-desc">Precio ↓</option>
+                                                <option value="name-asc">Nombre A-Z</option>
                                             <option value="newest">Más nuevos</option>
                                         </select>
                                     </>
@@ -453,7 +451,7 @@ export default function BrandsPage() {
                         {loading ? (
                             <div className="h-5 w-40 bg-gray-200 rounded animate-pulse mb-4"></div>
                         ) : (
-                            <p className="text-sm text-gray-500 mb-4">
+                            <p className="text-sm text-gray-500 mb-4 p-2">
                                 Mostrando {filteredProducts.length} productos de {totalItems}
                                 {selectedBrand !== 'all' ? ` de ${selectedBrand}` : ''}
                             </p>

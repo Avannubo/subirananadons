@@ -463,10 +463,46 @@ export default function Page() {
         }
         return pages;
     };
+    // Build a flat list of all categories for the mobile dropdown, with parent > child structure
+    // (removed duplicate allCategories declaration)
+    // Handler for mobile dropdown category change
+    // (removed duplicate handleMobileCategoryChange declaration)
+    // Flatten category tree for mobile dropdown: [{ label: 'Parent > Child', value: 'Child' }, ...]
+    function flattenCategories(node, parentPath = []) {
+        let flat = [];
+        const currentPath = [...parentPath, node.label];
+        if (!node.submenu || node.submenu.length === 0) {
+            flat.push({ label: currentPath.join(' > '), value: node.label });
+        } else {
+            node.submenu.forEach(sub => {
+                flat = flat.concat(flattenCategories(sub, currentPath));
+            });
+        }
+        return flat;
+    }
+    // Memoize all categories for dropdown
+    const allCategories = useMemo(() => flattenCategories(productMenuTree), []);
+    // Handler for mobile dropdown change
+    const handleMobileCategoryChange = (e) => {
+        const selectedLabel = e.target.value;
+        // Find the path for the selected label
+        const found = findCategoryAndPath(productMenuTree, selectedLabel);
+        if (found) {
+            setCategoryPath(found.path);
+            // Update URL params
+            const params = new URLSearchParams(searchParams);
+            if (selectedLabel === productMenuTree.label) {
+                params.delete('category');
+            } else {
+                params.set('category', selectedLabel);
+            }
+            router.push(`/products?${params.toString()}`);
+        }
+    };
     return (
         <ShopLayout>
             {/* Banner with overlay and white title, matching brands page */}
-            <div className="relative w-full h-[40vh] flex flex-col justify-center items-center">
+            <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
                 <Image
                     src={bannerUrl || "/assets/images/bg-beagrumb.jpg"}
                     alt="banner"
@@ -475,12 +511,12 @@ export default function Page() {
                     priority
                 />
                 {/* Overlay for contrast */}
-                <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
                 <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <h1 className="text-4xl font-bold text-white mt-30">Tienda</h1>
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Tienda</h1>
                 </div>
             </div>
-            <div className="container w-full max-w-[1500px] bg-white px-2 sm:px-4 py-4 sm:py-8">
+            <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-8 rounded-t-2xl mt-4 sm:mt-0 shadow-sm">
                 {/* Active Brand Filter Indicator */}
                 {activeBrandFilter && (
                     <div className="mb-4 bg-[#00B0C8]/10 px-4 py-3 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
@@ -505,8 +541,8 @@ export default function Page() {
                     </div>
                 )}
                 {/* Breadcrumbs */}
-                <nav aria-label="Breadcrumb" className="mb-6 pl-2 overflow-x-auto">
-                    <ol className="flex items-center space-x-1 text-md text-gray-500 flex-wrap min-w-[300px]">
+                <nav aria-label="Breadcrumb" className="hidden lg:flex mb-2 pl-2 overflow-x-auto">
+                    <ol className="flex items-center space-x-1 text-sm sm:text-md text-gray-500 flex-wrap min-w-[200px]">
                         {categoryPath.map((label, index) => (
                             <li key={index} className="flex items-center">
                                 {index > 0 && (
@@ -523,9 +559,22 @@ export default function Page() {
                         ))}
                     </ol>
                 </nav>
-                <div className="flex flex-col lg:flex-row gap-8">
+                <div className="flex flex-col lg:flex-row gap-2">
                     {/* Category/Subcategory List Sidebar */}
-                    <aside className="w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 mb-6 lg:mb-0">
+                    {/* Mobile dropdown visible only on mobile, sidebar visible only on sm+ */}
+                    <div className="block lg:hidden w-full mb-4 ">
+                        <select
+                            id="mobile-category-select"
+                            className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition"
+                            value={currentCategoryLabel}
+                            onChange={handleMobileCategoryChange}
+                        >
+                            {allCategories.map(cat => (
+                                <option key={cat.value} value={cat.value}>{cat.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <aside className="hidden lg:flex w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 mb-6 lg:mb-0">
                         {/*   <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
                             {currentCategoryLabel === productMenuTree.label ? "Categorías" : `Subcategorías de ${categoryPath[categoryPath.length - 2] || "Productos"}`}
                         </h3> */}
@@ -569,43 +618,81 @@ export default function Page() {
                     </aside>
                     {/* Product Grid Area */}
                     <main className="w-full flex-grow">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 flex-wrap gap-4">
-                            <div className="flex items-center space-x-2">
-                                {/* Grid/List view toggle icons */}
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                                </button>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 flex-wrap gap-2">
+                            {/* Mobile: sort and view controls stacked, desktop: inline */}
+                            <div className="flex flex-row w-full justify-between items-center gap-2 sm:hidden  ">
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => setViewMode('grid')}
+                                        className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('list')}
+                                        className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                    </button>
+                                </div>
+                                <div className="flex items-center">
+                                    <label htmlFor="sort-by" className="mr-1 text-gray-600 text-xs whitespace-nowrap">Ordenar:</label>
+                                    <select
+                                        id="sort-by"
+                                        className="border border-gray-300 rounded p-1 text-xs text-gray-600"
+                                        value={sortOrder}
+                                        onChange={handleSortChange}
+                                    >
+                                        <option value="sales-desc">Ventas ↓</option>
+                                        <option value="price-asc">Precio ↑</option>
+                                        <option value="price-desc">Precio ↓</option>
+                                        <option value="name-asc">Nombre A-Z</option>
+                                        <option value="name-desc">Nombre Z-A</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto gap-2 sm:gap-0">
+                            {/* Desktop controls */}
+                            <div className="hidden sm:flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto gap-2 sm:gap-0">
+                                <div className="flex items-center space-x-2">
+                                    <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">Ordenar por:</label>
+                                    <select
+                                        id="sort-by"
+                                        className="border border-gray-300 w-full text-start rounded p-2 text-gray-600"
+                                        value={sortOrder}
+                                        onChange={handleSortChange}
+                                    >
+                                        <option value="sales-desc">Ventas ↓</option>
+                                        <option value="price-asc">Precio ↑</option>
+                                        <option value="price-desc">Precio ↓</option>
+                                        <option value="name-asc">Nombre A-Z</option>
+                                        <option value="name-desc">Nombre Z-A</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div className="hidden sm:flex items-center justify-between space-x-4 w-full sm:w-auto mt-2 sm:mt-0">
+                                <div className="flex items-center space-x-2">
+                                    {/* Grid/List view toggle icons */}
+                                    <button
+                                        onClick={() => setViewMode('grid')}
+                                        className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('list')}
+                                        className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                    </button>
+                                </div>
                                 {!loading && totalProducts > 0 && (
                                     <span className="text-sm text-gray-500 mr-0 sm:mr-4">
                                         Mostrando {(currentPage - 1) * productsPerPage + 1}-
                                         {Math.min(currentPage * productsPerPage, totalProducts)} de {totalProducts} productos
                                     </span>
                                 )}
-                                {/* Sort dropdown */}
-                                <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">Ordenar por:</label>
-                                <select
-                                    id="sort-by"
-                                    className="border border-gray-300 rounded p-2 text-gray-600"
-                                    value={sortOrder}
-                                    onChange={handleSortChange}
-                                >
-                                    <option value="sales-desc">Ventas en orden decreciente</option>
-                                    <option value="price-asc">Precio: más bajo primero</option>
-                                    <option value="price-desc">Precio: más alto primero</option>
-                                    <option value="name-asc">Nombre: A-Z</option>
-                                    <option value="name-desc">Nombre: Z-A</option>
-                                </select>
                             </div>
                         </div>
                         {/* Loading state */}

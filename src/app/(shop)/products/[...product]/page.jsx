@@ -277,8 +277,8 @@ export default function Page() {
         <ShopLayout>
             <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 mt-20">
                 {/* Breadcrumb */}
-                <nav className="mb-6 sm:mb-8 overflow-x-auto">
-                    <ol className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
+                <nav className="mb-6 sm:mb-8 overflow-x-auto mt-10">
+                    <ol className="hidden md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
                         <li><a href="/products" className="hover:text-gray-700">Productos</a></li>
                         <li><span className="mx-2">/</span></li>
                         <li><a href={`/products?category=${encodeURIComponent(product.category)}`} className="hover:text-gray-700">{product.category}</a></li>
@@ -376,7 +376,7 @@ export default function Page() {
                                 </ul>
                             </div>
                             {/* Quantity Selector */}
-                            <div className="flex flex-wrap items-center space-x-4 ">
+                            <div className="flex flex-wrap items-center space-x-2 ">
                                 <span className="text-gray-700">Cantidad:</span>
                                 <div className="flex items-center border border-gray-300 rounded-md mt-2 sm:mt-0">
                                     <button
@@ -402,7 +402,7 @@ export default function Page() {
                                 Añadir al carrito
                             </button>
                             {/* Wishlist Button */}
-                            <button className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-2 mt-2">
+                            <button className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center   mt-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>

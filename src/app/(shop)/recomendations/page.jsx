@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import { motion } from 'framer-motion';
 import Image from "next/image";
@@ -159,6 +159,23 @@ const recommendations = {
 
 export default function RecommendationsPage() {
     const [selectedCategory, setSelectedCategory] = useState('TODOS');
+    const [bannerImage, setBannerImage] = useState(null);
+
+    useEffect(() => {
+        const fetchBanner = async () => {
+            try {
+                const res = await fetch('/api/portimg/active');
+                if (!res.ok) throw new Error('Failed to fetch banner');
+                const data = await res.json();
+                if (data && data.imageUrl) {
+                    setBannerImage(data.imageUrl);
+                }
+            } catch (err) {
+                console.error('Error fetching banner:', err);
+            }
+        };
+        fetchBanner();
+    }, []);
 
     return (
         <ShopLayout>
@@ -170,33 +187,32 @@ export default function RecommendationsPage() {
                 transition={{ duration: 0.5 }}
             >
                 <Image
-                    src="/assets/images/bg-beagrumb.jpg"
+                    src={bannerImage || "/assets/images/bg-beagrumb.jpg"}
                     alt="Background"
                     fill
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 text-zinc-900 mt-20">
-                    <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
-                        <motion.h1
-                            className="text-2xl md:text-5xl font-bold mb-6"
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.2, duration: 0.5 }}
-                        >
-                            Recomendaciones
-                        </motion.h1>
-                        <motion.div
-                            className="w-full max-w-2xl"
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.4, duration: 0.5 }}
-                        >
-                            <p className="text-lg mb-4">
-                                A continuación un listado de los principales productos que le ayudarán a crear su lista de nacimiento.
-                            </p>
-                        </motion.div>
-                    </div>
+                <div className="absolute inset-0 bg-black/30" />
+                <div className="absolute inset-0 text-zinc-900 mt-30 flex flex-col items-center justify-center text-center">
+                    <motion.h1
+                        className="text-2xl md:text-5xl font-bold mb-6 text-white"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                    >
+                        Recomendaciones
+                    </motion.h1>
+                    <motion.div
+                        className="w-full max-w-2xl"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                    >
+                        <p className="text-lg mb-4 text-white drop-shadow">
+                            A continuación un listado de los principales productos que le ayudarán a crear su lista de nacimiento.
+                        </p>
+                    </motion.div>
                 </div>
             </motion.div>
 
@@ -260,4 +276,4 @@ export default function RecommendationsPage() {
             </div>
         </ShopLayout>
     );
-} 
+}

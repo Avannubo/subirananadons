@@ -34,14 +34,16 @@ export default function ProductQuickView({ product, onClose }) {
     if (!product) return null;
     const incrementQuantity = () => setQuantity(q => q + 1);
     const decrementQuantity = () => setQuantity(q => Math.max(1, q - 1)); // Prevent quantity < 1
-    // Get available images for thumbnails
-    const thumbnailImages = [
-        product.imageUrl,
-        product.imageUrlHover,
-        // Add more actual image URLs from product data if available
-        // product.image3,
-        // product.image4,
-    ].filter(Boolean).slice(0, 4); // Filter out falsy values and limit
+    // Get available images for thumbnails (remove duplicates)
+    const thumbnailImages = Array.from(
+        new Set([
+            product.imageUrl,
+            product.imageUrlHover,
+            // Add more actual image URLs from product data if available
+            // product.image3,
+            // product.image4,
+        ].filter(Boolean))
+    ).slice(0, 4); // Filter out falsy values, remove duplicates, and limit
     const handleThumbnailClick = (imageUrl) => {
         setSelectedImage(imageUrl);
     };
@@ -58,7 +60,7 @@ export default function ProductQuickView({ product, onClose }) {
     return (
         <AnimatePresence>
             <motion.div
-                className="fixed inset-0 bg-[#00000070] z-40 flex items-center justify-center p-4"
+                className="fixed inset-0 bg-[#00000050] z-40 flex items-center justify-center p-2 mt-10 sm:p-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -67,94 +69,99 @@ export default function ProductQuickView({ product, onClose }) {
                 role="dialog"
             >
                 <motion.div
-                    className="bg-white rounded-lg shadow-xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col relative"
+                    className="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-4xl max-h-[95vh] flex flex-col relative"
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                 >
-                    {/* Close Button - Moved outside the scrollable content div */}
+                    {/* Close Button */}
                     <button
                         onClick={onClose}
-                        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 z-50 bg-white rounded-full p-1"
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 z-50 bg-white rounded-full p-1 sm:top-3 sm:right-3"
                         aria-label="Cerrar vista rápida"
                     >
                         <X className="h-6 w-6" />
                     </button>
                     {/* Modal Content */}
-                    <div className="flex flex-col md:flex-row overflow-y-auto pt-8">
+                    <div className="flex flex-col md:flex-row overflow-y-auto pt-8 md:pt-8">
                         {/* Image Section */}
-                        <div className="w-full md:w-1/2 pb-6 px-6 flex flex-col items-center">
-                            <div className="relative w-full h-80 mb-4">
+                        <div className="w-full md:w-1/2 pb-4 px-2 sm:px-6 flex flex-col items-center">
+                            <div className="relative w-full h-56 sm:h-80 mb-4 mt-2">
                                 <Image
-                                    key={selectedImage} // Add key to force re-render on src change (for potential transitions)
-                                    src={selectedImage || '/placeholder.png'} // Use selectedImage state, provide fallback
+                                    key={selectedImage}
+                                    src={selectedImage || '/placeholder.png'}
                                     alt={product.name}
-                                    layout="fill"
-                                    objectFit="cover"
+                                    fill
+                                    className="rounded-lg object-contain"
                                     priority
-                                    className="rounded-lg"
                                 />
                             </div>
-                            {/* Thumbnails (Optional) */}
+                            {/* Thumbnails */}
                             <div className="flex space-x-2 justify-center">
                                 {thumbnailImages.map((thumb, index) => (
                                     <div
                                         key={index}
-                                        className={`relative w-16 h-16 border rounded overflow-hidden cursor-pointer ${selectedImage === thumb ? 'border-[#00B0C8] border-2' : 'border-gray-200'}`}
+                                        className={`relative w-12 h-12 sm:w-16 sm:h-16 border rounded overflow-hidden cursor-pointer ${selectedImage === thumb ? 'border-[#00B0C8] border-2' : 'border-gray-200'}`}
                                         onClick={() => handleThumbnailClick(thumb)}
                                     >
                                         <Image
                                             src={thumb}
                                             alt={`Thumbnail ${index + 1}`}
-                                            layout="fill"
-                                            objectFit="cover"
+                                            fill
+                                            className="object-cover"
                                         />
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                        {/* Details Section */}
-                        <div className="w-full md:w-1/2 p-6 flex flex-col justify-between">
+                        </div> 
+                        <div className="w-full md:w-1/2 p-4 sm:p-6 flex flex-col justify-between">
                             <div>
-                                <h2 className="text-2xl font-semibold text-gray-800 mb-2">{product.name}</h2>
-                                <p className="text-3xl font-bold text-gray-900 mb-3">{product.price}</p>
-                                <p className="text-sm text-gray-500 mb-4">Impuestos incluidos</p>
-                                <p className="text-sm text-gray-600 mb-6 leading-relaxed">{product.description}</p>
+                                <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">{product.name}</h2>
+                                <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{product.price}</p>
+                                <p className="text-xs sm:text-sm text-gray-500 mb-4">Impuestos incluidos</p>
+                                <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">
+                                    {product.description?.length > 0
+                                        ? product.description
+                                        : ''}
+                                    {product.description && product.description.length > 0 ? '...' : ''}
+                                </p>
                             </div>
                             {/* Actions */}
                             <div className="mt-auto">
                                 <div className="flex items-center mb-4">
-                                    <span className="text-sm font-medium text-gray-600 mr-4 uppercase">Cantidad</span>
+                                    <span className="text-xs sm:text-sm font-medium text-gray-600 mr-4 uppercase">Cantidad</span>
                                     <div className="flex items-center border border-gray-300 rounded">
-                                        <button onClick={decrementQuantity} className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l focus:outline-none">
+                                        <button onClick={decrementQuantity} className="px-2 sm:px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l focus:outline-none">
                                             <Minus className="h-4 w-4" />
                                         </button>
                                         <input
                                             type="number"
                                             value={quantity}
-                                            readOnly // Or implement onChange if direct input is needed
-                                            className="w-12 text-center border-l border-r border-gray-300 focus:outline-none"
+                                            readOnly
+                                            className="w-10 sm:w-12 text-center border-l border-r border-gray-300 focus:outline-none"
                                         />
-                                        <button onClick={incrementQuantity} className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r focus:outline-none">
+                                        <button onClick={incrementQuantity} className="px-2 sm:px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r focus:outline-none">
                                             <Plus className="h-4 w-4" />
                                         </button>
                                     </div>
                                 </div>
-                                <div className='flex flex-row  space-x-3'>
-                                    <button className="w-full bg-black text-white uppercase p-2 rounded font-semibold hover:bg-gray-800 transition duration-200 mb-3">
+                                {/* Lista button */}
+                                {/* <div className='mb-3'>
+                                    <button
+                                        onClick={handleAddToWishlist}
+                                        className="w-full bg-gray-400 text-white uppercase p-2 py-3 rounded font-semibold transition duration-200 hover:bg-gray-500 mb-2"
+                                    >
+                                        Añadir a mi lista
+                                    </button>
+                                </div> */}
+                                {/* Comprar and Ver detalles side by side */}
+                                <div className="flex flex-row gap-2 mb-1">
+                                    <button className="w-1/2 bg-black text-white uppercase py-3 rounded font-semibold hover:bg-gray-800 transition duration-200">
                                         Ver detalles
                                     </button>
                                     <button
-                                        onClick={handleAddToWishlist}
-                                        className="w-full bg-gray-400 text-white uppercase p-2 rounded font-semibold transition duration-200 mb-3 hover:bg-gray-500"
-                                        >
-                                        Añadir a mi lista
-                                    </button> 
-                                </div>
-                                <div>
-                                    <button
-                                        className="w-full bg-black text-white uppercase py-3 rounded font-semibold hover:bg-gray-800 transition duration-200 mb-3"
+                                        className="w-1/2 bg-[#00B0C8] text-white uppercase py-3 rounded font-semibold hover:bg-[#0090a8] transition duration-200"
                                     >
                                         Comprar
                                     </button>

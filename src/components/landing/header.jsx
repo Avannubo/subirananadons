@@ -11,11 +11,11 @@ export default function Page() {
     // Calculate total quantity of items in cart
     const cartItemsCount = cartItems ? cartItems.reduce((total, item) => total + item.quantity, 0) : 0;
     return (
-        <div className="fixed top-0 z-50 w-full bg-white shadow-md px-2 md:px-5 py-3 md:py-5">
+        <div className="fixed top-0 z-50 w-full bg-white shadow-md px-2 md:px-5 py-2 ">
             <div className="flex flex-col justify-center w-full">
                 <div className="w-full flex flex-row justify-between items-center">
                     {/* Hamburger menu */}
-                    <div className="flex justify-between items-center px-0 md:px-4 py-2 md:py-3 w-[90px] md:w-[300px]">
+                    <div className="flex justify-between items-center px-0 md:px-4 py-2   w-[90px] md:w-[300px]">
                         <MenuVertical />
                     </div>
                     {/* Logo */}

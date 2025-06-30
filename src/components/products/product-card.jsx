@@ -209,7 +209,12 @@ export default function ProductCard({
                     <div className="flex flex-col justify-start">
                         <h3 className="font-semibold text-xl mb-2 whitespace-nowrap overflow-hidden text-ellipsis w-full" title={product.name}>{product.name}</h3>
                         <p className="text-gray-700 text-lg mb-3">{product.price}</p>
-                        <p className="text-gray-600 text-sm">{product.description}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">
+                            {product.description?.length > 0
+                                ? product.description
+                                : ''}
+                            {product.description && product.description.length > 0 ? '...' : ''}
+                        </p>
                     </div>
                 </Link>
             </motion.div>

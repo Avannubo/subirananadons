@@ -25,6 +25,7 @@ export default function SearchPage() {
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [viewMode, setViewMode] = useState('grid'); // Add view mode state
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false); // Add quick view modal state
+    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false); // Add filter modal state
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -335,11 +336,19 @@ export default function SearchPage() {
                 </div>
             </motion.div>
             <div className="container mx-auto px-4 py-8">
-                {/* Removing breadcrumb section */}
+                {/* Filter Button for mobile */}
+                <div className="md:hidden flex justify-end mb-4">
+                    <button
+                        className="px-4 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition"
+                        onClick={() => setIsFilterModalOpen(true)}
+                    >
+                        Filtrar
+                    </button>
+                </div>
                 <div className="flex flex-col md:flex-row gap-8">
-                    {/* Filters Sidebar */}
+                    {/* Filters Sidebar (desktop) */}
                     <motion.div
-                        className="w-full md:w-1/4"
+                        className="hidden md:block w-full md:w-1/4"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
@@ -448,6 +457,115 @@ export default function SearchPage() {
                             </div>
                         </div>
                     </motion.div>
+                    {/* Filter Modal (mobile) */}
+                    {isFilterModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000050] bg-opacity-40">
+                            <div className="bg-white rounded-lg p-6 w-11/12 max-w-sm relative animate-fadeInUp">
+                                <button
+                                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                                    onClick={() => setIsFilterModalOpen(false)}
+                                    aria-label="Cerrar"
+                                >
+                                    &times;
+                                </button>
+                                {/* Filter content here (copied from sidebar) */}
+                                <div>
+                                    <div className="mb-8">
+                                        <h3 className="text-lg font-medium mb-4">Categoría</h3>
+                                        <select
+                                            value={selectedCategory}
+                                            onChange={(e) => setSelectedCategory(e.target.value)}
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                        >
+                                            <option value="">Todas las categorías</option>
+                                            {categories.map((category) => (
+                                                <React.Fragment key={category.id}>
+                                                    <option value={category.originalName || category.name}>
+                                                        {category.name} {category.count > 0 && `(${category.count})`}
+                                                    </option>
+                                                    {category.children?.map(child => (
+                                                        <option
+                                                            key={child.id}
+                                                            value={child.originalName}
+                                                            className="pl-4"
+                                                        >
+                                                            {child.name}
+                                                        </option>
+                                                    ))}
+                                                </React.Fragment>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="mb-8">
+                                        <h3 className="text-lg font-medium mb-4">Marca</h3>
+                                        <select
+                                            value={selectedBrand}
+                                            onChange={(e) => setSelectedBrand(e.target.value)}
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                        >
+                                            <option value="">Todas las marcas</option>
+                                            {brands.map((brand) => (
+                                                <option key={brand._id} value={brand.name}>
+                                                    {brand.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="mb-8">
+                                        <h3 className="text-lg font-medium mb-4">Precio</h3>
+                                        <div className="px-2 py-4">
+                                            <Range
+                                                step={10}
+                                                min={0}
+                                                max={1000}
+                                                values={priceRange}
+                                                onChange={setPriceRange}
+                                                renderTrack={({ props, children }) => {
+                                                    const { key, ...restProps } = props;
+                                                    return (
+                                                        <div
+                                                            key={key}
+                                                            {...restProps}
+                                                            className="h-1 w-full bg-gray-200 rounded-full"
+                                                        >
+                                                            <div
+                                                                className="h-1 bg-[#00B0C8]"
+                                                                style={{
+                                                                    width: `${((priceRange[1] - priceRange[0]) / 1000) * 100}%`,
+                                                                    left: `${(priceRange[0] / 1000) * 100}%`
+                                                                }}
+                                                            />
+                                                            {children}
+                                                        </div>
+                                                    );
+                                                }}
+                                                renderThumb={({ props }) => {
+                                                    const { key, ...restProps } = props;
+                                                    return (
+                                                        <div
+                                                            key={key}
+                                                            {...restProps}
+                                                            className="h-5 w-5 rounded-full bg-white border-2 border-[#00B0C8] focus:outline-none"
+                                                        />
+                                                    );
+                                                }}
+                                            />
+                                            <div className="flex justify-between mt-2 text-sm text-gray-600">
+                                                <span>{priceRange[0]}€</span>
+                                                <span>{priceRange[1]}€</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        className="w-full mt-2 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition"
+                                        onClick={() => setIsFilterModalOpen(false)}
+                                    >
+                                        Aplicar Filtros
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     {/* Products Section */}
                     <motion.div
                         className="w-full md:w-3/4"
