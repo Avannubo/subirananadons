@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import { motion } from 'framer-motion';
@@ -160,7 +159,6 @@ const recommendations = {
 export default function RecommendationsPage() {
     const [selectedCategory, setSelectedCategory] = useState('TODOS');
     const [bannerImage, setBannerImage] = useState(null);
-
     useEffect(() => {
         const fetchBanner = async () => {
             try {
@@ -179,9 +177,8 @@ export default function RecommendationsPage() {
 
     return (
         <ShopLayout>
-            {/* Hero Section */}
             <motion.div
-                className="relative w-full h-[400px] bg-gray-100"
+                className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -193,15 +190,16 @@ export default function RecommendationsPage() {
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 bg-black/30" />
-                <div className="absolute inset-0 text-zinc-900 mt-30 flex flex-col items-center justify-center text-center">
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
                     <motion.h1
-                        className="text-2xl md:text-5xl font-bold mb-6 text-white"
+                        className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg"
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
                     >
                         Recomendaciones
+                        
                     </motion.h1>
                     <motion.div
                         className="w-full max-w-2xl"
@@ -209,42 +207,14 @@ export default function RecommendationsPage() {
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
                     >
-                        <p className="text-lg mb-4 text-white drop-shadow">
+                        <p className="text-sm my-2 text-gray-800 text-center drop-shadow">
                             A continuación un listado de los principales productos que le ayudarán a crear su lista de nacimiento.
                         </p>
                     </motion.div>
+
                 </div>
             </motion.div>
-
             <div className="container mx-auto px-4 py-8">
-                {/* Categories Navigation */}
-                {/*
-                <div className="flex overflow-x-auto pb-4 mb-8 gap-2 scrollbar-hide sticky top-20 bg-white z-10">
-                    <button
-                        onClick={() => setSelectedCategory('TODOS')}
-                        className={`px-4 py-2 rounded-full whitespace-nowrap text-sm transition-colors ${selectedCategory === 'TODOS'
-                            ? 'bg-[#00B0C8] text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                    >
-                        TODOS
-                    </button>
-                    {Object.keys(recommendations).map((category) => (
-                        <button
-                            key={category}
-                            onClick={() => setSelectedCategory(category)}
-                            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm transition-colors ${selectedCategory === category
-                                ? 'bg-[#00B0C8] text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            {category}
-                        </button>
-                    ))}
-                </div>
-                */}
-
-                {/* Content Grid */}
                 <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
                     {Object.entries(recommendations).map(([category, items]) => (
                         <motion.div

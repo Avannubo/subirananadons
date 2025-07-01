@@ -63,7 +63,7 @@ export default function BirthListsPage() {
     return (
         <ShopLayout>
             <motion.div
-                className="relative w-full h-[40vh] bg-gray-100"
+                className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -77,48 +77,44 @@ export default function BirthListsPage() {
                     blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAEDQIHq4C7sgAAAABJRU5ErkJggg=="
                 />
                 {/* Color overlay for better contrast */}
-                <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
-                <div className="absolute inset-0 text-zinc-900 mt-30 z-20">
-                    <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
-                        <motion.h1
-                            className="text-4xl font-bold text-white mb-4"
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.2, duration: 0.5 }}
-                        >
-                            Listas de Nacimiento
-                        </motion.h1>
-                        <motion.div
-                            className="w-full max-w-2xl"
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.4, duration: 0.5 }}
-                        >
-                            <form onSubmit={handleSearch} className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Pega aquí el enlace de una lista de nacimiento"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full px-6 py-4 rounded-full border-2 border-white bg-white/90 focus:bg-white focus:border-[#00B0C8] focus:outline-none text-lg shadow-sm"
-                                />
-                                <button
-                                    type="submit"
-                                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#00B0C8] transition-colors"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </button>
-                            </form>
-                            <p className="mt-4 text-sm text-white">
-                                Ingresa el enlace completo o el ID de la lista de nacimiento para acceder a ella
-                            </p>
-                        </motion.div>
-                    </div>
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <motion.h1
+                        className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                    >
+                        Listas de Nacimiento
+                    </motion.h1>
                 </div>
             </motion.div>
-            <div className="container mx-auto px-4 py-12">
+            {/* Search bar below the banner */}
+            <div className="w-full flex flex-col items-center m-2  p-2 relative">
+                <form onSubmit={handleSearch} className="w-full max-w-2xl mx-auto flex flex-col items-center">
+                    <div className="w-full flex items-center bg-white bg-opacity-90 rounded-full shadow-md px-4 py-3 mb-2 border border-gray-200">
+                        <input
+                            type="text"
+                            placeholder="Pega aquí el enlace de una lista de nacimiento"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="flex-1 bg-transparent border-none outline-none text-lg placeholder-gray-400 px-2"
+                        />
+                        <button
+                            type="submit"
+                            className="ml-2 text-gray-500 hover:text-[#00B0C8] focus:outline-none"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <p className="text-gray-700 text-sm text-center drop-shadow-sm">
+                        Ingresa el enlace completo o el ID de la lista de nacimiento para acceder a ella
+                    </p>
+                </form>
+            </div>
+            <div className="container mx-auto p-4">
                 <div className="flex flex-col md:flex-row gap-6 mb-12">
                     <motion.div
                         className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-6 md:mb-12 text-white"

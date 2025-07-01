@@ -816,7 +816,7 @@ export default function CartPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">Envío a domicilio</p>
-                                                    <p className="text-sm text-gray-500">Entrega en 24-48 horas laborables</p>
+                                                    {/* <p className="text-sm text-gray-500">Entrega en 24-48 horas laborables</p> */}
                                                     {calculateSubtotal() >= 60 && !hasOnlyGiftItems && (
                                                         <p className="text-xs text-green-600 font-medium mt-1">Envío gratis en pedidos superiores a 60€</p>
                                                     )}
@@ -845,7 +845,7 @@ export default function CartPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">Recoger en tienda</p>
-                                                    <p className="text-sm text-gray-500">Disponible in 2-4 horas</p>
+                                                    {/* <p className="text-sm text-gray-500">Disponible in 2-4 horas</p> */}
                                                     {hasGiftItems && (
                                                         <p className="text-xs text-pink-600 font-medium mt-1">
                                                             {hasOnlyGiftItems

@@ -210,7 +210,7 @@ export default function TransportistasTab() {
                     </tbody>
                 </table>
             </div>
-            <div>
+            {/* <div>
                 <h2 className="text-xl font-semibold mb-4">Preferencias</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="p-4 rounded-lg border border-gray-200">
@@ -256,7 +256,7 @@ export default function TransportistasTab() {
                                     />
                                     <span className="bg-gray-200 px-3 py-2 rounded-r">kg</span>
                                 </div>
-                            </div> */}
+                            </div>  
                         </div>
                     </div>
                     <div className="p-4 rounded-lg border border-gray-200">
@@ -315,7 +315,9 @@ export default function TransportistasTab() {
                         Guardar Preferencias
                     </button>
                 </div>
-            </div> 
+            </div >  
+            */
+}
 
             {/* Edit Modal */}
             {showEditModal && (

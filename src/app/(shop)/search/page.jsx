@@ -315,7 +315,7 @@ export default function SearchPage() {
                     </motion.h1>
                 </div>
             </motion.div>
-            <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-4 sm:py-8 rounded-t-2xl shadow-sm mx-auto">
+            <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-4 sm:py-8 rounded-t-2xl   mx-auto">
                 {/* Search bar and filter button row */}
                 <div className="flex  flex-row sm:items-center gap-2 mb-4">
                     <div className="relative flex-1">

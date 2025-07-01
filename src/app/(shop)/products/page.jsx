@@ -28,6 +28,7 @@ const productMenuTree = {
             label: "Baño",
             submenu: [
                 { label: "Accesorios baño" },
+                { label: "Capas de baño" },
                 { label: "Kits higiene y cosmética" },
                 { label: "Cajas toallitas" },
                 { label: "Pañales y contenedores pañales" },
@@ -462,12 +463,7 @@ export default function Page() {
             pages.push(totalPages);
         }
         return pages;
-    };
-    // Build a flat list of all categories for the mobile dropdown, with parent > child structure
-    // (removed duplicate allCategories declaration)
-    // Handler for mobile dropdown category change
-    // (removed duplicate handleMobileCategoryChange declaration)
-    // Flatten category tree for mobile dropdown: [{ label: 'Parent > Child', value: 'Child' }, ...]
+    }; 
     function flattenCategories(node, parentPath = []) {
         let flat = [];
         const currentPath = [...parentPath, node.label];
@@ -516,7 +512,7 @@ export default function Page() {
                     <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Tienda</h1>
                 </div>
             </div>
-            <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-8 rounded-t-2xl mt-4 sm:mt-0 shadow-sm">
+            <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-8 rounded-t-2xl mt-4 sm:mt-0 ">
                 {/* Active Brand Filter Indicator */}
                 {activeBrandFilter && (
                     <div className="mb-4 bg-[#00B0C8]/10 px-4 py-3 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">

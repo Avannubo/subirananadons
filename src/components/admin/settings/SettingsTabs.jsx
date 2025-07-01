@@ -4,8 +4,8 @@ import TransportistasTab from "@/components/admin/settings/tabs/TransportistasTa
 import OffersTab from "@/components/admin/settings/tabs/OffersTab";
 import SliderTab from "@/components/admin/settings/tabs/SliderTab";
 import BannerTab from "@/components/admin/settings/tabs/BannerTab";
-import ProductosTab from "@/components/admin/settings/tabs/ProductosTab";
-import InformacionTab from "@/components/admin/settings/tabs/InformacionTab";
+import RecomendationTab from "@/components/admin/settings/tabs/RecomendationTab";
+import TextosLegalesTab from "@/components/admin/settings/tabs/TextosLegalesTab";
 import EmailTab from "@/components/admin/settings/tabs/EmailTab";
 import EquipoTab from "@/components/admin/settings/tabs/EquipoTab";
 import TabNavigation from "@/components/admin/shared/TabNavigation";
@@ -16,8 +16,8 @@ export default function SettingsTabs() {
         { id: 'slider', label: 'Slider Conf.' },
         { id: 'images', label: 'Ofertas Conf.' },
         { id: 'banner', label: 'Banner Img.' },
-        // { id: 'pago', label: 'Pago' },
-        // { id: 'productos', label: 'Configuración de Productos' },
+        { id: 'recomendation', label: 'Recomendation Conf.' },
+        { id: 'politicas', label: 'Textos de politicas' },
         // { id: 'informacion', label: 'Información' },
         // { id: 'rendimiento', label: 'Rendimiento' },
         // { id: 'administracion', label: 'Administración' },
@@ -51,9 +51,9 @@ export default function SettingsTabs() {
                 {activeTab === 'slider' && <SliderTab />}
                 {activeTab === 'images' && <OffersTab />}
                 {activeTab === 'banner' && <BannerTab />}
-                {/*  {activeTab === 'productos' && <ProductosTab />}
-                {activeTab === 'informacion' && <InformacionTab />}
-                {activeTab === 'email' && <EmailTab />}
+                {activeTab === 'recomendation' && <RecomendationTab />}
+                {activeTab === 'politicas' && <TextosLegalesTab />}
+                {/*{activeTab === 'email' && <EmailTab />}
                 {activeTab === 'equipo' && <EquipoTab />}
                 */}
             </div>
