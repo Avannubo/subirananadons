@@ -29,7 +29,7 @@ export default function BrandsTable() {
     const [isLoading, setIsLoading] = useState(false);
 
     // Fetch brands from the API
-    const fetchBrands = async (page = 1, limit = pagination.limit) => {
+    const fetchBrands = async (page = 1, limit = pagination.limit, search = searchTerm, enabledOnly = showEnabledOnly) => {
         try {
             setLoading(true);
             const queryParams = new URLSearchParams();
@@ -41,6 +41,8 @@ export default function BrandsTable() {
             if (!useClientPagination) {
                 queryParams.append('page', page);
                 queryParams.append('limit', limit);
+                if (search) queryParams.append('search', search);
+                if (enabledOnly) queryParams.append('enabled', 'true');
             }
 
             const response = await fetch(`/api/brands?${queryParams.toString()}`);
@@ -54,7 +56,7 @@ export default function BrandsTable() {
             // For now, we'll use client-side pagination
             if (Array.isArray(data)) {
                 setAllBrands(data);
-                applyClientPagination(data, page, limit);
+                applyClientPagination(data, page, limit, search, enabledOnly);
             } else if (data.brands && Array.isArray(data.brands)) {
                 if (data.pagination) {
                     setUseClientPagination(false);
@@ -75,13 +77,13 @@ export default function BrandsTable() {
                 } else {
                     setAllBrands(data.brands);
                     setUseClientPagination(true);
-                    applyClientPagination(data.brands, page, limit);
+                    applyClientPagination(data.brands, page, limit, search, enabledOnly);
                 }
             } else {
                 const brandsArray = data.brands || data || [];
                 setAllBrands(brandsArray);
                 setUseClientPagination(true);
-                applyClientPagination(brandsArray, page, limit);
+                applyClientPagination(brandsArray, page, limit, search, enabledOnly);
             }
         } catch (error) {
             console.error('Error fetching brands:', error);
@@ -101,22 +103,23 @@ export default function BrandsTable() {
     };
 
     // Apply client-side pagination
-    const applyClientPagination = (brandsArray, page, limit) => {
+    const applyClientPagination = (brandsArray, page, limit, customSearchTerm = null, customShowEnabledOnly = null) => {
         // Sort brands by MongoDB _id to maintain a stable order
-        // MongoDB ObjectIDs have a timestamp component that's tied to creation time
-        // This ensures brands stay in the same position even after edits
         brandsArray.sort((a, b) => {
-            // Sort by _id which is tied to creation time and immutable
             return a._id > b._id ? -1 : 1;
         });
 
+        // Use the latest search/filter values if provided, otherwise from state
+        const search = customSearchTerm !== null ? customSearchTerm : searchTerm;
+        const enabledOnly = customShowEnabledOnly !== null ? customShowEnabledOnly : showEnabledOnly;
+
         const filteredBrands = brandsArray.filter((brand) => {
-            const matchesSearch = !searchTerm ||
-                brand.id?.toString().includes(searchTerm) ||
-                brand.name?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = !search ||
+                (brand._id?.toString().toLowerCase().includes(search.toLowerCase())) ||
+                (brand.id?.toString().toLowerCase().includes(search.toLowerCase())) ||
+                (brand.name?.toLowerCase().includes(search.toLowerCase()));
 
-            const matchesStatus = !showEnabledOnly || brand.enabled;
-
+            const matchesStatus = !enabledOnly || brand.enabled;
             return matchesSearch && matchesStatus;
         });
 
@@ -141,7 +144,10 @@ export default function BrandsTable() {
     // Apply filters when search or filter changes
     useEffect(() => {
         if (useClientPagination && allBrands.length > 0) {
-            applyClientPagination(allBrands, 1, pagination.limit);
+            applyClientPagination(allBrands, 1, pagination.limit, searchTerm, showEnabledOnly);
+        } else if (!useClientPagination) {
+            // For server-side pagination, refetch with search/filter
+            fetchBrands(1, pagination.limit, searchTerm, showEnabledOnly);
         }
     }, [searchTerm, showEnabledOnly]);
 
