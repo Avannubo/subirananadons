@@ -72,7 +72,7 @@ export default function Page() {
             });
             console.log('Image converted to base64, uploading to server...');
             // Upload using our server API endpoint (which handles Cloudinary authentication)
-            const response = await fetch('/api/upload', {
+            const response = await fetch('/api/cloudinary/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

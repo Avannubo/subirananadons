@@ -59,7 +59,7 @@ export default function ConfiguracionTab() {
                 reader.readAsDataURL(selectedImage);
             });
             // Upload to server
-            const response = await fetch('/api/upload', {
+            const response = await fetch('/api/cloudinary/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

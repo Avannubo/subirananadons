@@ -286,7 +286,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 });
 
                                 // Upload to server
-                                const response = await fetch('/api/upload', {
+                                const response = await fetch('/api/cloudinary/upload', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
@@ -433,7 +433,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 reader.readAsDataURL(selectedImage instanceof FileList ? selectedImage[0] : selectedImage);
             });
             // Upload to server
-            const response = await fetch('/api/upload', {
+            const response = await fetch('/api/cloudinary/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

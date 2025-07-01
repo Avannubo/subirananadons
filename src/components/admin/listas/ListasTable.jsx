@@ -24,7 +24,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         isPublic: true,
         items: []
     });
-    const saveButtonRef = useRef(null); 
+    const saveButtonRef = useRef(null);
     const filteredLists = lists.filter((list) => {
         const items = list.rawData?.items || [];
         const hasMatchingProduct = !filters.searchProduct ||
@@ -138,7 +138,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                         reader.readAsDataURL(editForm.image);
                     });
                     // Upload to server
-                    const response = await fetch('/api/upload', {
+                    const response = await fetch('/api/cloudinary/upload', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

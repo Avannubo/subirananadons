@@ -77,33 +77,33 @@ export default function OffersTab() {
         }
     };
 
-        const uploadImage = async () => {
-            if (!selectedImage) return null;
-            setIsUploading(true);
-            try {
-                const base64Image = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsDataURL(selectedImage);
-                });
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: base64Image })
-                });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Error uploading image');
-                }
-                const data = await response.json();
-                return data.url;
-            } catch (error) {
-                toast.error('Error al subir la imagen');
-                return null;
-            } finally {
-                setIsUploading(false);
+    const uploadImage = async () => {
+        if (!selectedImage) return null;
+        setIsUploading(true);
+        try {
+            const base64Image = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(selectedImage);
+            });
+            const response = await fetch('/api/cloudinary/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64Image })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error uploading image');
             }
-        };
+            const data = await response.json();
+            return data.url;
+        } catch (error) {
+            toast.error('Error al subir la imagen');
+            return null;
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     const handleSubmit = async e => {
         e.preventDefault();
@@ -214,7 +214,7 @@ export default function OffersTab() {
         <div className="p-6 bg-white rounded-xl">
             <h2 className="font-bold mb-6 text-lg text-gray-800">Ofertas Destacadas</h2>
             {error && <div className="text-red-500 mb-2">{error}</div>}
-          
+
             <form onSubmit={handleSubmit} className="mb-8 space-y-6">
                 <div className="flex flex-col items-center space-y-4">
                     <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
