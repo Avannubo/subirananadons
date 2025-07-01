@@ -58,22 +58,34 @@ export default function ListEditModal({
 
             // Keep existing items and add new ones without _id field (let MongoDB generate it)
             const newItems = [
-                ...currentItems.map(item => ({
-                    _id: item._id,
-                    product: item.product._id || item.product,
-                    quantity: item.quantity || 1,
-                    state: item.state || 0,
-                    reserved: item.reserved || 0,
-                    priority: item.priority || 2
-                })),
+                ...currentItems.map(item => {
+                    const obj = {
+                        _id: item._id,
+                        product: item.product._id || item.product,
+                        quantity: item.quantity || 1,
+                        state: item.state || 0,
+                        reserved: item.reserved || 0,
+                        priority: item.priority || 2
+                    };
+                    if (item.userData !== undefined && item.userData !== null) {
+                        obj.userData = item.userData;
+                    }
+                    return obj;
+                }),
                 ...selectedProducts.map(item => ({
                     product: item.product._id || item.product,
                     quantity: item.quantity || 1,
                     state: item.state || 0,
                     reserved: 0,
-                    priority: item.priority || 2
+                    priority: item.priority || 2,
+                    userData: {} // Always send a valid object
                 }))
-            ];
+            ].map(item => {
+                if (item.userData === null || item.userData === undefined) {
+                    delete item.userData;
+                }
+                return item;
+            });
 
             // Update the list with all items
             const response = await fetch(`/api/birthlists/${selectedList.id}/items`, {
