@@ -101,10 +101,11 @@ export async function PATCH(request, { params }) {
         }
 
         // Validate status if it's being updated
-        if (data.status !== undefined && !['processing', 'cancelled'].includes(data.status)) {
+        const allowedStatuses = ['acceptado', 'procesando', 'enviado', 'completo', 'cancelado'];
+        if (data.status !== undefined && !allowedStatuses.includes(data.status)) {
             return NextResponse.json({
                 success: false,
-                message: 'Invalid order status. Allowed values are: processing, cancelled'
+                message: 'Invalid order status. Allowed values are: ' + allowedStatuses.join(', ')
             }, { status: 400 });
         }
 

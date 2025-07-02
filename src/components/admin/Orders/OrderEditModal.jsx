@@ -10,14 +10,9 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
     });    // Initialize form data when order changes
     useEffect(() => {
         if (order) {
-            // Map the display status back to the database status
-            const statusMap = {
-                'Acceptado': 'processing',
-                'Cancelados': 'cancelled'
-            };
-
+            // Map display status to DB status (identity for new statuses)
             setFormData({
-                status: statusMap[order.status] || 'processing',
+                status: order.status || 'procesando',
                 trackingNumber: order.trackingNumber || '',
                 notes: order.notes || ''
             });
@@ -66,8 +61,11 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                                 disabled={isLoading}
                                 required
                             >
-                                <option value="processing">Acceptado</option>
-                                <option value="cancelled">Cancelado</option>
+                                <option value="acceptado">Acceptado</option>
+                                <option value="procesando">Procesando</option>
+                                <option value="enviado">Enviado</option>
+                                <option value="completo">Completo</option>
+                                <option value="cancelado">Cancelado</option>
                             </select>
                         </div>
 

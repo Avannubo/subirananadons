@@ -32,7 +32,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
         setCurrentPage,
         setLimit
     } = useOrders(userRole);
-    const tabs = ['Todos', 'Acceptado', 'Cancelados'];
+    const tabs = ['Todos', 'Acceptado', 'Procesando', 'Enviado', 'Completo', 'Cancelado'];
     // Initial fetch of all orders when component mounts
     useEffect(() => {
         console.log(`OrdersTabs mounted with userRole: ${userRole}`);
@@ -262,19 +262,34 @@ export default function OrdersTabs({ userRole = 'user' }) {
             dateTo: ''
         });
     };
+    // Normalize status for filtering and counts
+    const normalizeStatus = (status) => {
+        if (!status) return '';
+        const map = {
+            'acceptado': 'Acceptado',
+            'procesando': 'Procesando',
+            'enviado': 'Enviado',
+            'completo': 'Completo',
+            'cancelado': 'Cancelado',
+        };
+        const s = status.toLowerCase().trim();
+        return map[s] || status;
+    };
+
     // Filter orders based on active tab
     const filteredOrders = orders.filter(order => {
         if (activeTab === 'Todos') return true;
-        if (activeTab === 'Acceptado') return order.status === 'Acceptado';
-        if (activeTab === 'Cancelados') return order.status === 'Cancelados';
-        return false;
+        return normalizeStatus(order.status) === activeTab;
     });
 
     // Prepare counts for the TabNavigation component
     const orderCounts = {
         'Todos': orders.length,
-        'Acceptado': orders.filter(order => order.status === 'Acceptado').length,
-        'Cancelados': orders.filter(order => order.status === 'Cancelados').length
+        'Acceptado': orders.filter(order => normalizeStatus(order.status) === 'Acceptado').length,
+        'Procesando': orders.filter(order => normalizeStatus(order.status) === 'Procesando').length,
+        'Enviado': orders.filter(order => normalizeStatus(order.status) === 'Enviado').length,
+        'Completo': orders.filter(order => normalizeStatus(order.status) === 'Completo').length,
+        'Cancelado': orders.filter(order => normalizeStatus(order.status) === 'Cancelado').length,
     };
     console.log('Order tab counts:', orderCounts);
     return (

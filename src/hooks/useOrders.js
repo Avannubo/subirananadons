@@ -69,8 +69,11 @@ export function useOrders(userRole) {
     };    // Map database status to UI status
     const mapOrderStatus = (status) => {
         const statusMap = {
-            'processing': 'Acceptado',
-            'cancelled': 'Cancelados'
+            'acceptado': 'Acceptado',
+            'procesando': 'Procesando',
+            'enviado': 'Enviado',
+            'completo': 'Completo',
+            'cancelado': 'Cancelado'
         };
         return statusMap[status] || status;
     };
@@ -78,20 +81,23 @@ export function useOrders(userRole) {
     // Map UI status back to database status
     const mapStatusToDb = (uiStatus) => {
         const reverseStatusMap = {
-            'Acceptado': 'processing',
-            'Cancelados': 'cancelled'
+            'Acceptado': 'acceptado',
+            'Procesando': 'procesando',
+            'Enviado': 'enviado',
+            'Completo': 'completo',
+            'Cancelado': 'cancelado'
         };
-        return reverseStatusMap[uiStatus] || 'processing';
+        return reverseStatusMap[uiStatus] || 'procesando';
     };
     // Update order status
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
             // If the new status is already a DB status (not UI status)
             // we use it directly, otherwise we map it
-            const dbStatus =
-                ['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus)
-                    ? newStatus
-                    : mapStatusToDb(newStatus);
+            const allowedDbStatuses = ['acceptado', 'procesando', 'enviado', 'completo', 'cancelado'];
+            const dbStatus = allowedDbStatuses.includes(newStatus)
+                ? newStatus
+                : mapStatusToDb(newStatus);
             const response = await fetch(`/api/orders/${orderId}`, {
                 method: 'PATCH',
                 headers: {
@@ -109,7 +115,7 @@ export function useOrders(userRole) {
                     order.id === orderId
                         ? {
                             ...order,
-                            status: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus)
+                            status: allowedDbStatuses.includes(newStatus)
                                 ? mapOrderStatus(newStatus)
                                 : newStatus
                         }

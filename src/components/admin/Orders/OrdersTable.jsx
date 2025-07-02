@@ -1,7 +1,8 @@
+// State for bulk status selector
 'use client';
-import { FiSearch, FiFilter, FiEye, FiDownload, FiTrash2, FiEdit } from 'react-icons/fi';
+import { FiEye, FiTrash2, FiEdit } from 'react-icons/fi';
 import { FaRegFilePdf } from 'react-icons/fa';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import Pagination from '../shared/Pagination';
 
@@ -20,6 +21,7 @@ export default function OrdersTable({
     onLimitChange
 }) {
     const [selectedOrders, setSelectedOrders] = useState([]);
+    const [bulkStatusValue, setBulkStatusValue] = useState("");
     const [statusDropdown, setStatusDropdown] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
@@ -92,26 +94,25 @@ export default function OrdersTable({
             setSelectedOrders([...selectedOrders, id]);
         }
     };
-    const handleBulkAction = (action) => {
+    const handleBulkAction = (action, value) => {
         if (selectedOrders.length === 0) {
             alert('Por favor, selecciona al menos un pedido');
             return;
         }
         if (action === 'eliminar') {
             if (window.confirm(`¿Estás seguro de que deseas eliminar ${selectedOrders.length} pedidos? Esta acción no se puede deshacer.`)) {
-                // Call the API to delete multiple orders
-                // For now, we'll just handle each order individually
                 Promise.all(selectedOrders.map(id => onDelete(id)))
                     .then(() => setSelectedOrders([]));
             }
-        } else if (action === 'enviar') {
-            // Call the API to mark orders as shipped
-            Promise.all(selectedOrders.map(id => onStatusChange(id, 'Enviado')))
-                .then(() => setSelectedOrders([]));
         } else if (action === 'archivar') {
-            // This would be implemented with a real archive feature
             alert(`Archivando ${selectedOrders.length} pedidos`);
             setSelectedOrders([]);
+        } else if (action === 'estado' && value) {
+            // Only update the selected orders in the local orders array if possible
+            Promise.all(selectedOrders.map(id => onStatusChange(id, value)))
+                .then(() => {
+                    setBulkStatusValue("");
+                });
         }
     };
     const toggleStatusDropdown = (id) => {
@@ -144,14 +145,37 @@ export default function OrdersTable({
     const handleSaveEdit = async (orderId, formData) => {
         setIsActionLoading(true);
         try {
-            // Convert UI status to DB status using the mapStatusToDb function
-            // We expect this is implemented in the parent component
-            const success = await onStatusChange(orderId, formData.status);
-            if (success) {
+            // Send PATCH request to update order (status, notes, trackingNumber)
+            const res = await fetch(`/api/orders/${orderId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status: formData.status,
+                    notes: formData.notes,
+                    trackingNumber: formData.trackingNumber
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success('Pedido actualizado correctamente');
+                // Update the local orders array with the new order data
+                if (data.order) {
+                    const updatedOrder = data.order;
+                    if (Array.isArray(orders)) {
+                        const idx = orders.findIndex(o => o.id === updatedOrder._id || o.id === updatedOrder.id);
+                        if (idx !== -1) {
+                            orders[idx] = {
+                                ...orders[idx],
+                                ...updatedOrder,
+                                id: updatedOrder._id || updatedOrder.id // ensure id stays consistent
+                            };
+                        }
+                    }
+                }
                 setEditModalOpen(false);
                 setSelectedOrder(null);
             } else {
-                alert('Error al actualizar el pedido');
+                alert(data.message || 'Error al actualizar el pedido');
             }
         } catch (error) {
             console.error('Error saving order edit:', error);
@@ -183,7 +207,7 @@ export default function OrdersTable({
         <div className="bg-white rounded-lg shadow overflow-hidden">
             {/* Bulk Actions (Admin only) */}
             {userRole === 'admin' && selectedOrders.length > 0 && (
-                <div className="bg-gray-100 p-3 flex items-center">
+                <div className="bg-gray-100 p-3 flex items-center flex-wrap gap-2">
                     <span className="text-sm mr-4">{selectedOrders.length} pedidos seleccionados</span>
                     <button
                         onClick={() => handleBulkAction('archivar')}
@@ -191,11 +215,28 @@ export default function OrdersTable({
                     >
                         Archivar
                     </button>
-                    <button
-                        onClick={() => handleBulkAction('enviar')}
-                        className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded mr-2"
+                    {/* Bulk status change dropdown with confirm button */}
+                    <select
+                        className="px-3 py-1 text-sm rounded border border-gray-300 mr-2"
+                        style={{ width: 'auto', minWidth: '180px', maxWidth: '100%', display: 'inline-block' }}
+                        value={bulkStatusValue}
+                        onChange={e => setBulkStatusValue(e.target.value)}
                     >
-                        Marcar como enviado
+                        <option value="" disabled>Cambiar estado a...</option>
+                        <option value="acceptado">Acceptado</option>
+                        <option value="procesando">Procesando</option>
+                        <option value="enviado">Enviado</option>
+                        <option value="completo">Completo</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                    <button
+                        className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded mr-2"
+                        disabled={!bulkStatusValue}
+                        onClick={() => {
+                            if (bulkStatusValue) handleBulkAction('estado', bulkStatusValue);
+                        }}
+                    >
+                        Confirmar
                     </button>
                     <button
                         onClick={() => handleBulkAction('eliminar')}
@@ -245,42 +286,50 @@ export default function OrdersTable({
                                     <td className="px-6 py-4">{order.reference}</td>
                                     {userRole === 'admin' && <td className="px-6 py-4">{order.customer}</td>}
                                     <td className="px-6 py-4">{order.total}</td>
-                                    <td className="px-6 py-4">{order.payment}</td>                                    <td className="px-6 py-4">
-                                        {userRole === 'admin' ? (
-                                            <div className="relative">
-                                                <button
-                                                    onClick={() => toggleStatusDropdown(order.id)}
-                                                    className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'Acceptado' ? 'bg-green-100 text-green-800' :
-                                                        'bg-red-100 text-red-800'
-                                                        } flex items-center`}
-                                                >
-                                                    {order.status}
-                                                </button>
-                                                {statusDropdown === order.id && (
-                                                    <div className="absolute z-10 mt-1 w-48 bg-white rounded-md shadow-lg py-1">
-                                                        <button
-                                                            onClick={() => changeOrderStatus(order.id, 'Acceptado')}
-                                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                                        >
-                                                            Acceptado
-                                                        </button>
-                                                        <button
-                                                            onClick={() => changeOrderStatus(order.id, 'Cancelados')}
-                                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                                        >
-                                                            Cancelados
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (<span
-                                            className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'Acceptado' ? 'bg-green-100 text-green-800' :
-                                                'bg-red-100 text-red-800'
-                                                }`}
-                                        >
-                                            {order.status}
-                                        </span>
-                                        )}
+                                    <td className="px-6 py-4">{order.payment}</td>
+                                    <td className="px-6 py-4">
+                                        {(() => {
+                                            // Normalize and map status to allowed values
+                                            const rawStatus = (order.status || '').toLowerCase().trim();
+                                            // Map legacy/english/invalid statuses to allowed values
+                                            const statusMap = {
+                                                'pending': 'procesando',
+                                                'processing': 'procesando',
+                                                'accepted': 'acceptado',
+                                                'shipped': 'enviado',
+                                                'completed': 'completo',
+                                                'cancelled': 'cancelado',
+                                                'canceled': 'cancelado',
+                                                // Spanish allowed values
+                                                'acceptado': 'acceptado',
+                                                'procesando': 'procesando',
+                                                'enviado': 'enviado',
+                                                'completo': 'completo',
+                                                'cancelado': 'cancelado',
+                                            };
+                                            const status = statusMap[rawStatus] || 'procesando'; // fallback to 'procesando' if invalid
+                                            const statusColorMap = {
+                                                'acceptado': 'bg-green-100 text-green-800',
+                                                'procesando': 'bg-yellow-100 text-yellow-800',
+                                                'enviado': 'bg-blue-100 text-blue-800',
+                                                'completo': 'bg-gray-100 text-gray-800',
+                                                'cancelado': 'bg-red-100 text-red-800',
+                                            };
+                                            const statusLabelMap = {
+                                                'acceptado': 'Acceptado',
+                                                'procesando': 'Procesando',
+                                                'enviado': 'Enviado',
+                                                'completo': 'Completo',
+                                                'cancelado': 'Cancelado',
+                                            };
+                                            const colorClass = statusColorMap[status] || 'bg-gray-100 text-gray-800';
+                                            const label = statusLabelMap[status] || status;
+                                            return (
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+                                                    {label}
+                                                </span>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-6 py-4">{order.date}</td>
                                     <td className="px-6 py-4 text-sm flex flex-row items-center space-x-4 justify-center">

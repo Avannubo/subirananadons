@@ -65,8 +65,8 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['processing', 'cancelled'],
-        default: 'processing'
+        enum: ['acceptado', 'procesando', 'enviado', 'completo', 'cancelado'],
+        default: 'acceptado'
     },
     totalAmount: {
         type: Number,
