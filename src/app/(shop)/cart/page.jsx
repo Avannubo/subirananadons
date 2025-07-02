@@ -11,7 +11,7 @@ import { ShoppingCart, Mail } from 'lucide-react';
 
 export default function CartPage() {
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
-    const { user, loading: userLoading } = useUser(); 
+    const { user, loading: userLoading } = useUser();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
         name: '',
@@ -139,10 +139,22 @@ export default function CartPage() {
             return sum + (price * (item.quantity || 1));
         }, 0);
     };
+
+    // Subtotal for only regular (personal) items
+    const calculateRegularSubtotal = () => {
+        return regularItems.reduce((sum, item) => {
+            const price = typeof item.priceValue === 'number'
+                ? item.priceValue
+                : (typeof item.price === 'number'
+                    ? item.price
+                    : parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
+            return sum + (price * (item.quantity || 1));
+        }, 0);
+    };
     const calculateShipping = () => {
-        const subtotal = calculateSubtotal();
+        const regularSubtotal = calculateRegularSubtotal();
         if (deliveryMethod === 'pickup') return 0;
-        return subtotal >= 60 ? 0 : 5.99;
+        return regularSubtotal >= 60 ? 0 : (regularItems.length === 0 ? 0 : 5.99);
     };
     const calculateTax = () => {
         return calculateSubtotal() * 0.21;
@@ -391,7 +403,7 @@ export default function CartPage() {
         };
 
         sendEmail();
-    }; 
+    };
 
     return (
         <ShopLayout>
@@ -782,15 +794,15 @@ export default function CartPage() {
                                         </div>
                                     )}
                                     {/* Free Shipping Progress */}
-                                    {calculateSubtotal() < 60 && deliveryMethod === 'delivery' && !hasGiftItems && (
+                                    {calculateRegularSubtotal() < 60 && deliveryMethod === 'delivery' && !hasGiftItems && (
                                         <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                                             <p className="text-sm text-gray-700 mb-2">
-                                                ¡Añade <span className="font-bold text-[#00B0C8]">{(60 - calculateSubtotal()).toFixed(2)}€</span> más a tu pedido para conseguir envío gratis!
+                                                ¡Añade <span className="font-bold text-[#00B0C8]">{(60 - calculateRegularSubtotal()).toFixed(2)}€</span> más a tu pedido para conseguir envío gratis!
                                             </p>
                                             <div className="w-full bg-gray-200 rounded-full h-2.5">
                                                 <div
                                                     className="bg-[#00B0C8] h-2.5 rounded-full transition-all duration-500 ease-in-out"
-                                                    style={{ width: `${Math.min(100, (calculateSubtotal() / 60) * 100)}%` }}
+                                                    style={{ width: `${Math.min(100, (calculateRegularSubtotal() / 60) * 100)}%` }}
                                                 ></div>
                                             </div>
                                         </div>
@@ -817,16 +829,16 @@ export default function CartPage() {
                                                 <div>
                                                     <p className="font-medium">Envío a domicilio</p>
                                                     {/* <p className="text-sm text-gray-500">Entrega en 24-48 horas laborables</p> */}
-                                                    {calculateSubtotal() >= 60 && !hasOnlyGiftItems && (
+                                                    {calculateRegularSubtotal() >= 60 && !hasOnlyGiftItems && (
                                                         <p className="text-xs text-green-600 font-medium mt-1">Envío gratis en pedidos superiores a 60€</p>
                                                     )}
                                                     {hasGiftItems && !hasOnlyGiftItems && (
-                                                        <p className="text-xs text-orange-600 font-medium mt-1">Los productos de regalo deberán recogerse en tienda</p>
+                                                        <p className="text-xs text-orange-600 font-medium mt-1">Los productos de regalo deberán recogerse en tienda por el propietario de la lista </p>
                                                     )}
                                                 </div>
                                             </div>
                                             <span className="text-[#00B0C8] font-medium">
-                                                {calculateSubtotal() >= 60 || regularItems.length === 0 ? 'Gratis' : '5,99 €'}
+                                                {calculateRegularSubtotal() >= 60 || regularItems.length === 0 ? 'Gratis' : '5,99 €'}
                                             </span>
                                         </div>
                                         <div
@@ -910,7 +922,7 @@ export default function CartPage() {
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span>Envío</span>
-                                                {calculateSubtotal() >= 60 && deliveryMethod === 'delivery' ? (
+                                                {calculateRegularSubtotal() >= 60 && deliveryMethod === 'delivery' ? (
                                                     <span className="flex items-center text-green-600">
                                                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

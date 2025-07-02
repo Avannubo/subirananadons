@@ -195,7 +195,7 @@ export default function BirthListPage({ params }) {
                 // Validate required gift information
                 if (!list.userId) {
                     console.error('Missing list owner ID');
-                    toast.error('Error: No se puede identificar el propietario de la lista');
+                    // toast.error('Error: No se puede identificar el propietario de la lista');
                     return;
                 }
 
@@ -222,9 +222,9 @@ export default function BirthListPage({ params }) {
                 };
 
                 const success = await addToCart(productForCart, 1); if (success) {
-                    toast.success('Regalo añadido al carrito');
+                    console.log('Regalo añadido al carrito');
                 } else {
-                    toast.error('No se pudo añadir el regalo al carrito');
+                    console.log('No se pudo añadir el regalo al carrito');
                 }
             } catch (error) {
                 console.error('Error adding gift to cart:', error);

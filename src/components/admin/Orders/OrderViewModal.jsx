@@ -334,9 +334,12 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                 Cantidad
                                                             </th>
-                                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                Tipo
+                                                            </th> <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                 Precio
                                                             </th>
+
                                                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                 Subtotal
                                                             </th>
@@ -361,8 +364,13 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                                 )}
                                                                             </div>
                                                                             <div className="ml-4">
-                                                                                <div className="text-sm font-medium text-gray-900">
-                                                                                    {product?.name || `Producto ${index + 1}`}
+                                                                                <div className="text-sm font-medium text-gray-900 flex flex-col">
+                                                                                    <span>{product?.name || `Producto ${index + 1}`}</span>
+                                                                                    {(item.listName || item.list || item.listTitle) && (
+                                                                                        <span className="italic text-xs text-pink-600 mt-1">
+                                                                                            (Lista: {item.listName || item.list || item.listTitle})
+                                                                                        </span>
+                                                                                    )}
                                                                                 </div>
                                                                                 <div className="text-xs text-gray-500 flex flex-col">
                                                                                     <span>Ref: {product?.reference || "N/A"}</span>
@@ -373,6 +381,9 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                     </td>
                                                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                                         {item.quantity}
+                                                                    </td>
+                                                                    <td className={`item-type px-6 py-4 whitespace-nowrap text-center text-sm font-semibold ${item.type === 'gift' ? 'gift-type text-pink-600' : 'personal-type text-blue-600'}`}>
+                                                                        {item.type === 'gift' ? 'Regalo' : 'Personal'}
                                                                     </td>
                                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                                                                         {formatPrice(item.price)}

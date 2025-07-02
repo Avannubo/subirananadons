@@ -196,7 +196,7 @@ export default function ListViewModal({
                 if (onStatusChange) {
                     onStatusChange(newStatus);
                 }
-                toast.success(`Lista marcada como ${newStatus}`);
+                // toast.success(`Lista marcada como ${newStatus}`);
             } else {
                 toast.success('Lista guardada');
             }
@@ -224,6 +224,9 @@ export default function ListViewModal({
             );
         }
 
+        // Hide reserver client info for owner if reserved (state === 1)
+        const isOwner = user && selectedList && user._id === selectedList.ownerId;
+        const hideUserData = isOwner && item.state === 1;
         return (
             <div key={item._id} className="p-4 bg-white border-b border-gray-200">
                 <div className="flex items-start">
@@ -315,7 +318,7 @@ export default function ListViewModal({
                                 </p>
                             )}
                         </div>
-                        {item.userData && (item.state === 1 || item.state === 2) && (
+                        {!hideUserData && item.userData && (item.state === 1 || item.state === 2) && (
                             <div className="mt-2 bg-gray-50 p-2 rounded-md border border-gray-200">
                                 <div className="flex items-start space-x-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-500 mt-0.5">
@@ -480,7 +483,7 @@ export default function ListViewModal({
 
                         {/* Products sections */}
                         <div className="grid grid-cols-3 gap-4 flex-1 h-full">
-                            {/* Pending Items - Always shown */}
+                            {/* Pending Items - Always shown, but for owner also show reserved with tag */}
                             <div className="flex flex-col">
                                 <div className="flex items-center mb-4">
                                     <span className="text-[#00B0C8] mr-2">
@@ -495,15 +498,50 @@ export default function ListViewModal({
                                         <div className="flex justify-center items-center py-10">
                                             <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
                                         </div>
-                                    ) : getPendingItems().length === 0 ? (
-                                        <div className="text-center py-10">
-                                            <p className="text-gray-500">No hay productos pendientes.</p>
-                                        </div>
-                                    ) : (
-                                        <div className="divide-y divide-gray-200 h-full overflow-y-auto">
-                                            {getPendingItems().map((item, index) => renderProduct(item, index))}
-                                        </div>
-                                    )}
+                                    ) : (() => {
+                                        // For the owner, show reserved products in pending with a tag
+                                        const isOwner = user && selectedList && user._id === selectedList.ownerId;
+                                        let pendingItems = getPendingItems();
+                                        let reservedItems = [];
+                                        const isAdmin = user && user.role === 'admin';
+                                        if (!isAdmin && isOwner) {
+                                            reservedItems = getReservedItems();
+                                        }
+                                        // For admin, do NOT show reserved products in pending or with tag
+                                        if (isAdmin) {
+                                            pendingItems = pendingItems.filter(item => item.state !== 1);
+                                        }
+                                        const allItems = (!isAdmin && isOwner) ? [...pendingItems, ...reservedItems] : pendingItems;
+                                        if (allItems.length === 0) {
+                                            return (
+                                                <div className="text-center py-10">
+                                                    <p className="text-gray-500">No hay productos pendientes.</p>
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <div className="divide-y divide-gray-200 h-full overflow-y-auto">
+                                                {allItems.map((item, index) => {
+                                                    // If owner and item is reserved, add tag and hide reserver info
+                                                    const isReserved = !isAdmin && isOwner && reservedItems.some(r => r._id === item._id);
+                                                    // If reserved, render product without reserver info
+                                                    if (isReserved) {
+                                                        return (
+                                                            <div key={item._id || index} className="relative">
+                                                                {renderProduct({ ...item, reservedBy: undefined, reservedData: undefined }, index)}
+                                                                <span className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">Reservado</span>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return (
+                                                        <div key={item._id || index} className="relative">
+                                                            {renderProduct(item, index)}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             </div>
 
@@ -640,7 +678,7 @@ export default function ListViewModal({
                                 type="button"
                                 onClick={() => setShowModal(false)}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
-                            >
+                                >
                                 Cerrar
                             </button> */}
                             </div>
