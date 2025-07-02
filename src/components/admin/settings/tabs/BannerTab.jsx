@@ -129,80 +129,96 @@ export default function BannerTab() {
         <div className="p-4 bg-gray-50 rounded-lg">
             <h2 className="font-bold mb-4 text-lg text-gray-800">Subir Imagen</h2>
             <div className="flex flex-col items-center space-y-4">
-                <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-white">
-                    {preview ? (
-                        <img src={preview} alt="Preview" className="w-full h-full object-contain rounded-lg" />
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12" />
-                            </svg>
-                            <span>No image selected</span>
+                {/* Skeleton loader for uploading state */}
+                {isUploading ? (
+                    <div className="w-full animate-pulse">
+                        <div className="w-full p-2 h-44 rounded-lg border border-dashed border-gray-300 overflow-hidden bg-white flex items-center justify-center">
+                            <div className="h-24 w-40 bg-gray-200 rounded-lg" />
                         </div>
-                    )}
-                    {isUploading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 z-10">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                        <div className="flex flex-row items-center space-x-2 w-full max-w-md mt-4">
+                            <div className="h-10 w-1/2 bg-gray-200 rounded-md" />
+                            <div className="h-10 w-1/2 bg-gray-200 rounded-md" />
                         </div>
-                    )}
-                </div>
-                <div className='flex flex-row items-center space-x-2 w-full max-w-md'>
-                    <label htmlFor="portimg-upload" className={`block w-full px-4 py-2 text-center text-white rounded-md cursor-pointer ${isUploading ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'}`}>
-                        {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
-                    </label>
-                    <input id="portimg-upload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" disabled={isUploading} />
-                    <button
-                        onClick={() => setShowImageSelector(true)}
-                        disabled={isUploading}
-                        className={`w-full px-4 py-2 whitespace-nowrap rounded-md text-white ${isUploading ? 'bg-gray-400' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
-                    >
-                        Seleccionar existente
-                    </button>
-                </div>
-                <button
-                    onClick={handleUpload}
-                    disabled={(!image && !selectedImageUrl) || isUploading}
-                    className={`w-full max-w-md px-4 py-2 rounded-md text-white ${(!image && !selectedImageUrl) || isUploading ? 'bg-gray-400' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
-                >
-                    {isUploading ? 'Guardando...' : 'Guardar Imagen'}
-                </button>
-                {showImageSelector && (
-                    <ImageSelector
-                        onSelect={(url) => {
-                            setSelectedImageUrl(url);
-                            setShowImageSelector(false);
-                        }}
-                        onClose={() => setShowImageSelector(false)}
-                    />
-                )}
-                {/* Rest of your component remains the same */}
-                {uploadedImages.length > 0 && (
-                    <div className="w-full mt-6">
-                        <h3 className="font-semibold mb-2 text-gray-700">Imágenes subidas:</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {uploadedImages.map(img => (
-                                <div key={img._id} className={`border border-gray-200 rounded-lg overflow-hidden bg-white shadow flex flex-col items-center ${img.active ? 'ring-2 ring-[#00B0C8]' : ''}`}>
-                                    <img src={img.imageUrl} alt="uploaded" className="object-cover w-full h-32 mb-2" />
-                                    <button
-                                        onClick={() => setActivePortada(img._id)}
-                                        className={`px-3 m-2 py-1 rounded text-xs ${img.active ? 'bg-[#00B0C8] text-white' : 'bg-gray-200 text-gray-700 hover:bg-[#00B0C8] hover:text-white'}`}
-                                        disabled={img.active}
-                                    >
-                                        {img.active ? 'Banner Activa' : 'Establecer como Banner'}
-                                    </button>
-                                    <div className='space-x-2'>
-                                        <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="text-[#007d8d] break-all px-3 py-1 rounded text-xs bg-[#007d8d30] hover:bg-[#007d8d40] ">Ver</a>
-                                        <button
-                                            onClick={() => deleteImage(img._id)}
-                                            className="px-3 py-1 mb-2 rounded text-xs bg-red-100 text-red-700 hover:bg-red-200"
-                                        >
-                                            Eliminar
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <div className="h-10 w-full max-w-md bg-gray-200 rounded-md mt-4" />
                     </div>
+                ) : (
+                    <>
+                        <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-white">
+                            {preview ? (
+                                <img src={preview} alt="Preview" className="w-full h-full object-contain rounded-lg" />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12" />
+                                    </svg>
+                                    <span>No image selected</span>
+                                </div>
+                            )}
+                            {isUploading && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 z-10">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                                </div>
+                            )}
+                        </div>
+                        <div className='flex flex-row items-center space-x-2 w-full max-w-md'>
+                            <label htmlFor="portimg-upload" className={`block w-full px-4 py-2 text-center text-white rounded-md cursor-pointer ${isUploading ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'}`}>
+                                {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
+                            </label>
+                            <input id="portimg-upload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" disabled={isUploading} />
+                            <button
+                                onClick={() => setShowImageSelector(true)}
+                                disabled={isUploading}
+                                className={`w-full px-4 py-2 whitespace-nowrap rounded-md text-white ${isUploading ? 'bg-gray-400' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                            >
+                                Seleccionar existente
+                            </button>
+                        </div>
+                        <button
+                            onClick={handleUpload}
+                            disabled={(!image && !selectedImageUrl) || isUploading}
+                            className={`w-full max-w-md px-4 py-2 rounded-md text-white ${(!image && !selectedImageUrl) || isUploading ? 'bg-gray-400' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                        >
+                            {isUploading ? 'Guardando...' : 'Guardar Imagen'}
+                        </button>
+                        {showImageSelector && (
+                            <ImageSelector
+                                onSelect={(url) => {
+                                    setSelectedImageUrl(url);
+                                    setShowImageSelector(false);
+                                }}
+                                onClose={() => setShowImageSelector(false)}
+                            />
+                        )}
+                        {/* Rest of your component remains the same */}
+                        {uploadedImages.length > 0 && (
+                            <div className="w-full mt-6">
+                                <h3 className="font-semibold mb-2 text-gray-700">Imágenes subidas:</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {uploadedImages.map(img => (
+                                        <div key={img._id} className={`border border-gray-200 rounded-lg overflow-hidden bg-white shadow flex flex-col items-center ${img.active ? 'ring-2 ring-[#00B0C8]' : ''}`}>
+                                            <img src={img.imageUrl} alt="uploaded" className="object-cover w-full h-32 mb-2" />
+                                            <button
+                                                onClick={() => setActivePortada(img._id)}
+                                                className={`px-3 m-2 py-1 rounded text-xs ${img.active ? 'bg-[#00B0C8] text-white' : 'bg-gray-200 text-gray-700 hover:bg-[#00B0C8] hover:text-white'}`}
+                                                disabled={img.active}
+                                            >
+                                                {img.active ? 'Banner Activa' : 'Establecer como Banner'}
+                                            </button>
+                                            <div className='space-x-2'>
+                                                <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="text-[#007d8d] break-all px-3 py-1 rounded text-xs bg-[#007d8d30] hover:bg-[#007d8d40] ">Ver</a>
+                                                <button
+                                                    onClick={() => deleteImage(img._id)}
+                                                    className="px-3 py-1 mb-2 rounded text-xs bg-red-100 text-red-700 hover:bg-red-200"
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>
