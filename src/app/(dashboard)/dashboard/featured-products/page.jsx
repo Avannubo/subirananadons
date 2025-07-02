@@ -13,7 +13,7 @@ export default function FeaturedProductsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [itemsPerPage, setItemsPerPage] = useState(99999);
     const [totalItems, setTotalItems] = useState(0);
     const [totalFeaturedCount, setTotalFeaturedCount] = useState(0);
 
@@ -147,23 +147,24 @@ export default function FeaturedProductsPage() {
                             Los productos destacados aparecen en la sección "Productos Destacados" en la página de inicio y otras secciones destacadas de la tienda.
                         </p>
                         <div className="flex justify-between items-center flex-wrap gap-4">
-                            <div className="flex items-center space-x-2">                                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium text-sm flex items-center">
+                            <div className="flex items-center space-x-2">
+                                <div className="bg-blue-100 text-blue-800 p-3 rounded-lg font-medium text-sm flex items-center">
                                 <FiStar className="mr-1" />
                                 <span>Productos Destacados: {totalFeaturedCount}</span>
                             </div>
-                                <button
+                                {/* <button
                                     onClick={fetchProducts}
                                     className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full font-medium text-sm"
                                 >
                                     Actualizar
-                                </button>
+                                </button> */}
                             </div>
-                            <div className="flex space-x-2">
-                                <div className="relative rounded-md">
+                            <div className="flex-1 flex space-x-2">
+                                <div className="relative rounded-md w-full">
                                     <input
                                         type="text"
                                         placeholder="Buscar por nombre o referencia"
-                                        className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        className="border border-gray-300 rounded-md w-full px-4 py-2 focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
@@ -176,14 +177,14 @@ export default function FeaturedProductsPage() {
                                         </button>
                                     )}
                                 </div>
-                                <select
+                                {/* <select
                                     className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                     value={filter}
                                     onChange={(e) => setFilter(e.target.value)}
                                 >
                                     <option value="all">Todos los productos</option>
                                     <option value="featured">Solo destacados</option>
-                                </select>
+                                </select> */}
                             </div>
                         </div>
                     </div>
@@ -296,8 +297,9 @@ export default function FeaturedProductsPage() {
                                         </tbody>
                                     </table>
                                 </div>
-                            )}                            <div className="px-6 py-4">
-                                <Pagination
+                            )}
+                            <div className="px-6 py-4">
+                                {/* <Pagination
                                     currentPage={currentPage}
                                     totalPages={totalPages}
                                     totalItems={totalItems}
@@ -305,7 +307,7 @@ export default function FeaturedProductsPage() {
                                     onPageChange={setCurrentPage}
                                     onItemsPerPageChange={handleItemsPerPageChange}
                                     showingText="Mostrando {} de {} productos"
-                                />
+                                /> */}
                             </div>
                         </div>
                     )}
