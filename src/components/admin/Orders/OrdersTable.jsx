@@ -18,7 +18,8 @@ export default function OrdersTable({
     onDelete,
     pagination,
     onPageChange,
-    onLimitChange
+    onLimitChange,
+    showPagination
 }) {
     const [selectedOrders, setSelectedOrders] = useState([]);
     const [bulkStatusValue, setBulkStatusValue] = useState("");

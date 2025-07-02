@@ -25,7 +25,14 @@ export default function ConfiguracionTab() {
         fetch('/api/slider')
             .then(res => res.json())
             .then(data => {
-                setSliders(data);
+                // Sort slides by order ascending, fallback to _id if order is missing
+                const sorted = [...data].sort((a, b) => {
+                    if (typeof a.order === 'number' && typeof b.order === 'number') return a.order - b.order;
+                    if (typeof a.order === 'number') return -1;
+                    if (typeof b.order === 'number') return 1;
+                    return (a._id || '').localeCompare(b._id || '');
+                });
+                setSliders(sorted);
                 setLoading(false);
             });
     }, []);
@@ -93,9 +100,20 @@ export default function ConfiguracionTab() {
                 imageUrl = uploadedUrl;
             }
             const method = editingId ? 'PUT' : 'POST';
+            // Calculate order automatically
+            let order = 0;
+            if (editingId) {
+                // Keep the same order for editing
+                const editingSlider = sliders.find(s => s._id === editingId);
+                order = editingSlider ? editingSlider.order : 0;
+            } else {
+                // New slide: order is max+1
+                order = sliders.length > 0 ? Math.max(...sliders.map(s => typeof s.order === 'number' ? s.order : 0)) + 1 : 0;
+            }
             const body = {
                 ...form,
                 imageUrl: imageUrl || form.imageUrl,
+                order,
                 _id: editingId
             };
             const res = await fetch('/api/slider', {
@@ -138,6 +156,32 @@ export default function ConfiguracionTab() {
         });
         setImagePreview(slider.imageUrl || '');
         setEditingId(slider._id);
+    };
+
+    // Move slider up or down
+    const moveSlider = (id, direction) => {
+        setSliders(prev => {
+            const idx = prev.findIndex(s => s._id === id);
+            if (idx === -1) return prev;
+            const newSliders = [...prev];
+            const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+            if (swapIdx < 0 || swapIdx >= newSliders.length) return prev;
+            // Swap order values
+            const tempOrder = newSliders[idx].order;
+            newSliders[idx].order = newSliders[swapIdx].order;
+            newSliders[swapIdx].order = tempOrder;
+            // Swap positions in array
+            [newSliders[idx], newSliders[swapIdx]] = [newSliders[swapIdx], newSliders[idx]];
+            // Persist both changed sliders
+            [newSliders[idx], newSliders[swapIdx]].forEach(async (slider) => {
+                await fetch('/api/slider', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...slider, _id: slider._id })
+                });
+            });
+            return [...newSliders];
+        });
     };
     // Delete slider
     const handleDelete = async id => {
@@ -278,14 +322,7 @@ export default function ConfiguracionTab() {
                         placeholder="Button Link"
                         className="border border-gray-300 p-2 rounded w-full bg-gray-50"
                     />
-                    <input
-                        name="order"
-                        type="number"
-                        value={form.order}
-                        onChange={handleChange}
-                        placeholder="Order"
-                        className="border border-gray-300 p-2 rounded w-full bg-gray-50"
-                    />
+                    {/* Order field hidden, order is set automatically */}
                 </div>
                 <label className="flex items-center gap-2">
                     <input
@@ -329,7 +366,47 @@ export default function ConfiguracionTab() {
                     onClose={() => setShowImageSelector(false)}
                 />
             )}
-            {loading ? <div>Loading...</div> : (
+            {loading ? (
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm bg-white rounded-xl shadow border border-gray-200 animate-pulse">
+                        <thead>
+                            <tr className="bg-gray-50 text-gray-700 uppercase text-xs">
+                                <th className="py-3 px-2 font-semibold text-left">Imagen</th>
+                                <th className="py-3 px-2 font-semibold text-left">Texto del botón</th>
+                                <th className="py-3 px-2 font-semibold text-left">Enlace del botón</th>
+                                <th className="py-3 px-2 font-semibold text-left">Orden</th>
+                                <th className="py-3 px-2 font-semibold text-left">Activo</th>
+                                <th className="py-3 px-2 font-semibold text-left">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {[...Array(5)].map((_, i) => (
+                                <tr key={i} className="border-b border-gray-100 align-middle justify-center hover:bg-gray-50 transition">
+                                    <td className="py-2 px-2 flex items-center justify-center">
+                                        <div className="h-12 w-20 bg-gray-200 rounded-lg" />
+                                    </td>
+                                    <td className="py-2 px-2 flex items-center justify-center">
+                                        <div className="h-4 w-32 bg-gray-200 rounded" />
+                                    </td>
+                                    <td className="py-2 px-2 flex items-center justify-center">
+                                        <div className="h-4 w-32 bg-gray-200 rounded" />
+                                    </td>
+                                    <td className="flex flex-row items-center gap-1 justify-center">
+                                        <div className="h-4 w-8 bg-gray-200 rounded" />
+                                    </td>
+                                    <td className="py-2 px-2 flex items-center justify-center">
+                                        <div className="h-4 w-10 bg-gray-200 rounded-full" />
+                                    </td>
+                                    <td className="py-2 px-2 flex items-center gap-2 justify-center">
+                                        <div className="h-8 w-12 bg-gray-200 rounded-full" />
+                                        <div className="h-8 w-12 bg-gray-200 rounded-full" />
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm bg-white rounded-xl shadow border border-gray-200">
                         <thead>
@@ -344,7 +421,7 @@ export default function ConfiguracionTab() {
                         </thead>
                         <tbody>
                             {sliders.map(slider => (
-                                <tr key={slider._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                                <tr key={slider._id} className="border-b border-gray-100 align-middle justify-center hover:bg-gray-50 transition">
                                     <td className="py-2 px-2">
                                         {slider.imageUrl && (
                                             <img src={slider.imageUrl} alt="slider" className="h-12 w-20 object-cover rounded-lg border border-gray-200 bg-gray-100" />
@@ -352,11 +429,33 @@ export default function ConfiguracionTab() {
                                     </td>
                                     <td className="py-2 px-2">{slider.btnText}</td>
                                     <td className="py-2 px-2">{slider.btnLink}</td>
-                                    <td className="py-2 px-2">{slider.order}</td>
+                                    <td className=" flex flex-row items-center gap-1">
+                                        {/* Hide up arrow for first slide */}
+                                        {sliders[0]._id !== slider._id && (
+                                            <button
+                                                type="button"
+                                                className="p-1 rounded hover:bg-gray-200"
+                                                title="Subir"
+                                                onClick={() => moveSlider(slider._id, 'up')}
+                                            >
+                                                <span style={{ fontSize: '1.1em', display: 'inline-block' }}>&#8593;</span>
+                                            </button>
+                                        )}
+                                        {sliders[sliders.length - 1]._id !== slider._id && (
+                                            <button
+                                                type="button"
+                                                className="p-1 rounded hover:bg-gray-200"
+                                                title="Bajar"
+                                                onClick={() => moveSlider(slider._id, 'down')}
+                                            >
+                                                <span style={{ fontSize: '1.1em', display: 'inline-block' }}>&#8595;</span>
+                                            </button>
+                                        )}
+                                    </td>
                                     <td className="py-2 px-2">
                                         <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${slider.active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>{slider.active ? 'Yes' : 'No'}</span>
                                     </td>
-                                    <td className="py-2 px-2 h-20  flex items-center gap-2">
+                                    <td className="py-1 px-2  flex flex-row  items-center gap-2">
                                         <button
                                             onClick={() => handleEdit(slider)}
                                             className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 border border-blue-100 text-xs h-8 flex items-center justify-center"
@@ -365,7 +464,7 @@ export default function ConfiguracionTab() {
                                         </button>
                                         <button
                                             onClick={() => handleDelete(slider._id)}
-                                            className="bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100 border border-red-100 text-xs h-8 flex items-center justify-center"
+                                            className="bg-red-50 text-red-600 px-2 py-1 rounded-full hover:bg-red-100 border border-red-100 text-xs h-8 flex items-center justify-center"
                                         >
                                             Delete
                                         </button>

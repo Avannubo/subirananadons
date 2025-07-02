@@ -295,7 +295,49 @@ export default function OffersTab() {
                     )}
                 </div>
             </form>
-            {loading ? <div>Cargando...</div> : (
+            {loading ? (
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm bg-white rounded-xl shadow border border-gray-200 animate-pulse">
+                        <thead>
+                            <tr className="bg-gray-50 text-gray-700 uppercase text-xs">
+                                <th className="py-3 px-2 font-semibold text-left">Imagen</th>
+                                <th className="py-3 px-2 font-semibold text-left">Título</th>
+                                <th className="py-3 px-2 font-semibold text-left">Descripción</th>
+                                <th className="py-3 px-2 font-semibold text-left">Marca</th>
+                                <th className="py-3 px-2 font-semibold text-left">Desc. %</th>
+                                <th className="py-3 px-2 font-semibold text-left">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {[...Array(4)].map((_, i) => (
+                                <tr key={i} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                                    <td className="py-2 px-2">
+                                        <div className="h-12 w-20 bg-gray-200 rounded-lg mx-auto" />
+                                    </td>
+                                    <td className="py-2 px-2">
+                                        <div className="h-4 w-24 bg-gray-200 rounded mx-auto" />
+                                    </td>
+                                    <td className="py-2 px-2">
+                                        <div className="h-4 w-32 bg-gray-200 rounded mx-auto" />
+                                    </td>
+                                    <td className="py-2 px-2">
+                                        <div className="h-4 w-20 bg-gray-200 rounded mx-auto" />
+                                    </td>
+                                    <td className="py-2 px-2">
+                                        <div className="h-4 w-10 bg-gray-200 rounded mx-auto" />
+                                    </td>
+                                    <td className="py-2 px-2">
+                                        <div className="flex gap-2 justify-center">
+                                            <div className="h-8 w-12 bg-gray-200 rounded-full" />
+                                            <div className="h-8 w-12 bg-gray-200 rounded-full" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm bg-white rounded-xl shadow border border-gray-200">
                         <thead>

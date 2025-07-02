@@ -134,20 +134,42 @@ export default function TransportistasTab() {
         });
         setShowEditModal(true);
     };
-    if (loading) return <div className="p-4">Cargando...</div>;
+    if (loading) return (
+        <div className="p-6 bg-white rounded-xl">
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 animate-pulse">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logotipo</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retraso</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Envío gratis</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posición</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {[...Array(4)].map((_, i) => (
+                            <tr key={i}>
+                                <td className="px-6 py-4"><div className="h-4 w-8 bg-gray-200 rounded mx-auto" /></td>
+                                <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-200 rounded mx-auto" /></td>
+                                <td className="px-6 py-4"><div className="h-10 w-16 bg-gray-200 rounded-lg mx-auto" /></td>
+                                <td className="px-6 py-4"><div className="h-4 w-16 bg-gray-200 rounded mx-auto" /></td>
+                                <td className="px-6 py-4"><div className="h-6 w-16 bg-gray-200 rounded-full mx-auto" /></td>
+                                <td className="px-6 py-4"><div className="h-6 w-16 bg-gray-200 rounded-full mx-auto" /></td>
+                                <td className="px-6 py-4"><div className="h-4 w-8 bg-gray-200 rounded mx-auto" /></td>
+                                <td className="px-6 py-4"><div className="flex gap-2 justify-center"><div className="h-8 w-12 bg-gray-200 rounded-full" /><div className="h-8 w-12 bg-gray-200 rounded-full" /></div></td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
     return (
         <div className="space-y-12">
-            {/* <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-            /> */}
             <div className="overflow-x-auto">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Transportistas</h2>
@@ -210,114 +232,6 @@ export default function TransportistasTab() {
                     </tbody>
                 </table>
             </div>
-            {/* <div>
-                <h2 className="text-xl font-semibold mb-4">Preferencias</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-4 rounded-lg border border-gray-200">
-                        <h3 className="text-lg font-medium mb-3">Manipulación</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Gastos de manipulación y gestión</label>
-                                <div className="flex">
-                                    <input
-                                        type="number"
-                                        name="gastosManipulacion"
-                                        value={preferences.gastosManipulacion}
-                                        onChange={handlePreferenceChange}
-                                        className="border border-gray-200 rounded-l px-3 py-2 w-full"
-                                        step="0.01"
-                                    />
-                                    <span className="bg-gray-200 px-3 py-2 rounded-r text-nowrap">€ (impuestos excl.)</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Envío gratuito a partir de</label>
-                                <div className="flex">
-                                    <input
-                                        type="number"
-                                        name="minimoEnvioGratis"
-                                        value={preferences.minimoEnvioGratis}
-                                        onChange={handlePreferenceChange}
-                                        className="border border-gray-200 rounded-l px-3 py-2 w-full"
-                                        step="0.1"
-                                    />
-                                    <span className="bg-gray-200 px-3 py-2 rounded-r">€</span>
-                                </div>
-                            </div>
-                            {/* <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Envío gratuito a partir de</label>
-                                <div className="flex">
-                                    <input
-                                        type="number"
-                                        name="minimoPesoGratis"
-                                        value={preferences.minimoPesoGratis}
-                                        onChange={handlePreferenceChange}
-                                        className="border border-gray-200 rounded-l px-3 py-2 w-full"
-                                    />
-                                    <span className="bg-gray-200 px-3 py-2 rounded-r">kg</span>
-                                </div>
-                            </div>  
-                        </div>
-                    </div>
-                    <div className="p-4 rounded-lg border border-gray-200">
-                        <h3 className="text-lg font-medium mb-3">Opciones del transportista</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Transportista predeterminado</label>
-                                <select
-                                    name="transportistaPredeterminado"
-                                    value={preferences.transportistaPredeterminado}
-                                    onChange={handlePreferenceChange}
-                                    className="border border-gray-200 rounded w-full px-3 py-2"
-                                >
-                                    <option value="">Seleccionar transportista</option>
-                                    {transportistas.map(t => (
-                                        <option key={t._id} value={t._id}>{t.nombre}</option>
-                                    ))}
-                                </select>
-                                <p className="text-xs text-gray-500 mt-1">Transportista por defecto de tu tienda.</p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
-                                <select
-                                    name="ordenarPor"
-                                    value={preferences.ordenarPor}
-                                    onChange={handlePreferenceChange}
-                                    className="border border-gray-200 rounded w-full px-3 py-2"
-                                >
-                                    <option value="precio">Precio</option>
-                                    <option value="nombre">Nombre</option>
-                                    <option value="posicion">Posición</option>
-                                </select>
-                                <p className="text-xs text-gray-500 mt-1">Esto solo será visible en el Front.</p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
-                                <select
-                                    name="ordenDireccion"
-                                    value={preferences.ordenDireccion}
-                                    onChange={handlePreferenceChange}
-                                    className="border border-gray-200 rounded w-full px-3 py-2"
-                                >
-                                    <option value="ascendente">Ascendente</option>
-                                    <option value="descendente">Descendente</option>
-                                </select>
-                                <p className="text-xs text-gray-500 mt-1">Esto solo será visible en el Front.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="mt-6">
-                    <button
-                        onClick={handleSavePreferences}
-                        className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#00b1c8ad]"
-                    >
-                        Guardar Preferencias
-                    </button>
-                </div>
-            </div >  
-            */
-}
 
             {/* Edit Modal */}
             {showEditModal && (
