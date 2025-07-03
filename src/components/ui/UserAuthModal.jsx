@@ -193,16 +193,22 @@ export default function AuthModal({ title }) {
     }, []);
     return (
         <div className="">
-            {title && (
-                <>
-                    <button
-                        onClick={openLogin}
-                        className="py-2.5 font-medium text-[#353535] hover:text-[#00B0C8] hover:bg-gray-50 px-4 rounded transition-colors uppercase flex items-center"
-                    >
-                        <UserRound className="mr-3" size={20} />
-                        {title.toUpperCase()}
-                    </button>
-                </>
+            {title ? (
+                <button
+                    onClick={openLogin}
+                    className="py-2.5 w-full font-medium text-[#353535] hover:text-[#00B0C8] hover:bg-gray-50 px-4 rounded transition-colors uppercase flex items-center"
+                >
+                    <UserRound className="mr-3" size={20} />
+                    {title.toUpperCase()}
+                </button>
+            ) : (
+                <button
+                    onClick={openLogin}
+                    className="p-2  transition-colors flex items-center justify-center"
+                    aria-label="Abrir modal de autenticación"
+                >
+                    <UserRound size={24} />
+                </button>
             )}
             {isOpen && (
                 <div className="fixed w-screen h-screen inset-0 flex items-center justify-center z-[9999] pointer-events-none">
@@ -261,7 +267,7 @@ export default function AuthModal({ title }) {
                                         />
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <div className="flex items-center">
+                                        {/*  <div className="flex items-center">
                                             <input
                                                 id="remember-me"
                                                 name="remember-me"
@@ -271,7 +277,7 @@ export default function AuthModal({ title }) {
                                             <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                                                 Recuérdame
                                             </label>
-                                        </div>
+                                        </div> */}
                                         <button
                                             type="button"
                                             onClick={() => toggleView('recover')}
