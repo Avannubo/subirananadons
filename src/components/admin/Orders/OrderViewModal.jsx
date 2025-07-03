@@ -268,32 +268,39 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
                                                     <FiMapPin className="mr-2 text-[#00B0C8]" /> Dirección de envío
                                                 </h4>
-                                                <div className=" p-4 space-y-3">
-                                                    <div>
-                                                        <p className="text-xs text-gray-500">Calle:</p>
-                                                        <p className="font-medium ">{order.shippingAddress.address}</p>
+                                                {order.deliveryMethod === 'pickup' ? (
+                                                    <div className="p-4 flex flex-col items-center justify-center text-center text-[#00B0C8] font-semibold min-h-[150px]">
+                                                        <svg width="84px" height="84px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M22 22H2" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M20 22V11" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M4 22V11" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M16.5278 2H7.47214C6.26932 2 5.66791 2 5.18461 2.2987C4.7013 2.5974 4.43234 3.13531 3.89443 4.21114L2.49081 7.75929C2.16652 8.57905 1.88279 9.54525 2.42867 10.2375C2.79489 10.7019 3.36257 11 3.99991 11C5.10448 11 5.99991 10.1046 5.99991 9C5.99991 10.1046 6.89534 11 7.99991 11C9.10448 11 9.99991 10.1046 9.99991 9C9.99991 10.1046 10.8953 11 11.9999 11C13.1045 11 13.9999 10.1046 13.9999 9C13.9999 10.1046 14.8953 11 15.9999 11C17.1045 11 17.9999 10.1046 17.9999 9C17.9999 10.1046 18.8953 11 19.9999 11C20.6373 11 21.205 10.7019 21.5712 10.2375C22.1171 9.54525 21.8334 8.57905 21.5091 7.75929L20.1055 4.21114C19.5676 3.13531 19.2986 2.5974 18.8153 2.2987C18.332 2 17.7306 2 16.5278 2Z" stroke="#1C274C" strokeWidth="1.5" strokeLinejoin="round"></path> <path opacity="0.5" d="M9.5 21.5V18.5C9.5 17.5654 9.5 17.0981 9.70096 16.75C9.83261 16.522 10.022 16.3326 10.25 16.201C10.5981 16 11.0654 16 12 16C12.9346 16 13.4019 16 13.75 16.201C13.978 16.3326 14.1674 16.522 14.299 16.75C14.5 17.0981 14.5 17.5654 14.5 18.5V21.5" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> </g></svg>
+                                                        <span className="block mt-2 text-lg">Para recoger en tienda</span>
                                                     </div>
-                                                    <div className="flex flex-row justify-between gap-2">
-                                                        <div className='flex-1'>
-                                                            <p className="text-xs text-gray-500">Código Postal:</p>
-                                                            <p className="font-medium ">{order.shippingAddress.postalCode}</p>
+                                                ) : (
+                                                    <div className=" p-4 space-y-3">
+                                                        <div>
+                                                            <p className="text-xs text-gray-500">Calle:</p>
+                                                            <p className="font-medium ">{order.shippingAddress.address}</p>
                                                         </div>
-                                                        <div className='flex-1'>
-                                                            <p className="text-xs text-gray-500">Ciudad:</p>
-                                                            <p className="font-medium ">{order.shippingAddress.city}</p>
+                                                        <div className="flex flex-row justify-between gap-2">
+                                                            <div className='flex-1'>
+                                                                <p className="text-xs text-gray-500">Código Postal:</p>
+                                                                <p className="font-medium ">{order.shippingAddress.postalCode}</p>
+                                                            </div>
+                                                            <div className='flex-1'>
+                                                                <p className="text-xs text-gray-500">Ciudad:</p>
+                                                                <p className="font-medium ">{order.shippingAddress.city}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className='flex flex-row justify-between gap-2'>
+                                                            <div className='flex-1'>
+                                                                <p className="text-xs text-gray-500">Provincia:</p>
+                                                                <p className="font-medium ">{order.shippingAddress.province}</p>
+                                                            </div>
+                                                            <div className='flex-1'>
+                                                                <p className="text-xs text-gray-500">País:</p>
+                                                                <p className="font-medium ">{order.shippingAddress.country}</p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className='flex flex-row justify-between gap-2'>
-                                                        <div className='flex-1'>
-                                                            <p className="text-xs text-gray-500">Provincia:</p>
-                                                            <p className="font-medium ">{order.shippingAddress.province}</p>
-                                                        </div>
-                                                        <div className='flex-1'>
-                                                            <p className="text-xs text-gray-500">País:</p>
-                                                            <p className="font-medium ">{order.shippingAddress.country}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                         {/* Notes */}
@@ -325,77 +332,79 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <FiPackage className="mr-2 text-[#00B0C8]" /> Productos
                                             </h4>
                                             <div className="overflow-x-auto">
-                                                <table className="min-w-full divide-y divide-gray-200">
-                                                    <thead className="bg-gray-50">
-                                                        <tr>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Producto
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Cantidad
-                                                            </th>
-                                                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Tipo
-                                                            </th> <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Precio
-                                                            </th>
+                                                <div className="overflow-x-auto" style={{ maxHeight: '300px', minHeight: '300px', height: '300px', overflowY: 'auto' }}>
+                                                    <table className="min-w-full divide-y divide-gray-200">
+                                                        <thead className="bg-gray-50">
+                                                            <tr>
+                                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                    Producto
+                                                                </th>
+                                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                    Cantidad
+                                                                </th>
+                                                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                    Tipo
+                                                                </th> <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                    Precio
+                                                                </th>
 
-                                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Subtotal
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="bg-white divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
-                                                        {order.items.map((item, index) => {
-                                                            const product = getProductDetails(item.product);
-                                                            return (
-                                                                <tr key={index} className="hover:bg-gray-50">
-                                                                    <td className="px-6 py-4">
-                                                                        <div className="flex items-center space-x-2">
-                                                                            <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
-                                                                                {product?.image ? (
-                                                                                    <img
-                                                                                        src={product.image}
-                                                                                        alt={product.name || `Producto ${index + 1}`}
-                                                                                        className="h-full w-full object-cover"
-                                                                                    />
-                                                                                ) : (
-                                                                                    <FiPackage className="text-gray-500" />
-                                                                                )}
-                                                                            </div>
-                                                                            <div className="ml-4">
-                                                                                <div className="text-sm font-medium text-gray-900 flex flex-col">
-                                                                                    <span>{product?.name || `Producto ${index + 1}`}</span>
-                                                                                    {(item.listName || item.list || item.listTitle) && (
-                                                                                        <span className="italic text-xs text-pink-600 mt-1">
-                                                                                            (Lista: {item.listName || item.list || item.listTitle})
-                                                                                        </span>
+                                                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                    Subtotal
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="bg-white divide-y divide-gray-200">
+                                                            {order.items.map((item, index) => {
+                                                                const product = getProductDetails(item.product);
+                                                                return (
+                                                                    <tr key={index} className="hover:bg-gray-50">
+                                                                        <td className="px-6 py-4">
+                                                                            <div className="flex items-center space-x-2">
+                                                                                <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
+                                                                                    {product?.image ? (
+                                                                                        <img
+                                                                                            src={product.image}
+                                                                                            alt={product.name || `Producto ${index + 1}`}
+                                                                                            className="h-full w-full object-cover"
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <FiPackage className="text-gray-500" />
                                                                                     )}
                                                                                 </div>
-                                                                                <div className="text-xs text-gray-500 flex flex-col">
-                                                                                    <span>Ref: {product?.reference || "N/A"}</span>
-                                                                                    <span>ID: {item.product || "N/A"}</span>
+                                                                                <div className="ml-4">
+                                                                                    <div className="text-sm font-medium text-gray-900 flex flex-col">
+                                                                                        <span>{product?.name || `Producto ${index + 1}`}</span>
+                                                                                        {(item.listName || item.list || item.listTitle) && (
+                                                                                            <span className="italic text-xs text-pink-600 mt-1">
+                                                                                                (Lista: {item.listName || item.list || item.listTitle})
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="text-xs text-gray-500 flex flex-col">
+                                                                                        <span>Ref: {product?.reference || "N/A"}</span>
+                                                                                        <span>ID: {item.product || "N/A"}</span>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                                        {item.quantity}
-                                                                    </td>
-                                                                    <td className={`item-type px-6 py-4 whitespace-nowrap text-center text-sm font-semibold ${item.type === 'gift' ? 'gift-type text-pink-600' : 'personal-type text-blue-600'}`}>
-                                                                        {item.type === 'gift' ? 'Regalo' : 'Personal'}
-                                                                    </td>
-                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                                                                        {formatPrice(item.price)}
-                                                                    </td>
-                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-                                                                        {formatPrice(item.price * item.quantity)}
-                                                                    </td>
-                                                                </tr>
-                                                            );
-                                                        })}
-                                                    </tbody>
-                                                </table>
+                                                                        </td>
+                                                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                                            {item.quantity}
+                                                                        </td>
+                                                                        <td className={`item-type px-6 py-4 whitespace-nowrap text-center text-sm font-semibold ${item.type === 'gift' ? 'gift-type text-pink-600' : 'personal-type text-blue-600'}`}>
+                                                                            {item.type === 'gift' ? 'Regalo' : 'Personal'}
+                                                                        </td>
+                                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                                                            {formatPrice(item.price)}
+                                                                        </td>
+                                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                                                                            {formatPrice(item.price * item.quantity)}
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
                                         {/* Order Summary */}

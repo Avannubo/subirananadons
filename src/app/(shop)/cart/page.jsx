@@ -622,7 +622,7 @@ export default function CartPage() {
                                                     {/* Add note field */}
                                                     <div className="col-span-2">
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Notas generales
+                                                            Notas para Tienda
                                                         </label>
                                                         <textarea
                                                             name="notes"
@@ -638,7 +638,7 @@ export default function CartPage() {
                                                     {hasGiftItems && (
                                                         <div className="col-span-2">
                                                             <label className="block text-sm font-medium text-pink-600 mb-1">
-                                                                Nota para los regalos
+                                                                    Nota para los propietarios de la lista
                                                             </label>
                                                             <textarea
                                                                 name="giftNote"

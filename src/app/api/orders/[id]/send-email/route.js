@@ -67,7 +67,10 @@ export async function POST(request, { params }) {
         // Transform the order data
         const transformedOrder = {
             ...order,
-            items: order.items.map(item => {                const productData = item.product || {};
+            items: order.items.map(item => {
+                console.log(item);
+                
+                const productData = item.product || {};
                 // Use the price from the order item, not from the product
                 const price = Number(item.price || 0);
                 const quantity = Number(item.quantity || 1);

@@ -64,7 +64,7 @@ export async function POST(request) {
                 country: shippingDetails.country || 'España'
             },
             deliveryMethod: deliveryMethod,
-            status: 'processing', // Set initial status to processing (Acceptado)
+            // status: 'procesando', // Set initial status to procesando (Acceptado)
             totalAmount: totals.total,
             subtotal: totals.subtotal,
             tax: totals.tax,
