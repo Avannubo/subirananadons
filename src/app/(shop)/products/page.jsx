@@ -7,124 +7,8 @@ import ProductCard from "@/components/products/product-card";
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductQuickView from "@/components/products/product-quick-view";
 import { fetchProducts, formatProduct } from '@/services/ProductService';
-// Nested Menu Structure for Productos
-const productMenuTree = {
-    label: "Productos",
-    submenu: [
-        {
-            label: "Alimentación",
-            submenu: [
-                { label: "Tronas de viaje" },
-                { label: "Robots de cocina" },
-                { label: "Platos y cubiertos" },
-                { label: "Botellas y vasos" },
-                { label: "Baberos" },
-                { label: "Botes y fiambreras" },
-                { label: "Termos" },
-                { label: "Lactancia" }
-            ]
-        },
-        {
-            label: "Baño",
-            submenu: [
-                { label: "Accesorios baño" },
-                { label: "Capas de baño" },
-                { label: "Kits higiene y cosmética" },
-                { label: "Cajas toallitas" },
-                { label: "Pañales y contenedores pañales" },
-                { label: "Orinales y reductores WC" }
-            ]
-        },
-        {
-            label: "Casa",
-            submenu: [
-                { label: "Intercomunicadores" },
-                { label: "Tronas" },
-                { label: "Barandillas de escalera" },
-                { label: "Hamacas" }
-            ]
-        },
-        {
-            label: "Habitación",
-            submenu: [
-                { label: "Cuna, colecho y moisés" },
-                { label: "Mobiliario" },
-                { label: "Colchones y protectores" },
-                { label: "Téxtil" },
-                { label: "Cambiadores y fundas" },
-                { label: "Luces y decoración" },
-                { label: "Barreras cama" }
-            ]
-        },
-        { label: "Gemelos" }, // No submenu means it's a direct category
-        {
-            label: "Madres",
-            submenu: [
-                { label: "Ropa embarazo y porteo" },
-                { label: "Sujetadores embarazo i lactancia" },
-                { label: "Basicos embarazo" },
-                { label: "Basicos hospital" }]
-        },
-        {
-            label: "Cochecitos",
-            submenu: [
-                { label: "Sillas de paseo" },
-                { label: "Accesorios cochecito" }
-            ]
-        },
-        {
-            label: "Entretenimientos",
-            submenu: [
-                { label: "Doudous y peluches" },
-                { label: "Botellas sensoriales" },
-                { label: "Alfombras de actividades" },
-                { label: "Bolsa almacenaje" },
-                { label: "Mordedores" },
-                { label: "Varios" }
-            ]
-        },
-        {
-            label: "Salud",
-            submenu: [
-                { label: "Aspirador nasal" },
-                { label: "Termómetros" },
-                { label: "Humidificadores" },
-                { label: "Cojines" },
-                { label: "Cojines cabeza plana" },
-                { label: "Casco antiruido" }
-            ]
-        },
-        {
-            label: "Sillas De Coche",
-            submenu: [
-                { label: "Grupo 0+" },
-                { label: "Grupo 0-1" },
-                { label: "Grupo 0-1 - 2" },
-                { label: "Grupo 0-1 - 2 - 3" },
-                { label: "Grupo 2-3" },
-                { label: "Fundas silla" },
-                { label: "Accesorios coche" }
-            ]
-        },
-        {
-            label: "Otros Productos",
-            submenu: [
-                { label: "Mochilas" },
-                { label: "Fulares y bandoleras" },
-                { label: "Ropa porteo" },
-                { label: "Cunas de viaje" },
-                { label: "Ropa bebé" },
-                { label: "Bolsas maternales" },
-                { label: "Bolsas muda" },
-                { label: "Porta Documentos" },
-                { label: "Mochilas infantiles" },
-                { label: "Arrullos" },
-                { label: "Silla para bici" },
-                { label: "Cambiadores de viaje" }
-            ]
-        }
-    ]
-};
+import { fetchCategories } from '@/services/CategoryService';
+
 // Helper function to find a category node and its path by label
 function findCategoryAndPath(node, labelToFind, currentPath = []) {
     const pathIncludingSelf = [...currentPath, node.label]; // Build path first
@@ -155,11 +39,16 @@ function getAllLeafCategoryLabels(node) {
     return labels;
 }
 export default function Page() {
+    // State and effect for categories (declare FIRST)
+    const [categories, setCategories] = useState([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
+    const [categoriesError, setCategoriesError] = useState(null);
+
     const [viewMode, setViewMode] = useState('grid');
     const [sortOrder, setSortOrder] = useState('sales-desc');
     const [quickViewProduct, setQuickViewProduct] = useState(null);
-    // Initialize with the root label from the tree
-    const [categoryPath, setCategoryPath] = useState([productMenuTree.label]);
+    // Initialize with the root label from the DB
+    const [categoryPath, setCategoryPath] = useState(['Productos']);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -177,9 +66,19 @@ export default function Page() {
     const [bannerUrl, setBannerUrl] = useState(null);
     // Get the current category node based on the last item in the path
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
-    // Start search from the root of the tree
-    const currentCategoryData = useMemo(() => findCategoryAndPath(productMenuTree, currentCategoryLabel), [currentCategoryLabel]);
-    const currentSubcategories = currentCategoryData?.node?.submenu || [];
+    // Helper to find a category node by path in the categories tree
+    function findCategoryNodeByPath(categories, path) {
+        let node = { children: categories };
+        for (const label of path) {
+            if (!node.children) return null;
+            node = node.children.find(cat => cat.name === label);
+            if (!node) return null;
+        }
+        return node;
+    }
+    const currentCategoryNode = useMemo(() => findCategoryNodeByPath(categories, categoryPath.slice(1)), [categories, categoryPath]);
+    const currentSubcategories = currentCategoryNode?.children || [];
+
     // Effect to handle URL parameters when the component mounts
     useEffect(() => {
         const categoryParam = searchParams.get('category');
@@ -222,6 +121,23 @@ export default function Page() {
             }
         }
         fetchBanner();
+    }, []);
+    // Fetch categories from DB on mount
+    useEffect(() => {
+        async function loadCategories() {
+            setCategoriesLoading(true);
+            try {
+                const cats = await fetchCategories({ parent: 'null', includeChildren: true });
+                setCategories(cats);
+                setCategoriesError(null);
+            } catch (err) {
+                setCategoriesError('Error loading categories');
+                setCategories([]);
+            } finally {
+                setCategoriesLoading(false);
+            }
+        }
+        loadCategories();
     }, []);
     // Helper function to find a category in the category tree
     function findCategoryInTree(rootNode, categoryToFind) {
@@ -278,11 +194,10 @@ export default function Page() {
                     status: 'active'
                 };
                 // Get current leaf categories if we're in a specific category
-                if (currentCategoryData?.node && categoryPath.length > 1) {
-                    const leafCategories = getAllLeafCategoryLabels(currentCategoryData.node);
-                    if (leafCategories.length > 0) {
-                        options.category = leafCategories.join(',');
-                    }
+                if (currentCategoryNode && categoryPath.length > 1) {
+                    // If you want to filter by all leaf subcategories, you can implement a helper for DB structure
+                    // For now, just use the current category name
+                    options.category = currentCategoryNode.name;
                 }
                 // Add brand filter if present in URL
                 const brandParam = searchParams.get('brand');
@@ -324,7 +239,7 @@ export default function Page() {
             }
         }
         loadProducts();
-    }, [categoryPath, currentCategoryData, currentPage, searchParams]);
+    }, [categoryPath, currentCategoryNode, currentPage, searchParams]);
     // Reset to page 1 when category changes
     useEffect(() => {
         setCurrentPage(1);
@@ -463,7 +378,7 @@ export default function Page() {
             pages.push(totalPages);
         }
         return pages;
-    }; 
+    };
     function flattenCategories(node, parentPath = []) {
         let flat = [];
         const currentPath = [...parentPath, node.label];
@@ -477,17 +392,40 @@ export default function Page() {
         return flat;
     }
     // Memoize all categories for dropdown
-    const allCategories = useMemo(() => flattenCategories(productMenuTree), []);
+    function flattenCategoriesFromDb(categories, parentPath = []) {
+        let flat = [];
+        for (const cat of categories) {
+            const currentPath = [...parentPath, cat.name];
+            if (!cat.children || cat.children.length === 0) {
+                flat.push({ label: currentPath.join(' > '), value: cat.name });
+            } else {
+                flat = flat.concat(flattenCategoriesFromDb(cat.children, currentPath));
+            }
+        }
+        return flat;
+    }
+    const allCategories = useMemo(() => flattenCategoriesFromDb(categories), [categories]);
     // Handler for mobile dropdown change
     const handleMobileCategoryChange = (e) => {
         const selectedLabel = e.target.value;
-        // Find the path for the selected label
-        const found = findCategoryAndPath(productMenuTree, selectedLabel);
-        if (found) {
-            setCategoryPath(found.path);
+        // Find the path for the selected label in the DB categories
+        function findPathByLabel(categories, label, path = []) {
+            for (const cat of categories) {
+                const newPath = [...path, cat.name];
+                if (cat.name === label) return newPath;
+                if (cat.children) {
+                    const found = findPathByLabel(cat.children, label, newPath);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+        const foundPath = findPathByLabel(categories, selectedLabel);
+        if (foundPath) {
+            setCategoryPath(['Productos', ...foundPath]);
             // Update URL params
             const params = new URLSearchParams(searchParams);
-            if (selectedLabel === productMenuTree.label) {
+            if (selectedLabel === 'Productos') {
                 params.delete('category');
             } else {
                 params.set('category', selectedLabel);
@@ -572,42 +510,60 @@ export default function Page() {
                     </div>
                     <aside className="hidden lg:flex w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 mb-6 lg:mb-0">
                         {/*   <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-                            {currentCategoryLabel === productMenuTree.label ? "Categorías" : `Subcategorías de ${categoryPath[categoryPath.length - 2] || "Productos"}`}
+                            {currentCategoryLabel === 'Productos' ? "Categorías" : `Subcategorías de ${categoryPath[categoryPath.length - 2] || "Productos"}`}
                         </h3> */}
                         {/* Show subcategories if available, otherwise show siblings */}
-                        {currentSubcategories.length > 0 ? (
+                        {currentSubcategories && currentSubcategories.length > 0 ? (
                             <ul className="space-y-1">
                                 {currentSubcategories.map((subCategory) => (
-                                    <li key={subCategory.label}>
+                                    <li key={subCategory._id}>
                                         <button
-                                            onClick={() => handleCategoryChange(subCategory.label)}
+                                            onClick={() => {
+                                                setCategoryPath([...categoryPath, subCategory.name]);
+                                                // Update URL parameters
+                                                const params = new URLSearchParams(searchParams);
+                                                params.set('category', subCategory.name);
+                                                router.push(`/products?${params.toString()}`);
+                                            }}
                                             className={`w-full text-left px-2 py-1.5 rounded text-gray-600 hover:bg-gray-100 hover:font-semibold transition-colors duration-150`}
                                         >
-                                            {subCategory.label}
+                                            {subCategory.name}
                                         </button>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
                             categoryPath.length > 1 && (
-                                /* Get the parent's submenu (siblings) when there are no subcategories */
                                 <ul className="space-y-1">
-                                    {categoryPath.length > 2 &&
-                                        findCategoryAndPath(productMenuTree, categoryPath[categoryPath.length - 2])?.node?.submenu?.map((siblingCategory) => (
-                                            <li key={siblingCategory.label}>
+                                    {/* Get the parent's children (siblings) when there are no subcategories */}
+                                    {(function getSiblings() {
+                                        // Find parent node
+                                        const parentPath = categoryPath.slice(0, -1);
+                                        const parentNode = findCategoryNodeByPath(categories, parentPath.slice(1));
+                                        if (!parentNode || !parentNode.children) return null;
+                                        return parentNode.children.map((siblingCategory) => (
+                                            <li key={siblingCategory._id}>
                                                 <button
-                                                    onClick={() => handleSiblingCategoryChange(siblingCategory.label)}
+                                                    onClick={() => {
+                                                        // Replace last in path with sibling
+                                                        const newPath = [...categoryPath.slice(0, -1), siblingCategory.name];
+                                                        setCategoryPath(newPath);
+                                                        // Update URL parameters
+                                                        const params = new URLSearchParams(searchParams);
+                                                        params.set('category', siblingCategory.name);
+                                                        router.push(`/products?${params.toString()}`);
+                                                    }}
                                                     className={`w-full text-left px-2 py-1.5 rounded transition-colors duration-150 
-                                                        ${siblingCategory.label === currentCategoryLabel
+                                                        ${siblingCategory.name === currentCategoryLabel
                                                             ? 'text-[#00B0C8] font-semibold bg-gray-100'
                                                             : 'text-gray-600 hover:bg-gray-100 hover:font-semibold'
                                                         }`}
                                                 >
-                                                    {siblingCategory.label}
+                                                    {siblingCategory.name}
                                                 </button>
                                             </li>
-                                        ))
-                                    }
+                                        ));
+                                    })()}
                                 </ul>
                             )
                         )}

@@ -52,7 +52,7 @@ const ImageGallery = () => {
                                 <div className="absolute inset-0 bg-black/20 flex items-end p-3 md:p-6 transition-colors duration-300 group-hover:bg-black/30">
                                     <div className="text-white w-full">
                                         <h3 className="text-xl md:text-4xl font-bold mb-1 line-clamp-2">{item.title}</h3>
-                                        <p className="text-white/90 text-xs md:text-base line-clamp-2">{item.description}</p>
+                                        <p className="text-white/90 text-lg line-clamp-2">{item.description}</p>
                                     </div>
                                 </div>
                             </div>
@@ -88,8 +88,8 @@ const ImageGallery = () => {
                                 />
                                 <div className="absolute inset-0 bg-black/20 flex rounded-lg items-end p-3 md:p-6 group-hover:bg-black/30 transition-colors duration-300">
                                     <div className="text-white w-full">
-                                        <h3 className="text-lg md:text-2xl font-bold mb-1 line-clamp-2">{item.title}</h3>
-                                        <p className="text-white/90 text-xs md:text-base line-clamp-2">{item.description}</p>
+                                        <h3 className="text-xl md:text-4xl font-bold mb-1 line-clamp-2">{item.title}</h3>
+                                        <p className="text-white/90 text-lg line-clamp-2">{item.description}</p>
                                     </div>
                                 </div>
                             </div>

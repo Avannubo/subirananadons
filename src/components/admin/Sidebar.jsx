@@ -10,10 +10,11 @@ import {
     CircleUserRound,
     TagIcon,
     Star,
-    ChartArea
+    ChartArea,
+    LogOut
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { InstagramIcon, YoutubeIcon, LinkedinIcon } from "lucide-react"; 
+import { InstagramIcon, YoutubeIcon, LinkedinIcon } from "lucide-react";
 const getNavigationItems = (userRole) => [
     // {
     //     href: "/dashboard",
@@ -88,7 +89,7 @@ export default function Sidebar() {
                     <div className='flex items-center justify-center font-bold text-2xl border-b pb-2 border-gray-200'>
                         <span className="font-medium">Hola! {session?.user.name}</span>
                     </div>
-                    {navigationItems.map((item, index) => { 
+                    {navigationItems.map((item, index) => {
                         if (!item.roles.includes(userRole)) {
                             return null;
                         }
@@ -106,6 +107,16 @@ export default function Sidebar() {
                     })}
                 </nav>
                 <div className="mt-auto pt-6 border-t border-gray-200">
+                    <button
+                        onClick={() => {
+                            // Use next-auth signOut if available
+                            import('next-auth/react').then(({ signOut }) => signOut({ callbackUrl: '/' }));
+                        }}
+                        className="w-full flex items-center justify-center gap-2 py-2 mb-4 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-[#00B0C8] hover:text-white rounded-lg transition-colors"
+                    >
+                        <LogOut size={20} />
+                        Cerrar sesión
+                    </button>
                     <div className="flex space-x-5 justify-center my-4">
                         <Link href="https://instagram.com" aria-label="Instagram" className="text-[#333] hover:text-[#00B0C8] transition-colors">
                             <InstagramIcon size={28} />
