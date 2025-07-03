@@ -30,7 +30,7 @@ export default function SearchPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [itemsPerPage, setItemsPerPage] = useState(12);
+    const [itemsPerPage, setItemsPerPage] = useState(6);
     const handleQuickView = (product) => {
         setQuickViewProduct(product);
         setIsQuickViewOpen(true);

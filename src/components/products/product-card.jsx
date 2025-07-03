@@ -79,7 +79,7 @@ export default function ProductCard({
         e.stopPropagation();
         try {
             await addToCart(product, 1);
-            toast.success(`${product.name} añadido al carrito`);
+            // toast.success(`${product.name} añadido al carrito`);
         } catch (error) {
             toast.error('Error al añadir al carrito');
             console.error('Error adding to cart:', error);

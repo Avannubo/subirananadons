@@ -62,7 +62,7 @@ export default function FadeSlider() {
                         <div className="absolute bottom-15 left-1/2 -translate-x-1/2 z-20 flex justify-center w-full md:w-auto md:font-semibold   md:left-50 md:translate-x-0 md:justify-center md:items-center">
                             <Link
                                 href={slide.btnLink}
-                                className="flex items-center uppercase  text-white rounded-md transition-colors text-sm md:text-4xl mx-auto relative group"
+                                className="flex items-center uppercase  text-white rounded-md transition-colors text-lg font-bold md:text-4xl mx-auto relative group"
                             >
                                 <span
                                     className="relative z-10"
@@ -75,27 +75,6 @@ export default function FadeSlider() {
                                 />
                             </Link>
                         </div>
-                        {/* <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex justify-center w-full md:w-auto  md:left-50 md:translate-x-0 md:justify-center md:items-center">
-                            <Link
-                                href={slide.btnLink}
-                                className="flex items-center uppercase  text-white rounded-md transition-colors text-sm md:text-4xl mx-auto relative group"
-                            >
-                                <span
-                                    style={{
-                                        WebkitTextStroke: '1.5px #fff',
-                                        color: 'white',
-                                        textShadow: '2px 2px 8px #000, 0 2px 12px #000'
-                                    }}
-                                    className="relative z-10"
-                                >
-                                    {slide.btnText || 'Learn More'}
-                                </span>
-                                <span
-                                    className="absolute left-0 -bottom-1 w-0 h-[5px] bg-white transition-all duration-500 group-hover:w-full shadow-[0_2px_8px_0_rgba(0,0,0,0.7)]"
-                                    aria-hidden="true"
-                                />
-                            </Link>
-                        </div> */}
                     </SwiperSlide>
                 ))}
             </Swiper>
