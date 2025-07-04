@@ -14,7 +14,7 @@ import {
     LogOut
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { InstagramIcon, YoutubeIcon, LinkedinIcon } from "lucide-react";
+import useShopSocials from "@/lib/useShopSocials";
 const getNavigationItems = (userRole) => [
     // {
     //     href: "/dashboard",
@@ -118,15 +118,14 @@ export default function Sidebar() {
                         Cerrar sesión
                     </button>
                     <div className="flex space-x-5 justify-center my-4">
-                        <Link href="https://instagram.com" aria-label="Instagram" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                            <InstagramIcon size={28} />
-                        </Link>
-                        <Link href="https://youtube.com" aria-label="YouTube" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                            <YoutubeIcon size={28} />
-                        </Link>
-                        <Link href="https://linkedin.com" aria-label="LinkedIn" className="text-[#333] hover:text-[#00B0C8] transition-colors">
-                            <LinkedinIcon size={28} />
-                        </Link>
+                        {useShopSocials().socials.map((social) => {
+                            const Icon = social.Icon;
+                            return (
+                                <Link key={social.key} href={social.link} aria-label={social.name} className="text-[#333] hover:text-[#00B0C8] transition-colors" target="_blank" rel="noopener noreferrer">
+                                    <Icon size={28} />
+                                </Link>
+                            );
+                        })}
                     </div>
                     <p className="text-sm text-center text-gray-500 mt-2">© 2025 Subirana</p>
                 </div>

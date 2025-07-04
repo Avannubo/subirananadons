@@ -6,7 +6,7 @@ export default async function ConfiguracionPage() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="p-6">
+                <div className="p-6 min-h-[100vh]">
                     <h1 className="text-3xl font-bold mb-6">Configuración</h1>
                     <SettingsTabs />
                 </div>
