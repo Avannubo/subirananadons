@@ -1,129 +1,14 @@
 'use client';
-import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
-import ProductCard from "@/components/products/product-card";
-import ProductQuickView from "@/components/products/product-quick-view";
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchProducts, formatProduct } from '@/services/ProductService';
+import ShopLayout from "@/components/Layouts/shop-layout";
+import ProductCard from "@/components/products/product-card";
 import { useSearchParams, useRouter } from 'next/navigation';
-// Nested Menu Structure for Productos
-const productMenuTree = {
-    label: "Productos",
-    submenu: [
-        {
-            label: "Alimentación",
-            submenu: [
-                { label: "Tronas de viaje" },
-                { label: "Robots de cocina" },
-                { label: "Platos y cubiertos" },
-                { label: "Botellas y vasos" },
-                { label: "Baberos" },
-                { label: "Botes y fiambreras" },
-                { label: "Termos" },
-                { label: "Lactancia" }
-            ]
-        },
-        {
-            label: "Baño",
-            submenu: [
-                { label: "Accesorios baño" },
-                { label: "Kits higiene y cosmética" },
-                { label: "Cajas toallitas" },
-                { label: "Pañales y contenedores pañales" },
-                { label: "Orinales y reductores WC" }
-            ]
-        },
-        {
-            label: "Casa",
-            submenu: [
-                { label: "Intercomunicadores" },
-                { label: "Tronas" },
-                { label: "Barandillas de escalera" },
-                { label: "Hamacas" }
-            ]
-        },
-        {
-            label: "Habitación",
-            submenu: [
-                { label: "Cuna, colecho y moisés" },
-                { label: "Mobiliario" },
-                { label: "Colchones y protectores" },
-                { label: "Téxtil" },
-                { label: "Cambiadores y fundas" },
-                { label: "Luces y decoración" },
-                { label: "Barreras cama" }
-            ]
-        },
-        { label: "Gemelos" }, // No submenu means it's a direct category
-        {
-            label: "Madres",
-            submenu: [
-                { label: "Ropa embarazo y porteo" },
-                { label: "Sujetadores embarazo i lactancia" },
-                { label: "Basicos embarazo" },
-                { label: "Basicos hospital" }]
-        },
-        {
-            label: "Cochecitos",
-            submenu: [
-                { label: "Sillas de paseo" },
-                { label: "Accesorios cochecito" }
-            ]
-        },
-        {
-            label: "Entretenimientos",
-            submenu: [
-                { label: "Doudous y peluches" },
-                { label: "Botellas sensoriales" },
-                { label: "Alfombras de actividades" },
-                { label: "Bolsa almacenaje" },
-                { label: "Mordedores" },
-                { label: "Varios" }
-            ]
-        },
-        {
-            label: "Salud",
-            submenu: [
-                { label: "Aspirador nasal" },
-                { label: "Termómetros" },
-                { label: "Humidificadores" },
-                { label: "Cojines" },
-                { label: "Cojines cabeza plana" },
-                { label: "Casco antiruido" }
-            ]
-        },
-        {
-            label: "Sillas De Coche",
-            submenu: [
-                { label: "Grupo 0+" },
-                { label: "Grupo 0-1" },
-                { label: "Grupo 0-1 - 2" },
-                { label: "Grupo 0-1 - 2 - 3" },
-                { label: "Grupo 2-3" },
-                { label: "Fundas silla" },
-                { label: "Accesorios coche" }
-            ]
-        },
-        {
-            label: "Otros Productos",
-            submenu: [
-                { label: "Mochilas" },
-                { label: "Fulares y bandoleras" },
-                { label: "Ropa porteo" },
-                { label: "Cunas de viaje" },
-                { label: "Ropa bebé" },
-                { label: "Bolsas maternales" },
-                { label: "Bolsas muda" },
-                { label: "Porta Documentos" },
-                { label: "Mochilas infantiles" },
-                { label: "Arrullos" },
-                { label: "Silla para bici" },
-                { label: "Cambiadores de viaje" }
-            ]
-        }
-    ]
-};
+import ProductQuickView from "@/components/products/product-quick-view";
+import { fetchProducts, formatProduct } from '@/services/ProductService';
+import { fetchCategories } from '@/services/CategoryService';
+
 // Helper function to find a category node and its path by label
 function findCategoryAndPath(node, labelToFind, currentPath = []) {
     const pathIncludingSelf = [...currentPath, node.label]; // Build path first
@@ -154,11 +39,16 @@ function getAllLeafCategoryLabels(node) {
     return labels;
 }
 export default function Page() {
+    // State and effect for categories (declare FIRST)
+    const [categories, setCategories] = useState([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
+    const [categoriesError, setCategoriesError] = useState(null);
+
     const [viewMode, setViewMode] = useState('grid');
     const [sortOrder, setSortOrder] = useState('sales-desc');
     const [quickViewProduct, setQuickViewProduct] = useState(null);
-    // Initialize with the root label from the tree
-    const [categoryPath, setCategoryPath] = useState([productMenuTree.label]);
+    // Initialize with the root label from the DB
+    const [categoryPath, setCategoryPath] = useState(['Productos']);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -172,40 +62,100 @@ export default function Page() {
     const router = useRouter();
     // Track if a brand filter is active
     const [activeBrandFilter, setActiveBrandFilter] = useState(null);
+    // Add useState for banner image
+    const [bannerUrl, setBannerUrl] = useState(null);
     // Get the current category node based on the last item in the path
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
-    // Start search from the root of the tree
-    const currentCategoryData = useMemo(() => findCategoryAndPath(productMenuTree, currentCategoryLabel), [currentCategoryLabel]);
-    const currentSubcategories = currentCategoryData?.node?.submenu || [];
+    // Helper to find a category node by path in the categories tree
+    function findCategoryNodeByPath(categories, path) {
+        let node = { children: categories };
+        for (const label of path) {
+            if (!node.children) return null;
+            node = node.children.find(cat => cat.name === label);
+            if (!node) return null;
+        }
+        return node;
+    }
+    const currentCategoryNode = useMemo(() => findCategoryNodeByPath(categories, categoryPath.slice(1)), [categories, categoryPath]);
+    const currentSubcategories = currentCategoryNode?.children || [];
+
     // Effect to handle URL parameters when the component mounts
     useEffect(() => {
         const categoryParam = searchParams.get('category');
         const brandParam = searchParams.get('brand');
         console.log('URL Parameters:', { category: categoryParam, brand: brandParam });
-        if (categoryParam) {
-            // Find the category path for the specified category
-            const categoryNode = findCategoryInTree(productMenuTree, categoryParam);
-            if (categoryNode) {
-                console.log('Found category path:', categoryNode.path);
-                setCategoryPath(categoryNode.path);
+        if (categoryParam && categories && categories.length > 0) {
+            // Find the category path for the specified category in the DB-driven categories
+            function findPathByLabel(categories, label, path = []) {
+                for (const cat of categories) {
+                    const newPath = [...path, cat.name];
+                    if (cat.name === label) return newPath;
+                    if (cat.children) {
+                        const found = findPathByLabel(cat.children, label, newPath);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            }
+            const foundPath = findPathByLabel(categories, categoryParam);
+            if (foundPath) {
+                setCategoryPath(['Productos', ...foundPath]);
             } else {
-                console.log('Category not found in tree:', categoryParam);
                 // Try to match by case-insensitive partial match
                 const normalizedCategory = categoryParam.toLowerCase().trim();
-                const matchResult = findCategoryByPartialMatch(productMenuTree, normalizedCategory);
+                function findPartialPath(categories, search, path = []) {
+                    for (const cat of categories) {
+                        const newPath = [...path, cat.name];
+                        if (cat.name.toLowerCase().includes(search)) return newPath;
+                        if (cat.children) {
+                            const found = findPartialPath(cat.children, search, newPath);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                }
+                const matchResult = findPartialPath(categories, normalizedCategory);
                 if (matchResult) {
-                    console.log('Found category by partial match:', matchResult.path);
-                    setCategoryPath(matchResult.path);
+                    setCategoryPath(['Productos', ...matchResult]);
                 }
             }
         }
         if (brandParam) {
-            // Store the active brand filter for UI indication
             setActiveBrandFilter(brandParam);
             console.log('Filtering by brand:', brandParam);
         }
         // Only run this effect when the component mounts, not on every searchParams change
         // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [categories]);
+    // Fetch active banner image on mount
+    useEffect(() => {
+        async function fetchBanner() {
+            try {
+                const res = await fetch('/api/portimg/active');
+                const data = await res.json();
+                setBannerUrl(data.imageUrl);
+            } catch (e) {
+                setBannerUrl(null);
+            }
+        }
+        fetchBanner();
+    }, []);
+    // Fetch categories from DB on mount
+    useEffect(() => {
+        async function loadCategories() {
+            setCategoriesLoading(true);
+            try {
+                const cats = await fetchCategories({ parent: 'null', includeChildren: true });
+                setCategories(cats);
+                setCategoriesError(null);
+            } catch (err) {
+                setCategoriesError('Error loading categories');
+                setCategories([]);
+            } finally {
+                setCategoriesLoading(false);
+            }
+        }
+        loadCategories();
     }, []);
     // Helper function to find a category in the category tree
     function findCategoryInTree(rootNode, categoryToFind) {
@@ -262,11 +212,10 @@ export default function Page() {
                     status: 'active'
                 };
                 // Get current leaf categories if we're in a specific category
-                if (currentCategoryData?.node && categoryPath.length > 1) {
-                    const leafCategories = getAllLeafCategoryLabels(currentCategoryData.node);
-                    if (leafCategories.length > 0) {
-                        options.category = leafCategories.join(',');
-                    }
+                if (currentCategoryNode && categoryPath.length > 1) {
+                    // If you want to filter by all leaf subcategories, you can implement a helper for DB structure
+                    // For now, just use the current category name
+                    options.category = currentCategoryNode.name;
                 }
                 // Add brand filter if present in URL
                 const brandParam = searchParams.get('brand');
@@ -308,7 +257,7 @@ export default function Page() {
             }
         }
         loadProducts();
-    }, [categoryPath, currentCategoryData, currentPage, searchParams]);
+    }, [categoryPath, currentCategoryNode, currentPage, searchParams]);
     // Reset to page 1 when category changes
     useEffect(() => {
         setCurrentPage(1);
@@ -409,7 +358,7 @@ export default function Page() {
     // Generate page numbers for pagination
     const getPageNumbers = () => {
         let pages = [];
-        const maxPagesToShow = 5;
+        const maxPagesToShow = 1;
         if (totalPages <= maxPagesToShow) {
             // If we have fewer pages than the max, show all pages
             for (let i = 1; i <= totalPages; i++) {
@@ -448,18 +397,81 @@ export default function Page() {
         }
         return pages;
     };
+    function flattenCategories(node, parentPath = []) {
+        let flat = [];
+        const currentPath = [...parentPath, node.label];
+        if (!node.submenu || node.submenu.length === 0) {
+            flat.push({ label: currentPath.join(' > '), value: node.label });
+        } else {
+            node.submenu.forEach(sub => {
+                flat = flat.concat(flattenCategories(sub, currentPath));
+            });
+        }
+        return flat;
+    }
+    // Memoize all categories for dropdown
+    function flattenCategoriesFromDb(categories, parentPath = []) {
+        let flat = [];
+        for (const cat of categories) {
+            const currentPath = [...parentPath, cat.name];
+            if (!cat.children || cat.children.length === 0) {
+                flat.push({ label: currentPath.join(' > '), value: cat.name });
+            } else {
+                flat = flat.concat(flattenCategoriesFromDb(cat.children, currentPath));
+            }
+        }
+        return flat;
+    }
+    const allCategories = useMemo(() => flattenCategoriesFromDb(categories), [categories]);
+    // Handler for mobile dropdown change
+    const handleMobileCategoryChange = (e) => {
+        const selectedLabel = e.target.value;
+        // Find the path for the selected label in the DB categories
+        function findPathByLabel(categories, label, path = []) {
+            for (const cat of categories) {
+                const newPath = [...path, cat.name];
+                if (cat.name === label) return newPath;
+                if (cat.children) {
+                    const found = findPathByLabel(cat.children, label, newPath);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+        const foundPath = findPathByLabel(categories, selectedLabel);
+        if (foundPath) {
+            setCategoryPath(['Productos', ...foundPath]);
+            // Update URL params
+            const params = new URLSearchParams(searchParams);
+            if (selectedLabel === 'Productos') {
+                params.delete('category');
+            } else {
+                params.set('category', selectedLabel);
+            }
+            router.push(`/products?${params.toString()}`);
+        }
+    };
     return (
         <ShopLayout>
-            <div className="relative w-full h-full flex flex-col justify-start items-start mt-20">
-                <Image src="/assets/images/bg-beagrumb.jpg" alt="logo" className="w-full h-[20vh] object-cover" width={2010} height={2010} />
-                <div className="absolute inset-0 flex items-center mt-14 justify-center">
-                    <h1 className="text-4xl text-zinc-800 font-bold">Tienda</h1>
+            {/* Banner with overlay and white title, matching brands page */}
+            <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
+                <Image
+                    src={bannerUrl || "/assets/images/bg-beagrumb.jpg"}
+                    alt="banner"
+                    fill
+                    className="object-cover"
+                    priority
+                />
+                {/* Overlay for contrast */}
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Tienda</h1>
                 </div>
             </div>
-            <div className="container w-[1500px] bg-white px-4 py-8">
+            <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-8 rounded-t-2xl mt-4 sm:mt-0 ">
                 {/* Active Brand Filter Indicator */}
                 {activeBrandFilter && (
-                    <div className="mb-4 bg-[#00B0C8]/10 px-4 py-3 rounded-lg flex items-center justify-between">
+                    <div className="mb-4 bg-[#00B0C8]/10 px-4 py-3 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                         <div className="flex items-center">
                             <span className="mr-2 text-[#00B0C8]">Filtrando por marca:</span>
                             <span className="font-medium">{activeBrandFilter}</span>
@@ -481,8 +493,8 @@ export default function Page() {
                     </div>
                 )}
                 {/* Breadcrumbs */}
-                <nav aria-label="Breadcrumb" className="mb-6 pl-2">
-                    <ol className="flex items-center space-x-1 text-md text-gray-500 flex-wrap">
+                <nav aria-label="Breadcrumb" className="hidden lg:flex mb-2 pl-2 overflow-x-auto">
+                    <ol className="flex items-center space-x-1 text-sm sm:text-md text-gray-500 flex-wrap min-w-[200px]">
                         {categoryPath.map((label, index) => (
                             <li key={index} className="flex items-center">
                                 {index > 0 && (
@@ -499,89 +511,158 @@ export default function Page() {
                         ))}
                     </ol>
                 </nav>
-                <div className="flex flex-col md:flex-row gap-8">
+                <div className="flex flex-col lg:flex-row gap-2">
                     {/* Category/Subcategory List Sidebar */}
-                    <aside className="w-full md:w-1/4 lg:w-1/5 flex-shrink-0 ">
+                    {/* Mobile dropdown visible only on mobile, sidebar visible only on sm+ */}
+                    <div className="block lg:hidden w-full mb-4 ">
+                        <select
+                            id="mobile-category-select"
+                            className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition"
+                            value={currentCategoryLabel}
+                            onChange={handleMobileCategoryChange}
+                        >
+                            {allCategories.map(cat => (
+                                <option key={cat.value} value={cat.value}>{cat.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <aside className="hidden lg:flex w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 mb-6 lg:mb-0">
                         {/*   <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-                            {currentCategoryLabel === productMenuTree.label ? "Categorías" : `Subcategorías de ${categoryPath[categoryPath.length - 2] || "Productos"}`}
+                            {currentCategoryLabel === 'Productos' ? "Categorías" : `Subcategorías de ${categoryPath[categoryPath.length - 2] || "Productos"}`}
                         </h3> */}
                         {/* Show subcategories if available, otherwise show siblings */}
-                        {currentSubcategories.length > 0 ? (
+                        {currentSubcategories && currentSubcategories.length > 0 ? (
                             <ul className="space-y-1">
                                 {currentSubcategories.map((subCategory) => (
-                                    <li key={subCategory.label}>
+                                    <li key={subCategory._id}>
                                         <button
-                                            onClick={() => handleCategoryChange(subCategory.label)}
+                                            onClick={() => {
+                                                setCategoryPath([...categoryPath, subCategory.name]);
+                                                // Update URL parameters
+                                                const params = new URLSearchParams(searchParams);
+                                                params.set('category', subCategory.name);
+                                                router.push(`/products?${params.toString()}`);
+                                            }}
                                             className={`w-full text-left px-2 py-1.5 rounded text-gray-600 hover:bg-gray-100 hover:font-semibold transition-colors duration-150`}
                                         >
-                                            {subCategory.label}
+                                            {subCategory.name}
                                         </button>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
                             categoryPath.length > 1 && (
-                                /* Get the parent's submenu (siblings) when there are no subcategories */
                                 <ul className="space-y-1">
-                                    {categoryPath.length > 2 &&
-                                        findCategoryAndPath(productMenuTree, categoryPath[categoryPath.length - 2])?.node?.submenu?.map((siblingCategory) => (
-                                            <li key={siblingCategory.label}>
+                                    {/* Get the parent's children (siblings) when there are no subcategories */}
+                                    {(function getSiblings() {
+                                        // Find parent node
+                                        const parentPath = categoryPath.slice(0, -1);
+                                        const parentNode = findCategoryNodeByPath(categories, parentPath.slice(1));
+                                        if (!parentNode || !parentNode.children) return null;
+                                        return parentNode.children.map((siblingCategory) => (
+                                            <li key={siblingCategory._id}>
                                                 <button
-                                                    onClick={() => handleSiblingCategoryChange(siblingCategory.label)}
+                                                    onClick={() => {
+                                                        // Replace last in path with sibling
+                                                        const newPath = [...categoryPath.slice(0, -1), siblingCategory.name];
+                                                        setCategoryPath(newPath);
+                                                        // Update URL parameters
+                                                        const params = new URLSearchParams(searchParams);
+                                                        params.set('category', siblingCategory.name);
+                                                        router.push(`/products?${params.toString()}`);
+                                                    }}
                                                     className={`w-full text-left px-2 py-1.5 rounded transition-colors duration-150 
-                                                        ${siblingCategory.label === currentCategoryLabel
+                                                        ${siblingCategory.name === currentCategoryLabel
                                                             ? 'text-[#00B0C8] font-semibold bg-gray-100'
                                                             : 'text-gray-600 hover:bg-gray-100 hover:font-semibold'
                                                         }`}
                                                 >
-                                                    {siblingCategory.label}
+                                                    {siblingCategory.name}
                                                 </button>
                                             </li>
-                                        ))
-                                    }
+                                        ));
+                                    })()}
                                 </ul>
                             )
                         )}
                     </aside>
                     {/* Product Grid Area */}
                     <main className="w-full flex-grow">
-                        <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-                            <div className="flex items-center space-x-2">
-                                {/* Grid/List view toggle icons */}
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                                </button>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 flex-wrap gap-2">
+                            {/* Mobile: sort and view controls stacked, desktop: inline */}
+                            <div className="flex flex-row w-full justify-between items-center gap-2 sm:hidden  ">
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => setViewMode('grid')}
+                                        className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('list')}
+                                        className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                    </button>
+                                </div>
+                                <div className="flex items-center">
+                                    <label htmlFor="sort-by" className="mr-1 text-gray-600 text-xs whitespace-nowrap">Ordenar:</label>
+                                    <select
+                                        id="sort-by"
+                                        className="border border-gray-300 rounded p-1 text-xs text-gray-600"
+                                        value={sortOrder}
+                                        onChange={handleSortChange}
+                                    >
+                                        <option value="sales-desc">Ventas ↓</option>
+                                        <option value="price-asc">Precio ↑</option>
+                                        <option value="price-desc">Precio ↓</option>
+                                        <option value="name-asc">Nombre A-Z</option>
+                                        <option value="name-desc">Nombre Z-A</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div className="flex items-center">
+                            {/* Desktop controls */}
+                            <div className="hidden sm:flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto gap-2 sm:gap-0">
+                                <div className="flex items-center space-x-2">
+                                    <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">Ordenar por:</label>
+                                    <select
+                                        id="sort-by"
+                                        className="border border-gray-300 w-full text-start rounded p-2 text-gray-600"
+                                        value={sortOrder}
+                                        onChange={handleSortChange}
+                                    >
+                                        <option value="sales-desc">Ventas ↓</option>
+                                        <option value="price-asc">Precio ↑</option>
+                                        <option value="price-desc">Precio ↓</option>
+                                        <option value="name-asc">Nombre A-Z</option>
+                                        <option value="name-desc">Nombre Z-A</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div className="hidden sm:flex items-center justify-between space-x-4 w-full sm:w-auto mt-2 sm:mt-0">
+                                <div className="flex items-center space-x-2">
+                                    {/* Grid/List view toggle icons */}
+                                    <button
+                                        onClick={() => setViewMode('grid')}
+                                        className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('list')}
+                                        className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                    </button>
+                                </div>
                                 {!loading && totalProducts > 0 && (
-                                    <span className="text-sm text-gray-500 mr-4">
+                                    <span className="text-sm text-gray-500 mr-0 sm:mr-4">
                                         Mostrando {(currentPage - 1) * productsPerPage + 1}-
                                         {Math.min(currentPage * productsPerPage, totalProducts)} de {totalProducts} productos
                                     </span>
                                 )}
-                                {/* Sort dropdown */}
-                                <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">Ordenar por:</label>
-                                <select
-                                    id="sort-by"
-                                    className="border border-gray-300 rounded p-2 text-gray-600"
-                                    value={sortOrder}
-                                    onChange={handleSortChange}
-                                >
-                                    <option value="sales-desc">Ventas en orden decreciente</option>
-                                    <option value="price-asc">Precio: más bajo primero</option>
-                                    <option value="price-desc">Precio: más alto primero</option>
-                                    <option value="name-asc">Nombre: A-Z</option>
-                                    <option value="name-desc">Nombre: Z-A</option>
-                                </select>
                             </div>
                         </div>
                         {/* Loading state */}

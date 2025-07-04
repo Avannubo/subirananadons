@@ -33,7 +33,7 @@ export async function GET(request) {
         const totalLists = await BirthList.countDocuments();
         const activeLists = await BirthList.countDocuments({ status: 'Activa' });
         const completedLists = await BirthList.countDocuments({ status: 'Completada' });
-        const canceledLists = await BirthList.countDocuments({ status: 'Cancelada' });
+        const canceledLists = await BirthList.countDocuments({ status: 'InActiva' });
 
         // Count lists created this month
         const listsThisMonth = await BirthList.countDocuments({
@@ -54,7 +54,7 @@ export async function GET(request) {
 
         // Count canceled lists this month
         const canceledListsThisMonth = await BirthList.countDocuments({
-            status: 'Cancelada',
+            status: 'InActiva',
             createdAt: { $gte: firstDayOfMonth }
         });
 

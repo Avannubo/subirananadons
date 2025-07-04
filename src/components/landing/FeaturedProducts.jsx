@@ -80,12 +80,12 @@ const sampleFeaturedProducts = [
     }
 ];
 
-export default function FeaturedProducts({ limit = 8, forceUseSampleData = false, debug = false }) {
+export default function FeaturedProducts({ limit = 8, forceUseSampleData = false }) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [usingSampleData, setUsingSampleData] = useState(false);
     const [error, setError] = useState(null);
-
+ 
     useEffect(() => {
         const getProducts = async () => {
             try {
@@ -145,11 +145,11 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
     if (loading) {
         return (
             <div className="w-full py-8">
-                <div className="container mx-auto">
-                    <h2 className="text-3xl text-black font-bold mb-8">Productos Destacados</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="container mx-auto px-2">
+                    <h2 className="text-2xl md:text-3xl text-black font-bold mb-6 md:mb-8">Productos Destacados</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                         {[...Array(Math.min(limit, 4))].map((_, index) => (
-                            <div key={index} className="bg-gray-100 animate-pulse rounded-lg h-64"></div>
+                            <div key={index} className="bg-gray-100 animate-pulse rounded-lg h-48 md:h-64"></div>
                         ))}
                     </div>
                 </div>
@@ -163,34 +163,25 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
 
     return (
         <div className="w-full py-8">
-            <ProductSlider
-                title="Productos Destacados"
-                products={products}
-                className="w-full"
-                slidesPerView={{
-                    mobile: 2,
-                    tablet: 3,
-                    desktop: 4
-                }}
-            />
-            {usingSampleData && (
-                <div className="container mx-auto mt-2">
-                    <p className="text-xs text-gray-500 text-center">
-                        Mostrando datos de ejemplo. {error ? `Error: ${error}` : 'No se encontraron productos destacados en la base de datos.'}
-                    </p>
-                </div>
-            )}
-            {/* {debug && (
-                <div className="container mx-auto mt-4 p-4 bg-gray-100 rounded">
-                    <h3 className="text-sm font-bold mb-2">Debug Information:</h3>
-                    <ul className="text-xs space-y-1">
-                        <li>Source: {usingSampleData ? 'Sample Data' : 'Database'}</li>
-                        <li>Products Count: {products.length}</li>
-                        <li>Requested Limit: {limit}</li>
-                        {error && <li className="text-red-500">Error: {error}</li>}
-                    </ul>
-                </div>
-            )} */}
+            <div className="container mx-auto px-2">
+                <ProductSlider
+                    title="Productos Destacados"
+                    products={products}
+                    className="w-full"
+                    slidesPerView={{
+                        mobile: 2,
+                        tablet: 3,
+                        desktop: 4
+                    }}
+                />
+                {usingSampleData && (
+                    <div className="mt-2">
+                        <p className="text-xs text-gray-500 text-center">
+                            Mostrando datos de ejemplo. {error ? `Error: ${error}` : 'No se encontraron productos destacados en la base de datos.'}
+                        </p>
+                    </div>
+                )}
+            </div>
         </div>
     );
-} 
+}

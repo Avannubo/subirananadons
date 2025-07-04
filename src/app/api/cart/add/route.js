@@ -90,15 +90,16 @@ export async function POST(request) {
                 console.error('Error finding user cart:', cartError);
                 // Continue with empty cart
             }
-            // Check if product already exists in cart
-            const existingItemIndex = cart.items.findIndex(
-                item => item.product?.toString() === product._id.toString()
-            );
+            // Check if product already exists in cart            // For gift items, always add as new. For regular items, check for duplicates
+            const existingItemIndex = !isGift ? cart.items.findIndex(
+                item => item.product?.toString() === product._id.toString() && !item.isGift
+            ) : -1;
+
             if (existingItemIndex > -1) {
-                // Update existing item quantity
+                // Update existing non-gift item quantity
                 cart.items[existingItemIndex].quantity += Number(quantity);
             } else {
-                // Add new item
+                // Add new item (gift items always go here)
                 cart.items.push({
                     product: product._id.toString(),
                     quantity: Number(quantity),

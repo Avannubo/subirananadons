@@ -31,7 +31,7 @@ export default function ListasStats() {
         },
         {
             icon: <FiX className="text-purple-600 text-xl" />,
-            title: "Listas canceladas",
+            title: "Listas InActivas",
             value: loading ? "Cargando..." : stats.canceledListsThisMonth.toString(),
             description: "Este mes",
             bgColor: "bg-purple-100"

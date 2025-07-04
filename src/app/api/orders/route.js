@@ -5,6 +5,8 @@ import Order from '@/models/Order';
 import User from '@/models/User';
 import dbConnect from '@/lib/dbConnect';
 import mongoose from 'mongoose';
+import BirthList from '@/models/BirthList';
+import EmailService from '@/services/EmailService';
 
 // Generate a unique order number
 function generateOrderNumber() {
@@ -35,13 +37,20 @@ export async function POST(request) {
             items: items.map(item => {
                 const productId = typeof item.id === 'string' && /^[0-9a-fA-F]{24}$/.test(item.id)
                     ? item.id
-                    : item.id.toString();
-
-                return {
-                    product: productId,
-                    quantity: item.quantity,
-                    price: item.priceValue || parseFloat(item.price.replace(',', '.'))
-                };
+                    : item.id.toString(); return {
+                        product: productId,
+                        quantity: item.quantity,
+                        price: item.priceValue || parseFloat(item.price.replace(',', '.')),
+                        type: item.type || 'regular',
+                        giftInfo: item.type === 'gift' ? item.listInfo : undefined,
+                        buyerInfo: item.type === 'gift' ? {
+                            name: shippingDetails.name,
+                            email: shippingDetails.email,
+                            phone: shippingDetails.phone,
+                            note: shippingDetails.giftNote || '',
+                            userId: session?.user?.id
+                        } : undefined
+                    };
             }),
             shippingAddress: {
                 name: shippingDetails.name,
@@ -55,12 +64,13 @@ export async function POST(request) {
                 country: shippingDetails.country || 'España'
             },
             deliveryMethod: deliveryMethod,
-            status: 'pending',
+            // status: 'procesando', // Set initial status to procesando (Acceptado)
             totalAmount: totals.total,
             subtotal: totals.subtotal,
             tax: totals.tax,
             shippingCost: totals.shipping,
-            notes: shippingDetails.notes || ''
+            notes: shippingDetails.notes || '',
+            giftNote: shippingDetails.giftNote || ''
         };
 
         // If user is logged in, link the order to the user
@@ -70,6 +80,62 @@ export async function POST(request) {
 
         // Create the order
         const order = await Order.create(orderData);
+
+        // For gift items, update the birth list items to mark them as purchased
+        const giftItems = items.filter(item => item.type === 'gift' && item.listInfo);
+        if (giftItems.length > 0) {
+            for (const item of giftItems) {
+                if (!item.listInfo.listId || !item.listInfo.itemId) continue;
+
+                try {
+                    // Find the birth list
+                    const birthList = await BirthList.findById(item.listInfo.listId);
+                    if (!birthList) {
+                        console.error(`Birth list not found: ${item.listInfo.listId}`);
+                        continue;
+                    }
+
+                    // Find the specific item in the birth list
+                    const birthListItem = birthList.items.id(item.listInfo.itemId);
+                    if (!birthListItem) {
+                        console.error(`Item not found in birth list: ${item.listInfo.itemId}`);
+                        continue;
+                    }
+
+                    // Create buyer info with notes
+                    const buyerInfoWithNote = {
+                        ...item.buyerInfo,
+                        message: shippingDetails.giftNote || '', // This will be stored in both userData.message and messages.note
+                        quantity: item.quantity
+                    };
+
+                    if (session?.user?.id) {
+                        buyerInfoWithNote.userId = session.user.id;
+                    }                    // Update the item's state to purchased (2) and include buyer info with note
+                    await birthList.updateItemState(item.listInfo.itemId, 2, buyerInfoWithNote);
+
+                    // Check if the list is now complete after this item update
+                    if (birthList.status === 'Activa') {
+                        const isListComplete = birthList.items.every(item => item.state === 2);
+                        if (isListComplete) {
+                            birthList.status = 'Completada';
+                            await birthList.save();
+
+                            // Send notification email
+                            try {
+                                await EmailService.sendListCompletedNotification(birthList, await User.findById(birthList.user));
+                            } catch (emailError) {
+                                console.error('Error sending list completion notification:', emailError);
+                                // Continue with the order even if email fails
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error updating birth list item state: ${error.message}`);
+                    // Continue processing other items even if one fails
+                }
+            }
+        }
 
         // Return success response
         return NextResponse.json({

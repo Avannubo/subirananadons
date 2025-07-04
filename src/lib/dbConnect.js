@@ -20,7 +20,7 @@ if (!cached) {
 
 async function dbConnect() {
     if (cached.conn) {
-        console.log('Using cached database connection');
+        // console.log('Using cached database connection');
         return cached.conn;
     }
 

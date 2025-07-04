@@ -71,7 +71,7 @@ export default function ListStatusModal({
                             >
                                 <option value="Activa">Activa</option>
                                 <option value="Completada">Completada</option>
-                                <option value="Cancelada">Cancelada</option>
+                                <option value="InActiva">InActiva</option>
                             </select>
                         </div>
 
@@ -109,14 +109,14 @@ export default function ListStatusModal({
                                                 ? 'Lista Activa'
                                                 : status === 'Completada'
                                                     ? 'Lista Completada'
-                                                    : 'Lista Cancelada'}
+                                                    : 'Lista InActiva'}
                                         </p>
                                         <p className="text-xs text-gray-600 mt-1">
                                             {status === 'Activa'
                                                 ? 'Esta lista está disponible para recibir regalos'
                                                 : status === 'Completada'
                                                     ? 'Todos los productos fueron recibidos'
-                                                    : 'Esta lista ha sido cancelada'}
+                                                    : 'Esta lista ha sido InActiva'}
                                         </p>
                                     </div>
                                 </div>

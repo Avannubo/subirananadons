@@ -72,7 +72,7 @@ export default function Page() {
             });
             console.log('Image converted to base64, uploading to server...');
             // Upload using our server API endpoint (which handles Cloudinary authentication)
-            const response = await fetch('/api/upload', {
+            const response = await fetch('/api/cloudinary/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -373,7 +373,7 @@ export default function Page() {
                                 <p className="mt-1 text-xs text-gray-500">Opcional</p>
                             </div>
                             {/* Privacy Section */}
-                            <div className="pt-4 border-t border-gray-200">
+                            {/* <div className="pt-4 border-t border-gray-200">
                                 <div className="flex items-start mb-4">
                                     <div className="flex items-center h-5">
                                         <input
@@ -413,7 +413,7 @@ export default function Page() {
                                         </span>
                                     </label>
                                 </div>
-                            </div>
+                            </div> */}
                             {/* Submit Button */}
                             <div className="pt-4">
                                 <button

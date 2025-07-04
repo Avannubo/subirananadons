@@ -81,20 +81,24 @@ export async function PUT(request, { params }) {
                 { success: false, message: 'Unauthorized: Admin access required' },
                 { status: 403 }
             );
-        }
-
-        // Connect to database
+        }        // Connect to database
         await dbConnect();
 
-        // Get client ID from params
-        const { id } = params;
-
-        // Get request body
+        // Get and validate params
+        const resolvedParams = await Promise.resolve(params);
+        const id = resolvedParams.id;
+        if (!id) {
+            return NextResponse.json(
+                { success: false, message: 'Missing client ID' },
+                { status: 400 }
+            );
+        }        // Get request body
         const data = await request.json();
-        const { name, lastName, email, active, newsletter, partnerOffers } = data;
+        const { name, lastName, email, active, newsletter, partnerOffers, password } = data;
+        console.log('Updating client with data:', { ...data, password: password ? '[REDACTED]' : undefined });
 
-        // Find the user
-        const user = await User.findById(id);
+        // Find the user with password field
+        const user = await User.findById(id).select('+password');
         if (!user) {
             return NextResponse.json(
                 { success: false, message: 'Client not found' },
@@ -137,10 +141,14 @@ export async function PUT(request, { params }) {
 
         if (newsletter !== undefined) {
             user.newsletter = newsletter;
+        } if (partnerOffers !== undefined) {
+            user.partnerOffers = partnerOffers;
         }
 
-        if (partnerOffers !== undefined) {
-            user.partnerOffers = partnerOffers;
+        // Update password if provided
+        if (password) {
+            user.password = password;
+            user.markModified('password'); // Ensure mongoose knows the password was modified
         }
 
         // Save the updated user
@@ -171,13 +179,18 @@ export async function DELETE(request, { params }) {
                 { success: false, message: 'Unauthorized: Admin access required' },
                 { status: 403 }
             );
-        }
-
-        // Connect to database
+        }        // Connect to database
         await dbConnect();
 
-        // Get client ID from params
-        const { id } = params;
+        // Get and validate params
+        const resolvedParams = await Promise.resolve(params);
+        const id = resolvedParams.id;
+        if (!id) {
+            return NextResponse.json(
+                { success: false, message: 'Missing client ID' },
+                { status: 400 }
+            );
+        }
 
         // Find the user
         const user = await User.findById(id);

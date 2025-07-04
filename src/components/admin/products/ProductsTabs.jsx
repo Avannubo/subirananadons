@@ -31,6 +31,7 @@ export default function ProductsTabs() {
     const tabs = tabConfig.map(tab => tab.name);
 
     // Get the current component based on active tab
+    
     const activeComponent = tabConfig.find(tab => tab.name === activeTab)?.component || null;
 
     return (

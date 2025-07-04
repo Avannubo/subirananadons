@@ -7,8 +7,7 @@ import dbConnect from '@/lib/dbConnect';
 // Get all products or filtered products
 export async function GET(request) {
     try {
-        const { searchParams } = new URL(request.url);
-        const name = searchParams.get('name');
+        const { searchParams } = new URL(request.url); const name = searchParams.get('name');
         const reference = searchParams.get('reference');
         const category = searchParams.get('category');
         const status = searchParams.get('status');
@@ -16,6 +15,8 @@ export async function GET(request) {
         const lowStock = searchParams.get('lowStock');
         const search = searchParams.get('search');
         const preventSort = searchParams.get('preventSort') === 'true';
+        const minPrice = parseFloat(searchParams.get('minPrice'));
+        const maxPrice = parseFloat(searchParams.get('maxPrice'));
 
         // Pagination parameters
         const page = parseInt(searchParams.get('page')) || 1;
@@ -53,9 +54,7 @@ export async function GET(request) {
             }
 
             if (brand) query.brand = { $regex: brand, $options: 'i' };
-        }
-
-        if (status) query.status = status;
+        } if (status) query.status = status;
 
         // Low stock filter
         if (lowStock === 'true') {
@@ -68,14 +67,32 @@ export async function GET(request) {
             };
         }
 
-        // Get total count for pagination
+        // Add price range filter
+        if (!isNaN(minPrice) || !isNaN(maxPrice)) {
+            query.price_incl_tax = {};
+            if (!isNaN(minPrice)) {
+                query.price_incl_tax.$gte = minPrice;
+            }
+            if (!isNaN(maxPrice)) {
+                query.price_incl_tax.$lte = maxPrice;
+            }
+        }// Get total count for pagination
         const totalItems = await Product.countDocuments(query);
 
         // Build the query with optional sorting
         let productsQuery = Product.find(query);
 
-        // Only sort by updatedAt if preventSort is false
-        if (!preventSort) {
+        // Handle sort parameters
+        const sortField = searchParams.get('sort');
+        const sortOrder = searchParams.get('order');
+
+        if (sortField && sortOrder) {
+            // Create sort object based on the sort field and order
+            const sortObj = {};
+            sortObj[sortField] = sortOrder === 'asc' ? 1 : -1;
+            productsQuery = productsQuery.sort(sortObj);
+        } else if (!preventSort) {
+            // Default sort by updatedAt if no specific sort is requested
             productsQuery = productsQuery.sort({ updatedAt: -1 });
         }
 

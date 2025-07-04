@@ -463,7 +463,7 @@ export default function ProductsTable(props) {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th> */}
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Imagen</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referencia</th>
@@ -476,9 +476,9 @@ export default function ProductsTable(props) {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {[1, 2, 3, 4, 5].map((item) => (
                                     <tr key={item}>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        {/* <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
-                                        </td>
+                                        </td> */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
                                         </td>
@@ -513,9 +513,9 @@ export default function ProductsTable(props) {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     ID
-                                </th>
+                                </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Imagen
                                 </th>
@@ -527,7 +527,10 @@ export default function ProductsTable(props) {
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Categoría
-                                </th>
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Marca
+                                    </th>
                                 {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Precio (imp. excl.)
                                 </th> */}
@@ -546,9 +549,9 @@ export default function ProductsTable(props) {
                             {products.length > 0 ? (
                                 products.map((product, index) => (
                                     <tr key={product._id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {index + 1}
-                                        </td>
+                                        </td> */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="relative">
                                                 <img
@@ -568,6 +571,8 @@ export default function ProductsTable(props) {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.category}>
                                             {product.category}
+                                        </td>                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.brand}>
+                                            {product.brand}
                                         </td>
                                         {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {product.price_excl_tax.toFixed(2)} €

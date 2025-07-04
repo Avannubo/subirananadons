@@ -19,7 +19,7 @@ export default function ProductSlider({
         default: 4,
         desktop: 4,
         tablet: 3,
-        mobile: 2
+        mobile: 1
     }
 }) {
     const [hoveredProduct, setHoveredProduct] = useState(null);
@@ -41,17 +41,17 @@ export default function ProductSlider({
     // Determine if we should show navigation arrows (for 5 or more products)
     const showNavigation = products.length >= 5;
     return (
-        <div className={`px-4 ${className}`}>
+        <div className={`px-2 md:px-4 ${className}`}>
             <div className="container mx-auto">
-                <div className="flex justify-between items-center mb-8">
-                    {title && <h2 className="text-3xl text-black font-bold">{title}</h2>}
+                <div className="flex flex-row justify-between items-center mb-4 md:mb-8 gap-2 md:gap-0">
+                    {title && <h2 className="text-2xl md:text-4xl text-black font-bold">{title}</h2>}
                     {showNavigation && (
-                        <div className="flex space-x-4">
+                        <div className="flex space-x-2 md:space-x-4">
                             <button
                                 onClick={() => swiperRef.current?.slidePrev()}
                                 className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
@@ -59,7 +59,7 @@ export default function ProductSlider({
                                 onClick={() => swiperRef.current?.slideNext()}
                                 className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </button>
@@ -71,7 +71,7 @@ export default function ProductSlider({
                         onBeforeInit={(swiper) => {
                             swiperRef.current = swiper;
                         }}
-                        spaceBetween={30}
+                        spaceBetween={8}
                         pagination={{
                             clickable: true,
                             el: '.custom-pagination',
@@ -84,11 +84,11 @@ export default function ProductSlider({
                         }}
                         modules={[Pagination, Navigation]}
                         breakpoints={{
-                            320: { slidesPerView: slidesPerView.mobile || 2 },
-                            768: { slidesPerView: slidesPerView.tablet || 3 },
+                            320: { slidesPerView: 1 },
+                            640: { slidesPerView: slidesPerView.tablet || 3 },
                             1024: { slidesPerView: slidesPerView.desktop || 4 },
                         }}
-                        loop={products.length >= slidesPerView.desktop}
+                        loop={products.length >= (slidesPerView.desktop || 4)}
                         grabCursor={true}
                         draggable={true}
                         navigation={{
@@ -99,7 +99,7 @@ export default function ProductSlider({
                         className="relative"
                     >
                         {products.map((product) => (
-                            <SwiperSlide key={product.id}>
+                            <SwiperSlide key={product.id} className="h-full">
                                 <ProductCard
                                     product={product}
                                     onQuickViewClick={() => handleQuickView(product)}
@@ -113,7 +113,7 @@ export default function ProductSlider({
                         <div className="swiper-button-next !hidden"></div>
                     </Swiper>
                     {/* Custom Pagination */}
-                    <div className="custom-pagination flex justify-center items-center mt-8"></div>
+                    <div className="custom-pagination flex justify-center items-center mt-4 md:mt-8"></div>
                 </div>
             </div>
             {/* Quick View Modal */}

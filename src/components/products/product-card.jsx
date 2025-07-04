@@ -1,43 +1,99 @@
 "use client"
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/contexts/CartContext.jsx';
+import { useSession } from 'next-auth/react';
+import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
 // Product Card Component - Handles both grid and list view with hover effect
-export default function ProductCard({ product, viewMode = "grid", onQuickViewClick }) {
+export default function ProductCard({
+    product,
+    viewMode = "grid",
+    onQuickViewClick,
+    setShowAuthModal,  // Function to show/hide auth modal
+    setAuthModalData   // Function to set auth modal data (title, message, callback)
+}) {
     const [isHovered, setIsHovered] = useState(false);
+    const [isAddingToList, setIsAddingToList] = useState(false);
     const { addToCart } = useCart();
+    const { data: session } = useSession();
+    const router = useRouter();
     const currentImageUrl = isHovered && product.imageUrlHover ? product.imageUrlHover : product.imageUrl;
-    const HoverButton = ({ children, onClick }) => (
+    const HoverButton = ({ children, onClick, disabled }) => (
         <button
-            className="bg-white rounded-full p-2 shadow text-gray-700 hover:bg-gray-100 transition duration-200 focus:outline-none flex items-center justify-center"
+            className={`bg-white rounded-full p-2 shadow text-gray-700 hover:bg-gray-100 transition duration-200 focus:outline-none flex items-center justify-center ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={onClick}
+            disabled={disabled}
         >
             {children}
         </button>
-    );
-
-    const onAddToWishlist = async (e) => {  
+    ); const onAddToWishlist = async () => {
+        if (isAddingToList) return;
         try {
-            // await addToWishlist(product);
-            toast.success(`${product.name} añadido a la lista de deseos`);
+            setIsAddingToList(true);
+            // Case 1: Not logged in - Show AuthModal
+            if (!session) {
+                toast.error('Inicia sesión para añadir productos a las listas', { duration: 3000 });
+            }
+
+            // Get user's birth lists
+            const result = await fetchBirthLists();
+            if (!result.success) {
+                if (result.message.includes('Unauthorized')) {
+                    // Handle auth error specifically
+                    if (setShowAuthModal && setAuthModalData) {
+                        setAuthModalData({
+                            callback: () => onAddToWishlist(),
+                            message: 'Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.'
+                        });
+                        setShowAuthModal(true);
+                    } else {
+                        toast.success('Inicia sesión para añadir productos a las listas', { duration: 3000 });
+                    }
+                    return;
+                }
+                throw new Error(result.message);
+            }
+            const userLists = result.data;
+            // Case 2: No lists - Prompt to create list
+            if (!userLists || userLists.length === 0) {
+                router.push('/dashboard/listas');
+                toast.success('Crea tu primera lista para añadir productos', { duration: 5000 });
+                return;
+            }
+            // Case 3: Has lists - Go to lists page to select one
+            router.push('/dashboard/listas');
+            toast.success('Edita la lista para añadir productos', { duration: 5000 });
         } catch (error) {
-            toast.error('Error al añadir a la lista de deseos');
-            console.error('Error adding to wishlist:', error);
+            console.error('Error checking birth lists:', error);
+            toast.error(error.message || 'Error al comprobar las listas');
+        } finally {
+            setIsAddingToList(false);
         }
     };
-
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
         try {
             await addToCart(product, 1);
-            toast.success(`${product.name} añadido al carrito`);
+            // toast.success(`${product.name} añadido al carrito`);
         } catch (error) {
             toast.error('Error al añadir al carrito');
             console.error('Error adding to cart:', error);
+        }
+    };
+    const handleAddToBirthList = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await addProductToBirthList(product.id);
+            toast.success(`${product.name} añadido a la lista de nacimiento`);
+        } catch (error) {
+            toast.error('Error al añadir a la lista de nacimiento');
+            console.error('Error adding to birth list:', error);
         }
     };
     // Generate the product URL based on category and name
@@ -74,7 +130,7 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                             className="transition-opacity duration-300 ease-in-out rounded-lg object-contain"
                         />
                         {/* Hover Overlay Buttons - Grid View */}
-                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 group-hover:bg-opacity-30 opacity-0 group-hover:opacity-100 transition-all duration-300 px-3 py-2 rounded-full">
+                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 px-3 py-2 transition-all duration-300 z-10">
                             <HoverButton onClick={handleAddToCart}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                             </HoverButton>
@@ -112,7 +168,7 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
-                className="flex flex-row items-start text-left p-4 w-full overflow-hidden group"
+                className="flex flex-row items-start text-left p-4 px-8 w-full overflow-hidden group"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
@@ -126,9 +182,9 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                             className="transition-opacity duration-300 ease-in-out rounded-lg object-contain"
                         />
                         {/* Hover Overlay Buttons - List View */}
-                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 group-hover:bg-opacity-30 opacity-0 group-hover:opacity-100 transition-all duration-300 px-3 py-2 rounded-full">
+                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3  group-hover:opacity-100 transition-all duration-300 px-3 py-2 rounded-full">
                             <HoverButton onClick={handleAddToCart}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5  mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                             </HoverButton>
                             <HoverButton onClick={(e) => {
                                 e.preventDefault(); // Prevent navigation
@@ -153,10 +209,15 @@ export default function ProductCard({ product, viewMode = "grid", onQuickViewCli
                     <div className="flex flex-col justify-start">
                         <h3 className="font-semibold text-xl mb-2 whitespace-nowrap overflow-hidden text-ellipsis w-full" title={product.name}>{product.name}</h3>
                         <p className="text-gray-700 text-lg mb-3">{product.price}</p>
-                        <p className="text-gray-600 text-sm">{product.description}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">
+                            {product.description?.length > 0
+                                ? product.description
+                                : ''}
+                            {product.description && product.description.length > 0 ? '...' : ''}
+                        </p>
                     </div>
                 </Link>
             </motion.div>
         );
     }
-} 
+}

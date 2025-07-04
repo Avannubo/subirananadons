@@ -7,22 +7,12 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
         status: '',
         trackingNumber: '',
         notes: ''
-    });
-
-    // Initialize form data when order changes
+    });    // Initialize form data when order changes
     useEffect(() => {
         if (order) {
-            // Map the display status back to the database status
-            const statusMap = {
-                'Pendiente de pago': 'pending',
-                'Pago aceptado': 'processing',
-                'Enviado': 'shipped',
-                'Entregado': 'delivered',
-                'Cancelado': 'cancelled'
-            };
-
+            // Map display status to DB status (identity for new statuses)
             setFormData({
-                status: statusMap[order.status] || 'pending',
+                status: order.status || 'procesando',
                 trackingNumber: order.trackingNumber || '',
                 notes: order.notes || ''
             });
@@ -71,11 +61,11 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                                 disabled={isLoading}
                                 required
                             >
-                                <option value="pending">Pendiente de pago</option>
-                                <option value="processing">Pago aceptado</option>
-                                <option value="shipped">Enviado</option>
-                                <option value="delivered">Entregado</option>
-                                <option value="cancelled">Cancelado</option>
+                                <option value="acceptado">Acceptado</option>
+                                <option value="procesando">Procesando</option>
+                                <option value="enviado">Enviado</option>
+                                <option value="completo">Completo</option>
+                                <option value="cancelado">Cancelado</option>
                             </select>
                         </div>
 
@@ -138,4 +128,4 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
             </div>
         </div>
     );
-} 
+}

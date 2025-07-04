@@ -5,30 +5,25 @@ export default function Pagination({
     currentPage = 1,
     totalPages = 1,
     totalItems = 0,
-    itemsPerPage = 5,
+    itemsPerPage = 2,
     onPageChange,
     onItemsPerPageChange,
     showingText = "Mostrando {} de {} productos"
 }) {
-    // Calculate visible pages range
+    // Calculate visible pages range (improved for ellipsis and style)
     const getVisiblePages = () => {
-        // Always show at least current page
-        const pages = [currentPage];
-
-        // Add pages before current page
-        let before = currentPage - 1;
-        while (before > 0 && pages.length < 5) {
-            pages.unshift(before);
-            before--;
+        const pages = [];
+        if (totalPages <= 5) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            if (currentPage <= 3) {
+                pages.push(1, 2, 3, '...', totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                pages.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pages.push(1, '...', currentPage, '...', totalPages);
+            }
         }
-
-        // Add pages after current page
-        let after = currentPage + 1;
-        while (after <= totalPages && pages.length < 5) {
-            pages.push(after);
-            after++;
-        }
-
         return pages;
     };
 
@@ -53,72 +48,83 @@ export default function Pagination({
         }
     };
 
+    // Navigation helpers for new style
+    const goToPreviousPage = () => {
+        if (currentPage > 1) onPageChange(currentPage - 1);
+    };
+    const goToNextPage = () => {
+        if (currentPage < totalPages) onPageChange(currentPage + 1);
+    };
+    const goToPage = (page) => {
+        if (page !== '...' && page !== currentPage) onPageChange(page);
+    };
+
     return (
-        <div className="flex justify-between items-center flex-wrap gap-3 mt-4 mb-2">
-            <div className="text-sm text-gray-600">
-                {formattedShowingText}
-            </div>
-
-            <div className="flex items-center gap-4">
-                <div className="flex items-center">
-                    <span className="text-sm text-gray-600 mr-2">Items por página:</span>
-                    <select
-                        value={itemsPerPage}
-                        onChange={(e) => handleItemsPerPageChange(e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                        <option value={500}>500</option>
-                    </select>
-                </div>
-
-                <div className="flex">
+        <div className="flex flex-col items-center justify-center gap-3 mt-4 mb-2 px-4">
+            <div className="text-sm text-gray-600 mb-2">{formattedShowingText}</div>
+            <div className="flex justify-center mt-4">
+                <nav className="flex items-center space-x-1" aria-label="Pagination">
+                    {/* Previous page button */}
                     <button
-                        onClick={() => onPageChange(1)}
+                        onClick={goToPreviousPage}
                         disabled={currentPage === 1}
-                        className="border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+                        className={`px-3 py-2 rounded-md ${currentPage === 1
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'text-gray-700 hover:bg-gray-100'}`}
+                        aria-label="Anterior"
                     >
-                        Anterior
+                        <span className="sr-only">Anterior</span>
+                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
                     </button>
-
-                    {visiblePages.map(page => (
+                    {/* Page numbers */}
+                    {visiblePages.map((page, index) => (
                         <button
-                            key={page}
-                            onClick={() => onPageChange(page)}
-                            className={`border border-gray-300 px-4 py-2 text-sm ${currentPage === page
-                                ? 'bg-[#00B0C8] text-white border-[#00B0C8]'
-                                : 'hover:bg-gray-50'
+                            key={index}
+                            onClick={() => typeof page === 'number' ? goToPage(page) : null}
+                            disabled={page === '...'}
+                            className={`px-4 py-2 rounded-md ${page === currentPage
+                                ? 'bg-[#00B0C8] text-white'
+                                : page === '...'
+                                    ? 'text-gray-500'
+                                    : 'text-gray-700 hover:bg-gray-100'
                                 }`}
                         >
                             {page}
                         </button>
                     ))}
-
-                    {totalPages > 5 && !visiblePages.includes(totalPages) && (
-                        <>
-                            <span className="border border-gray-300 px-4 py-2 text-sm">...</span>
-                            <button
-                                onClick={() => onPageChange(totalPages)}
-                                className="border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
-                            >
-                                {totalPages}
-                            </button>
-                        </>
-                    )}
-
+                    {/* Next page button */}
                     <button
-                        onClick={() => onPageChange(currentPage + 1)}
+                        onClick={goToNextPage}
                         disabled={currentPage === totalPages}
-                        className="border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+                        className={`px-3 py-2 rounded-md ${currentPage === totalPages
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'text-gray-700 hover:bg-gray-100'}`}
+                        aria-label="Siguiente"
                     >
-                        Siguiente
+                        <span className="sr-only">Siguiente</span>
+                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                        </svg>
                     </button>
-                </div>
+                </nav>
+            </div>
+            <div className="flex items-center mt-2">
+                <span className="text-sm text-gray-600 mr-2">Items por página:</span>
+                <select
+                    value={itemsPerPage}
+                    onChange={(e) => handleItemsPerPageChange(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1 text-sm"
+                >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={500}>500</option>
+                </select>
             </div>
         </div>
     );
-} 
+}

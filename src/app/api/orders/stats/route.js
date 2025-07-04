@@ -57,55 +57,43 @@ export async function GET(request) {
             ? 100
             : Math.round(((totalOrders - prevTotalOrders) / prevTotalOrders) * 100);
 
-        // Calculate completed orders (shipped or delivered)
-        const completedOrders = currentPeriodOrders.filter(
-            order => order.status === 'shipped' || order.status === 'delivered'
+        // Calculate accepted orders
+        const acceptedOrders = currentPeriodOrders.filter(
+            order => order.status === 'processing'
         ).length;
 
-        const prevCompletedOrders = prevPeriodOrders.filter(
-            order => order.status === 'shipped' || order.status === 'delivered'
+        const prevAcceptedOrders = prevPeriodOrders.filter(
+            order => order.status === 'processing'
         ).length;
 
-        // Calculate completed orders trend
-        const completedOrdersTrend = prevCompletedOrders === 0
+        // Calculate accepted orders trend
+        const acceptedOrdersTrend = prevAcceptedOrders === 0
             ? 100
-            : Math.round(((completedOrders - prevCompletedOrders) / prevCompletedOrders) * 100);
+            : Math.round(((acceptedOrders - prevAcceptedOrders) / prevAcceptedOrders) * 100);
 
-        // Calculate pending orders
-        const pendingOrders = currentPeriodOrders.filter(
-            order => order.status === 'pending' || order.status === 'processing'
+        // Calculate cancelled orders
+        const cancelledOrders = currentPeriodOrders.filter(
+            order => order.status === 'cancelled'
         ).length;
 
-        const prevPendingOrders = prevPeriodOrders.filter(
-            order => order.status === 'pending' || order.status === 'processing'
+        const prevCancelledOrders = prevPeriodOrders.filter(
+            order => order.status === 'cancelled'
         ).length;
 
-        // Calculate pending orders trend
-        const pendingOrdersTrend = prevPendingOrders === 0
-            ? 100
-            : Math.round(((pendingOrders - prevPendingOrders) / prevPendingOrders) * 100);
-
-        // For customer queries, we would need to add a new model
-        // For now, let's simulate this data
-        const customerQueries = Math.floor(totalOrders * 1.2);
-        const prevCustomerQueries = Math.floor(prevTotalOrders * 1.2);
-
-        // Calculate customer queries trend
-        const customerQueriesTrend = prevCustomerQueries === 0
-            ? 100
-            : Math.round(((customerQueries - prevCustomerQueries) / prevCustomerQueries) * 100);
+        // Calculate cancelled orders trend
+        const cancelledOrdersTrend = prevCancelledOrders === 0
+            ? 0
+            : Math.round(((cancelledOrders - prevCancelledOrders) / prevCancelledOrders) * 100);
 
         return NextResponse.json({
             success: true,
             stats: {
                 totalOrders,
                 totalOrdersTrend,
-                completedOrders,
-                completedOrdersTrend,
-                pendingOrders,
-                pendingOrdersTrend,
-                customerQueries,
-                customerQueriesTrend
+                acceptedOrders,
+                acceptedOrdersTrend,
+                cancelledOrders,
+                cancelledOrdersTrend
             }
         });
     } catch (error) {
@@ -116,4 +104,4 @@ export async function GET(request) {
             error: error.message
         }, { status: 500 });
     }
-} 
+}

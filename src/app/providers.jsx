@@ -1,7 +1,7 @@
 'use client'
 
 import { SessionProvider, useSession } from 'next-auth/react'
-import { CartProvider } from '@/contexts/CartContext'
+import { CartProvider } from '@/contexts/CartContext.jsx'
 import { UserProvider } from '@/contexts/UserContext'
 import { StatsProvider } from '@/contexts/StatsContext'
 import { ClientStatsProvider } from '@/contexts/ClientStatsContext'

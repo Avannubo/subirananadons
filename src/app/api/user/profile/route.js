@@ -55,12 +55,10 @@ export async function PUT(request) {
         if (birthDate !== undefined) user.birthDate = birthDate;
         if (image !== undefined) user.image = image;
         if (newsletter !== undefined) user.newsletter = newsletter;
-        if (partnerOffers !== undefined) user.partnerOffers = partnerOffers;
-
-        // Update password if provided
-        if (password && password.trim() !== '') {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            user.password = hashedPassword;
+        if (partnerOffers !== undefined) user.partnerOffers = partnerOffers;        // Update password if provided
+        if (password) {
+            user.password = password;
+            user.markModified('password'); // Ensure mongoose knows the password was modified
         }
 
         // Save updated user

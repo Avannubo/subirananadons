@@ -1,92 +1,95 @@
+"use client";
 import Image from 'next/image';
 import Link from 'next/link';
-
+import { useEffect, useState } from 'react';
 const ImageGallery = () => {
-    const galleryItems = [
-        {
-            id: 1,
-            title: 'Joolz',
-            description: 'Descubre nuestros productos Joolz',
-            imageUrl: '/assets/images/joolz.png',
-            width: 60,
-            href: "/brands?brand=Joolz"
-        },
-        {
-            id: 2,
-            title: 'Stokke',
-            description: 'Explora la colección Stokke',
-            imageUrl: '/assets/images/stokke.png',
-            width: 40,
-            href: "/brands?brand=Stokke"
-        },
-        {
-            id: 3,
-            title: 'Bugaboo',
-            description: 'Los mejores productos Bugaboo',
-            imageUrl: '/assets/images/bugaboo.jpg',
-            width: 40,
-            href: "/brands?brand=Bugaboo"
-        },
-        {
-            id: 4,
-            title: 'Joie',
-            description: 'Colección completa de Joie',
-            imageUrl: '/assets/images/joie.png',
-            width: 60,
-            href: "/brands?brand=Joie"
-        }
-    ];
-
+    const [offers, setOffers] = useState([]);
+    useEffect(() => { 
+        fetch('/api/offers')
+            .then(res => res.json())
+            .then(data => {
+                if (!Array.isArray(data)) {
+                    data = data ? [data] : [];
+                }
+                console.log("Offers fetched:", data);
+                setOffers(data);
+            })
+            .catch(err => {
+                console.error("Error in offers fetch:", err);
+            });
+    }, []);
     return (
         <div className="w-full overflow-hidden bg-white">
-            <div className="container w-[1400px] mt-20 mx-auto py-12">
-                {/* First Row - 60/40 Split */}
-                <div className="flex flex-col md:flex-row gap-6 mb-6">
-                    {galleryItems.slice(0, 2).map((item) => (
+            <div className="container mx-auto mt-4 md:mt-20 py-8 md:pt-4 md:pb-12 relative px-2 md:px-0">
+                <h2 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8 text-gray-800">Ofertas</h2>
+                {/* First row with 2 offers */}
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4 md:mb-6">
+                    {offers.slice(0, 2).map((item, idx) => (
                         <Link
-                            key={item.id}
-                            href={item.href}
-                            className={`relative rounded-lg overflow-hidden ${item.width === 60 ? 'md:w-3/5' : 'md:w-2/5'}`}
-                            style={{ height: '420px' }}
+                            key={item._id || idx}
+                            href={`/brands?brand=${encodeURIComponent(item.brand)}`}
+                            className={`relative rounded-lg overflow-hidden w-full ${idx === 0 ? 'md:w-3/5' : 'md:w-2/5'} min-h-[220px] h-[45vw] max-h-[340px] md:max-h-[420px]`}
                         >
-                            <div className="relative w-full h-full group  ">
+                            <div className="relative w-full h-full group">
+                                {/* Brand logo at top left of the container */}
+                                {item.brandLogo && (
+                                    <div className='absolute top-2 left-2 p-2 w-16 h-16 md:w-34 md:h-34 flex items-center justify-center bg-white rounded-md z-10'>
+                                        <img
+                                            src={item.brandLogo}
+                                            alt={item.brand}
+                                            className="object-contain w-full h-full"
+                                        />
+                                    </div>
+                                )}
                                 <Image
                                     src={item.imageUrl}
                                     alt={item.title}
                                     fill
                                     className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                    unoptimized={item.imageUrl.startsWith('data:image')}
+                                    sizes="100vw"
                                 />
-                                <div className="absolute inset-0 bg-black/20 flex items-end p-6 transition-colors duration-300 group-hover:bg-black/30">
-                                    <div className="text-white">
-                                        <h3 className="text-2xl font-bold mb-1">{item.title}</h3>
-                                        <p className="text-white/90">{item.description}</p>
+                                <div className="absolute inset-0 bg-black/20 flex items-end p-3 md:p-6 transition-colors duration-300 group-hover:bg-black/30">
+                                    <div className="text-white w-full">
+                                        <h3 className="text-xl md:text-4xl font-bold mb-1 line-clamp-2">{item.title}</h3>
+                                        <p className="text-white/90 text-lg line-clamp-2">{item.description}</p>
                                     </div>
                                 </div>
                             </div>
                         </Link>
                     ))}
                 </div>
-
-                {/* Second Row - 40/60 Split (reversed) */}
-                <div className="flex flex-col md:flex-row gap-6">
-                    {galleryItems.slice(2, 4).map((item) => (
+                {/* Second row with 2 offers */}
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                    {offers.slice(2, 4).map((item, idx) => (
                         <Link
-                            key={item.id}
-                            href={item.href}
-                            className={`relative rounded-lg overflow-hidden ${item.width === 60 ? 'md:w-3/5' : 'md:w-2/5'}`}
-                            style={{ height: '400px' }}
+                            key={item._id || idx}
+                            href={`/brands?brand=${encodeURIComponent(item.brand)}`}
+                            className={`relative rounded-lg overflow-hidden w-full ${idx === 1 ? 'md:w-3/5' : 'md:w-2/5'} min-h-[220px] h-[45vw] max-h-[340px] md:max-h-[420px]`}
                         >
                             <div className="relative w-full h-full group">
+                                {/* Brand logo at top left of the container */}
+                                {item.brandLogo && (
+                                    <div className='absolute top-2 left-2 w-16 h-16 md:w-34 md:h-34 p-2 flex items-center justify-center bg-white rounded-md z-10'>
+                                        <img
+                                            src={item.brandLogo}
+                                            alt={item.brand}
+                                            className="object-contain w-full h-full"
+                                        />
+                                    </div>
+                                )}
                                 <Image
                                     src={item.imageUrl}
                                     alt={item.title}
                                     fill
                                     className="object-cover rounded-lg transition-transform duration-500 group-hover:scale-105"
+                                    unoptimized={item.imageUrl.startsWith('data:image')}
+                                    sizes="100vw"
                                 />
-                                <div className="absolute inset-0 bg-black/20 flex rounded-lg items-end p-6 group-hover:bg-black/30 transition-colors duration-300">
-                                    <div className="text-white">
-                                        <h3 className="text-2xl font-bold mb-1">{item.title}</h3>
-                                        <p className="text-white/90">{item.description}</p>
+                                <div className="absolute inset-0 bg-black/20 flex rounded-lg items-end p-3 md:p-6 group-hover:bg-black/30 transition-colors duration-300">
+                                    <div className="text-white w-full">
+                                        <h3 className="text-xl md:text-4xl font-bold mb-1 line-clamp-2">{item.title}</h3>
+                                        <p className="text-white/90 text-lg line-clamp-2">{item.description}</p>
                                     </div>
                                 </div>
                             </div>
@@ -97,5 +100,4 @@ const ImageGallery = () => {
         </div>
     );
 };
-
 export default ImageGallery;

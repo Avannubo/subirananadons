@@ -8,12 +8,12 @@ import { fetchBirthLists, createBirthList, formatBirthList } from '@/services/Bi
 import ProductSelection from '@/components/admin/listas/ProductSelection';
 import TabNavigation from '@/components/admin/shared/TabNavigation';
 export default function ListasTabs({ userRole = 'user' }) {
-    const [activeTab, setActiveTab] = useState('Todos');
-    const [filters, setFilters] = useState({
+    const [activeTab, setActiveTab] = useState('Todos'); const [filters, setFilters] = useState({
         searchId: '',
         searchReference: '',
         searchName: '',
         searchCreator: '',
+        searchProduct: '',
         dateFrom: '',
         dateTo: ''
     });
@@ -64,12 +64,12 @@ export default function ListasTabs({ userRole = 'user' }) {
         // Fetch lists from API
         loadBirthLists();
     }, [userRole]);
-    const tabs = ['Todos', 'Activas', 'Completadas', 'Canceladas'];
+    const tabs = ['Todos', 'Activas', 'Completadas', 'InActivas'];
     const filteredLists = displayLists.filter((list) => {
         if (activeTab === 'Todos') return true;
         if (activeTab === 'Activas') return list.status === 'Activa';
         if (activeTab === 'Completadas') return list.status === 'Completada';
-        if (activeTab === 'Canceladas') return list.status === 'Cancelada';
+        if (activeTab === 'InActivas') return list.status === 'InActiva';
         return false;
     });
     // Handle filter changes
@@ -79,7 +79,7 @@ export default function ListasTabs({ userRole = 'user' }) {
             ...prev,
             [name]: value
         }));
-    }; 
+    };
     // Refresh data
     const refreshData = async () => {
         await loadBirthLists();
@@ -193,7 +193,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                     'Todos': displayLists.length,
                     'Activas': displayLists.filter(list => list.status === 'Activa').length,
                     'Completadas': displayLists.filter(list => list.status === 'Completada').length,
-                    'Canceladas': displayLists.filter(list => list.status === 'Cancelada').length
+                    'InActivas': displayLists.filter(list => list.status === 'InActiva').length
                 }}
             />
             <div className="bg-white rounded-lg shadow">
@@ -224,17 +224,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="relative">
-                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Buscar ID"
-                                name="searchId"
-                                value={filters.searchId}
-                                onChange={handleFilterChange}
-                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                            />
-                        </div>
+
                         <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
@@ -264,6 +254,17 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 placeholder="Buscar Creador"
                                 name="searchCreator"
                                 value={filters.searchCreator}
+                                onChange={handleFilterChange}
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                            />
+                        </div>
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar por producto"
+                                name="searchProduct"
+                                value={filters.searchProduct}
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
@@ -306,6 +307,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                     </div>
                 )}
             </div>
+
             {/* Create List Modal - kept as is */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
@@ -420,7 +422,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         />
                                     </div>
                                     {/* Privacy */}
-                                    <div className="flex items-center">
+                                    {/* <div className="flex items-center">
                                         <input
                                             type="checkbox"
                                             id="isPublic"
@@ -432,7 +434,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-700">
                                             Lista Pública (Visible para cualquier persona con el enlace)
                                         </label>
-                                    </div>
+                                    </div> */}
                                     <div className="flex justify-end space-x-4 pt-4">
                                         <button
                                             type="button"
@@ -491,16 +493,45 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <div className="bg-gray-50 p-6 rounded-lg">
                                         <h3 className="text-lg font-medium text-gray-900 mb-4">Compartir tu Lista</h3>
-                                        <p className="text-gray-600 mb-4">
+                                        <p className="text-gray-600 ">
                                             Tu lista estará disponible para compartir después de crearla. Podrás enviar el enlace a familiares y amigos.
                                         </p>
-                                        <div className="text-center p-4">
-                                            <svg className="w-20 h-20 mx-auto text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                            </svg>
+                                        <div className="text-start ">
+
                                             <p className="mt-4 text-gray-600">
                                                 Después de crear la lista, podrás compartirla por correo electrónico, WhatsApp o copiar el enlace directo.
                                             </p>
+                                            {/* <svg className="w-20 h-20 mx-auto text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                            </svg> */}
+                                        </div>
+                                    </div>
+                                    {/* Terms and Conditions Checkbox */}
+                                    <div className="bg-white p-4 rounded shadow border border-gray-100">
+                                        <div className="mb-2">
+                                            <strong className="block text-gray-800 mb-1">Condiciones de uso de las listas de nacimiento y regalo:</strong>
+                                            <ul className="list-disc pl-5 text-sm text-gray-700 mb-2">
+                                                <li>La lista que crees podrá ser compartida con otras personas mediante un enlace.</li>
+                                                <li>Los productos y datos de la lista serán visibles para quienes reciban el enlace.</li>
+                                                <li>Puedes modificar o eliminar tu lista en cualquier momento desde tu cuenta.</li>
+                                                <li>La gestión de reservas y compras de productos depende de la participación de tus invitados.</li>
+                                                <li>Debes respetar las normas de uso y la privacidad de los datos según la legislación vigente.</li>
+                                            </ul>
+                                            <span className="text-xs text-gray-500">Por favor, lee atentamente estas condiciones antes de continuar.</span>
+                                        </div>
+                                        <div className="flex items-start mt-2">
+                                            <input
+                                                id="acceptTerms"
+                                                name="acceptTerms"
+                                                type="checkbox"
+                                                checked={formData.acceptTerms || false}
+                                                onChange={e => setFormData(prev => ({ ...prev, acceptTerms: e.target.checked }))}
+                                                className="h-5 w-5 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 rounded mt-1"
+                                                required
+                                            />
+                                            <label htmlFor="acceptTerms" className="ml-3 text-sm text-gray-700 select-none">
+                                                Confirmo que he leído y acepto las condiciones de uso de las listas, los <a href="/terminos-y-condiciones" target="_blank" rel="noopener noreferrer" className="underline text-[#00B0C8] hover:text-[#008da0]">Términos y Condiciones</a> y la <a href="/politica-de-privacidad" target="_blank" rel="noopener noreferrer" className="underline text-[#00B0C8] hover:text-[#008da0]">Política de Privacidad</a> de este sitio web.
+                                            </label>
                                         </div>
                                     </div>
                                     <div className="flex justify-between space-x-4 pt-4">

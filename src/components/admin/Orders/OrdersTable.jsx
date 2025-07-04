@@ -1,10 +1,14 @@
+// State for bulk status selector
 'use client';
+import { FiEye, FiTrash2, FiEdit } from 'react-icons/fi';
+import { FaRegFilePdf } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
-import { FiEdit, FiTrash2, FiEye, FiChevronLeft, FiChevronRight, FiCheck } from 'react-icons/fi';
+import { toast } from 'react-hot-toast';
+import Pagination from '../shared/Pagination';
+
 import OrderDeleteModal from './OrderDeleteModal';
 import OrderEditModal from './OrderEditModal';
 import OrderViewModal from './OrderViewModal';
-import Pagination from '@/components/admin/shared/Pagination';
 export default function OrdersTable({
     orders,
     filters,
@@ -14,24 +18,59 @@ export default function OrdersTable({
     onDelete,
     pagination,
     onPageChange,
-    onLimitChange
+    onLimitChange,
+    showPagination
 }) {
     const [selectedOrders, setSelectedOrders] = useState([]);
+    const [bulkStatusValue, setBulkStatusValue] = useState("");
     const [statusDropdown, setStatusDropdown] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
-    // Log orders received for debugging
+
     useEffect(() => {
         console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
         console.log('Orders data:', orders);
     }, [orders, userRole]);
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters((prev) => ({ ...prev, [name]: value }));
+
+
+
+    const viewPdf = async (pdfUrl) => {
+        if (!pdfUrl || pdfUrl === '#') {
+            toast.error('PDF no disponible');
+            return;
+        }
+        try {
+            window.open(pdfUrl, '_blank');
+        } catch (error) {
+            console.error('Error viewing PDF:', error);
+            toast.error('Error al visualizar el PDF');
+        }
     };
+
+    // const downloadPdf = async (orderId) => {
+    //     try {
+    //         const response = await fetch(`/api/orders/${orderId}/invoice`);
+    //         if (!response.ok) throw new Error('Error downloading invoice');
+
+    //         const blob = await response.blob();
+    //         const url = window.URL.createObjectURL(blob);
+    //         const link = document.createElement('a');
+    //         link.href = url;
+    //         link.download = `ticket.pdf`;
+    //         document.body.appendChild(link);
+    //         link.click();
+    //         link.remove();
+    //         window.URL.revokeObjectURL(url);
+    //         toast.success('Ticket descargada correctamente');
+    //     } catch (error) {
+    //         console.error('Error downloading invoice:', error);
+    //         toast.error('Error al descargar la ticket');
+    //     }
+    // };
+
     // Filter the orders based on search criteria
     const filteredOrders = orders.filter((order) => {
         return (
@@ -56,26 +95,25 @@ export default function OrdersTable({
             setSelectedOrders([...selectedOrders, id]);
         }
     };
-    const handleBulkAction = (action) => {
+    const handleBulkAction = (action, value) => {
         if (selectedOrders.length === 0) {
             alert('Por favor, selecciona al menos un pedido');
             return;
         }
         if (action === 'eliminar') {
             if (window.confirm(`¿Estás seguro de que deseas eliminar ${selectedOrders.length} pedidos? Esta acción no se puede deshacer.`)) {
-                // Call the API to delete multiple orders
-                // For now, we'll just handle each order individually
                 Promise.all(selectedOrders.map(id => onDelete(id)))
                     .then(() => setSelectedOrders([]));
             }
-        } else if (action === 'enviar') {
-            // Call the API to mark orders as shipped
-            Promise.all(selectedOrders.map(id => onStatusChange(id, 'Enviado')))
-                .then(() => setSelectedOrders([]));
         } else if (action === 'archivar') {
-            // This would be implemented with a real archive feature
             alert(`Archivando ${selectedOrders.length} pedidos`);
             setSelectedOrders([]);
+        } else if (action === 'estado' && value) {
+            // Only update the selected orders in the local orders array if possible
+            Promise.all(selectedOrders.map(id => onStatusChange(id, value)))
+                .then(() => {
+                    setBulkStatusValue("");
+                });
         }
     };
     const toggleStatusDropdown = (id) => {
@@ -108,14 +146,37 @@ export default function OrdersTable({
     const handleSaveEdit = async (orderId, formData) => {
         setIsActionLoading(true);
         try {
-            // Convert UI status to DB status using the mapStatusToDb function
-            // We expect this is implemented in the parent component
-            const success = await onStatusChange(orderId, formData.status);
-            if (success) {
+            // Send PATCH request to update order (status, notes, trackingNumber)
+            const res = await fetch(`/api/orders/${orderId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status: formData.status,
+                    notes: formData.notes,
+                    trackingNumber: formData.trackingNumber
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success('Pedido actualizado correctamente');
+                // Update the local orders array with the new order data
+                if (data.order) {
+                    const updatedOrder = data.order;
+                    if (Array.isArray(orders)) {
+                        const idx = orders.findIndex(o => o.id === updatedOrder._id || o.id === updatedOrder.id);
+                        if (idx !== -1) {
+                            orders[idx] = {
+                                ...orders[idx],
+                                ...updatedOrder,
+                                id: updatedOrder._id || updatedOrder.id // ensure id stays consistent
+                            };
+                        }
+                    }
+                }
                 setEditModalOpen(false);
                 setSelectedOrder(null);
             } else {
-                alert('Error al actualizar el pedido');
+                alert(data.message || 'Error al actualizar el pedido');
             }
         } catch (error) {
             console.error('Error saving order edit:', error);
@@ -144,10 +205,10 @@ export default function OrdersTable({
         }
     };
     return (
-        <div className="bg-white rounded-lg shadow overflow-hidden"> 
+        <div className="bg-white rounded-lg shadow overflow-hidden">
             {/* Bulk Actions (Admin only) */}
             {userRole === 'admin' && selectedOrders.length > 0 && (
-                <div className="bg-gray-100 p-3 flex items-center">
+                <div className="bg-gray-100 p-3 flex items-center flex-wrap gap-2">
                     <span className="text-sm mr-4">{selectedOrders.length} pedidos seleccionados</span>
                     <button
                         onClick={() => handleBulkAction('archivar')}
@@ -155,11 +216,28 @@ export default function OrdersTable({
                     >
                         Archivar
                     </button>
-                    <button
-                        onClick={() => handleBulkAction('enviar')}
-                        className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded mr-2"
+                    {/* Bulk status change dropdown with confirm button */}
+                    <select
+                        className="px-3 py-1 text-sm rounded border border-gray-300 mr-2"
+                        style={{ width: 'auto', minWidth: '180px', maxWidth: '100%', display: 'inline-block' }}
+                        value={bulkStatusValue}
+                        onChange={e => setBulkStatusValue(e.target.value)}
                     >
-                        Marcar como enviado
+                        <option value="" disabled>Cambiar estado a...</option>
+                        <option value="acceptado">Acceptado</option>
+                        <option value="procesando">Procesando</option>
+                        <option value="enviado">Enviado</option>
+                        <option value="completo">Completo</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                    <button
+                        className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded mr-2"
+                        disabled={!bulkStatusValue}
+                        onClick={() => {
+                            if (bulkStatusValue) handleBulkAction('estado', bulkStatusValue);
+                        }}
+                    >
+                        Confirmar
                     </button>
                     <button
                         onClick={() => handleBulkAction('eliminar')}
@@ -183,7 +261,6 @@ export default function OrdersTable({
                                     />
                                 </th>
                             )}
-                            <th className="px-6 py-3 text-left">ID</th>
                             <th className="px-6 py-3 text-left">Referencia</th>
                             {userRole === 'admin' && <th className="px-6 py-3 text-left">Cliente</th>}
                             <th className="px-6 py-3 text-left">Total</th>
@@ -206,69 +283,66 @@ export default function OrdersTable({
                                             />
                                         </td>
                                     )}
-                                    <td className="px-6 py-4">{index + 1}</td>
+                                    {/* <td className="px-6 py-4">{index + 1}</td> */}
                                     <td className="px-6 py-4">{order.reference}</td>
                                     {userRole === 'admin' && <td className="px-6 py-4">{order.customer}</td>}
                                     <td className="px-6 py-4">{order.total}</td>
                                     <td className="px-6 py-4">{order.payment}</td>
                                     <td className="px-6 py-4">
-                                        {userRole === 'admin' ? (
-                                            <div className="relative">
-                                                <button
-                                                    onClick={() => toggleStatusDropdown(order.id)}
-                                                    className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'Pago aceptado' ? 'bg-green-100 text-green-800' :
-                                                        order.status === 'Pendiente de pago' ? 'bg-yellow-100 text-yellow-800' :
-                                                            order.status === 'Enviado' ? 'bg-blue-100 text-blue-800' :
-                                                                'bg-red-100 text-red-800'
-                                                        } flex items-center`}
-                                                >
-                                                    {order.status}
-                                                </button>
-                                                {statusDropdown === order.id && (
-                                                    <div className="absolute z-10 mt-1 w-48 bg-white rounded-md shadow-lg py-1">
-                                                        <button
-                                                            onClick={() => changeOrderStatus(order.id, 'Pendiente de pago')}
-                                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                                        >
-                                                            Pendiente de pago
-                                                        </button>
-                                                        <button
-                                                            onClick={() => changeOrderStatus(order.id, 'Pago aceptado')}
-                                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                                        >
-                                                            Pago aceptado
-                                                        </button>
-                                                        <button
-                                                            onClick={() => changeOrderStatus(order.id, 'Enviado')}
-                                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                                        >
-                                                            Enviado
-                                                        </button>
-                                                        <button
-                                                            onClick={() => changeOrderStatus(order.id, 'Devuelto')}
-                                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                                        >
-                                                            Devuelto
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <span
-                                                className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'Pago aceptado' ? 'bg-green-100 text-green-800' :
-                                                    order.status === 'Pendiente de pago' ? 'bg-yellow-100 text-yellow-800' :
-                                                        order.status === 'Enviado' ? 'bg-blue-100 text-blue-800' :
-                                                            'bg-red-100 text-red-800'
-                                                    }`}
-                                            >
-                                                {order.status}
-                                            </span>
-                                        )}
+                                        {(() => {
+                                            // Normalize and map status to allowed values
+                                            const rawStatus = (order.status || '').toLowerCase().trim();
+                                            // Map legacy/english/invalid statuses to allowed values
+                                            const statusMap = {
+                                                'pending': 'procesando',
+                                                'processing': 'procesando',
+                                                'accepted': 'acceptado',
+                                                'shipped': 'enviado',
+                                                'completed': 'completo',
+                                                'cancelled': 'cancelado',
+                                                'canceled': 'cancelado',
+                                                // Spanish allowed values
+                                                'acceptado': 'acceptado',
+                                                'procesando': 'procesando',
+                                                'enviado': 'enviado',
+                                                'completo': 'completo',
+                                                'cancelado': 'cancelado',
+                                            };
+                                            const status = statusMap[rawStatus] || 'procesando'; // fallback to 'procesando' if invalid
+                                            const statusColorMap = {
+                                                'acceptado': 'bg-green-100 text-green-800',
+                                                'procesando': 'bg-yellow-100 text-yellow-800',
+                                                'enviado': 'bg-blue-100 text-blue-800',
+                                                'completo': 'bg-gray-100 text-gray-800',
+                                                'cancelado': 'bg-red-100 text-red-800',
+                                            };
+                                            const statusLabelMap = {
+                                                'acceptado': 'Acceptado',
+                                                'procesando': 'Procesando',
+                                                'enviado': 'Enviado',
+                                                'completo': 'Completo',
+                                                'cancelado': 'Cancelado',
+                                            };
+                                            const colorClass = statusColorMap[status] || 'bg-gray-100 text-gray-800';
+                                            const label = statusLabelMap[status] || status;
+                                            return (
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+                                                    {label}
+                                                </span>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-6 py-4">{order.date}</td>
-                                    <td className="px-6 py-4 text-sm flex flex-row items-center justify-center">
+                                    <td className="px-6 py-4 text-sm flex flex-row items-center space-x-4 justify-center">
                                         <button
-                                            className="text-[#00B0C8] hover:text-[#008A9B] mr-2 text-center"
+                                            onClick={() => viewPdf("/uploads/invoices/invoice-" + order.reference + ".pdf")}
+                                            className="text-green-600 hover:text-green-800 flex items-center"
+                                            title="Ver Ticket PDF"
+                                        >
+                                            <FaRegFilePdf size={20} />
+                                        </button>
+                                        <button
+                                            className="text-[#00B0C8] hover:text-[#008A9B] mr-4 text-center"
                                             title="Ver detalles"
                                             onClick={() => handleViewOrder(order)}
                                         >
@@ -277,7 +351,7 @@ export default function OrdersTable({
                                         {userRole === 'admin' && (
                                             <>
                                                 <button
-                                                    className="text-yellow-600 hover:text-yellow-900 mr-2 text-center"
+                                                    className="text-yellow-600 hover:text-yellow-900 mr-4 text-center"
                                                     title="Editar pedido"
                                                     onClick={() => handleEditOrder(order)}
                                                 >

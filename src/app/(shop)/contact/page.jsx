@@ -1,10 +1,8 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-
 export default function ContactPage() {
     const [formData, setFormData] = useState({
         name: '',
@@ -13,13 +11,11 @@ export default function ContactPage() {
         subject: '',
         message: ''
     });
-
+    const [bannerImage, setBannerImage] = useState(null);
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Here you would typically handle the form submission
         console.log('Form submitted:', formData);
     };
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -27,37 +23,50 @@ export default function ContactPage() {
             [name]: value
         }));
     };
-
+    useEffect(() => {
+        const fetchBanner = async () => {
+            try {
+                const res = await fetch('/api/portimg/active');
+                if (!res.ok) throw new Error('Failed to fetch banner');
+                const data = await res.json();
+                if (data && (data.image || data.imageUrl)) {
+                    setBannerImage(data.image || data.imageUrl);
+                }
+            } catch (err) {
+                setBannerImage(null);
+            }
+        };
+        fetchBanner();
+    }, []);
     return (
         <ShopLayout>
             {/* Hero Section */}
             <motion.div
-                className="relative w-full h-[35vh] bg-gray-100"
+                className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
             >
                 <Image
-                    src="/assets/images/bg-beagrumb.jpg"
+                    src={bannerImage || "/assets/images/bg-beagrumb.jpg"}
                     alt="Background"
                     fill
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 text-zinc-900 mt-20">
-                    <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
-                        <motion.h1
-                            className="text-4xl font-bold mb-6"
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.2, duration: 0.5 }}
-                        >
-                            Contacto
-                        </motion.h1>
-                    </div>
+                {/* Overlay for contrast */}
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <motion.h1
+                        className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                    >
+                        Contacto
+                    </motion.h1>
                 </div>
             </motion.div>
-
             <div className="container mx-auto px-4 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {/* Contact Information */}
@@ -81,7 +90,6 @@ export default function ContactPage() {
                                         <p className="text-gray-600">Carrer de Sant Sebastià, 55, 08030 Barcelona</p>
                                     </div>
                                 </div>
-
                                 <div className="flex items-start space-x-4">
                                     <div className="w-8 h-8 rounded-full bg-[#00B0C8] flex items-center justify-center flex-shrink-0">
                                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +101,6 @@ export default function ContactPage() {
                                         <p className="text-gray-600">933 46 86 11</p>
                                     </div>
                                 </div>
-
                                 <div className="flex items-start space-x-4">
                                     <div className="w-8 h-8 rounded-full bg-[#00B0C8] flex items-center justify-center flex-shrink-0">
                                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +112,6 @@ export default function ContactPage() {
                                         <p className="text-gray-600">info@subirana.com</p>
                                     </div>
                                 </div>
-
                                 <div className="flex items-start space-x-4">
                                     <div className="w-8 h-8 rounded-full bg-[#00B0C8] flex items-center justify-center flex-shrink-0">
                                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +126,6 @@ export default function ContactPage() {
                                 </div>
                             </div>
                         </div>
-
                         {/* Map */}
                         <div className="h-[300px] bg-gray-100 rounded-lg overflow-hidden">
                             <iframe
@@ -133,7 +138,6 @@ export default function ContactPage() {
                             ></iframe>
                         </div>
                     </motion.div>
-
                     {/* Contact Form */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
@@ -156,7 +160,6 @@ export default function ContactPage() {
                                     required
                                 />
                             </div>
-
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                                     Email
@@ -171,7 +174,6 @@ export default function ContactPage() {
                                     required
                                 />
                             </div>
-
                             <div>
                                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                                     Teléfono
@@ -185,7 +187,6 @@ export default function ContactPage() {
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#00B0C8] focus:border-[#00B0C8] outline-none transition-colors"
                                 />
                             </div>
-
                             <div>
                                 <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
                                     Asunto
@@ -200,7 +201,6 @@ export default function ContactPage() {
                                     required
                                 />
                             </div>
-
                             <div>
                                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
                                     Mensaje
@@ -215,7 +215,6 @@ export default function ContactPage() {
                                     required
                                 ></textarea>
                             </div>
-
                             <button
                                 type="submit"
                                 className="w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#0090a8] transition-colors duration-300"
@@ -228,4 +227,4 @@ export default function ContactPage() {
             </div>
         </ShopLayout>
     );
-} 
+}

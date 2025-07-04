@@ -1,15 +1,16 @@
-'use client';
+'use client'
 import { useEffect, useState, useMemo } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
-import UserAuth from "@/components/ui/UserAuthModal";
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/contexts/CartContext.jsx';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
+import { ShoppingCart, Mail } from 'lucide-react';
+
 export default function CartPage() {
-    const { cartItems, updateQuantity, removeFromCart } = useCart();
+    const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
     const { user, loading: userLoading } = useUser();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
@@ -22,22 +23,31 @@ export default function CartPage() {
         postalCode: '',
         province: '',
         country: 'España',
-        notes: ''
+        notes: '',
+        giftNote: '' // Add new field for gift-specific notes
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
     const [orderError, setOrderError] = useState(null);
-    const [userType, setUserType] = useState('guest'); // 'guest' or 'register'
-    const regularItems = cartItems.filter(item => !item.isGift);
-    const giftItems = cartItems.filter(item => item.isGift);
+    // Remove userType state since we're not using login options anymore
+    const [invoiceBlob, setInvoiceBlob] = useState(null);
+
+    // Separate regular and gift items once cartItems is available
+    const regularItems = useMemo(() => cartItems?.filter(item => item.type !== 'gift') ?? [], [cartItems]);
+    const giftItems = useMemo(() => cartItems?.filter(item => item.type === 'gift') ?? [], [cartItems]);
     // Check if cart has any gift items
     const hasGiftItems = useMemo(() => {
-        return cartItems.some(item => item.isGift);
+        return cartItems?.some(item => item.type === 'gift') ?? false;
     }, [cartItems]);
+
     // Check if cart has only gift items
     const hasOnlyGiftItems = useMemo(() => {
-        return cartItems.length > 0 && cartItems.every(item => item.isGift);
+        return cartItems?.length > 0 && cartItems?.every(item => item.type === 'gift');
     }, [cartItems]);
+    // Determine if we should show address fields
+    const showAddressFields = useMemo(() => {
+        return deliveryMethod === 'delivery' && !hasOnlyGiftItems;
+    }, [deliveryMethod, hasOnlyGiftItems]);
     // Force pickup method if cart has gift items
     useEffect(() => {
         if (hasGiftItems) {
@@ -62,7 +72,9 @@ export default function CartPage() {
                 address: prev.address,
                 city: prev.city,
                 postalCode: prev.postalCode,
-                province: prev.province
+                province: prev.province,
+                notes: prev.notes || '', // Add notes field here
+                giftNote: prev.giftNote || '' // Add notes field here
             }));
             // Only fetch address data if not gift-only order
             if (!hasOnlyGiftItems) {
@@ -127,10 +139,22 @@ export default function CartPage() {
             return sum + (price * (item.quantity || 1));
         }, 0);
     };
+
+    // Subtotal for only regular (personal) items
+    const calculateRegularSubtotal = () => {
+        return regularItems.reduce((sum, item) => {
+            const price = typeof item.priceValue === 'number'
+                ? item.priceValue
+                : (typeof item.price === 'number'
+                    ? item.price
+                    : parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
+            return sum + (price * (item.quantity || 1));
+        }, 0);
+    };
     const calculateShipping = () => {
-        const subtotal = calculateSubtotal();
+        const regularSubtotal = calculateRegularSubtotal();
         if (deliveryMethod === 'pickup') return 0;
-        return subtotal >= 60 ? 0 : 5.99;
+        return regularSubtotal >= 60 ? 0 : (regularItems.length === 0 ? 0 : 5.99);
     };
     const calculateTax = () => {
         return calculateSubtotal() * 0.21;
@@ -142,8 +166,6 @@ export default function CartPage() {
     const saveUserAddressPreferences = async () => {
         if (!user?.id) return;
         try {
-            // This could be a separate API endpoint to save user address preferences
-            // For now, we'll just log it
             console.log('Saving user address preferences:', {
                 name: formData.name,
                 lastName: formData.lastName,
@@ -153,86 +175,71 @@ export default function CartPage() {
                 postalCode: formData.postalCode,
                 province: formData.province,
             });
-            // In a real implementation, you would save this data to the user profile
-            // await fetch('/api/user/address', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({
-            //         address: formData.address,
-            //         city: formData.city,
-            //         postalCode: formData.postalCode,
-            //         province: formData.province,
-            //         phone: formData.phone,
-            //     }),
-            // });
         } catch (error) {
             console.error('Error saving address preferences:', error);
         }
     };
     // Handle order submission
     const handleSubmitOrder = async () => {
-        // Determine which fields are required based on delivery method and cart contents
-        let requiredFields = ['name', 'lastName', 'email', 'phone'];
-        // Add address fields only if delivery method is 'delivery' or not all items are gifts
-        if (deliveryMethod === 'delivery' && !hasOnlyGiftItems) {
-            requiredFields = [...requiredFields, 'address', 'city', 'postalCode', 'province'];
+        // Clear any previous errors
+        setOrderError(null);
+
+        // Validate cart contents
+        if (cartItems.length === 0) {
+            setOrderError('No hay productos en el carrito');
+            return;
         }
+
+        // Determine required fields based on order contents and delivery method
+        const needsShippingAddress = deliveryMethod === 'delivery' && regularItems.length > 0;
+        const requiredFields = ['name', 'lastName', 'email', 'phone'];
+
+        if (needsShippingAddress) {
+            requiredFields.push('address', 'city', 'postalCode', 'province');
+        }
+
+        // Validate required fields
         const missingFields = requiredFields.filter(field => !formData[field]);
         if (missingFields.length > 0) {
             setOrderError('Por favor, completa todos los campos obligatorios');
             return;
         }
-        if (cartItems.length === 0) {
-            setOrderError('No hay productos en el carrito');
-            return;
-        }
+
         try {
             setIsSubmitting(true);
             setOrderError(null);
-            // Handle user registration if selected
-            if (userType === 'register' && !user) {
-                // Validate passwords match
-                if (formData.password !== formData.confirmPassword) {
-                    setOrderError('Las contraseñas no coinciden');
-                    return;
-                }
-                try {
-                    // Call your registration API
-                    const registerResponse = await fetch('/api/auth/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            name: `${formData.name} ${formData.lastName}`,
-                            email: formData.email,
-                            password: formData.password
-                        })
-                    });
-                    if (!registerResponse.ok) {
-                        throw new Error('Error al crear la cuenta');
-                    }
-                    // Optionally sign in the user automatically
-                    // This depends on your auth implementation
-                } catch (error) {
-                    setOrderError('Error al crear la cuenta: ' + error.message);
-                    return;
-                }
-            }
-            // Prepare the buyer information for gift items
             const buyerInfo = {
                 name: `${formData.name} ${formData.lastName}`.trim(),
                 email: formData.email,
                 phone: formData.phone
             };
+
             const orderData = {
                 items: cartItems.map(item => ({
                     ...item,
-                    // Add buyer information to gift items
-                    buyerInfo: item.isGift ? buyerInfo : undefined
+                    buyerInfo: item.type === 'gift' ? {
+                        ...buyerInfo,
+                        ...(item.listInfo || {}),
+                        note: formData.giftNote
+                    } : undefined,
+                    quantity: item.type === 'gift' ? 1 : item.quantity,
+                    notes: formData.notes
                 })),
-                shippingDetails: formData,
-                deliveryMethod: deliveryMethod,
-                hasGiftItems: hasGiftItems,
+                shippingDetails: {
+                    ...formData,
+                    // Only include address if there are regular items and delivery is selected
+                    ...(needsShippingAddress ? {} : {
+                        address: undefined,
+                        city: undefined,
+                        postalCode: undefined,
+                        province: undefined
+                    })
+                },
+                deliveryMethod,
+                hasGiftItems,
                 isGiftOnly: hasOnlyGiftItems,
+                notes: formData.notes,
+                giftNote: hasGiftItems ? formData.giftNote : undefined,
                 totals: {
                     subtotal: calculateSubtotal(),
                     shipping: calculateShipping(),
@@ -240,6 +247,7 @@ export default function CartPage() {
                     total: calculateTotal()
                 }
             };
+
             const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: {
@@ -251,12 +259,14 @@ export default function CartPage() {
             if (!response.ok) {
                 throw new Error(data.message || 'Error al procesar el pedido');
             }
+
             // Save user address preferences for future orders
             if (user?.id) {
                 await saveUserAddressPreferences();
             }
+
             // Order created successfully - include more detailed information
-            setOrderSuccess({
+            const orderSuccess = {
                 orderNumber: data.order.orderNumber,
                 orderId: data.order.id,
                 totalAmount: calculateTotal().toFixed(2),
@@ -267,9 +277,31 @@ export default function CartPage() {
                     name: `${formData.name} ${formData.lastName}`.trim(),
                     email: formData.email
                 }
-            });
+            };
+
+            setOrderSuccess(orderSuccess);
+
+            // Automatically send the confirmation email
+            try {
+                const emailResponse = await fetch(`/api/orders/${data.order.id}/send-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!emailResponse.ok) {
+                    console.error('Error sending automatic order confirmation email');
+                    // Don't throw error here, just log it - the order was still created successfully
+                }
+            } catch (emailError) {
+                console.error('Error in automatic email sending:', emailError);
+                // Don't throw error here, just log it - the order was still created successfully
+            }
+
             // Clear the cart
-            cartItems.forEach(item => removeFromCart(item.id));
+            clearCart();
+
             // Reset form data
             setFormData({
                 name: '',
@@ -281,12 +313,15 @@ export default function CartPage() {
                 postalCode: '',
                 province: '',
                 country: 'España',
-                notes: ''
+                notes: '',
+                giftNote: ''
             });
-            // After 5 seconds, scroll to top
+
+            // After successful order, scroll to top
             setTimeout(() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }, 1000);
+
         } catch (error) {
             console.error('Error creating order:', error);
             setOrderError(error.message || 'Error al procesar el pedido');
@@ -295,40 +330,81 @@ export default function CartPage() {
         }
     };
     // Handle invoice download
-    const handleDownloadInvoice = async () => {
-        if (!orderSuccess) return;
-        toast.success('Generando factura...');
-        try {
-            // Call API to generate/download invoice PDF
-            const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
-                method: 'GET',
-                headers: { 'Accept': 'application/pdf' }
-            });
-            if (!res.ok) throw new Error('No se pudo generar la factura');
-            const blob = await res.blob();
-            // Create a link to download the PDF
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Factura-${orderSuccess.orderNumber}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-            toast.success('Factura descargada correctamente');
-        } catch (err) {
-            toast.error('Error al descargar la factura');
-        }
+    useEffect(() => {
+        const generateInvoice = async () => {
+            if (!orderSuccess) return;
+            // toast.success('Generando Ticket...');
+            try {
+                const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/pdf' }
+                });
+                if (!res.ok) throw new Error('No se pudo generar la Ticket');
+                const blob = await res.blob();
+                setInvoiceBlob(blob);
+                // toast.success('Ticket generada correctamente');
+                //close the modal 
+            } catch (err) {
+                toast.error('Error al generar la Ticket');
+            }
+        };
+        generateInvoice();
+    }, [orderSuccess]);
+
+
+    const handleDownloadInvoice = () => {
+        if (!invoiceBlob || !orderSuccess) return;
+        const url = window.URL.createObjectURL(invoiceBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Ticket-${orderSuccess.orderNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success('Ticket descargada correctamente');
     };
+
+
     // Handle sending email with receipt
-    const handleSendEmail = () => {
+    const handleSendEmail = async () => {
         if (!orderSuccess) return;
-        toast.success(`Enviando email a ${orderSuccess.buyerDetails.email}...`);
-        // Simulating email sending
-        setTimeout(() => {
-            toast.success('Email enviado correctamente');
-        }, 1500);
+
+        // Create a loading toast that we can dismiss later
+        const loadingToastId = toast.loading('Enviando email...');
+
+        const sendEmail = async () => {
+            try {
+                const response = await fetch(`/api/orders/${orderSuccess.orderId}/send-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: orderSuccess.buyerDetails.email,
+                        orderNumber: orderSuccess.orderNumber,
+                        items: orderSuccess.items
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al enviar el email');
+                }
+
+                // Dismiss loading toast and show success
+                toast.dismiss(loadingToastId);
+                toast.success('Email enviado correctamente');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                // Dismiss loading toast and show error
+                toast.dismiss(loadingToastId);
+                toast.error('Error al enviar el email');
+            }
+        };
+
+        sendEmail();
     };
+
     return (
         <ShopLayout>
             <div className="container mx-auto px-4 py-8 mt-24 ">
@@ -342,78 +418,29 @@ export default function CartPage() {
                                 <div className="sticky top-[120px] space-y-4">
                                     {/* User Type Selection - Only for guests */}
                                     <div className='bg-white rounded-lg shadow-sm p-6'>
-                                        <div className="flex items-start space-x-4 justify-start ">
-                                            <h2 className="text-xl font-bold mb-6">Datos del usuario</h2>
-                                            {/* <UserAuth /> */}
-                                        </div> 
+                                        <div className="flex items-start justify-between">
+                                            {/* <h2 className="text-xl font-bold mb-6">Datos del usuario</h2> */}
+                                            {/* {!user && (
+                                                <button
+                                                    onClick={() => setIsAuthModalOpen(true)}
+                                                    className="text-[#00B0C8] text-sm hover:underline"
+                                                >
+                                                    Iniciar sesión
+                                                </button>
+                                            )} */}
+                                        </div>
                                         {!user ? (
-                                            <>
-                                                <div className="space-y-4">
-                                                    <div className="flex flex-col   gap-4">
-                                                        <div className='flex flex-row gap-4 space-x-2'>
-                                                            <div
-                                                                className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'login'
-                                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5'
-                                                                    : 'border-gray-200 hover:border-[#00B0C8]'
-                                                                    }`}
-                                                                onClick={() => setUserType('login')}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${userType === 'login' ? 'border-[#00B0C8]' : 'border-gray-400'}`}>
-                                                                        {userType === 'login' && (
-                                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
-                                                                        )}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium">Login</p>
-                                                                        <p className="text-sm text-gray-500"> Gestiona tus pedidos fácilmente</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div
-                                                                className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'register'
-                                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5'
-                                                                    : 'border-gray-200 hover:border-[#00B0C8]'
-                                                                    }`}
-                                                                onClick={() => setUserType('register')}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${userType === 'register' ? 'border-[#00B0C8]' : 'border-gray-400'}`}>
-                                                                        {userType === 'register' && (
-                                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
-                                                                        )}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium">Registrar</p>
-                                                                        <p className="text-sm text-gray-500">Crear una nueva cuenta</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>  
-                                                        <div className='flex-1 flex-row gap-4 space-x-2'>
-                                                            <div
-                                                                className={`flex-1 w-full p-4 border rounded-lg cursor-pointer transition-all ${userType === 'guest'
-                                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5'
-                                                                    : 'border-gray-200 hover:border-[#00B0C8]'
-                                                                    }`}
-                                                                onClick={() => setUserType('guest')}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${userType === 'guest' ? 'border-[#00B0C8]' : 'border-gray-400'}`}>
-                                                                        {userType === 'guest' && (
-                                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
-                                                                        )}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium">Comprar como invitado</p>
-                                                                        <p className="text-sm text-gray-500">Continuar sin crear una cuenta</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </>
+                                            <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                                                <p className="text-sm text-blue-600 mb-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Comprando como invitado
+                                                </p>
+                                                <p className="text-xs text-gray-600">
+                                                    Inicia sesión para ver tus pedidos en el panel y crear listas de nacimiento
+                                                </p>
+                                            </div>
                                         ) : (
                                             <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
                                                 <p className="text-sm flex items-center text-blue-600">
@@ -440,7 +467,7 @@ export default function CartPage() {
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                            Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista. Por favor, proporciona tus datos de contacto.
+                                                            Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista.
                                                         </p>
                                                     </div>
                                                 )}
@@ -494,7 +521,7 @@ export default function CartPage() {
                                                             required
                                                         />
                                                     </div>
-                                                    {userType === 'register' && (
+                                                    {/* {userType === 'register' && (
                                                         <div className="col-span-2">
                                                             <h3 className="font-medium mb-4">Contraseña para la cuenta</h3>
                                                             <div className="space-y-4">
@@ -522,7 +549,7 @@ export default function CartPage() {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    )}
+                                                    )} */}
                                                     <div className="col-span-2">
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             Teléfono
@@ -536,8 +563,7 @@ export default function CartPage() {
                                                             required
                                                         />
                                                     </div>
-                                                    {/* Only show address fields if not gift-only or delivery method is not pickup */}
-                                                    {(!hasOnlyGiftItems || deliveryMethod === 'delivery') && (
+                                                    {/* Only show address fields if not gift-only or delivery method is not pickup */}                                    {showAddressFields && (
                                                         <>
                                                             <div className="col-span-2">
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -593,6 +619,40 @@ export default function CartPage() {
                                                             </div>
                                                         </>
                                                     )}
+                                                    {/* Add note field */}
+                                                    <div className="col-span-2">
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            Notas para Tienda
+                                                        </label>
+                                                        <textarea
+                                                            name="notes"
+                                                            value={formData.notes}
+                                                            onChange={handleInputChange}
+                                                            placeholder="Instrucciones especiales para la entrega, preferencias, etc."
+                                                            rows={3}
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] text-sm"
+                                                        />
+                                                    </div>
+
+                                                    {/* Add gift note field when there are gift items */}
+                                                    {hasGiftItems && (
+                                                        <div className="col-span-2">
+                                                            <label className="block text-sm font-medium text-pink-600 mb-1">
+                                                                    Nota para los propietarios de la lista
+                                                            </label>
+                                                            <textarea
+                                                                name="giftNote"
+                                                                value={formData.giftNote}
+                                                                onChange={handleInputChange}
+                                                                placeholder="Añade una nota especial para el propietario de la lista de regalos"
+                                                                rows={3}
+                                                                className="w-full px-3 py-2 border border-pink-200 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-400 text-sm bg-pink-50/30"
+                                                            />
+                                                            <p className="mt-1 text-xs text-pink-600">
+                                                                Esta nota será visible para el propietario de la lista cuando recoja los regalos
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </>
                                         )}
@@ -627,7 +687,7 @@ export default function CartPage() {
                                                 <div className="flex-grow">
                                                     <h3 className="font-medium">{item.name}</h3>
                                                     <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
-                                                    <p className="text-[#00B0C8] font-medium">{item.price}</p>
+                                                    <p className="text-[#00B0C8] font-medium">{item.price}€</p>
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
                                                             Lista de regalo: {item.listOwner}
@@ -689,10 +749,10 @@ export default function CartPage() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="flex-grow">
+                                                <div className="flex-1">
                                                     <h3 className="font-medium">{item.name}</h3>
                                                     <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
-                                                    <p className="text-[#00B0C8] font-medium">{item.price}</p>
+                                                    <p className="text-[#00B0C8] font-medium">{item.price}€</p>
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
                                                             Lista de regalo: {item.listOwner}
@@ -700,29 +760,18 @@ export default function CartPage() {
                                                         </p>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
-                                                    >
-                                                        -
-                                                    </button>
-                                                    <span className="w-8 text-center">{item.quantity}</span>
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
-                                                    >
-                                                        +
-                                                    </button>
+                                                <div className="flex-1 flex-col space-y-3 w-full mt-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-2 justify-between">                                            <p className="text-sm text-gray-500">Cantidad: 1</p>
+                                                            <button
+                                                                onClick={() => removeFromCart(item.id)}
+                                                                className="text-sm text-red-600 hover:text-red-900"
+                                                            >
+                                                                Eliminar
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <button
-                                                    onClick={() => removeFromCart(item.id)}
-                                                    className="text-red-500 hover:text-red-700"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
                                             </div>
                                         ))}
                                     </div>
@@ -739,57 +788,57 @@ export default function CartPage() {
                                                 </svg>
                                                 {hasOnlyGiftItems
                                                     ? 'Tu carrito contiene solo productos de regalo que deben ser recogidos en tienda por el propietario de la lista. Al comprar estos artículos, serán marcados como comprados en la lista de regalo.'
-                                                    : 'Este pedido incluye artículos de regalo (recogida en tienda obligatoria por el propietario de la lista). Por ello, todo el pedido se configurará para recoger en tienda. Si deseas envío a domicilio para los otros artículos, por favor sepáralos en un pedido diferente. Los artículos de regalo serán marcados como comprados en la lista.'
+                                                    : 'Este pedido incluye artículos de regalo (recogida en tienda obligatoria por el propietario de la lista). Estos artículos no pueden ser enviados a domicilio.'
                                                 }
                                             </p>
                                         </div>
                                     )}
                                     {/* Free Shipping Progress */}
-                                    {calculateSubtotal() < 60 && deliveryMethod === 'delivery' && !hasGiftItems && (
+                                    {calculateRegularSubtotal() < 60 && deliveryMethod === 'delivery' && !hasGiftItems && (
                                         <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                                             <p className="text-sm text-gray-700 mb-2">
-                                                ¡Añade <span className="font-bold text-[#00B0C8]">{(60 - calculateSubtotal()).toFixed(2)}€</span> más a tu pedido para conseguir envío gratis!
+                                                ¡Añade <span className="font-bold text-[#00B0C8]">{(60 - calculateRegularSubtotal()).toFixed(2)}€</span> más a tu pedido para conseguir envío gratis!
                                             </p>
                                             <div className="w-full bg-gray-200 rounded-full h-2.5">
                                                 <div
                                                     className="bg-[#00B0C8] h-2.5 rounded-full transition-all duration-500 ease-in-out"
-                                                    style={{ width: `${Math.min(100, (calculateSubtotal() / 60) * 100)}%` }}
+                                                    style={{ width: `${Math.min(100, (calculateRegularSubtotal() / 60) * 100)}%` }}
                                                 ></div>
                                             </div>
                                         </div>
                                     )}
                                     <div className="space-y-4">
                                         <div
-                                            className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${hasGiftItems
+                                            className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${hasOnlyGiftItems
                                                 ? 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-60'
                                                 : deliveryMethod === 'delivery'
                                                     ? 'border-[#00B0C8] bg-[#00B0C8]/5 cursor-pointer'
                                                     : 'border-gray-200 hover:border-[#00B0C8] cursor-pointer'
                                                 }`}
-                                            onClick={() => !hasGiftItems && handleDeliveryMethodChange('delivery')}
+                                            onClick={() => !hasOnlyGiftItems && handleDeliveryMethodChange('delivery')}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${hasGiftItems
+                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${hasOnlyGiftItems
                                                     ? 'border-gray-400'
                                                     : deliveryMethod === 'delivery' ? 'border-[#00B0C8]' : 'border-gray-400'
                                                     }`}>
-                                                    {deliveryMethod === 'delivery' && !hasGiftItems && (
+                                                    {deliveryMethod === 'delivery' && !hasOnlyGiftItems && (
                                                         <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
                                                     )}
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">Envío a domicilio</p>
-                                                    <p className="text-sm text-gray-500">Entrega en 24-48 horas laborables</p>
-                                                    {calculateSubtotal() >= 60 && !hasGiftItems && (
+                                                    {/* <p className="text-sm text-gray-500">Entrega en 24-48 horas laborables</p> */}
+                                                    {calculateRegularSubtotal() >= 60 && !hasOnlyGiftItems && (
                                                         <p className="text-xs text-green-600 font-medium mt-1">Envío gratis en pedidos superiores a 60€</p>
                                                     )}
-                                                    {hasGiftItems && (
-                                                        <p className="text-xs text-red-600 font-medium mt-1">No disponible para productos de regalo</p>
+                                                    {hasGiftItems && !hasOnlyGiftItems && (
+                                                        <p className="text-xs text-orange-600 font-medium mt-1">Los productos de regalo deberán recogerse en tienda por el propietario de la lista </p>
                                                     )}
                                                 </div>
                                             </div>
                                             <span className="text-[#00B0C8] font-medium">
-                                                {calculateSubtotal() >= 60 || regularItems.length === 0 ? 'Gratis' : '5,99 €'}
+                                                {calculateRegularSubtotal() >= 60 || regularItems.length === 0 ? 'Gratis' : '5,99 €'}
                                             </span>
                                         </div>
                                         <div
@@ -808,9 +857,14 @@ export default function CartPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">Recoger en tienda</p>
-                                                    <p className="text-sm text-gray-500">Disponible en 2-4 horas</p>
+                                                    {/* <p className="text-sm text-gray-500">Disponible in 2-4 horas</p> */}
                                                     {hasGiftItems && (
-                                                        <p className="text-xs text-pink-600 font-medium mt-1">Obligatorio para productos de regalo — Solo el propietario de la lista puede recogerlos</p>
+                                                        <p className="text-xs text-pink-600 font-medium mt-1">
+                                                            {hasOnlyGiftItems
+                                                                ? 'Única opción disponible para pedidos de regalo'
+                                                                : 'Obligatorio para productos de regalo — Solo el propietario de la lista puede recogerlos'
+                                                            }
+                                                        </p>
                                                     )}
                                                 </div>
                                             </div>
@@ -818,6 +872,45 @@ export default function CartPage() {
                                         </div>
                                     </div>
                                 </div>
+                                {/* Gift Notes Section */}
+                                {/* {giftItems.length > 0 && (
+                                    <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
+                                        <h2 className="text-xl font-bold mb-4">Notas para los regalos</h2>
+                                        <div className="space-y-6">
+                                            {giftItems.map((item) => (
+                                                <div key={`note-${item.id}`} className="space-y-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="relative w-16 h-16 overflow-hidden rounded-md border border-gray-200">
+                                                            <Image
+                                                                src={item.image}
+                                                                alt="img"
+                                                                fill
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-sm font-medium text-gray-900">{item.name}</h3>
+                                                            <p className="text-sm text-gray-500">{item.priceValue}€</p>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label htmlFor={`gift-note-${item.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                                                            Nota para el regalo
+                                                        </label>
+                                                        <textarea
+                                                            id={`gift-note-${item.id}`}
+                                                            value={giftNotes[item.id] || item.giftInfo?.note || ''}
+                                                            onChange={(e) => handleGiftNoteChange(item.id, e.target.value)}
+                                                            placeholder="Añade un mensaje personal para este regalo..."
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] text-sm"
+                                                            rows={3}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )} */}
                                 {/* Order Summary */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
                                     <h2 className="text-xl font-bold mb-4">Resumen del pedido</h2>
@@ -829,7 +922,7 @@ export default function CartPage() {
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span>Envío</span>
-                                                {calculateSubtotal() >= 60 && deliveryMethod === 'delivery' ? (
+                                                {calculateRegularSubtotal() >= 60 && deliveryMethod === 'delivery' ? (
                                                     <span className="flex items-center text-green-600">
                                                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -876,11 +969,12 @@ export default function CartPage() {
                     </>
                 ) : (
                     <motion.div
-                        className="text-center py-16"
+                        className="text-center py-16 min-h-[60vh] flex flex-col items-center justify-center space-y-4"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                     >
-                        <h2 className="text-2xl font-bold mb-4">Tu carrito está vacío</h2>
+                        <ShoppingCart className='text-gray-600 w-40 h-40' />
+                        <h2 className="text-2xl text-gray-800 font-bold mb-4">Tu carrito está vacío</h2>
                         <p className="text-gray-500 mb-8">¿No sabes qué comprar? ¡Miles de productos te esperan!</p>
                         <Link
                             href="/products"
@@ -938,16 +1032,14 @@ export default function CartPage() {
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Descargar Factura
+                                Descargar Ticket
                             </button>
                             <button
                                 onClick={handleSendEmail}
                                 className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                Enviar por Email
+                                <Mail />
+                                Enviar una copia de Email
                             </button>
                         </div>
                         <div className="mt-4 pt-3 border-t border-gray-200">
@@ -965,6 +1057,7 @@ export default function CartPage() {
                     </div>
                 </div>
             )}
+            {/* <UserAuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} /> */}
         </ShopLayout>
     );
 }

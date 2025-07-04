@@ -10,6 +10,10 @@ const giftInfoSchema = new mongoose.Schema({
     },
     babyName: {
         type: String
+    },
+    note: {
+        type: String,
+        default: ''
     }
 }, { _id: false });
 

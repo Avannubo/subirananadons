@@ -34,46 +34,42 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
         loadProducts();
     }, [currentPage, search]);
     const handleSelectProduct = (product) => {
-        const existingIndex = selectedItems.findIndex(item => item.product._id === product._id);
-        let updatedItems;
+        // Check if product is already in the list
+        const isProductInList = selectedItems.some(item => item.product._id === product._id);
 
-        if (existingIndex >= 0) {
-            updatedItems = [...selectedItems];
-            updatedItems[existingIndex].quantity += 1;
-            setSelectedItems(updatedItems);
-        } else {
-            updatedItems = [
-                ...selectedItems,
-                {
-                    product,
-                    quantity: 1,
-                    reserved: 0,
-                    priority: 2
-                }
-            ];
-            setSelectedItems(updatedItems);
-        }
+        // if (isProductInList) {
+        //     toast.error(`${product.name} ya está en la lista`);
+        //     return;
+        // }
 
-        // Call onProductSelect only with the updated items to prevent unnecessary rerenders
+        const newItem = {
+            _id: crypto.randomUUID(), // Add a unique ID for each selected item
+            product,
+            quantity: 1,
+            state: 0 // default state: pending
+        };
+
+        const updatedItems = [...selectedItems, newItem];
+        setSelectedItems(updatedItems);
+
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
 
         toast.success(`${product.name} añadido a la lista`);
     };
-    const handleRemoveProduct = (productId) => {
-        const updatedItems = selectedItems.filter(item => item.product._id !== productId);
+    const handleRemoveProduct = (itemId) => {
+        const updatedItems = selectedItems.filter(item => item._id !== itemId);
         setSelectedItems(updatedItems);
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
         toast.success('Producto eliminado de la lista');
     };
-    const handleQuantityChange = (productId, newQuantity) => {
-        if (newQuantity < 1) return;
+    const handleQuantityChange = (productId) => {
         const updatedItems = selectedItems.map(item => {
             if (item.product._id === productId) {
-                return { ...item, quantity: newQuantity };
+                return { ...item, quantity: 1 }; // force quantity to 1
             }
             return item;
         });
@@ -82,30 +78,46 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             onProductSelect(updatedItems);
         }
     };
+
+    // const handleQuantityChange = (productId, newQuantity) => {
+    //     if (newQuantity < 1) return;
+    //     const updatedItems = selectedItems.map(item => {
+    //         if (item.product._id === productId) {
+    //             return { ...item, quantity: newQuantity };
+    //         }
+    //         return item;
+    //     });
+    //     setSelectedItems(updatedItems);
+    //     if (onProductSelect) {
+    //         onProductSelect(updatedItems);
+    //     }
+    // };
     return (
         <div>
             {selectedItems.length > 0 && (
-                <div className="mb-6   bg-gray-50 rounded-lg h-scree">
+                <div className="mb-6   bg-gray-50 rounded-lg min-w-[600px] p-4 shadow-md">
                     <h3 className="font-medium text-gray-900 mb-2">Productos seleccionados ({selectedItems.length})</h3>
                     <div className="space-y-2 max-h-[100px] overflow-y-auto">
-                        {selectedItems.map((item) => (
-                            <div key={item.product._id} className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden mr-3">
-                                        {item.product.image && (
-                                            <Image
-                                                src={item.product.image}
-                                                alt={item.product.name}
-                                                width={40}
-                                                height={40}
-                                                className="object-cover"
-                                            />
-                                        )}
+                        {selectedItems
+                            .filter(item => item.state === 0)
+                            .map((item, index) => (
+                                <div key={item._id} className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden mr-3">
+                                            {item.product.image && (
+                                                <Image
+                                                    src={item.product.image}
+                                                    alt={item.product.name}
+                                                    width={40}
+                                                    height={40}
+                                                    className="object-cover"
+                                                />
+                                            )}
+                                        </div>
+                                        <span className="text-sm font-medium">{item.product.name}</span>
                                     </div>
-                                    <span className="text-sm font-medium">{item.product.name}</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="flex items-center border border-gray-300  rounded-md">
+                                    <div className="flex items-center space-x-3">
+                                        {/* <div className="flex items-center border border-gray-300  rounded-md">
                                         <button
                                             onClick={(e) => {
                                                 e.preventDefault();
@@ -127,22 +139,21 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                         >
                                             +
                                         </button>
+                                    </div> */}                                    <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleRemoveProduct(item._id);
+                                            }}
+                                            className="text-red-500 hover:text-red-700"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            handleRemoveProduct(item.product._id);
-                                        }}
-                                        className="text-red-500 hover:text-red-700"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
                     </div>
                 </div>
             )}

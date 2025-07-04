@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import Order from '@/models/Order';
 import dbConnect from '@/lib/dbConnect';
 import mongoose from 'mongoose';
+import Order from '@/models/Order';
+import Invoice from '@/models/Invoice';
+// Ensure Invoice model is imported before using it in population
 
 // Get a single order by ID
 export async function GET(request, { params }) {
@@ -31,45 +33,46 @@ export async function GET(request, { params }) {
             }, { status: 400 });
         }
 
-        const order = await Order.findById(id).populate('user', 'name email');
-        console.log('Order Detail API - Order found:', order ? 'Yes' : 'No');
+        // First try to find the order without population to ensure it exists
+        const order = await Order.findById(id);
 
-        // Check if order exists
         if (!order) {
-            console.error('Order Detail API - Order not found:', id);
             return NextResponse.json({
                 success: false,
                 message: 'Order not found'
             }, { status: 404 });
         }
 
-        // Check if user is authorized to view this order
-        const isAdmin = session.user.role === 'admin';
-        const isOrderOwner = order.user?._id.toString() === session.user.id;
-        console.log('Order Detail API - Auth check:', { isAdmin, isOrderOwner, userId: session.user.id, orderUserId: order.user?._id.toString() });
+        // Then populate the references if needed
+        const populatedOrder = await Order.findById(id)
+            .populate('user', 'name email')
+            .lean(); // Use lean() for better performance
 
-        if (!isAdmin && !isOrderOwner) {
-            console.error('Order Detail API - User not authorized to view order');
-            return NextResponse.json({
-                success: false,
-                message: 'You are not authorized to view this order'
-            }, { status: 403 });
+        // Handle invoices separately to avoid schema registration issues
+        if (populatedOrder.invoices && populatedOrder.invoices.length > 0) {
+            try {
+                const invoices = await Invoice.find({
+                    _id: { $in: populatedOrder.invoices }
+                }).select('pdfUrl invoiceNumber').lean();
+                populatedOrder.invoices = invoices;
+            } catch (invoiceError) {
+                console.error('Error fetching invoices:', invoiceError);
+                populatedOrder.invoices = []; // Fallback to empty array if invoice fetch fails
+            }
         }
 
         return NextResponse.json({
             success: true,
-            order
+            order: populatedOrder
         });
     } catch (error) {
-        console.error('Error fetching order:', error);
+        console.error('Order Detail API - Error:', error);
         return NextResponse.json({
             success: false,
-            message: 'Failed to fetch order',
-            error: error.message
+            message: error.message || 'Failed to fetch order details'
         }, { status: 500 });
     }
 }
-
 // Update an order
 export async function PATCH(request, { params }) {
     try {
@@ -80,7 +83,6 @@ export async function PATCH(request, { params }) {
                 message: 'Unauthorized'
             }, { status: 401 });
         }
-
         const isAdmin = session.user.role === 'admin';
         if (!isAdmin) {
             return NextResponse.json({
@@ -88,11 +90,9 @@ export async function PATCH(request, { params }) {
                 message: 'Only administrators can update orders'
             }, { status: 403 });
         }
-
         await dbConnect();
         const { id } = params;
         const data = await request.json();
-
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return NextResponse.json({
                 success: false,
@@ -100,10 +100,18 @@ export async function PATCH(request, { params }) {
             }, { status: 400 });
         }
 
+        // Validate status if it's being updated
+        const allowedStatuses = ['acceptado', 'procesando', 'enviado', 'completo', 'cancelado'];
+        if (data.status !== undefined && !allowedStatuses.includes(data.status)) {
+            return NextResponse.json({
+                success: false,
+                message: 'Invalid order status. Allowed values are: ' + allowedStatuses.join(', ')
+            }, { status: 400 });
+        }
+
         // Validate the update data
         const allowedFields = ['status', 'trackingNumber', 'notes', 'paymentDetails'];
         const updateData = {};
-
         for (const field of allowedFields) {
             if (data[field] !== undefined) {
                 updateData[field] = data[field];
@@ -147,7 +155,6 @@ export async function PATCH(request, { params }) {
         }, { status: 500 });
     }
 }
-
 // Delete an order
 export async function DELETE(request, { params }) {
     try {
@@ -158,7 +165,6 @@ export async function DELETE(request, { params }) {
                 message: 'Unauthorized'
             }, { status: 401 });
         }
-
         const isAdmin = session.user.role === 'admin';
         if (!isAdmin) {
             return NextResponse.json({
@@ -166,20 +172,16 @@ export async function DELETE(request, { params }) {
                 message: 'Only administrators can delete orders'
             }, { status: 403 });
         }
-
         await dbConnect();
         const { id } = params;
-
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return NextResponse.json({
                 success: false,
                 message: 'Invalid order ID'
             }, { status: 400 });
         }
-
         // Find and delete the order
         const deletedOrder = await Order.findByIdAndDelete(id);
-
         // Check if order exists
         if (!deletedOrder) {
             return NextResponse.json({
@@ -187,7 +189,6 @@ export async function DELETE(request, { params }) {
                 message: 'Order not found'
             }, { status: 404 });
         }
-
         return NextResponse.json({
             success: true,
             message: 'Order deleted successfully'
@@ -200,4 +201,4 @@ export async function DELETE(request, { params }) {
             error: error.message
         }, { status: 500 });
     }
-} 
+}
