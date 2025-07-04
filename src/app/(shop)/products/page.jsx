@@ -84,31 +84,49 @@ export default function Page() {
         const categoryParam = searchParams.get('category');
         const brandParam = searchParams.get('brand');
         console.log('URL Parameters:', { category: categoryParam, brand: brandParam });
-        if (categoryParam) {
-            // Find the category path for the specified category
-            const categoryNode = findCategoryInTree(productMenuTree, categoryParam);
-            if (categoryNode) {
-                console.log('Found category path:', categoryNode.path);
-                setCategoryPath(categoryNode.path);
+        if (categoryParam && categories && categories.length > 0) {
+            // Find the category path for the specified category in the DB-driven categories
+            function findPathByLabel(categories, label, path = []) {
+                for (const cat of categories) {
+                    const newPath = [...path, cat.name];
+                    if (cat.name === label) return newPath;
+                    if (cat.children) {
+                        const found = findPathByLabel(cat.children, label, newPath);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            }
+            const foundPath = findPathByLabel(categories, categoryParam);
+            if (foundPath) {
+                setCategoryPath(['Productos', ...foundPath]);
             } else {
-                console.log('Category not found in tree:', categoryParam);
                 // Try to match by case-insensitive partial match
                 const normalizedCategory = categoryParam.toLowerCase().trim();
-                const matchResult = findCategoryByPartialMatch(productMenuTree, normalizedCategory);
+                function findPartialPath(categories, search, path = []) {
+                    for (const cat of categories) {
+                        const newPath = [...path, cat.name];
+                        if (cat.name.toLowerCase().includes(search)) return newPath;
+                        if (cat.children) {
+                            const found = findPartialPath(cat.children, search, newPath);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                }
+                const matchResult = findPartialPath(categories, normalizedCategory);
                 if (matchResult) {
-                    console.log('Found category by partial match:', matchResult.path);
-                    setCategoryPath(matchResult.path);
+                    setCategoryPath(['Productos', ...matchResult]);
                 }
             }
         }
         if (brandParam) {
-            // Store the active brand filter for UI indication
             setActiveBrandFilter(brandParam);
             console.log('Filtering by brand:', brandParam);
         }
         // Only run this effect when the component mounts, not on every searchParams change
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [categories]);
     // Fetch active banner image on mount
     useEffect(() => {
         async function fetchBanner() {
