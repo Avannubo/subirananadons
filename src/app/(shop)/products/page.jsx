@@ -687,7 +687,7 @@ export default function Page() {
                         {!loading && !error && (
                             <motion.div
                                 layout
-                                className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col space-y-6'}`}
+                                className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'grid grid-cols-1 lg:grid-cols-2 gap-6'}`}
                             >
                                 <AnimatePresence>
                                     {filteredAndSortedProducts.map((product) => (

@@ -70,7 +70,12 @@ export default function Page() {
                         </Link> 
                         <Link href="/cart" className="p-2 text-sm text-gray-700 relative">
                             <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
-                            <span className="absolute top-1 -right-1 z-30 bg-[#00B0C8] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-white shadow animate-bounce">
+                            <span
+                                className={
+                                    `absolute top-1 -right-1 z-30 bg-[#00B0C8] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-white shadow
+                                    ${cartItemsCount > 0 ? "animate-bounce" : ""}`
+                                }
+                            >
                                 {cartItemsCount}
                             </span>
                         </Link> 
