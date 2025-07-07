@@ -6,12 +6,14 @@ import UserAuth from "@/components/ui/UserAuthModal";
 import Link from 'next/link';
 import { InstagramIcon, UserRound, Search, ShoppingBag, TagIcon, Gift, Mail } from "lucide-react";
 import useShopSocials from "@/lib/useShopSocials";
+import useShopParameter from "@/lib/useShopParameter";
 export default function Menu() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [menuVisible, setMenuVisible] = useState(false);
     const [openSubmenus, setOpenSubmenus] = useState({});
 
     const { socials } = useShopSocials();
+    const { value: shopPhone } = useShopParameter('telephone');
     // Handles swipe animation for open/close
     // menuVisible keeps the menu mounted for animation
     const openMenu = () => {
@@ -172,7 +174,9 @@ export default function Menu() {
                                         );
                                     })}
                                 </div>
-                                <Link href="#" className="block text-gray-700 text-sm hover:text-[#00B0C8] cursor-pointer text-center">Tel: 938 751 567</Link>
+                                <Link href={`tel:${shopPhone || '938751567'}`} className="block text-gray-700 text-sm hover:text-[#00B0C8] cursor-pointer text-center">
+                                    Tel: {shopPhone || '938 751 567'}
+                                </Link>
                                 <p className="text-xs md:text-sm text-center text-gray-400 mt-2">© 2025 Subirana</p>
                             </div>
                         </div>

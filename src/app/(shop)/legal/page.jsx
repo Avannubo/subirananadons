@@ -1,18 +1,46 @@
+"use client";
 import React from 'react';
 import Header from '@/components/landing/header';
 import Footer from '@/components/landing/footer';
-export const metadata = {
-    title: 'Aviso Legal | Subirana',
-    description: 'Aviso legal, términos y condiciones de uso del sitio web de Subirana',
-};
+
+// export const metadata = {
+//     title: 'Aviso Legal | Subirana',
+//     description: 'Aviso legal, términos y condiciones de uso del sitio web de Subirana',
+// };
 
 export default function LegalPage() {
+    const [banner, setBanner] = React.useState(null);
+    React.useEffect(() => {
+        async function fetchBanner() {
+            try {
+                const res = await fetch('/api/shop-parameters?key=legal_banner');
+                const data = await res.json();
+                setBanner(data?.find?.(p => p.key === 'legal_banner')?.value || "/assets/images/bg-beagrumb.jpg");
+            } catch {
+                setBanner("/assets/images/bg-beagrumb.jpg");
+            }
+        }
+        fetchBanner();
+    }, []);
     return (
         <>
             <Header />
+            <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center overflow-hidden">
+                <img
+                    src={banner}
+                    alt="banner"
+                    className="object-cover w-full h-full absolute inset-0"
+                    style={{ objectFit: 'cover' }}
+                />
+                {/* Overlay for contrast */}
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">
+                        Aviso Legal
+                    </h1>
+                </div>
+            </div>
             <div className="container mx-auto px-4 py-12 max-w-[1500px]">
-                <h1 className="text-3xl font-bold mb-8">Aviso Legal</h1>
-
                 <div className="prose max-w-none">
                     <section className="mb-8">
                         <h2 className="text-2xl font-semibold mb-4">1. Información del Titular</h2>

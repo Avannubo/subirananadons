@@ -1,24 +1,54 @@
+"use client";
 import React from 'react';
 import Header from '@/components/landing/header';
 import Footer from '@/components/landing/footer';
 import { Cookie, List, ExternalLink, Settings, RefreshCw, Contact } from 'lucide-react';
 
-export const metadata = {
-    title: 'Política de Cookies | Subirana',
-    description: 'Información sobre el uso de cookies en el sitio web de Subirana',
-};
+// export const metadata = {
+//     title: 'Política de Cookies | Subirana',
+//     description: 'Información sobre el uso de cookies en el sitio web de Subirana',
+// };
 
 export default function CookiesPage() {
+    const [banner, setBanner] = React.useState(null);
+
+    React.useEffect(() => {
+        async function fetchBanner() {
+            try {
+                const res = await fetch('/api/shop-parameters?key=cookies_banner');
+                const data = await res.json();
+                setBanner(data?.find?.(p => p.key === 'cookies_banner')?.value || "/assets/images/bg-beagrumb.jpg");
+            } catch {
+                setBanner("/assets/images/bg-beagrumb.jpg");
+            }
+        }
+        fetchBanner();
+    }, []);
+
     return (
         <>
             <Header />
+            <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center overflow-hidden">
+                <img
+                    src={banner}
+                    alt="banner"
+                    className="object-cover w-full h-full absolute inset-0"
+                    style={{ objectFit: 'cover' }}
+                />
+                {/* Overlay for contrast */}
+                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">
+                        Política de Cookies
+                    </h1>
+                </div>
+            </div>
             <div className="container mx-auto px-4 py-12 max-w-[1500px]">
                 <h1 className="text-3xl font-bold mb-8">Política de Cookies</h1>
 
                 <div className="prose max-w-none">
                     <section className="mb-8">
-                        <div className="flex items-center mb-4">
-                            <Cookie className="text-[#00B0C8] mr-2" size={24} />
+                        <div className="flex items-center mb-4"> 
                             <h2 className="text-2xl font-semibold">1. ¿Qué son las cookies?</h2>
                         </div>
                         <p>
@@ -30,8 +60,7 @@ export default function CookiesPage() {
                     </section>
 
                     <section className="mb-8">
-                        <div className="flex items-center mb-4">
-                            <List className="text-[#00B0C8] mr-2" size={24} />
+                        <div className="flex items-center mb-4"> 
                             <h2 className="text-2xl font-semibold">2. Tipos de cookies que utilizamos</h2>
                         </div>
                         <h3 className="text-xl font-medium mt-6 mb-3">Cookies esenciales</h3>
@@ -64,8 +93,7 @@ export default function CookiesPage() {
                     </section>
 
                     <section className="mb-8">
-                        <div className="flex items-center mb-4">
-                            <ExternalLink className="text-[#00B0C8] mr-2" size={24} />
+                        <div className="flex items-center mb-4"> 
                             <h2 className="text-2xl font-semibold">3. Cookies de terceros</h2>
                         </div>
                         <p>
@@ -77,8 +105,7 @@ export default function CookiesPage() {
                     </section>
 
                     <section className="mb-8">
-                        <div className="flex items-center mb-4">
-                            <Settings className="text-[#00B0C8] mr-2" size={24} />
+                        <div className="flex items-center mb-4"> 
                             <h2 className="text-2xl font-semibold">4. Gestión de cookies</h2>
                         </div>
                         <p>
@@ -97,8 +124,7 @@ export default function CookiesPage() {
                     </section>
 
                     <section className="mb-8">
-                        <div className="flex items-center mb-4">
-                            <RefreshCw className="text-[#00B0C8] mr-2" size={24} />
+                        <div className="flex items-center mb-4"> 
                             <h2 className="text-2xl font-semibold">5. Cambios en nuestra política de cookies</h2>
                         </div>
                         <p>
@@ -108,8 +134,7 @@ export default function CookiesPage() {
                     </section>
 
                     <section>
-                        <div className="flex items-center mb-4">
-                            <Contact className="text-[#00B0C8] mr-2" size={24} />
+                        <div className="flex items-center mb-4"> 
                             <h2 className="text-2xl font-semibold">6. Contacto</h2>
                         </div>
                         <p>
@@ -128,4 +153,4 @@ export default function CookiesPage() {
             <Footer />
         </>
     );
-} 
+}

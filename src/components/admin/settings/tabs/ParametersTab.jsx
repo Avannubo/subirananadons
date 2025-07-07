@@ -111,6 +111,13 @@ export default function ParametersTab() {
             description: "Porcentaje de IVA aplicado en la tienda",
             unit: "%",
         },
+        {
+            key: "telephone",
+            label: "Teléfono",
+            type: "text",
+            description: "Teléfono de contacto mostrado en la web",
+            unit: "",
+        },
     ];
 
     // Socials parameter state
