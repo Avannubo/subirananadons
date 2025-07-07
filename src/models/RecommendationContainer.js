@@ -1,12 +1,19 @@
 import mongoose from 'mongoose';
 
+
 const RecommendationContainerSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    items: [
+    groups: [
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product',
-            required: true
+            groupTitle: { type: String, required: true },
+            category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: false },
+            items: [
+                {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'Product',
+                    required: true
+                }
+            ]
         }
     ]
 }, { timestamps: true });

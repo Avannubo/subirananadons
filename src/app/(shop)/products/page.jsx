@@ -211,11 +211,17 @@ export default function Page() {
                     limit: productsPerPage,
                     status: 'active'
                 };
-                // Get current leaf categories if we're in a specific category
+                // Get all leaf categories under the current node (including itself if it's a leaf)
                 if (currentCategoryNode && categoryPath.length > 1) {
-                    // If you want to filter by all leaf subcategories, you can implement a helper for DB structure
-                    // For now, just use the current category name
-                    options.category = currentCategoryNode.name;
+                    function getAllLeafNames(node) {
+                        if (!node.children || node.children.length === 0) {
+                            return [node.name];
+                        } else {
+                            return node.children.flatMap(getAllLeafNames);
+                        }
+                    }
+                    const allLeafNames = getAllLeafNames(currentCategoryNode);
+                    options.category = allLeafNames.join(',');
                 }
                 // Add brand filter if present in URL
                 const brandParam = searchParams.get('brand');
