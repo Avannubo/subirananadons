@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
+
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
@@ -8,6 +9,9 @@ import { useCart } from '@/contexts/CartContext.jsx';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 import { ShoppingCart, Mail } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const ModalTPV = dynamic(() => import('@/components/cart/ModalTPV'), { ssr: false });
 
 export default function CartPage() {
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
@@ -31,6 +35,9 @@ export default function CartPage() {
     const [orderError, setOrderError] = useState(null);
     // Remove userType state since we're not using login options anymore
     const [invoiceBlob, setInvoiceBlob] = useState(null);
+    const [showTPVModal, setShowTPVModal] = useState(false);
+    const [tpvOrderData, setTpvOrderData] = useState(null);
+    const [tpvTotal, setTpvTotal] = useState(0);
 
     // Separate regular and gift items once cartItems is available
     const regularItems = useMemo(() => cartItems?.filter(item => item.type !== 'gift') ?? [], [cartItems]);
@@ -118,7 +125,7 @@ export default function CartPage() {
     useEffect(() => {
         // This will trigger a re-render with the correct shipping cost
         const shipping = calculateShipping();
-        console.log(`Delivery method: ${deliveryMethod}, Subtotal: ${calculateSubtotal()}, Shipping: ${shipping}`);
+        // console.log(`Delivery method: ${deliveryMethod}, Subtotal: ${calculateSubtotal()}, Shipping: ${shipping}`);
     }, [cartItems, deliveryMethod]);
     const handleDeliveryMethodChange = (method) => {
         // Only allow changing to 'delivery' if there are regular items
@@ -181,230 +188,36 @@ export default function CartPage() {
     };
     // Handle order submission
     const handleSubmitOrder = async () => {
-        // Clear any previous errors
         setOrderError(null);
-
-        // Validate cart contents
         if (cartItems.length === 0) {
             setOrderError('No hay productos en el carrito');
             return;
         }
-
-        // Determine required fields based on order contents and delivery method
-        const needsShippingAddress = deliveryMethod === 'delivery' && regularItems.length > 0;
+        // Validate required fields (basic)
         const requiredFields = ['name', 'lastName', 'email', 'phone'];
-
+        const needsShippingAddress = deliveryMethod === 'delivery' && regularItems.length > 0;
         if (needsShippingAddress) {
             requiredFields.push('address', 'city', 'postalCode', 'province');
         }
-
-        // Validate required fields
         const missingFields = requiredFields.filter(field => !formData[field]);
         if (missingFields.length > 0) {
             setOrderError('Por favor, completa todos los campos obligatorios');
             return;
         }
-
-        try {
-            setIsSubmitting(true);
-            setOrderError(null);
-            const buyerInfo = {
-                name: `${formData.name} ${formData.lastName}`.trim(),
-                email: formData.email,
-                phone: formData.phone
-            };
-
-            const orderData = {
-                items: cartItems.map(item => ({
-                    ...item,
-                    buyerInfo: item.type === 'gift' ? {
-                        ...buyerInfo,
-                        ...(item.listInfo || {}),
-                        note: formData.giftNote
-                    } : undefined,
-                    quantity: item.type === 'gift' ? 1 : item.quantity,
-                    notes: formData.notes
-                })),
-                shippingDetails: {
-                    ...formData,
-                    // Only include address if there are regular items and delivery is selected
-                    ...(needsShippingAddress ? {} : {
-                        address: undefined,
-                        city: undefined,
-                        postalCode: undefined,
-                        province: undefined
-                    })
-                },
-                deliveryMethod,
-                hasGiftItems,
-                isGiftOnly: hasOnlyGiftItems,
-                notes: formData.notes,
-                giftNote: hasGiftItems ? formData.giftNote : undefined,
-                totals: {
-                    subtotal: calculateSubtotal(),
-                    shipping: calculateShipping(),
-                    tax: calculateTax(),
-                    total: calculateTotal()
-                }
-            };
-
-            const response = await fetch('/api/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(orderData),
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || 'Error al procesar el pedido');
-            }
-
-            // Save user address preferences for future orders
-            if (user?.id) {
-                await saveUserAddressPreferences();
-            }
-
-            // Order created successfully - include more detailed information
-            const orderSuccess = {
-                orderNumber: data.order.orderNumber,
-                orderId: data.order.id,
-                totalAmount: calculateTotal().toFixed(2),
-                items: cartItems,
-                giftItems: cartItems.filter(item => item.isGift),
-                hasGiftItems: hasGiftItems,
-                buyerDetails: {
-                    name: `${formData.name} ${formData.lastName}`.trim(),
-                    email: formData.email
-                }
-            };
-
-            setOrderSuccess(orderSuccess);
-
-            // Automatically send the confirmation email
-            try {
-                const emailResponse = await fetch(`/api/orders/${data.order.id}/send-email`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!emailResponse.ok) {
-                    console.error('Error sending automatic order confirmation email');
-                    // Don't throw error here, just log it - the order was still created successfully
-                }
-            } catch (emailError) {
-                console.error('Error in automatic email sending:', emailError);
-                // Don't throw error here, just log it - the order was still created successfully
-            }
-
-            // Clear the cart
-            clearCart();
-
-            // Reset form data
-            setFormData({
-                name: '',
-                lastName: '',
-                email: '',
-                phone: '',
-                address: '',
-                city: '',
-                postalCode: '',
-                province: '',
-                country: 'España',
-                notes: '',
-                giftNote: ''
-            });
-
-            // After successful order, scroll to top
-            setTimeout(() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 1000);
-
-        } catch (error) {
-            console.error('Error creating order:', error);
-            setOrderError(error.message || 'Error al procesar el pedido');
-        } finally {
-            setIsSubmitting(false);
-        }
+        setTpvOrderData(prepareTPVOrderData());
+        setTpvTotal(calculateTotal());
+        setShowTPVModal(true);
     };
-    // Handle invoice download
-    useEffect(() => {
-        const generateInvoice = async () => {
-            if (!orderSuccess) return;
-            // toast.success('Generando Ticket...');
-            try {
-                const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/pdf' }
-                });
-                if (!res.ok) throw new Error('No se pudo generar la Ticket');
-                const blob = await res.blob();
-                setInvoiceBlob(blob);
-                // toast.success('Ticket generada correctamente');
-                //close the modal 
-            } catch (err) {
-                toast.error('Error al generar la Ticket');
-            }
+
+    // Helper to prepare TPV order data
+    const prepareTPVOrderData = () => {
+        return {
+            orderId: (Date.now() % 100000000).toString().padStart(8, '0'),
+            cartProducts: cartItems,
         };
-        generateInvoice();
-    }, [orderSuccess]);
-
-
-    const handleDownloadInvoice = () => {
-        if (!invoiceBlob || !orderSuccess) return;
-        const url = window.URL.createObjectURL(invoiceBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Ticket-${orderSuccess.orderNumber}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-        toast.success('Ticket descargada correctamente');
     };
 
-
-    // Handle sending email with receipt
-    const handleSendEmail = async () => {
-        if (!orderSuccess) return;
-
-        // Create a loading toast that we can dismiss later
-        const loadingToastId = toast.loading('Enviando email...');
-
-        const sendEmail = async () => {
-            try {
-                const response = await fetch(`/api/orders/${orderSuccess.orderId}/send-email`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: orderSuccess.buyerDetails.email,
-                        orderNumber: orderSuccess.orderNumber,
-                        items: orderSuccess.items
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al enviar el email');
-                }
-
-                // Dismiss loading toast and show success
-                toast.dismiss(loadingToastId);
-                toast.success('Email enviado correctamente');
-            } catch (error) {
-                console.error('Error sending email:', error);
-                // Dismiss loading toast and show error
-                toast.dismiss(loadingToastId);
-                toast.error('Error al enviar el email');
-            }
-        };
-
-        sendEmail();
-    };
-
+    // In the return JSX, after the main ShopLayout content:
     return (
         <ShopLayout>
             <div className="container mx-auto px-4 py-8 mt-24 ">
@@ -638,7 +451,7 @@ export default function CartPage() {
                                                     {hasGiftItems && (
                                                         <div className="col-span-2">
                                                             <label className="block text-sm font-medium text-pink-600 mb-1">
-                                                                    Nota para los propietarios de la lista
+                                                                Nota para los propietarios de la lista
                                                             </label>
                                                             <textarea
                                                                 name="giftNote"
@@ -985,12 +798,18 @@ export default function CartPage() {
                     </motion.div>
                 )}
             </div>
-            {orderSuccess && (
+
+            {/* Redsys return modals */}
+            {/* Redsys return modals without router */}
+            {(orderSuccess || typeof window !== 'undefined' && (window.location.search.includes('success=true') || window.location.search.includes('cancelled=true'))) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000050] bg-opacity-40">
-                    <div className="relative bg-green-50 border border-green-200 text-green-700 rounded-md shadow-lg max-w-2xl w-full mx-4 p-10">
+                    <div className={`relative rounded-md shadow-lg max-w-2xl w-full mx-4 p-10 border ${typeof window !== 'undefined' && window.location.search.includes('success=true') ? 'bg-green-50 border-green-200 text-green-700' : typeof window !== 'undefined' && window.location.search.includes('cancelled=true') ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
                         <button
                             className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-                            onClick={() => setOrderSuccess(null)}
+                            onClick={() => {
+                                setOrderSuccess(null);
+                                if (typeof window !== 'undefined') window.history.replaceState(null, '', '/cart');
+                            }}
                             aria-label="Cerrar"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -998,18 +817,34 @@ export default function CartPage() {
                             </svg>
                         </button>
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xl font-bold">¡Pedido realizado con éxito!</h3>
-                            <span className="text-sm bg-green-200 text-green-800 py-1 px-3 rounded-full">
-                                #{orderSuccess.orderNumber}
-                            </span>
+                            <h3 className="text-xl font-bold">
+                                {typeof window !== 'undefined' && window.location.search.includes('success=true') ? '¡Pago realizado con éxito!' : typeof window !== 'undefined' && window.location.search.includes('cancelled=true') ? 'Pago cancelado' : '¡Pedido realizado con éxito!'}
+                            </h3>
+                            {orderSuccess?.orderNumber && (
+                                <span className="text-sm bg-green-200 text-green-800 py-1 px-3 rounded-full">
+                                    #{orderSuccess.orderNumber}
+                                </span>
+                            )}
                         </div>
                         <div className="mt-3 mb-4">
-                            <p className="mb-1">
-                                Hemos enviado un correo con los detalles de tu compra a <strong>{orderSuccess.buyerDetails.email}</strong>
-                            </p>
-                            <p className="text-lg font-semibold">Total: {orderSuccess.totalAmount} €</p>
+                            {typeof window !== 'undefined' && window.location.search.includes('success=true') ? (
+                                <>
+                                    <p className="mb-1">Tu pago ha sido completado correctamente.</p>
+                                    <p className="text-lg font-semibold">Gracias por tu compra.</p>
+                                </>
+                            ) : typeof window !== 'undefined' && window.location.search.includes('cancelled=true') ? (
+                                <>
+                                    <p className="mb-1">El pago ha sido cancelado o ha fallado.</p>
+                                    <p className="text-lg font-semibold">No se ha realizado ningún cargo.</p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="mb-1">Hemos enviado un correo con los detalles de tu compra a <strong>{orderSuccess?.buyerDetails?.email}</strong></p>
+                                    <p className="text-lg font-semibold">Total: {orderSuccess?.totalAmount} €</p>
+                                </>
+                            )}
                         </div>
-                        {orderSuccess.hasGiftItems && (
+                        {orderSuccess?.hasGiftItems && typeof window !== 'undefined' && !window.location.search.includes('success=true') && !window.location.search.includes('cancelled=true') && (
                             <div className="mb-4 p-3 bg-pink-50 text-pink-700 rounded-md border border-pink-200">
                                 <p className="text-sm flex items-center font-semibold mb-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1025,28 +860,35 @@ export default function CartPage() {
                             </div>
                         )}
                         <div className="grid grid-cols-2 gap-3 mt-4">
-                            <button
-                                onClick={handleDownloadInvoice}
-                                className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Descargar Ticket
-                            </button>
-                            <button
-                                onClick={handleSendEmail}
-                                className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
-                            >
-                                <Mail />
-                                Enviar una copia de Email
-                            </button>
+                            {typeof window !== 'undefined' && window.location.search.includes('success=true') && (
+                                <button
+                                    onClick={handleDownloadInvoice}
+                                    className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Descargar Ticket
+                                </button>
+                            )}
+                            {typeof window !== 'undefined' && window.location.search.includes('success=true') && (
+                                <button
+                                    onClick={handleSendEmail}
+                                    className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                                >
+                                    <Mail />
+                                    Enviar una copia de Email
+                                </button>
+                            )}
                         </div>
                         <div className="mt-4 pt-3 border-t border-gray-200">
                             <Link
                                 href="/products"
                                 className="text-[#00B0C8] hover:underline flex items-center justify-center gap-2"
-                                onClick={() => setOrderSuccess(null)}
+                                onClick={() => {
+                                    setOrderSuccess(null);
+                                    if (typeof window !== 'undefined') window.history.replaceState(null, '', '/cart');
+                                }}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -1058,6 +900,13 @@ export default function CartPage() {
                 </div>
             )}
             {/* <UserAuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} /> */}
+            {/* ModalTPV for payment confirmation */}
+            <ModalTPV
+                isOpen={showTPVModal}
+                onClose={() => setShowTPVModal(false)}
+                orderData={tpvOrderData}
+                precioTotal={tpvTotal}
+            />
         </ShopLayout>
     );
 }
