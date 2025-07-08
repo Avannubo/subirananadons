@@ -69,11 +69,14 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
         let encodedDsSignature = CryptoJS.HmacSHA256(encodedParameters, base64Decode(encodedSignatureDES));
         let dsSignature = CryptoJS.enc.Base64.stringify(encodedDsSignature);
 
-        // Populate form fields
-        if (typeof document !== 'undefined' && document.forms["pago"]) {
-            document.forms["pago"].datos.value = JSON.stringify(data);
-            document.forms["pago"].Ds_MerchantParameters.value = encodedParameters;
-            document.forms["pago"].Ds_Signature.value = dsSignature;
+
+        // Populate form fields safely
+        if (typeof document !== 'undefined') {
+            const form = document.forms["pago"];
+            if (form) {
+                if (form.Ds_MerchantParameters) form.Ds_MerchantParameters.value = encodedParameters;
+                if (form.Ds_Signature) form.Ds_Signature.value = dsSignature;
+            }
         }
 
         console.log('Encoded Parameters:', encodedParameters);
