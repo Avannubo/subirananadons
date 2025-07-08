@@ -460,20 +460,26 @@ export default function Page() {
     return (
         <ShopLayout>
             {/* Banner with overlay and white title, matching brands page */}
-            <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
-                <Image
-                    src={bannerUrl || "/assets/images/bg-beagrumb.jpg"}
-                    alt="banner"
-                    fill
-                    className="object-cover"
-                    priority
-                />
-                {/* Overlay for contrast */}
-                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
-                <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Tienda</h1>
+            {bannerUrl ? (
+                <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
+                    <Image
+                        src={bannerUrl}
+                        alt="banner"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    {/* Overlay for contrast */}
+                    <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                    <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Tienda</h1>
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white">
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">Tienda</h1>
+                </div>
+            )}
             <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-8 rounded-t-2xl mt-4 sm:mt-0 ">
                 {/* Active Brand Filter Indicator */}
                 {activeBrandFilter && (
@@ -687,7 +693,7 @@ export default function Page() {
                         {!loading && !error && (
                             <motion.div
                                 layout
-                                className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'grid grid-cols-1 lg:grid-cols-2 gap-6'}`}
+                                className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'grid grid-cols-1 lgç:grid-cols-2 gap-6'}`}
                             >
                                 <AnimatePresence>
                                     {filteredAndSortedProducts.map((product) => (

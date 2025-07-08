@@ -118,6 +118,13 @@ export default function ParametersTab() {
             description: "Teléfono de contacto mostrado en la web",
             unit: "",
         },
+        {
+            key: "whatsapp",
+            label: "WhatsApp",
+            type: "text",
+            description: "Enlace de WhatsApp mostrado en la web (ejemplo: https://wa.me/34600000000)",
+            unit: "",
+        },
     ];
 
     // Socials parameter state

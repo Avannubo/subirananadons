@@ -197,13 +197,38 @@ export default function BannerTab() {
                                     {uploadedImages.map(img => (
                                         <div key={img._id} className={`border border-gray-200 rounded-lg overflow-hidden bg-white shadow flex flex-col items-center ${img.active ? 'ring-2 ring-[#00B0C8]' : ''}`}>
                                             <img src={img.imageUrl} alt="uploaded" className="object-cover w-full h-32 mb-2" />
-                                            <button
-                                                onClick={() => setActivePortada(img._id)}
-                                                className={`px-3 m-2 py-1 rounded text-xs ${img.active ? 'bg-[#00B0C8] text-white' : 'bg-gray-200 text-gray-700 hover:bg-[#00B0C8] hover:text-white'}`}
-                                                disabled={img.active}
-                                            >
-                                                {img.active ? 'Banner Activa' : 'Establecer como Banner'}
-                                            </button>
+                                            <div className='flex flex-row items-center '>
+                                                <button
+                                                    onClick={() => setActivePortada(img._id)}
+                                                    className={`px-3 m-2 py-1 rounded text-xs ${img.active ? 'bg-[#00B0C8] text-white' : 'bg-gray-200 text-gray-700 hover:bg-[#00B0C8] hover:text-white'}`}
+                                                    disabled={img.active}
+                                                >
+                                                    {img.active ? 'Banner Activa' : 'Establecer como Banner'}
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setActivePortada(null);
+                                                        // Remove active status from this image in DB
+                                                        fetch('/api/portimg', {
+                                                            method: 'PUT',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ _id: img._id, active: false })
+                                                        })
+                                                            .then(res => {
+                                                                // if (!res.ok) throw new Error('No se pudo quitar el banner');
+                                                                setUploadedImages(images => images.map(im => im._id === img._id ? { ...im, active: false } : im));
+                                                                toast.success('Banner quitado');
+                                                            })
+                                                            .catch(err => toast.error(err.message));
+                                                    }
+                                                    }
+                                                    className="px-3 py-1 rounded text-xs bg-gray-200 text-gray-700 hover:bg-red-200"
+                                                    disabled={!img.active}
+                                                >
+                                                    Quitar banner
+                                                </button>
+                                            </div>
+
                                             <div className='space-x-2'>
                                                 <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="text-[#007d8d] break-all px-3 py-1 rounded text-xs bg-[#007d8d30] hover:bg-[#007d8d40] ">Ver</a>
                                                 <button
@@ -212,6 +237,7 @@ export default function BannerTab() {
                                                 >
                                                     Eliminar
                                                 </button>
+
                                             </div>
                                         </div>
                                     ))}

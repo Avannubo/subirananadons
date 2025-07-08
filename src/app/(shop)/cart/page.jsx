@@ -217,6 +217,82 @@ export default function CartPage() {
         };
     };
 
+    // Handle invoice download
+    useEffect(() => {
+        const generateInvoice = async () => {
+            if (!orderSuccess) return;
+            // toast.success('Generando Ticket...');
+            try {
+                const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/pdf' }
+                });
+                if (!res.ok) throw new Error('No se pudo generar la Ticket');
+                const blob = await res.blob();
+                setInvoiceBlob(blob);
+                // toast.success('Ticket generada correctamente');
+                //close the modal 
+            } catch (err) {
+                toast.error('Error al generar la Ticket');
+            }
+        };
+        generateInvoice();
+    }, [orderSuccess]);
+
+    
+    const handleDownloadInvoice = () => {
+        if (!invoiceBlob || !orderSuccess) return;
+        const url = window.URL.createObjectURL(invoiceBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Ticket-${orderSuccess.orderNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success('Ticket descargada correctamente');
+    };
+
+
+    // Handle sending email with receipt
+    const handleSendEmail = async () => {
+        if (!orderSuccess) return;
+
+        // Create a loading toast that we can dismiss later
+        const loadingToastId = toast.loading('Enviando email...');
+
+        const sendEmail = async () => {
+            try {
+                const response = await fetch(`/api/orders/${orderSuccess.orderId}/send-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: orderSuccess.buyerDetails.email,
+                        orderNumber: orderSuccess.orderNumber,
+                        items: orderSuccess.items
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al enviar el email');
+                }
+
+                // Dismiss loading toast and show success
+                toast.dismiss(loadingToastId);
+                toast.success('Email enviado correctamente');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                // Dismiss loading toast and show error
+                toast.dismiss(loadingToastId);
+                toast.error('Error al enviar el email');
+            }
+        };
+
+        sendEmail();
+    };
+
     // In the return JSX, after the main ShopLayout content:
     return (
         <ShopLayout>
