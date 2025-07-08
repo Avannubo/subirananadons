@@ -221,7 +221,7 @@ export default function CartPage() {
     useEffect(() => {
         const generateInvoice = async () => {
             if (!orderSuccess) return;
-            // toast.success('Generando Ticket...');
+            toast.success('Generando Ticket...');
             try {
                 const res = await fetch(`/api/orders/${orderSuccess.orderId}/invoice`, {
                     method: 'GET',
@@ -239,7 +239,7 @@ export default function CartPage() {
         generateInvoice();
     }, [orderSuccess]);
 
-    
+
     const handleDownloadInvoice = () => {
         if (!invoiceBlob || !orderSuccess) return;
         const url = window.URL.createObjectURL(invoiceBlob);
