@@ -108,16 +108,13 @@ export default function Sidebar() {
                 </nav>
                 <div className="mt-auto pt-6 border-t border-gray-200">
                     <button
-                        onClick={() => {
-                            // Use next-auth signOut if available
-                            import('next-auth/react').then(({ signOut }) => signOut({ callbackUrl: '/' }));
-                        }}
+                       onClick={() => signOut({ callbackUrl: '/' })}
                         className="w-full flex items-center justify-center gap-2 py-2 mb-4 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-[#00B0C8] hover:text-white rounded-lg transition-colors"
                     >
                         <LogOut size={20} />
                         Cerrar sesión
                     </button>
-                    <div className="flex space-x-5 justify-center my-4">
+                    {/* <div className="flex space-x-5 justify-center my-4">
                         {useShopSocials().socials.map((social) => {
                             const Icon = social.Icon;
                             return (
@@ -126,7 +123,7 @@ export default function Sidebar() {
                                 </Link>
                             );
                         })}
-                    </div>
+                    </div> */}
                     <p className="text-sm text-center text-gray-500 mt-2">© 2025 Subirana</p>
                 </div>
             </div>

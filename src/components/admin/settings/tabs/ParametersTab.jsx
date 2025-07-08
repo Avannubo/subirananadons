@@ -122,8 +122,13 @@ export default function ParametersTab() {
             key: "whatsapp",
             label: "WhatsApp",
             type: "text",
-            description: "Enlace de WhatsApp mostrado en la web (ejemplo: https://wa.me/34600000000)",
+            description: "Número de WhatsApp mostrado en la web (solo los 9 dígitos, sin prefijo ni espacios)",
             unit: "",
+            sanitize: (value) => {
+                // Remove country code, non-digits, and keep first 9 digits
+                const digits = (value || "").replace(/\D/g, "");
+                return digits.slice(-9); // Take last 9 digits (in case user pastes with country code)
+            }
         },
     ];
 
@@ -203,15 +208,28 @@ export default function ParametersTab() {
             {/* General Parameters */}
             {parameterDefs.map((param) => (
                 <div key={param.key} className="bg-gray-50 p-4 flex flex-row justify-between items-center rounded-lg border border-gray-200">
-                    <h2 className="text-lg font-semibold mb-2">{param.label}</h2>
+                    <div className="flex-1 flex-col w-full">
+                        <h2 className="text-lg font-semibold mb-2">{param.label}</h2>
+                        {param.key === "whatsapp" && (
+                            <span className="text-xs text-gray-500 mb-2">Introduce solo el número español, sin prefijo internacional ni espacios. Ejemplo: 612345678</span>
+                        )}
+                    </div>
                     {editing[param.key] ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex-1 items-center gap-2">
                             <Input
                                 type={param.type}
                                 min={param.min}
                                 max={param.max}
                                 value={edit[param.key] ?? ""}
-                                onChange={e => setEdit((prev) => ({ ...prev, [param.key]: param.type === "number" ? Number(e.target.value) : e.target.value }))}
+                                onChange={e => {
+                                    let val = e.target.value;
+                                    if (param.key === "whatsapp" && param.sanitize) {
+                                        val = param.sanitize(val);
+                                    } else if (param.type === "number") {
+                                        val = Number(val);
+                                    }
+                                    setEdit((prev) => ({ ...prev, [param.key]: val }));
+                                }}
                                 className="w-24"
                             />
                             {param.unit && <span>{param.unit}</span>}
