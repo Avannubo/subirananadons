@@ -192,7 +192,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                     </div>
                 )}
                 {/* Hidden payment form for Redsys */}
-                <form className="hidden" target="_blank" name="pago" action="https://sis-t.redsys.es:25443/sis/realizarPago" method="POST" >
+                <form className="hidden" name="pago" action="https://sis-t.redsys.es:25443/sis/realizarPago" method="POST" >
                     <textarea name="Ds_MerchantParameters" cols="80" rows="5" readOnly></textarea>
                     <input type="text" name="Ds_Signature" defaultValue="" size="100" readOnly />
                     <input type="text" name="Ds_SignatureVersion" defaultValue="HMAC_SHA256_V1" readOnly />

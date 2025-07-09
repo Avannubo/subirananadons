@@ -862,7 +862,7 @@ export default function CartPage() {
                         <div className="grid grid-cols-2 gap-3 mt-4">
                             {typeof window !== 'undefined' && window.location.search.includes('success=true') && (
                                 <button
-                                    onClick={handleDownloadInvoice}
+                                    // onClick={handleDownloadInvoice}
                                     className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -873,7 +873,7 @@ export default function CartPage() {
                             )}
                             {typeof window !== 'undefined' && window.location.search.includes('success=true') && (
                                 <button
-                                    onClick={handleSendEmail}
+                                    // onClick={handleSendEmail}
                                     className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                                 >
                                     <Mail />
