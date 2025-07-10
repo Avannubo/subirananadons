@@ -171,7 +171,16 @@ export default function CartSuccessPage() {
         };
     }, [invoiceBlob, order]);
 
-    if (loading) return <div className="min-h-[60vh] flex items-center justify-center">Cargando...</div>;
+    if (loading) return (
+        <ShopLayout>
+            <div className="min-h-[60vh] flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#00B0C8] border-t-transparent mb-4"></div>
+                    <div className="text-lg text-[#00B0C8] font-semibold">Cargando...</div>
+                </div>
+            </div>
+        </ShopLayout>
+    );
 
     return (
         <ShopLayout>    <div className="min-h-[60vh] flex flex-col items-center justify-center py-16">
