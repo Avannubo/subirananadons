@@ -19,7 +19,20 @@ export default function CartSuccessPage() {
         try {
             const orderPending = JSON.parse(pending);
             const data = await OrderService.createOrder(orderPending);
+
+            // add the click on the btns here adter 2000ms
+            setTimeout(() => {
+                if (typeof window !== 'undefined') {
+                    // Simulate button clicks
+                    // window.dispatchEvent(new Event('download-invoice'));
+                    window.dispatchEvent(new Event('send-email'));
+                }
+            }, 2000);
+            // onClick={handleDownloadInvoice}
+            // onClick={handleSendEmail}
+
             window.localStorage.removeItem('orderpending');
+            window.localStorage.removeItem('cart');
             return data;
         } catch (err) {
             toast.error('Error al procesar el pedido pendiente');
@@ -37,7 +50,7 @@ export default function CartSuccessPage() {
                         const json = await res.json();
                         if (json.success && json.order) {
                             setOrder(json.order);
-                            // Send confirmation email via API route
+                            // Send confirmation email ONCE after order creation
                             try {
                                 const resEmailer = await fetch(`/api/orders/${data.id}/send-email`, {
                                     method: 'POST',
@@ -49,16 +62,27 @@ export default function CartSuccessPage() {
                             } catch (err) {
                                 toast.error('No se pudo enviar el email de confirmación');
                             }
-
-                            //
+                            // Generate and auto-download invoice ONCE after order creation
                             try {
-                                const res = await fetch(`/api/orders/${data.id}/invoice`, {
+                                const resInvoice = await fetch(`/api/orders/${data.id}/invoice`, {
                                     method: 'GET',
                                     headers: { 'Accept': 'application/pdf' }
                                 });
-                                if (!res.ok) throw new Error('No se pudo generar la Ticket');
-                                const blob = await res.blob();
+                                if (!resInvoice.ok) throw new Error('No se pudo generar la Ticket');
+                                const blob = await resInvoice.blob();
                                 setInvoiceBlob(blob);
+                                // Auto-download
+                                const url = window.URL.createObjectURL(blob);
+                                const invoiceNumber = json.order.orderNumber || json.order._id || json.order.id;
+                                const filename = `Ticket-${invoiceNumber}.pdf`;
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.download = filename;
+                                document.body.appendChild(link);
+                                link.click();
+                                link.remove();
+                                window.URL.revokeObjectURL(url);
+                                toast.success('Ticket descargada correctamente');
                             } catch (err) {
                                 toast.error('Error al generar la Ticket');
                             }
@@ -74,14 +98,14 @@ export default function CartSuccessPage() {
                 }
                 setLoading(false);
             });
-
     }, []);
 
-    // Generate and save invoice PDF blob when order is loaded
+    // Generate and save invoice PDF blob when order is loaded (for button re-download)
     useEffect(() => {
+        if (!order) return;
+        // Only generate if not already set (avoid duplicate download)
+        if (invoiceBlob) return;
         const generateInvoice = async () => {
-            if (!order) return;
-            toast.success('Generando Ticket...');
             try {
                 const orderId = order._id || order.id;
                 const res = await fetch(`/api/orders/${orderId}/invoice`, {
@@ -134,6 +158,18 @@ export default function CartSuccessPage() {
             toast.error('Error al enviar el email');
         }
     };
+
+    // Listen for simulated events and call the handlers
+    useEffect(() => {
+        const downloadListener = () => handleDownloadInvoice();
+        const emailListener = () => handleSendEmail();
+        window.addEventListener('download-invoice', downloadListener);
+        window.addEventListener('send-email', emailListener);
+        return () => {
+            window.removeEventListener('download-invoice', downloadListener);
+            window.removeEventListener('send-email', emailListener);
+        };
+    }, [invoiceBlob, order]);
 
     if (loading) return <div className="min-h-[60vh] flex items-center justify-center">Cargando...</div>;
 
