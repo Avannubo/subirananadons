@@ -49,5 +49,11 @@
     "emailLabel": "Email:",
     "phoneLabel": "Teléfono:",
     "section6Text2": "Última actualización: Mayo 2023"
+  },
+  "HomePage": {
+    "feature1": "Crea lista",
+    "feature2": "Añade tus favoritos",
+    "feature3": "Comparte la lista",
+    "feature4": "Recibe los regalos"
   }
 }

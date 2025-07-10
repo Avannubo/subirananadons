@@ -1,6 +1,5 @@
 {
   "LegalPage": {
- 
     "title": "Avís Legal",
     "section1Title": "1. Informació del Titular",
     "section1Text": "En compliment de la Llei 34/2002, d'11 de juliol, de Serveis de la Societat de la Informació i Comerç Electrònic, l'informem que:",
@@ -24,7 +23,7 @@
     "section6Title": "6. Llei Aplicable i Jurisdicció",
     "section6Text1": "Les presents condicions es regeixen per la legislació espanyola. Per a la resolució de qualsevol controvèrsia que pogués sorgir per l'accés a aquesta pàgina web, l'usuari i Subirana acorden sotmetre's als Jutjats i Tribunals de Barcelona (Espanya), amb renúncia expressa a qualsevol altre fur que pogués correspondre'ls.",
     "section6Text2": "Darrera actualització: Maig 2023"
-  } ,
+  },
   "CookiesPage": {
     "title": "Política de Cookies",
     "section1Title": "1. Què són les cookies?",
@@ -50,5 +49,11 @@
     "emailLabel": "Email:",
     "phoneLabel": "Telèfon:",
     "section6Text2": "Darrera actualització: Maig 2023"
+  },
+  "HomePage": {
+    "feature1": "Crea llista",
+    "feature2": "Afegeix els teus favorits",
+    "feature3": "Comparteix la llista",
+    "feature4": "Rep els regals"
   }
 }
