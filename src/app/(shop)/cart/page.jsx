@@ -10,6 +10,7 @@ import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 import { ShoppingCart, Mail } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { OrderService } from '@/services/OrderService';
 
 const ModalTPV = dynamic(() => import('@/components/cart/ModalTPV'), { ssr: false });
 
@@ -204,6 +205,56 @@ export default function CartPage() {
             setOrderError('Por favor, completa todos los campos obligatorios');
             return;
         }
+
+        // Build orderData as requested
+        const buyerInfo = {
+            name: `${formData.name} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone
+        };
+        const orderData = {
+            items: cartItems.map(item => ({
+                ...item,
+                buyerInfo: item.type === 'gift' ? {
+                    ...buyerInfo,
+                    ...(item.listInfo || {}),
+                    note: formData.giftNote
+                } : undefined,
+                quantity: item.type === 'gift' ? 1 : item.quantity,
+                notes: formData.notes
+            })),
+            shippingDetails: {
+                ...formData,
+                // Only include address if there are regular items and delivery is selected
+                ...(needsShippingAddress ? {} : {
+                    address: undefined,
+                    city: undefined,
+                    postalCode: undefined,
+                    province: undefined
+                })
+            },
+            deliveryMethod,
+            hasGiftItems,
+            isGiftOnly: hasOnlyGiftItems,
+            notes: formData.notes,
+            giftNote: hasGiftItems ? formData.giftNote : undefined,
+            totals: {
+                subtotal: calculateSubtotal(),
+                shipping: calculateShipping(),
+                tax: calculateTax(),
+                total: calculateTotal()
+            }
+        };
+
+        // Save orderData as 'orderpending' in localStorage
+        if (typeof window !== 'undefined') {
+            try {
+                window.localStorage.setItem('orderpending', JSON.stringify(orderData));
+            } catch (e) {
+                // Ignore localStorage errors
+            }
+        }
+
         setTpvOrderData(prepareTPVOrderData());
         setTpvTotal(calculateTotal());
         setShowTPVModal(true);
@@ -801,7 +852,7 @@ export default function CartPage() {
 
             {/* Redsys return modals */}
             {/* Redsys return modals without router */}
-            {(orderSuccess || typeof window !== 'undefined' && (window.location.search.includes('success=true') || window.location.search.includes('cancelled=true'))) && (
+            {/* {(orderSuccess || typeof window !== 'undefined' && (window.location.search.includes('success=true') || window.location.search.includes('cancelled=true'))) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000050] bg-opacity-40">
                     <div className={`relative rounded-md shadow-lg max-w-2xl w-full mx-4 p-10 border ${typeof window !== 'undefined' && window.location.search.includes('success=true') ? 'bg-green-50 border-green-200 text-green-700' : typeof window !== 'undefined' && window.location.search.includes('cancelled=true') ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
                         <button
@@ -898,7 +949,7 @@ export default function CartPage() {
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
             {/* <UserAuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} /> */}
             {/* ModalTPV for payment confirmation */}
             <ModalTPV

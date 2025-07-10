@@ -84,16 +84,33 @@ export async function GET(request) {
 
         // Handle sort parameters
         const sortField = searchParams.get('sort');
-        const sortOrder = searchParams.get('order');
+        const sortOrderParam = searchParams.get('order');
 
-        if (sortField && sortOrder) {
-            // Create sort object based on the sort field and order
-            const sortObj = {};
-            sortObj[sortField] = sortOrder === 'asc' ? 1 : -1;
-            productsQuery = productsQuery.sort(sortObj);
+        if (sortField) {
+            // Support explicit sort field and order
+            let order = -1; // default to descending
+            if (sortOrderParam === 'asc') order = 1;
+            if (sortOrderParam === 'desc') order = -1;
+            // If sortField is 'newest' or 'createdAt', always sort by createdAt desc
+            if (sortField === 'newest' || sortField === 'createdAt') {
+                productsQuery = productsQuery.sort({ createdAt: -1 });
+            } else if (sortField === 'oldest') {
+                productsQuery = productsQuery.sort({ createdAt: 1 });
+            } else if (sortField === 'lastmodified' || sortField === 'updatedAt') {
+                productsQuery = productsQuery.sort({ updatedAt: -1 });
+            } else if (sortField === 'az') {
+                productsQuery = productsQuery.sort({ name: 1 });
+            } else if (sortField === 'za') {
+                productsQuery = productsQuery.sort({ name: -1 });
+            } else {
+                // Generic field
+                const sortObj = {};
+                sortObj[sortField] = order;
+                productsQuery = productsQuery.sort(sortObj);
+            }
         } else if (!preventSort) {
-            // Default sort by updatedAt if no specific sort is requested
-            productsQuery = productsQuery.sort({ updatedAt: -1 });
+            // Default: sort by createdAt descending (newest first)
+            productsQuery = productsQuery.sort({ createdAt: -1 });
         }
 
         // Apply pagination
@@ -180,4 +197,4 @@ export async function POST(request) {
 
         return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
     }
-} 
+}

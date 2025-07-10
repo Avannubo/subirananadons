@@ -164,16 +164,16 @@ export default function Menu() {
                                 </ul>
                             </nav>
                             <div className="mt-auto pt-4 md:pt-6 border-t border-gray-200">
-                                <div className="flex space-x-2 justify-center my-2 md:my-4">
+                                {/* <div className="flex space-x-2 justify-center my-2 md:my-4">
                                     {socials.map((social) => {
                                         const Icon = social.Icon;
                                         return (
-                                            <a key={social.key} target="_blank" href={social.link} aria-label={social.name} className="flex justify-center items-center text-gray-700 hover:text-[#00B0C8] cursor-pointer" rel="noopener noreferrer">
+                                            <Link key={social.key} target="_blank" href={social.link} aria-label={social.name} className="flex justify-center items-center text-gray-700 hover:text-[#00B0C8] cursor-pointer" rel="noopener noreferrer">
                                                 <Icon className="w-6 h-6" />
-                                            </a>
+                                            </Link>
                                         );
                                     })}
-                                </div>
+                                </div> */}
                                 <Link href={`tel:${shopPhone || '938751567'}`} className="block text-gray-700 text-sm hover:text-[#00B0C8] cursor-pointer text-center">
                                     Tel: {shopPhone || '938 751 567'}
                                 </Link>

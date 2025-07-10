@@ -56,8 +56,8 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             "DS_MERCHANT_ORDER": merchantOrder,
             "DS_MERCHANT_TERMINAL": "2",
             "DS_MERCHANT_TRANSACTIONTYPE": "0",
-            "DS_MERCHANT_URLOK": `${window.location.origin}/cart?success=true`,
-            "DS_MERCHANT_URLKO": `${window.location.origin}/cart?cancelled=true`
+            "DS_MERCHANT_URLOK": `${window.location.origin}/cart/order/success`,
+            "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed` 
         };
 
         console.log('Payment Data:', data);

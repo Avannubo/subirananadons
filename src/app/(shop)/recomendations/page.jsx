@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function RecommendationsPage() {
     const [groups, setGroups] = useState([]);
-    const [bannerImage, setBannerImage] = useState(null);
+    const [bannerUrl, setBannerImage] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -46,43 +46,26 @@ export default function RecommendationsPage() {
 
     return (
         <ShopLayout>
-            <motion.div
-                className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-            >
-                <Image
-                    src={bannerImage || "/assets/images/bg-beagrumb.jpg"}
-                    alt="Background"
-                    fill
-                    className="object-cover"
-                    priority
-                />
-                <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                    <motion.h1
-                        className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.2, duration: 0.5 }}
-                    >
-                        Recomendaciones
-
-                    </motion.h1>
-                    <motion.div
-                        className="w-full max-w-2xl"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.4, duration: 0.5 }}
-                    >
-                        <p className="text-sm my-2 text-gray-800 text-center drop-shadow">
-                            A continuación un listado de los principales productos que le ayudarán a crear su lista de nacimiento.
-                        </p>
-                    </motion.div>
-
+            {bannerUrl ? (
+                <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
+                    <Image
+                        src={bannerUrl}
+                        alt="banner"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    {/* Overlay for contrast */}
+                    <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
+                    <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Recomendaciones</h1>
+                    </div>
                 </div>
-            </motion.div>
+            ) : (
+                <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white">
+                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20"> Recomendaciones</h1>
+                </div>
+            )}
             <div className="container mx-auto px-4 py-8">
                 {loading ? (
                     <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -122,9 +105,12 @@ export default function RecommendationsPage() {
                                                 >
                                                     <span className="font-medium">{g.groupTitle}</span>
                                                     {g.category && g.category.name && (
-                                                        <Link href={`/products?category=${encodeURIComponent(g.category.name.replace(/\s+/g, '-'))}`}>
+                                                        <Link
+                                                            href={`/products?category=${g.category.name.replace(/\s+/g, "+")}`}
+                                                            className="text-[#0090a8] hover:underline"
+                                                        >
                                                             <span className="ml-2 text-sm text-[#0090a8]">({g.category.name})</span>
-                                                        </Link>
+                                                     </Link>
                                                     )}
 
                                                 </motion.li>

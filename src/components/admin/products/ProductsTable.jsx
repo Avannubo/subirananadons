@@ -10,13 +10,14 @@ import ConfirmModal from '@/components/shared/ConfirmModal';
 import Pagination from '@/components/admin/shared/Pagination';
 
 export default function ProductsTable(props) {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState("");
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
         name: '',
         reference: '',
         category: '',
     });
+    const [sortOrder, setSortOrder] = useState('newest'); // default: newest first
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
@@ -33,7 +34,7 @@ export default function ProductsTable(props) {
     const [allProducts, setAllProducts] = useState([]); // Store all products for client-side pagination
     const [useClientPagination, setUseClientPagination] = useState(false); // Flag to determine pagination mode
 
-    // Fetch products from the API
+    // Update the fetchProducts function to include sortOrder in API calls
     const fetchProducts = async (page = 1, limit = pagination.limit) => {
         try {
             setLoading(true);
@@ -46,9 +47,8 @@ export default function ProductsTable(props) {
             // Add the category filter from props if it exists
             if (props.categoryFilter) queryParams.append('categoryId', props.categoryFilter);
 
-            // IMPORTANT: Always prevent server sorting to ensure consistent ordering 
-            // We'll handle sorting client-side to maintain stable order
-            queryParams.append('preventSort', 'true');
+            // Add sort order parameter
+            queryParams.append('sort', sortOrder);
 
             // For server-side pagination
             if (!useClientPagination) {
@@ -71,21 +71,14 @@ export default function ProductsTable(props) {
                 setAllProducts(data);
                 setUseClientPagination(true);
 
-                // Apply client-side pagination
+                // Apply client-side sorting and pagination
                 applyClientPagination(data, page, limit);
             } else if (data.products && Array.isArray(data.products)) {
                 // Handle case where API returns {products: [...], pagination: {...}}
                 if (data.pagination) {
                     // Server pagination is working
                     setUseClientPagination(false);
-
-                    // Sort products by _id to ensure stable order
-                    const sortedProducts = [...data.products].sort((a, b) => {
-                        // Sort by _id which is tied to creation time and immutable
-                        return a._id > b._id ? -1 : 1;
-                    });
-
-                    setProducts(sortedProducts);
+                    setProducts(data.products);
                     setPagination({
                         currentPage: data.pagination.currentPage || page,
                         totalPages: data.pagination.totalPages || Math.ceil(data.products.length / limit) || 1,
@@ -114,29 +107,77 @@ export default function ProductsTable(props) {
         }
     };
 
-    // Apply client-side pagination
-    const applyClientPagination = (productsArray, page, limit) => {
-        // Sort products by MongoDB _id to maintain a stable order
-        // MongoDB ObjectIDs have a timestamp component that's tied to creation time
-        // This ensures products stay in the same position even after edits
-        productsArray.sort((a, b) => {
-            // Sort by _id which is tied to creation time and immutable
-            return a._id > b._id ? -1 : 1;
-        });
+    // Update the sortOrder useEffect to trigger a refresh
+    useEffect(() => {
+        if (useClientPagination) {
+            applyClientPagination(allProducts, pagination.currentPage, pagination.limit);
+        } else {
+            // When using server-side, refetch with new sort order
+            fetchProducts(pagination.currentPage);
+        }
+    }, [sortOrder]);
 
+    // Apply client-side pagination with sorting
+    const applyClientPagination = (productsArray, page, limit) => {
+        let sortedProducts = [...productsArray];
+        if (sortOrder === 'newest') {
+            sortedProducts.sort((a, b) => {
+                // Always sort by createdAt descending, fallback to _id if missing
+                if (a.createdAt && b.createdAt) {
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                } else if (a.createdAt) {
+                    return -1;
+                } else if (b.createdAt) {
+                    return 1;
+                } else {
+                    return a._id > b._id ? -1 : 1;
+                }
+            });
+        } else if (sortOrder === 'oldest') {
+            sortedProducts.sort((a, b) => {
+                if (a.createdAt && b.createdAt) {
+                    return new Date(a.createdAt) - new Date(b.createdAt);
+                } else if (a.createdAt) {
+                    return -1;
+                } else if (b.createdAt) {
+                    return 1;
+                } else {
+                    return a._id > b._id ? 1 : -1;
+                }
+            });
+        } else if (sortOrder === 'lastmodified') {
+            sortedProducts.sort((a, b) => {
+                if (a.updatedAt && b.updatedAt) return new Date(b.updatedAt) - new Date(a.updatedAt);
+                return 0;
+            });
+        } else if (sortOrder === 'az') {
+            sortedProducts.sort((a, b) => {
+                const nameA = (a.name || '').toLowerCase();
+                const nameB = (b.name || '').toLowerCase();
+                if (nameA < nameB) return -1;
+                if (nameA > nameB) return 1;
+                return 0;
+            });
+        } else if (sortOrder === 'za') {
+            sortedProducts.sort((a, b) => {
+                const nameA = (a.name || '').toLowerCase();
+                const nameB = (b.name || '').toLowerCase();
+                if (nameA > nameB) return -1;
+                if (nameA < nameB) return 1;
+                return 0;
+            });
+        }
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
-        const paginatedProducts = productsArray.slice(startIndex, endIndex);
-
+        const paginatedProducts = sortedProducts.slice(startIndex, endIndex);
         setProducts(paginatedProducts);
         setPagination({
             currentPage: page,
-            totalPages: Math.ceil(productsArray.length / limit) || 1,
-            totalItems: productsArray.length,
+            totalPages: Math.ceil(sortedProducts.length / limit) || 1,
+            totalItems: sortedProducts.length,
             limit: limit
         });
-
-        console.log(`Client pagination: showing items ${startIndex + 1}-${Math.min(endIndex, productsArray.length)} of ${productsArray.length}`);
+        console.log(`Client pagination: showing items ${startIndex + 1}-${Math.min(endIndex, sortedProducts.length)} of ${sortedProducts.length}`);
     };
 
     // Load products on component mount
@@ -144,53 +185,66 @@ export default function ProductsTable(props) {
         fetchProducts(1); // Always start at page 1 when category filter changes
     }, [props.categoryFilter]);
 
-    // Handle filter change
+
+    // Handle filter change and run search instantly (client-side)
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
-        setFilters(prev => ({ ...prev, [name]: value }));
+        setFilters(prev => {
+            const newFilters = { ...prev, [name]: value };
+            // Always run search instantly on all products (client-side)
+            if (useClientPagination) {
+                // Reset to first page on filter change
+                const filteredProducts = filterProductsClientSide(allProducts, newFilters);
+                applyClientPagination(filteredProducts, 1, pagination.limit);
+            } else {
+                // If not client-side, fallback to server fetch
+                fetchProducts(1);
+            }
+            return newFilters;
+        });
     };
 
-    // Apply filters
-    const applyFilters = () => {
+    // Ensure table updates when filters change and pagination is client-side
+    useEffect(() => {
         if (useClientPagination) {
-            // If we have all products loaded, filter client-side
-            const filteredProducts = filterProductsClientSide(allProducts);
+            const filteredProducts = filterProductsClientSide(allProducts, filters);
             applyClientPagination(filteredProducts, 1, pagination.limit);
-        } else {
-            // Otherwise use server filtering
-            fetchProducts(1); // Reset to page 1 when applying new filters
         }
-    };
+    }, [filters, allProducts, useClientPagination]);
 
-    // Filter products client-side
-    const filterProductsClientSide = (productsToFilter) => {
+    // Filter products client-side (accepts custom filters for instant search, left-side/startsWith for name)
+    const filterProductsClientSide = (productsToFilter, customFilters = filters) => {
         return productsToFilter.filter(product => {
-            const nameMatch = !filters.name ||
-                product.name.toLowerCase().includes(filters.name.toLowerCase());
+            // Name: startsWith (left-side, case-insensitive, ignore leading/trailing spaces)
+            const nameFilter = (customFilters.name || '').trim().toLowerCase();
+            const nameMatch = !nameFilter ||
+                (product.name && product.name.toLowerCase().startsWith(nameFilter));
 
-            const referenceMatch = !filters.reference ||
-                product.reference.toLowerCase().includes(filters.reference.toLowerCase());
+            // Reference: startsWith
+            const referenceFilter = (customFilters.reference || '').trim().toLowerCase();
+            const referenceMatch = !referenceFilter ||
+                (product.reference && product.reference.toLowerCase().startsWith(referenceFilter));
 
-            const categoryMatch = !filters.category ||
-                product.category.toLowerCase().includes(filters.category.toLowerCase());
+            // Category: startsWith
+            const categoryFilter = (customFilters.category || '').trim().toLowerCase();
+            const categoryMatch = !categoryFilter ||
+                (product.category && product.category.toLowerCase().startsWith(categoryFilter));
 
             return nameMatch && referenceMatch && categoryMatch;
         });
     };
 
-    // Clear filters
+    // Clear filters (not used anymore, but keep for possible future use)
     const clearFilters = () => {
         setFilters({
             name: '',
             reference: '',
             category: '',
         });
-
         if (useClientPagination) {
-            // If client-side, just reset to show all products
             applyClientPagination(allProducts, 1, pagination.limit);
         } else {
-            fetchProducts(1); // Reset to page 1 when clearing filters
+            fetchProducts(1);
         }
     };
 
@@ -382,6 +436,13 @@ export default function ProductsTable(props) {
         };
     }, []);
 
+    // Re-apply sorting when sortOrder changes (client-side)
+    useEffect(() => {
+        if (useClientPagination) {
+            applyClientPagination(allProducts, pagination.currentPage, pagination.limit);
+        }
+    }, [sortOrder]);
+
     // For debugging
     useEffect(() => {
         console.log("Current pagination state:", pagination);
@@ -404,14 +465,28 @@ export default function ProductsTable(props) {
                 </div>
             </div>
 
-            {/* Search and Filters */}
-            <div className="p-4 border-b border-gray-200 grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Search, Filters, and Sort (instant search, no apply/clean btns) */}
+            <div className="p-4 border-b border-gray-200 grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="relative">
+                    <select
+                        value={sortOrder}
+                        onChange={e => setSortOrder(e.target.value)}
+                        className="border border-gray-300 rounded w-full py-2 px-3 text-gray-700"
+                    >
+                        <option value="newest">Más nuevos primero</option>
+                        <option value="oldest">Más antiguos primero</option>
+                        <option value="az">Alfabético A-Z</option>
+                        <option value="za">Alfabético Z-A</option>
+                        <option value="lastmodified">Última modificación</option>
+                    </select>
+                </div>
                 <div className="relative">
                     <FiSearch className="absolute left-3 top-3 text-gray-400" />
                     <input
-                        type="text"
+                        type="search"
                         name="name"
-                        placeholder="Buscar por nombre"
+                        autoComplete="off"
+                        placeholder="Buscar por nombre (empieza por...)"
                         value={filters.name}
                         onChange={handleFilterChange}
                         className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
@@ -420,9 +495,10 @@ export default function ProductsTable(props) {
                 <div className="relative">
                     <FiSearch className="absolute left-3 top-3 text-gray-400" />
                     <input
-                        type="text"
+                        type="search"
                         name="reference"
-                        placeholder="Buscar ref."
+                        autoComplete="off"
+                        placeholder="Buscar ref. (empieza por...)"
                         value={filters.reference}
                         onChange={handleFilterChange}
                         className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
@@ -431,29 +507,16 @@ export default function ProductsTable(props) {
                 <div className="relative">
                     <FiSearch className="absolute left-3 top-3 text-gray-400" />
                     <input
-                        type="text"
+                        type="search"
                         name="category"
-                        placeholder="Buscar categoría"
+                        autoComplete="off"
+                        placeholder="Buscar categoría (empieza por...)"
                         value={filters.category}
                         onChange={handleFilterChange}
                         className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                     />
                 </div>
-                <div className="flex items-center space-x-2">
-                    <button
-                        onClick={applyFilters}
-                        className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B]"
-                    >
-                        <FiFilter className="mr-2" />
-                        Aplicar
-                    </button>
-                    <button
-                        onClick={clearFilters}
-                        className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                    >
-                        Limpiar
-                    </button>
-                </div>
+                {/* No apply/clean buttons, search runs instantly */}
             </div>
 
             {/* Products Table */}
@@ -527,10 +590,10 @@ export default function ProductsTable(props) {
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Categoría
-                                    </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Marca
-                                    </th>
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Marca
+                                </th>
                                 {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Precio (imp. excl.)
                                 </th> */}
