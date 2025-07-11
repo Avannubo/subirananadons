@@ -31,8 +31,19 @@ const ImageGallery = () => {
                 {/* First row with 2 offers */}
                 <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4 md:mb-6">
                     {offers.slice(0, 2).map((item, idx) => {
-                        const title = item.titleTranslations?.[locale] || item.title;
-                        const description = item.descriptionTranslations?.[locale] || item.description;
+                        // Handle new translation structure
+                        let title = '';
+                        let description = '';
+                        if (item.title && typeof item.title === 'object') {
+                            title = item.title[locale] || item.title.ca || item.title.es || '';
+                        } else {
+                            title = item.title || '';
+                        }
+                        if (item.description && typeof item.description === 'object') {
+                            description = item.description[locale] || item.description.ca || item.description.es || '';
+                        } else {
+                            description = item.description || '';
+                        }
                         return (
                             <Link
                                 key={item._id || idx}
@@ -72,8 +83,18 @@ const ImageGallery = () => {
                 {/* Second row with 2 offers */}
                 <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                     {offers.slice(2, 4).map((item, idx) => {
-                        const title = item.titleTranslations?.[locale] || item.title;
-                        const description = item.descriptionTranslations?.[locale] || item.description;
+                        let title = '';
+                        let description = '';
+                        if (item.title && typeof item.title === 'object') {
+                            title = item.title[locale] || item.title.ca || item.title.es || '';
+                        } else {
+                            title = item.title || '';
+                        }
+                        if (item.description && typeof item.description === 'object') {
+                            description = item.description[locale] || item.description.ca || item.description.es || '';
+                        } else {
+                            description = item.description || '';
+                        }
                         return (
                             <Link
                                 key={item._id || idx}
