@@ -8,6 +8,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import ProductQuickView from "@/components/products/product-quick-view";
 import { fetchProducts, formatProduct } from '@/services/ProductService';
 import { fetchCategories } from '@/services/CategoryService';
+import { useTranslations } from 'next-intl';
 
 // Helper function to find a category node and its path by label
 function findCategoryAndPath(node, labelToFind, currentPath = []) {
@@ -66,6 +67,7 @@ export default function Page() {
     const [bannerUrl, setBannerUrl] = useState(null);
     // Get the current category node based on the last item in the path
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
+    const t = useTranslations('ProductsPage');
     // Helper to find a category node by path in the categories tree
     function findCategoryNodeByPath(categories, path) {
         let node = { children: categories };
@@ -464,7 +466,7 @@ export default function Page() {
                 <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
                     <Image
                         src={bannerUrl}
-                        alt="banner"
+                        alt={t('bannerAlt')}
                         fill
                         className="object-cover"
                         priority
@@ -472,12 +474,12 @@ export default function Page() {
                     {/* Overlay for contrast */}
                     <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
                     <div className="absolute inset-0 flex items-center justify-center z-20">
-                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Tienda</h1>
+                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">{t('title')}</h1>
                     </div>
                 </div>
             ) : (
                 <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white">
-                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">Tienda</h1>
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">{t('title')}</h1>
                 </div>
             )}
             <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-8 rounded-t-2xl mt-4 sm:mt-0 ">
@@ -618,36 +620,36 @@ export default function Page() {
                                     </button>
                                 </div>
                                 <div className="flex items-center">
-                                    <label htmlFor="sort-by" className="mr-1 text-gray-600 text-xs whitespace-nowrap">Ordenar:</label>
+                                    <label htmlFor="sort-by" className="mr-1 text-gray-600 text-xs whitespace-nowrap">{t('sortLabelMobile')}</label>
                                     <select
                                         id="sort-by"
                                         className="border border-gray-300 rounded p-1 text-xs text-gray-600"
                                         value={sortOrder}
                                         onChange={handleSortChange}
                                     >
-                                        <option value="sales-desc">Ventas ↓</option>
-                                        <option value="price-asc">Precio ↑</option>
-                                        <option value="price-desc">Precio ↓</option>
-                                        <option value="name-asc">Nombre A-Z</option>
-                                        <option value="name-desc">Nombre Z-A</option>
+                                        <option value="sales-desc">{t('sortSalesDesc')}</option>
+                                        <option value="price-asc">{t('sortPriceAsc')}</option>
+                                        <option value="price-desc">{t('sortPriceDesc')}</option>
+                                        <option value="name-asc">{t('sortNameAsc')}</option>
+                                        <option value="name-desc">{t('sortNameDesc')}</option>
                                     </select>
                                 </div>
                             </div>
                             {/* Desktop controls */}
                             <div className="hidden sm:flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto gap-2 sm:gap-0">
                                 <div className="flex items-center space-x-2">
-                                    <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">Ordenar por:</label>
+                                    <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">{t('sortLabelDesktop')}</label>
                                     <select
                                         id="sort-by"
                                         className="border border-gray-300 w-full text-start rounded p-2 text-gray-600"
                                         value={sortOrder}
                                         onChange={handleSortChange}
                                     >
-                                        <option value="sales-desc">Ventas ↓</option>
-                                        <option value="price-asc">Precio ↑</option>
-                                        <option value="price-desc">Precio ↓</option>
-                                        <option value="name-asc">Nombre A-Z</option>
-                                        <option value="name-desc">Nombre Z-A</option>
+                                        <option value="sales-desc">{t('sortSalesDesc')}</option>
+                                        <option value="price-asc">{t('sortPriceAsc')}</option>
+                                        <option value="price-desc">{t('sortPriceDesc')}</option>
+                                        <option value="name-asc">{t('sortNameAsc')}</option>
+                                        <option value="name-desc">{t('sortNameDesc')}</option>
                                     </select>
                                 </div>
                             </div>
@@ -671,8 +673,11 @@ export default function Page() {
                                 </div>
                                 {!loading && totalProducts > 0 && (
                                     <span className="text-sm text-gray-500 mr-0 sm:mr-4">
-                                        Mostrando {(currentPage - 1) * productsPerPage + 1}-
-                                        {Math.min(currentPage * productsPerPage, totalProducts)} de {totalProducts} productos
+                                        {t('showingProducts', {
+                                            from: (currentPage - 1) * productsPerPage + 1,
+                                            to: Math.min(currentPage * productsPerPage, totalProducts),
+                                            total: totalProducts
+                                        })}
                                     </span>
                                 )}
                             </div>
@@ -709,7 +714,7 @@ export default function Page() {
                         )}
                         {/* No results message */}
                         {!loading && !error && filteredAndSortedProducts.length === 0 && (
-                            <p className="text-center text-gray-500 mt-8">No hay productos que coincidan con la categoría seleccionada.</p>
+                            <p className="text-center text-gray-500 mt-8">{t('noProductsForCategory')}</p>
                         )}
                         {/* Pagination controls */}
                         {!loading && !error && totalPages > 1 && (
@@ -723,7 +728,7 @@ export default function Page() {
                                             ? 'text-gray-400 cursor-not-allowed'
                                             : 'text-gray-700 hover:bg-gray-100'}`}
                                     >
-                                        <span className="sr-only">Anterior</span>
+                                        <span className="sr-only">{t('prevPageAria')}</span>
                                         <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                             <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
@@ -752,7 +757,7 @@ export default function Page() {
                                             ? 'text-gray-400 cursor-not-allowed'
                                             : 'text-gray-700 hover:bg-gray-100'}`}
                                     >
-                                        <span className="sr-only">Siguiente</span>
+                                        <span className="sr-only">{t('nextPageAria')}</span>
                                         <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                         </svg>
