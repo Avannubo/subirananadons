@@ -55,5 +55,31 @@
     "feature2": "Añade tus favoritos",
     "feature3": "Comparte la lista",
     "feature4": "Recibe los regalos"
+  },
+  "ContactPage": {
+    "title": "Contacto",
+    "section1Title": "1. Información de contacto",
+    "section1Text": "Por favor, utiliza el siguiente formulario o la información de contacto para ponerte en contacto con nosotros.",
+    "formNameLabel": "Nombre",
+    "formEmailLabel": "Correo electrónico",
+    "formMessageLabel": "Mensaje",
+    "formSubmitButton": "Enviar",
+    "formSuccessMessage": "¡Tu mensaje ha sido enviado correctamente!",
+    "formErrorMessage": "Ha habido un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.",
+    "addressLabel": "Dirección:",
+    "phoneLabel": "Teléfono:",
+    "emailLabel": "Correo electrónico:",
+    "submitButton": "Enviar",
+    "successMessage": "¡Tu mensaje ha sido enviado correctamente!"
+  },
+  "Footer": {
+    "copyright": "Copyright © 2025 Subirana",
+    "terms": "Términos y Condiciones",
+    "privacy": "Política de Privacidad",
+    "cookies": "Política de Cookies",
+    "legal": "Aviso Legal",
+    "phone": "+34 93 243 25 10",
+    "email": "info@example.com",
+    "contact": "Ponte en contacto"
   }
 }

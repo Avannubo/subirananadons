@@ -1,8 +1,12 @@
+
 import Image from "next/image";
 import Link from "next/link";
 import { InstagramIcon, YoutubeIcon, LinkedinIcon, Phone, Mail, ExternalLink } from "lucide-react";
+import { useTranslations } from 'next-intl';
+
 
 export default function Footer() {
+    const t = useTranslations('Footer');
     return (
         <footer className="bg-white text-[#333] w-full pt-10 md:pt-20">
             <div className="pt-6 md:pt-10" style={{ boxShadow: "0px -10px 15px -3px rgba(0, 0, 0, 0.1)" }}>
@@ -30,15 +34,15 @@ export default function Footer() {
                                     <LinkedinIcon size={28} />
                                 </Link>
                             </div>
-                            <p className="text-xs md:text-sm mt-4 text-center md:text-left">Copyright © 2025 Subirana</p>
+                            <p className="text-xs md:text-sm mt-4 text-center md:text-left">{t('copyright')}</p>
                         </div>
                         {/* Middle Links Column */}
                         <div className="flex flex-row justify-center items-center">
                             <ul className="space-y-2 md:space-y-3 text-center md:text-left">
-                                <li><Link href="/terms" className="hover:text-[#00B0C8] transition-colors cursor-pointer uppercase">Términos y Condiciones</Link></li>
-                                <li><Link href="/privacy" className="hover:text-[#00B0C8] transition-colors cursor-pointer">POLÍTICA DE PRIVACIDAD</Link></li>
-                                <li><Link href="/cookies" className="hover:text-[#00B0C8] transition-colors cursor-pointer">POLÍTICA DE COOKIES</Link></li>
-                                <li><Link href="/legal" className="hover:text-[#00B0C8] transition-colors cursor-pointer">AVISO LEGAL</Link></li>
+                                <li><Link href="/terms" className="hover:text-[#00B0C8] transition-colors cursor-pointer uppercase">{t('terms')}</Link></li>
+                                <li><Link href="/privacy" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('privacy')}</Link></li>
+                                <li><Link href="/cookies" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('cookies')}</Link></li>
+                                <li><Link href="/legal" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('legal')}</Link></li>
                             </ul>
                         </div>
                         {/* Right Links & Contact Column */}
@@ -46,15 +50,15 @@ export default function Footer() {
                             <ul className="space-y-2 md:space-y-3 w-full text-center md:text-right">
                                 <li className="flex items-center justify-center md:justify-end gap-2">
                                     <Phone size={18} className="text-[#00B0C8]" />
-                                    <span className="hover:text-[#00B0C8] transition-colors cursor-pointer">+34 93 243 25 10</span>
+                                    <span className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('phone')}</span>
                                 </li>
                                 <li className="flex items-center justify-center md:justify-end gap-2 mt-2 md:mt-4">
                                     <Mail size={18} className="text-[#00B0C8]" />
-                                    <Link href="mailto:info@example.com" className="hover:text-[#00B0C8] transition-colors cursor-pointer">info@example.com</Link>
+                                    <Link href="mailto:info@example.com" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('email')}</Link>
                                 </li>
                                 <li className="flex items-center justify-center md:justify-end gap-2 mt-2 md:mt-4">
                                     <ExternalLink size={18} className="text-[#00B0C8]" />
-                                    <Link href="/contact" className="hover:text-[#00B0C8] transition-colors cursor-pointer">PONTE EN CONTACTO</Link>
+                                    <Link href="/contact" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('contact')}</Link>
                                 </li>
                             </ul>
                         </div>

@@ -55,5 +55,30 @@
     "feature2": "Afegeix els teus favorits",
     "feature3": "Comparteix la llista",
     "feature4": "Rep els regals"
+  },
+  "ContactPage": {
+    "title": "Contacte",
+    "section1Title": "1. Informació de contacte",
+    "section1Text": "Si us plau, utilitza el següent formulari o la informació de contacte per posar-te en contacte amb nosaltres.",
+    "formNameLabel": "Nom",
+    "formEmailLabel": "Correu electrònic",
+    "formMessageLabel": "Missatge",
+    "formSubmitButton": "Enviar",
+    "formSuccessMessage": "El teu missatge s'ha enviat correctament!",
+    "formErrorMessage": "Hi ha hagut un error en enviar el missatge. Si us plau, torna-ho a intentar més tard.",
+    "addressLabel": "Adreça:",
+    "phoneLabel": "Telèfon:",
+    "emailLabel": "Correu electrònic:",
+    "submitButton": "Enviar"
+  },
+  "Footer": {
+    "copyright": "Copyright © 2025 Subirana",
+    "terms": "Termes i Condicions",
+    "privacy": "Política de Privacitat",
+    "cookies": "Política de Cookies",
+    "legal": "Avís Legal",
+    "phone": "+34 93 243 25 10",
+    "email": "info@example.com",
+    "contact": "Contacta'ns"
   }
 }
