@@ -84,9 +84,8 @@
     "hours2": "Sábado: 10:00 - 14:00",
     "nameLabel": "Nombre",
     "subjectLabel": "Asunto",
-    "messageLabel": "Mensaje", 
+    "messageLabel": "Mensaje",
     "contact": "Ponte en contacto"
-    
   },
   "Footer": {
     "copyright": "Copyright © 2025 Subirana",
@@ -98,8 +97,6 @@
     "email": "info@example.com",
     "contact": "Ponte en contacto",
     "socialMedia": "Síguenos en"
-
-    
   },
   "CartPage": {
     "title": "Carrito de compra",
@@ -239,5 +236,46 @@
     "noProductsForCategory": "No se han encontrado productos para esta categoría.",
     "prevPageAria": "Página anterior",
     "nextPageAria": "Página siguiente"
+  },
+  "UserAuthModal": {
+    "loginTitle": "Iniciar Sesión",
+    "registerTitle": "Crear Cuenta",
+    "recoverTitle": "Recuperar Contraseña",
+    "emailLabel": "Dirección de correo electrónico",
+    "emailPlaceholder": "Tu correo electrónico",
+    "passwordLabel": "Contraseña",
+    "passwordPlaceholder": "Tu contraseña",
+    "forgotPasswordBtn": "¿Olvidaste tu contraseña?",
+    "loginBtn": "INICIAR SESIÓN",
+    "noAccount": "¿No tienes cuenta?",
+    "createAccountBtn": "Cree uno aquí",
+    "sendRecoveryEmailBtn": "Enviar email de recuperación",
+    "backToLoginBtn": "Volver al inicio de sesión",
+    "nameLabel": "Nombre completo",
+    "namePlaceholder": "Tu nombre completo",
+    "confirmPasswordLabel": "Confirmar Contraseña",
+    "confirmPasswordPlaceholder": "Confirma tu contraseña",
+    "acceptTerms": "Acepto los",
+    "termsLink": "Términos y Condiciones",
+    "registerBtn": "REGISTRARSE",
+    "alreadyHaveAccount": "¿Ya tienes cuenta?",
+    "loginBtnShort": "Inicia sesión",
+    "forgotEmailError": "Por favor, introduce tu correo electrónico",
+    "forgotEmailSendError": "Error al enviar el email de recuperación",
+    "forgotEmailSuccess": "Si el correo existe en nuestra base de datos, recibirás un email con instrucciones para restablecer tu contraseña",
+    "loginError": "Error al iniciar sesión.",
+    "loginEmailNotFound": "El correo electrónico no está registrado.",
+    "loginPasswordIncorrect": "La contraseña es incorrecta.",
+    "loginCheckCredentials": "Por favor verifica tus credenciales.",
+    "loginSuccess": "¡Inicio de sesión exitoso!",
+    "loginErrorGeneric": "Error al iniciar sesión. Por favor intenta nuevamente.",
+    "registerFieldsError": "Por favor, completa todos los campos",
+    "registerTermsError": "Debes aceptar los términos y condiciones",
+    "registerPasswordMismatch": "Las contraseñas no coinciden",
+    "registerPasswordLength": "La contraseña debe tener al menos 6 caracteres",
+    "registerEmailDuplicate": "Este correo electrónico ya está registrado",
+    "registerErrorGeneric": "Error en el registro. Por favor intenta nuevamente.",
+    "registerSuccess": "¡Registro exitoso! Iniciando sesión...",
+    "registerLoginError": "Registro exitoso pero error al iniciar sesión. Por favor inicia sesión manualmente."
   }
 }
