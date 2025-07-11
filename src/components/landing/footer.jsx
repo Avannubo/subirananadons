@@ -39,7 +39,7 @@ export default function Footer() {
                         {/* Middle Links Column */}
                         <div className="flex flex-row justify-center items-center">
                             <ul className="space-y-2 md:space-y-3 text-center md:text-left">
-                                <li><Link href="/terms" className="hover:text-[#00B0C8] transition-colors cursor-pointer uppercase">{t('terms')}</Link></li>
+                                <li><Link href="/terms" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('terms')}</Link></li>
                                 <li><Link href="/privacy" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('privacy')}</Link></li>
                                 <li><Link href="/cookies" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('cookies')}</Link></li>
                                 <li><Link href="/legal" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('legal')}</Link></li>
