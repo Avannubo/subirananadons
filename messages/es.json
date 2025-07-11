@@ -1,4 +1,25 @@
 {
+  "ProductPage": {
+    "errorTitle": "Error",
+    "errorNotFound": "Producto no encontrado",
+    "backToShop": "Volver a la tienda",
+    "breadcrumbProducts": "Productos",
+    "detailsTitle": "Detalles del producto",
+    "dimensions": "Dimensiones",
+    "washingInstructions": "Instrucciones de lavado",
+    "reference": "Referencia",
+    "brand": "Marca",
+    "quantity": "Cantidad",
+    "addToCart": "Añadir al carrito",
+    "addToWishlist": "Añadir a mi lista",
+    "tabDescription": "Descripción",
+    "tabDetails": "Detalles del producto",
+    "relatedProducts": "Productos relacionados",
+    "noDescription": "Sin descripción disponible",
+    "notAvailable": "N/D",
+    "seeLabel": "Ver etiqueta",
+    "uncategorized": "Sin categoría"
+  },
   "LegalPage": {
     "title": "Aviso Legal",
     "section1Title": "1. Información del Titular",

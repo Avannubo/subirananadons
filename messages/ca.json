@@ -1,4 +1,25 @@
 {
+  "ProductPage": {
+    "errorTitle": "Error",
+    "errorNotFound": "Producte no trobat",
+    "backToShop": "Tornar a la botiga",
+    "breadcrumbProducts": "Productes",
+    "detailsTitle": "Detalls del producte",
+    "dimensions": "Dimensions",
+    "washingInstructions": "Instruccions de rentat",
+    "reference": "Referència",
+    "brand": "Marca",
+    "quantity": "Quantitat",
+    "addToCart": "Afegir a la cistella",
+    "addToWishlist": "Afegir a la meva llista",
+    "tabDescription": "Descripció",
+    "tabDetails": "Detalls del producte",
+    "relatedProducts": "Productes relacionats",
+    "noDescription": "Sense descripció disponible",
+    "notAvailable": "N/D",
+    "seeLabel": "Veure etiqueta",
+    "uncategorized": "Sense categoria"
+  },
   "LegalPage": {
     "title": "Avís Legal",
     "section1Title": "1. Informació del Titular",
@@ -58,10 +79,10 @@
   },
   "ContactPage": {
     "title": "Contacte",
-    "formTitle": "Formulari de contacte",  
-    "section1Subtitle": "Ens encantaria escoltar-te!",  
+    "formTitle": "Formulari de contacte",
+    "section1Subtitle": "Ens encantaria escoltar-te!",
     "address": "Adreça",
-    "phone": "Telèfon", 
+    "phone": "Telèfon",
     "infoTitle": "Informació de contacte",
     "infoText": "Si tens alguna pregunta, suggeriment o simplement vols dir hola, no dubtis en posar-te en contacte amb nosaltres. Estem aquí per ajudar-te!",
     "section1Subtitle2": "Omple el formulari a continuació o utilitza la informació de contacte per comunicar-te amb nosaltres.",
@@ -90,7 +111,7 @@
     "messageLabel": "Missatge",
     "email": "info@example.com",
     "contact": "Ponte en contacte",
-    "contactUs": "Contacta'ns", 
+    "contactUs": "Contacta'ns",
     "contactUsDescription": "Si tens alguna pregunta, suggeriment o simplement vols dir hola, no dubtis en posar-te en contacte amb nosaltres. Estem aquí per ajudar-te!",
     "contactUsSubtitle": "Omple el formulari a continuació o utilitza la informació de contacte per comunicar-te amb nosaltres.",
     "contactUsSubtitle2": "També pots visitar-nos a la nostra botiga física per rebre atenció personalitzada."

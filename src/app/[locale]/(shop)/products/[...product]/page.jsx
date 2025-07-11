@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import { motion, useMotionValue, useTransform } from 'framer-motion';
@@ -9,6 +10,7 @@ import { useCart } from '@/contexts/CartContext.jsx';
 import { toast } from 'react-hot-toast';
 import { fetchProductById, fetchProducts, formatProduct } from '@/services/ProductService';
 export default function Page() {
+    const t = useTranslations('ProductPage');
     const params = useParams();
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
@@ -99,15 +101,15 @@ export default function Page() {
                     name: productData.name,
                     price: `${productData.price_incl_tax.toFixed(2).replace('.', ',')} €`,
                     priceValue: productData.price_incl_tax,
-                    description: productData.description || 'No description available',
+                    description: productData.description || t('noDescription'),
                     details: {
-                        dimensions: productData.dimensions || 'N/A',
-                        washingInstructions: productData.care_instructions || 'See label',
-                        reference: productData.reference || 'N/A',
-                        brand: productData.brand || 'N/A'
+                        dimensions: productData.dimensions || t('notAvailable'),
+                        washingInstructions: productData.care_instructions || t('seeLabel'),
+                        reference: productData.reference || t('notAvailable'),
+                        brand: productData.brand || t('notAvailable')
                     },
                     images: [],
-                    category: productData.category || 'Uncategorized'
+                    category: productData.category || t('uncategorized')
                 };
 
                 // Collect all product images
@@ -263,10 +265,10 @@ export default function Page() {
             <ShopLayout>
                 <div className="container mx-auto px-4 py-8 mt-22">
                     <div className="text-center py-16">
-                        <h2 className="text-2xl text-red-500 mb-4">Error</h2>
-                        <p className="text-gray-600">{error || 'Product not found'}</p>
+                        <h2 className="text-2xl text-red-500 mb-4">{t('errorTitle')}</h2>
+                        <p className="text-gray-600">{error || t('errorNotFound')}</p>
                         <a href="/products" className="mt-6 inline-block bg-[#00B0C8] text-white py-2 px-6 rounded-md hover:bg-[#009bb1]">
-                            Volver a la tienda
+                            {t('backToShop')}
                         </a>
                     </div>
                 </div>
@@ -279,7 +281,7 @@ export default function Page() {
                 {/* Breadcrumb */}
                 <nav className="mb-6 sm:mb-8 overflow-x-auto mt-10">
                     <ol className="hidden md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
-                        <li><a href="/products" className="hover:text-gray-700">Productos</a></li>
+                        <li><a href="/products" className="hover:text-gray-700">{t('breadcrumbProducts')}</a></li>
                         <li><span className="mx-2">/</span></li>
                         <li><a href={`/products?category=${encodeURIComponent(product.category)}`} className="hover:text-gray-700">{product.category}</a></li>
                         <li><span className="mx-2">/</span></li>
@@ -359,25 +361,25 @@ export default function Page() {
                         <div className="space-y-4">
                             <p className="text-gray-600 break-words">{product.description}</p>
                             <div className="py-4">
-                                <h3 className="font-bold text-gray-900 mb-2">Detalles del producto</h3>
+                                <h3 className="font-bold text-gray-900 mb-2">{t('detailsTitle')}</h3>
                                 <ul className="list-disc list-inside space-y-1 text-gray-600">
                                     {product.details.dimensions && (
-                                        <li>Dimensiones: {product.details.dimensions}</li>
+                                        <li>{t('dimensions')}: {product.details.dimensions}</li>
                                     )}
                                     {product.details.washingInstructions && (
-                                        <li>Instrucciones de lavado: {product.details.washingInstructions}</li>
+                                        <li>{t('washingInstructions')}: {product.details.washingInstructions}</li>
                                     )}
                                     {product.details.reference && (
-                                        <li>Referencia: {product.details.reference}</li>
+                                        <li>{t('reference')}: {product.details.reference}</li>
                                     )}
                                     {product.details.brand && (
-                                        <li>Marca: {product.details.brand}</li>
+                                        <li>{t('brand')}: {product.details.brand}</li>
                                     )}
                                 </ul>
                             </div>
                             {/* Quantity Selector */}
                             <div className="flex flex-wrap items-center space-x-2 ">
-                                <span className="text-gray-700">Cantidad:</span>
+                                <span className="text-gray-700">{t('quantity')}:</span>
                                 <div className="flex items-center border border-gray-300 rounded-md mt-2 sm:mt-0">
                                     <button
                                         onClick={() => handleQuantityChange(-1)}
@@ -399,14 +401,14 @@ export default function Page() {
                                 onClick={handleAddToCart}
                                 className="w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200 mt-2"
                             >
-                                Añadir al carrito
+                                {t('addToCart')}
                             </button>
                             {/* Wishlist Button */}
                             <button className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center   mt-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
-                                Añadir a mi lista
+                                {t('addToWishlist')}
                             </button>
                         </div>
                     </div>
@@ -415,11 +417,11 @@ export default function Page() {
                 <div className="mt-10 sm:mt-16">
                     <div className="border-b border-gray-200">
                         <nav className="-mb-px flex flex-wrap space-x-4 sm:space-x-8 overflow-x-auto">
-                            {['DESCRIPCIÓN', 'DETALLES DEL PRODUCTO'].map((tab) => (
+                            {[t('tabDescription'), t('tabDetails')].map((tab, idx) => (
                                 <button
                                     key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`pb-4 px-1 text-xs sm:text-sm font-medium ${activeTab === tab
+                                    onClick={() => setActiveTab(idx === 0 ? 'DESCRIPCIÓN' : 'DETALLES DEL PRODUCTO')}
+                                    className={`pb-4 px-1 text-xs sm:text-sm font-medium ${activeTab === (idx === 0 ? 'DESCRIPCIÓN' : 'DETALLES DEL PRODUCTO')
                                         ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
                                         : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
@@ -439,16 +441,16 @@ export default function Page() {
                             <div className="prose max-w-none">
                                 <ul className="list-disc list-inside space-y-2 text-gray-600">
                                     {product.details.dimensions && (
-                                        <li>Dimensiones: {product.details.dimensions}</li>
+                                        <li>{t('dimensions')}: {product.details.dimensions}</li>
                                     )}
                                     {product.details.washingInstructions && (
-                                        <li>Instrucciones de lavado: {product.details.washingInstructions}</li>
+                                        <li>{t('washingInstructions')}: {product.details.washingInstructions}</li>
                                     )}
                                     {product.details.reference && (
-                                        <li>Referencia: {product.details.reference}</li>
+                                        <li>{t('reference')}: {product.details.reference}</li>
                                     )}
                                     {product.details.brand && (
-                                        <li>Marca: {product.details.brand}</li>
+                                        <li>{t('brand')}: {product.details.brand}</li>
                                     )}
                                 </ul>
                             </div>
@@ -459,7 +461,7 @@ export default function Page() {
                 {relatedProducts.length > 0 && (
                     <div className="mt-10 sm:mt-16">
                         <ProductSlider
-                            title="PRODUCTOS RELACIONADOS"
+                            title={t('relatedProducts')}
                             products={relatedProducts}
                             className="w-full"
                             slidesPerView={{
