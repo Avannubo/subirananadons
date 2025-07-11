@@ -22,6 +22,13 @@ export default function FadeSlider() {
                 setLoading(false);
             });
     }, []);
+    // Get locale from router or context. Example: from next/router
+    // You may need to adjust this depending on your app's i18n setup
+    let locale = 'ca'; // Default locale
+    if (typeof window !== 'undefined') {
+        locale = (window.location.pathname.split('/')[1] || 'ca');
+    }
+
     return (
         <div className="w-full h-[45vw] min-h-[450px] max-h-[600px] md:h-[100vh] md:min-h-[350px] md:max-h-full relative">
             <Swiper
@@ -67,7 +74,7 @@ export default function FadeSlider() {
                                 <span
                                     className="relative z-10"
                                 >
-                                    {slide.btnText || 'Learn More'}
+                                    {(slide.btnText && slide.btnText[locale]) || 'Learn More'}
                                 </span>
                                 <span
                                     className="absolute left-0 -bottom-1 w-0 h-[3px] bg-white transition-all duration-500 group-hover:w-full"

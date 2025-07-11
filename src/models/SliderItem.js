@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 
 const SliderItemSchema = new mongoose.Schema({
     imageUrl: { type: String, required: true },
-    btnText: { type: String },
+    btnText: {
+        es: { type: String },
+        ca: { type: String }
+    },
     btnLink: { type: String },
     order: { type: Number, default: 0 },
     active: { type: Boolean, default: true }

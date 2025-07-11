@@ -8,7 +8,7 @@ export default function ConfiguracionTab() {
     const [loading, setLoading] = useState(true);
     const [form, setForm] = useState({
         imageUrl: '',
-        btnText: '',
+        btnText: { es: '', ca: '' },
         btnLink: '',
         order: 0,
         active: true
@@ -39,7 +39,15 @@ export default function ConfiguracionTab() {
     // Handle form input
     const handleChange = e => {
         const { name, value, type, checked } = e.target;
-        setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
+        if (name === 'btnText.es' || name === 'btnText.ca') {
+            const lang = name.split('.')[1];
+            setForm(f => ({
+                ...f,
+                btnText: { ...f.btnText, [lang]: value }
+            }));
+        } else {
+            setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
+        }
     };
     // Handle image selection
     const handleImageChange = (e) => {
@@ -135,7 +143,7 @@ export default function ConfiguracionTab() {
                 });
             }
             // Reset form
-            setForm({ imageUrl: '', btnText: '', btnLink: '', order: 0, active: true });
+            setForm({ imageUrl: '', btnText: { es: '', ca: '' }, btnLink: '', order: 0, active: true });
             setEditingId(null);
             setSelectedImage(null);
             setImagePreview('');
@@ -149,7 +157,10 @@ export default function ConfiguracionTab() {
     const handleEdit = slider => {
         setForm({
             imageUrl: slider.imageUrl || '',
-            btnText: slider.btnText || '',
+            btnText: {
+                ca: slider.btnText?.ca ?? '',
+                es: slider.btnText?.es ?? ''
+            },
             btnLink: slider.btnLink || '',
             order: slider.order || 0,
             active: slider.active !== false
@@ -194,7 +205,7 @@ export default function ConfiguracionTab() {
         if (!res.ok) return setError('Error deleting slider');
         setSliders(sliders.filter(s => s._id !== id));
         if (editingId === id) {
-            setForm({ imageUrl: '', btnText: '', btnLink: '', order: 0, active: true });
+            setForm({ imageUrl: '', btnText: { ca: '', es: '' }, btnLink: '', order: 0, active: true });
             setEditingId(null);
             setImagePreview('');
         }
@@ -202,10 +213,10 @@ export default function ConfiguracionTab() {
     };
     return (
         <div className="p-6 bg-white rounded-xl">
-            <h2 className="font-bold mb-6 text-lg text-gray-800">Slider Images</h2>
+            <h2 className="font-bold mb-6 text-lg text-gray-800">Imatges del slider</h2>
             {error && <div className="text-red-500 mb-2">{error}</div>}
             <form onSubmit={handleSubmit} className="mb-8 space-y-6">
-                {/* Image Upload Section */}
+                {/* Secció de pujada d'imatges */}
                 <div className="flex flex-col items-center space-y-4">
                     <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
                         {isUploading && (
@@ -216,13 +227,13 @@ export default function ConfiguracionTab() {
                         {imagePreview ? (
                             <img
                                 src={imagePreview}
-                                alt="Preview"
+                                alt="Previsualització"
                                 className="w-full h-full object-contain rounded-lg"
                             />
                         ) : (
                             <div className="flex flex-col items-center justify-center h-full">
                                 <FiUpload className="w-10 h-10 text-gray-400" />
-                                <p className="mt-2 text-sm text-gray-500">No image selected</p>
+                                <p className="mt-2 text-sm text-gray-500">No s'ha seleccionat cap imatge</p>
                             </div>
                         )}
                     </div>
@@ -235,7 +246,7 @@ export default function ConfiguracionTab() {
                                     : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
                                     }`}
                             >
-                                {isUploading ? 'Uploading...' : 'Select Images'}
+                                {isUploading ? 'Pujant...' : 'Selecciona imatges'}
                             </label>
                             <input
                                 type="file"
@@ -260,7 +271,7 @@ export default function ConfiguracionTab() {
                                 }`}
                         >
                             <FiPlus size={16} />
-                            <span>Preview URL</span>
+                            <span>Previsualitza URL</span>
                         </button>
                         <button
                             type="button"
@@ -268,16 +279,16 @@ export default function ConfiguracionTab() {
                             disabled={isUploading}
                             className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
                         >
-                            Seleccionar existente
+                            Selecciona existent
                         </button>
                     </div>
                     <p className="mt-1 text-xs text-gray-500 text-center">
-                        Formats: JPG, PNG. Max: 5MB
+                        Formats: JPG, PNG. Màx: 5MB
                     </p>
-                    {/* Manual URL input */}
+                    {/* Entrada manual de la URL */}
                     <div className="w-full">
                         <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
-                            Image URL (optional)
+                            URL de la imatge (opcional)
                         </label>
                         <div className="flex mt-1">
                             <input
@@ -298,31 +309,38 @@ export default function ConfiguracionTab() {
                                 }}
                                 className="text-nowrap bg-gray-200 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-300"
                             >
-                                Preview
+                                Previsualitza
                             </button>
                         </div>
                         <p className="mt-1 text-xs text-gray-500">
-                            Or paste the URL directly here
+                            O enganxa la URL directament aquí
                         </p>
                     </div>
                 </div>
-                {/* Other form fields */}
+                {/* Altres camps del formulari */}
                 <div className="flex flex-col md:flex-row gap-2">
                     <input
-                        name="btnText"
-                        value={form.btnText}
+                        name="btnText.ca"
+                        value={form.btnText.ca}
                         onChange={handleChange}
-                        placeholder="Button Text"
+                        placeholder="Text (CA)"
+                        className="border border-gray-300 p-2 rounded w-full bg-gray-50"
+                    />
+                    <input
+                        name="btnText.es"
+                        value={form.btnText.es}
+                        onChange={handleChange}
+                        placeholder="Text (ES)"
                         className="border border-gray-300 p-2 rounded w-full bg-gray-50"
                     />
                     <input
                         name="btnLink"
                         value={form.btnLink}
                         onChange={handleChange}
-                        placeholder="Button Link"
+                        placeholder="Enllaç del botó"
                         className="border border-gray-300 p-2 rounded w-full bg-gray-50"
                     />
-                    {/* Order field hidden, order is set automatically */}
+                    {/* El camp d'ordre està ocult, s'estableix automàticament */}
                 </div>
                 <label className="flex items-center gap-2">
                     <input
@@ -331,7 +349,7 @@ export default function ConfiguracionTab() {
                         checked={form.active}
                         onChange={handleChange}
                     />
-                    Active
+                    Actiu
                 </label>
                 <div className="flex gap-2">
                     <button
@@ -339,7 +357,7 @@ export default function ConfiguracionTab() {
                         className="bg-[#00B0C8] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm"
                         disabled={isUploading}
                     >
-                        {editingId ? 'Update' : 'Add'} Slider
+                        {editingId ? 'Actualitza' : 'Afegeix'} slider
                     </button>
                     {editingId && (
                         <button
@@ -351,7 +369,7 @@ export default function ConfiguracionTab() {
                             }}
                             className="px-4 py-2 text-gray-700 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200"
                         >
-                            Cancel
+                            Cancel·la
                         </button>
                     )}
                 </div>
@@ -371,12 +389,12 @@ export default function ConfiguracionTab() {
                     <table className="w-full text-sm bg-white rounded-xl shadow border border-gray-200 animate-pulse">
                         <thead>
                             <tr className="bg-gray-50 text-gray-700 uppercase text-xs">
-                                <th className="py-3 px-2 font-semibold text-left">Imagen</th>
-                                <th className="py-3 px-2 font-semibold text-left">Texto del botón</th>
-                                <th className="py-3 px-2 font-semibold text-left">Enlace del botón</th>
-                                <th className="py-3 px-2 font-semibold text-left">Orden</th>
-                                <th className="py-3 px-2 font-semibold text-left">Activo</th>
-                                <th className="py-3 px-2 font-semibold text-left">Acciones</th>
+                                <th className="py-3 px-2 font-semibold text-left">Imatge</th>
+                                <th className="py-3 px-2 font-semibold text-left">Text del botó</th>
+                                <th className="py-3 px-2 font-semibold text-left">Enllaç del botó</th>
+                                <th className="py-3 px-2 font-semibold text-left">Ordre</th>
+                                <th className="py-3 px-2 font-semibold text-left">Actiu</th>
+                                <th className="py-3 px-2 font-semibold text-left">Accions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -427,7 +445,10 @@ export default function ConfiguracionTab() {
                                             <img src={slider.imageUrl} alt="slider" className="h-12 w-20 object-cover rounded-lg border border-gray-200 bg-gray-100" />
                                         )}
                                     </td>
-                                    <td className="py-2 px-2">{slider.btnText}</td>
+                                    <td className="py-2 px-2">
+                                        <div><span className="font-semibold">CA:</span> {slider.btnText?.ca}</div>
+                                        <div><span className="font-semibold">ES:</span> {slider.btnText?.es}</div>
+                                    </td>
                                     <td className="py-2 px-2">{slider.btnLink}</td>
                                     <td className=" flex flex-row items-center gap-1">
                                         {/* Hide up arrow for first slide */}
@@ -435,7 +456,7 @@ export default function ConfiguracionTab() {
                                             <button
                                                 type="button"
                                                 className="p-1 rounded hover:bg-gray-200"
-                                                title="Subir"
+                                                title="Puja"
                                                 onClick={() => moveSlider(slider._id, 'up')}
                                             >
                                                 <span style={{ fontSize: '1.1em', display: 'inline-block' }}>&#8593;</span>
@@ -445,7 +466,7 @@ export default function ConfiguracionTab() {
                                             <button
                                                 type="button"
                                                 className="p-1 rounded hover:bg-gray-200"
-                                                title="Bajar"
+                                                title="Baixa"
                                                 onClick={() => moveSlider(slider._id, 'down')}
                                             >
                                                 <span style={{ fontSize: '1.1em', display: 'inline-block' }}>&#8595;</span>
@@ -453,20 +474,20 @@ export default function ConfiguracionTab() {
                                         )}
                                     </td>
                                     <td className="py-2 px-2">
-                                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${slider.active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>{slider.active ? 'Yes' : 'No'}</span>
+                                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${slider.active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>{slider.active ? 'Sí' : 'No'}</span>
                                     </td>
                                     <td className="py-1 px-2  flex flex-row  items-center gap-2">
                                         <button
                                             onClick={() => handleEdit(slider)}
                                             className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 border border-blue-100 text-xs h-8 flex items-center justify-center"
                                         >
-                                            Edit
+                                            Edita
                                         </button>
                                         <button
                                             onClick={() => handleDelete(slider._id)}
                                             className="bg-red-50 text-red-600 px-2 py-1 rounded-full hover:bg-red-100 border border-red-100 text-xs h-8 flex items-center justify-center"
                                         >
-                                            Delete
+                                            Elimina
                                         </button>
                                     </td>
                                 </tr>

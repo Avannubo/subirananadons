@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import FadeSlider from "@/components/landing/FadeSlider";
-import ImageGallery from "@/components/landing/ImageGalaryHome";
+import ImageGallery from "@/components/landing/ofertas";
 import FeaturedProducts from "@/components/landing/FeaturedProducts";
 import ShopLayout from "../../components/Layouts/shop-layout";
 

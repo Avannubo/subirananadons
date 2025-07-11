@@ -2,8 +2,14 @@ import mongoose from 'mongoose';
 
 const OfferSchema = new mongoose.Schema({
     imageUrl: { type: String, required: true },
-    title: { type: String, required: true },
-    description: { type: String, required: true },
+    title: {
+        es: { type: String },
+        ca: { type: String }
+    },
+    description: {
+        es: { type: String },
+        ca: { type: String }
+    },
     link: { type: String, required: false },
     order: { type: Number, default: 0 },
     brand: { type: String },
