@@ -25,7 +25,11 @@ export default function LegalContentEditor() {
                 const params = await res.json();
                 const map = {};
                 LEGAL_KEYS.forEach(({ key }) => {
-                    map[key] = params.find((p) => p.key === key)?.value || "";
+                    const param = params.find((p) => p.key === key);
+                    map[key] = {
+                        ca: param?.value?.ca?.value || "",
+                        es: param?.value?.es?.value || ""
+                    };
                 });
                 setEdit(map);
                 setInitial(map);
@@ -38,8 +42,14 @@ export default function LegalContentEditor() {
         fetchAll();
     }, []);
 
-    const handleChange = (key, value) => {
-        setEdit((prev) => ({ ...prev, [key]: value }));
+    const handleChange = (key, lang, value) => {
+        setEdit((prev) => ({
+            ...prev,
+            [key]: {
+                ...prev[key],
+                [lang]: value
+            }
+        }));
     };
 
     const handleSave = async (key) => {
@@ -50,11 +60,21 @@ export default function LegalContentEditor() {
             const res = await fetch("/api/shop-parameters", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ key, value: edit[key] }),
+                body: JSON.stringify({
+                    key,
+                    value: {
+                        ca: { value: edit[key].ca },
+                        es: { value: edit[key].es }
+                    },
+                    description: {
+                        ca: key,
+                        es: key
+                    }
+                }),
             });
             if (!res.ok) throw new Error();
             setSuccess("Guardado");
-            setInitial((prev) => ({ ...prev, [key]: edit[key] }));
+            setInitial((prev) => ({ ...prev, [key]: { ...edit[key] } }));
         } catch {
             setError("No se pudo guardar el texto legal");
         } finally {
@@ -69,24 +89,34 @@ export default function LegalContentEditor() {
             {LEGAL_KEYS.map(({ key, label }) => (
                 <div key={key} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h2 className="font-bold mb-2">{label}</h2>
-                    <textarea
-                        className="w-full min-h-[220px] border border-gray-300 rounded p-2 mb-2"
-                        value={edit[key] || ""}
-                        onChange={(e) => handleChange(key, e.target.value)}
-                        disabled={loading}
-                    />
+                    <div className="mb-2">
+                        <label className="block font-semibold mb-1">Català</label>
+                        <textarea
+                            className="w-full min-h-[120px] border border-gray-300 rounded p-2 mb-2"
+                            value={edit[key]?.ca || ""}
+                            onChange={(e) => handleChange(key, 'ca', e.target.value)}
+                            disabled={loading}
+                        />
+                        <label className="block font-semibold mb-1">Castellano</label>
+                        <textarea
+                            className="w-full min-h-[120px] border border-gray-300 rounded p-2"
+                            value={edit[key]?.es || ""}
+                            onChange={(e) => handleChange(key, 'es', e.target.value)}
+                            disabled={loading}
+                        />
+                    </div>
                     <div className="flex gap-2">
                         <button
                             className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8]"
                             onClick={() => handleSave(key)}
-                            disabled={loading || edit[key] === initial[key]}
+                            disabled={loading || (edit[key]?.ca === initial[key]?.ca && edit[key]?.es === initial[key]?.es)}
                         >
                             Guardar
                         </button>
                         <button
                             className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                            onClick={() => setEdit((prev) => ({ ...prev, [key]: initial[key] }))}
-                            disabled={loading || edit[key] === initial[key]}
+                            onClick={() => setEdit((prev) => ({ ...prev, [key]: { ...initial[key] } }))}
+                            disabled={loading || (edit[key]?.ca === initial[key]?.ca && edit[key]?.es === initial[key]?.es)}
                         >
                             Cancelar
                         </button>

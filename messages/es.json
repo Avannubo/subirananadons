@@ -329,5 +329,9 @@
     "removeBanner": "Quitar banner",
     "view": "Ver",
     "delete": "Eliminar"
+  },
+  "RecommendationsPage": {
+    "title": "Recomendaciones",
+    "noRecommendations": "No hay recomanacions disponibles."
   }
 }

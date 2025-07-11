@@ -336,5 +336,9 @@
     "registerErrorGeneric": "Error en el registre. Si us plau, intenta-ho de nou.",
     "registerSuccess": "Registre amb èxit! Iniciant sessió...",
     "registerLoginError": "Registre amb èxit però error en iniciar sessió. Si us plau, inicia sessió manualment."
+  },
+  "RecommendationsPage": {
+    "title": "Recomanacions",
+    "noRecommendations": "No hi ha recomanacions disponibles."
   }
 }

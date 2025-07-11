@@ -6,10 +6,12 @@ import Header from '@/components/landing/header';
 import Footer from '@/components/landing/footer';
 import { Info, Database, FileText, Shield, User, Contact, RefreshCw } from 'lucide-react';
 // Removed export const metadata because it is not allowed in a client component
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function PrivacyPage() {
     const { value: privacyText, loading } = useShopParameter('privacy_policy');
     const [banner, setBanner] = React.useState(null);
+    const locale = useLocale();
     React.useEffect(() => {
         async function fetchBanner() {
             try {
@@ -22,13 +24,23 @@ export default function PrivacyPage() {
         }
         fetchBanner();
     }, []);
-
     function formatNumberedHeadings(text) {
         if (!text) return '';
         return text
             .replace(/^(\d+\.[^\n]*)/gm, '<span style="display:block;font-size:1.5em;font-weight:bold;margin-top:1.2em;">$1</span>')
             .replace(/\n/g, '<br/>');
     }
+    // privacyText is expected to be an object with language keys (es, ca, ...)
+    let translatedText = '';
+    if (privacyText && typeof privacyText === 'object' && privacyText[locale]?.value) {
+        translatedText = privacyText[locale].value;
+    } else if (privacyText && typeof privacyText === 'object') {
+        // fallback to 'es' if locale not found
+        translatedText = privacyText['es']?.value || '';
+    } else if (typeof privacyText === 'string') {
+        translatedText = privacyText;
+    }
+
     return (
         <>
             <Header />
@@ -43,21 +55,23 @@ export default function PrivacyPage() {
                 {/* Overlay for contrast */}
                 <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
                 <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Política de Privacidad</h1>
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">
+                        {locale === 'ca' ? 'Política de Privacitat' : 'Política de Privacidad'}
+                    </h1>
                 </div>
             </div>
             <div className="container mx-auto px-4 py-12 max-w-[1500px]">
                 <div className="prose max-w-none">
                     {loading ? (
-                        <p className="text-gray-400">Cargando...</p>
-                    ) : privacyText ? (
-                        <div dangerouslySetInnerHTML={{ __html: formatNumberedHeadings(privacyText) }} />
+                        <p className="text-gray-400">{locale === 'ca' ? 'Carregant...' : 'Cargando...'}</p>
+                    ) : translatedText ? (
+                        <div dangerouslySetInnerHTML={{ __html: formatNumberedHeadings(translatedText) }} />
                     ) : (
-                        <p className="text-gray-400">No hay contenido de política de privacidad disponible.</p>
+                        <p className="text-gray-400">{locale === 'ca' ? 'No hi ha contingut de política de privacitat disponible.' : 'No hay contenido de política de privacidad disponible.'}</p>
                     )}
                 </div>
             </div>
             <Footer />
         </>
     );
-} 
+}

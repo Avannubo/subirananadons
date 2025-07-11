@@ -6,7 +6,7 @@ export default function ProductosTab() {
     const [groups, setGroups] = useState([]);
     const [editGroupIdx, setEditGroupIdx] = useState(null);
     const [categories, setCategories] = useState([]);
-    const [form, setForm] = useState({ groupTitle: '', name: '', category: '' });
+    const [form, setForm] = useState({ groupTitle: { ca: '', es: '' }, name: { ca: '', es: '' }, category: '' });
     const [recommendations, setRecommendations] = useState([]);
     const [editIdx, setEditIdx] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -45,10 +45,14 @@ export default function ProductosTab() {
     function handleEditGroup(idx) {
         const group = groups[idx];
         setEditGroupIdx(idx);
-        setForm({ groupTitle: group.title, name: '', category: '' });
+        setForm({
+            groupTitle: group.title || { ca: '', es: '' },
+            name: { ca: '', es: '' },
+            category: ''
+        });
         setRecommendations(
             (group.groups || []).map(g => ({
-                name: g.groupTitle,
+                name: g.groupTitle || { ca: '', es: '' },
                 category: g.category?._id || g.category,
                 categoryName: g.category?.name || ''
             }))
@@ -62,11 +66,11 @@ export default function ProductosTab() {
             toast.error('Has de seleccionar una categoria');
             return;
         }
-        if (!form.name) return;
+        if (!form.name.ca || !form.name.es) return;
         if (editIdx !== null) {
             // Edit mode
             setRecommendations(prev => prev.map((r, idx) => idx === editIdx ? {
-                name: form.name,
+                name: { ...form.name },
                 category: form.category,
                 categoryName: categories.find(c => c._id === form.category)?.name || ''
             } : r));
@@ -75,15 +79,15 @@ export default function ProductosTab() {
             // Add mode
             setRecommendations(prev => [
                 ...prev,
-                { name: form.name, category: form.category, categoryName: categories.find(c => c._id === form.category)?.name || '' }
+                { name: { ...form.name }, category: form.category, categoryName: categories.find(c => c._id === form.category)?.name || '' }
             ]);
         }
-        setForm(f => ({ ...f, name: '', category: '' }));
+        setForm(f => ({ ...f, name: { ca: '', es: '' }, category: '' }));
     }
 
     function handleEditRecommendation(idx) {
         const rec = recommendations[idx];
-        setForm(f => ({ ...f, name: rec.name, category: rec.category }));
+        setForm(f => ({ ...f, name: { ...rec.name }, category: rec.category }));
         setEditIdx(idx);
     }
 
@@ -92,7 +96,7 @@ export default function ProductosTab() {
         // If editing the one being removed, reset edit
         if (editIdx === idx) {
             setEditIdx(null);
-            setForm(f => ({ ...f, name: '', category: '' }));
+            setForm(f => ({ ...f, name: { ca: '', es: '' }, category: '' }));
         }
     }
 
@@ -127,7 +131,7 @@ export default function ProductosTab() {
             }
             if (!res.ok) throw new Error();
             setSuccess(editGroupIdx !== null ? 'Grupo actualizado' : 'Grupo añadido');
-            setForm({ groupTitle: '', name: '', category: '' });
+            setForm({ groupTitle: { ca: '', es: '' }, name: { ca: '', es: '' }, category: '' });
             setRecommendations([]);
             setEditGroupIdx(null);
             fetchGroups();
@@ -168,22 +172,45 @@ export default function ProductosTab() {
         <div className="p-4 bg-gray-50 rounded-lg">
             <h2 className="text-xl font-bold mb-4">Grups de Recomanacions</h2>
             <form className="mb-6 flex flex-col gap-2" onSubmit={handleSaveGroup}>
-                <div className='flex-1 mb-2'>
-                    <label className="block text-sm font-medium">Títol del Grup</label>
-                    <input
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                        value={form.groupTitle}
-                        onChange={e => setForm(f => ({ ...f, groupTitle: e.target.value }))}
-                        required
-                    />
+                <div className='flex-1 flex felx-col mb-2 space-x-4'>
+                    <div className='flex-1'>
+                        <label className="block text-sm font-medium">Títol del Grup (CA)</label>
+
+                        <input
+                            className="border border-gray-300 rounded px-2 py-1 w-full mb-1"
+                            value={form.groupTitle.ca}
+                            onChange={e => setForm(f => ({ ...f, groupTitle: { ...f.groupTitle, ca: e.target.value } }))}
+                            required
+                        />
+                    </div>
+                    <div className='flex-1'>
+                        <label className="block text-sm font-medium">Títol del Grup (ES)</label>
+                        <input
+                            className="border border-gray-300 rounded px-2 py-1 w-full"
+                            value={form.groupTitle.es}
+                            onChange={e => setForm(f => ({ ...f, groupTitle: { ...f.groupTitle, es: e.target.value } }))}
+                            required
+                        />
+                    </div>
+
                 </div>
                 <div className='flex flex-row gap-2 space-x-2 items-end'>
                     <div className='flex-1'>
-                        <label className="block text-sm font-medium">Nom de Recomanació</label>
+                        <label className="block text-sm font-medium">Nom de Recomanació (CA)</label>
+                        <input
+                            className="border border-gray-300 rounded px-2 py-1 w-full mb-1"
+                            value={form.name.ca}
+                            onChange={e => setForm(f => ({ ...f, name: { ...f.name, ca: e.target.value } }))}
+                        />
+                    </div>
+
+                    <div className='flex-1'>
+
+                        <label className="block text-sm font-medium">Nom de Recomanació (ES)</label>
                         <input
                             className="border border-gray-300 rounded px-2 py-1 w-full"
-                            value={form.name}
-                            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                            value={form.name.es}
+                            onChange={e => setForm(f => ({ ...f, name: { ...f.name, es: e.target.value } }))}
                         />
                     </div>
                     <div className='flex-1'>
@@ -203,7 +230,7 @@ export default function ProductosTab() {
                         className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#0090a8]"
                         onClick={handleAddRecommendation}
                         type="button"
-                        disabled={!form.name || !form.category}
+                        disabled={!form.name.ca || !form.name.es || !form.category}
                     >
                         Afegir
                     </button>
@@ -219,7 +246,10 @@ export default function ProductosTab() {
                                     return (
                                         <li key={realIdx} className="flex items-center gap-2">
                                             <span>
-                                                <span className="font-medium cursor-pointer text-[#00B0C8] hover:underline" onClick={() => handleEditRecommendation(realIdx)}>{r.name}</span>
+                                                <span className="font-medium cursor-pointer text-[#00B0C8] hover:underline" onClick={() => handleEditRecommendation(realIdx)}>
+                                                    {r.name?.ca || ''}
+                                                    {r.name?.es ? ` / ${r.name.es}` : ''}
+                                                </span>
                                                 <span className="text-sm text-gray-500"> ({r.categoryName})</span>
                                             </span>
                                             <button
@@ -239,7 +269,10 @@ export default function ProductosTab() {
                                     return (
                                         <li key={realIdx} className="flex items-center gap-2">
                                             <span>
-                                                <span className="font-medium cursor-pointer text-[#00B0C8] hover:underline" onClick={() => handleEditRecommendation(realIdx)}>{r.name}</span>
+                                                <span className="font-medium cursor-pointer text-[#00B0C8] hover:underline" onClick={() => handleEditRecommendation(realIdx)}>
+                                                    {r.name?.ca || ''}
+                                                    {r.name?.es ? ` / ${r.name.es}` : ''}
+                                                </span>
                                                 <span className="text-sm text-gray-500"> ({r.categoryName})</span>
                                             </span>
                                             <button
@@ -303,7 +336,8 @@ export default function ProductosTab() {
                             <div key={container._id} className="break-inside-avoid-column mb-4">
                                 <div className="bg-white rounded shadow p-3">
                                     <div className="font-bold flex items-center gap-2">
-                                        {container.title}
+                                        {container.title?.ca || ''}
+                                        {container.title?.es ? ` / ${container.title.es}` : ''}
                                         <button
                                             className="text-xs text-[#00B0C8] border border-[#00B0C820] rounded px-2 py-1 hover:bg-[#00B0C810]"
                                             onClick={() => handleEditGroup(idx)}
@@ -322,7 +356,10 @@ export default function ProductosTab() {
                                         <ul className="space-y-2 mt-2">
                                             {container.groups.map((g, gidx) => (
                                                 <li key={g._id || gidx}>
-                                                    <span className="font-medium">{g.groupTitle}</span>
+                                                    <span className="font-medium">
+                                                        {g.groupTitle?.ca || ''}
+                                                        {g.groupTitle?.es ? ` / ${g.groupTitle.es}` : ''}
+                                                    </span>
                                                     {g.category && g.category.name && (
                                                         <span className="ml-2 text-sm text-gray-600">({g.category.name})</span>
                                                     )}
