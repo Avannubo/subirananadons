@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext.jsx';
+import { useTranslations } from 'next-intl';
 // Categories for filtering
 const categories = [
     "Todos",
@@ -19,6 +20,7 @@ const categories = [
 ];
 export default function BirthListPage({ params }) {
     const id = use(params).id;
+    const t = useTranslations('BirthListDetailPage');
     const [selectedCategory, setSelectedCategory] = useState("Todos");
     const [sortBy, setSortBy] = useState("default");
     const [list, setList] = useState(null);
@@ -149,10 +151,10 @@ export default function BirthListPage({ params }) {
                         <svg className="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <h3 className="text-xl font-semibold text-gray-700 mb-2">Error al cargar la lista</h3>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('errorLoadListTitle')}</h3>
                         <p className="text-gray-500 mb-6">{error}</p>
                         <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors">
-                            Volver a las listas
+                            {t('backToListsBtn')}
                         </Link>
                     </div>
                 </div>
@@ -167,10 +169,10 @@ export default function BirthListPage({ params }) {
                         <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <h3 className="text-xl font-semibold text-gray-700 mb-2">Lista no encontrada</h3>
-                        <p className="text-gray-500 mb-6">No se pudo encontrar la lista de regalos solicitada.</p>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('listNotFoundTitle')}</h3>
+                        <p className="text-gray-500 mb-6">{t('listNotFoundDesc')}</p>
                         <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors">
-                            Volver a las listas
+                            {t('backToListsBtn')}
                         </Link>
                     </div>
                 </div>
@@ -258,7 +260,7 @@ export default function BirthListPage({ params }) {
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                         >
-                            Lista de {list?.babyName}
+                            {t('listTitle', { babyName: list?.babyName })}
                         </motion.h1>
                         <motion.p
                             className="text-lg text-zinc-900 mb-2"
@@ -274,7 +276,7 @@ export default function BirthListPage({ params }) {
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2 }}
                         >
-                            Fecha prevista: {list && new Date(list.dueDate).toLocaleDateString('es-ES')}
+                            {t('dueDateLabel')}: {list && new Date(list.dueDate).toLocaleDateString('es-ES')}
                         </motion.p>
                     </div>
                 </div>
@@ -283,14 +285,14 @@ export default function BirthListPage({ params }) {
                 <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                         <div className="w-full md:w-2/3 mb-4 md:mb-0">                <div className="flex justify-between mb-2">
-                            <span className="text-gray-600">Regalos comprados</span>
+                            <span className="text-gray-600">{t('giftsPurchasedLabel')}</span>
                             <span className="font-medium">{list.progress}%</span>
                         </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
                                     className="bg-[#00B0C8] h-2 rounded-full transition-all duration-500"
                                     style={{ width: `${list.progress}%` }}
-                                    title={`${list.progress}% de los regalos han sido comprados`}
+                                    title={t('giftsPurchasedTitle', { percent: list.progress })}
                                 />
                             </div>
                         </div>
@@ -302,7 +304,7 @@ export default function BirthListPage({ params }) {
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
                                 </svg>
-                                Compartir Lista
+                                {t('shareListBtn')}
                             </button>
                         </div>
                     </div>
@@ -330,10 +332,10 @@ export default function BirthListPage({ params }) {
                         onChange={(e) => setSortBy(e.target.value)}
                         className="px-4 py-2 border border-gray-300 rounded-md"
                     >
-                        <option value="default">Ordenar por</option>
-                        <option value="price-asc">Precio: menor a mayor</option>
-                        <option value="price-desc">Precio: mayor a menor</option>
-                        <option value="name">Nombre</option>
+                        <option value="default">{t('sortDefault')}</option>
+                        <option value="price-asc">{t('sortPriceAsc')}</option>
+                        <option value="price-desc">{t('sortPriceDesc')}</option>
+                        <option value="name">{t('sortName')}</option>
                     </select> */}
                 </div>
                 {/* Products Grid */}
@@ -353,11 +355,12 @@ export default function BirthListPage({ params }) {
                                         alt={product.name}
                                         fill
                                         className="object-contain"
-                                    />                                    {product.status !== 'available' && (
+                                    />
+                                    {product.status !== 'available' && (
                                         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
                                             <div className=" px-4 py-2 rounded-lg">
                                                 <span className="text-white text-lg font-medium uppercase tracking-wider">
-                                                    {product.status === 'purchased' ? 'Comprado' : 'Reservado'}
+                                                    {product.status === 'purchased' ? t('productPurchased') : t('productReserved')}
                                                 </span>
                                             </div>
                                         </div>
@@ -374,12 +377,12 @@ export default function BirthListPage({ params }) {
                                                 onClick={() => handleReserveClick(product)}
                                                 className="w-full bg-[#00B0C8] text-white py-1.5 text-sm rounded-md hover:bg-[#0090a8] transition-colors"
                                             >
-                                                Añadir al carrito
+                                                {t('addToCartBtn')}
                                             </button>
                                         ) : (
                                             <div className="text-center py-1.5 bg-gray-100 rounded-md">
                                                 <span className="text-sm text-gray-600">
-                                                    {product.status === 'purchased' ? 'Comprado' : 'Reservado'}
+                                                    {product.status === 'purchased' ? t('productPurchased') : t('productReserved')}
                                                 </span>
                                             </div>
                                         )}
@@ -389,7 +392,7 @@ export default function BirthListPage({ params }) {
                         ))
                     ) : (
                         <div className="col-span-full text-center py-12">
-                            <p className="text-gray-500">No se encontraron productos en esta categoría.</p>
+                            <p className="text-gray-500">{t('noProductsFound')}</p>
                         </div>
                     )}
                 </div>

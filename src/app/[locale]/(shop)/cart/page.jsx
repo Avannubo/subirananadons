@@ -2,6 +2,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 
+
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
@@ -11,10 +12,12 @@ import { toast } from 'react-hot-toast';
 import { ShoppingCart, Mail } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { OrderService } from '@/services/OrderService';
+import { useTranslations } from 'next-intl';
 
 const ModalTPV = dynamic(() => import('@/components/cart/ModalTPV'), { ssr: false });
 
 export default function CartPage() {
+    const t = useTranslations('CartPage');
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
     const { user, loading: userLoading } = useUser();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
@@ -283,13 +286,13 @@ export default function CartPage() {
                                     {/* User Type Selection - Only for guests */}
                                     <div className='bg-white rounded-lg shadow-sm p-6'>
                                         <div className="flex items-start justify-between">
-                                            {/* <h2 className="text-xl font-bold mb-6">Datos del usuario</h2> */}
+                                            {/* <h2 className="text-xl font-bold mb-6">{t('userData')}</h2> */}
                                             {/* {!user && (
                                                 <button
                                                     onClick={() => setIsAuthModalOpen(true)}
                                                     className="text-[#00B0C8] text-sm hover:underline"
                                                 >
-                                                    Iniciar sesión
+                                                    {t('login')}
                                                 </button>
                                             )} */}
                                         </div>
@@ -299,10 +302,11 @@ export default function CartPage() {
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
-                                                    Comprando como invitado
+                                                    {t('loginInfo')}
+
                                                 </p>
                                                 <p className="text-xs text-gray-600">
-                                                    Inicia sesión para ver tus pedidos en el panel y crear listas de nacimiento
+                                                    {t('loginPanelInfo')}
                                                 </p>
                                             </div>
                                         ) : (
@@ -311,17 +315,17 @@ export default function CartPage() {
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                     </svg>
-                                                    Comprando como {user.email}
+                                                    {t('buyingAs')} {user.email}
                                                 </p>
                                             </div>
                                         )}
                                     </div>
                                     <div className='bg-white rounded-lg shadow-sm p-6 '>
-                                        <h2 className="text-xl font-bold mb-6">Datos de {deliveryMethod === 'pickup' ? 'Contacto' : 'Envío'}</h2>
+                                        <h2 className="text-xl font-bold mb-6">{deliveryMethod === 'pickup' ? t('contactData') : t('shippingData')}</h2>
                                         {userLoading ? (
                                             <div className="flex items-center justify-center py-4">
                                                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00B0C8]"></div>
-                                                <span className="ml-2 text-gray-600">Cargando tus datos...</span>
+                                                <span className="ml-2 text-gray-600">{t('loadingUserData')}</span>
                                             </div>
                                         ) : (
                                             <>
@@ -331,7 +335,7 @@ export default function CartPage() {
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                            Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista.
+                                                            {t('giftPickupOnly')}
                                                         </p>
                                                     </div>
                                                 )}
@@ -341,14 +345,14 @@ export default function CartPage() {
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                            Hemos rellenado automáticamente algunos campos con tus datos. Por favor, verifica y completa la información.
+                                                            {t('autofillInfo')}
                                                         </p>
                                                     </div>
                                                 )}
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="col-span-1">
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Nombre
+                                                            {t('nameLabel')}
                                                         </label>
                                                         <input
                                                             type="text"
@@ -361,7 +365,7 @@ export default function CartPage() {
                                                     </div>
                                                     <div className="col-span-1">
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Apellidos
+                                                            {t('lastNameLabel')}
                                                         </label>
                                                         <input
                                                             type="text"
@@ -374,7 +378,7 @@ export default function CartPage() {
                                                     </div>
                                                     <div className="col-span-2">
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Email
+                                                            {t('emailLabel')}
                                                         </label>
                                                         <input
                                                             type="email"
@@ -385,38 +389,9 @@ export default function CartPage() {
                                                             required
                                                         />
                                                     </div>
-                                                    {/* {userType === 'register' && (
-                                                        <div className="col-span-2">
-                                                            <h3 className="font-medium mb-4">Contraseña para la cuenta</h3>
-                                                            <div className="space-y-4">
-                                                                <div>
-                                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                        Contraseña
-                                                                    </label>
-                                                                    <input
-                                                                        type="password"
-                                                                        name="password"
-                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                                        required={userType === 'register'}
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                        Confirmar contraseña
-                                                                    </label>
-                                                                    <input
-                                                                        type="password"
-                                                                        name="confirmPassword"
-                                                                        className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
-                                                                        required={userType === 'register'}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )} */}
                                                     <div className="col-span-2">
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Teléfono
+                                                            {t('phoneLabel')}
                                                         </label>
                                                         <input
                                                             type="tel"
@@ -427,11 +402,11 @@ export default function CartPage() {
                                                             required
                                                         />
                                                     </div>
-                                                    {/* Only show address fields if not gift-only or delivery method is not pickup */}                                    {showAddressFields && (
+                                                    {showAddressFields && (
                                                         <>
                                                             <div className="col-span-2">
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                    Dirección
+                                                                    {t('addressLabel')}
                                                                 </label>
                                                                 <input
                                                                     type="text"
@@ -444,7 +419,7 @@ export default function CartPage() {
                                                             </div>
                                                             <div className="col-span-1">
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                    Ciudad
+                                                                    {t('cityLabel')}
                                                                 </label>
                                                                 <input
                                                                     type="text"
@@ -457,7 +432,7 @@ export default function CartPage() {
                                                             </div>
                                                             <div className="col-span-1">
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                    Código Postal
+                                                                    {t('postalCodeLabel')}
                                                                 </label>
                                                                 <input
                                                                     type="text"
@@ -470,7 +445,7 @@ export default function CartPage() {
                                                             </div>
                                                             <div className="col-span-2">
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                                    Provincia
+                                                                    {t('provinceLabel')}
                                                                 </label>
                                                                 <input
                                                                     type="text"
@@ -483,37 +458,34 @@ export default function CartPage() {
                                                             </div>
                                                         </>
                                                     )}
-                                                    {/* Add note field */}
                                                     <div className="col-span-2">
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Notas para Tienda
+                                                            {t('notesLabel')}
                                                         </label>
                                                         <textarea
                                                             name="notes"
                                                             value={formData.notes}
                                                             onChange={handleInputChange}
-                                                            placeholder="Instrucciones especiales para la entrega, preferencias, etc."
+                                                            placeholder={t('notesPlaceholder')}
                                                             rows={3}
                                                             className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] text-sm"
                                                         />
                                                     </div>
-
-                                                    {/* Add gift note field when there are gift items */}
                                                     {hasGiftItems && (
                                                         <div className="col-span-2">
                                                             <label className="block text-sm font-medium text-pink-600 mb-1">
-                                                                Nota para los propietarios de la lista
+                                                                {t('giftNoteLabel')}
                                                             </label>
                                                             <textarea
                                                                 name="giftNote"
                                                                 value={formData.giftNote}
                                                                 onChange={handleInputChange}
-                                                                placeholder="Añade una nota especial para el propietario de la lista de regalos"
+                                                                placeholder={t('giftNotePlaceholder')}
                                                                 rows={3}
                                                                 className="w-full px-3 py-2 border border-pink-200 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-400 text-sm bg-pink-50/30"
                                                             />
                                                             <p className="mt-1 text-xs text-pink-600">
-                                                                Esta nota será visible para el propietario de la lista cuando recoja los regalos
+                                                                {t('giftNoteHelp')}
                                                             </p>
                                                         </div>
                                                     )}
@@ -525,11 +497,10 @@ export default function CartPage() {
                             </div>
                             {/* Right Column - Products */}
                             <div className="lg:w-1/2 flex flex-col">
-                                {/* First, separate the cart items */}
                                 {/* Regular Items Section */}
                                 {regularItems.length > 0 && (
                                     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                                        <h2 className="text-xl font-bold p-6 border-b border-gray-200">Tu pedido</h2>
+                                        <h2 className="text-xl font-bold p-6 border-b border-gray-200">{t('yourOrder')}</h2>
                                         {regularItems.map((item, index) => (
                                             <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
                                                 <div className="relative w-20 h-20">
@@ -587,14 +558,14 @@ export default function CartPage() {
                                             </div>
                                         ))}
                                         {regularItems.length === 0 && (
-                                            <p className="text-gray-500 text-center py-4">No hay productos en tu pedido</p>
+                                            <p className="text-gray-500 text-center py-4">{t('noProducts')}</p>
                                         )}
                                     </div>
                                 )}
                                 {/* Gift Items Section - Only show if there are gift items */}
                                 {giftItems.length > 0 && (
                                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-4">
-                                        <h2 className="text-xl font-bold p-6 border-b border-gray-200">Regalos de Compra</h2>
+                                        <h2 className="text-xl font-bold p-6 border-b border-gray-200">{t('giftOrder')}</h2>
                                         {giftItems.map((item, index) => (
                                             <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
                                                 <div className="relative w-20 h-20">
@@ -631,7 +602,7 @@ export default function CartPage() {
                                                                 onClick={() => removeFromCart(item.id)}
                                                                 className="text-sm text-red-600 hover:text-red-900"
                                                             >
-                                                                Eliminar
+                                                                {t('remove')}
                                                             </button>
                                                         </div>
                                                     </div>
@@ -642,7 +613,7 @@ export default function CartPage() {
                                 )}
                                 {/* Delivery Method Selection */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
-                                    <h2 className="text-xl font-bold mb-4">Método de entrega</h2>
+                                    <h2 className="text-xl font-bold mb-4">{t('deliveryMethod')}</h2>
                                     {/* Gift Items Notice */}
                                     {hasGiftItems && (
                                         <div className="mb-4 p-3 bg-pink-50 border border-pink-200 rounded-lg">
@@ -651,8 +622,8 @@ export default function CartPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                                                 </svg>
                                                 {hasOnlyGiftItems
-                                                    ? 'Tu carrito contiene solo productos de regalo que deben ser recogidos en tienda por el propietario de la lista. Al comprar estos artículos, serán marcados como comprados en la lista de regalo.'
-                                                    : 'Este pedido incluye artículos de regalo (recogida en tienda obligatoria por el propietario de la lista). Estos artículos no pueden ser enviados a domicilio.'
+                                                    ? t('onlyGiftItemsInfo')
+                                                    : t('giftItemsInfo')
                                                 }
                                             </p>
                                         </div>
@@ -661,7 +632,7 @@ export default function CartPage() {
                                     {calculateRegularSubtotal() < 60 && deliveryMethod === 'delivery' && !hasGiftItems && (
                                         <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                                             <p className="text-sm text-gray-700 mb-2">
-                                                ¡Añade <span className="font-bold text-[#00B0C8]">{(60 - calculateRegularSubtotal()).toFixed(2)}€</span> más a tu pedido para conseguir envío gratis!
+                                                {t('addForFreeShipping', { amount: (60 - calculateRegularSubtotal()).toFixed(2) })}
                                             </p>
                                             <div className="w-full bg-gray-200 rounded-full h-2.5">
                                                 <div
@@ -691,18 +662,18 @@ export default function CartPage() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium">Envío a domicilio</p>
+                                                    <p className="font-medium">{t('deliveryOption')}</p>
                                                     {/* <p className="text-sm text-gray-500">Entrega en 24-48 horas laborables</p> */}
                                                     {calculateRegularSubtotal() >= 60 && !hasOnlyGiftItems && (
-                                                        <p className="text-xs text-green-600 font-medium mt-1">Envío gratis en pedidos superiores a 60€</p>
+                                                        <p className="text-xs text-green-600 font-medium mt-1">{t('freeShippingInfo')}</p>
                                                     )}
                                                     {hasGiftItems && !hasOnlyGiftItems && (
-                                                        <p className="text-xs text-orange-600 font-medium mt-1">Los productos de regalo deberán recogerse en tienda por el propietario de la lista </p>
+                                                        <p className="text-xs text-orange-600 font-medium mt-1">{t('giftPickupInfo')}</p>
                                                     )}
                                                 </div>
                                             </div>
                                             <span className="text-[#00B0C8] font-medium">
-                                                {calculateRegularSubtotal() >= 60 || regularItems.length === 0 ? 'Gratis' : '5,99 €'}
+                                                {calculateRegularSubtotal() >= 60 || regularItems.length === 0 ? t('free') : t('shippingPrice')}
                                             </span>
                                         </div>
                                         <div
@@ -720,90 +691,47 @@ export default function CartPage() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium">Recoger en tienda</p>
+                                                    <p className="font-medium">{t('pickupOption')}</p>
                                                     {/* <p className="text-sm text-gray-500">Disponible in 2-4 horas</p> */}
                                                     {hasGiftItems && (
                                                         <p className="text-xs text-pink-600 font-medium mt-1">
                                                             {hasOnlyGiftItems
-                                                                ? 'Única opción disponible para pedidos de regalo'
-                                                                : 'Obligatorio para productos de regalo — Solo el propietario de la lista puede recogerlos'
+                                                                ? t('onlyGiftPickup')
+                                                                : t('mandatoryGiftPickup')
                                                             }
                                                         </p>
                                                     )}
                                                 </div>
                                             </div>
-                                            <span className="text-[#00B0C8] font-medium">Gratis</span>
+                                            <span className="text-[#00B0C8] font-medium">{t('free')}</span>
                                         </div>
                                     </div>
                                 </div>
-                                {/* Gift Notes Section */}
-                                {/* {giftItems.length > 0 && (
-                                    <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
-                                        <h2 className="text-xl font-bold mb-4">Notas para los regalos</h2>
-                                        <div className="space-y-6">
-                                            {giftItems.map((item) => (
-                                                <div key={`note-${item.id}`} className="space-y-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="relative w-16 h-16 overflow-hidden rounded-md border border-gray-200">
-                                                            <Image
-                                                                src={item.image}
-                                                                alt="img"
-                                                                fill
-                                                                className="object-cover"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="text-sm font-medium text-gray-900">{item.name}</h3>
-                                                            <p className="text-sm text-gray-500">{item.priceValue}€</p>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <label htmlFor={`gift-note-${item.id}`} className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Nota para el regalo
-                                                        </label>
-                                                        <textarea
-                                                            id={`gift-note-${item.id}`}
-                                                            value={giftNotes[item.id] || item.giftInfo?.note || ''}
-                                                            onChange={(e) => handleGiftNoteChange(item.id, e.target.value)}
-                                                            placeholder="Añade un mensaje personal para este regalo..."
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] text-sm"
-                                                            rows={3}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )} */}
                                 {/* Order Summary */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 mt-4 border border-gray-200">
-                                    <h2 className="text-xl font-bold mb-4">Resumen del pedido</h2>
+                                    <h2 className="text-xl font-bold mb-4">{t('orderSummary')}</h2>
                                     <div className="flex flex-col justify-between items-end gap-4">
                                         <div className="w-full space-y-3">
                                             <div className="flex justify-between">
-                                                <span>Subtotal</span>
+                                                <span>{t('subtotal')}</span>
                                                 <span>{calculateSubtotal().toFixed(2)} €</span>
                                             </div>
                                             <div className="flex justify-between items-center">
-                                                <span>Envío</span>
+                                                <span>{t('shipping')}</span>
                                                 {calculateRegularSubtotal() >= 60 && deliveryMethod === 'delivery' ? (
                                                     <span className="flex items-center text-green-600">
                                                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                         </svg>
-                                                        Gratis
+                                                        {t('free')}
                                                     </span>
                                                 ) : (
                                                     <span>{calculateShipping().toFixed(2)} €</span>
                                                 )}
                                             </div>
-                                            {/* <div className="flex justify-between">
-                                                <span>IVA (21%)</span>
-                                                <span>{calculateTax().toFixed(2)} €</span>
-                                            </div> */}
                                             <div className="border-t border-gray-200 pt-3 mt-3">
                                                 <div className="flex justify-between font-bold">
-                                                    <span>Total</span>
+                                                    <span>{t('total')}</span>
                                                     <span>{calculateTotal().toFixed(2)} €</span>
                                                 </div>
                                             </div>
@@ -818,7 +746,7 @@ export default function CartPage() {
                                                 disabled={isSubmitting}
                                                 className={`w-full ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#0090a8]'} text-white py-3 px-6 rounded-md transition-colors duration-300`}
                                             >
-                                                {isSubmitting ? 'Procesando...' : 'Finalizar compra'}
+                                                {isSubmitting ? t('processing') : t('checkout')}
                                             </button>
                                             {orderError && (
                                                 <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
@@ -838,120 +766,18 @@ export default function CartPage() {
                         animate={{ opacity: 1 }}
                     >
                         <ShoppingCart className='text-gray-600 w-40 h-40' />
-                        <h2 className="text-2xl text-gray-800 font-bold mb-4">Tu carrito está vacío</h2>
-                        <p className="text-gray-500 mb-8">¿No sabes qué comprar? ¡Miles de productos te esperan!</p>
+                        <h2 className="text-2xl text-gray-800 font-bold mb-4">{t('emptyTitle')}</h2>
+                        <p className="text-gray-500 mb-8">{t('emptyDescription')}</p>
                         <Link
                             href="/products"
                             className="inline-block bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#0090a8] transition-colors duration-300"
                         >
-                            Continuar comprando
+                            {t('continueShopping')}
                         </Link>
                     </motion.div>
                 )}
             </div>
 
-            {/* Redsys return modals */}
-            {/* Redsys return modals without router */}
-            {/* {(orderSuccess || typeof window !== 'undefined' && (window.location.search.includes('success=true') || window.location.search.includes('cancelled=true'))) && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000050] bg-opacity-40">
-                    <div className={`relative rounded-md shadow-lg max-w-2xl w-full mx-4 p-10 border ${typeof window !== 'undefined' && window.location.search.includes('success=true') ? 'bg-green-50 border-green-200 text-green-700' : typeof window !== 'undefined' && window.location.search.includes('cancelled=true') ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
-                        <button
-                            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-                            onClick={() => {
-                                setOrderSuccess(null);
-                                if (typeof window !== 'undefined') window.history.replaceState(null, '', '/cart');
-                            }}
-                            aria-label="Cerrar"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xl font-bold">
-                                {typeof window !== 'undefined' && window.location.search.includes('success=true') ? '¡Pago realizado con éxito!' : typeof window !== 'undefined' && window.location.search.includes('cancelled=true') ? 'Pago cancelado' : '¡Pedido realizado con éxito!'}
-                            </h3>
-                            {orderSuccess?.orderNumber && (
-                                <span className="text-sm bg-green-200 text-green-800 py-1 px-3 rounded-full">
-                                    #{orderSuccess.orderNumber}
-                                </span>
-                            )}
-                        </div>
-                        <div className="mt-3 mb-4">
-                            {typeof window !== 'undefined' && window.location.search.includes('success=true') ? (
-                                <>
-                                    <p className="mb-1">Tu pago ha sido completado correctamente.</p>
-                                    <p className="text-lg font-semibold">Gracias por tu compra.</p>
-                                </>
-                            ) : typeof window !== 'undefined' && window.location.search.includes('cancelled=true') ? (
-                                <>
-                                    <p className="mb-1">El pago ha sido cancelado o ha fallado.</p>
-                                    <p className="text-lg font-semibold">No se ha realizado ningún cargo.</p>
-                                </>
-                            ) : (
-                                <>
-                                    <p className="mb-1">Hemos enviado un correo con los detalles de tu compra a <strong>{orderSuccess?.buyerDetails?.email}</strong></p>
-                                    <p className="text-lg font-semibold">Total: {orderSuccess?.totalAmount} €</p>
-                                </>
-                            )}
-                        </div>
-                        {orderSuccess?.hasGiftItems && typeof window !== 'undefined' && !window.location.search.includes('success=true') && !window.location.search.includes('cancelled=true') && (
-                            <div className="mb-4 p-3 bg-pink-50 text-pink-700 rounded-md border border-pink-200">
-                                <p className="text-sm flex items-center font-semibold mb-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                                    </svg>
-                                    Compra de regalo realizada
-                                </p>
-                                <ul className="text-sm ml-7 list-disc">
-                                    <li>Los artículos de regalo han sido marcados como comprados</li>
-                                    <li>El propietario de la lista será notificado</li>
-                                    <li>Recuerda que estos artículos deben ser recogidos en tienda</li>
-                                </ul>
-                            </div>
-                        )}
-                        <div className="grid grid-cols-2 gap-3 mt-4">
-                            {typeof window !== 'undefined' && window.location.search.includes('success=true') && (
-                                <button
-                                    // onClick={handleDownloadInvoice}
-                                    className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    Descargar Ticket
-                                </button>
-                            )}
-                            {typeof window !== 'undefined' && window.location.search.includes('success=true') && (
-                                <button
-                                    // onClick={handleSendEmail}
-                                    className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
-                                >
-                                    <Mail />
-                                    Enviar una copia de Email
-                                </button>
-                            )}
-                        </div>
-                        <div className="mt-4 pt-3 border-t border-gray-200">
-                            <Link
-                                href="/products"
-                                className="text-[#00B0C8] hover:underline flex items-center justify-center gap-2"
-                                onClick={() => {
-                                    setOrderSuccess(null);
-                                    if (typeof window !== 'undefined') window.history.replaceState(null, '', '/cart');
-                                }}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                </svg>
-                                Continuar comprando
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            )} */}
-            {/* <UserAuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} /> */}
-            {/* ModalTPV for payment confirmation */}
             <ModalTPV
                 isOpen={showTPVModal}
                 onClose={() => setShowTPVModal(false)}

@@ -8,10 +8,13 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
+import { useTranslations } from 'next-intl';
+
 export default function BirthListsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [bannerImage, setBannerImage] = useState(null);
     const router = useRouter();
+    const t = useTranslations('BirthListsPage');
 
     useEffect(() => {
         const fetchBanner = async () => {
@@ -32,7 +35,7 @@ export default function BirthListsPage() {
     const handleSearch = (e) => {
         e.preventDefault();
         if (!searchTerm) {
-            toast.error('Por favor ingresa un enlace de lista de nacimiento');
+            toast.error(t('searchErrorEmpty'));
             return;
         }
 
@@ -49,14 +52,14 @@ export default function BirthListsPage() {
             }
 
             if (!id) {
-                toast.error('Enlace de lista de nacimiento inválido');
+                toast.error(t('searchErrorInvalid'));
                 return;
             }
 
             // Navigate to the birth list page
             router.push(`/listas-de-nacimiento/${id}`);
         } catch (error) {
-            toast.error('Enlace de lista de nacimiento inválido');
+            toast.error(t('searchErrorInvalid'));
         }
     };
 
@@ -66,7 +69,7 @@ export default function BirthListsPage() {
                 <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
                     <Image
                         src={bannerImage}
-                        alt="banner"
+                        alt={t('bannerAlt')}
                         fill
                         className="object-cover"
                         priority
@@ -74,12 +77,12 @@ export default function BirthListsPage() {
                     {/* Overlay for contrast */}
                     <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
                     <div className="absolute inset-0 flex items-center justify-center z-20">
-                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Listas de Nacimiento</h1>
+                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">{t('title')}</h1>
                     </div>
                 </div>
             ) : (
                 <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white">
-                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">Listas de Nacimiento</h1>
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">{t('title')}</h1>
                 </div>
             )}
             {/* Search bar below the banner */}
@@ -88,7 +91,7 @@ export default function BirthListsPage() {
                     <div className="w-full flex items-center bg-white bg-opacity-90 rounded-full shadow-md px-4 py-3 mb-2 border border-gray-200">
                         <input
                             type="text"
-                            placeholder="Pega aquí el enlace de una lista de nacimiento"
+                            placeholder={t('searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="flex-1 bg-transparent border-none outline-none text-lg placeholder-gray-400 px-2"
@@ -103,7 +106,7 @@ export default function BirthListsPage() {
                         </button>
                     </div>
                     <p className="text-gray-700 text-sm text-center drop-shadow-sm">
-                        Ingresa el enlace completo o el ID de la lista de nacimiento para acceder a ella
+                        {t('searchHelp')}
                     </p>
                 </form>
             </div>
@@ -117,14 +120,14 @@ export default function BirthListsPage() {
                     >
                         <div className="flex flex-col items-start justify-start space-y-4">
                             <div>
-                                <h2 className="text-2xl font-bold mb-2">¿Esperando un bebé?</h2>
-                                <p className="text-white/90">Crea tu propia lista de nacimiento y compártela con tus seres queridos. Es fácil, rápido y te ayudará a organizar todo lo que necesitas para la llegada de tu bebé.</p>
+                                <h2 className="text-2xl font-bold mb-2">{t('expectingTitle')}</h2>
+                                <p className="text-white/90">{t('expectingDesc')}</p>
                             </div>
                             <button
                                 onClick={() => router.push('/dashboard/listas')}
                                 className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
                             >
-                                Crear Lista
+                                {t('createListBtn')}
                             </button>
                         </div>
                     </motion.div>
@@ -136,14 +139,14 @@ export default function BirthListsPage() {
                     >
                         <div className="flex flex-col items-start justify-start space-y-4">
                             <div>
-                                <h2 className="text-2xl font-bold mb-2">¿No sabes qué comprar?</h2>
-                                <p className="text-white/90">Mira los productos esenciales y más comprados para un primer comprador en nuestra página de recomendaciones. Encuentra inspiración y asegúrate de elegir lo mejor para el bebé.</p>
+                                <h2 className="text-2xl font-bold mb-2">{t('recommendTitle')}</h2>
+                                <p className="text-white/90">{t('recommendDesc')}</p>
                             </div>
                             <Link
                                 href="/recomendations"
                                 className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
                             >
-                                Ver Recomendaciones
+                                {t('recommendBtn')}
                             </Link>
                         </div>
                     </motion.div>
@@ -156,7 +159,7 @@ export default function BirthListsPage() {
                     transition={{ delay: 0.6 }}
                 >
                     <div className="container mx-auto px-2 md:px-4">
-                        <h2 className="text-2xl font-bold text-center mb-8 md:mb-12">¿Cómo Funciona?</h2>
+                        <h2 className="text-2xl font-bold text-center mb-8 md:mb-12">{t('howWorksTitle')}</h2>
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-8 md:space-y-0 overflow-x-auto">
                             <div className="flex-1 min-w-[220px] text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
@@ -164,8 +167,8 @@ export default function BirthListsPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">Iniciar Sesión</h3>
-                                <p className="text-gray-600">Regístrate o inicia sesión para empezar tu lista</p>
+                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep1Title')}</h3>
+                                <p className="text-gray-600">{t('howWorksStep1Desc')}</p>
                             </div>
                             <div className="flex-1 min-w-[220px] text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
@@ -173,8 +176,8 @@ export default function BirthListsPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">Crea tu Lista</h3>
-                                <p className="text-gray-600">Añade los productos que necesitas para el bebé</p>
+                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep2Title')}</h3>
+                                <p className="text-gray-600">{t('howWorksStep2Desc')}</p>
                             </div>
                             <div className="flex-1 min-w-[220px] text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
@@ -182,8 +185,8 @@ export default function BirthListsPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">Comparte</h3>
-                                <p className="text-gray-600">Envía tu lista a familiares y amigos</p>
+                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep3Title')}</h3>
+                                <p className="text-gray-600">{t('howWorksStep3Desc')}</p>
                             </div>
                             <div className="flex-1 min-w-[220px] text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
@@ -191,8 +194,8 @@ export default function BirthListsPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8 4-8-4V5l8 4 8-4v2zM4 13.8V7.2l8 4 8-4v6.6" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">Recibe los Regalos</h3>
-                                <p className="text-gray-600">Gestiona tu lista y recibe notificaciones de las compras</p>
+                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep4Title')}</h3>
+                                <p className="text-gray-600">{t('howWorksStep4Desc')}</p>
                             </div>
                         </div>
                     </div>
