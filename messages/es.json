@@ -306,5 +306,28 @@
     "registerErrorGeneric": "Error en el registro. Por favor intenta nuevamente.",
     "registerSuccess": "¡Registro exitoso! Iniciando sesión...",
     "registerLoginError": "Registro exitoso pero error al iniciar sesión. Por favor inicia sesión manualmente."
+  },
+  "BannerTab": {
+    "uploadTitle": "Subir imagen",
+    "uploadError": "Error al subir la imagen",
+    "noImageSelected": "No se ha seleccionado ninguna imagen",
+    "saveError": "No se pudo guardar la URL en la base de datos",
+    "saveSuccess": "Imagen guardada correctamente",
+    "updateBannerError": "No se pudo actualizar el banner",
+    "bannerUpdated": "Portada actualizada",
+    "confirmDelete": "¿Quieres eliminar esta imagen?",
+    "deleteError": "No se pudo eliminar la imagen",
+    "deleteSuccess": "Imagen eliminada",
+    "uploading": "Subiendo...",
+    "selectImage": "Seleccionar imagen",
+    "selectExisting": "Seleccionar existente",
+    "saving": "Guardando...",
+    "saveImage": "Guardar imagen",
+    "uploadedImages": "Imágenes subidas:",
+    "bannerActive": "Banner activo",
+    "setAsBanner": "Establecer como banner",
+    "removeBanner": "Quitar banner",
+    "view": "Ver",
+    "delete": "Eliminar"
   }
 }

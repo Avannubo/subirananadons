@@ -1,4 +1,27 @@
 {
+  "BannerTab": {
+    "uploadTitle": "Pujar imatge",
+    "uploadError": "Error en pujar la imatge",
+    "noImageSelected": "No s'ha seleccionat cap imatge",
+    "saveError": "No s'ha pogut desar la URL a la base de dades",
+    "saveSuccess": "Imatge desada correctament",
+    "updateBannerError": "No s'ha pogut actualitzar el banner",
+    "bannerUpdated": "Portada actualitzada",
+    "confirmDelete": "Vols eliminar aquesta imatge?",
+    "deleteError": "No s'ha pogut eliminar la imatge",
+    "deleteSuccess": "Imatge eliminada",
+    "uploading": "Pujant...",
+    "selectImage": "Selecciona imatge",
+    "selectExisting": "Selecciona existent",
+    "saving": "Desant...",
+    "saveImage": "Desar imatge",
+    "uploadedImages": "Imatges pujades:",
+    "bannerActive": "Banner actiu",
+    "setAsBanner": "Establir com a banner",
+    "removeBanner": "Treure banner",
+    "view": "Veure",
+    "delete": "Eliminar"
+  },
   "Menu": {
     "products": "Productes",
     "brands": "Marques",
