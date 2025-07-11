@@ -1,4 +1,12 @@
 {
+  "Menu": {
+    "products": "Productos",
+    "brands": "Marcas",
+    "birthlists": "Listas de nacimiento",
+    "contact": "Contacto",
+    "search": "Buscar",
+    "cart": "Carrito"
+  },
   "ProductPage": {
     "errorTitle": "Error",
     "errorNotFound": "Producto no encontrado",

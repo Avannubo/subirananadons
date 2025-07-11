@@ -1,4 +1,12 @@
 {
+  "Menu": {
+    "products": "Productes",
+    "brands": "Marques",
+    "birthlists": "Llistes de naixement",
+    "contact": "Contacte",
+    "search": "Cercar",
+    "cart": "Cistella"
+  },
   "ProductPage": {
     "errorTitle": "Error",
     "errorNotFound": "Producte no trobat",

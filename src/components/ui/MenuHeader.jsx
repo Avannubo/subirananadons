@@ -7,7 +7,9 @@ import Link from 'next/link';
 import { InstagramIcon, UserRound, Search, ShoppingBag, TagIcon, Gift, Mail } from "lucide-react";
 import useShopSocials from "@/lib/useShopSocials";
 import useShopParameter from "@/lib/useShopParameter";
+import { useTranslations } from 'next-intl';
 export default function Menu() {
+    const t = useTranslations('Menu');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [menuVisible, setMenuVisible] = useState(false);
     const [openSubmenus, setOpenSubmenus] = useState({});
@@ -35,32 +37,32 @@ export default function Menu() {
         logo: "/assets/logo-header.svg",
         items: [
             {
-                label: "Productos",
+                label: t('products'),
                 href: "/products",
                 icon: ShoppingBag
             },
             {
-                label: "Marcas",
+                label: t('brands'),
                 href: "/brands",
                 icon: TagIcon
             },
             {
-                label: "Listas de nacimientos",
+                label: t('birthlists'),
                 href: "/listas-de-nacimiento",
                 icon: Gift
             },
             {
-                label: "Contacto",
+                label: t('contact'),
                 href: "/contact",
                 icon: Mail
             },
             {
-                label: "Buscar",
+                label: t('search'),
                 href: "/search",
                 icon: Search
             },
             {
-                label: "Carrito",
+                label: t('cart'),
                 href: "/cart",
                 icon: ShoppingBag
             }
