@@ -184,9 +184,26 @@
     "backToListsBtn": "Volver a las listas",
     "listNotFoundTitle": "Lista no encontrada",
     "listNotFoundDesc": "No se pudo encontrar la lista de nacimiento. Comprueba el enlace o el ID.",
-    "addToCartBtn": "Reservar como regalo",
+    "addToCartBtn": "afegir a la cistella",
     "productPurchased": "Comprado",
     "productReserved": "Reservado",
     "noProductsFound": "No se han encontrado productos en esta categoría."
+  },
+  "BrandsPage": {
+    "title": "Marcas",
+    "bannerAlt": "Banner de marcas",
+    "sidebarTitle": "Marcas",
+    "allBrandsOption": "Todas las marcas",
+    "sortLabel": "Ordenar por:",
+    "sortDefault": "Por defecto",
+    "sortPriceAsc": "Precio ↑",
+    "sortPriceDesc": "Precio ↓",
+    "sortNameAsc": "Nombre A-Z",
+    "sortNewest": "Más nuevos",
+    "showingProducts": "Mostrando {count} productos de {total}",
+    "showingForBrand": "de {brand}",
+    "noProductsForBrand": "No hay productos disponibles para esta marca.",
+    "prevPageAria": "Página anterior",
+    "nextPageAria": "Página siguiente"
   }
 }

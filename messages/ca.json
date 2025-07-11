@@ -183,9 +183,26 @@
     "backToListsBtn": "Tornar a les llistes",
     "listNotFoundTitle": "Llista no trobada",
     "listNotFoundDesc": "No s'ha pogut trobar la llista de naixement. Comprova l'enllaç o l'ID.",
-    "addToCartBtn": "Reservar com a regal",
+    "addToCartBtn": "Co regal",
     "productPurchased": "Comprat",
     "productReserved": "Reservat",
     "noProductsFound": "No s'han trobat productes en aquesta categoria."
+  },
+  "BrandsPage": {
+    "title": "Marques",
+    "bannerAlt": "Banner de marques",
+    "sidebarTitle": "Marques",
+    "allBrandsOption": "Totes les marques",
+    "sortLabel": "Ordenar per:",
+    "sortDefault": "Per defecte",
+    "sortPriceAsc": "Preu ↑",
+    "sortPriceDesc": "Preu ↓",
+    "sortNameAsc": "Nom A-Z",
+    "sortNewest": "Més nous",
+    "showingProducts": "Mostrant {count} productes de {total}",
+    "showingForBrand": "de {brand}",
+    "noProductsForBrand": "No hi ha productes disponibles per aquesta marca.",
+    "prevPageAria": "Pàgina anterior",
+    "nextPageAria": "Pàgina següent"
   }
 }

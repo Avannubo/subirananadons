@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion } from 'framer-motion';
 import ProductCard from "@/components/products/product-card";
 import ProductQuickView from "@/components/products/product-quick-view";
+import { useTranslations } from 'next-intl';
 // Helper function to parse price
 const parsePrice = (price) => {
     if (typeof price === 'string') {
@@ -25,11 +26,11 @@ export default function BrandsPage() {
     const [loading, setLoading] = useState(true);
     const [brandsLoading, setBrandsLoading] = useState(true);
     const [bannerImage, setBannerImage] = useState(null);
-    // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const productsPerPage = 12;
+    const t = useTranslations('BrandsPage');
     // Fetch brands
     useEffect(() => {
         const fetchBrands = async () => {
@@ -266,7 +267,7 @@ export default function BrandsPage() {
                 <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
                     <Image
                         src={bannerImage}
-                        alt="banner"
+                        alt={t('bannerAlt')}
                         fill
                         className="object-cover"
                         priority
@@ -274,12 +275,12 @@ export default function BrandsPage() {
                     {/* Overlay for contrast */}
                     <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
                     <div className="absolute inset-0 flex items-center justify-center z-20">
-                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Marcas</h1>
+                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">{t('title')}</h1>
                     </div>
                 </div>
             ) : (
                 <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white">
-                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">Marcas</h1>
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">{t('title')}</h1>
                 </div>
             )}
             <div className="container mx-auto px-2 sm:px-4 py-4 ">
@@ -292,7 +293,7 @@ export default function BrandsPage() {
                         transition={{ delay: 0.4, duration: 0.5 }}
                     >
                         <div className="sticky top-24 bg-white">
-                            <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">Marcas</h2>
+                            <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">{t('sidebarTitle')}</h2>
                             <div className="hidden lg:block max-h-[calc(100vh-650px)] lg:max-h-[65vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                 <ul className="space-y-1">
                                     {/* All Products option - always show this */}
@@ -317,7 +318,7 @@ export default function BrandsPage() {
                                                         <span className="text-gray-500 text-xs">ALL</span>
                                                     </div>
                                                 </div>
-                                                <span className="hover:text-[#00B0C8] transition-colors active:font-bold">Todas las marcas</span>
+                                                <span className="hover:text-[#00B0C8] transition-colors active:font-bold">{t('allBrandsOption')}</span>
                                             </button>
                                         </motion.li>
                                     ) : (
@@ -377,7 +378,7 @@ export default function BrandsPage() {
                                     onChange={e => handleBrandSelect(e.target.value)}
                                     disabled={brandsLoading}
                                 >
-                                    <option value="all">Todas las marcas</option>
+                                    <option value="all">{t('allBrandsOption')}</option>
                                     {brands.map((brand) => (
                                         <option key={brand._id} value={brand.name}>{brand.name}</option>
                                     ))}
@@ -425,17 +426,17 @@ export default function BrandsPage() {
                                     </div>
                                 ) : (
                                     <>
-                                        <span className="mr-2 text-sm text-gray-500">Ordenar por:</span>
+                                        <span className="mr-2 text-sm text-gray-500">{t('sortLabel')}</span>
                                         <select
                                             className="border rounded-md py-1 px-2 text-sm"
                                             onChange={handleSortChange}
                                             value={sortBy}
                                         >
-                                            <option value="default">Por defecto</option>
-                                            <option value="price-asc">Precio ↑</option>
-                                            <option value="price-desc">Precio ↓</option>
-                                            <option value="name-asc">Nombre A-Z</option>
-                                            <option value="newest">Más nuevos</option>
+                                            <option value="default">{t('sortDefault')}</option>
+                                            <option value="price-asc">{t('sortPriceAsc')}</option>
+                                            <option value="price-desc">{t('sortPriceDesc')}</option>
+                                            <option value="name-asc">{t('sortNameAsc')}</option>
+                                            <option value="newest">{t('sortNewest')}</option>
                                         </select>
                                     </>
                                 )}
@@ -446,8 +447,8 @@ export default function BrandsPage() {
                             <div className="h-5 w-40 bg-gray-200 rounded animate-pulse mb-4"></div>
                         ) : (
                             <p className="text-sm text-gray-500 mb-4 p-2">
-                                Mostrando {filteredProducts.length} productos de {totalItems}
-                                {selectedBrand !== 'all' ? ` de ${selectedBrand}` : ''}
+                                {t('showingProducts', { count: filteredProducts.length, total: totalItems })}
+                                {selectedBrand !== 'all' ? ` ${t('showingForBrand', { brand: selectedBrand })}` : ''}
                             </p>
                         )}
                         {/* Products Grid/List - Show skeleton or content */}
@@ -470,7 +471,7 @@ export default function BrandsPage() {
                                 {filteredProducts.length === 0 && (
                                     <div className="py-12 text-center">
                                         <p className="text-gray-500">
-                                            No hay productos disponibles para esta marca.
+                                            {t('noProductsForBrand')}
                                         </p>
                                     </div>
                                 )}
@@ -511,7 +512,7 @@ export default function BrandsPage() {
                                         onClick={handlePrevPage}
                                         disabled={currentPage === 1}
                                         className={`p-2 ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'}`}
-                                        aria-label="Previous page"
+                                        aria-label={t('prevPageAria')}
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -537,7 +538,7 @@ export default function BrandsPage() {
                                         onClick={handleNextPage}
                                         disabled={currentPage === totalPages}
                                         className={`p-2 ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'}`}
-                                        aria-label="Next page"
+                                        aria-label={t('nextPageAria')}
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
