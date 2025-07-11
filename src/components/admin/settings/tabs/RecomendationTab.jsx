@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 export default function ProductosTab() {
     const [groups, setGroups] = useState([]);
@@ -57,7 +58,11 @@ export default function ProductosTab() {
 
     function handleAddRecommendation(e) {
         e.preventDefault();
-        if (!form.name || !form.category) return;
+        if (!form.category) {
+            toast.error('Has de seleccionar una categoria');
+            return;
+        }
+        if (!form.name) return;
         if (editIdx !== null) {
             // Edit mode
             setRecommendations(prev => prev.map((r, idx) => idx === editIdx ? {
@@ -134,12 +139,37 @@ export default function ProductosTab() {
         }
     }
 
+    // Delete group handler
+    async function handleDeleteGroup(idx) {
+        if (!window.confirm('Segur que vols eliminar aquest grup?')) return;
+        const group = groups[idx];
+        if (!group || !group._id) return;
+        setLoading(true);
+        setError('');
+        setSuccess('');
+        try {
+            const res = await fetch('/api/admin/recommendations', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: group._id })
+            });
+            if (!res.ok) throw new Error();
+            setSuccess('Grup eliminat');
+            fetchGroups();
+        } catch (e) {
+            setError('Error al eliminar el grup');
+        } finally {
+            setLoading(false);
+            setTimeout(() => setSuccess(''), 1500);
+        }
+    }
+
     return (
         <div className="p-4 bg-gray-50 rounded-lg">
-            <h2 className="text-xl font-bold mb-4">Grupos de Recomendaciones</h2>
+            <h2 className="text-xl font-bold mb-4">Grups de Recomanacions</h2>
             <form className="mb-6 flex flex-col gap-2" onSubmit={handleSaveGroup}>
                 <div className='flex-1 mb-2'>
-                    <label className="block text-sm font-medium">Título del Grupo</label>
+                    <label className="block text-sm font-medium">Títol del Grup</label>
                     <input
                         className="border border-gray-300 rounded px-2 py-1 w-full"
                         value={form.groupTitle}
@@ -149,7 +179,7 @@ export default function ProductosTab() {
                 </div>
                 <div className='flex flex-row gap-2 space-x-2 items-end'>
                     <div className='flex-1'>
-                        <label className="block text-sm font-medium">Nombre de Recomendación</label>
+                        <label className="block text-sm font-medium">Nom de Recomanació</label>
                         <input
                             className="border border-gray-300 rounded px-2 py-1 w-full"
                             value={form.name}
@@ -157,13 +187,13 @@ export default function ProductosTab() {
                         />
                     </div>
                     <div className='flex-1'>
-                        <label className="block text-sm font-medium">Categoría</label>
+                        <label className="block text-sm font-medium">Categoria</label>
                         <select
                             className="border border-gray-300 rounded px-2 py-1 w-full"
                             value={form.category}
                             onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
                         >
-                            <option value="">Selecciona una categoría</option>
+                            <option value="">Selecciona una categoria</option>
                             {categories.map(cat => (
                                 <option key={cat._id} value={cat._id}>{cat.name}</option>
                             ))}
@@ -175,13 +205,13 @@ export default function ProductosTab() {
                         type="button"
                         disabled={!form.name || !form.category}
                     >
-                        Añadir
+                        Afegir
                     </button>
                 </div>
-                {/* List of recommendations to be added to the group */}
+                {/* Llista de recomanacions a afegir al grup */}
                 {recommendations.length > 0 && (
                     <div className="mt-4">
-                        <h4 className="font-semibold mb-2">Recomendaciones en este grupo:</h4>
+                        <h4 className="font-semibold mb-2">Recomanacions en aquest grup:</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
                             <ul className="list-disc ml-6">
                                 {recommendations.filter((_, idx) => idx % 2 === 0).map((r, idx) => {
@@ -197,7 +227,7 @@ export default function ProductosTab() {
                                                 className="ml-2 text-red-500 hover:text-red-700 text-xs border border-red-200 rounded px-1"
                                                 onClick={() => handleRemoveRecommendation(realIdx)}
                                             >
-                                                Quitar
+                                                Treure
                                             </button>
                                         </li>
                                     );
@@ -217,7 +247,7 @@ export default function ProductosTab() {
                                                 className="ml-2 text-red-500 hover:text-red-700 text-xs border border-red-200 rounded px-1"
                                                 onClick={() => handleRemoveRecommendation(realIdx)}
                                             >
-                                                Quitar
+                                                Treure
                                             </button>
                                         </li>
                                     );
@@ -225,7 +255,7 @@ export default function ProductosTab() {
                             </ul>
                         </div>
                         {editIdx !== null && (
-                            <div className="text-xs text-blue-600 mt-2">Editando recomendación, guarda o cancela para continuar.</div>
+                            <div className="text-xs text-blue-600 mt-2">Editant recomanació, desa o cancel·la per continuar.</div>
                         )}
                     </div>
                 )}
@@ -234,26 +264,26 @@ export default function ProductosTab() {
                     className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#0090a8] mt-2 md:mt-0"
                     disabled={loading || !form.groupTitle || recommendations.length === 0}
                 >
-                    {editGroupIdx !== null ? 'Actualizar Grupo' : 'Crear Grupo'}
+                    {editGroupIdx !== null ? 'Actualitzar Grup' : 'Crear Grup'}
                 </button>
                 {editGroupIdx !== null && (
                     <button
                         type="button"
-                        className="ml-2 bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 mt-2 md:mt-0"
+                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 mt-2 md:mt-0"
                         onClick={() => {
                             setEditGroupIdx(null);
                             setForm({ groupTitle: '', name: '', category: '' });
                             setRecommendations([]);
                         }}
                     >
-                        Cancelar Edición
+                        Cancel·lar Edició
                     </button>
                 )}
             </form>
             {error && <div className="text-red-500 mb-2">{error}</div>}
             {success && <div className="text-green-600 mb-2">{success}</div>}
             <div>
-                <h3 className="text-lg font-semibold mb-2">Grupos Guardados</h3>
+                <h3 className="text-lg font-semibold mb-2">Grups desats</h3>
                 {loading ? (
                     <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {Array.from({ length: 6 }).map((_, idx) => (
@@ -280,7 +310,14 @@ export default function ProductosTab() {
                                         >
                                             Editar
                                         </button>
+                                        <button
+                                            className="text-xs text-red-500 border border-red-200 rounded px-2 py-1 hover:bg-red-50"
+                                            onClick={() => handleDeleteGroup(idx)}
+                                        >
+                                            Eliminar
+                                        </button>
                                     </div>
+
                                     {container.groups && container.groups.length > 0 && (
                                         <ul className="space-y-2 mt-2">
                                             {container.groups.map((g, gidx) => (
