@@ -160,7 +160,7 @@ export default function CategoriesTree() {
     };
     const saveCategory = async (categoryData) => {
         try {
-            // Defensive: always send name as {es, ca}
+            // Defensiu: sempre envia el nom com {es, ca}
             let migratedName = categoryData.name;
             if (typeof migratedName === 'string') {
                 migratedName = { es: migratedName, ca: '' };
@@ -188,50 +188,50 @@ export default function CategoriesTree() {
             });
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || 'Error saving category');
+                throw new Error(error.error || 'Error desant la categoria');
             }
             const savedCategory = await response.json();
-            toast.success(isEditing ? 'Category updated' : 'Category created');
+            toast.success(isEditing ? 'Categoria actualitzada' : 'Categoria creada');
             setShowAddModal(false);
             setShowEditModal(false);
-            // Auto-expand the parent category when a subcategory is added
+            // Expandeix automàticament la categoria pare quan s'afegeix una subcategoria
             if (!isEditing && submissionData.parent) {
                 setExpandedCategories(prev => ({
                     ...prev,
                     [submissionData.parent]: true
                 }));
             }
-            // Set the last modified category ID for scrolling
+            // Marca la darrera categoria modificada per fer scroll
             setLastModifiedCategoryId(savedCategory._id || submissionData._id);
-            // Fetch the full tree again to update the view
+            // Torna a carregar l'arbre complet per actualitzar la vista
             fetchCategories();
         } catch (error) {
             console.error('Error saving category:', error);
-            toast.error(error.message || 'Error saving category');
+            toast.error(error.message || 'Error desant la categoria');
         }
     };
     const deleteCategory = async () => {
         if (!selectedCategory) return;
         try {
-            // Store the parent ID before deleting
+            // Desa l'ID del pare abans d'eliminar
             const parentId = selectedCategory.parent;
             const response = await fetch(`/api/categories/${selectedCategory._id}`, {
                 method: 'DELETE',
             });
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || 'Error deleting category');
+                throw new Error(error.error || 'Error eliminant la categoria');
             }
-            toast.success('Category deleted');
+            toast.success('Categoria eliminada');
             setShowDeleteModal(false);
-            // Set the parent category as the last modified for scrolling
+            // Marca la categoria pare com a darrera modificada per fer scroll
             if (parentId) {
                 setLastModifiedCategoryId(parentId);
             }
-            fetchCategories(); // Refresh categories
+            fetchCategories(); // Refresca les categories
         } catch (error) {
             console.error('Error deleting category:', error);
-            toast.error(error.message || 'Error deleting category');
+            toast.error(error.message || 'Error eliminant la categoria');
         }
     };
     // Recursive component to render a category and its children
@@ -272,28 +272,28 @@ export default function CategoriesTree() {
                     <span className="flex-grow font-medium text-lg cursor-pointer">
                         {displayName}
                         <span className="ml-2 text-xs text-gray-400">
-                            {level > 0 ? `(Nivel ${level + 1})` : ''}
+                            {level > 0 ? `(Nivell ${level + 1})` : ''}
                         </span>
                     </span>
                     <div className="flex items-center space-x-1 invisible group-hover:visible transition-all absolute right-2">
                         <button
                             className="p-1 text-[#00abc2] hover:text-[#00B0C8] rounded"
                             onClick={(e) => handleAddCategory(category, e)}
-                            title="Añadir subcategoría"
+                            title="Afegir subcategoria"
                         >
                             <FiFolderPlus size={20} />
                         </button>
                         <button
                             className="p-1 text-yellow-600 hover:text-yellow-700 rounded"
                             onClick={(e) => handleEditCategory(category, e)}
-                            title="Editar categoría"
+                            title="Editar categoria"
                         >
                             <FiEdit size={20} />
                         </button>
                         <button
                             className="p-1 text-red-600 hover:text-red-700 rounded"
                             onClick={(e) => handleDeleteCategory(category, e)}
-                            title="Eliminar categoría"
+                            title="Eliminar categoria"
                         >
                             <FiTrash2 size={20} />
                         </button>
@@ -317,29 +317,29 @@ export default function CategoriesTree() {
         <div className="categories-tree bg-white rounded-lg shadow">
             {/* Header */}
             <div className="flex justify-between items-center p-4 border-b border-gray-300">
-                <h3 className="text-lg font-medium">Categorías</h3>
+                <h3 className="text-lg font-medium">Categories</h3>
                 <div className="flex items-center space-x-2">
                     <div className="flex border border-gray-300 rounded overflow-hidden">
                         <button
                             onClick={() => toggleAllCategories(true)}
                             className="flex items-center text-xs p-1 text-gray-700 bg-gray-100 hover:bg-gray-200 border-r border-gray-300"
-                            title="Expandir todas"
+                            title="Expandeix totes"
                         >
-                            <FiPlusSquare size={14} className="mr-1" /> Expandir
+                            <FiPlusSquare size={14} className="mr-1" /> Expandeix
                         </button>
                         <button
                             onClick={() => toggleAllCategories(false)}
                             className="flex items-center text-xs p-1 text-gray-700 bg-gray-100 hover:bg-gray-200"
-                            title="Colapsar todas"
+                            title="Col·lapsa totes"
                         >
-                            <FiMinusSquare size={14} className="mr-1" /> Colapsar
+                            <FiMinusSquare size={14} className="mr-1" /> Col·lapsa
                         </button>
                     </div>
                     <button
                         onClick={() => handleAddCategory(null)}
                         className="flex items-center text-sm px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B]"
                     >
-                        <FiPlus className="mr-1" /> Añadir categoría
+                        <FiPlus className="mr-1" /> Afegir categoria
                     </button>
                 </div>
             </div>
@@ -351,7 +351,7 @@ export default function CategoriesTree() {
                     </div>
                 ) : categories.length === 0 ? (
                     <div className="text-center text-gray-500 my-4">
-                        No hay categorías. Crea una nueva categoría para empezar.
+                        No hi ha categories. Crea una nova categoria per començar.
                     </div>
                 ) : (
                     <div className="space-y-1">
@@ -392,10 +392,10 @@ export default function CategoriesTree() {
                     isOpen={showDeleteModal}
                     onClose={() => setShowDeleteModal(false)}
                     onConfirm={deleteCategory}
-                    title="Eliminar Categoría"
-                    message={`¿Estás seguro de que deseas eliminar la categoría "${getCategoryDisplayName(selectedCategory)}"? Esta acción no se puede deshacer.`}
-                    confirmText="Eliminar"
-                    cancelText="Cancelar"
+                    title="Eliminar Categoria"
+                    message={`Estàs segur que vols eliminar la categoria "${getCategoryDisplayName(selectedCategory)}"? Aquesta acció no es pot desfer.`}
+                    confirmText="Elimina"
+                    cancelText="Cancel·la"
                 />
             )}
         </div>
