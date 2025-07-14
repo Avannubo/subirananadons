@@ -87,7 +87,7 @@ export default function BrandsTable() {
             }
         } catch (error) {
             console.error('Error fetching brands:', error);
-            toast.error('Error loading brands');
+            toast.error('Error carregant les marques');
             // Initialize with empty state to prevent UI errors
             setBrands([]);
             setAllBrands([]);
@@ -209,7 +209,7 @@ export default function BrandsTable() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al eliminar la marca');
+                throw new Error(errorData.message || 'Error en eliminar la marca');
             }
 
             // Update the brands list by removing the deleted brand
@@ -224,10 +224,10 @@ export default function BrandsTable() {
             }
 
             setShowConfirmModal(false);
-            toast.success('Marca eliminada correctamente');
+            toast.success('Marca eliminada correctament');
         } catch (error) {
             console.error('Error deleting brand:', error);
-            toast.error(error.message || 'Error al eliminar la marca');
+            toast.error(error.message || 'Error en eliminar la marca');
         } finally {
             setIsLoading(false);
         }
@@ -276,11 +276,11 @@ export default function BrandsTable() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Operation failed');
+                throw new Error(errorData.error || 'Operació fallida');
             }
 
             const savedBrand = await response.json();
-            toast.success(isEditing ? 'Marca actualizada correctamente' : 'Marca añadida correctamente');
+            toast.success(isEditing ? 'Marca actualitzada correctament' : 'Marca afegida correctament');
             setShowModal(false);
 
             if (useClientPagination) {
@@ -305,7 +305,7 @@ export default function BrandsTable() {
             }
         } catch (error) {
             console.error('Error saving brand:', error);
-            toast.error(error.message || 'Error al guardar la marca');
+            toast.error(error.message || 'Error en desar la marca');
         }
     };
 
@@ -313,22 +313,22 @@ export default function BrandsTable() {
         <div className="bg-white rounded-lg shadow">
             {/* Header with title and actions */}
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-lg font-semibold">Marcas</h2>
+                <h2 className="text-lg font-semibold">Marques</h2>
                 <div className="flex space-x-2">
                     <button
                         onClick={handleAddBrand}
                         className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] flex items-center"
                     >
                         <FiPlus className="mr-1" />
-                        Añadir marca
+                        Afegir marca
                     </button>
                     {/* <button className="flex items-center px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
                         <FiUpload className="mr-2" />
-                        Importar
+                        Importa
                     </button>
                     <button className="flex items-center px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
                         <FiDownload className="mr-2" />
-                        Exportar
+                        Exporta
                     </button> */}
                 </div>
             </div>
@@ -340,7 +340,7 @@ export default function BrandsTable() {
                         <FiSearch className="absolute left-3 top-3 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Buscar marcas (por ID o nombre)"
+                            placeholder="Cerca marques"
                             className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -354,11 +354,11 @@ export default function BrandsTable() {
                                 onChange={() => setShowEnabledOnly(!showEnabledOnly)}
                                 className="rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
                             />
-                            <span>Mostrar solo activas</span>
+                            <span>Mostrar només actives</span>
                         </label>
                         {/* <button className="flex items-center px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
                             <FiFilter className="mr-2" />
-                            Filtros avanzados
+                            Filtres avançats
                         </button> */}
                     </div>
                 </div>
@@ -372,11 +372,11 @@ export default function BrandsTable() {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logotipo</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enlace</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logotip</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enllaç</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estat</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -414,11 +414,11 @@ export default function BrandsTable() {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logotipo</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enlace</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logotip</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enllaç</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estat</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -445,7 +445,7 @@ export default function BrandsTable() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${brand.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'}`}>
-                                                {brand.enabled ? 'Activado' : 'Desactivado'}
+                                                {brand.enabled ? 'Activa' : 'Inactiva'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -453,21 +453,21 @@ export default function BrandsTable() {
                                                 <button
                                                     className="text-[#00B0C8] hover:text-[#008A9B]"
                                                     onClick={() => handleViewBrand(brand)}
-                                                    title="Ver detalles"
+                                                    title="Veure detalls"
                                                 >
                                                     <FiEye size={20} />
                                                 </button>
                                                 <button
                                                     className="text-yellow-600 hover:text-yellow-900"
                                                     onClick={() => handleEditBrand(brand)}
-                                                    title="Editar marca"
+                                                    title="Edita marca"
                                                 >
                                                     <FiEdit size={20} />
                                                 </button>
                                                 <button
                                                     className="text-red-600 hover:text-red-900"
                                                     onClick={() => handleDeleteConfirm(brand)}
-                                                    title="Eliminar marca"
+                                                    title="Elimina marca"
                                                 >
                                                     <FiTrash2 size={20} />
                                                 </button>
@@ -482,8 +482,8 @@ export default function BrandsTable() {
                                             <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            <p className="text-gray-600 text-lg">No se encontraron marcas</p>
-                                            <p className="text-gray-500 text-sm mt-1">Añade una nueva marca o cambia los filtros</p>
+                                            <p className="text-gray-600 text-lg">No s'han trobat marques</p>
+                                            <p className="text-gray-500 text-sm mt-1">Afegeix una nova marca o canvia els filtres</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -503,7 +503,7 @@ export default function BrandsTable() {
                         itemsPerPage={pagination.limit}
                         onPageChange={handlePageChange}
                         onItemsPerPageChange={handleLimitChange}
-                        showingText="Mostrando {} de {} marcas"
+                        showingText="Mostrant {} de {} marques"
                     />
                 </div>
             )}
@@ -534,10 +534,10 @@ export default function BrandsTable() {
                     isOpen={showConfirmModal}
                     onClose={() => setShowConfirmModal(false)}
                     onConfirm={() => handleDeleteBrand(selectedBrand._id || selectedBrand.id)}
-                    title="Eliminar Marca"
-                    message={`¿Estás seguro de que deseas eliminar la marca "${selectedBrand.name}"? Esta acción no se puede deshacer.`}
-                    confirmText="Eliminar"
-                    cancelText="Cancelar"
+                    title="Elimina marca"
+                    message={`Estàs segur que vols eliminar la marca "${selectedBrand.name}"? Aquesta acció no es pot desfer.`}
+                    confirmText="Elimina"
+                    cancelText="Cancel·la"
                     isLoading={isLoading}
                 />
             )}

@@ -3,11 +3,20 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle } from '@headlessui/react';
 import { FiX } from 'react-icons/fi';
 
+// Utility to get display name from category (handles both string and object)
+function getCategoryDisplayName(cat) {
+    if (!cat) return '';
+    if (typeof cat.name === 'object') {
+        return cat.name.ca || cat.name.es || '';
+    }
+    return cat.name || '';
+}
+
 export default function CategoryModal({ isOpen, onClose, onSave, category, parent, isEditing = false }) {
     const [formData, setFormData] = useState({
-        name: '',
+        name: { ca: '', es: '' },
         slug: '',
-        description: '',
+        // description: { ca: '', es: '' },
         parent: null,
         isActive: true
     });
@@ -51,31 +60,80 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
     // Load category data when editing
     useEffect(() => {
         if (isEditing && category) {
+            let migratedName = category.name;
+            if (typeof category.name === 'string') {
+                migratedName = { es: category.name, ca: '' };
+            } else if (!category.name?.es && category.name?.ca) {
+                migratedName = { es: '', ca: category.name.ca };
+            } else if (!category.name?.ca && category.name?.es) {
+                migratedName = { es: category.name.es, ca: '' };
+            } else if (!category.name?.es && !category.name?.ca) {
+                migratedName = { es: '', ca: '' };
+            }
             setFormData({
                 _id: category._id,
-                name: category.name || '',
+                name: migratedName,
                 slug: category.slug || '',
-                description: category.description || '',
+                // description: {
+                //     ca: (category.description && category.description.ca) || '',
+                //     es: (category.description && category.description.es) || ''
+                // },
                 parent: category.parent || null,
                 isActive: category.isActive !== false
             });
         } else if (parent) {
-            // Set parent ID when adding a subcategory
+            // Defensive: migrate parent if needed
+            let migratedParent = parent;
+            if (parent && typeof parent.name === 'string') {
+                migratedParent = { ...parent, name: { es: parent.name, ca: '' } };
+            } else if (parent && (!parent.name?.es && parent.name?.ca)) {
+                migratedParent = { ...parent, name: { es: '', ca: parent.name.ca } };
+            } else if (parent && (!parent.name?.ca && parent.name?.es)) {
+                migratedParent = { ...parent, name: { es: parent.name.es, ca: '' } };
+            } else if (parent && (!parent.name?.es && !parent.name?.ca)) {
+                migratedParent = { ...parent, name: { es: '', ca: '' } };
+            }
             setFormData(prev => ({
                 ...prev,
-                parent: parent._id
+                name: { ca: '', es: '' },
+                // description: { ca: '', es: '' },
+                parent: migratedParent._id,
+                slug: '',
+                isActive: true
             }));
+        } else {
+            setFormData({
+                name: { ca: '', es: '' },
+                slug: '',
+                // description: { ca: '', es: '' },
+                parent: null,
+                isActive: true
+            });
         }
     }, [isEditing, category, parent]);
 
     // Handle form input changes
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-
-        // Special handling for the parent field to ensure it's properly set
-        if (name === 'parent') {
-            // If empty string (root category option), set to null
-            // Otherwise use the selected category ID
+        const { name, value, type, checked, id } = e.target;
+        // Handle translation fields for name (and description if needed)
+        if (name === 'name') {
+            setFormData(prev => ({
+                ...prev,
+                name: {
+                    ...prev.name,
+                    [id === 'name-ca' ? 'ca' : 'es']: value
+                }
+            }));
+            // Uncomment if you add description translation fields
+            // } else if (name === 'description') {
+            //     setFormData(prev => ({
+            //         ...prev,
+            //         description: {
+            //             ...prev.description,
+            //             [id === 'description-ca' ? 'ca' : 'es']: value
+            //         }
+            //     }));
+        } else if (name === 'parent') {
             setFormData(prev => ({
                 ...prev,
                 parent: value === '' ? null : value
@@ -89,13 +147,14 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
     };
 
     // Generate slug from name
+    // Generate slug from name (prefer Catalan, fallback to Spanish)
     const generateSlug = () => {
-        if (formData.name) {
-            const slug = formData.name
+        const baseName = formData.name?.ca || formData.name?.es || '';
+        if (baseName) {
+            const slug = baseName
                 .toLowerCase()
                 .replace(/[^\w ]+/g, '')
                 .replace(/ +/g, '-');
-
             setFormData(prev => ({ ...prev, slug }));
         }
     };
@@ -103,11 +162,9 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
     // Form validation
     const validateForm = () => {
         const newErrors = {};
-
-        if (!formData.name) {
-            newErrors.name = 'El nombre es obligatorio';
+        if (!formData.name.ca && !formData.name.es) {
+            newErrors.name = 'El nom o el nombre és obligatori';
         }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -115,18 +172,18 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validateForm()) return;
-
         setLoading(true);
-
         try {
-            // Ensure parent is either a valid ID or null
+            // Only send translation fields for name
             const submissionData = {
                 ...formData,
+                name: {
+                    ca: formData.name.ca,
+                    es: formData.name.es
+                },
                 parent: formData.parent || null
             };
-
             await onSave(submissionData);
         } catch (error) {
             console.error('Error saving category:', error);
@@ -136,9 +193,9 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
     };
 
     const modalTitle = isEditing
-        ? `Editar Categoría: ${category?.name}`
-        : parent
-            ? `Añadir Subcategoría a: ${parent.name}`
+        ? `Editar Categoría: ${getCategoryDisplayName(category)}`
+        : parent && typeof parent === 'object'
+            ? `Añadir Subcategoría a: ${getCategoryDisplayName(parent)}`
             : 'Añadir Nueva Categoría';
 
     return (
@@ -162,25 +219,40 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                     <form onSubmit={handleSubmit} className="px-4 pb-4" >
                         <div className="space-y-4">
                             {/* Name */}
-                            <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                    Nombre *
-                                </label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    onBlur={generateSlug}
-                                    className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'
-                                        } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                />
-                                {errors.name && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                                )}
-                            </div>
 
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label htmlFor="name-ca" className="block text-sm font-medium text-gray-700">
+                                        Títol del Grup (CA) *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="name-ca"
+                                        name="name"
+                                        value={formData.name.ca}
+                                        onChange={handleChange}
+                                        onBlur={generateSlug}
+                                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <label htmlFor="name-es" className="block text-sm font-medium text-gray-700">
+                                        Títol del Grup (ES) *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="name-es"
+                                        name="name"
+                                        value={formData.name.es}
+                                        onChange={handleChange}
+                                        onBlur={generateSlug}
+                                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                    />
+                                </div>
+                            </div>
+                            {errors.name && (
+                                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                            )}
                             {/* Parent Category Selection */}
                             <div>
                                 <label htmlFor="parent" className="block text-sm font-medium text-gray-700">
@@ -197,7 +269,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                     <option value="">Ninguna (Categoría Principal)</option>
                                     {allCategories.map(cat => (
                                         <option key={cat._id} value={cat._id}>
-                                            {cat.name} {cat.level > 1 ? `(Nivel ${cat.level})` : ''}
+                                            {getCategoryDisplayName(cat)} {cat.level > 1 ? `(Nivel ${cat.level})` : ''}
                                         </option>
                                     ))}
                                 </select>
@@ -234,7 +306,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                             </div>
 
                             {/* Description */}
-                            <div>
+                            {/* <div>
                                 <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                                     Descripción
                                 </label>
@@ -246,7 +318,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                     onChange={handleChange}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Active Status */}
                             <div className="flex items-center">

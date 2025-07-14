@@ -4,6 +4,15 @@ import { FiChevronRight, FiChevronDown, FiPlus, FiEdit, FiTrash2, FiFolder, FiFo
 import { toast } from 'react-hot-toast';
 import CategoryModal from './CategoryModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
+
+// Utility to get display name from category (handles both string and object)
+function getCategoryDisplayName(cat) {
+    if (!cat) return '';
+    if (typeof cat.name === 'object') {
+        return cat.name.ca || cat.name.es || '';
+    }
+    return cat.name || '';
+}
 export default function CategoriesTree() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -60,9 +69,20 @@ export default function CategoriesTree() {
         const rootCategories = [];
         // First pass: create a map of all categories by ID
         allCategories.forEach(category => {
-            // Ensure category has an empty children array
+            // Migrate name if needed: if name is a string, convert to { es, ca }
+            let migratedName = category.name;
+            if (typeof category.name === 'string') {
+                migratedName = { es: category.name, ca: '' };
+            } else if (!category.name?.es && category.name?.ca) {
+                migratedName = { es: '', ca: category.name.ca };
+            } else if (!category.name?.ca && category.name?.es) {
+                migratedName = { es: category.name.es, ca: '' };
+            } else if (!category.name?.es && !category.name?.ca) {
+                migratedName = { es: '', ca: '' };
+            }
             categoriesMap[category._id] = {
                 ...category,
+                name: migratedName,
                 children: []
             };
         });
@@ -140,16 +160,31 @@ export default function CategoriesTree() {
     };
     const saveCategory = async (categoryData) => {
         try {
-            const isEditing = !!categoryData._id;
+            // Defensive: always send name as {es, ca}
+            let migratedName = categoryData.name;
+            if (typeof migratedName === 'string') {
+                migratedName = { es: migratedName, ca: '' };
+            } else if (!migratedName?.es && migratedName?.ca) {
+                migratedName = { es: '', ca: migratedName.ca };
+            } else if (!migratedName?.ca && migratedName?.es) {
+                migratedName = { es: migratedName.es, ca: '' };
+            } else if (!migratedName?.es && !migratedName?.ca) {
+                migratedName = { es: '', ca: '' };
+            }
+            const submissionData = {
+                ...categoryData,
+                name: migratedName
+            };
+            const isEditing = !!submissionData._id;
             const url = isEditing
-                ? `/api/categories/${categoryData._id}`
+                ? `/api/categories/${submissionData._id}`
                 : '/api/categories';
             const response = await fetch(url, {
                 method: isEditing ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(categoryData),
+                body: JSON.stringify(submissionData),
             });
             if (!response.ok) {
                 const error = await response.json();
@@ -160,14 +195,14 @@ export default function CategoriesTree() {
             setShowAddModal(false);
             setShowEditModal(false);
             // Auto-expand the parent category when a subcategory is added
-            if (!isEditing && categoryData.parent) {
+            if (!isEditing && submissionData.parent) {
                 setExpandedCategories(prev => ({
                     ...prev,
-                    [categoryData.parent]: true
+                    [submissionData.parent]: true
                 }));
             }
             // Set the last modified category ID for scrolling
-            setLastModifiedCategoryId(savedCategory._id || categoryData._id);
+            setLastModifiedCategoryId(savedCategory._id || submissionData._id);
             // Fetch the full tree again to update the view
             fetchCategories();
         } catch (error) {
@@ -204,6 +239,12 @@ export default function CategoriesTree() {
         const hasChildren = category.children && category.children.length > 0;
         const isExpanded = expandedCategories[category._id];
         const isLastModified = category._id === lastModifiedCategoryId;
+        let displayName = '';
+        try {
+            displayName = getCategoryDisplayName(category);
+        } catch (e) {
+            displayName = '';
+        }
         return (
             <div
                 className={`category-item transition-colors duration-500 ${isLastModified ? 'bg-blue-50' : ''}`}
@@ -213,7 +254,6 @@ export default function CategoriesTree() {
                 <div
                     className={`flex items-center py-2 pr-2 hover:bg-gray-100 group relative`}
                     style={{ paddingLeft: `${level * 16 + 8}px` }}
-                    // onClick={(e) => handleEditCategory(category, e)}
                 >
                     {hasChildren ? (
                         <button
@@ -230,7 +270,7 @@ export default function CategoriesTree() {
                     )}
                     <FiFolder className="mr-2 text-gray-400" />
                     <span className="flex-grow font-medium text-lg cursor-pointer">
-                        {category.name}
+                        {displayName}
                         <span className="ml-2 text-xs text-gray-400">
                             {level > 0 ? `(Nivel ${level + 1})` : ''}
                         </span>
@@ -335,7 +375,15 @@ export default function CategoriesTree() {
                     isOpen={showEditModal}
                     onClose={() => setShowEditModal(false)}
                     onSave={saveCategory}
-                    category={selectedCategory}
+                    category={(() => {
+                        // Always pass a migrated name object
+                        if (!selectedCategory) return undefined;
+                        if (typeof selectedCategory.name === 'object' && (selectedCategory.name.ca || selectedCategory.name.es)) {
+                            return selectedCategory;
+                        }
+                        // If name is string or invalid, migrate to object
+                        return { ...selectedCategory, name: { es: selectedCategory.name || '', ca: '' } };
+                    })()}
                     isEditing
                 />
             )}
@@ -345,7 +393,7 @@ export default function CategoriesTree() {
                     onClose={() => setShowDeleteModal(false)}
                     onConfirm={deleteCategory}
                     title="Eliminar Categoría"
-                    message={`¿Estás seguro de que deseas eliminar la categoría "${selectedCategory?.name}"? Esta acción no se puede deshacer.`}
+                    message={`¿Estás seguro de que deseas eliminar la categoría "${getCategoryDisplayName(selectedCategory)}"? Esta acción no se puede deshacer.`}
                     confirmText="Eliminar"
                     cancelText="Cancelar"
                 />

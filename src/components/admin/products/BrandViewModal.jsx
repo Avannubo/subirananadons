@@ -7,7 +7,7 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
             <div className="bg-white rounded-md shadow w-full max-w-lg">
                 <div className="flex justify-between items-center p-4 border-b border-gray-300">
                     <h2 className="text-xl font-medium">
-                        Detalles de la marca
+                        Detalls de la marca
                     </h2>
                     <button
                         onClick={onClose}
@@ -29,21 +29,21 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                 />
                             ) : (
                                 <div className="w-32 h-32 flex items-center justify-center bg-gray-100 border border-gray-300 rounded p-2">
-                                    <span className="text-gray-400 text-sm">No hay logotipo</span>
+                                    <span className="text-gray-400 text-sm">No hi ha logotip</span>
                                 </div>
                             )}
-                           
+
                         </div>
                         {/* Details Section */}
                         <div className="md:w-1/2">
                             <div className="space-y-3">
                                 <div>
                                     <h4 className="text-sm text-gray-500">ID</h4>
-                                    <p className="font-medium">{brand.id || brand._id || 'N/A'}</p>
+                                    <p className="font-medium">{brand.id || brand._id || 'N/D'}</p>
                                 </div>
                                 <div>
-                                    <h4 className="text-sm text-gray-500">Nombre</h4>
-                                    <p className="font-medium">{brand.name || 'N/A'}</p>
+                                    <h4 className="text-sm text-gray-500">Nom</h4>
+                                    <p className="font-medium">{brand.name || 'N/D'}</p>
                                 </div>
                                 {brand.slug && (
                                     <div>
@@ -53,13 +53,13 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                 )}
                                 {brand.description && (
                                     <div>
-                                        <h4 className="text-sm text-gray-500">Descripción</h4>
+                                        <h4 className="text-sm text-gray-500">Descripció</h4>
                                         <p>{brand.description}</p>
                                     </div>
                                 )}
                                 {brand.website && (
                                     <div>
-                                        <h4 className="text-sm text-gray-500">Sitio web</h4>
+                                        <h4 className="text-sm text-gray-500">Lloc web</h4>
                                         <a
                                             href={brand.website}
                                             target="_blank"
@@ -74,11 +74,11 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                 <div className="mt-3 text-start">
                                     <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${brand.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'
                                         }`}>
-                                        {brand.enabled ? 'Activado' : 'Desactivado'}
+                                        {brand.enabled ? 'Actiu' : 'Inactiu'}
                                     </span>
                                 </div>
                                 {/* <div>
-                                    <h4 className="text-sm text-gray-500">Productos</h4>
+                                    <h4 className="text-sm text-gray-500">Productes</h4>
                                     <p>{brand.products || 0}</p>
                                 </div> */}
                             </div>
@@ -91,7 +91,7 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                         onClick={onClose}
                         className="px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                     >
-                        Cerrar
+                        Tancar
                     </button>
                 </div>
             </div>

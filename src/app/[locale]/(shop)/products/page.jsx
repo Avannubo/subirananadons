@@ -8,18 +8,40 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import ProductQuickView from "@/components/products/product-quick-view";
 import { fetchProducts, formatProduct } from '@/services/ProductService';
 import { fetchCategories } from '@/services/CategoryService';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
-// Helper function to find a category node and its path by label
-function findCategoryAndPath(node, labelToFind, currentPath = []) {
-    const pathIncludingSelf = [...currentPath, node.label]; // Build path first
-    if (node.label === labelToFind) {
+// Utility to get display name from category (handles translation and legacy)
+function getCategoryDisplayName(cat, locale = 'es') {
+    if (!cat) return '';
+    // For menu nodes
+    if (typeof cat === 'object' && cat !== null) {
+        if (cat.label) {
+            if (typeof cat.label === 'object') {
+                return cat.label[locale] || cat.label.ca || cat.label.es || Object.values(cat.label)[0] || '';
+            }
+            return cat.label;
+        }
+        if (cat.name) {
+            if (typeof cat.name === 'object') {
+                return cat.name[locale] || cat.name.ca || cat.name.es || Object.values(cat.name)[0] || '';
+            }
+            return cat.name;
+        }
+    }
+    if (typeof cat === 'string') return cat;
+    return '';
+}
+
+// Helper function to find a category node and its path by label (handles translation)
+function findCategoryAndPath(node, labelToFind, currentPath = [], locale = 'es') {
+    const nodeLabel = getCategoryDisplayName(node, locale);
+    const pathIncludingSelf = [...currentPath, nodeLabel];
+    if (nodeLabel === labelToFind) {
         return { node, path: pathIncludingSelf };
     }
     if (node.submenu) {
         for (const subNode of node.submenu) {
-            // Pass the updated path for the *parent* node
-            const result = findCategoryAndPath(subNode, labelToFind, pathIncludingSelf);
+            const result = findCategoryAndPath(subNode, labelToFind, pathIncludingSelf, locale);
             if (result) return result;
         }
     }
@@ -40,6 +62,7 @@ function getAllLeafCategoryLabels(node) {
     return labels;
 }
 export default function Page() {
+    const locale = useLocale();
     // State and effect for categories (declare FIRST)
     const [categories, setCategories] = useState([]);
     const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -68,17 +91,17 @@ export default function Page() {
     // Get the current category node based on the last item in the path
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
     const t = useTranslations('ProductsPage');
-    // Helper to find a category node by path in the categories tree
-    function findCategoryNodeByPath(categories, path) {
+    // Helper to find a category node by path in the categories tree (handles translation)
+    function findCategoryNodeByPath(categories, path, locale = 'es') {
         let node = { children: categories };
         for (const label of path) {
             if (!node.children) return null;
-            node = node.children.find(cat => cat.name === label);
+            node = node.children.find(cat => getCategoryDisplayName(cat, locale) === label);
             if (!node) return null;
         }
         return node;
     }
-    const currentCategoryNode = useMemo(() => findCategoryNodeByPath(categories, categoryPath.slice(1)), [categories, categoryPath]);
+    const currentCategoryNode = useMemo(() => findCategoryNodeByPath(categories, categoryPath.slice(1), locale), [categories, categoryPath, locale]);
     const currentSubcategories = currentCategoryNode?.children || [];
 
     // Effect to handle URL parameters when the component mounts
@@ -90,8 +113,9 @@ export default function Page() {
             // Find the category path for the specified category in the DB-driven categories
             function findPathByLabel(categories, label, path = []) {
                 for (const cat of categories) {
-                    const newPath = [...path, cat.name];
-                    if (cat.name === label) return newPath;
+                    const catLabel = getCategoryDisplayName(cat, locale);
+                    const newPath = [...path, catLabel];
+                    if (catLabel === label) return newPath;
                     if (cat.children) {
                         const found = findPathByLabel(cat.children, label, newPath);
                         if (found) return found;
@@ -107,8 +131,9 @@ export default function Page() {
                 const normalizedCategory = categoryParam.toLowerCase().trim();
                 function findPartialPath(categories, search, path = []) {
                     for (const cat of categories) {
-                        const newPath = [...path, cat.name];
-                        if (cat.name.toLowerCase().includes(search)) return newPath;
+                        const catLabel = getCategoryDisplayName(cat, locale);
+                        const newPath = [...path, catLabel];
+                        if (catLabel.toLowerCase().includes(search)) return newPath;
                         if (cat.children) {
                             const found = findPartialPath(cat.children, search, newPath);
                             if (found) return found;
@@ -217,7 +242,7 @@ export default function Page() {
                 if (currentCategoryNode && categoryPath.length > 1) {
                     function getAllLeafNames(node) {
                         if (!node.children || node.children.length === 0) {
-                            return [node.name];
+                            return [getCategoryDisplayName(node, locale)];
                         } else {
                             return node.children.flatMap(getAllLeafNames);
                         }
@@ -418,19 +443,20 @@ export default function Page() {
         return flat;
     }
     // Memoize all categories for dropdown
-    function flattenCategoriesFromDb(categories, parentPath = []) {
+    function flattenCategoriesFromDb(categories, parentPath = [], locale = 'es') {
         let flat = [];
         for (const cat of categories) {
-            const currentPath = [...parentPath, cat.name];
+            const catLabel = getCategoryDisplayName(cat, locale);
+            const currentPath = [...parentPath, catLabel];
             if (!cat.children || cat.children.length === 0) {
-                flat.push({ label: currentPath.join(' > '), value: cat.name });
+                flat.push({ label: currentPath.join(' > '), value: catLabel });
             } else {
-                flat = flat.concat(flattenCategoriesFromDb(cat.children, currentPath));
+                flat = flat.concat(flattenCategoriesFromDb(cat.children, currentPath, locale));
             }
         }
         return flat;
     }
-    const allCategories = useMemo(() => flattenCategoriesFromDb(categories), [categories]);
+    const allCategories = useMemo(() => flattenCategoriesFromDb(categories, [], locale), [categories, locale]);
     // Handler for mobile dropdown change
     const handleMobileCategoryChange = (e) => {
         const selectedLabel = e.target.value;
@@ -551,15 +577,16 @@ export default function Page() {
                                     <li key={subCategory._id}>
                                         <button
                                             onClick={() => {
-                                                setCategoryPath([...categoryPath, subCategory.name]);
+                                                const subLabel = getCategoryDisplayName(subCategory, locale);
+                                                setCategoryPath([...categoryPath, subLabel]);
                                                 // Update URL parameters
                                                 const params = new URLSearchParams(searchParams);
-                                                params.set('category', subCategory.name);
+                                                params.set('category', subLabel);
                                                 router.push(`/products?${params.toString()}`);
                                             }}
                                             className={`w-full text-left px-2 py-1.5 rounded text-gray-600 hover:bg-gray-100 hover:font-semibold transition-colors duration-150`}
                                         >
-                                            {subCategory.name}
+                                            {getCategoryDisplayName(subCategory, locale)}
                                         </button>
                                     </li>
                                 ))}
@@ -578,20 +605,21 @@ export default function Page() {
                                                 <button
                                                     onClick={() => {
                                                         // Replace last in path with sibling
-                                                        const newPath = [...categoryPath.slice(0, -1), siblingCategory.name];
+                                                        const siblingLabel = getCategoryDisplayName(siblingCategory, locale);
+                                                        const newPath = [...categoryPath.slice(0, -1), siblingLabel];
                                                         setCategoryPath(newPath);
                                                         // Update URL parameters
                                                         const params = new URLSearchParams(searchParams);
-                                                        params.set('category', siblingCategory.name);
+                                                        params.set('category', siblingLabel);
                                                         router.push(`/products?${params.toString()}`);
                                                     }}
                                                     className={`w-full text-left px-2 py-1.5 rounded transition-colors duration-150 
-                                                        ${siblingCategory.name === currentCategoryLabel
+                                                        ${getCategoryDisplayName(siblingCategory, locale) === currentCategoryLabel
                                                             ? 'text-[#00B0C8] font-semibold bg-gray-100'
                                                             : 'text-gray-600 hover:bg-gray-100 hover:font-semibold'
                                                         }`}
                                                 >
-                                                    {siblingCategory.name}
+                                                    {getCategoryDisplayName(siblingCategory, locale)}
                                                 </button>
                                             </li>
                                         ));

@@ -10,7 +10,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
         name: '',
         logo: '',
         enabled: true,
-        description: '',
+        // description: '',
         website: '',
     });
     const [slug, setSlug] = useState('');
@@ -26,7 +26,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                 name: brand.name || '',
                 logo: brand.logo || '',
                 enabled: brand.enabled !== undefined ? brand.enabled : true,
-                description: brand.description || '',
+                // description: brand.description || '',
                 website: brand.website || '',
             });
             setSlug(brand.slug || '');
@@ -37,7 +37,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                 name: '',
                 logo: '',
                 enabled: true,
-                description: '',
+                // description: '',
                 website: '',
             });
             setSlug('');
@@ -96,13 +96,13 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
         if (file) {
             // Check file type and size
             if (!file.type.match('image.*')) {
-                toast.error('Por favor, selecciona una imagen válida');
+                toast.error('Si us plau, selecciona una imatge vàlida');
                 return;
             }
 
             // Check file size (5MB limit)
             if (file.size > 5 * 1024 * 1024) {
-                toast.error('La imagen es demasiado grande. El tamaño máximo es 5MB');
+                toast.error('La imatge és massa gran. La mida màxima és 5MB');
                 return;
             }
 
@@ -133,7 +133,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
         e.preventDefault();
 
         if (!formData.name.trim()) {
-            toast.error('El nombre de la marca es obligatorio');
+            toast.error('El nom de la marca és obligatori');
             return;
         }
 
@@ -161,7 +161,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
             <div className="bg-white rounded-md shadow w-full max-w-lg">
                 <div className="flex justify-between items-center p-4 border-b border-gray-300">
                     <h2 className="text-xl font-medium">
-                        {isEditing ? 'Editar Marca' : 'Añadir Nueva Marca'}
+                        {isEditing ? 'Editar marca' : 'Afegir nova marca'}
                     </h2>
                     <button
                         onClick={onClose}
@@ -175,7 +175,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                                Nombre <span className="text-red-500">*</span>
+                                Nom <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -205,15 +205,15 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                     onClick={generateSlug}
                                     className="px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm"
                                 >
-                                    Generar
+                                    Genera
                                 </button>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">Se usa en URLs. Se generará automáticamente si se deja en blanco.</p>
+                            <p className="text-xs text-gray-500 mt-1">S'utilitza a les URLs. Es generarà automàticament si es deixa en blanc.</p>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Logotipo
+                                Logotip
                             </label>
                             <div className="flex flex-col items-center gap-2">
                                 <div
@@ -238,7 +238,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                         <div className="relative h-full w-full flex items-center justify-center">
                                             <img
                                                 src={imagePreview}
-                                                alt="Logo preview"
+                                                alt="Previsualització del logotip"
                                                 className="max-h-full max-w-full object-contain"
                                             />
                                             <button
@@ -253,10 +253,10 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                         <>
                                             <FiImage className="w-10 h-10 text-gray-400 mb-2" />
                                             <span className="text-sm text-gray-500">
-                                                Arrastra y suelta una imagen o haz clic para seleccionar
+                                                Arrossega i deixa anar una imatge o fes clic per seleccionar
                                             </span>
                                             <span className="text-xs text-gray-400 mt-1">
-                                                PNG, JPG, GIF hasta 5MB
+                                                PNG, JPG, GIF fins a 5MB
                                             </span>
                                         </>
                                     )}
@@ -266,7 +266,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                     onClick={() => setShowImageSelector(true)}
                                     className="w-full px-4 py-2 text-white text-sm rounded-md bg-[#00B0C8] hover:bg-[#008A9B]"
                                 >
-                                    Seleccionar existente
+                                    Selecciona existent
                                 </button>
                             </div>
                             {showImageSelector && (
@@ -281,9 +281,10 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                             )}
                         </div>
 
+                        {/*
                         <div>
                             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                                Descripción
+                                Descripció
                             </label>
                             <textarea
                                 id="description"
@@ -294,10 +295,11 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                             ></textarea>
                         </div>
+                        */}
 
                         <div>
                             <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
-                                Sitio web
+                                Lloc web
                             </label>
                             <input
                                 type="url"
@@ -331,13 +333,13 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                             onClick={onClose}
                             className="px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                         >
-                            Cancelar
+                            Cancel·la
                         </button>
                         <button
                             type="submit"
                             className="px-4 py-2 border border-transparent rounded text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008A9B]"
                         >
-                            {isEditing ? 'Actualizar' : 'Crear'}
+                            {isEditing ? 'Actualitza' : 'Crea'}
                         </button>
                     </div>
                 </form>
