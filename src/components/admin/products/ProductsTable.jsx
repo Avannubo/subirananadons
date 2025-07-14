@@ -618,24 +618,25 @@ export default function ProductsTable(props) {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="relative">
                                                 <img
-                                                    src={product.image}
-                                                    alt={product.name}
+                                                    src={typeof product.image === 'object' && product.image !== null ? product.image.es || product.image.ca || '' : product.image}
+                                                    alt={typeof product.name === 'object' && product.name !== null ? product.name.es || product.name.ca || '' : product.name}
                                                     className="h-10 w-10 rounded object-cover cursor-pointer"
-                                                    onMouseEnter={() => handleImageMouseEnter(product.image)}
+                                                    onMouseEnter={() => handleImageMouseEnter(typeof product.image === 'object' && product.image !== null ? product.image.es || product.image.ca || '' : product.image)}
                                                     onMouseLeave={handleImageMouseLeave}
                                                 />
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-xs truncate" title={product.name}>
-                                            {product.name}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-xs truncate" title={typeof product.name === 'object' && product.name !== null ? product.name.es || product.name.ca || '' : product.name}>
+                                            {typeof product.name === 'object' && product.name !== null ? product.name.es || product.name.ca || '' : product.name}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.reference}>
-                                            {product.reference}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={typeof product.reference === 'object' && product.reference !== null ? product.reference.es || product.reference.ca || '' : product.reference}>
+                                            {typeof product.reference === 'object' && product.reference !== null ? product.reference.es || product.reference.ca || '' : product.reference}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.category}>
-                                            {product.category}
-                                        </td>                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.brand}>
-                                            {product.brand}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={typeof product.category === 'object' && product.category !== null ? product.category.es || product.category.ca || '' : product.category}>
+                                            {typeof product.category === 'object' && product.category !== null ? product.category.es || product.category.ca || '' : product.category}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={typeof product.brand === 'object' && product.brand !== null ? product.brand.es || product.brand.ca || '' : product.brand}>
+                                            {typeof product.brand === 'object' && product.brand !== null ? product.brand.es || product.brand.ca || '' : product.brand}
                                         </td>
                                         {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {product.price_excl_tax.toFixed(2)} €

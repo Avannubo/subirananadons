@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 import FadeSlider from "@/components/landing/FadeSlider";
 import ImageGallery from "@/components/landing/ofertas";
 import FeaturedProducts from "@/components/landing/FeaturedProducts";
-import ShopLayout from "../../components/Layouts/shop-layout";
+import ShopLayout from "../../../components/Layouts/shop-layout";
 
 export default function Home() {
     const t = useTranslations('HomePage');

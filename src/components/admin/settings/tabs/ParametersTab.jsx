@@ -14,6 +14,7 @@ import {
     Pencil,
     Trash2
 } from 'lucide-react';
+import { useLocale } from 'next-intl';
 
 // Helper for fetching and saving parameters
 async function fetchParameters() {
@@ -33,6 +34,8 @@ async function saveParameter(key, value, description = "") {
 }
 
 export default function ParametersTab() {
+    const locale = useLocale();
+
     // Generalized parameter state
     const [parameters, setParameters] = useState({});
     const [edit, setEdit] = useState({}); // { key: value }
@@ -72,7 +75,7 @@ export default function ParametersTab() {
                 setParameters(paramMap);
                 setSocials(socialsArr);
             })
-            .catch(() => setError("No se pudieron cargar los parámetros"));
+            .catch(() => setError(locale === 'ca' ? "No s'han pogut carregar els paràmetres" : "No se pudieron cargar los parámetros"));
     }, []);
 
     // Helper for starting edit
@@ -94,7 +97,7 @@ export default function ParametersTab() {
             setParameters((prev) => ({ ...prev, [key]: saved.value }));
             setEditing((prev) => ({ ...prev, [key]: false }));
         } catch (e) {
-            setError("No se pudo guardar el parámetro");
+            setError(locale === 'ca' ? "No s'ha pogut desar el paràmetre" : "No se pudo guardar el parámetro");
         } finally {
             setLoading(false);
         }
@@ -171,7 +174,7 @@ export default function ParametersTab() {
             setNewSocial({ name: '', link: '', icon: 'Instagram' });
             setAddingSocial(false);
         } catch (e) {
-            setError("No se pudo guardar la red social");
+            setError(locale === 'ca' ? "No s'ha pogut desar la xarxa social" : "No se pudo guardar la red social");
         } finally {
             setLoading(false);
         }
@@ -196,7 +199,7 @@ export default function ParametersTab() {
                 return copy;
             });
         } catch (e) {
-            setError("No se pudo eliminar la red social");
+            setError(locale === 'ca' ? "No s'ha pogut eliminar la xarxa social" : "No se pudo eliminar la red social");
         } finally {
             setLoading(false);
         }
@@ -211,7 +214,7 @@ export default function ParametersTab() {
                     <div className="flex-1 flex-col w-full">
                         <h2 className="text-lg font-semibold mb-2">{param.label}</h2>
                         {param.key === "whatsapp" && (
-                            <span className="text-xs text-gray-500 mb-2">Introduce solo el número español, sin prefijo internacional ni espacios. Ejemplo: 612345678</span>
+                            <span className="text-xs text-gray-500 mb-2">{locale === 'ca' ? "Introdueix només el número espanyol, sense prefix internacional ni espais. Exemple: 612345678" : "Introduce solo el número español, sin prefijo internacional ni espacios. Ejemplo: 612345678"}</span>
                         )}
                     </div>
                     {editing[param.key] ? (
@@ -238,14 +241,14 @@ export default function ParametersTab() {
                                 className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8]"
                                 disabled={loading}
                             >
-                                Guardar
+                                {locale === 'ca' ? 'Desar' : 'Guardar'}
                             </button>
                             <button
                                 onClick={() => cancelEdit(param.key)}
                                 className="px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                                 disabled={loading}
                             >
-                                Cancelar
+                                {locale === 'ca' ? 'Cancel·lar' : 'Cancelar'}
                             </button>
                         </div>
                     ) : (
@@ -265,32 +268,32 @@ export default function ParametersTab() {
 
             {/* Socials Parameters */}
             <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                <h2 className="text-lg font-bold mb-4 flex items-center justify-between">Redes Sociales
+                <h2 className="text-lg font-bold mb-4 flex items-center justify-between">{locale === 'ca' ? 'Xarxes Socials' : 'Redes Sociales'}
                     <button
                         className="ml-4 px-3 py-1 bg-[#00B0C8]/10 text-[#00B0C8] rounded hover:bg-[#00B0C8]/20 border border-[#00B0C8] text-sm transition"
                         onClick={() => setAddingSocial(v => !v)}
                     >
-                        {addingSocial ? 'Cancelar' : 'Añadir nueva'}
+                        {addingSocial ? (locale === 'ca' ? 'Cancel·lar' : 'Cancelar') : (locale === 'ca' ? 'Afegir nova' : 'Añadir nueva')}
                     </button>
                 </h2>
                 {addingSocial && (
                     <div className="flex flex-col md:flex-row gap-2 mb-4 items-center">
                         <Input
                             type="text"
-                            placeholder="Nombre"
+                            placeholder={locale === 'ca' ? 'Nom' : 'Nombre'}
                             value={newSocial.name}
                             onChange={e => setNewSocial(s => ({ ...s, name: e.target.value }))}
                             className="w-40"
                         />
                         <Input
                             type="text"
-                            placeholder="Enlace"
+                            placeholder={locale === 'ca' ? 'Enllaç' : 'Enlace'}
                             value={newSocial.link}
                             onChange={e => setNewSocial(s => ({ ...s, link: e.target.value }))}
                             className="w-40"
                         />
                         <div className="flex items-center gap-1">
-                            <span className="text-xs text-gray-500">Icono:</span>
+                            <span className="text-xs text-gray-500">{locale === 'ca' ? 'Icona:' : 'Icono:'}</span>
                             <select
                                 value={newSocial.icon}
                                 onChange={e => setNewSocial(s => ({ ...s, icon: e.target.value }))}
@@ -309,7 +312,7 @@ export default function ParametersTab() {
                             className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8] text-sm transition"
                             onClick={handleAddSocial}
                         >
-                            Añadir
+                            {locale === 'ca' ? 'Afegir' : 'Añadir'}
                         </button>
                     </div>
                 )}
@@ -337,19 +340,19 @@ export default function ParametersTab() {
                                             className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8] transition"
                                             disabled={loading}
                                         >
-                                            Guardar
+                                            {locale === 'ca' ? 'Desar' : 'Guardar'}
                                         </button>
                                         <button
                                             onClick={() => cancelEdit(param.key)}
                                             className="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 border border-gray-300 transition"
                                             disabled={loading}
                                         >
-                                            Cancelar
+                                            {locale === 'ca' ? 'Cancel·lar' : 'Cancelar'}
                                         </button>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-4 ">
-                                        <span className="truncate text-md text-gray-700 max-w-xs">{parameters[param.key] || param.link || <span className="text-gray-400">No configurado</span>}</span>
+                                        <span className="truncate text-md text-gray-700 max-w-xs">{parameters[param.key] || param.link || <span className="text-gray-400">{locale === 'ca' ? 'No configurat' : 'No configurado'}</span>}</span>
                                         <button
                                             onClick={() => startEdit(param.key)}
                                             className="p-1 rounded hover:bg-[#fff7e6] border border-[#F6A609] transition"

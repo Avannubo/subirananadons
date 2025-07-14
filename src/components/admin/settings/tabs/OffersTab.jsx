@@ -239,7 +239,7 @@ export default function OffersTab() {
                         ) : (
                             <div className="flex flex-col items-center justify-center h-full">
                                 <FiUpload className="w-10 h-10 text-gray-400" />
-                                <p className="mt-2 text-sm text-gray-500">No image selected</p>
+                                <p className="mt-2 text-sm text-gray-500">No s'ha seleccionat cap imatge</p>
                             </div>
                         )}
                     </div>
