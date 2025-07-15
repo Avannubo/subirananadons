@@ -96,13 +96,18 @@ export default function ProductCard({
             console.error('Error adding to birth list:', error);
         }
     };
-    // Generate the product URL based on category and name
-    const productUrl = `/products/${encodeURIComponent(
-        product.category?.toLowerCase().replace(/\s+/g, '-') || 'category'
-    )}/${encodeURIComponent(
-        product.name.toLowerCase().replace(/\s+/g, '-')
-    )}-${product.id}`;
-    
+    // Get the correct translated product name based on locale
+    let translatedName = product.name;
+    if (product.translations && typeof product.translations === 'object') {
+        if (product.translations[typeof window !== 'undefined' && window.__NEXT_LOCALE__ ? window.__NEXT_LOCALE__ : 'es'] && product.translations[typeof window !== 'undefined' && window.__NEXT_LOCALE__ ? window.__NEXT_LOCALE__ : 'es'].name) {
+            translatedName = product.translations[typeof window !== 'undefined' && window.__NEXT_LOCALE__ ? window.__NEXT_LOCALE__ : 'es'].name;
+        }
+    }
+    // Generate the product URL based on category and translated name
+    const productUrl = product.category && product.category.slug
+        ? `/products/${encodeURIComponent(product.category.slug)}/${encodeURIComponent(translatedName.toLowerCase().replace(/\s+/g, '-'))}-${product.id}`
+        : '#';
+
     if (viewMode === 'grid') {
         // Grid View Layout
         return (

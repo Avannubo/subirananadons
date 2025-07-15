@@ -95,10 +95,17 @@ export default function Page() {
                         productData = nameResponse.products[0];
                     }
                 }
+                // Get the correct translated product name based on locale
+                let translatedName = productData.name;
+                if (productData.translations && typeof productData.translations === 'object') {
+                    if (productData.translations[locale] && productData.translations[locale].name) {
+                        translatedName = productData.translations[locale].name;
+                    }
+                }
                 // Format the product details
                 const formattedProduct = {
                     id: productData._id,
-                    name: productData.name,
+                    name: translatedName,
                     price: `${productData.price_incl_tax.toFixed(2).replace('.', ',')} €`,
                     priceValue: productData.price_incl_tax,
                     description: productData.description || t('noDescription'),
