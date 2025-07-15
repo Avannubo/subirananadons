@@ -5,70 +5,11 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 
-// Helper to get display name for category
-function getCategoryDisplayName(cat, categories) {
-    if (!cat) return '';
-    // Populated object with ca/es/name
-    if (typeof cat === 'object' && (cat.ca || cat.es || cat.name)) {
-        if (typeof cat.name === 'object') return cat.name.ca || cat.name.es || cat.name.name || '';
-        return cat.ca || cat.es || cat.name || '';
-    }
-    // Populated object with _id and name fields
-    if (typeof cat === 'object' && cat._id && (cat.name || cat.ca || cat.es)) {
-        if (typeof cat.name === 'object') return cat.name.ca || cat.name.es || cat.name.name || '';
-        return cat.ca || cat.es || cat.name || '';
-    }
-    // If cat is an object with $oid (MongoDB export)
-    if (typeof cat === 'object' && cat.$oid && Array.isArray(categories)) {
-        const found = categories.find(c => c._id === cat.$oid || (c._id && c._id.toString && c._id.toString() === cat.$oid));
-        if (found) {
-            if (typeof found.name === 'object') return found.name.ca || found.name.es || found.name.name || '';
-            return found.ca || found.es || found.name || '';
-        }
-        return cat.$oid;
-    }
-    // If cat is a string and looks like an ObjectId, try to find the category name
-    if (typeof cat === 'string' && /^[a-fA-F0-9]{24}$/.test(cat) && Array.isArray(categories)) {
-        const found = categories.find(c => c._id === cat || (c._id && c._id.toString && c._id.toString() === cat));
-        if (found) {
-            if (typeof found.name === 'object') return found.name.ca || found.name.es || found.name.name || '';
-            return found.ca || found.es || found.name || '';
-        }
-    }
-    // Otherwise just return empty string (never show the id)
-    return '';
-}
-
-// Helper to get display name for brand
-function getBrandDisplayName(brand, brands) {
-    if (!brand) return '';
-    // Populated object with name
-    if (typeof brand === 'object' && brand.name) {
-        return brand.name;
-    }
-    // Populated object with _id and name
-    if (typeof brand === 'object' && brand._id && brand.name) {
-        return brand.name;
-    }
-    // If brand is an object with $oid (MongoDB export)
-    if (typeof brand === 'object' && brand.$oid && Array.isArray(brands)) {
-        const found = brands.find(b => b._id === brand.$oid || (b._id && b._id.toString && b._id.toString() === brand.$oid));
-        if (found) return found.name || '';
-        return '';
-    }
-    // If brand is a string and looks like an ObjectId, try to find the brand name
-    if (typeof brand === 'string' && /^[a-fA-F0-9]{24}$/.test(brand) && Array.isArray(brands)) {
-        const found = brands.find(b => b._id === brand || (b._id && b._id.toString && b._id.toString() === brand));
-        if (found) return found.name || '';
-    }
-    // Otherwise just return empty string (never show the id)
-    return '';
-}
-
 export default function ProductViewModal({ isOpen, onClose, product, categories = [], brands = [] }) {
+
     // Language state for translation switcher
     const [lang, setLang] = useState('ca');
-    useEffect(() => { setLang('ca'); }, [product]); // Reset to ES on product change
+    // Do not reset lang on product change, only set default on first mount
 
     if (!product) return null;
 
@@ -120,9 +61,23 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
     const availableStock = product.stock?.available || 0;
 
 
-    // Get display names for category and brand
-    const categoryDisplay = getCategoryDisplayName(product.category, categories);
-    const brandDisplay = getBrandDisplayName(product.brand, brands);
+
+    // Helper to get display name from populated object or string
+    const getDisplayName = (field) => {
+        if (!field) return '';
+        if (typeof field === 'string') return field;
+        if (typeof field === 'object') {
+            // If has a name property (populated), or translation object
+            if (field.name) return typeof field.name === 'object' ? (field.name[lang] || field.name.es || field.name.ca || '') : field.name;
+            // If translation object
+            if (field[lang] || field.es || field.ca) return field[lang] || field.es || field.ca || '';
+        }
+        return '';
+    };
+
+
+    const categoryDisplay = getDisplayName(product.category);
+    const brandDisplay = getDisplayName(product.brand);
 
     // Get translated name/description (only these two fields are translated)
     const getTranslated = (field) => {
@@ -239,23 +194,23 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="space-y-2">
                                             <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
+                                                <span className="text-sm font-medium text-gray-500">ID:</span>
+                                                <p className="text-sm text-gray-700">{product._id || product.id || 'N/A'}</p>
+                                            </div><div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">Referencia:</span>
                                                 <p className="text-sm text-gray-700">{product.reference || 'N/A'}</p>
                                             </div>
-                                            <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
-                                                <span className="text-sm font-medium text-gray-500">Categoría:</span>
-                                                <p className="text-sm text-gray-700">{categoryDisplay || 'N/A'}</p>
-                                            </div>
+
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-2"> <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
+                                            <span className="text-sm font-medium text-gray-500">Categoría:</span>
+                                            <p className="text-sm text-gray-700">{categoryDisplay || 'N/A'}</p>
+                                        </div>
                                             <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">Marca:</span>
                                                 <p className="text-sm text-gray-700">{brandDisplay || 'N/A'}</p>
                                             </div>
-                                            <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
-                                                <span className="text-sm font-medium text-gray-500">ID:</span>
-                                                <p className="text-sm text-gray-700">{product._id || product.id || 'N/A'}</p>
-                                            </div>
+
                                         </div>
                                     </div>
                                     {product.description && (
@@ -323,7 +278,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                         </button>
                     </div>
                 </Dialog.Panel>
-            </div>
-        </Dialog>
+            </div >
+        </Dialog >
     );
 } 

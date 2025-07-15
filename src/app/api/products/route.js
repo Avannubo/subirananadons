@@ -116,14 +116,25 @@ export async function GET(request) {
         // Apply pagination
         productsQuery = productsQuery.skip(skip).limit(limit);
 
-        // Execute the query
-        const products = await productsQuery;
+        // Populate brand and category fields
+        const products = await productsQuery.populate('brand').populate('category');
+
+        // Map products to include brand and category names
+        const productsWithNames = products.map(product => {
+            // Convert to plain object if needed
+            const prod = product.toObject ? product.toObject() : product;
+            return {
+                ...prod,
+                brand: prod.brand && typeof prod.brand === 'object' && prod.brand !== null ? (prod.brand.name || prod.brand) : prod.brand,
+                category: prod.category && typeof prod.category === 'object' && prod.category !== null ? (prod.category.name || prod.category) : prod.category
+            };
+        });
 
         // Calculate pagination info
         const totalPages = Math.ceil(totalItems / limit);
 
         return NextResponse.json({
-            products,
+            products: productsWithNames,
             pagination: {
                 currentPage: page,
                 totalPages,

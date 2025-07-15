@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2, FiEye, FiSearch, FiFilter, FiPlus } from 'react-icons/fi';
-import { toast } from 'react-hot-toast';
-import Link from 'next/link';
+import { toast } from 'react-hot-toast'; 
 import ProductModal from './ProductModal';
 import ProductViewModal from './ProductViewModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
