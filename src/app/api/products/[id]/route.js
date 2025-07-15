@@ -121,6 +121,7 @@ export async function PUT(request, { params }) {
         const updatedProduct = await product.save();
 
         // Populate category and brand before returning
+        // Fix: Use correct model names for population (should match Mongoose model registration)
         const populatedProduct = await Product.findById(updatedProduct._id)
             .populate('category')
             .populate('brand');
