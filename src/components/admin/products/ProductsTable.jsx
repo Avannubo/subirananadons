@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2, FiEye, FiSearch, FiFilter, FiPlus } from 'react-icons/fi';
-import { toast } from 'react-hot-toast'; 
+import { toast } from 'react-hot-toast';
 import ProductModal from './ProductModal';
 import ProductViewModal from './ProductViewModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
@@ -321,7 +321,17 @@ export default function ProductsTable(props) {
 
     // Handle product edit
     const handleEditProduct = (product) => {
-        setSelectedProduct(product);
+        // If product.category or product.brand is an ObjectId, try to populate from props
+        let populatedProduct = { ...product };
+        if (populatedProduct.category && typeof populatedProduct.category === 'string' && Array.isArray(props.categories)) {
+            const foundCat = props.categories.find(c => c._id === populatedProduct.category || (c._id && c._id.$oid === populatedProduct.category));
+            if (foundCat) populatedProduct.category = foundCat;
+        }
+        if (populatedProduct.brand && typeof populatedProduct.brand === 'string' && Array.isArray(props.brands)) {
+            const foundBrand = props.brands.find(b => b._id === populatedProduct.brand || (b._id && b._id.$oid === populatedProduct.brand));
+            if (foundBrand) populatedProduct.brand = foundBrand;
+        }
+        setSelectedProduct(populatedProduct);
         setIsEditing(true);
         setShowModal(true);
     };

@@ -8,6 +8,8 @@ import { useStats } from '@/contexts/StatsContext';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
 
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
+    console.log(product);
+
     const [formData, setFormData] = useState({
         name: { es: '', ca: '' },
         reference: '',
@@ -44,7 +46,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [productImages, setProductImages] = useState([]);
     const [showImageSelector, setShowImageSelector] = useState(false);
     const stats = useStats();
-
     // Fetch all categories and brands when modal opens
     useEffect(() => {
         if (isOpen) {
@@ -52,7 +53,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             fetchBrands();
         }
     }, [isOpen]);
-
     // Fetch categories for the dropdown
     const fetchCategories = async () => {
         try {
@@ -70,7 +70,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setLoadingCategories(false);
         }
     };
-
     // Fetch brands for the dropdown
     const fetchBrands = async () => {
         try {
@@ -91,7 +90,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setLoadingBrands(false);
         }
     };
-
     // Organize categories into a proper hierarchy for the dropdown
     const organizeCategories = (allCategories) => {
         const categoriesMap = {};
@@ -147,37 +145,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 setSelectedImageIndex(0);
             }
 
-            // Defensive migration for name and description fields
-            let migratedName = product.name;
-            if (typeof product.name === 'string') {
-                migratedName = { es: product.name, ca: '' };
-            } else if (!product.name?.es && product.name?.ca) {
-                migratedName = { es: '', ca: product.name.ca };
-            } else if (!product.name?.ca && product.name?.es) {
-                migratedName = { es: product.name.es, ca: '' };
-            } else if (!product.name?.es && !product.name?.ca) {
-                migratedName = { es: '', ca: '' };
-            }
-
-            let migratedDescription = product.description;
-            if (typeof product.description === 'string') {
-                migratedDescription = { es: product.description, ca: '' };
-            } else if (!product.description?.es && product.description?.ca) {
-                migratedDescription = { es: '', ca: product.description.ca };
-            } else if (!product.description?.ca && product.description?.es) {
-                migratedDescription = { es: product.description.es, ca: '' };
-            } else if (!product.description?.es && !product.description?.ca) {
-                migratedDescription = { es: '', ca: '' };
-            }
-
             setFormData({
-                name: migratedName,
+                name: product.name,
                 reference: product.reference || '',
-                description: migratedDescription,
-                category: product.category || '',
+                description: product.description,
+                category: product.category,
                 categoryId: product.categoryId || '',
-                brand: product.brand || '',
+                brand: product.brand,
                 brandId: product.brandId || '',
+                categoryDisplayName: product.categoryDisplayName || '',
+                brandDisplayName: product.brandDisplayName || '',
                 price_excl_tax: product.price_excl_tax || '',
                 price_incl_tax: product.price_incl_tax || '',
                 image: product.image || '',
@@ -772,7 +749,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                                            Categoría *
+                                            Categoría : {product.category || 'N/A'}
                                         </label>
                                         <div className="relative">
                                             <div
@@ -780,7 +757,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                                             >
                                                 <span className="truncate">{
-                                                    formData.categoryDisplayName || 'Seleccionar categoria'
+                                                    formData.categoryDisplayName || 'Seleccionar nueva categoria'
                                                 }</span>
                                                 <FiChevronRight className={`transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
                                             </div>
@@ -823,7 +800,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     </div>
                                     <div>
                                         <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
-                                            Marca
+                                            Marca : {product.brand || 'N/A'}
                                         </label>
                                         <div className="relative">
                                             <div
@@ -856,7 +833,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         <span className="truncate text-gray-700 font-medium">{
                                                             (() => {
                                                                 const selectedBrand = brands.find(b => b._id === formData.brand);
-                                                                return selectedBrand ? selectedBrand.name : '';
+                                                                return selectedBrand ? selectedBrand.name : ' Seleccionar nueva marca';
                                                             })()
                                                         }</span>
                                                     </div>
