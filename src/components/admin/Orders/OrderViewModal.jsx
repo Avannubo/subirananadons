@@ -3,6 +3,107 @@ import { useState, useEffect } from 'react';
 import { FiX, FiPackage, FiMapPin, FiUser, FiCreditCard, FiTruck, FiCalendar, FiDollarSign, FiFileText, FiMessageSquare } from 'react-icons/fi';
 
 export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) {
+    // Locale detection (default to 'ca')
+    let locale = 'ca';
+    if (typeof window !== 'undefined' && window.navigator) {
+        const lang = window.navigator.language || window.navigator.userLanguage;
+        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    }
+
+    // Translations
+    const translations = {
+        ca: {
+            orderDetails: 'Detalls de la Comanda',
+            date: 'Data',
+            total: 'Total',
+            paymentMethod: 'Mètode de pagament',
+            status: 'Estat',
+            customerInfo: 'Informació del client',
+            name: 'Nom',
+            email: 'Correu electrònic',
+            phone: 'Telèfon',
+            shippingAddress: 'Adreça d\'enviament',
+            street: 'Carrer',
+            postalCode: 'Codi Postal',
+            city: 'Ciutat',
+            province: 'Província',
+            country: 'País',
+            pickup: 'Per recollir a la botiga',
+            notes: 'Notes',
+            noNotes: 'No hi ha notes per a aquesta comanda.',
+            tracking: 'Seguiment',
+            noTracking: 'No hi ha número de seguiment disponible.',
+            products: 'Productes',
+            product: 'Producte',
+            quantity: 'Quantitat',
+            type: 'Tipus',
+            price: 'Preu',
+            subtotal: 'Subtotal',
+            orderSummary: 'Resum de la comanda',
+            shipping: 'Enviament',
+            taxes: 'Impostos',
+            pending: 'Pendent',
+            subtotalLabel: 'Subtotal',
+            totalLabel: 'Total',
+            notFound: 'No s\'ha trobat informació de la comanda.',
+            close: 'Tancar',
+            gift: 'Regal',
+            personal: 'Personal',
+            statusMap: {
+                pending: 'Pendent de pagament',
+                processing: 'Pagament acceptat',
+                shipped: 'Enviat',
+                delivered: 'Entregat',
+                cancelled: 'Cancel·lat',
+            },
+        },
+        es: {
+            orderDetails: 'Detalles del Pedido',
+            date: 'Fecha',
+            total: 'Total',
+            paymentMethod: 'Método de pago',
+            status: 'Estado',
+            customerInfo: 'Información del cliente',
+            name: 'Nombre',
+            email: 'Correo electrónico',
+            phone: 'Teléfono',
+            shippingAddress: 'Dirección de envío',
+            street: 'Calle',
+            postalCode: 'Código Postal',
+            city: 'Ciudad',
+            province: 'Provincia',
+            country: 'País',
+            pickup: 'Para recoger en tienda',
+            notes: 'Notas',
+            noNotes: 'No hay notas para este pedido.',
+            tracking: 'Seguimiento',
+            noTracking: 'No hay número de seguimiento disponible.',
+            products: 'Productos',
+            product: 'Producto',
+            quantity: 'Cantidad',
+            type: 'Tipo',
+            price: 'Precio',
+            subtotal: 'Subtotal',
+            orderSummary: 'Resumen del pedido',
+            shipping: 'Envío',
+            taxes: 'Impuestos',
+            pending: 'Pendiente',
+            subtotalLabel: 'Subtotal',
+            totalLabel: 'Total',
+            notFound: 'No se encontró información del pedido.',
+            close: 'Cerrar',
+            gift: 'Regalo',
+            personal: 'Personal',
+            statusMap: {
+                pending: 'Pendiente de pago',
+                processing: 'Pago aceptado',
+                shipped: 'Enviado',
+                delivered: 'Entregado',
+                cancelled: 'Cancelado',
+            },
+        }
+    };
+    const t = translations[locale];
     const [order, setOrder] = useState(null);
     const [error, setError] = useState(null);
     const [loadingOrder, setLoadingOrder] = useState(false);
@@ -116,7 +217,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
 
     const formatDate = (dateString) => {
         try {
-            return new Date(dateString).toLocaleDateString('es-ES', {
+            return new Date(dateString).toLocaleDateString(locale === 'ca' ? 'ca-ES' : 'es-ES', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -131,20 +232,13 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
 
     const formatPrice = (price) => {
         if (!price || parseFloat(price) === 0) {
-            return 'Gratis';
+            return locale === 'ca' ? 'Gratuït' : 'Gratis';
         }
         return `${parseFloat(price).toFixed(2)} €`;
     };
 
     const mapStatus = (status) => {
-        const statusMap = {
-            'pending': 'Pendiente de pago',
-            'processing': 'Pago aceptado',
-            'shipped': 'Enviado',
-            'delivered': 'Entregado',
-            'cancelled': 'Cancelado'
-        };
-        return statusMap[status] || status;
+        return t.statusMap[status] || status;
     };
 
     const getStatusColorClass = (status) => {
@@ -170,7 +264,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                     <div className="flex justify-between items-center border-b border-gray-300 p-4 sticky top-0 bg-white z-10">
                         <h3 className="text-xl font-semibold flex items-center">
                             <FiPackage className="mr-2 text-[#00B0C8]" />
-                            Detalles del Pedido
+                            {t.orderDetails}
                             {order && <span className="ml-2 text-[#00B0C8]">#{order.orderNumber}</span>}
                         </h3>
                         <button
@@ -203,7 +297,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <FiCalendar className="text-[#00B0C8]" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-500">Fecha</p>
+                                                <p className="text-xs text-gray-500">{t.date}</p>
                                                 <p className="font-medium text-sm">{formatDate(order.createdAt)}</p>
                                             </div>
                                         </div>
@@ -212,7 +306,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <FiDollarSign className="text-green-600" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-500">Total</p>
+                                                <p className="text-xs text-gray-500">{t.total}</p>
                                                 <p className="font-medium text-sm">{formatPrice(order.totalAmount)}</p>
                                             </div>
                                         </div>
@@ -221,7 +315,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <FiCreditCard className="text-purple-600" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-500">Método de pago</p>
+                                                <p className="text-xs text-gray-500">{t.paymentMethod}</p>
                                                 <p className="font-medium text-sm">{order.paymentMethod || 'Pendiente'}</p>
                                             </div>
                                         </div>
@@ -230,7 +324,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <FiTruck className="text-blue-600" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-500">Estado</p>
+                                                <p className="text-xs text-gray-500">{t.status}</p>
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColorClass(order.status)}`}>
                                                     {mapStatus(order.status)}
                                                 </span>
@@ -246,19 +340,19 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                             {/* Customer Information */}
                                             <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden">
                                                 <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                    <FiUser className="mr-2 text-[#00B0C8]" /> Información del cliente
+                                                    <FiUser className="mr-2 text-[#00B0C8]" /> {t.customerInfo}
                                                 </h4>
                                                 <div className="space-y-3 p-4">
                                                     <div>
-                                                        <p className="text-xs text-gray-500">Nombre</p>
+                                                        <p className="text-xs text-gray-500">{t.name}</p>
                                                         <p className="font-medium">{`${order.shippingAddress.name} ${order.shippingAddress.lastName}`}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs text-gray-500">Correo electrónico</p>
+                                                        <p className="text-xs text-gray-500">{t.email}</p>
                                                         <p className="font-medium">{order.shippingAddress.email}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs text-gray-500">Teléfono</p>
+                                                        <p className="text-xs text-gray-500">{t.phone}</p>
                                                         <p className="font-medium">{order.shippingAddress.phone}</p>
                                                     </div>
                                                 </div>
@@ -266,36 +360,36 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                             {/* Shipping Information */}
                                             <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden">
                                                 <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                    <FiMapPin className="mr-2 text-[#00B0C8]" /> Dirección de envío
+                                                    <FiMapPin className="mr-2 text-[#00B0C8]" /> {t.shippingAddress}
                                                 </h4>
                                                 {order.deliveryMethod === 'pickup' ? (
                                                     <div className="p-4 flex flex-col items-center justify-center text-center text-[#00B0C8] font-semibold min-h-[150px]">
                                                         <svg width="84px" height="84px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M22 22H2" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M20 22V11" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M4 22V11" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M16.5278 2H7.47214C6.26932 2 5.66791 2 5.18461 2.2987C4.7013 2.5974 4.43234 3.13531 3.89443 4.21114L2.49081 7.75929C2.16652 8.57905 1.88279 9.54525 2.42867 10.2375C2.79489 10.7019 3.36257 11 3.99991 11C5.10448 11 5.99991 10.1046 5.99991 9C5.99991 10.1046 6.89534 11 7.99991 11C9.10448 11 9.99991 10.1046 9.99991 9C9.99991 10.1046 10.8953 11 11.9999 11C13.1045 11 13.9999 10.1046 13.9999 9C13.9999 10.1046 14.8953 11 15.9999 11C17.1045 11 17.9999 10.1046 17.9999 9C17.9999 10.1046 18.8953 11 19.9999 11C20.6373 11 21.205 10.7019 21.5712 10.2375C22.1171 9.54525 21.8334 8.57905 21.5091 7.75929L20.1055 4.21114C19.5676 3.13531 19.2986 2.5974 18.8153 2.2987C18.332 2 17.7306 2 16.5278 2Z" stroke="#1C274C" strokeWidth="1.5" strokeLinejoin="round"></path> <path opacity="0.5" d="M9.5 21.5V18.5C9.5 17.5654 9.5 17.0981 9.70096 16.75C9.83261 16.522 10.022 16.3326 10.25 16.201C10.5981 16 11.0654 16 12 16C12.9346 16 13.4019 16 13.75 16.201C13.978 16.3326 14.1674 16.522 14.299 16.75C14.5 17.0981 14.5 17.5654 14.5 18.5V21.5" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> </g></svg>
-                                                        <span className="block mt-2 text-lg">Para recoger en tienda</span>
+                                                        <span className="block mt-2 text-lg">{t.pickup}</span>
                                                     </div>
                                                 ) : (
                                                     <div className=" p-4 space-y-3">
                                                         <div>
-                                                            <p className="text-xs text-gray-500">Calle:</p>
+                                                            <p className="text-xs text-gray-500">{t.street}:</p>
                                                             <p className="font-medium ">{order.shippingAddress.address}</p>
                                                         </div>
                                                         <div className="flex flex-row justify-between gap-2">
                                                             <div className='flex-1'>
-                                                                <p className="text-xs text-gray-500">Código Postal:</p>
+                                                                <p className="text-xs text-gray-500">{t.postalCode}:</p>
                                                                 <p className="font-medium ">{order.shippingAddress.postalCode}</p>
                                                             </div>
                                                             <div className='flex-1'>
-                                                                <p className="text-xs text-gray-500">Ciudad:</p>
+                                                                <p className="text-xs text-gray-500">{t.city}:</p>
                                                                 <p className="font-medium ">{order.shippingAddress.city}</p>
                                                             </div>
                                                         </div>
                                                         <div className='flex flex-row justify-between gap-2'>
                                                             <div className='flex-1'>
-                                                                <p className="text-xs text-gray-500">Provincia:</p>
+                                                                <p className="text-xs text-gray-500">{t.province}:</p>
                                                                 <p className="font-medium ">{order.shippingAddress.province}</p>
                                                             </div>
                                                             <div className='flex-1'>
-                                                                <p className="text-xs text-gray-500">País:</p>
+                                                                <p className="text-xs text-gray-500">{t.country}:</p>
                                                                 <p className="font-medium ">{order.shippingAddress.country}</p>
                                                             </div>
                                                         </div>
@@ -306,21 +400,21 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         {/* Notes */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                             <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                <FiMessageSquare className="mr-2 text-[#00B0C8]" /> Notas
+                                                <FiMessageSquare className="mr-2 text-[#00B0C8]" /> {t.notes}
                                             </h4>
                                             <p className="text-gray-700 p-4">
-                                                {order.notes || 'No hay notas para este pedido.'}
+                                                {order.notes || t.noNotes}
                                             </p>
                                         </div>
                                         {/* Tracking */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                             <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                <FiTruck className="mr-2 text-[#00B0C8]" /> Seguimiento
+                                                <FiTruck className="mr-2 text-[#00B0C8]" /> {t.tracking}
                                             </h4>
                                             <p className="text-gray-700 p-4">
                                                 {order.trackingNumber
                                                     ? <span className="font-medium">{order.trackingNumber}</span>
-                                                    : 'No hay número de seguimiento disponible.'}
+                                                    : t.noTracking}
                                             </p>
                                         </div>
                                     </div>
@@ -329,7 +423,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         {/* Products */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                             <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                <FiPackage className="mr-2 text-[#00B0C8]" /> Productos
+                                                <FiPackage className="mr-2 text-[#00B0C8]" /> {t.products}
                                             </h4>
                                             <div className="overflow-x-auto">
                                                 <div className="overflow-x-auto" style={{ maxHeight: '300px', minHeight: '300px', height: '300px', overflowY: 'auto' }}>
@@ -337,19 +431,19 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                         <thead className="bg-gray-50">
                                                             <tr>
                                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                    Producto
+                                                                    {t.product}
                                                                 </th>
                                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                    Cantidad
+                                                                    {t.quantity}
                                                                 </th>
                                                                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                    Tipo
+                                                                    {t.type}
                                                                 </th> <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                    Precio
+                                                                    {t.price}
                                                                 </th>
 
                                                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                    Subtotal
+                                                                    {t.subtotal}
                                                                 </th>
                                                             </tr>
                                                         </thead>
@@ -391,7 +485,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                             {item.quantity}
                                                                         </td>
                                                                         <td className={`item-type px-6 py-4 whitespace-nowrap text-center text-sm font-semibold ${item.type === 'gift' ? 'gift-type text-pink-600' : 'personal-type text-blue-600'}`}>
-                                                                            {item.type === 'gift' ? 'Regalo' : 'Personal'}
+                                                                            {item.type === 'gift' ? t.gift : t.personal}
                                                                         </td>
                                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                                                                             {formatPrice(item.price)}
@@ -410,7 +504,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         {/* Order Summary */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                             <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                <FiCreditCard className="mr-2 text-[#00B0C8]" /> Resumen del pedido
+                                                <FiCreditCard className="mr-2 text-[#00B0C8]" /> {t.orderSummary}
                                             </h4>
                                             <div className="flex p-4 flex-row space-x-4 justify-between">
 
@@ -420,8 +514,8 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                             <FiTruck className="text-blue-600" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-medium">Envío</p>
-                                                            <p className="text-gray-600">{formatPrice(order.shippingCost) || 'Pendiente'}</p>
+                                                            <p className="text-sm font-medium">{t.shipping}</p>
+                                                            <p className="text-gray-600">{formatPrice(order.shippingCost) || t.pending}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -431,8 +525,8 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                             <FiCreditCard className="text-purple-600" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-medium">Impuestos</p>
-                                                            <p className="text-gray-600">{formatPrice(order.tax) || 'Pendiente'}</p>
+                                                            <p className="text-sm font-medium">{t.taxes}</p>
+                                                            <p className="text-gray-600">{formatPrice(order.tax) || t.pending}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -442,8 +536,8 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                             <FiDollarSign className="text-green-600" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-medium">Subtotal</p>
-                                                            <p className="text-gray-600">{formatPrice(order.subtotal) || 'Pendiente'}</p>
+                                                            <p className="text-sm font-medium">{t.subtotalLabel}</p>
+                                                            <p className="text-gray-600">{formatPrice(order.subtotal) || t.pending}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -453,8 +547,8 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                             <FiDollarSign className="text-green-600" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-medium">Total</p>
-                                                            <p className="text-gray-600">{formatPrice(order.totalAmount) || 'Pendiente'}</p>
+                                                            <p className="text-sm font-medium">{t.totalLabel}</p>
+                                                            <p className="text-gray-600">{formatPrice(order.totalAmount) || t.pending}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -465,7 +559,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                             </div>
                         ) : (
                             <div className="py-12 text-center text-gray-500">
-                                No se encontró información del pedido.
+                                {t.notFound}
                             </div>
                         )}
                     </div>
@@ -475,7 +569,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                             onClick={onClose}
                             className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
                         >
-                            Cerrar
+                            {t.close}
                         </button>
                     </div>
                 </div>

@@ -22,6 +22,92 @@ export default function OrdersTable({
     showPagination
 }) {
     const [selectedOrders, setSelectedOrders] = useState([]);
+    // Locale detection (default to 'ca')
+    let locale = 'ca';
+    if (typeof window !== 'undefined' && window.navigator) {
+        const lang = window.navigator.language || window.navigator.userLanguage;
+        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    }
+
+    // Translations
+    const translations = {
+        ca: {
+            selected: 'comandes seleccionades',
+            archive: 'Arxivar',
+            changeStatus: 'Canvia l\'estat a...',
+            accepted: 'Acceptada',
+            processing: 'Processant',
+            shipped: 'Enviada',
+            completed: 'Completada',
+            cancelled: 'Cancel·lada',
+            confirm: 'Confirma',
+            delete: 'Elimina',
+            reference: 'Referència',
+            client: 'Client',
+            total: 'Total',
+            payment: 'Mètode de pagament',
+            status: 'Estat',
+            date: 'Data',
+            actions: 'Accions',
+            noOrders: 'No s\'han trobat comandes.',
+            viewPDF: 'Veure tiquet PDF',
+            viewDetails: 'Veure detalls',
+            editOrder: 'Edita comanda',
+            deleteOrder: 'Elimina comanda',
+            confirmDelete: 'Estàs segur que vols eliminar',
+            updateSuccess: 'Comanda actualitzada correctament',
+            updateError: 'Error en actualitzar la comanda',
+            deleteError: 'Error en eliminar la comanda',
+            pleaseSelect: 'Si us plau, selecciona almenys una comanda',
+            archiving: 'Arxivant',
+            statusLabels: {
+                acceptado: 'Acceptada',
+                procesando: 'Processant',
+                enviado: 'Enviada',
+                completo: 'Completada',
+                cancelado: 'Cancel·lada',
+            },
+        },
+        es: {
+            selected: 'pedidos seleccionados',
+            archive: 'Archivar',
+            changeStatus: 'Cambiar estado a...',
+            accepted: 'Acceptado',
+            processing: 'Procesando',
+            shipped: 'Enviado',
+            completed: 'Completo',
+            cancelled: 'Cancelado',
+            confirm: 'Confirmar',
+            delete: 'Eliminar',
+            reference: 'Referencia',
+            client: 'Cliente',
+            total: 'Total',
+            payment: 'Método de pago',
+            status: 'Estado',
+            date: 'Fecha',
+            actions: 'Acciones',
+            noOrders: 'No se encontraron pedidos.',
+            viewPDF: 'Ver Ticket PDF',
+            viewDetails: 'Ver detalles',
+            editOrder: 'Editar pedido',
+            deleteOrder: 'Eliminar pedido',
+            confirmDelete: '¿Estás seguro de que deseas eliminar',
+            updateSuccess: 'Pedido actualizado correctamente',
+            updateError: 'Error al actualizar el pedido',
+            deleteError: 'Error al eliminar el pedido',
+            pleaseSelect: 'Por favor, selecciona al menos un pedido',
+            archiving: 'Archivando',
+            statusLabels: {
+                acceptado: 'Acceptado',
+                procesando: 'Procesando',
+                enviado: 'Enviado',
+                completo: 'Completo',
+                cancelado: 'Cancelado',
+            },
+        }
+    };
+    const t = translations[locale];
+    const statusLabelMap = t.statusLabels;
     const [bulkStatusValue, setBulkStatusValue] = useState("");
     const [statusDropdown, setStatusDropdown] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -97,19 +183,18 @@ export default function OrdersTable({
     };
     const handleBulkAction = (action, value) => {
         if (selectedOrders.length === 0) {
-            alert('Por favor, selecciona al menos un pedido');
+            alert(t.pleaseSelect);
             return;
         }
         if (action === 'eliminar') {
-            if (window.confirm(`¿Estás seguro de que deseas eliminar ${selectedOrders.length} pedidos? Esta acción no se puede deshacer.`)) {
+            if (window.confirm(`${t.confirmDelete} ${selectedOrders.length} ${t.selected}?`)) {
                 Promise.all(selectedOrders.map(id => onDelete(id)))
                     .then(() => setSelectedOrders([]));
             }
         } else if (action === 'archivar') {
-            alert(`Archivando ${selectedOrders.length} pedidos`);
+            alert(`${t.archiving} ${selectedOrders.length} ${t.selected}`);
             setSelectedOrders([]);
         } else if (action === 'estado' && value) {
-            // Only update the selected orders in the local orders array if possible
             Promise.all(selectedOrders.map(id => onStatusChange(id, value)))
                 .then(() => {
                     setBulkStatusValue("");
@@ -146,7 +231,6 @@ export default function OrdersTable({
     const handleSaveEdit = async (orderId, formData) => {
         setIsActionLoading(true);
         try {
-            // Send PATCH request to update order (status, notes, trackingNumber)
             const res = await fetch(`/api/orders/${orderId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -158,8 +242,7 @@ export default function OrdersTable({
             });
             const data = await res.json();
             if (res.ok && data.success) {
-                toast.success('Pedido actualizado correctamente');
-                // Update the local orders array with the new order data
+                toast.success(t.updateSuccess);
                 if (data.order) {
                     const updatedOrder = data.order;
                     if (Array.isArray(orders)) {
@@ -168,7 +251,7 @@ export default function OrdersTable({
                             orders[idx] = {
                                 ...orders[idx],
                                 ...updatedOrder,
-                                id: updatedOrder._id || updatedOrder.id // ensure id stays consistent
+                                id: updatedOrder._id || updatedOrder.id
                             };
                         }
                     }
@@ -176,11 +259,11 @@ export default function OrdersTable({
                 setEditModalOpen(false);
                 setSelectedOrder(null);
             } else {
-                alert(data.message || 'Error al actualizar el pedido');
+                alert(data.message || t.updateError);
             }
         } catch (error) {
             console.error('Error saving order edit:', error);
-            alert('Error al actualizar el pedido');
+            alert(t.updateError);
         } finally {
             setIsActionLoading(false);
         }
@@ -195,11 +278,11 @@ export default function OrdersTable({
                 setDeleteModalOpen(false);
                 setSelectedOrder(null);
             } else {
-                alert('Error al eliminar el pedido');
+                alert(t.deleteError);
             }
         } catch (error) {
             console.error('Error deleting order:', error);
-            alert('Error al eliminar el pedido');
+            alert(t.deleteError);
         } finally {
             setIsActionLoading(false);
         }
@@ -209,12 +292,12 @@ export default function OrdersTable({
             {/* Bulk Actions (Admin only) */}
             {userRole === 'admin' && selectedOrders.length > 0 && (
                 <div className="bg-gray-100 p-3 flex items-center flex-wrap gap-2">
-                    <span className="text-sm mr-4">{selectedOrders.length} pedidos seleccionados</span>
+                    <span className="text-sm mr-4">{selectedOrders.length} {t.selected}</span>
                     <button
                         onClick={() => handleBulkAction('archivar')}
                         className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded mr-2"
                     >
-                        Archivar
+                        {t.archive}
                     </button>
                     {/* Bulk status change dropdown with confirm button */}
                     <select
@@ -223,12 +306,12 @@ export default function OrdersTable({
                         value={bulkStatusValue}
                         onChange={e => setBulkStatusValue(e.target.value)}
                     >
-                        <option value="" disabled>Cambiar estado a...</option>
-                        <option value="acceptado">Acceptado</option>
-                        <option value="procesando">Procesando</option>
-                        <option value="enviado">Enviado</option>
-                        <option value="completo">Completo</option>
-                        <option value="cancelado">Cancelado</option>
+                        <option value="" disabled>{t.changeStatus}</option>
+                        <option value="acceptado">{statusLabelMap.acceptado}</option>
+                        <option value="procesando">{statusLabelMap.procesando}</option>
+                        <option value="enviado">{statusLabelMap.enviado}</option>
+                        <option value="completo">{statusLabelMap.completo}</option>
+                        <option value="cancelado">{statusLabelMap.cancelado}</option>
                     </select>
                     <button
                         className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded mr-2"
@@ -237,13 +320,13 @@ export default function OrdersTable({
                             if (bulkStatusValue) handleBulkAction('estado', bulkStatusValue);
                         }}
                     >
-                        Confirmar
+                        {t.confirm}
                     </button>
                     <button
                         onClick={() => handleBulkAction('eliminar')}
                         className="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded"
                     >
-                        Eliminar
+                        {t.delete}
                     </button>
                 </div>
             )}
@@ -261,13 +344,13 @@ export default function OrdersTable({
                                     />
                                 </th>
                             )}
-                            <th className="px-6 py-3 text-left">Referencia</th>
-                            {userRole === 'admin' && <th className="px-6 py-3 text-left">Cliente</th>}
-                            <th className="px-6 py-3 text-left">Total</th>
-                            <th className="px-6 py-3 text-left">Método de pago</th>
-                            <th className="px-6 py-3 text-left">Estado</th>
-                            <th className="px-6 py-3 text-left">Fecha</th>
-                            <th className="px-6 py-3 text-left">Acciones</th>
+                            <th className="px-6 py-3 text-left">{t.reference}</th>
+                            {userRole === 'admin' && <th className="px-6 py-3 text-left">{t.client}</th>}
+                            <th className="px-6 py-3 text-left">{t.total}</th>
+                            <th className="px-6 py-3 text-left">{t.payment}</th>
+                            <th className="px-6 py-3 text-left">{t.status}</th>
+                            <th className="px-6 py-3 text-left">{t.date}</th>
+                            <th className="px-6 py-3 text-left">{t.actions}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -283,16 +366,13 @@ export default function OrdersTable({
                                             />
                                         </td>
                                     )}
-                                    {/* <td className="px-6 py-4">{index + 1}</td> */}
                                     <td className="px-6 py-4">{order.reference}</td>
                                     {userRole === 'admin' && <td className="px-6 py-4">{order.customer}</td>}
                                     <td className="px-6 py-4">{order.total}</td>
                                     <td className="px-6 py-4">{order.payment}</td>
                                     <td className="px-6 py-4">
                                         {(() => {
-                                            // Normalize and map status to allowed values
                                             const rawStatus = (order.status || '').toLowerCase().trim();
-                                            // Map legacy/english/invalid statuses to allowed values
                                             const statusMap = {
                                                 'pending': 'procesando',
                                                 'processing': 'procesando',
@@ -301,27 +381,19 @@ export default function OrdersTable({
                                                 'completed': 'completo',
                                                 'cancelled': 'cancelado',
                                                 'canceled': 'cancelado',
-                                                // Spanish allowed values
                                                 'acceptado': 'acceptado',
                                                 'procesando': 'procesando',
                                                 'enviado': 'enviado',
                                                 'completo': 'completo',
                                                 'cancelado': 'cancelado',
                                             };
-                                            const status = statusMap[rawStatus] || 'procesando'; // fallback to 'procesando' if invalid
+                                            const status = statusMap[rawStatus] || 'procesando';
                                             const statusColorMap = {
                                                 'acceptado': 'bg-green-100 text-green-800',
                                                 'procesando': 'bg-yellow-100 text-yellow-800',
                                                 'enviado': 'bg-blue-100 text-blue-800',
                                                 'completo': 'bg-gray-100 text-gray-800',
                                                 'cancelado': 'bg-red-100 text-red-800',
-                                            };
-                                            const statusLabelMap = {
-                                                'acceptado': 'Acceptado',
-                                                'procesando': 'Procesando',
-                                                'enviado': 'Enviado',
-                                                'completo': 'Completo',
-                                                'cancelado': 'Cancelado',
                                             };
                                             const colorClass = statusColorMap[status] || 'bg-gray-100 text-gray-800';
                                             const label = statusLabelMap[status] || status;
@@ -337,13 +409,13 @@ export default function OrdersTable({
                                         <button
                                             onClick={() => viewPdf("/uploads/invoices/invoice-" + order.reference + ".pdf")}
                                             className="text-green-600 hover:text-green-800 flex items-center"
-                                            title="Ver Ticket PDF"
+                                            title={t.viewPDF}
                                         >
                                             <FaRegFilePdf size={20} />
                                         </button>
                                         <button
                                             className="text-[#00B0C8] hover:text-[#008A9B] mr-4 text-center"
-                                            title="Ver detalles"
+                                            title={t.viewDetails}
                                             onClick={() => handleViewOrder(order)}
                                         >
                                             <FiEye size={20} />
@@ -352,14 +424,14 @@ export default function OrdersTable({
                                             <>
                                                 <button
                                                     className="text-yellow-600 hover:text-yellow-900 mr-4 text-center"
-                                                    title="Editar pedido"
+                                                    title={t.editOrder}
                                                     onClick={() => handleEditOrder(order)}
                                                 >
                                                     <FiEdit size={20} />
                                                 </button>
                                                 <button
                                                     className="text-red-600 hover:text-red-900 text-center"
-                                                    title="Eliminar pedido"
+                                                    title={t.deleteOrder}
                                                     onClick={() => handleDeleteOrder(order)}
                                                 >
                                                     <FiTrash2 size={20} />
@@ -372,7 +444,7 @@ export default function OrdersTable({
                         ) : (
                             <tr>
                                 <td colSpan={userRole === 'admin' ? 9 : 7} className="px-6 py-4 text-center text-gray-500">
-                                    No se encontraron pedidos.
+                                    {t.noOrders}
                                 </td>
                             </tr>
                         )}
@@ -390,9 +462,8 @@ export default function OrdersTable({
                         onPageChange={onPageChange}
                         onItemsPerPageChange={onLimitChange || ((newLimit) => {
                             console.log('Items per page changed to', newLimit);
-                            // If onLimitChange is not provided, just log the change
                         })}
-                        showingText="Mostrando {} de {} pedidos"
+                        showingText={locale === 'ca' ? 'Mostrant {} de {} comandes' : 'Mostrando {} de {} pedidos'}
                     />
                 </div>
             )}

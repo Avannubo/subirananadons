@@ -8,7 +8,7 @@ export default async function BrandsPage() {
         <AuthCheck>
             <AdminLayout>
                 <div className="py-6 min-h-[100vh]">
-                    <h1 className="text-2xl font-bold mb-6">Gestión de Marcas</h1>
+                    <h1 className="text-2xl font-bold mb-6">Gestió de Marques</h1>
                     {/* <BrandsStats /> */}
                     <div className="bg-white rounded-lg shadow">
                         <BrandsTable />
