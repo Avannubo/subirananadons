@@ -339,12 +339,12 @@ export default function OrdersTabs({ userRole = 'user' }) {
     console.log('Order tab counts:', orderCounts);
     return (
         <>
-            <TabNavigation
+            {/* <TabNavigation
                 tabs={tabs}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 counts={orderCounts}
-            />
+            /> */}
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">

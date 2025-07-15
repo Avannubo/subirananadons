@@ -1,8 +1,60 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { FiX, FiSave } from 'react-icons/fi';
 
 export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoading }) {
+    // Locale detection (default to 'ca')
+    let locale = 'ca';
+    if (typeof window !== 'undefined' && window.navigator) {
+        const lang = window.navigator.language || window.navigator.userLanguage;
+        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    }
+
+    // Translations
+    const translations = {
+        ca: {
+            editOrder: 'Editar Comanda',
+            status: 'Estat',
+            trackingNumber: 'Número de seguiment',
+            trackingPlaceholder: 'Número de seguiment (opcional)',
+            notes: 'Notes',
+            notesPlaceholder: 'Notes addicionals sobre la comanda',
+            cancel: 'Cancel·lar',
+            save: 'Desar canvis',
+            saving: 'Desant...',
+            customer: 'Client',
+            id: 'ID',
+            statusOptions: {
+                acceptado: 'Acceptat',
+                procesando: 'Processant',
+                enviado: 'Enviat',
+                completo: 'Complet',
+                cancelado: 'Cancel·lat',
+            },
+        },
+        es: {
+            editOrder: 'Editar Pedido',
+            status: 'Estado',
+            trackingNumber: 'Número de seguimiento',
+            trackingPlaceholder: 'Número de seguimiento (opcional)',
+            notes: 'Notas',
+            notesPlaceholder: 'Notas adicionales sobre el pedido',
+            cancel: 'Cancelar',
+            save: 'Guardar cambios',
+            saving: 'Guardando...',
+            customer: 'Cliente',
+            id: 'ID',
+            statusOptions: {
+                acceptado: 'Aceptado',
+                procesando: 'Procesando',
+                enviado: 'Enviado',
+                completo: 'Completo',
+                cancelado: 'Cancelado',
+            },
+        }
+    };
+    const t = translations[locale];
     const [formData, setFormData] = useState({
         status: '',
         trackingNumber: '',
@@ -36,7 +88,7 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
             <div className="bg-white rounded-lg shadow-lg max-w-xl w-full">
                 <div className="flex justify-between items-center border-b border-gray-200 p-4">
                     <h3 className="text-xl font-semibold">
-                        Editar Pedido: {order.reference}
+                        {t.editOrder}: {order.reference}
                     </h3>
                     <button
                         onClick={onClose}
@@ -51,7 +103,7 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Estado
+                                {t.status}
                             </label>
                             <select
                                 name="status"
@@ -61,17 +113,17 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                                 disabled={isLoading}
                                 required
                             >
-                                <option value="acceptado">Acceptado</option>
-                                <option value="procesando">Procesando</option>
-                                <option value="enviado">Enviado</option>
-                                <option value="completo">Completo</option>
-                                <option value="cancelado">Cancelado</option>
+                                <option value="acceptado">{t.statusOptions.acceptado}</option>
+                                <option value="procesando">{t.statusOptions.procesando}</option>
+                                <option value="enviado">{t.statusOptions.enviado}</option>
+                                <option value="completo">{t.statusOptions.completo}</option>
+                                <option value="cancelado">{t.statusOptions.cancelado}</option>
                             </select>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Número de seguimiento
+                                {t.trackingNumber}
                             </label>
                             <input
                                 type="text"
@@ -79,7 +131,7 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                                 value={formData.trackingNumber}
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                placeholder="Número de seguimiento (opcional)"
+                                placeholder={t.trackingPlaceholder}
                                 disabled={isLoading}
                             />
                         </div>
@@ -87,7 +139,7 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
 
                     <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Notas
+                            {t.notes}
                         </label>
                         <textarea
                             name="notes"
@@ -95,15 +147,15 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                             onChange={handleChange}
                             rows="3"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                            placeholder="Notas adicionales sobre el pedido"
+                            placeholder={t.notesPlaceholder}
                             disabled={isLoading}
                         />
                     </div>
 
                     <div className="flex justify-between items-center mt-6 pt-4  ">
                         <div className="flex flex-col text-sm text-gray-500">
-                            <p>ID: {order.id}</p>
-                            <p>Cliente: {order.customer}</p>
+                            {/* <p>{t.id}: {order.id}</p> */}
+                            <p>{t.customer}: {order.customer}</p>
                         </div>
                         <div className="flex space-x-3">
                             <button
@@ -112,7 +164,7 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
                                 disabled={isLoading}
                             >
-                                Cancelar
+                                {t.cancel}
                             </button>
                             <button
                                 type="submit"
@@ -120,7 +172,7 @@ export default function OrderEditModal({ isOpen, onClose, onSave, order, isLoadi
                                 disabled={isLoading}
                             >
                                 <FiSave size={20} className="mr-2" />
-                                {isLoading ? 'Guardando...' : 'Guardar cambios'}
+                                {isLoading ? t.saving : t.save}
                             </button>
                         </div>
                     </div>
