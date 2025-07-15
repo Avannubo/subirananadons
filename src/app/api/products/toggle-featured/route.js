@@ -4,18 +4,8 @@ import Product from '@/models/Product';
 
 export async function POST(request) {
     try {
-        // Only allow in development environment
-        if (process.env.NODE_ENV !== 'development') {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: 'This API is only available in development mode'
-                },
-                { status: 403 }
-            );
-        }
-
         const { productId } = await request.json();
+        console.log('[toggle-featured] Received productId:', productId);
 
         if (!productId) {
             return NextResponse.json(
@@ -29,8 +19,9 @@ export async function POST(request) {
 
         await dbConnect();
 
-        // Find the product by ID
+        // Find the product by ID to get current featured value
         const product = await Product.findById(productId);
+        console.log('[toggle-featured] Product found:', product ? product._id : null, 'Current featured:', product ? product.featured : null);
 
         if (!product) {
             return NextResponse.json(
@@ -42,17 +33,22 @@ export async function POST(request) {
             );
         }
 
-        // Toggle the featured status
-        product.featured = !product.featured;
-        await product.save();
+        // Toggle the featured status using findByIdAndUpdate to avoid full validation
+        const newFeatured = !product.featured;
+        const updatedProduct = await Product.findByIdAndUpdate(
+            productId,
+            { $set: { featured: newFeatured } },
+            { new: true, runValidators: false }
+        );
+        console.log('[toggle-featured] Updated product from DB:', updatedProduct ? updatedProduct.featured : null);
 
         return NextResponse.json({
             success: true,
-            message: `Product ${product.featured ? 'marked as featured' : 'unmarked as featured'}`,
+            message: `Product ${updatedProduct.featured ? 'marked as featured' : 'unmarked as featured'}`,
             product: {
-                id: product._id,
-                name: product.name,
-                featured: product.featured
+                id: updatedProduct._id,
+                name: updatedProduct.name,
+                featured: updatedProduct.featured
             }
         });
     } catch (error) {
@@ -66,4 +62,4 @@ export async function POST(request) {
             { status: 500 }
         );
     }
-} 
+}

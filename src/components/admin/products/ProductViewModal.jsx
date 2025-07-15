@@ -134,7 +134,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                 {galleryImages.length > 1 && (
                                     <div className="w-full mt-3">
                                         <h4 className="text-xs font-medium text-gray-500 uppercase mb-2 flex items-center">
-                                            <FiImage className="mr-1 text-[#00B0C8]" /> Galería ({galleryImages.length} imágenes)
+                                            <FiImage className="mr-1 text-[#00B0C8]" /> Galeria ({galleryImages.length} imatges)
                                         </h4>
                                         <div className="flex space-x-2 overflow-x-auto pb-2">
                                             {galleryImages.map((img, index) => (
@@ -159,7 +159,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                                     )}
                                                     {index === 1 && product.imageHover && (
                                                         <div className="absolute top-0 left-0 bg-indigo-500 text-white text-[8px] px-1">
-                                                            Secundaria
+                                                            Secundària
                                                         </div>
                                                     )}
                                                 </button>
@@ -173,13 +173,13 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                         product.status === 'inactive' ? 'bg-yellow-100 text-yellow-800' :
                                             'bg-red-100 text-red-800'
                                         }`}>
-                                        {product.status === 'active' ? 'Activo' :
-                                            product.status === 'inactive' ? 'Inactivo' :
-                                                'Descontinuado'}
+                                        {product.status === 'active' ? 'Actiu' :
+                                            product.status === 'inactive' ? 'Inactiu' :
+                                                'Descatalogat'}
                                     </span>
                                     {product.featured && (
                                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            Destacado
+                                            Destacat
                                         </span>
                                     )}
                                 </div>
@@ -189,26 +189,26 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                 {/* Basic Information */}
                                 <section className="border-b border-gray-200 pb-4 space-y-2">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiTag className="mr-2 text-[#00B0C8]" /> Información Básica
+                                        <FiTag className="mr-2 text-[#00B0C8]" /> Informació bàsica
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="space-y-2">
                                             <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">ID:</span>
-                                                <p className="text-sm text-gray-700">{product._id || product.id || 'N/A'}</p>
+                                                <p className="text-sm text-gray-700">{product._id || product.id || 'N/D'}</p>
                                             </div><div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
-                                                <span className="text-sm font-medium text-gray-500">Referencia:</span>
-                                                <p className="text-sm text-gray-700">{product.reference || 'N/A'}</p>
+                                                <span className="text-sm font-medium text-gray-500">Referència:</span>
+                                                <p className="text-sm text-gray-700">{product.reference || 'N/D'}</p>
                                             </div>
 
                                         </div>
                                         <div className="space-y-2"> <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
-                                            <span className="text-sm font-medium text-gray-500">Categoría:</span>
-                                            <p className="text-sm text-gray-700">{categoryDisplay || 'N/A'}</p>
+                                            <span className="text-sm font-medium text-gray-500">Categoria:</span>
+                                            <p className="text-sm text-gray-700">{categoryDisplay || 'N/D'}</p>
                                         </div>
                                             <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">Marca:</span>
-                                                <p className="text-sm text-gray-700">{brandDisplay || 'N/A'}</p>
+                                                <p className="text-sm text-gray-700">{brandDisplay || 'N/D'}</p>
                                             </div>
 
                                         </div>
@@ -216,7 +216,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                     {product.description && (
                                         <section>
                                             <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                                <h3 className="text-sm font-medium text-gray-500">Descripción:</h3>
+                                                <h3 className="text-sm font-medium text-gray-500">Descripció:</h3>
                                                 <p className="text-sm text-gray-700">
                                                     {getTranslated(product.description)}
                                                 </p>
@@ -227,19 +227,19 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                 {/* Pricing Information */}
                                 <section className="border-b border-gray-200 pb-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiDollarSign className="mr-2 text-[#00B0C8]" /> Precios
+                                        <FiDollarSign className="mr-2 text-[#00B0C8]" /> Preus
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                            <span className="text-sm font-medium text-gray-500">Precio (sin IVA):</span>
+                                            <span className="text-sm font-medium text-gray-500">Preu (sense IVA):</span>
                                             <p className="text-base font-medium text-gray-800">
-                                                {product.price_excl_tax ? formatPrice(product.price_excl_tax) : 'N/A'}
+                                                {product.price_excl_tax ? formatPrice(product.price_excl_tax) : 'N/D'}
                                             </p>
                                         </div>
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                            <span className="text-sm font-medium text-gray-500">Precio (con IVA):</span>
+                                            <span className="text-sm font-medium text-gray-500">Preu (amb IVA):</span>
                                             <p className="text-base font-medium text-gray-800">
-                                                {product.price_incl_tax ? formatPrice(product.price_incl_tax) : 'N/A'}
+                                                {product.price_incl_tax ? formatPrice(product.price_incl_tax) : 'N/D'}
                                             </p>
                                         </div>
                                     </div>
@@ -247,17 +247,17 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                 {/* Inventory Information */}
                                 <section className="  border-gray-200 pb-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiBox className="mr-2 text-[#00B0C8]" /> Inventario
+                                        <FiBox className="mr-2 text-[#00B0C8]" /> Inventari
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                            <span className="text-sm font-medium text-gray-500">Stock Disponible:</span>
+                                            <span className="text-sm font-medium text-gray-500">Estoc disponible:</span>
                                             <p className={`text-base font-medium ${availableStock >= (product.stock?.minStock || 5) ? 'text-green-600' : 'text-red-600'}`}>
                                                 {availableStock}
                                             </p>
                                         </div>
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                            <span className="text-sm font-medium text-gray-500">Stock Mínimo:</span>
+                                            <span className="text-sm font-medium text-gray-500">Estoc mínim:</span>
                                             <p className="text-base font-medium text-gray-800">
                                                 {product.stock?.minStock !== undefined ? product.stock.minStock : '0'}
                                             </p>
@@ -274,7 +274,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                             onClick={onClose}
                             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         >
-                            Cerrar
+                            Tancar
                         </button>
                     </div>
                 </Dialog.Panel>

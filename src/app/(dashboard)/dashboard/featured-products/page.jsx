@@ -48,32 +48,61 @@ export default function FeaturedProductsPage() {
         try {
             setLoading(true);
             const params = new URLSearchParams({
-                page: currentPage.toString(),
-                limit: itemsPerPage.toString(),
+                limit: '99999', // fetch all for client-side pagination
                 preventSort: 'true'
             });
-
-            if (searchTerm) {
-                params.append('search', searchTerm);
-            }
-
             if (filter === 'featured') {
                 params.append('featured', 'true');
             }
-
             const response = await fetch(`/api/products?${params}`);
             if (!response.ok) throw new Error('Failed to fetch products');
             const data = await response.json();
-
             if (data && Array.isArray(data.products)) {
-                const sortedProducts = [...data.products].sort((a, b) => {
+                // Search logic: support translation objects for name, brand, category
+                const getName = (prod) => {
+                    if (!prod.name) return '';
+                    if (typeof prod.name === 'object') {
+                        return prod.name.ca || prod.name.es || '';
+                    }
+                    return prod.name;
+                };
+                const getBrand = (prod) => {
+                    if (!prod.brand) return '';
+                    if (typeof prod.brand === 'object') {
+                        return prod.brand.ca || prod.brand.es || '';
+                    }
+                    return prod.brand;
+                };
+                const getCategory = (prod) => {
+                    if (!prod.category) return '';
+                    if (typeof prod.category === 'object') {
+                        return prod.category.ca || prod.category.es || '';
+                    }
+                    return prod.category;
+                };
+                const search = searchTerm.trim().toLowerCase();
+                let filtered = data.products;
+                if (search) {
+                    filtered = data.products.filter(prod => {
+                        const name = getName(prod).toLowerCase();
+                        const brand = getBrand(prod).toLowerCase();
+                        const category = getCategory(prod).toLowerCase();
+                        const ref = (prod.reference || '').toLowerCase();
+                        return (
+                            name.includes(search) ||
+                            brand.includes(search) ||
+                            category.includes(search) ||
+                            ref.includes(search)
+                        );
+                    });
+                }
+                const sortedProducts = [...filtered].sort((a, b) => {
                     if (a.featured && !b.featured) return -1;
                     if (!a.featured && b.featured) return 1;
-                    return a.name.localeCompare(b.name);
+                    return getName(a).localeCompare(getName(b));
                 });
-
                 setAllProducts(sortedProducts);
-                setTotalItems(data.total || sortedProducts.length);
+                setTotalItems(sortedProducts.length);
             } else {
                 toast.error('Error: Invalid data format');
             }
@@ -88,7 +117,7 @@ export default function FeaturedProductsPage() {
     // Toggle featured status of a product
     const toggleFeatured = async (productId) => {
         try {
-            const toastId = toast.loading('Actualizando estado...');
+            const toastId = toast.loading('Actualitzant estat...');
             const response = await fetch('/api/products/toggle-featured', {
                 method: 'POST',
                 headers: {
@@ -98,8 +127,12 @@ export default function FeaturedProductsPage() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al actualizar el estado');
+                let errorMsg = 'Error en actualitzar l\'estat';
+                try {
+                    const errorData = await response.json();
+                    if (errorData && errorData.message) errorMsg = errorData.message;
+                } catch { }
+                throw new Error(errorMsg);
             }
 
             const data = await response.json();
@@ -113,7 +146,7 @@ export default function FeaturedProductsPage() {
             );
 
             fetchFeaturedCount();
-            toast.success(data.message || 'Estado actualizado correctamente', { id: toastId });
+            toast.success((data && data.message) || 'Estat actualitzat correctament', { id: toastId });
         } catch (error) {
             console.error('Error toggling featured status:', error);
             toast.error(`Error: ${error.message}`);
@@ -133,37 +166,31 @@ export default function FeaturedProductsPage() {
         setCurrentPage(1);
     };
 
-    // Pagination logic    
+    // Pagination logic (client-side)
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const paginatedProducts = allProducts;
+    const paginatedProducts = allProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     return (
         <AuthCheck>
             <AdminLayout>
                 <div className="py-6 min-h-[100vh]">
-                    <h1 className="text-2xl font-bold mb-6">Gestión de Productos Destacados</h1>
+                    <h1 className="text-2xl font-bold mb-6">Gestió de Productes Destacats</h1>
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <p className="text-gray-600 mb-4">
-                            Los productos destacados aparecen en la sección "Productos Destacados" en la página de inicio y otras secciones destacadas de la tienda.
+                            Els productes destacats apareixen a la secció "Productes Destacats" a la pàgina d'inici i altres seccions destacades de la botiga.
                         </p>
                         <div className="flex justify-between items-center flex-wrap gap-4">
                             <div className="flex items-center space-x-2">
                                 <div className="bg-blue-100 text-blue-800 p-3 rounded-lg font-medium text-sm flex items-center">
-                                <FiStar className="mr-1" />
-                                <span>Productos Destacados: {totalFeaturedCount}</span>
-                            </div>
-                                {/* <button
-                                    onClick={fetchProducts}
-                                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full font-medium text-sm"
-                                >
-                                    Actualizar
-                                </button> */}
+                                    <FiStar className="mr-1" />
+                                    <span>Productes Destacats: {totalFeaturedCount}</span>
+                                </div>
                             </div>
                             <div className="flex-1 flex space-x-2">
                                 <div className="relative rounded-md w-full">
                                     <input
                                         type="text"
-                                        placeholder="Buscar por nombre o referencia"
+                                        placeholder="Cerca per nom, marca, categoria o referència"
                                         className="border border-gray-300 rounded-md w-full px-4 py-2 focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -177,14 +204,6 @@ export default function FeaturedProductsPage() {
                                         </button>
                                     )}
                                 </div>
-                                {/* <select
-                                    className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                    value={filter}
-                                    onChange={(e) => setFilter(e.target.value)}
-                                >
-                                    <option value="all">Todos los productos</option>
-                                    <option value="featured">Solo destacados</option>
-                                </select> */}
                             </div>
                         </div>
                     </div>
@@ -197,14 +216,13 @@ export default function FeaturedProductsPage() {
                             {paginatedProducts.length === 0 ? (
                                 <div className="p-8 text-center">
                                     <FiAlertCircle className="mx-auto text-gray-400 text-4xl mb-4" />
-                                    <p className="text-gray-500 mb-2">No se encontraron productos</p>
+                                    <p className="text-gray-500 mb-2">No s'han trobat productes</p>
                                     <p className="text-gray-400 text-sm">
                                         {searchTerm
-                                            ? 'Intenta con otra búsqueda o elimina los filtros'
-                                            : filter === 'featured'
-                                                ? 'No hay productos destacados. Marca productos como destacados utilizando la opción "Todos los productos"'
-                                                : 'No hay productos disponibles en la base de datos'
-                                        }
+                                            ? 'Intenta amb una altra cerca o elimina els filtres'
+                                            : (filter === 'featured'
+                                                ? 'No hi ha productes destacats. Marca productes com a destacats utilitzant l\'opció "Tots els productes"'
+                                                : 'No hi ha productes disponibles a la base de dades')}
                                     </p>
                                 </div>
                             ) : (
@@ -213,22 +231,22 @@ export default function FeaturedProductsPage() {
                                         <thead className="bg-gray-50">
                                             <tr>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Imagen
+                                                    Imatge
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Producto
+                                                    Producte
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Referencia
+                                                    Referència
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Precio
+                                                    Preu
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Estado
+                                                    Estat
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Destacado
+                                                    Destacat
                                                 </th>
                                             </tr>
                                         </thead>
@@ -245,13 +263,17 @@ export default function FeaturedProductsPage() {
                                                                 />
                                                             ) : (
                                                                 <div className="h-full w-full flex items-center justify-center text-gray-400">
-                                                                    No img
+                                                                    Sense imatge
                                                                 </div>
                                                             )}
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                                        <div className="text-sm font-medium text-gray-900">
+                                                            {typeof product.name === 'object'
+                                                                ? (product.name.ca || product.name.es || '-')
+                                                                : (product.name || '-')}
+                                                        </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="text-sm text-gray-500">{product.reference || '-'}</div>
@@ -266,9 +288,9 @@ export default function FeaturedProductsPage() {
                                                             product.status === 'inactive' ? 'bg-yellow-100 text-yellow-800' :
                                                                 'bg-red-100 text-red-800'
                                                             }`}>
-                                                            {product.status === 'active' ? 'Activo' :
-                                                                product.status === 'inactive' ? 'Inactivo' :
-                                                                    'Descontinuado'}
+                                                            {product.status === 'active' ? 'Actiu' :
+                                                                product.status === 'inactive' ? 'Inactiu' :
+                                                                    'Descatalogat'}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -282,7 +304,7 @@ export default function FeaturedProductsPage() {
                                                             >
                                                                 {product.featured ? (
                                                                     <>
-                                                                        <FiCheck className="mr-1" /> Destacado
+                                                                        <FiCheck className="mr-1" /> Destacat
                                                                     </>
                                                                 ) : (
                                                                     <>
@@ -299,15 +321,15 @@ export default function FeaturedProductsPage() {
                                 </div>
                             )}
                             <div className="px-6 py-4">
-                                {/* <Pagination
+                                <Pagination
                                     currentPage={currentPage}
                                     totalPages={totalPages}
                                     totalItems={totalItems}
                                     itemsPerPage={itemsPerPage}
                                     onPageChange={setCurrentPage}
                                     onItemsPerPageChange={handleItemsPerPageChange}
-                                    showingText="Mostrando {} de {} productos"
-                                /> */}
+                                    showingText="Mostrant {} de {} productes"
+                                />
                             </div>
                         </div>
                     )}

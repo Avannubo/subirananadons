@@ -6,10 +6,8 @@ import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { useStats } from '@/contexts/StatsContext';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
-
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
     console.log(product);
-
     const [formData, setFormData] = useState({
         name: { es: '', ca: '' },
         reference: '',
@@ -113,38 +111,30 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         });
         return rootCategories;
     };
-
     // Get hierarchical categories for the dropdown
     const hierarchicalCategories = organizeCategories(categories);
-
     // Load product data when editing
     useEffect(() => {
         if (isEditing && product) {
             // Format all images into a single array for the UI
             const allImages = [];
-
             // Add main image
             if (product.image) {
                 allImages.push(product.image);
             }
-
             // Add hover image if different from main image
             if (product.imageHover && product.imageHover !== product.image) {
                 allImages.push(product.imageHover);
             }
-
             // Add additional images
             if (product.additionalImages && Array.isArray(product.additionalImages)) {
                 allImages.push(...product.additionalImages);
             }
-
             setProductImages(allImages);
-
             if (allImages.length > 0) {
                 setImagePreview(allImages[0]);
                 setSelectedImageIndex(0);
             }
-
             setFormData({
                 name: product.name,
                 reference: product.reference || '',
@@ -194,7 +184,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             });
         }
     }, [isEditing, product]);
-
     // Handle form input changes
     const handleChange = (e) => {
         const { name, value, type, checked, id } = e.target;
@@ -230,7 +219,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             }));
         }
     };
-
     // Handle category selection from the dropdown
     // Fix: handleCategorySelect should update category (ObjectId) and categoryDisplayName (string)
     // If user selects a new category, set ObjectId; otherwise, keep legacy string until changed
@@ -243,7 +231,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }));
         setShowCategoryDropdown(false);
     };
-
     // Handle brand selection
     // Fix: handleBrandSelect should update brand (ObjectId) and brandDisplayName (string)
     // If user selects a new brand, set ObjectId; otherwise, keep legacy string until changed
@@ -256,34 +243,29 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }));
         setShowBrandDropdown(false);
     };
-
     // Handle image selection
     const handleImageChange = (e) => {
         const files = e.target.files;
         if (files && files.length > 0) {
             setSelectedImage(files);
-
             // Show preview of the first file
             const fileReader = new FileReader();
             fileReader.onload = () => {
                 setImagePreview(fileReader.result);
             };
             fileReader.readAsDataURL(files[0]);
-
             // If multiple files selected, upload them immediately
             if (files.length > 1) {
                 handleAddImage();
             }
         }
     };
-
     // Add image to product images array
     const handleAddImage = async () => {
         if (!selectedImage && !formData.image) {
             toast.error('Por favor seleccione una imagen o proporcione una URL');
             return;
         }
-
         // If URL provided, add it directly
         if (formData.image && !selectedImage) {
             // Check if this URL already exists in the product images
@@ -291,10 +273,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 toast.error('Esta imagen ya ha sido añadida');
                 return;
             }
-
             const newImages = [...productImages, formData.image];
             setProductImages(newImages);
-
             // Clear inputs for next image
             setSelectedImage(null);
             setImagePreview('');
@@ -302,20 +282,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 ...prev,
                 image: ''
             }));
-
             toast.success('Imagen añadida correctamente');
             return;
         }
-
         // Handle multiple files upload
         if (selectedImage && selectedImage.length) {
             setIsUploading(true);
             const toastId = toast.loading(`Subiendo ${selectedImage.length} imágenes...`);
-
             try {
                 const uploadPromises = [];
                 const filesArray = Array.from(selectedImage);
-
                 // Process each file for upload
                 for (const file of filesArray) {
                     uploadPromises.push(
@@ -327,7 +303,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     reader.onloadend = () => resolveBase64(reader.result);
                                     reader.readAsDataURL(file);
                                 });
-
                                 // Upload to server
                                 const response = await fetch('/api/cloudinary/upload', {
                                     method: 'POST',
@@ -336,12 +311,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     },
                                     body: JSON.stringify({ image: base64Image })
                                 });
-
                                 if (!response.ok) {
                                     const errorData = await response.json();
                                     throw new Error(errorData.error || `Error al subir la imagen ${file.name}`);
                                 }
-
                                 const data = await response.json();
                                 resolve(data.url);
                             } catch (error) {
@@ -351,15 +324,12 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         })
                     );
                 }
-
                 // Wait for all uploads to complete
                 const uploadedUrls = await Promise.all(uploadPromises);
                 const validUrls = uploadedUrls.filter(url => url !== null);
-
                 if (validUrls.length > 0) {
                     // Filter out any URLs that already exist in the product images
                     const newUrls = validUrls.filter(url => !productImages.includes(url));
-
                     if (newUrls.length === 0) {
                         toast.warning('Todas las imágenes ya han sido añadidas', { id: toastId });
                     } else {
@@ -369,11 +339,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 } else {
                     toast.error('Error al subir las imágenes', { id: toastId });
                 }
-
                 // Clear inputs for next upload
                 setSelectedImage(null);
                 setImagePreview('');
-
             } catch (error) {
                 console.error('Error uploading images:', error);
                 toast.error('Error al subir las imágenes', { id: toastId });
@@ -382,7 +350,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             }
             return;
         }
-
         // Handle single file upload (legacy path)
         if (selectedImage) {
             const imageUrl = await uploadImage();
@@ -392,29 +359,23 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     toast.error('Esta imagen ya ha sido añadida');
                     return;
                 }
-
                 // Add the new image to the array
                 const newImages = [...productImages, imageUrl];
                 setProductImages(newImages);
-
                 // Clear inputs for next image
                 setSelectedImage(null);
                 setImagePreview('');
-
                 toast.success('Imagen añadida correctamente');
             }
         }
     };
-
     // Remove an image
     // (This block was a duplicate and has been removed to fix the redeclaration error)
-
     // Select an image to view
     const handleSelectImage = (index) => {
         setSelectedImageIndex(index);
         setImagePreview(productImages[index]);
     };
-
     // Upload image to Cloudinary (legacy method for single image, kept for compatibility)
     const uploadImage = async () => {
         if (!selectedImage) return formData.image;
@@ -450,7 +411,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setIsUploading(false);
         }
     };
-
     // Form validation
     const validateForm = () => {
         const newErrors = {};
@@ -475,20 +435,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) return;
         setLoading(true);
-
         try {
-
             // Prepare images for submission
             let mainImage = '';
             let hoverImage = '';
             let additionalImages = [];
-
             if (productImages.length > 0) {
                 mainImage = productImages[0];
                 if (productImages.length > 1) {
@@ -498,11 +454,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     }
                 }
             }
-
             // Ensure category and brand are ObjectId (not name or empty string)
             let categoryId = formData.category;
             let brandId = formData.brand;
-
             // Accept both string and ObjectId
             const isObjectId = (val) => {
                 if (!val) return false;
@@ -510,11 +464,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 if (typeof val === 'object' && val.toString) return /^[a-fA-F0-9]{24}$/.test(val.toString());
                 return false;
             };
-
             // Treat empty string as null for category/brand
             if (categoryId === "") categoryId = null;
             if (brandId === "") brandId = null;
-
             // Always convert to ObjectId string or null (never send object)
             // Fix: Use categoryDisplayName if categoryId is not an ObjectId
             if (categoryId && !isObjectId(categoryId)) {
@@ -533,7 +485,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             }
             if (categoryId && typeof categoryId === 'object' && categoryId.toString) categoryId = categoryId.toString();
             if (!categoryId || !isObjectId(categoryId)) categoryId = null;
-
             // Fix: Use brandDisplayName if brandId is not an ObjectId
             if (brandId && !isObjectId(brandId)) {
                 let foundBrand = null;
@@ -548,7 +499,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             }
             if (brandId && typeof brandId === 'object' && brandId.toString) brandId = brandId.toString();
             if (!brandId || !isObjectId(brandId)) brandId = null;
-
             const processedData = {
                 ...formData,
                 category: categoryId,
@@ -563,10 +513,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     minStock: parseInt(formData.stock.minStock || 5),
                 },
             };
-
             // Save the product and get the saved product
             const savedProduct = await onSave(processedData);
-
             // Notify stats context about the change
             if (stats.notifyChange) {
                 setTimeout(() => {
@@ -580,7 +528,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setLoading(false);
         }
     };
-
     // Render category tree for dropdown with improved hierarchy indicators
     const getCategoryDisplayName = (cat) => {
         if (!cat) return '';
@@ -601,7 +548,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setShowBrandDropdown(true);
         }
     };
-
     const renderCategoryOption = (category, level = 0, isLast = false, prefix = '') => {
         const currentPrefix = level === 0 ? '' : isLast ? `${prefix}└─ ` : `${prefix}├─ `;
         const childPrefix = level === 0 ? '' : isLast ? `${prefix}   ` : `${prefix}│  `;
@@ -634,21 +580,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             </div>
         );
     };
-
     // Filter brands based on search term
     const filteredBrands = brands.filter(brand =>
         (brand.name || '').toLowerCase().includes(brandSearchTerm.toLowerCase())
     );
-
     // Reset search when dropdown closes
     useEffect(() => {
         if (!showBrandDropdown) {
             setBrandSearchTerm('');
         }
     }, [showBrandDropdown]);
-
-
-
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -656,7 +597,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 <Dialog.Panel className="w-full max-w-7xl bg-white rounded-lg shadow-xl overflow-hidden">
                     <div className="flex justify-between items-center p-4 border-b border-gray-300">
                         <DialogTitle className="text-lg font-medium">
-                            {isEditing ? 'Editar Producto' : 'Añadir Nuevo Producto'}
+                            {isEditing ? 'Editar producte' : 'Afegir nou producte'}
                         </DialogTitle>
                         <button
                             onClick={onClose}
@@ -669,21 +610,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Left Column */}
                             <div className="space-y-6 md:col-span-2">
-                                <h3 className="text-md font-medium">Información Básica</h3>
+                                <h3 className="text-md font-medium">Informació bàsica</h3>
                                 <div className="flex gap-4">
-                                    <div className="flex-1">
-                                        <label htmlFor="name-es" className="block text-sm font-medium text-gray-700">
-                                            Nombre (ES) *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="name-es"
-                                            name="name"
-                                            value={formData.name.es}
-                                            onChange={handleChange}
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                        />
-                                    </div>
                                     <div className="flex-1">
                                         <label htmlFor="name-ca" className="block text-sm font-medium text-gray-700">
                                             Nom (CA)
@@ -697,13 +625,54 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                         />
                                     </div>
+                                    <div className="flex-1">
+                                        <label htmlFor="name-es" className="block text-sm font-medium text-gray-700">
+                                            Nom (ES) *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="name-es"
+                                            name="name"
+                                            value={formData.name.es}
+                                            onChange={handleChange}
+                                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                        />
+                                    </div>
                                 </div>
                                 {errors.name && (
                                     <p className="mt-1 text-sm text-red-600">{errors.name}</p>
                                 )}
+                                <div className="flex gap-4 mt-4">
+                                    <div className="flex-1">
+                                        <label htmlFor="description-ca" className="block text-sm font-medium text-gray-700">
+                                            Descripció (CA)
+                                        </label>
+                                        <textarea
+                                            id="description-ca"
+                                            name="description"
+                                            rows={2}
+                                            value={formData.description.ca}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label htmlFor="description-es" className="block text-sm font-medium text-gray-700">
+                                            Descripció (ES)
+                                        </label>
+                                        <textarea
+                                            id="description-es"
+                                            name="description"
+                                            rows={2}
+                                            value={formData.description.es}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        />
+                                    </div>
+                                </div>
                                 <div>
                                     <label htmlFor="reference" className="block text-sm font-medium text-gray-700">
-                                        Referencia *
+                                        Referència *
                                     </label>
                                     <input
                                         type="text"
@@ -718,38 +687,22 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <p className="mt-1 text-sm text-red-600">{errors.reference}</p>
                                     )}
                                 </div>
-                                <div className="flex gap-4 mt-4">
-                                    <div className="flex-1">
-                                        <label htmlFor="description-es" className="block text-sm font-medium text-gray-700">
-                                            Descripción (ES)
-                                        </label>
-                                        <textarea
-                                            id="description-es"
-                                            name="description"
-                                            rows={2}
-                                            value={formData.description.es}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label htmlFor="description-ca" className="block text-sm font-medium text-gray-700">
-                                            Descripció (CA)
-                                        </label>
-                                        <textarea
-                                            id="description-ca"
-                                            name="description"
-                                            rows={2}
-                                            value={formData.description.ca}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                        />
-                                    </div>
-                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                                            Categoría : {product.category || 'N/A'}
+                                            Categoria :
+                                            {isEditing && (
+                                                <span className='font-bold'>{
+                                                    product.category && typeof product.category === 'object'
+                                                        ? (
+                                                            // If category has a name object (populated)
+                                                            product.category.name && typeof product.category.name === 'object'
+                                                                ? (product.category.name.ca || product.category.name.es || product.category.name.name || 'N/D')
+                                                                // If category is a translation object itself (like { ca, es })
+                                                                : (product.category.ca || product.category.es || product.category.name || 'N/D')
+                                                        )
+                                                        : (product.category || 'N/D')
+                                                }</span>)}
                                         </label>
                                         <div className="relative">
                                             <div
@@ -757,7 +710,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                                             >
                                                 <span className="truncate">{
-                                                    formData.categoryDisplayName || 'Seleccionar nueva categoria'
+                                                    formData.categoryDisplayName || 'Selecciona categoria'
                                                 }</span>
                                                 <FiChevronRight className={`transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
                                             </div>
@@ -766,10 +719,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     {loadingCategories ? (
                                                         <div className="flex justify-center p-4">
                                                             <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                                                            <span className="ml-2">Cargando categorías...</span>
+                                                            <span className="ml-2">Carregant categories...</span>
                                                         </div>
                                                     ) : hierarchicalCategories.length === 0 ? (
-                                                        <div className="p-4 text-gray-500">No hay categorías disponibles</div>
+                                                        <div className="p-4 text-gray-500">No hi ha categories disponibles</div>
                                                     ) : (
                                                         <div className="py-1 category-dropdown">
                                                             <style jsx global>{`
@@ -800,7 +753,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     </div>
                                     <div>
                                         <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
-                                            Marca : {product.brand || 'N/A'}
+                                            Marca :
+                                            {isEditing && (<span className='font-bold'> {product.brand || 'N/D'}</span>)}
                                         </label>
                                         <div className="relative">
                                             <div
@@ -833,14 +787,14 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         <span className="truncate text-gray-700 font-medium">{
                                                             (() => {
                                                                 const selectedBrand = brands.find(b => b._id === formData.brand);
-                                                                return selectedBrand ? selectedBrand.name : ' Seleccionar nueva marca';
+                                                                return selectedBrand ? selectedBrand.name : ' Selecciona nova marca';
                                                             })()
                                                         }</span>
                                                     </div>
                                                 ) : (
                                                     <div className="flex items-center space-x-2">
                                                         <FiPackage size={16} className="text-gray-400" />
-                                                        <span className="truncate text-gray-500">Seleccionar marca</span>
+                                                        <span className="truncate text-gray-500">Selecciona marca</span>
                                                     </div>
                                                 )}
                                                 <FiChevronRight className={`transition-transform ${showBrandDropdown ? 'rotate-90' : ''}`} />
@@ -851,7 +805,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     <div className="p-2 border-b border-gray-200 sticky top-0 bg-white z-10">
                                                         <input
                                                             type="text"
-                                                            placeholder="Buscar marca..."
+                                                            placeholder="Cerca marca..."
                                                             value={brandSearchTerm}
                                                             onChange={handleBrandSearch}
                                                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
@@ -863,13 +817,13 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         {loadingBrands ? (
                                                             <div className="flex justify-center p-4">
                                                                 <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                                                                <span className="ml-2">Cargando marcas...</span>
+                                                                <span className="ml-2">Carregant marques...</span>
                                                             </div>
                                                         ) : filteredBrands.length === 0 ? (
                                                             <div className="p-4 text-center text-gray-500">
                                                                 {brandSearchTerm ?
-                                                                    `No se encontraron marcas con "${brandSearchTerm}"` :
-                                                                    "No hay marcas disponibles"}
+                                                                    `No s'han trobat marques amb "${brandSearchTerm}"` :
+                                                                    "No hi ha marques disponibles"}
                                                             </div>
                                                         ) : (
                                                             <div className="p-2  brand-dropdown">
@@ -922,7 +876,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="price_excl_tax" className="block text-sm font-medium text-gray-700">
-                                            Precio sin Impuestos (€) *
+                                            Preu sense impostos (€) *
                                         </label>
                                         <input
                                             type="text"
@@ -939,7 +893,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     </div>
                                     <div>
                                         <label htmlFor="price_incl_tax" className="block text-sm font-medium text-gray-700">
-                                            Precio con Impuestos (€) *
+                                            Preu amb impostos (€) *
                                         </label>
                                         <input
                                             type="text"
@@ -955,11 +909,11 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         )}
                                     </div>
                                 </div>
-                                <h3 className="text-md font-medium mt-6">Inventario</h3>
+                                <h3 className="text-md font-medium mt-6">Inventari</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="available" className="block text-sm font-medium text-gray-700">
-                                            Stock
+                                            Estoc
                                         </label>
                                         <input
                                             type="number"
@@ -977,7 +931,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     </div>
                                     <div>
                                         <label htmlFor="minStock" className="block text-sm font-medium text-gray-700">
-                                            Stock Mínimo
+                                            Estoc mínim
                                         </label>
                                         <input
                                             type="number"
@@ -996,7 +950,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                                            Estado
+                                            Estat
                                         </label>
                                         <select
                                             id="status"
@@ -1005,9 +959,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             onChange={handleChange}
                                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                         >
-                                            <option value="active">Activo</option>
-                                            <option value="inactive">Inactivo</option>
-                                            <option value="discontinued">Descontinuado</option>
+                                            <option value="active">Actiu</option>
+                                            <option value="inactive">Inactiu</option>
+                                            <option value="discontinued">Descatalogat</option>
                                         </select>
                                     </div>
                                     <div className="flex items-center h-full pt-6">
@@ -1020,21 +974,20 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
                                         />
                                         <label htmlFor="featured" className="ml-2 block text-sm font-medium text-gray-700">
-                                            Destacado
+                                            Destacat
                                         </label>
                                     </div>
                                 </div>
                             </div>
                             {/* Right Column - Multiple Image Upload */}
                             <div className="space-y-6">
-                                <h3 className="text-md font-medium">Imágenes del Producto</h3>
-
+                                <h3 className="text-md font-medium">Imatges del producte</h3>
                                 {/* Current Images */}
                                 {productImages.length > 0 && (
                                     <div className="mb-6">
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Imágenes Actuales</h4>
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Imatges actuals</h4>
                                         <p className="text-xs text-gray-500 mb-2">
-                                            La primera imagen será la principal, la segunda será la de hover (opcional).
+                                            La primera imatge serà la principal, la segona serà la de hover (opcional).
                                         </p>
                                         <div className="flex overflow-x-auto p-1 space-x-4">
                                             {productImages.map((img, index) => (
@@ -1046,7 +999,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     <div className="relative cursor-pointer" onClick={() => handleSelectImage(index)}>
                                                         <Image
                                                             src={img || '/assets/images/product-placeholder.jpg'}
-                                                            alt={`Imagen de producto ${index + 1}`}
+                                                            alt={`Imatge de producte ${index + 1}`}
                                                             width={500}
                                                             height={500}
                                                             className="h-28 w-28 object-cover"
@@ -1058,7 +1011,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         )}
                                                         {index === 1 && (
                                                             <div className="absolute top-0 left-0 bg-indigo-500 text-white text-xs px-2 py-1">
-                                                                Secundaria
+                                                                Secundària
                                                             </div>
                                                         )}
                                                     </div>
@@ -1068,7 +1021,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             onClick={() => handleMoveImageUp(index)}
                                                             disabled={index === 0}
                                                             className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                            title="Mover a la izquierda"
+                                                            title="Mou a l'esquerra"
                                                         >
                                                             <FiChevronRight className="transform rotate-180" size={16} />
                                                         </button>
@@ -1076,7 +1029,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             type="button"
                                                             onClick={() => handleRemoveImage(index)}
                                                             className="text-red-500 p-1 rounded hover:bg-gray-200"
-                                                            title="Eliminar imagen"
+                                                            title="Elimina imatge"
                                                         >
                                                             <FiTrash2 size={16} />
                                                         </button>
@@ -1085,7 +1038,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             onClick={() => handleMoveImageDown(index)}
                                                             disabled={index === productImages.length - 1}
                                                             className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                            title="Mover a la derecha"
+                                                            title="Mou a la dreta"
                                                         >
                                                             <FiChevronRight size={16} />
                                                         </button>
@@ -1095,7 +1048,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         </div>
                                     </div>
                                 )}
-
                                 {/* Image Upload */}
                                 <div className="flex flex-col items-center space-y-4">
                                     <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
@@ -1115,16 +1067,15 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         ) : (
                                             <div className="flex flex-col items-center justify-center h-full">
                                                 <FiUpload className="w-10 h-10 text-gray-400" />
-                                                <p className="mt-2 text-sm text-gray-500">No hay imagen seleccionada</p>
+                                                <p className="mt-2 text-sm text-gray-500">No hi ha imatge seleccionada</p>
                                                 <p className="mt-1 text-xs text-gray-400">
                                                     {productImages.length === 0
-                                                        ? "Añada al menos una imagen principal"
-                                                        : "Añada más imágenes (opcional)"}
+                                                        ? "Afegeix almenys una imatge principal"
+                                                        : "Afegeix més imatges (opcional)"}
                                                 </p>
                                             </div>
                                         )}
                                     </div>
-
                                     <div className="w-full grid grid-cols-2 gap-2">
                                         <div>
                                             <label
@@ -1134,7 +1085,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
                                                     }`}
                                             >
-                                                {isUploading ? 'Subiendo...' : 'Seleccionar imágenes'}
+                                                {isUploading ? 'Pujant...' : 'Selecciona imatges'}
                                             </label>
                                             <input
                                                 type="file"
@@ -1156,7 +1107,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 }`}
                                         >
                                             <FiPlus size={16} />
-                                            <span>Añadir a Galería</span>
+                                            <span>Afegeix a galeria</span>
                                         </button>
                                         <button
                                             type="button"
@@ -1164,7 +1115,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             disabled={isUploading}
                                             className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
                                         >
-                                            Seleccionar existente
+                                            Selecciona existent
                                         </button>
                                     </div>
                                     {showImageSelector && (
@@ -1178,13 +1129,12 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         />
                                     )}
                                     <p className="mt-1 text-xs text-gray-500 text-center">
-                                        Formatos: JPG, PNG. Max: 5MB
+                                        Formats: JPG, PNG. Màx: 5MB
                                     </p>
-
                                     {/* Manual URL input */}
                                     <div className="w-full mt-4">
                                         <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-                                            URL de Imagen (opcional)
+                                            URL d'imatge (opcional)
                                         </label>
                                         <div className="flex mt-1">
                                             <input
@@ -1194,7 +1144,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 value={formData.image}
                                                 onChange={handleChange}
                                                 className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                                placeholder="https://ejemplo.com/imagen.jpg"
+                                                placeholder="https://exemple.com/imatge.jpg"
                                             />
                                             <button
                                                 type="button"
@@ -1205,31 +1155,30 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 }}
                                                 className="text-nowrap bg-gray-200 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-300"
                                             >
-                                                Vista previa
+                                                Vista prèvia
                                             </button>
                                         </div>
                                         <p className="mt-1 text-xs text-gray-500">
-                                            O pegue la URL directamente aquí
+                                            O enganxa la URL directament aquí
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <div className="mt-8 flex justify-end space-x-3">
                             <button
                                 type="button"
                                 onClick={onClose}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                             >
-                                Cancelar
+                                Cancel·la
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading || isUploading}
                                 className="px-4 py-2 bg-[#00B0C8] text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] disabled:opacity-50"
                             >
-                                {loading ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
+                                {loading ? 'Desant...' : isEditing ? 'Actualitza' : 'Crea'}
                             </button>
                         </div>
                     </form>
