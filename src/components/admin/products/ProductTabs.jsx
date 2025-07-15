@@ -37,8 +37,8 @@ const products = [
 ];
 
 export default function ProductTabs() {
-    const [activeTab, setActiveTab] = useState('Productos');
-    const tabs = ['Productos', 'Categorías', 'Stocks', 'Marcas']; //, 'Descuentos'
+    const [activeTab, setActiveTab] = useState('Productes');
+    const tabs = ['Productes', 'Categories', 'Estocs', 'Marques']; //, 'Descomptes'
 
     return (
         <div>
@@ -50,13 +50,13 @@ export default function ProductTabs() {
             />
 
             {/* Content Switching */}
-            {activeTab === 'Productos' && <ProductsTable products={products} />}
-            {activeTab === 'Categorías' && <CategoriesTree />}
-            {activeTab === 'Stocks' && <StockManagement products={products} />}
-            {activeTab === 'Marcas' && <BrandsTable brands={brands} />}
-            {activeTab === 'Descuentos' && (
-                <div className="text-gray-500 italic">Descuentos: Próximamente...</div>
-            )}
+            {activeTab === 'Productes' && <ProductsTable products={products} />}
+            {activeTab === 'Categories' && <CategoriesTree />}
+            {activeTab === 'Estocs' && <StockManagement products={products} />}
+            {activeTab === 'Marques' && <BrandsTable brands={brands} />}
+            {/* {activeTab === 'Descomptes' && (
+                <div className="text-gray-500 italic">Descomptes: Aviat disponible...</div>
+            )} */}
         </div>
     );
 }

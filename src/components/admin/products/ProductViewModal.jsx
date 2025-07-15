@@ -4,7 +4,72 @@ import { FiX, FiPackage, FiDollarSign, FiTag, FiBox, FiImage } from 'react-icons
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
-export default function ProductViewModal({ isOpen, onClose, product }) {
+
+// Helper to get display name for category
+function getCategoryDisplayName(cat, categories) {
+    if (!cat) return '';
+    // Populated object with ca/es/name
+    if (typeof cat === 'object' && (cat.ca || cat.es || cat.name)) {
+        if (typeof cat.name === 'object') return cat.name.ca || cat.name.es || cat.name.name || '';
+        return cat.ca || cat.es || cat.name || '';
+    }
+    // Populated object with _id and name fields
+    if (typeof cat === 'object' && cat._id && (cat.name || cat.ca || cat.es)) {
+        if (typeof cat.name === 'object') return cat.name.ca || cat.name.es || cat.name.name || '';
+        return cat.ca || cat.es || cat.name || '';
+    }
+    // If cat is an object with $oid (MongoDB export)
+    if (typeof cat === 'object' && cat.$oid && Array.isArray(categories)) {
+        const found = categories.find(c => c._id === cat.$oid || (c._id && c._id.toString && c._id.toString() === cat.$oid));
+        if (found) {
+            if (typeof found.name === 'object') return found.name.ca || found.name.es || found.name.name || '';
+            return found.ca || found.es || found.name || '';
+        }
+        return cat.$oid;
+    }
+    // If cat is a string and looks like an ObjectId, try to find the category name
+    if (typeof cat === 'string' && /^[a-fA-F0-9]{24}$/.test(cat) && Array.isArray(categories)) {
+        const found = categories.find(c => c._id === cat || (c._id && c._id.toString && c._id.toString() === cat));
+        if (found) {
+            if (typeof found.name === 'object') return found.name.ca || found.name.es || found.name.name || '';
+            return found.ca || found.es || found.name || '';
+        }
+    }
+    // Otherwise just return empty string (never show the id)
+    return '';
+}
+
+// Helper to get display name for brand
+function getBrandDisplayName(brand, brands) {
+    if (!brand) return '';
+    // Populated object with name
+    if (typeof brand === 'object' && brand.name) {
+        return brand.name;
+    }
+    // Populated object with _id and name
+    if (typeof brand === 'object' && brand._id && brand.name) {
+        return brand.name;
+    }
+    // If brand is an object with $oid (MongoDB export)
+    if (typeof brand === 'object' && brand.$oid && Array.isArray(brands)) {
+        const found = brands.find(b => b._id === brand.$oid || (b._id && b._id.toString && b._id.toString() === brand.$oid));
+        if (found) return found.name || '';
+        return '';
+    }
+    // If brand is a string and looks like an ObjectId, try to find the brand name
+    if (typeof brand === 'string' && /^[a-fA-F0-9]{24}$/.test(brand) && Array.isArray(brands)) {
+        const found = brands.find(b => b._id === brand || (b._id && b._id.toString && b._id.toString() === brand));
+        if (found) return found.name || '';
+    }
+    // Otherwise just return empty string (never show the id)
+    return '';
+}
+
+export default function ProductViewModal({ isOpen, onClose, product, categories = [], brands = [] }) {
+    // Language state for translation switcher
+    const [lang, setLang] = useState('ca');
+    useEffect(() => { setLang('ca'); }, [product]); // Reset to ES on product change
+
     if (!product) return null;
 
     // Get all product images for the gallery
@@ -54,6 +119,19 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
     // Calculate available stock
     const availableStock = product.stock?.available || 0;
 
+
+    // Get display names for category and brand
+    const categoryDisplay = getCategoryDisplayName(product.category, categories);
+    const brandDisplay = getBrandDisplayName(product.brand, brands);
+
+    // Get translated name/description (only these two fields are translated)
+    const getTranslated = (field) => {
+        if (!field) return '';
+        if (typeof field === 'string') return field;
+        if (typeof field === 'object') return field[lang] || field.es || field.ca || '';
+        return '';
+    };
+
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -63,14 +141,24 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                     <div className="flex justify-between items-center p-4 border-b border-gray-300 bg-gray-50">
                         <Dialog.Title className="text-lg font-medium text-gray-800 flex items-center">
                             <FiPackage className="mr-2 text-[#00B0C8]" />
-                            {product.name}
+                            {getTranslated(product.name)}
                         </Dialog.Title>
-                        <button
-                            onClick={onClose}
-                            className="text-gray-400 hover:text-gray-500"
-                        >
-                            <FiX className="h-5 w-5" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setLang('es')}
+                                className={`px-2 py-1 rounded text-xs font-medium border ${lang === 'es' ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300'}`}
+                            >ES</button>
+                            <button
+                                onClick={() => setLang('ca')}
+                                className={`px-2 py-1 rounded text-xs font-medium border ${lang === 'ca' ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300'}`}
+                            >CA</button>
+                            <button
+                                onClick={onClose}
+                                className="ml-2 text-gray-400 hover:text-gray-500"
+                            >
+                                <FiX className="h-5 w-5" />
+                            </button>
+                        </div>
                     </div>
                     <div className="p-6 max-h-[80vh] overflow-y-auto">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -156,13 +244,13 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                             </div>
                                             <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">Categoría:</span>
-                                                <p className="text-sm text-gray-700">{product.category || 'N/A'}</p>
+                                                <p className="text-sm text-gray-700">{categoryDisplay || 'N/A'}</p>
                                             </div>
                                         </div>
                                         <div className="space-y-2">
                                             <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">Marca:</span>
-                                                <p className="text-sm text-gray-700">{product.brand || 'N/A'}</p>
+                                                <p className="text-sm text-gray-700">{brandDisplay || 'N/A'}</p>
                                             </div>
                                             <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                                 <span className="text-sm font-medium text-gray-500">ID:</span>
@@ -175,7 +263,7 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                             <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                                 <h3 className="text-sm font-medium text-gray-500">Descripción:</h3>
                                                 <p className="text-sm text-gray-700">
-                                                    {product.description}
+                                                    {getTranslated(product.description)}
                                                 </p>
                                             </div>
                                         </section>
@@ -220,8 +308,8 @@ export default function ProductViewModal({ isOpen, onClose, product }) {
                                             </p>
                                         </div>
                                     </div>
-                                </section> 
-                               
+                                </section>
+
                             </div>
                         </div>
                     </div>

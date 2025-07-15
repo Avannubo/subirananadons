@@ -156,14 +156,40 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        // Create the product
+        // Fix: Ensure category and brand are ObjectId or string, not object
+        let categoryValue = body.category;
+        if (categoryValue && typeof categoryValue === 'object' && categoryValue._id) {
+            categoryValue = categoryValue._id;
+        }
+        if (categoryValue && typeof categoryValue === 'object' && categoryValue.es) {
+            // Sometimes category is { es: '...', ca: '' }
+            categoryValue = categoryValue.es || categoryValue.ca || '';
+        }
+        if (categoryValue && typeof categoryValue === 'object') {
+            // Fallback: try toString
+            if (categoryValue.toString) categoryValue = categoryValue.toString();
+        }
+        if (!categoryValue || typeof categoryValue !== 'string') categoryValue = '';
+
+        let brandValue = body.brand;
+        if (brandValue && typeof brandValue === 'object' && brandValue._id) {
+            brandValue = brandValue._id;
+        }
+        if (brandValue && typeof brandValue === 'object' && brandValue.name) {
+            brandValue = brandValue.name;
+        }
+        if (brandValue && typeof brandValue === 'object') {
+            if (brandValue.toString) brandValue = brandValue.toString();
+        }
+        if (!brandValue || typeof brandValue !== 'string') brandValue = '';
+
         const product = await Product.create({
             name: body.name,
             reference: body.reference || '',
             description: body.description || '',
-            category: body.category,
+            category: categoryValue,
             categoryId: body.categoryId || '',
-            brand: body.brand || '',
+            brand: brandValue,
             brandId: body.brandId || '',
             price_excl_tax: parseFloat(body.price_excl_tax),
             price_incl_tax: parseFloat(body.price_incl_tax),

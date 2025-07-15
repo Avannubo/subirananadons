@@ -2,9 +2,8 @@ import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({
     name: {
-        type: String,
-        required: [true, 'Please provide a product name'],
-        maxlength: [100, 'Name cannot be more than 100 characters']
+        es: { type: String, required: [true, 'Por favor, proporciona un nombre de producto'], maxlength: [100, 'El nombre no puede tener más de 100 caracteres'], trim: true },
+        ca: { type: String, required: [true, 'Si us plau, proporciona un nom de producte'], maxlength: [100, 'El nom no pot tenir més de 100 caràcters'], trim: true }
     },
     reference: {
         type: String,
@@ -12,16 +11,18 @@ const productSchema = new mongoose.Schema({
         sparse: true
     },
     description: {
-        type: String,
-        maxlength: [1000, 'Description cannot be more than 1000 characters']
+        es: { type: String, maxlength: [1000, 'La descripción no puede tener más de 1000 caracteres'], trim: true },
+        ca: { type: String, maxlength: [1000, 'La descripció no pot tenir més de 1000 caràcters'], trim: true }
     },
     category: {
-        type: String,
-        required: [true, 'Please provide a category']
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: [false, 'Por favor, selecciona una categoría']
     },
     brand: {
-        type: String,
-        default: ''
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Brand',
+        required: [false]
     },
     price_excl_tax: {
         type: Number,

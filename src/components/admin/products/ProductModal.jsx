@@ -9,9 +9,9 @@ import ImageSelector from '@/components/admin/shared/ImageSelector';
 
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
     const [formData, setFormData] = useState({
-        name: '',
+        name: { es: '', ca: '' },
         reference: '',
-        description: '',
+        description: { es: '', ca: '' },
         category: '',
         categoryId: '',
         brand: '',
@@ -147,10 +147,33 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 setSelectedImageIndex(0);
             }
 
+            // Defensive migration for name and description fields
+            let migratedName = product.name;
+            if (typeof product.name === 'string') {
+                migratedName = { es: product.name, ca: '' };
+            } else if (!product.name?.es && product.name?.ca) {
+                migratedName = { es: '', ca: product.name.ca };
+            } else if (!product.name?.ca && product.name?.es) {
+                migratedName = { es: product.name.es, ca: '' };
+            } else if (!product.name?.es && !product.name?.ca) {
+                migratedName = { es: '', ca: '' };
+            }
+
+            let migratedDescription = product.description;
+            if (typeof product.description === 'string') {
+                migratedDescription = { es: product.description, ca: '' };
+            } else if (!product.description?.es && product.description?.ca) {
+                migratedDescription = { es: '', ca: product.description.ca };
+            } else if (!product.description?.ca && product.description?.es) {
+                migratedDescription = { es: product.description.es, ca: '' };
+            } else if (!product.description?.es && !product.description?.ca) {
+                migratedDescription = { es: '', ca: '' };
+            }
+
             setFormData({
-                name: product.name || '',
+                name: migratedName,
                 reference: product.reference || '',
-                description: product.description || '',
+                description: migratedDescription,
                 category: product.category || '',
                 categoryId: product.categoryId || '',
                 brand: product.brand || '',
@@ -172,13 +195,50 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setProductImages([]);
             setSelectedImageIndex(-1);
             setImagePreview('');
+            setFormData({
+                name: { es: '', ca: '' },
+                reference: '',
+                description: { es: '', ca: '' },
+                category: '',
+                categoryId: '',
+                brand: '',
+                brandId: '',
+                price_excl_tax: '',
+                price_incl_tax: '',
+                image: '',
+                imageHover: '',
+                additionalImages: [],
+                stock: {
+                    available: '',
+                    minStock: 5
+                },
+                status: 'active',
+                featured: false,
+            });
         }
     }, [isEditing, product]);
 
     // Handle form input changes
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        if (name === 'available' || name === 'minStock') {
+        const { name, value, type, checked, id } = e.target;
+        // Handle translation fields for name and description
+        if (name === 'name') {
+            setFormData(prev => ({
+                ...prev,
+                name: {
+                    ...prev.name,
+                    [id === 'name-ca' ? 'ca' : 'es']: value
+                }
+            }));
+        } else if (name === 'description') {
+            setFormData(prev => ({
+                ...prev,
+                description: {
+                    ...prev.description,
+                    [id === 'description-ca' ? 'ca' : 'es']: value
+                }
+            }));
+        } else if (name === 'available' || name === 'minStock') {
             setFormData(prev => ({
                 ...prev,
                 stock: {
@@ -195,21 +255,27 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
 
     // Handle category selection from the dropdown
-    const handleCategorySelect = (categoryName, categoryId) => {
+    // Fix: handleCategorySelect should update category (ObjectId) and categoryDisplayName (string)
+    // If user selects a new category, set ObjectId; otherwise, keep legacy string until changed
+    const handleCategorySelect = (categoryObj) => {
         setFormData(prev => ({
             ...prev,
-            category: categoryName,
-            categoryId: categoryId
+            category: categoryObj._id,
+            categoryDisplayName: getCategoryDisplayName(categoryObj),
+            _categoryChanged: true // flag to indicate user changed category
         }));
         setShowCategoryDropdown(false);
     };
 
     // Handle brand selection
-    const handleBrandSelect = (brandName, brandId) => {
+    // Fix: handleBrandSelect should update brand (ObjectId) and brandDisplayName (string)
+    // If user selects a new brand, set ObjectId; otherwise, keep legacy string until changed
+    const handleBrandSelect = (brandObj) => {
         setFormData(prev => ({
             ...prev,
-            brand: brandName,
-            brandId: brandId
+            brand: brandObj._id,
+            brandDisplayName: brandObj.name,
+            _brandChanged: true // flag to indicate user changed brand
         }));
         setShowBrandDropdown(false);
     };
@@ -364,55 +430,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
 
     // Remove an image
-    const handleRemoveImage = (index) => {
-        const newImages = [...productImages];
-        newImages.splice(index, 1);
-        setProductImages(newImages);
-
-        // Update selected image if needed
-        if (selectedImageIndex >= newImages.length) {
-            setSelectedImageIndex(Math.max(0, newImages.length - 1));
-            setImagePreview(newImages.length > 0 ? newImages[Math.max(0, newImages.length - 1)] : '');
-        }
-    };
-
-    // Move image up in the list
-    const handleMoveImageUp = (index) => {
-        if (index <= 0) return;
-
-        const newImages = [...productImages];
-        const temp = newImages[index];
-        newImages[index] = newImages[index - 1];
-        newImages[index - 1] = temp;
-
-        setProductImages(newImages);
-
-        // Update selected image index if it was moved
-        if (selectedImageIndex === index) {
-            setSelectedImageIndex(index - 1);
-        } else if (selectedImageIndex === index - 1) {
-            setSelectedImageIndex(index);
-        }
-    };
-
-    // Move image down in the list
-    const handleMoveImageDown = (index) => {
-        if (index >= productImages.length - 1) return;
-
-        const newImages = [...productImages];
-        const temp = newImages[index];
-        newImages[index] = newImages[index + 1];
-        newImages[index + 1] = temp;
-
-        setProductImages(newImages);
-
-        // Update selected image index if it was moved
-        if (selectedImageIndex === index) {
-            setSelectedImageIndex(index + 1);
-        } else if (selectedImageIndex === index + 1) {
-            setSelectedImageIndex(index);
-        }
-    };
+    // (This block was a duplicate and has been removed to fix the redeclaration error)
 
     // Select an image to view
     const handleSelectImage = (index) => {
@@ -461,7 +479,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         const newErrors = {};
         if (!formData.name) newErrors.name = 'El nombre es obligatorio';
         if (!formData.reference) newErrors.reference = 'La referencia es obligatoria';
-        if (!formData.category) newErrors.category = 'La categoría es obligatoria';
+        // if (!formData.category) newErrors.category = 'La categoría es obligatoria';
         if (!formData.price_excl_tax) newErrors.price_excl_tax = 'El precio sin impuestos es obligatorio';
         if (!formData.price_incl_tax) newErrors.price_incl_tax = 'El precio con impuestos es obligatorio';
         // Validate numeric fields
@@ -488,6 +506,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         setLoading(true);
 
         try {
+
             // Prepare images for submission
             let mainImage = '';
             let hoverImage = '';
@@ -495,29 +514,77 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
 
             if (productImages.length > 0) {
                 mainImage = productImages[0];
-
                 if (productImages.length > 1) {
                     hoverImage = productImages[1];
-
                     if (productImages.length > 2) {
                         additionalImages = productImages.slice(2);
                     }
                 }
             }
 
-            // Convert string values to numbers
+            // Ensure category and brand are ObjectId (not name or empty string)
+            let categoryId = formData.category;
+            let brandId = formData.brand;
+
+            // Accept both string and ObjectId
+            const isObjectId = (val) => {
+                if (!val) return false;
+                if (typeof val === 'string') return /^[a-fA-F0-9]{24}$/.test(val);
+                if (typeof val === 'object' && val.toString) return /^[a-fA-F0-9]{24}$/.test(val.toString());
+                return false;
+            };
+
+            // Treat empty string as null for category/brand
+            if (categoryId === "") categoryId = null;
+            if (brandId === "") brandId = null;
+
+            // Always convert to ObjectId string or null (never send object)
+            // Fix: Use categoryDisplayName if categoryId is not an ObjectId
+            if (categoryId && !isObjectId(categoryId)) {
+                let foundCat = null;
+                if (formData.categoryDisplayName) {
+                    foundCat = categories.find(cat => getCategoryDisplayName(cat) === formData.categoryDisplayName);
+                }
+                if (!foundCat && categoryId) {
+                    foundCat = categories.find(cat => getCategoryDisplayName(cat) === categoryId);
+                }
+                if (!foundCat && categoryId) {
+                    foundCat = categories.find(cat => cat.name === categoryId);
+                }
+                if (foundCat && isObjectId(foundCat._id)) categoryId = foundCat._id;
+                else categoryId = null;
+            }
+            if (categoryId && typeof categoryId === 'object' && categoryId.toString) categoryId = categoryId.toString();
+            if (!categoryId || !isObjectId(categoryId)) categoryId = null;
+
+            // Fix: Use brandDisplayName if brandId is not an ObjectId
+            if (brandId && !isObjectId(brandId)) {
+                let foundBrand = null;
+                if (formData.brandDisplayName) {
+                    foundBrand = brands.find(b => b.name === formData.brandDisplayName);
+                }
+                if (!foundBrand && brandId) {
+                    foundBrand = brands.find(b => b.name === brandId);
+                }
+                if (foundBrand && isObjectId(foundBrand._id)) brandId = foundBrand._id;
+                else brandId = null;
+            }
+            if (brandId && typeof brandId === 'object' && brandId.toString) brandId = brandId.toString();
+            if (!brandId || !isObjectId(brandId)) brandId = null;
+
             const processedData = {
                 ...formData,
+                category: categoryId,
+                brand: brandId,
                 image: mainImage,
                 imageHover: hoverImage,
                 additionalImages: additionalImages,
                 price_excl_tax: parseFloat(formData.price_excl_tax),
                 price_incl_tax: parseFloat(formData.price_incl_tax),
-                brandId: formData.brandId || '',
                 stock: {
                     available: parseInt(formData.stock.available || 0),
-                    minStock: parseInt(formData.stock.minStock || 5)
-                }
+                    minStock: parseInt(formData.stock.minStock || 5),
+                },
             };
 
             // Save the product and get the saved product
@@ -525,7 +592,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
 
             // Notify stats context about the change
             if (stats.notifyChange) {
-                // Use setTimeout to ensure the API has time to process the change
                 setTimeout(() => {
                     stats.notifyChange();
                 }, 500);
@@ -539,23 +605,41 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
 
     // Render category tree for dropdown with improved hierarchy indicators
+    const getCategoryDisplayName = (cat) => {
+        if (!cat) return '';
+        if (cat.name) {
+            if (typeof cat.name === 'object') {
+                return cat.name.ca || cat.name.es || cat.name.name || '';
+            }
+            return cat.name;
+        }
+        // fallback for legacy
+        return cat.ca || cat.es || cat.name || '';
+    };
+    // Handle brand search input
+    const handleBrandSearch = (e) => {
+        setBrandSearchTerm(e.target.value);
+        // Keep the dropdown open
+        if (!showBrandDropdown) {
+            setShowBrandDropdown(true);
+        }
+    };
+
     const renderCategoryOption = (category, level = 0, isLast = false, prefix = '') => {
-        // Determine the prefix for this category based on its position in the hierarchy
         const currentPrefix = level === 0 ? '' : isLast ? `${prefix}└─ ` : `${prefix}├─ `;
-        // Determine the prefix for child categories
         const childPrefix = level === 0 ? '' : isLast ? `${prefix}   ` : `${prefix}│  `;
         return (
             <div key={category._id} className="category-item">
                 <div
                     className={`px-3  hover:bg-gray-100 cursor-pointer flex items-center ${level > 0 ? 'border-l border-gray-200' : ''}`}
-                    onClick={() => handleCategorySelect(category.name, category._id)}
+                    onClick={() => handleCategorySelect(category)}
                 >
                     {level > 0 && (
                         <span className="text-gray-400 font-mono mr-1">{currentPrefix}</span>
                     )}
                     <div className="flex items-center">
                         <FiFolder className={`mr-1 ${level === 0 ? 'text-[#00B0C8]' : 'text-gray-400'}`} size={14} />
-                        <span className={`${level === 0 ? 'font-medium' : ''} text-sm`}>{category.name}</span>
+                        <span className={`${level === 0 ? 'font-medium' : ''} text-sm`}>{getCategoryDisplayName(category)}</span>
                     </div>
                 </div>
                 {category.children && category.children.length > 0 && (
@@ -576,7 +660,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
 
     // Filter brands based on search term
     const filteredBrands = brands.filter(brand =>
-        brand.name.toLowerCase().includes(brandSearchTerm.toLowerCase())
+        (brand.name || '').toLowerCase().includes(brandSearchTerm.toLowerCase())
     );
 
     // Reset search when dropdown closes
@@ -586,14 +670,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }
     }, [showBrandDropdown]);
 
-    // Handle brand search input
-    const handleBrandSearch = (e) => {
-        setBrandSearchTerm(e.target.value);
-        // Keep the dropdown open
-        if (!showBrandDropdown) {
-            setShowBrandDropdown(true);
-        }
-    };
+
 
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -616,23 +693,37 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                             {/* Left Column */}
                             <div className="space-y-6 md:col-span-2">
                                 <h3 className="text-md font-medium">Información Básica</h3>
-                                <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                        Nombre *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'
-                                            } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                    />
-                                    {errors.name && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                                    )}
+                                <div className="flex gap-4">
+                                    <div className="flex-1">
+                                        <label htmlFor="name-es" className="block text-sm font-medium text-gray-700">
+                                            Nombre (ES) *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="name-es"
+                                            name="name"
+                                            value={formData.name.es}
+                                            onChange={handleChange}
+                                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label htmlFor="name-ca" className="block text-sm font-medium text-gray-700">
+                                            Nom (CA)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="name-ca"
+                                            name="name"
+                                            value={formData.name.ca}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        />
+                                    </div>
                                 </div>
+                                {errors.name && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                                )}
                                 <div>
                                     <label htmlFor="reference" className="block text-sm font-medium text-gray-700">
                                         Referencia *
@@ -650,18 +741,33 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <p className="mt-1 text-sm text-red-600">{errors.reference}</p>
                                     )}
                                 </div>
-                                <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                                        Descripción
-                                    </label>
-                                    <textarea
-                                        id="description"
-                                        name="description"
-                                        rows={3}
-                                        value={formData.description}
-                                        onChange={handleChange}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                    />
+                                <div className="flex gap-4 mt-4">
+                                    <div className="flex-1">
+                                        <label htmlFor="description-es" className="block text-sm font-medium text-gray-700">
+                                            Descripción (ES)
+                                        </label>
+                                        <textarea
+                                            id="description-es"
+                                            name="description"
+                                            rows={2}
+                                            value={formData.description.es}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label htmlFor="description-ca" className="block text-sm font-medium text-gray-700">
+                                            Descripció (CA)
+                                        </label>
+                                        <textarea
+                                            id="description-ca"
+                                            name="description"
+                                            rows={2}
+                                            value={formData.description.ca}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        />
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -673,7 +779,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 className={`mt-1 block w-full px-3 py-2 border ${errors.category ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none cursor-pointer flex justify-between items-center`}
                                                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                                             >
-                                                <span className="truncate">{formData.category || 'Seleccionar categoría'}</span>
+                                                <span className="truncate">{
+                                                    formData.categoryDisplayName || 'Seleccionar categoria'
+                                                }</span>
                                                 <FiChevronRight className={`transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
                                             </div>
                                             {showCategoryDropdown && (
@@ -688,15 +796,15 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     ) : (
                                                         <div className="py-1 category-dropdown">
                                                             <style jsx global>{`
-                                                                .category-dropdown .category-item {
-                                                                    margin: 0;
-                                                                    padding: 0;
-                                                                }
-                                                                .category-dropdown .subcategory-group {
-                                                                    margin: 0;
-                                                                    padding: 0;
-                                                                }
-                                                            `}</style>
+                                                                    .category-dropdown .category-item {
+                                                                        margin: 0;
+                                                                        padding: 0;
+                                                                    }
+                                                                    .category-dropdown .subcategory-group {
+                                                                        margin: 0;
+                                                                        padding: 0;
+                                                                    }
+                                                                `}</style>
                                                             {hierarchicalCategories.map((category, index) =>
                                                                 renderCategoryOption(
                                                                     category,
@@ -725,7 +833,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 {formData.brand ? (
                                                     <div className="flex items-center space-x-3 truncate">
                                                         {(() => {
-                                                            const selectedBrand = brands.find(b => b._id === formData.brandId || b.name === formData.brand);
+                                                            const selectedBrand = brands.find(b => b._id === formData.brand);
                                                             if (selectedBrand?.logo) {
                                                                 return (
                                                                     <div className="w-6 h-6 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
@@ -745,7 +853,12 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                 </div>
                                                             );
                                                         })()}
-                                                        <span className="truncate text-gray-700 font-medium">{formData.brand}</span>
+                                                        <span className="truncate text-gray-700 font-medium">{
+                                                            (() => {
+                                                                const selectedBrand = brands.find(b => b._id === formData.brand);
+                                                                return selectedBrand ? selectedBrand.name : '';
+                                                            })()
+                                                        }</span>
                                                     </div>
                                                 ) : (
                                                     <div className="flex items-center space-x-2">
@@ -784,16 +897,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         ) : (
                                                             <div className="p-2  brand-dropdown">
                                                                 <style jsx global>{`
-                                                                    .brand-dropdown .brand-item {
-                                                                        margin: 0;
-                                                                        padding: 0;
-                                                                    }
-                                                                `}</style>
+                                                                        .brand-dropdown .brand-item {
+                                                                            margin: 0;
+                                                                            padding: 0;
+                                                                        }
+                                                                    `}</style>
                                                                 {filteredBrands.map((brand, index) =>
                                                                     <div
                                                                         key={brand._id}
                                                                         className="brand-item px-3 py-2   cursor-pointer flex items-center  space-x-3 my-2"
-                                                                        onClick={() => handleBrandSelect(brand.name, brand._id)}
+                                                                        onClick={() => handleBrandSelect(brand)}
                                                                     >
                                                                         {brand.logo ? (
                                                                             <div className="w-10 h-10 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
@@ -951,7 +1064,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 <div
                                                     key={index}
                                                     className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden 
-                                                        ${selectedImageIndex === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}`}
+                                                            ${selectedImageIndex === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}`}
                                                 >
                                                     <div className="relative cursor-pointer" onClick={() => handleSelectImage(index)}>
                                                         <Image
