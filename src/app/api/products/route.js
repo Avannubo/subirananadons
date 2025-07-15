@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import Product from '@/models/Product';
+import '@/models/Brand';
+import '@/models/Category';
 import dbConnect from '@/lib/dbConnect';
 
 // Get all products or filtered products

@@ -67,6 +67,16 @@ import { Dialog, DialogTitle } from '@headlessui/react';
 import { FiX, FiEdit2, FiUpload, FiImage, FiTrash2 } from 'react-icons/fi';
 import ListProductsManager from './ListProductsManager';
 import AddProductToList from './AddProductToList';
+
+// Helper to get product name in correct locale, with fallbacks
+function getProductName(product, locale = 'es') {
+    if (!product) return 'ND';
+    if (typeof product.name === 'string') return product.name;
+    if (product.name && typeof product.name === 'object') {
+        return product.name[locale] || product.name.es || product.name.ca || product.name.name || 'ND';
+    }
+    return product.name || 'ND';
+}
 import { toast } from 'react-hot-toast';
 
 export default function ListEditModal({
@@ -403,11 +413,28 @@ export default function ListEditModal({
                                                 </button>
                                             )}
                                         </div>
-                                        <div className="bg-gray-50 p-4 rounded-lg min-h-[300px]">                                            <AddProductToList
-                                            selectedProducts={selectedProducts}
-                                            onProductSelect={handleProductSelect}
-                                            resetSelection={resetSelection}
-                                        />
+                                        <div className="bg-gray-50 p-4 rounded-lg min-h-[300px]">
+                                            <AddProductToList
+                                                selectedProducts={selectedProducts.map(item => ({
+                                                    ...item,
+                                                    // Always resolve product name to string for AddProductToList
+                                                    product: {
+                                                        ...item.product,
+                                                        name: getProductName(item.product, locale)
+                                                    }
+                                                }))}
+                                                onProductSelect={products => {
+                                                    // When receiving products, ensure name is always string
+                                                    setSelectedProducts(products.map(item => ({
+                                                        ...item,
+                                                        product: {
+                                                            ...item.product,
+                                                            name: getProductName(item.product, locale)
+                                                        }
+                                                    })));
+                                                }}
+                                                resetSelection={resetSelection}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -430,8 +457,7 @@ export default function ListEditModal({
                                 disabled={loading}
                                 ref={saveButtonRef}
                                 onClick={handleUpdateList}
-                                className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] transition-colors ${loading ? 'opacity-75 cursor-not-allowed' : ''
-                                    }`}
+                                className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] transition-colors ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
                             >
                                 {loading ? t.saving : t.save}
                             </button>

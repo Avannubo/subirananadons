@@ -16,38 +16,53 @@
  * @returns {Promise<Object>} - Products and pagination info
  */
 export async function fetchProducts(options = {}) {
+    const {
+        page = 1,
+        limit = 10,
+        category,
+        status = 'active',
+        search,
+        brand,
+        lowStock,
+        preventSort = false
+    } = options;
+
+    // Build query string from options
+    const params = new URLSearchParams();
+    params.append('page', page);
+    params.append('limit', limit);
+
+    if (status) params.append('status', status);
+    if (category) params.append('category', category);
+    if (search) params.append('search', search);
+    if (brand) params.append('brand', brand);
+    if (lowStock) params.append('lowStock', lowStock);
+    if (preventSort) params.append('preventSort', 'true');
+
     try {
-        const {
-            page = 1,
-            limit = 10,
-            category,
-            status = 'active',
-            search,
-            brand,
-            lowStock,
-            preventSort = false
-        } = options;
-
-        // Build query string from options
-        const params = new URLSearchParams();
-        params.append('page', page);
-        params.append('limit', limit);
-
-        if (status) params.append('status', status);
-        if (category) params.append('category', category);
-        if (search) params.append('search', search);
-        if (brand) params.append('brand', brand);
-        if (lowStock) params.append('lowStock', lowStock);
-        if (preventSort) params.append('preventSort', 'true');
-
         // Make API request
         const response = await fetch(`/api/products?${params.toString()}`);
-
-        if (!response.ok) {
-            throw new Error(`Error fetching products: ${response.status}`);
+        let data = null;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            console.error('ProductService fetchProducts JSON parse error:', parseError);
+            data = null;
         }
 
-        const data = await response.json();
+        if (!response.ok) {
+            // Log error but do not throw, return default structure
+            console.error(`ProductService fetchProducts error: ${response.status} - ${response.statusText}`);
+            return {
+                products: [],
+                pagination: {
+                    totalPages: 1,
+                    totalItems: 0,
+                    currentPage: 1,
+                    itemsPerPage: 10
+                }
+            };
+        }
 
         // Handle different response formats with default values
         if (Array.isArray(data)) {
@@ -65,8 +80,8 @@ export async function fetchProducts(options = {}) {
 
         // Ensure we have a products array even if the API returns null/undefined
         return {
-            products: data.products || [],
-            pagination: data.pagination || {
+            products: (data && data.products) || [],
+            pagination: (data && data.pagination) || {
                 totalPages: 1,
                 totalItems: 0,
                 currentPage: page,

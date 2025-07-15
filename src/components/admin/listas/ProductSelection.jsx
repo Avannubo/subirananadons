@@ -1,9 +1,40 @@
 'use client';
 import { useState, useEffect } from 'react';
+// Translation object for Catalan and Spanish
+const translations = {
+    ca: {
+        selected: 'Productes seleccionats',
+        searchPlaceholder: 'Cercar productes...',
+        noProducts: 'No s\'han trobat productes.',
+        addSuccess: 'afegit a la llista',
+        removeSuccess: 'Producte eliminat de la llista',
+        prev: 'Anterior',
+        next: 'Següent',
+    },
+    es: {
+        selected: 'Productos seleccionados',
+        searchPlaceholder: 'Buscar productos...',
+        noProducts: 'No se encontraron productos.',
+        addSuccess: 'añadido a la lista',
+        removeSuccess: 'Producto eliminado de la lista',
+        prev: 'Anterior',
+        next: 'Siguiente',
+    }
+};
+
+function getLocale() {
+    if (typeof window !== 'undefined') {
+        const lang = window.navigator.language || 'ca';
+        return lang.startsWith('ca') ? 'ca' : 'es';
+    }
+    return 'ca';
+}
 import { fetchProducts } from '@/services/ProductService';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 export default function ProductSelection({ onProductSelect, selectedProducts = [] }) {
+    const locale = getLocale();
+    const t = translations[locale];
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -38,7 +69,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
         const isProductInList = selectedItems.some(item => item.product._id === product._id);
 
         // if (isProductInList) {
-        //     toast.error(`${product.name} ya está en la lista`);
+        //     toast.error(`${getProductName(product)} ya está en la lista`);
         //     return;
         // }
 
@@ -56,15 +87,21 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             onProductSelect(updatedItems);
         }
 
-        toast.success(`${product.name} añadido a la lista`);
+        toast.success(`${getProductName(product)} ${t.addSuccess}`);
     };
+
+    function getProductName(product) {
+        if (!product || !product.name) return '';
+        if (typeof product.name === 'string') return product.name;
+        return product.name[locale] || product.name.ca || product.name.es || '';
+    }
     const handleRemoveProduct = (itemId) => {
         const updatedItems = selectedItems.filter(item => item._id !== itemId);
         setSelectedItems(updatedItems);
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
-        toast.success('Producto eliminado de la lista');
+        toast.success(t.removeSuccess);
     };
     const handleQuantityChange = (productId) => {
         const updatedItems = selectedItems.map(item => {
@@ -96,7 +133,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
         <div>
             {selectedItems.length > 0 && (
                 <div className="mb-6   bg-gray-50 rounded-lg min-w-[600px] p-4 shadow-md">
-                    <h3 className="font-medium text-gray-900 mb-2">Productos seleccionados ({selectedItems.length})</h3>
+                    <h3 className="font-medium text-gray-900 mb-2">{t.selected} ({selectedItems.length})</h3>
                     <div className="space-y-2 max-h-[100px] overflow-y-auto">
                         {selectedItems
                             .filter(item => item.state === 0)
@@ -107,39 +144,17 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                             {item.product.image && (
                                                 <Image
                                                     src={item.product.image}
-                                                    alt={item.product.name}
+                                                    alt={getProductName(item.product)}
                                                     width={40}
                                                     height={40}
                                                     className="object-cover"
                                                 />
                                             )}
                                         </div>
-                                        <span className="text-sm font-medium">{item.product.name}</span>
+                                        <span className="text-sm font-medium">{getProductName(item.product)}</span>
                                     </div>
                                     <div className="flex items-center space-x-3">
-                                        {/* <div className="flex items-center border border-gray-300  rounded-md">
                                         <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                handleQuantityChange(item.product._id, item.quantity - 1);
-                                            }}
-                                            className="px-2 py-1 text-gray-500 hover:bg-gray-100"
-                                        >
-                                            -
-                                        </button>
-                                        <span className="px-2 py-1 text-sm">{item.quantity}</span>
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                handleQuantityChange(item.product._id, item.quantity + 1);
-                                            }}
-                                            className="px-2 py-1 text-gray-500 hover:bg-gray-100"
-                                        >
-                                            +
-                                        </button>
-                                    </div> */}                                    <button
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 e.stopPropagation();
@@ -164,7 +179,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Buscar productos..."
+                        placeholder={t.searchPlaceholder}
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                     />
                     <button
@@ -194,7 +209,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                 <>
                     {products.length === 0 ? (
                         <div className="text-center py-10">
-                            <p className="text-gray-500">No se encontraron productos.</p>
+                            <p className="text-gray-500">{t.noProducts}</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -213,7 +228,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                             <div className=" bg-white overflow-hidden">
                                                 <Image
                                                     src={product.image}
-                                                    alt={product.name}
+                                                    alt={getProductName(product)}
                                                     width={300}
                                                     height={150}
                                                     className="object-contain p-2 w-full h-[150px]"
@@ -222,7 +237,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                         )}
                                     </div>
                                     <div className="p-4 pt-2 pb-3 bg-white">
-                                        <h3 className="font-medium text-gray-900 text-center truncate">{product.name}</h3>
+                                        <h3 className="font-medium text-gray-900 text-center truncate">{getProductName(product)}</h3>
                                         <p className="text-[#00B0C8] font-bold text-center text-md mt-2">{product.price_incl_tax?.toFixed(2).replace('.', ',')} €</p>
                                     </div>
                                 </div>
@@ -245,7 +260,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}
                                 >
-                                    Anterior
+                                    {t.prev}
                                 </button>
                                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                                     // Show 5 pages max, centered around current page
@@ -283,7 +298,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}
                                 >
-                                    Siguiente
+                                    {t.next}
                                 </button>
                             </div>
                         </div>

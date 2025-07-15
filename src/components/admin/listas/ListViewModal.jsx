@@ -4,6 +4,18 @@ import Image from 'next/image';
 import { useUser } from '@/contexts/UserContext';
 
 import { useState, useCallback, useEffect } from 'react';
+
+// Helper to get product name in correct locale with fallback
+function getProductName(product, locale = 'es') {
+    console.log('getProductName called with:', product, locale);
+    if (!product) return 'ND';
+    if (locale === 'ca' && product.name.ca && typeof product.name.ca === 'string' && product.name.ca.trim()) return product.name.ca;
+    if (locale === 'es' && product.name.es && typeof product.name.es === 'string' && product.name.es.trim()) return product.name.es;
+    if (product.name.es && typeof product.name.es === 'string' && product.name.es.trim()) return product.name.es;
+    if (product.name.ca && typeof product.name.ca === 'string' && product.name.ca.trim()) return product.name.ca;
+    if (product.name && typeof product.name === 'string' && product.name.trim()) return product.name;
+    return 'ND';
+}
 // Translation object for Catalan and Spanish
 const translations = {
     ca: {
@@ -346,6 +358,8 @@ export default function ListViewModal({
         // Hide reserver client info for owner if reserved (state === 1)
         const isOwner = user && selectedList && user._id === selectedList.ownerId;
         const hideUserData = isOwner && item.state === 1;
+        // Get product name in correct locale with fallback
+        const productName = getProductName(item.product, locale);
         return (
             <div key={item._id} className="p-4 bg-white border-b border-gray-200">
                 <div className="flex items-start">
@@ -353,7 +367,7 @@ export default function ListViewModal({
                         {item.product?.image && (
                             <Image
                                 src={item.product.image}
-                                alt={item.product.name}
+                                alt={productName}
                                 width={64}
                                 height={64}
                                 className="object-cover w-full h-full"
@@ -362,16 +376,16 @@ export default function ListViewModal({
                     </div>
                     <div className="flex-1">
                         <div className='flex justify-between items-center'>
-                            <h4 className="text-sm font-medium text-gray-900">{item.product.name}</h4>
+                            <h4 className="text-sm font-medium text-gray-900">{productName}</h4>
                             {user.role === 'admin' && (
                                 <div className="flex items-center space-x-2">
                                     {item.state === 1 && (
                                         <button
                                             onClick={() => moveItem(item, 'left')}
                                             className="px-3 py-1 text-sm rounded-md text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors duration-200"
-                                            title="Cancelar reserva"
+                                            title={t.cancelarReserva || 'Cancelar reserva'}
                                         >
-                                            Cancelar
+                                            {t.cancelarReserva || 'Cancelar'}
                                         </button>
                                     )}
                                     {item.state === 0 && (
@@ -383,9 +397,9 @@ export default function ListViewModal({
                                                     setShowDataModal(true);
                                                 }}
                                                 className="px-3 py-1 text-sm rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-colors duration-200"
-                                                title="Reservar producto"
+                                                title={t.reservar || 'Reservar producto'}
                                             >
-                                                Reservar
+                                                {t.reservar || 'Reservar'}
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -394,9 +408,9 @@ export default function ListViewModal({
                                                     setShowDataModal(true);
                                                 }}
                                                 className="px-3 py-1 text-sm rounded-md bg-green-50 text-green-600 hover:bg-green-100 border border-green-200 transition-colors duration-200"
-                                                title="Comprar producto"
+                                                title={t.comprar || 'Comprar producto'}
                                             >
-                                                Comprar
+                                                {t.comprar || 'Comprar'}
                                             </button>
                                         </>
                                     )}
@@ -408,9 +422,9 @@ export default function ListViewModal({
                                                 setShowDataModal(true);
                                             }}
                                             className="px-3 py-1 text-sm rounded-md bg-green-50 text-green-600 hover:bg-green-100 border border-green-200 transition-colors duration-200"
-                                            title="Comprar producto"
+                                            title={t.comprar || 'Comprar producto'}
                                         >
-                                            Comprar
+                                            {t.comprar || 'Comprar'}
                                         </button>
                                     )}
                                 </div>
@@ -418,7 +432,7 @@ export default function ListViewModal({
                         </div>
                         <div className='grid grid-cols-3 gap-2 mt-1'>
                             <p className="text-xs text-gray-500">Ref: {item.product.reference || '-'}</p>
-                            <p className="text-xs text-gray-500 mt-1">{item.product.brand}</p>
+                            {/* <p className="text-xs text-gray-500 mt-1">{item.product.brand}</p> */}
                             {user.role === 'admin' && (
                                 <p className="text-xs mt-1">
                                     Estado:{" "}
