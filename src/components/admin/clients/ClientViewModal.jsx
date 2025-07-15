@@ -7,11 +7,60 @@ import { useState, useEffect } from 'react';
 export default function ClientViewModal({ isOpen, onClose, client }) {
     if (!client) return null;
 
+    // Locale detection (default to 'ca')
+    let locale = 'ca';
+    if (typeof window !== 'undefined' && window.navigator) {
+        const lang = window.navigator.language || window.navigator.userLanguage;
+        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    }
+    // Translations
+    const translations = {
+        ca: {
+            active: 'Actiu',
+            inactive: 'Inactiu',
+            clientSince: 'Client des de',
+            contact: 'Informació de Contacte',
+            email: 'Email',
+            clientId: 'ID de client',
+            preferences: 'Preferències',
+            newsletter: 'Newsletter',
+            offers: 'Ofertes de socis',
+            subscribed: 'Subscrito',
+            notSubscribed: 'No subscrit',
+            purchaseHistory: 'Historial de Compres',
+            totalOrders: 'Total de compres',
+            orders: 'comandes',
+            close: 'Tancar',
+        },
+        es: {
+            active: 'Activo',
+            inactive: 'Inactivo',
+            clientSince: 'Cliente desde',
+            contact: 'Información de Contacto',
+            email: 'Email',
+            clientId: 'ID de cliente',
+            preferences: 'Preferencias',
+            newsletter: 'Newsletter',
+            offers: 'Ofertas de socios',
+            subscribed: 'Suscrito',
+            notSubscribed: 'No suscrito',
+            purchaseHistory: 'Historial de Compras',
+            totalOrders: 'Total de compras',
+            orders: 'pedidos',
+            close: 'Cerrar',
+        }
+    };
+    const t = translations[locale];
+
     // Format date to local format
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
-        return date.toLocaleDateString();
+        return date.toLocaleDateString(locale === 'ca' ? 'ca-ES' : 'es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
     };
 
     return (
@@ -58,11 +107,11 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                         </h3>
                                         <p className="text-sm text-gray-500 mt-1">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${client.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                {client.active ? 'Activo' : 'Inactivo'}
+                                                {client.active ? t.active : t.inactive}
                                             </span>
                                         </p>
                                         <p className="text-sm text-gray-600 mt-2">
-                                            Cliente desde {formatDate(client.registrationDate)}
+                                            {t.clientSince} {formatDate(client.registrationDate)}
                                         </p>
                                     </div>
                                 </div>
@@ -73,15 +122,15 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                 {/* Contact Information */}
                                 <section className="border-b border-gray-200 pb-4 space-y-2">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiMail className="mr-2 text-[#00B0C8]" /> Información de Contacto
+                                        <FiMail className="mr-2 text-[#00B0C8]" /> {t.contact}
                                     </h3>
                                     <div className="space-y-2">
                                         <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
-                                            <span className="text-sm font-medium text-gray-500">Email:</span>
+                                            <span className="text-sm font-medium text-gray-500">{t.email}:</span>
                                             <p className="text-sm text-gray-700">{client.email || 'N/A'}</p>
                                         </div>
                                         <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
-                                            <span className="text-sm font-medium text-gray-500">ID de cliente:</span>
+                                            <span className="text-sm font-medium text-gray-500">{t.clientId}:</span>
                                             <p className="text-sm text-gray-700">{client.id || 'N/A'}</p>
                                         </div>
                                     </div>
@@ -90,19 +139,19 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                 {/* Preferences Information */}
                                 <section className="border-b border-gray-200 pb-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiBell className="mr-2 text-[#00B0C8]" /> Preferencias
+                                        <FiBell className="mr-2 text-[#00B0C8]" /> {t.preferences}
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                            <span className="text-sm font-medium text-gray-500">Newsletter:</span>
+                                            <span className="text-sm font-medium text-gray-500">{t.newsletter}:</span>
                                             <p className={`text-sm ${client.newsletter ? 'text-green-600' : 'text-red-600'}`}>
-                                                {client.newsletter ? 'Suscrito' : 'No suscrito'}
+                                                {client.newsletter ? t.subscribed : t.notSubscribed}
                                             </p>
                                         </div>
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                            <span className="text-sm font-medium text-gray-500">Ofertas de socios:</span>
+                                            <span className="text-sm font-medium text-gray-500">{t.offers}:</span>
                                             <p className={`text-sm ${client.partnerOffers ? 'text-green-600' : 'text-red-600'}`}>
-                                                {client.partnerOffers ? 'Suscrito' : 'No suscrito'}
+                                                {client.partnerOffers ? t.subscribed : t.notSubscribed}
                                             </p>
                                         </div>
                                     </div>
@@ -111,12 +160,12 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                 {/* Purchase Information */}
                                 <section>
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiShoppingBag className="mr-2 text-[#00B0C8]" /> Historial de Compras
+                                        <FiShoppingBag className="mr-2 text-[#00B0C8]" /> {t.purchaseHistory}
                                     </h3>
                                     <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                        <span className="text-sm font-medium text-gray-500">Total de compras:</span>
+                                        <span className="text-sm font-medium text-gray-500">{t.totalOrders}:</span>
                                         <p className="text-base font-medium text-gray-800">
-                                            {client.sales || 0} pedidos
+                                            {client.sales || 0} {t.orders}
                                         </p>
                                     </div>
                                 </section>
@@ -128,7 +177,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                             onClick={onClose}
                             className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
                         >
-                            Cerrar
+                            {t.close}
                         </button>
                     </div>
                 </Dialog.Panel>

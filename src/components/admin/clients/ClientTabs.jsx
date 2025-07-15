@@ -11,6 +11,71 @@ import TabNavigation from '@/components/admin/shared/TabNavigation';
 import Pagination from '@/components/admin/shared/Pagination';
 
 export default function ClientsTabs() {
+    // Locale detection (default to 'ca')
+    let locale = 'ca';
+    if (typeof window !== 'undefined' && window.navigator) {
+        const lang = window.navigator.language || window.navigator.userLanguage;
+        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    }
+    // Translations
+    const translations = {
+        ca: {
+            tabs: ['Tots', 'Actius', 'Inactius'],
+            adminTitle: 'Administració de clients',
+            update: 'Actualitzar dades',
+            export: 'Exportar',
+            exportTitle: 'Exportar a CSV',
+            add: 'Nou Client',
+            addTitle: 'Afegir nou client',
+            searchId: 'Cercar ID',
+            searchName: 'Cercar Nom',
+            searchLastName: 'Cercar Cognoms',
+            searchEmail: 'Cercar Email',
+            filter: 'Filtrar',
+            filterTitle: 'Aplicar filtres',
+            clear: 'Netejar',
+            clearTitle: 'Netejar filtres',
+            loading: 'Carregant clients...',
+            showingText: 'Mostrant {} de {} clients',
+            deleted: 'Client eliminat correctament',
+            deleteError: 'Error en eliminar el client',
+            fetchError: 'Error en carregar els clients',
+            exportSuccess: 'Clients exportats correctament',
+            refreshSuccess: 'Dades actualitzades correctament',
+            yes: 'Sí',
+            no: 'No',
+            headers: ['ID', 'Nom', 'Cognoms', 'Email', 'Vendes', 'Data de registre', 'Actiu'],
+        },
+        es: {
+            tabs: ['Todos', 'Activos', 'Inactivos'],
+            adminTitle: 'Administración de clientes',
+            update: 'Actualizar datos',
+            export: 'Exportar',
+            exportTitle: 'Exportar a CSV',
+            add: 'Nuevo Cliente',
+            addTitle: 'Añadir nuevo cliente',
+            searchId: 'Buscar ID',
+            searchName: 'Buscar Nombre',
+            searchLastName: 'Buscar Apellidos',
+            searchEmail: 'Buscar Email',
+            filter: 'Filtrar',
+            filterTitle: 'Aplicar filtros',
+            clear: 'Limpiar',
+            clearTitle: 'Limpiar filtros',
+            loading: 'Cargando clientes...',
+            showingText: 'Mostrando {} de {} clientes',
+            deleted: 'Cliente eliminado correctamente',
+            deleteError: 'Error al eliminar el cliente',
+            fetchError: 'Error al cargar los clientes',
+            exportSuccess: 'Clientes exportados correctamente',
+            refreshSuccess: 'Datos actualizados correctamente',
+            yes: 'Sí',
+            no: 'No',
+            headers: ['ID', 'Nombre', 'Apellidos', 'Email', 'Ventas', 'Fecha de registro', 'Activo'],
+        }
+    };
+    const t = translations[locale];
+    const tabs = t.tabs;
     const { refreshStats } = useClientStats();
     const [activeTab, setActiveTab] = useState('Todos');
     const [filters, setFilters] = useState({
@@ -36,7 +101,7 @@ export default function ClientsTabs() {
         limit: 5
     });
 
-    const tabs = ['Todos', 'Activos', 'Inactivos', 'Newsletter', 'Ofertas'];
+    // const tabs = ['Todos', 'Activos', 'Inactivos', 'Newsletter', 'Ofertas'];
 
     // Load clients when component mounts
     useEffect(() => {
@@ -45,11 +110,9 @@ export default function ClientsTabs() {
 
     // Calculate status counts
     const statusCounts = {
-        Todos: clients.length,
-        Activos: clients.filter(c => c.active).length,
-        Inactivos: clients.filter(c => !c.active).length,
-        Newsletter: clients.filter(c => c.newsletter).length,
-        Ofertas: clients.filter(c => c.partnerOffers).length
+        [t.tabs[0]]: clients.length,
+        [t.tabs[1]]: clients.filter(c => c.active).length,
+        [t.tabs[2]]: clients.filter(c => !c.active).length
     };
 
     // Fetch clients from API
@@ -71,8 +134,8 @@ export default function ClientsTabs() {
             // Add tab filters
             if (activeTab === 'Activos') queryParams.append('active', 'true');
             if (activeTab === 'Inactivos') queryParams.append('active', 'false');
-            if (activeTab === 'Newsletter') queryParams.append('newsletter', 'true');
-            if (activeTab === 'Ofertas') queryParams.append('partnerOffers', 'true');
+            // if (activeTab === 'Newsletter') queryParams.append('newsletter', 'true');
+            // if (activeTab === 'Ofertas') queryParams.append('partnerOffers', 'true');
 
             const url = `/api/clients?${queryParams.toString()}`;
             console.log('Fetching clients with URL:', url);
@@ -99,7 +162,7 @@ export default function ClientsTabs() {
             }
         } catch (error) {
             console.error('Error fetching clients:', error);
-            toast.error('Error al cargar los clientes');
+            toast.error(t.fetchError);
         } finally {
             setIsLoading(false);
         }
@@ -144,7 +207,7 @@ export default function ClientsTabs() {
     const refreshData = async () => {
         await fetchClients();
         await refreshStats();
-        toast.success('Datos actualizados correctamente');
+        toast.success(t.refreshSuccess);
     };
 
     // Handle client view
@@ -252,7 +315,7 @@ export default function ClientsTabs() {
     // Export clients to CSV
     const exportToCSV = () => {
         // Create CSV content
-        const headers = ['ID', 'Nombre', 'Apellidos', 'Email', 'Ventas', 'Fecha de registro', 'Activo', 'Newsletter', 'Ofertas'];
+        const headers = t.headers;
 
         const csvContent = [
             headers.join(','),
@@ -282,7 +345,7 @@ export default function ClientsTabs() {
         link.click();
         document.body.removeChild(link);
 
-        toast.success('Clientes exportados correctamente');
+        toast.success(t.exportSuccess);
     };
 
     return (
@@ -296,12 +359,12 @@ export default function ClientsTabs() {
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">
-                        <h2 className="text-lg font-medium">Administración de clientes ({pagination.totalItems})</h2>
+                        <h2 className="text-lg font-medium">{t.adminTitle} ({pagination.totalItems})</h2>
                         <button
                             className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
                             onClick={refreshData}
                             disabled={isLoading}
-                            title="Actualizar datos"
+                            title={t.update}
                         >
                             <FiRefreshCw className={isLoading ? 'animate-spin' : ''} />
                         </button>
@@ -310,16 +373,16 @@ export default function ClientsTabs() {
                         <button
                             className="flex items-center px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors"
                             onClick={exportToCSV}
-                            title="Exportar a CSV"
+                            title={t.exportTitle}
                         >
-                            <FiDownload className="mr-1" /> Exportar
+                            <FiDownload className="mr-1" /> {t.export}
                         </button>
                         <button
                             className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
                             onClick={handleAddNewClient}
-                            title="Añadir nuevo cliente"
+                            title={t.addTitle}
                         >
-                            <FiPlus className="mr-1" /> Nuevo Cliente
+                            <FiPlus className="mr-1" /> {t.add}
                         </button>
                     </div>
                 </div>
@@ -331,7 +394,7 @@ export default function ClientsTabs() {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar ID"
+                                placeholder={t.searchId}
                                 name="searchId"
                                 value={filters.searchId}
                                 onChange={handleFilterChange}
@@ -342,7 +405,7 @@ export default function ClientsTabs() {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar Nombre"
+                                placeholder={t.searchName}
                                 name="searchName"
                                 value={filters.searchName}
                                 onChange={handleFilterChange}
@@ -353,7 +416,7 @@ export default function ClientsTabs() {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar Apellidos"
+                                placeholder={t.searchLastName}
                                 name="searchLastName"
                                 value={filters.searchLastName}
                                 onChange={handleFilterChange}
@@ -364,7 +427,7 @@ export default function ClientsTabs() {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar Email"
+                                placeholder={t.searchEmail}
                                 name="searchEmail"
                                 value={filters.searchEmail}
                                 onChange={handleFilterChange}
@@ -377,17 +440,17 @@ export default function ClientsTabs() {
                         <button
                             className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]"
                             onClick={applyFilters}
-                            title="Aplicar filtros"
+                            title={t.filterTitle}
                         >
                             <FiFilter className="mr-2" />
-                            Filtrar
+                            {t.filter}
                         </button>
                         <button
                             className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
                             onClick={clearFilters}
-                            title="Limpiar filtros"
+                            title={t.clearTitle}
                         >
-                            Limpiar
+                            {t.clear}
                         </button>
                     </div>
                 </div>
@@ -396,7 +459,7 @@ export default function ClientsTabs() {
                 {isLoading ? (
                     <div className="py-20 text-center">
                         <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
-                        <p className="mt-3 text-gray-600">Cargando clientes...</p>
+                        <p className="mt-3 text-gray-600">{t.loading}</p>
                     </div>
                 ) : (
                     <>
@@ -424,7 +487,7 @@ export default function ClientsTabs() {
                                         }));
                                         fetchClients();
                                     }}
-                                    showingText="Mostrando {} de {} clientes"
+                                    showingText={t.showingText}
                                 />
                             </div>
                         )}
