@@ -1,5 +1,40 @@
 'use client';
 import { useState, useEffect } from 'react';
+// Translation object for Catalan and Spanish
+const translations = {
+    ca: {
+        errorLoad: 'Error en carregar els productes de la llista',
+        errorRemove: 'Error en eliminar el producte de la llista',
+        errorRemoveInfo: 'Error: Informació del producte incompleta',
+        removed: 'Producte eliminat de la llista',
+        added: 'Productes afegits a la llista',
+        errorAdd: 'Error en afegir productes a la llista',
+        noPending: 'No hi ha productes pendents a la llista actual.',
+        product: 'Producte',
+        price: 'Preu',
+        actions: 'Accions',
+    },
+    es: {
+        errorLoad: 'Error al cargar los productos de la lista',
+        errorRemove: 'Error al eliminar el producto de la lista',
+        errorRemoveInfo: 'Error: Información del producto incompleta',
+        removed: 'Producto eliminado de la lista',
+        added: 'Productos añadidos a la lista',
+        errorAdd: 'Error al añadir productos a la lista',
+        noPending: 'No hay productos pendientes en la lista actual.',
+        product: 'Producto',
+        price: 'Precio',
+        actions: 'Acciones',
+    }
+};
+
+function getLocale() {
+    if (typeof window !== 'undefined') {
+        const lang = window.navigator.language || 'es';
+        return lang.startsWith('ca') ? 'ca' : 'es';
+    }
+    return 'es';
+}
 import { toast } from 'react-hot-toast';
 import { FiTrash2, FiPlus } from 'react-icons/fi';
 import Image from 'next/image';
@@ -7,6 +42,8 @@ import { fetchBirthListItems, updateBirthListItems, removeProductFromBirthList }
 import ProductSelection from './ProductSelection';
 import { Info, InfoIcon } from 'lucide-react';
 export default function ListProductsManager({ listId, onUpdate }) {
+    const locale = getLocale();
+    const t = translations[locale];
     const [loading, setLoading] = useState(true);
     const [items, setItems] = useState([]);
     const [showAddProducts, setShowAddProducts] = useState(false);
@@ -21,17 +58,18 @@ export default function ListProductsManager({ listId, onUpdate }) {
             if (result.success) {
                 setItems(result.data || []);
             } else {
-                toast.error('Error al cargar los productos de la lista');
+                toast.error(t.errorLoad);
             }
         } catch (error) {
             console.error('Error loading birth list items:', error);
-            toast.error('Error al cargar los productos de la lista');
+            toast.error(t.errorLoad);
         } finally {
             setLoading(false);
         }
-    }; const handleRemoveProduct = async (productId) => {
+    };
+    const handleRemoveProduct = async (productId) => {
         if (!productId || !listId) {
-            toast.error('Error: Información del producto incompleta');
+            toast.error(t.errorRemoveInfo);
             return;
         }
 
@@ -45,15 +83,15 @@ export default function ListProductsManager({ listId, onUpdate }) {
             if (result.success) {
                 // Only update UI after successful API call
                 setItems(prevItems => prevItems.filter(item => item._id !== productId));
-                toast.success('Producto eliminado de la lista');
+                toast.success(t.removed);
                 // Notify parent component if callback exists
                 if (onUpdate) onUpdate();
             } else {
-                toast.error(result.message || 'Error al eliminar el producto de la lista');
+                toast.error(result.message || t.errorRemove);
             }
         } catch (error) {
             console.error('Error removing product from list:', error);
-            toast.error('Error al eliminar el producto de la lista');
+            toast.error(t.errorRemove);
         } finally {
             setUpdatingProductId(null);
         }
@@ -108,13 +146,12 @@ export default function ListProductsManager({ listId, onUpdate }) {
     };
     return (
         <div className=" ">
-            {/* <h3 className="text-lg font-medium text-gray-900 mb-4">Productos en la Lista</h3> */}
-            {/* Toggle between product list and add products */}
-            {/* <div className="flex justify-between items-center mb-4">
+            {/* Product selection toggle and component */}
+            <div className="flex justify-between items-center mb-4">
                 <h4 className="text-gray-700">
-                    {showAddProducts ? 'Seleccionar Productos' : `Productos (${items.length})`}
+                    {showAddProducts ? (locale === 'ca' ? 'Seleccionar Productes' : 'Seleccionar Productos') : `${t.product} (${items.length})`}
                 </h4>
-                {/* <button
+                <button
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -123,45 +160,33 @@ export default function ListProductsManager({ listId, onUpdate }) {
                     className="flex items-center px-3 py-1 text-sm bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0]"
                 >
                     {showAddProducts ? (
-                        'Volver a la lista'
+                        locale === 'ca' ? 'Tornar a la llista' : 'Volver a la lista'
                     ) : (
                         <>
-                            <FiPlus className="mr-1" /> Añadir Productos
+                            <FiPlus className="mr-1" />{locale === 'ca' ? 'Afegir Productes' : 'Añadir Productos'}
                         </>
                     )}
-                </button>  
-            </div> */}
-            {/* Loading state */}
-
+                </button>
+            </div>
             {loading && !showAddProducts && (
                 <div className="flex justify-center items-center py-10">
-                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]" />
                 </div>
             )}
-            {/* Product selection component */}
-            {/* {showAddProducts && (
+            {showAddProducts && (
                 <ProductSelection
                     selectedProducts={items}
                     onProductSelect={handleAddProducts}
+                    locale={locale}
+                    t={t}
                 />
-            )} */}
-            {/* Product list */}
+            )}
             {!showAddProducts && !loading && (
                 <>
                     {items.filter(item => item.state === 0).length === 0 ? (
                         <div className="text-center py-10 bg-gray-50 rounded-lg">
                             <InfoIcon className="mx-auto mb-4 h-10 w-10 text-gray-400" />
-                            <p className="text-gray-500 mb-4">No hay productos pendientes en la lista actual.</p>
-                            {/* <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setShowAddProducts(true);
-                            }}
-                            className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0]"
-                        >
-                            Añadir Productos
-                        </button> */}
+                            <p className="text-gray-500 mb-4">{t.noPending}</p>
                         </div>
                     ) : (
                         <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden w-full max-h-[400px] overflow-y-auto">
@@ -169,13 +194,13 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Producto
+                                            {t.product}
                                         </th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Precio
+                                            {t.price}
                                         </th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Acciones
+                                            {t.actions}
                                         </th>
                                     </tr>
                                 </thead>
@@ -190,7 +215,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                             {item.product.image && (
                                                                 <Image
                                                                     src={item.product.image}
-                                                                    alt={item.product.name}
+                                                                    alt={item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
                                                                     width={40}
                                                                     height={40}
                                                                     className="object-cover w-full h-full"
@@ -199,7 +224,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                         </div>
                                                         <div className="ml-4">
                                                             <div className="text-sm font-medium text-gray-900">
-                                                                {item.product.name}
+                                                                {item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
                                                             </div>
                                                             <div className="text-sm text-gray-500">
                                                                 {item.product.brand}

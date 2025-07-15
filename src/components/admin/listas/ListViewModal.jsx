@@ -4,6 +4,123 @@ import Image from 'next/image';
 import { useUser } from '@/contexts/UserContext';
 
 import { useState, useCallback, useEffect } from 'react';
+// Translation object for Catalan and Spanish
+const translations = {
+    ca: {
+        details: 'Detalls de la Llista',
+        info: 'Informació de la Llista',
+        reference: 'Referència:',
+        babyName: 'Nom del Nadó:',
+        visibility: 'Visibilitat:',
+        public: 'Pública',
+        private: 'Privada',
+        description: 'Descripció:',
+        date: 'Data',
+        total: 'Total',
+        dueDate: 'Data Prevista',
+        status: 'Estat',
+        active: 'Activa',
+        completed: 'Completada',
+        inactive: 'Inactiva',
+        activeDesc: 'Aquesta llista està disponible per rebre regals',
+        completedDesc: 'Tots els productes han estat rebuts',
+        inactiveDesc: 'Aquesta llista ha estat inactiva',
+        pendingProducts: 'Productes Pendents',
+        boughtProducts: 'Productes Comprats',
+        reservedProducts: 'Productes Reservats',
+        progress: 'Progrés',
+        totalProducts: 'Total Productes',
+        receivedProducts: 'Productes Rebuts',
+        noPending: 'No hi ha productes pendents.',
+        noBought: 'No hi ha productes comprats.',
+        noReserved: 'No hi ha productes reservats.',
+        reservedTag: 'Reservat',
+        statePending: 'Pendent',
+        stateReserved: 'Reservat',
+        stateBought: 'Comprat',
+        stateUnknown: 'Desconegut',
+        errorProductData: 'Error: Dades del producte no disponibles',
+        productId: 'ID de l’article:',
+        cancel: 'Cancel·lar',
+        save: 'Desar',
+        buyerData: 'Dades del comprador',
+        name: 'Nom *',
+        email: 'Email *',
+        phone: 'Telèfon',
+        message: 'Missatge',
+        guardar: 'Desar',
+        purchased: 'Productes Rebuts',
+        productos: 'productes',
+        progresoTotal: 'Progrés total',
+        guardarBtn: 'Desar',
+        cerrar: 'Tancar',
+        reservar: 'Reservar',
+        comprar: 'Comprar',
+        cancelarReserva: 'Cancel·lar',
+        guardarCambios: 'Desar',
+    },
+    es: {
+        details: 'Detalles de la Lista',
+        info: 'Información de la Lista',
+        reference: 'Referencia:',
+        babyName: 'Nombre del Bebé:',
+        visibility: 'Visibilidad:',
+        public: 'Pública',
+        private: 'Privada',
+        description: 'Descripción:',
+        date: 'Fecha',
+        total: 'Total',
+        dueDate: 'Fecha Prevista',
+        status: 'Estado',
+        active: 'Activa',
+        completed: 'Completada',
+        inactive: 'InActiva',
+        activeDesc: 'Esta lista está disponible para recibir regalos',
+        completedDesc: 'Todos los productos fueron recibidos',
+        inactiveDesc: 'Esta lista ha sido InActiva',
+        pendingProducts: 'Productos Pendientes',
+        boughtProducts: 'Productos Comprados',
+        reservedProducts: 'Productos Reservados',
+        progress: 'Progreso',
+        totalProducts: 'Total Productos',
+        receivedProducts: 'Productos Recibidos',
+        noPending: 'No hay productos pendientes.',
+        noBought: 'No hay productos comprados.',
+        noReserved: 'No hay productos reservados.',
+        reservedTag: 'Reservado',
+        statePending: 'Pendiente',
+        stateReserved: 'Reservado',
+        stateBought: 'Comprado',
+        stateUnknown: 'Desconocido',
+        errorProductData: 'Error: Datos del producto no disponibles',
+        productId: 'ID del artículo:',
+        cancel: 'Cancelar',
+        save: 'Guardar',
+        buyerData: 'Datos del comprador',
+        name: 'Nombre *',
+        email: 'Email *',
+        phone: 'Teléfono',
+        message: 'Mensaje',
+        guardar: 'Guardar',
+        purchased: 'Productos Recibidos',
+        productos: 'productos',
+        progresoTotal: 'Progreso total',
+        guardarBtn: 'Guardar',
+        cerrar: 'Cerrar',
+        reservar: 'Reservar',
+        comprar: 'Comprar',
+        cancelarReserva: 'Cancelar',
+        guardarCambios: 'Guardar',
+    }
+};
+
+function getLocale() {
+    if (typeof window !== 'undefined') {
+        const lang = window.navigator.language || 'es';
+        return lang.startsWith('ca') ? 'ca' : 'es';
+    }
+    return 'es';
+}
 import { updateBirthListItems, fetchBirthListItems, updateBirthListItemState, updateBirthList } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
 import { stringify } from 'querystring';
@@ -18,6 +135,8 @@ export default function ListViewModal({
     openStatusModal,
     onStatusChange
 }) {
+    const locale = getLocale();
+    const t = translations[locale];
     const [loading, setLoading] = useState(false);
     const [items, setItems] = useState([]);
     const { user, loading: userLoading } = useUser();
@@ -169,10 +288,10 @@ export default function ListViewModal({
 
     const renderStateLabel = (state) => {
         switch (state) {
-            case 0: return "Pendiente";
-            case 1: return "Reservado";
-            case 2: return "Comprado";
-            default: return "Desconocido";
+            case 0: return t.statePending;
+            case 1: return t.stateReserved;
+            case 2: return t.stateBought;
+            default: return t.stateUnknown;
         }
     };
 
@@ -216,8 +335,8 @@ export default function ListViewModal({
                 <div key={item?._id || `error-${index}`} className="p-4 bg-white border-b border-gray-200">
                     <div className="flex items-start">
                         <div className="flex-1">
-                            <p className="text-sm text-red-500">Error: Datos del producto no disponibles</p>
-                            <p className="text-xs text-gray-500">ID del artículo: {item?._id || 'Desconocido'}</p>
+                            <p className="text-sm text-red-500">{t.errorProductData}</p>
+                            <p className="text-xs text-gray-500">{t.productId} {item?._id || t.stateUnknown}</p>
                         </div>
                     </div>
                 </div>
@@ -369,7 +488,7 @@ export default function ListViewModal({
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                     </svg>
                                 </span>
-                                <h2 className="text-xl font-bold text-gray-800">Detalles de la Lista</h2>
+                                <h2 className="text-xl font-bold text-gray-800">{t.details}</h2>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <button
@@ -389,26 +508,26 @@ export default function ListViewModal({
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
                                     </svg>
                                 </span>
-                                <h3 className="text-md font-semibold text-gray-800">Información de la Lista</h3>
+                                <h3 className="text-md font-semibold text-gray-800">{t.info}</h3>
                             </div>
                             <div className='flex flex-row space-x-4 mb-4'>
                                 <div className="bg-white rounded-lg border border-gray-200 w-[500px] ">
                                     <div className="flex flex-row space-x-2 justify-between p-4 space-y-3">
                                         <div>
-                                            <span className="block text-xs font-medium text-gray-500">Referencia:</span>
+                                            <span className="block text-xs font-medium text-gray-500">{t.reference}</span>
                                             <p className="text-sm text-gray-900 mt-1">{selectedList.reference}</p>
                                         </div>
                                         <div>
-                                            <span className="block text-xs font-medium text-gray-500">Nombre del Bebé:</span>
+                                            <span className="block text-xs font-medium text-gray-500">{t.babyName}</span>
                                             <p className="text-sm text-gray-900 mt-1">{selectedList.babyName}</p>
                                         </div>
                                         <div>
-                                            <span className="block text-xs font-medium text-gray-500">Visibilidad:</span>
-                                            <p className="text-sm text-gray-900 mt-1">{selectedList.isPublic ? 'Pública' : 'Privada'}</p>
+                                            <span className="block text-xs font-medium text-gray-500">{t.visibility}</span>
+                                            <p className="text-sm text-gray-900 mt-1">{selectedList.isPublic ? t.public : t.private}</p>
                                         </div>
                                         {selectedList.description && (
                                             <div>
-                                                <span className="block text-xs font-medium text-gray-500">Descripción:</span>
+                                                <span className="block text-xs font-medium text-gray-500">{t.description}</span>
                                                 <p className="text-sm text-gray-900 mt-1">{selectedList.description}</p>
                                             </div>
                                         )}
@@ -423,7 +542,7 @@ export default function ListViewModal({
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 00-2.25-2.25v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                                     </svg>
                                                 </span>
-                                                <h3 className="text-sm font-medium text-gray-500">Fecha</h3>
+                                                <h3 className="text-sm font-medium text-gray-500">{t.date}</h3>
                                             </div>
                                             <p className="text-md font-medium">{selectedList.creationDate}</p>
                                         </div>
@@ -434,9 +553,9 @@ export default function ListViewModal({
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
                                                 </span>
-                                                <h3 className="text-sm font-medium text-gray-500">Total</h3>
+                                                <h3 className="text-sm font-medium text-gray-500">{t.total}</h3>
                                             </div>
-                                            <p className="text-md font-medium">{selectedList.products} productos</p>
+                                            <p className="text-md font-medium">{selectedList.products} {t.productos}</p>
                                         </div>
                                         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                             <div className="flex items-center mb-2">
@@ -445,7 +564,7 @@ export default function ListViewModal({
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                                                     </svg>
                                                 </span>
-                                                <h3 className="text-sm font-medium text-gray-500">Fecha Prevista</h3>
+                                                <h3 className="text-sm font-medium text-gray-500">{t.dueDate}</h3>
                                             </div>
                                             <p className="text-md font-medium">{selectedList.dueDate}</p>
                                         </div>
@@ -456,7 +575,7 @@ export default function ListViewModal({
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
                                                 </span>
-                                                <h3 className="text-sm font-medium text-gray-500">Estado</h3>
+                                                <h3 className="text-sm font-medium text-gray-500">{t.status}</h3>
                                             </div>
                                             <div>
                                                 <span
@@ -468,11 +587,11 @@ export default function ListViewModal({
                                                     {selectedList.status}
                                                 </span>
                                                 <p className="text-xs text-gray-500 mt-1">
-                                                    {selectedList.status === 'Activa'
-                                                        ? 'Esta lista está disponible para recibir regalos'
-                                                        : selectedList.status === 'Completada'
-                                                            ? 'Todos los productos fueron recibidos'
-                                                            : 'Esta lista ha sido InActiva'}
+                                                    {selectedList.status === t.active
+                                                        ? t.activeDesc
+                                                        : selectedList.status === t.completed
+                                                            ? t.completedDesc
+                                                            : t.inactiveDesc}
                                                 </p>
                                             </div>
                                         </div>
@@ -491,7 +610,7 @@ export default function ListViewModal({
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                         </svg>
                                     </span>
-                                    <h3 className="text-md font-semibold text-gray-800">Productos Pendientes</h3>
+                                    <h3 className="text-md font-semibold text-gray-800">{t.pendingProducts}</h3>
                                 </div>
                                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[55vh] flex-1">
                                     {itemsLoading ? (
@@ -515,7 +634,7 @@ export default function ListViewModal({
                                         if (allItems.length === 0) {
                                             return (
                                                 <div className="text-center py-10">
-                                                    <p className="text-gray-500">No hay productos pendientes.</p>
+                                                    <p className="text-gray-500">{t.noPending}</p>
                                                 </div>
                                             );
                                         }
@@ -529,7 +648,7 @@ export default function ListViewModal({
                                                         return (
                                                             <div key={item._id || index} className="relative">
                                                                 {renderProduct({ ...item, reservedBy: undefined, reservedData: undefined }, index)}
-                                                                <span className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">Reservado</span>
+                                                                <span className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">{t.reservedTag}</span>
                                                             </div>
                                                         );
                                                     }
@@ -553,7 +672,7 @@ export default function ListViewModal({
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                         </svg>
                                     </span>
-                                    <h3 className="text-md font-semibold text-gray-800">Productos Comprados</h3>
+                                    <h3 className="text-md font-semibold text-gray-800">{t.boughtProducts}</h3>
                                 </div>
                                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[55vh] flex-1">
                                     {itemsLoading ? (
@@ -562,7 +681,7 @@ export default function ListViewModal({
                                         </div>
                                     ) : getBoughtItems().length === 0 ? (
                                         <div className="text-center py-10">
-                                            <p className="text-gray-500">No hay productos comprados.</p>
+                                            <p className="text-gray-500">{t.noBought}</p>
                                         </div>
                                     ) : (
                                         <div className="divide-y divide-gray-200 h-full overflow-y-auto">
@@ -582,7 +701,7 @@ export default function ListViewModal({
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                             </svg>
                                         </span>
-                                        <h3 className="text-md font-semibold text-gray-800">Productos Reservados</h3>
+                                        <h3 className="text-md font-semibold text-gray-800">{t.reservedProducts}</h3>
                                     </div>
                                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[55vh] flex-1">
                                         {itemsLoading ? (
@@ -591,7 +710,7 @@ export default function ListViewModal({
                                             </div>
                                         ) : getReservedItems().length === 0 ? (
                                             <div className="text-center py-10">
-                                                <p className="text-gray-500">No hay productos reservados.</p>
+                                                <p className="text-gray-500">{t.noReserved}</p>
                                             </div>
                                         ) : (
                                             <div className="divide-y divide-gray-200 h-full overflow-y-auto">
@@ -609,12 +728,12 @@ export default function ListViewModal({
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                                             </svg>
                                         </span>
-                                        <h3 className="text-md font-semibold text-gray-800">Progreso</h3>
+                                        <h3 className="text-md font-semibold text-gray-800">{t.progress}</h3>
                                     </div>
                                     <div className="bg-white rounded-lg border border-gray-200 p-4 h-[300px]">
                                         <div className="mb-6">
                                             <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-xs text-gray-500">Progreso total</span>
+                                                <span className="text-xs text-gray-500">{t.progresoTotal}</span>
                                                 <span className="text-xs font-medium">{calculateProgress()}%</span>
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -631,11 +750,11 @@ export default function ListViewModal({
                                         <div className="grid grid-row-2 gap-4 text-center">
                                             <div className="bg-gray-50 p-4 rounded-lg">
                                                 <div className="text-4xl font-bold text-[#00B0C8]">{selectedList.products}</div>
-                                                <div className="text-xs text-gray-500 mt-1">Total Productos</div>
+                                                <div className="text-xs text-gray-500 mt-1">{t.totalProducts}</div>
                                             </div>
                                             <div className="bg-gray-50 p-4 rounded-lg">
                                                 <div className="text-4xl font-bold text-green-500">{selectedList.purchased}</div>
-                                                <div className="text-xs text-gray-500 mt-1">Productos Recibidos</div>
+                                                <div className="text-xs text-gray-500 mt-1">{t.receivedProducts}</div>
                                             </div>
                                         </div>
                                         {/* <div className="text-center mt-6">
@@ -672,7 +791,7 @@ export default function ListViewModal({
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 3.75H6.912a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859M12 3v8.25m0 0l-3-3m3 3l3-3" />
                                     </svg>
-                                    Guardar
+                                    {t.save}
                                 </button>
                                 {/* <button
                                 type="button"
@@ -691,7 +810,7 @@ export default function ListViewModal({
                 <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg w-full max-w-md">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-medium">Datos del comprador</h3>
+                            <h3 className="text-lg font-medium">{t.buyerData}</h3>
                             <button
                                 onClick={() => setShowDataModal(false)}
                                 className="text-gray-500 hover:text-gray-700"
@@ -702,7 +821,7 @@ export default function ListViewModal({
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                    Nombre *
+                                    {t.name}
                                 </label>
                                 <input
                                     type="text"
@@ -716,7 +835,7 @@ export default function ListViewModal({
                             </div>
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                    Email *
+                                    {t.email}
                                 </label>
                                 <input
                                     type="email"
@@ -730,7 +849,7 @@ export default function ListViewModal({
                             </div>
                             <div>
                                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                                    Teléfono
+                                    {t.phone}
                                 </label>
                                 <input
                                     type="tel"
@@ -743,7 +862,7 @@ export default function ListViewModal({
                             </div>
                             <div>
                                 <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                                    Mensaje
+                                    {t.message}
                                 </label>
                                 <textarea
                                     id="message"
@@ -760,13 +879,13 @@ export default function ListViewModal({
                                 onClick={() => setShowDataModal(false)}
                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
-                                Cancelar
+                                {t.cancel}
                             </button>
                             <button
                                 onClick={confirmStateChange}
                                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
-                                Guardar
+                                {t.save}
                             </button>
                         </div>
                     </div>

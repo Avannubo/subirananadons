@@ -1,5 +1,68 @@
 'use client';
 import { useRef, useState, useEffect } from 'react';
+// Translation object for Catalan and Spanish
+const translations = {
+    ca: {
+        title: 'Editar Llista de Naixement',
+        listTitle: 'Títol de la Llista',
+        listTitlePlaceholder: 'Ex: Llista de Baby Shower per a Maria',
+        babyName: 'Nom del Nadó',
+        babyNamePlaceholder: 'Ex: Lucas o Nadó Garcia',
+        dueDate: 'Data Prevista',
+        description: 'Descripció',
+        descriptionPlaceholder: 'Escriu un missatge o descripció per als teus convidats',
+        productManagement: 'Gestió de Productes',
+        currentProducts: 'Productes Actuals',
+        addProducts: 'Afegir Productes',
+        add: 'Afegir',
+        addSelected: n => `Afegir (${n})`,
+        noProductsSelected: 'No hi ha productes seleccionats per afegir',
+        cancel: 'Cancel·lar',
+        saving: 'Desant...',
+        save: 'Desar Canvis',
+        imageTooLarge: 'La imatge no ha de superar els 5MB',
+        notImage: 'El fitxer ha de ser una imatge',
+        successAdd: n => `${n} producte(s) afegit(s) a la llista`,
+        errorAdd: 'Error en afegir productes a la llista',
+        errorFetch: 'Error en obtenir els productes actuals',
+        errorUpdate: 'Error en actualitzar la llista',
+        requiredFields: 'Si us plau, completa tots els camps obligatoris',
+    },
+    es: {
+        title: 'Editar Lista de Nacimiento',
+        listTitle: 'Título de la Lista',
+        listTitlePlaceholder: 'Ej: Lista de Baby Shower para María',
+        babyName: 'Nombre del Bebé',
+        babyNamePlaceholder: 'Ej: Lucas o Bebé García',
+        dueDate: 'Fecha Prevista',
+        description: 'Descripción',
+        descriptionPlaceholder: 'Escribe un mensaje o descripción para tus invitados',
+        productManagement: 'Gestión de Productos',
+        currentProducts: 'Productos Actuales',
+        addProducts: 'Agregar Productos',
+        add: 'Agregar',
+        addSelected: n => `Agregar (${n})`,
+        noProductsSelected: 'No hay productos seleccionados para agregar',
+        cancel: 'Cancelar',
+        saving: 'Guardando...',
+        save: 'Guardar Cambios',
+        imageTooLarge: 'La imagen no debe superar los 5MB',
+        notImage: 'El archivo debe ser una imagen',
+        successAdd: n => `${n} producto(s) agregado(s) a la lista`,
+        errorAdd: 'Error al agregar productos a la lista',
+        errorFetch: 'Error al obtener los productos actuales',
+        errorUpdate: 'Error al actualizar la lista',
+        requiredFields: 'Por favor complete todos los campos obligatorios',
+    }
+};
+
+function getLocale() {
+    if (typeof window !== 'undefined') {
+        const lang = window.navigator.language || 'es';
+        return lang.startsWith('ca') ? 'ca' : 'es';
+    }
+    return 'es';
+}
 import { Dialog, DialogTitle } from '@headlessui/react';
 import { FiX, FiEdit2, FiUpload, FiImage, FiTrash2 } from 'react-icons/fi';
 import ListProductsManager from './ListProductsManager';
@@ -16,6 +79,8 @@ export default function ListEditModal({
     loading,
     saveButtonRef
 }) {
+    const locale = getLocale();
+    const t = translations[locale];
     const fileInputRef = useRef(null);
     const [imagePreview, setImagePreview] = useState('/assets/images/Screenshot_4.png');
     const [isDragging, setIsDragging] = useState(false); const [selectedProducts, setSelectedProducts] = useState([]);
@@ -42,7 +107,7 @@ export default function ListEditModal({
     };    // Handle adding selected products to the list
     const handleAddProductsToList = async () => {
         if (selectedProducts.length === 0) {
-            toast.error('No hay productos seleccionados para agregar');
+            toast.error(t.noProductsSelected);
             return;
         }
 
@@ -52,7 +117,7 @@ export default function ListEditModal({
             const currentListData = await currentListResponse.json();
 
             if (!currentListData.success) {
-                throw new Error('Error al obtener los productos actuales');
+                throw new Error(t.errorFetch);
             }            // Combine current items with new ones
             const currentItems = currentListData.data || [];
 
@@ -99,16 +164,16 @@ export default function ListEditModal({
             });
 
             const result = await response.json(); if (result.success) {
-                toast.success(`${selectedProducts.length} producto(s) agregado(s) a la lista`);
+                toast.success(t.successAdd(selectedProducts.length));
                 setSelectedProducts([]); // Clear selected products
                 setResetSelection(prev => !prev); // Toggle to trigger useEffect in AddProductToList
                 setListProductsKey(prev => prev + 1); // Force refresh of ListProductsManager
             } else {
-                throw new Error(result.message || 'Error al agregar productos');
+                throw new Error(result.message || t.errorAdd);
             }
         } catch (error) {
             console.error('Error adding products to list:', error);
-            toast.error('Error al agregar productos a la lista');
+            toast.error(t.errorAdd);
         }
     };
 
@@ -117,12 +182,12 @@ export default function ListEditModal({
         if (!file) return;
 
         if (file.size > 5 * 1024 * 1024) {
-            alert('La imagen no debe superar los 5MB');
+            alert(t.imageTooLarge);
             return;
         }
 
         if (!file.type.startsWith('image/')) {
-            alert('El archivo debe ser una imagen');
+            alert(t.notImage);
             return;
         }
 
@@ -160,12 +225,12 @@ export default function ListEditModal({
         if (!file) return;
 
         if (file.size > 5 * 1024 * 1024) {
-            alert('La imagen no debe superar los 5MB');
+            alert(t.imageTooLarge);
             return;
         }
 
         if (!file.type.startsWith('image/')) {
-            alert('El archivo debe ser una imagen');
+            alert(t.notImage);
             return;
         }
 
@@ -210,7 +275,7 @@ export default function ListEditModal({
                     <div className="flex justify-between items-center p-4 px-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                         <DialogTitle className="text-xl font-semibold text-gray-800 flex items-center">
                             <FiEdit2 className="mr-3 text-[#00B0C8]" />
-                            Editar Lista de Nacimiento
+                            {t.title}
                         </DialogTitle>
                         <button
                             onClick={() => setShowModal(false)}
@@ -232,7 +297,7 @@ export default function ListEditModal({
                                         {/* Title */}
                                         <div className="space-y-2">
                                             <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                                                Título de la Lista <span className="text-red-500">*</span>
+                                                {t.listTitle} <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
@@ -241,7 +306,7 @@ export default function ListEditModal({
                                                 value={editForm.title}
                                                 onChange={handleEditChange}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition-colors"
-                                                placeholder="Ej: Lista de Baby Shower para María"
+                                                placeholder={t.listTitlePlaceholder}
                                                 required
                                             />
                                         </div>
@@ -249,7 +314,7 @@ export default function ListEditModal({
                                         {/* Baby Name */}
                                         <div className="space-y-2">
                                             <label htmlFor="babyName" className="block text-sm font-medium text-gray-700">
-                                                Nombre del Bebé <span className="text-red-500">*</span>
+                                                {t.babyName} <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
@@ -258,7 +323,7 @@ export default function ListEditModal({
                                                 value={editForm.babyName}
                                                 onChange={handleEditChange}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition-colors"
-                                                placeholder="Ej: Lucas o Bebé García"
+                                                placeholder={t.babyNamePlaceholder}
                                                 required
                                             />
                                         </div>
@@ -266,7 +331,7 @@ export default function ListEditModal({
                                         {/* Due Date */}
                                         <div className="space-y-2">
                                             <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
-                                                Fecha Prevista <span className="text-red-500">*</span>
+                                                {t.dueDate} <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="date"
@@ -283,7 +348,7 @@ export default function ListEditModal({
                                     {/* Description */}
                                     <div className="space-y-2 mb-2">
                                         <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                                            Descripción
+                                            {t.description}
                                         </label>
                                         <textarea
                                             id="description"
@@ -291,7 +356,7 @@ export default function ListEditModal({
                                             value={editForm.description}
                                             onChange={handleEditChange}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition-colors resize-y"
-                                            placeholder="Escribe un mensaje o descripción para tus invitados"
+                                            placeholder={t.descriptionPlaceholder}
                                             rows={1}
                                         />
                                     </div>
@@ -303,7 +368,7 @@ export default function ListEditModal({
                                 <div className="mb-6">
                                     <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                         <FiImage className="mr-2 text-[#00B0C8]" />
-                                        Gestión de Productos
+                                        {t.productManagement}
                                     </h3>
                                 </div>
 
@@ -311,7 +376,7 @@ export default function ListEditModal({
                                     {/* Current Products */}
                                     <div className="space-y-4">
                                         <h4 className="text-md font-medium text-gray-700 border-b border-gray-200 pb-2">
-                                            Productos Actuales
+                                            {t.currentProducts}
                                         </h4>
                                         <div className="bg-gray-50 p-4 rounded-lg min-h-[300px]">
                                             <ListProductsManager
@@ -326,7 +391,7 @@ export default function ListEditModal({
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between border-b border-gray-200 pb-2">
                                             <h4 className="text-md font-medium text-gray-700">
-                                                Agregar Productos
+                                                {t.addProducts}
                                             </h4>
                                             {selectedProducts.length > 0 && (
                                                 <button
@@ -334,7 +399,7 @@ export default function ListEditModal({
                                                     onClick={handleAddProductsToList}
                                                     className="px-3 py-1 bg-[#00B0C8] text-white text-sm rounded-md hover:bg-[#008da0] transition-colors"
                                                 >
-                                                    Agregar ({selectedProducts.length})
+                                                    {t.addSelected(selectedProducts.length)}
                                                 </button>
                                             )}
                                         </div>
@@ -358,7 +423,7 @@ export default function ListEditModal({
                                 onClick={() => setShowModal(false)}
                                 className="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors"
                             >
-                                Cancelar
+                                {t.cancel}
                             </button>
                             <button
                                 type="submit"
@@ -368,7 +433,7 @@ export default function ListEditModal({
                                 className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] transition-colors ${loading ? 'opacity-75 cursor-not-allowed' : ''
                                     }`}
                             >
-                                {loading ? 'Guardando...' : 'Guardar Cambios'}
+                                {loading ? t.saving : t.save}
                             </button>
                         </div>
                     </div>
