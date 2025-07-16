@@ -17,12 +17,12 @@ const productSchema = new mongoose.Schema({
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
-        required: [false, 'Por favor, selecciona una categoría']
+        required: false
     },
     brand: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Brand',
-        required: [false]
+        required: false
     },
     price_excl_tax: {
         type: Number,

@@ -19,6 +19,7 @@ export default function BrandsPage() {
     const searchParams = useSearchParams();
     const [brands, setBrands] = useState([]);
     const [selectedBrand, setSelectedBrand] = useState('');
+    const [selectedBrandId, setSelectedBrandId] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
     const [sortBy, setSortBy] = useState('default');
     const [filteredProducts, setFilteredProducts] = useState([]);
@@ -39,13 +40,19 @@ export default function BrandsPage() {
                 const response = await fetch('/api/brands?limit=100&enabled=true');
                 const data = await response.json();
                 if (data.brands && data.brands.length > 0) {
-                    setBrands(data.brands);
-                    // Get brand from URL parameters
-                    const urlBrand = searchParams.get('brand');
-                    if (urlBrand) {
-                        setSelectedBrand(urlBrand);
+                    // Sort brands alphabetically by name
+                    const sortedBrands = [...data.brands].sort((a, b) => a.name.localeCompare(b.name));
+                    setBrands(sortedBrands);
+                    // Get brand from URL parameters (should be brand _id)
+                    const urlBrandId = searchParams.get('brand');
+                    if (urlBrandId) {
+                        setSelectedBrandId(urlBrandId);
+                        // Find brand by id to set selectedBrand name for display
+                        const found = sortedBrands.find(b => b._id === urlBrandId);
+                        setSelectedBrand(found ? found.name : 'all');
                     } else {
                         setSelectedBrand('all');
+                        setSelectedBrandId('all');
                     }
                 }
             } catch (error) {
@@ -59,13 +66,13 @@ export default function BrandsPage() {
     // Fetch products for selected brand
     useEffect(() => {
         const fetchProducts = async () => {
-            if (!selectedBrand) return;
+            if (!selectedBrandId) return;
             try {
                 setLoading(true);
                 // If 'all' is selected, don't filter by brand
-                const endpoint = selectedBrand === 'all'
+                const endpoint = selectedBrandId === 'all'
                     ? `/api/products?limit=${productsPerPage}&page=${currentPage}&status=active`
-                    : `/api/products?brand=${selectedBrand}&limit=${productsPerPage}&page=${currentPage}&status=active`;
+                    : `/api/products?brand=${selectedBrandId}&limit=${productsPerPage}&page=${currentPage}&status=active`;
                 const response = await fetch(endpoint);
                 const data = await response.json();
                 let products = data.products || [];
@@ -101,13 +108,13 @@ export default function BrandsPage() {
             }
         };
         fetchProducts();
-    }, [selectedBrand, currentPage, productsPerPage]);
+    }, [selectedBrandId, currentPage, productsPerPage]);
     // Reset to page 1 when changing brands
     useEffect(() => {
-        if (selectedBrand) {
+        if (selectedBrandId) {
             setCurrentPage(1);
         }
-    }, [selectedBrand]);
+    }, [selectedBrandId]);
     // Sort products when sortBy changes
     useEffect(() => {
         if (filteredProducts.length > 0) {
@@ -174,16 +181,22 @@ export default function BrandsPage() {
     const handleSortChange = (e) => {
         setSortBy(e.target.value);
     };
-    const handleBrandSelect = (brandName) => {
+    const handleBrandSelect = (brandId) => {
         const params = new URLSearchParams(searchParams.toString());
-        if (brandName === 'all') {
+        if (brandId === 'all') {
             params.delete('brand');
+            setSelectedBrand('all');
+            setSelectedBrandId('all');
         } else {
-            params.set('brand', brandName);
+            params.set('brand', brandId);
+            setSelectedBrandId(brandId);
+            // Find brand name for display
+            const found = brands.find(b => b._id === brandId);
+            setSelectedBrand(found ? found.name : '');
         }
         router.replace(`/brands?${params.toString()}`);
-        setSelectedBrand(brandName);
     };
+
     // Go to previous page
     const handlePrevPage = () => {
         if (currentPage > 1) {
@@ -341,9 +354,9 @@ export default function BrandsPage() {
                                                 transition={{ delay: 0.1 * index, duration: 0.5 }}
                                             >
                                                 <button
-                                                    onClick={() => handleBrandSelect(brand.name)}
-                                                    data-brand={brand.name}
-                                                    className={`w-full text-left px-4 py-2 transition-colors hover:bg-gray-50 flex items-center gap-3 ${selectedBrand === brand.name
+                                                    onClick={() => handleBrandSelect(brand._id)}
+                                                    data-brand={brand._id}
+                                                    className={`w-full text-left px-4 py-2 transition-colors hover:bg-gray-50 flex items-center gap-3 ${selectedBrandId === brand._id
                                                         ? 'bg-gray-50 font-medium text-[#00B0C8]'
                                                         : ''
                                                         }`}
@@ -374,13 +387,13 @@ export default function BrandsPage() {
                             <div className="block lg:hidden w-full">
                                 <select
                                     className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition"
-                                    value={selectedBrand || 'all'}
+                                    value={selectedBrandId || 'all'}
                                     onChange={e => handleBrandSelect(e.target.value)}
                                     disabled={brandsLoading}
                                 >
                                     <option value="all">{t('allBrandsOption')}</option>
                                     {brands.map((brand) => (
-                                        <option key={brand._id} value={brand.name}>{brand.name}</option>
+                                        <option key={brand._id} value={brand._id}>{brand.name}</option>
                                     ))}
                                 </select>
                             </div>

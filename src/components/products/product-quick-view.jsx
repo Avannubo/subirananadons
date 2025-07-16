@@ -2,11 +2,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
+import { getTranslatedField } from '@/lib/getTranslatedField';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 export default function ProductQuickView({ product, onClose }) {
+    // Get current locale from next-intl
+    const locale = useLocale();
     console.log(product.description);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(product?.imageUrl); // State for main image
@@ -32,6 +36,9 @@ export default function ProductQuickView({ product, onClose }) {
         };
     }, []);
     if (!product) return null;
+    // Get translated name/description
+    const translatedName = getTranslatedField(product, 'name', locale);
+    const translatedDescription = getTranslatedField(product, 'description', locale);
     const incrementQuantity = () => setQuantity(q => q + 1);
     const decrementQuantity = () => setQuantity(q => Math.max(1, q - 1)); // Prevent quantity < 1
     // Get available images for thumbnails (remove duplicates)
@@ -60,7 +67,7 @@ export default function ProductQuickView({ product, onClose }) {
     return (
         <AnimatePresence>
             <motion.div
-                className="fixed inset-0 bg-[#00000050] z-40 flex items-center justify-center p-2 mt-10 sm:p-4"
+                className="fixed inset-0 bg-[#00000050] z-40 flex items-center justify-center p-2 sm:p-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -114,17 +121,15 @@ export default function ProductQuickView({ product, onClose }) {
                                     </div>
                                 ))}
                             </div>
-                        </div> 
+                        </div>
                         <div className="w-full md:w-1/2 p-4 sm:p-6 flex flex-col justify-between">
                             <div>
-                                <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">{product.name}</h2>
+                                <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">{translatedName}</h2>
                                 <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{product.price}</p>
                                 <p className="text-xs sm:text-sm text-gray-500 mb-4">Impuestos incluidos</p>
                                 <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">
-                                    {product.description?.length > 0
-                                        ? product.description
-                                        : ''}
-                                    {product.description && product.description.length > 0 ? '...' : ''}
+                                    {translatedDescription?.length > 0 ? translatedDescription : ''}
+                                    {translatedDescription && translatedDescription.length > 0 ? '...' : ''}
                                 </p>
                             </div>
                             {/* Actions */}

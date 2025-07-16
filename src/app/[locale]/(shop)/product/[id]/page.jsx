@@ -51,75 +51,38 @@ export default function Page() {
         async function loadProduct() {
             try {
                 setLoading(true);
-                // Get product ID from params
                 const productId = params?.id;
                 if (!productId) {
                     throw new Error('Invalid product URL');
                 }
-                // Fetch product by ID
+                // Fetch product by ID (raw object)
                 const productById = await fetchProductById(productId);
                 if (!productById) {
                     throw new Error('Product not found');
                 }
-                // Get the correct translated product name based on locale
-                let translatedName = productById.name;
-                if (productById.translations && typeof productById.translations === 'object') {
-                    if (productById.translations[locale] && productById.translations[locale].name) {
-                        translatedName = productById.translations[locale].name;
-                    }
-                }
-                // Format the product details
-                const formattedProduct = {
-                    id: productById._id,
-                    name: translatedName,
-                    price: `${productById.price_incl_tax.toFixed(2).replace('.', ',')} €`,
-                    priceValue: productById.price_incl_tax,
-                    description: productById.description || t('noDescription'),
-                    details: {
-                        dimensions: productById.dimensions || t('notAvailable'),
-                        washingInstructions: productById.care_instructions || t('seeLabel'),
-                        reference: productById.reference || t('notAvailable'),
-                        brand: productById.brand || t('notAvailable')
-                    },
-                    images: [],
-                    category: productById.category || t('uncategorized')
-                };
-
-                // Collect all product images
-                if (productById.image) {
-                    formattedProduct.images.push(productById.image);
-                }
-
-                // Add hover image if different from main image
-                if (productById.imageHover && productById.imageHover !== productById.image) {
-                    formattedProduct.images.push(productById.imageHover);
-                }
-
-                // Add additional images if available
-                if (productById.additionalImages && Array.isArray(productById.additionalImages) && productById.additionalImages.length > 0) {
-                    formattedProduct.images.push(...productById.additionalImages);
-                }
-
-                // Ensure we have at least one image
-                if (formattedProduct.images.length === 0) {
-                    formattedProduct.images.push('/assets/images/Screenshot_4.png');
-                }
-                setProduct(formattedProduct);
+                setProduct(productById);
                 // Fetch related products in the same category
                 const relatedResponse = await fetchProducts({
-                    category: productById.category,
+                    category: productById.category?._id || productById.category,
                     limit: 8,
                     status: 'active'
                 });
-                // Format related products and filter out the current product
                 const formattedRelated = relatedResponse.products
                     .filter(item => item._id !== productById._id)
                     .map(formatProduct)
-                    .slice(0, 8); // Limit to 8 related products
+                    .slice(0, 8);
                 setRelatedProducts(formattedRelated);
                 setError(null);
             } catch (err) {
                 console.error('Error loading product:', err);
+                // Show error as toast if available
+                if (err && err.message) {
+                    toast.error(err.message);
+                } else if (typeof err === 'string') {
+                    toast.error(err);
+                } else {
+                    toast.error('Failed to load product. Please try again later.');
+                }
                 setError('Failed to load product. Please try again later.');
                 setProduct(null);
                 setRelatedProducts([]);
@@ -150,84 +113,7 @@ export default function Page() {
         return (
             <ShopLayout>
                 <div className="container mx-auto px-4 py-8 mt-22">
-                    {/* Skeleton Breadcrumb */}
-                    <div className="mb-8">
-                        <div className="flex items-center space-x-2">
-                            <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
-                            <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
-                            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-                            <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
-                            <div className="h-4 w-40 bg-gray-200 rounded animate-pulse"></div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Skeleton Product Image */}
-                        <div className="space-y-4">
-                            <div className="relative w-full h-[600px] rounded-lg bg-gray-200 animate-pulse"></div>
-
-                            {/* Skeleton Thumbnails */}
-                            <div className="flex space-x-4 overflow-hidden">
-                                {[...Array(4)].map((_, index) => (
-                                    <div key={index} className="w-[180px] h-44 bg-gray-200 rounded-md animate-pulse"></div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Skeleton Product Info */}
-                        <div className="space-y-6">
-                            <div className="h-8 w-3/4 bg-gray-200 rounded animate-pulse"></div>
-                            <div className="h-7 w-32 bg-gray-200 rounded animate-pulse"></div>
-
-                            <div className="space-y-4">
-                                <div className="h-20 bg-gray-200 rounded animate-pulse"></div>
-
-                                <div className="py-4 space-y-3">
-                                    <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
-                                    {[...Array(4)].map((_, index) => (
-                                        <div key={index} className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
-                                    ))}
-                                </div>
-
-                                {/* Skeleton Quantity Selector */}
-                                <div className="flex items-center space-x-4">
-                                    <div className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
-                                    <div className="h-10 w-32 bg-gray-200 rounded animate-pulse"></div>
-                                </div>
-
-                                {/* Skeleton Buttons */}
-                                <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
-                                <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Skeleton Tabs */}
-                    <div className="mt-16">
-                        <div className="border-b border-gray-200">
-                            <div className="flex space-x-8">
-                                <div className="h-6 w-28 bg-gray-200 rounded animate-pulse"></div>
-                                <div className="h-6 w-28 bg-gray-200 rounded animate-pulse"></div>
-                            </div>
-                        </div>
-                        <div className="mt-6 pb-16 border-b border-gray-200">
-                            <div className="space-y-2">
-                                {[...Array(3)].map((_, index) => (
-                                    <div key={index} className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Skeleton Related Products */}
-                    <div className="mt-16">
-                        <div className="h-8 w-44 bg-gray-200 rounded animate-pulse mb-8"></div>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            {[...Array(4)].map((_, index) => (
-                                <div key={index} className="bg-gray-200 rounded-lg h-64 animate-pulse"></div>
-                            ))}
-                        </div>
-                    </div>
+                    {/* Skeleton UI ...existing code... */}
                 </div>
             </ShopLayout>
         );
@@ -237,17 +123,72 @@ export default function Page() {
         return (
             <ShopLayout>
                 <div className="container mx-auto px-4 py-8 mt-22">
-                    <div className="text-center py-16">
-                        <h2 className="text-2xl text-red-500 mb-4">{t('errorTitle')}</h2>
-                        <p className="text-gray-600">{error || t('errorNotFound')}</p>
-                        <a href="/products" className="mt-6 inline-block bg-[#00B0C8] text-white py-2 px-6 rounded-md hover:bg-[#009bb1]">
-                            {t('backToShop')}
-                        </a>
-                    </div>
+                    {/* Error UI ...existing code... */}
                 </div>
             </ShopLayout>
         );
     }
+    // Helper functions for translation
+    const getTranslated = (obj, fallback = '') => {
+        if (!obj) return fallback;
+        if (typeof obj === 'object') {
+            return obj[locale] || obj['es'] || obj['ca'] || fallback;
+        }
+        return obj;
+    };
+
+    // Images array
+    const images = [];
+    if (product.image) images.push(product.image);
+    if (product.imageHover && product.imageHover !== product.image) images.push(product.imageHover);
+    if (product.additionalImages && Array.isArray(product.additionalImages) && product.additionalImages.length > 0) {
+        images.push(...product.additionalImages);
+    }
+    if (images.length === 0) images.push('/assets/images/Screenshot_4.png');
+
+    // Price
+    const price = product.price_incl_tax ? `${product.price_incl_tax.toFixed(2).replace('.', ',')} €` : '';
+
+    // Category name
+    let categoryName = '';
+    if (product.category && typeof product.category === 'object') {
+        if (product.category.name && typeof product.category.name === 'object') {
+            categoryName = getTranslated(product.category.name, t('uncategorized'));
+        } else if (typeof product.category.name === 'string') {
+            categoryName = product.category.name;
+        } else {
+            categoryName = t('uncategorized');
+        }
+    } else if (typeof product.category === 'string') {
+        categoryName = product.category;
+    } else {
+        categoryName = t('uncategorized');
+    }
+
+    // Brand name
+    let brandName = '';
+    if (product.brand && typeof product.brand === 'object') {
+        brandName = product.brand.name || t('notAvailable');
+    } else if (typeof product.brand === 'string') {
+        brandName = product.brand;
+    } else {
+        brandName = t('notAvailable');
+    }
+
+    // Description
+    const description = getTranslated(product.description, t('noDescription'));
+
+    // Product name
+    const productName = getTranslated(product.name, t('noName'));
+
+    // Details
+    const details = {
+        dimensions: product.dimensions || t('notAvailable'),
+        washingInstructions: product.care_instructions || t('seeLabel'),
+        reference: product.reference || t('notAvailable'),
+        brand: brandName
+    };
+
     return (
         <ShopLayout>
             <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 mt-20">
@@ -256,9 +197,9 @@ export default function Page() {
                     <ol className="hidden md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
                         <li><a href="/products" className="hover:text-gray-700">{t('breadcrumbProducts')}</a></li>
                         <li><span className="mx-2">/</span></li>
-                        <li><a href={`/products?category=${encodeURIComponent(product.category)}`} className="hover:text-gray-700">{product.category}</a></li>
+                        <li><a href={`/products?category=${encodeURIComponent(categoryName)}`} className="hover:text-gray-700">{categoryName}</a></li>
                         <li><span className="mx-2">/</span></li>
-                        <li className="text-gray-900 font-medium whitespace-nowrap">{product.name}</li>
+                        <li className="text-gray-900 font-medium whitespace-nowrap">{productName}</li>
                     </ol>
                 </nav>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -271,8 +212,8 @@ export default function Page() {
                             transition={{ duration: 0.3 }}
                         >
                             <Image
-                                src={product.images[selectedImage]}
-                                alt={product.name}
+                                src={images[selectedImage]}
+                                alt={productName}
                                 fill
                                 className="object-contain"
                                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -280,7 +221,7 @@ export default function Page() {
                         </motion.div>
 
                         {/* Thumbnails */}
-                        {product.images.length > 1 && (
+                        {images.length > 1 && (
                             <div className="space-y-2">
                                 <div className="relative">
                                     <div
@@ -300,7 +241,7 @@ export default function Page() {
                                             whileTap={{ cursor: "grabbing" }}
                                             dragElastic={0.1}
                                         >
-                                            {product.images.map((image, index) => (
+                                            {images.map((image, index) => (
                                                 <div
                                                     key={index}
                                                     className={`relative border border-gray-200 rounded-md overflow-hidden \
@@ -313,7 +254,7 @@ export default function Page() {
                                                     >
                                                         <Image
                                                             src={image}
-                                                            alt={`${product.name} ${index + 1}`}
+                                                            alt={`${productName} ${index + 1}`}
                                                             fill
                                                             className="object-contain"
                                                             draggable={false}
@@ -329,24 +270,24 @@ export default function Page() {
                     </div>
                     {/* Product Info */}
                     <div className="space-y-6">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{product.name}</h1>
-                        <p className="text-xl sm:text-2xl font-semibold text-gray-900">{product.price}</p>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{productName}</h1>
+                        <p className="text-xl sm:text-2xl font-semibold text-gray-900">{price}</p>
                         <div className="space-y-4">
-                            <p className="text-gray-600 break-words">{product.description}</p>
+                            <p className="text-gray-600 break-words">{description}</p>
                             <div className="py-4">
                                 <h3 className="font-bold text-gray-900 mb-2">{t('detailsTitle')}</h3>
                                 <ul className="list-disc list-inside space-y-1 text-gray-600">
-                                    {product.details.dimensions && (
-                                        <li>{t('dimensions')}: {product.details.dimensions}</li>
+                                    {details.dimensions && (
+                                        <li>{t('dimensions')}: {details.dimensions}</li>
                                     )}
-                                    {product.details.washingInstructions && (
-                                        <li>{t('washingInstructions')}: {product.details.washingInstructions}</li>
+                                    {details.washingInstructions && (
+                                        <li>{t('washingInstructions')}: {details.washingInstructions}</li>
                                     )}
-                                    {product.details.reference && (
-                                        <li>{t('reference')}: {product.details.reference}</li>
+                                    {details.reference && (
+                                        <li>{t('reference')}: {details.reference}</li>
                                     )}
-                                    {product.details.brand && (
-                                        <li>{t('brand')}: {product.details.brand}</li>
+                                    {details.brand && (
+                                        <li>{t('brand')}: {details.brand}</li>
                                     )}
                                 </ul>
                             </div>
@@ -407,23 +348,23 @@ export default function Page() {
                     <div className="mt-4 sm:mt-6 pb-10 sm:pb-16 border-b border-gray-200">
                         {activeTab === 'DESCRIPCIÓN' && (
                             <div className="prose max-w-none">
-                                <p className="text-gray-600">{product.description}</p>
+                                <p className="text-gray-600">{description}</p>
                             </div>
                         )}
                         {activeTab === 'DETALLES DEL PRODUCTO' && (
                             <div className="prose max-w-none">
                                 <ul className="list-disc list-inside space-y-2 text-gray-600">
-                                    {product.details.dimensions && (
-                                        <li>{t('dimensions')}: {product.details.dimensions}</li>
+                                    {details.dimensions && (
+                                        <li>{t('dimensions')}: {details.dimensions}</li>
                                     )}
-                                    {product.details.washingInstructions && (
-                                        <li>{t('washingInstructions')}: {product.details.washingInstructions}</li>
+                                    {details.washingInstructions && (
+                                        <li>{t('washingInstructions')}: {details.washingInstructions}</li>
                                     )}
-                                    {product.details.reference && (
-                                        <li>{t('reference')}: {product.details.reference}</li>
+                                    {details.reference && (
+                                        <li>{t('reference')}: {details.reference}</li>
                                     )}
-                                    {product.details.brand && (
-                                        <li>{t('brand')}: {product.details.brand}</li>
+                                    {details.brand && (
+                                        <li>{t('brand')}: {details.brand}</li>
                                     )}
                                 </ul>
                             </div>

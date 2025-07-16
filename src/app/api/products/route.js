@@ -55,7 +55,15 @@ export async function GET(request) {
                 }
             }
 
-            if (brand) query.brand = { $regex: brand, $options: 'i' };
+            if (brand) {
+                // If brand is a valid ObjectId, match exactly, else fallback to regex (for legacy)
+                const isObjectId = /^[a-f\d]{24}$/i.test(brand);
+                if (isObjectId) {
+                    query.brand = brand;
+                } else {
+                    query.brand = { $regex: brand, $options: 'i' };
+                }
+            }
         } if (status) query.status = status;
 
         // Low stock filter

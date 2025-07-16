@@ -9,6 +9,7 @@ export async function GET(request) {
         const search = searchParams.get('search');
         const status = searchParams.get('status');
         const preventSort = searchParams.get('preventSort') === 'true';
+        const id = searchParams.get('id');
 
         // Pagination parameters
         const page = parseInt(searchParams.get('page')) || 1;
@@ -19,6 +20,10 @@ export async function GET(request) {
 
         // Build query based on search parameters
         const query = {};
+
+        if (id) {
+            query._id = id;
+        }
 
         if (search) {
             query.$or = [

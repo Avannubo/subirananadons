@@ -300,6 +300,16 @@ export default function Page() {
         if (loading) return [];
         // Products are already filtered by the API call, we just need to sort them
         const sortableProducts = [...products];
+        // Helper to get translated name for sorting
+        const getTranslatedName = (product) => {
+            if (product.translations && typeof product.translations === 'object') {
+                const translation = product.translations[locale];
+                if (translation && translation.name) {
+                    return translation.name;
+                }
+            }
+            return product.name;
+        };
         switch (sortOrder) {
             case 'price-asc':
                 sortableProducts.sort((a, b) => a.priceValue - b.priceValue);
@@ -308,10 +318,10 @@ export default function Page() {
                 sortableProducts.sort((a, b) => b.priceValue - a.priceValue);
                 break;
             case 'name-asc':
-                sortableProducts.sort((a, b) => a.name.localeCompare(b.name));
+                sortableProducts.sort((a, b) => getTranslatedName(a).localeCompare(getTranslatedName(b)));
                 break;
             case 'name-desc':
-                sortableProducts.sort((a, b) => b.name.localeCompare(a.name));
+                sortableProducts.sort((a, b) => getTranslatedName(b).localeCompare(getTranslatedName(a)));
                 break;
             case 'sales-desc':
             default:
@@ -583,6 +593,7 @@ export default function Page() {
                                                 const params = new URLSearchParams(searchParams);
                                                 params.set('category', subLabel);
                                                 router.push(`/products?${params.toString()}`);
+                                                // router.push(`/products?${subCategory.slug}`);
                                             }}
                                             className={`w-full text-left px-2 py-1.5 rounded text-gray-600 hover:bg-gray-100 hover:font-semibold transition-colors duration-150`}
                                         >

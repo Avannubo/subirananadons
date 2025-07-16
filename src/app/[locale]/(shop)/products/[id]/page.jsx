@@ -51,30 +51,32 @@ export default function Page() {
         async function loadProduct() {
             try {
                 setLoading(true);
-                // Get product ID from params
                 const productId = params?.id;
                 if (!productId) {
                     throw new Error('Invalid product URL');
                 }
-                // Fetch product by ID
                 const productById = await fetchProductById(productId);
                 if (!productById) {
                     throw new Error('Product not found');
                 }
-                // Get the correct translated product name based on locale
-                let translatedName = productById.name;
+                // Translation logic for name and description
+                let translatedName = '';
+                let translatedDescription = '';
                 if (productById.translations && typeof productById.translations === 'object') {
-                    if (productById.translations[locale] && productById.translations[locale].name) {
-                        translatedName = productById.translations[locale].name;
-                    }
+                    // Try .ca, .es, .name for name
+                    translatedName = productById.translations.ca?.name || productById.translations.es?.name || productById.name || t('noDescription');
+                    // Try .ca, .es, .description for description
+                    translatedDescription = productById.translations.ca?.description || productById.translations.es?.description || productById.description || t('noDescription');
+                } else {
+                    translatedName = productById.name || t('noDescription');
+                    translatedDescription = productById.description || t('noDescription');
                 }
-                // Format the product details
                 const formattedProduct = {
                     id: productById._id,
                     name: translatedName,
                     price: `${productById.price_incl_tax.toFixed(2).replace('.', ',')} €`,
                     priceValue: productById.price_incl_tax,
-                    description: productById.description || t('noDescription'),
+                    description: translatedDescription,
                     details: {
                         dimensions: productById.dimensions || t('notAvailable'),
                         washingInstructions: productById.care_instructions || t('seeLabel'),

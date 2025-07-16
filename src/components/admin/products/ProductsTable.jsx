@@ -9,6 +9,12 @@ import ConfirmModal from '@/components/shared/ConfirmModal';
 import Pagination from '@/components/admin/shared/Pagination';
 
 export default function ProductsTable(props) {
+    // Next Intl: detect browser locale
+    let locale = 'ca'; // default
+    if (typeof window !== 'undefined' && window.navigator?.language) {
+        locale = window.navigator.language.split('-')[0];
+        if (!['ca', 'es'].includes(locale)) locale = 'es';
+    }
     const [products, setProducts] = useState("");
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -258,12 +264,12 @@ export default function ProductsTable(props) {
         return brand;
     };
 
-    // For other fields (name, brand), keep translation fallback as before
-    const getLocaleString = (field, locale = 'es') => {
+    // Always use Catalan for name and category columns
+    const getCatalanString = (field) => {
         if (!field) return '';
         if (typeof field === 'string') return field;
-        if (typeof field === 'object' && (field.es || field.ca)) {
-            return field[locale] || field.es || field.ca || '';
+        if (typeof field === 'object' && (field.ca || field.es)) {
+            return field.ca || field.es || '';
         }
         return '';
     };
@@ -393,6 +399,23 @@ export default function ProductsTable(props) {
 
     // Handle form submission for add/edit
     const handleSaveProduct = async (formData) => {
+        // Client-side validation for obligatory fields
+        const requiredFields = [
+            { key: 'name', label: 'Nom' },
+        ]
+
+        const missingFields = requiredFields.filter(f => {
+            const value = formData[f.key];
+            if (f.key === 'name') {
+                // name can be object or string
+                if (!value || (typeof value === 'object' && !value.es && !value.ca) || (typeof value === 'string' && !value.trim())) return true;
+            }
+            return false;
+        });
+        if (missingFields.length > 0) {
+            toast.error('Omple tots els camps obligatoris: ' + missingFields.map(f => f.label).join(', '));
+            return;
+        }
         try {
             // Defensive: always send category as an object with ca and es
             let processedCategory = formData.category;
@@ -433,8 +456,15 @@ export default function ProductsTable(props) {
             }
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Operation failed');
+                let errorMsg = 'Operation failed';
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.error || errorData.message || errorMsg;
+                } catch (e) {
+                    // If response is not JSON, fallback to status text
+                    errorMsg = response.statusText || errorMsg;
+                }
+                throw new Error(errorMsg);
             }
 
             const savedProduct = await response.json();
@@ -709,7 +739,7 @@ export default function ProductsTable(props) {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="relative">
                                                 <img
-                                                    src={typeof product.image === 'object' && product.image !== null ? product.image.es || product.image.ca || '' : product.image}
+                                                    src={product.image}
                                                     alt={typeof product.name === 'object' && product.name !== null ? product.name.es || product.name.ca || '' : product.name}
                                                     className="h-10 w-10 rounded object-cover cursor-pointer"
                                                     onMouseEnter={() => handleImageMouseEnter(typeof product.image === 'object' && product.image !== null ? product.image.es || product.image.ca || '' : product.image)}
@@ -717,15 +747,11 @@ export default function ProductsTable(props) {
                                                 />
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-xs truncate" title={getLocaleString(product.name)}>
-                                            {getLocaleString(product.name)}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-xs truncate" title={getCatalanString(product.name)}>
+                                            {getCatalanString(product.name)}
                                         </td>
-                                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={getLocaleString(product.brand)}>
-                                             
-                                            {typeof product.brand === 'object' && product.brand !== null ? (product.brand.name || '') : (product.brand || '')}
-                                        </td> */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={getCategoryString(product.category)}>
-                                            {getCategoryString(product.category)}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={getCatalanString(product.category)}>
+                                            {getCatalanString(product.category)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={getBrandString(product.brand)}>
                                             {getBrandString(product.brand)}

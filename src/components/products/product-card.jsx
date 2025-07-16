@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from 'react';
+import { useLocale } from 'next-intl';
+import { getTranslatedField } from '@/lib/getTranslatedField';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useSession } from 'next-auth/react';
@@ -21,7 +23,11 @@ export default function ProductCard({
     const { addToCart } = useCart();
     const { data: session } = useSession();
     const router = useRouter();
+    const locale = useLocale();
     const currentImageUrl = isHovered && product.imageUrlHover ? product.imageUrlHover : product.imageUrl;
+    // Get translated name/description
+    const translatedName = getTranslatedField(product, 'name', locale);
+    const translatedDescription = getTranslatedField(product, 'description', locale);
     const HoverButton = ({ children, onClick, disabled }) => (
         <button
             className={`bg-white rounded-full p-2 shadow text-gray-700 hover:bg-gray-100 transition duration-200 focus:outline-none flex items-center justify-center ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -96,17 +102,8 @@ export default function ProductCard({
             console.error('Error adding to birth list:', error);
         }
     };
-    // Get the correct translated product name based on locale
-    let translatedName = product.name;
-    if (product.translations && typeof product.translations === 'object') {
-        if (product.translations[typeof window !== 'undefined' && window.__NEXT_LOCALE__ ? window.__NEXT_LOCALE__ : 'es'] && product.translations[typeof window !== 'undefined' && window.__NEXT_LOCALE__ ? window.__NEXT_LOCALE__ : 'es'].name) {
-            translatedName = product.translations[typeof window !== 'undefined' && window.__NEXT_LOCALE__ ? window.__NEXT_LOCALE__ : 'es'].name;
-        }
-    }
-    // Generate the product URL based on category and translated name
-    const productUrl = product.category && product.category.slug
-        ? `/products/${encodeURIComponent(product.category.slug)}/${encodeURIComponent(translatedName.toLowerCase().replace(/\s+/g, '-'))}-${product.id}`
-        : '#';
+    // Generate the product URL based on product id only
+    const productUrl = `/products/${product.id}`;
 
     if (viewMode === 'grid') {
         // Grid View Layout
@@ -130,7 +127,7 @@ export default function ProductCard({
                     <div className="relative w-full h-64 mb-4">
                         <Image
                             src={currentImageUrl}
-                            alt={product.name}
+                            alt={product.name.ca || product.name.es || product.name}
                             fill
                             sizes="(max-width: 768px) 100vw, 50vw"
                             className="transition-opacity duration-300 ease-in-out rounded-lg object-contain"
@@ -160,7 +157,7 @@ export default function ProductCard({
                             </HoverButton>
                         </div>
                     </div>
-                    <h3 className="font-semibold text-lg mb-2 w-full whitespace-nowrap overflow-hidden text-ellipsis h-7 min-h-[28px]" title={product.name}>{product.name}</h3>
+                    <h3 className="font-semibold text-lg mb-2 w-full whitespace-nowrap overflow-hidden text-ellipsis h-7 min-h-[28px]" title={translatedName}>{translatedName}</h3>
                     <p className="text-gray-700 hover:text-gray-900">{product.price}</p>
                 </Link>
             </motion.div>
@@ -182,20 +179,18 @@ export default function ProductCard({
                     <div className="relative w-1/4 h-40 mr-4 flex-shrink-0">
                         <Image
                             src={currentImageUrl}
-                            alt={product.name}
+                            alt={translatedName}
                             fill
-                            sizes="(max-width: 768px) 100vw, 25vw"
+                            sizes="(max-width: 768px) 100vw, 50vw"
                             className="transition-opacity duration-300 ease-in-out rounded-lg object-contain"
                         />
                     </div>
                     <div className="flex flex-col justify-start w-3/4">
-                        <h3 className="font-semibold text-xl mb-2 whitespace-nowrap overflow-hidden text-ellipsis w-full" title={product.name}>{product.name}</h3>
+                        <h3 className="font-semibold text-xl mb-2 whitespace-nowrap overflow-hidden text-ellipsis w-full" title={translatedName}>{translatedName}</h3>
                         <p className="text-gray-700 text-lg mb-3">{product.price}</p>
                         <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">
-                            {product.description?.length > 0
-                                ? product.description
-                                : ''}
-                            {product.description && product.description.length > 0 ? '...' : ''}
+                            {translatedDescription?.length > 0 ? translatedDescription : ''}
+                            {translatedDescription && translatedDescription.length > 0 ? '...' : ''}
                         </p>
                         {/* Action Icons Below Text - List View */}
                         <div className="flex items-center justify-start space-x-3 mt-2">

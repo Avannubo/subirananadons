@@ -52,7 +52,14 @@ export async function fetchProducts(options = {}) {
 
         if (!response.ok) {
             // Log error but do not throw, return default structure
-            console.error(`ProductService fetchProducts error: ${response.status} - ${response.statusText}`);
+            let errorMessage = `ProductService fetchProducts error: ${response.status} - ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error) {
+                    errorMessage += ` | ${errorData.error}`;
+                }
+            } catch { }
+            console.error(errorMessage);
             return {
                 products: [],
                 pagination: {
@@ -109,10 +116,11 @@ export async function fetchProducts(options = {}) {
  * @returns {Object} - Formatted product data
  */
 export function formatProduct(product) {
+    // Used for product lists only, not for product detail page
     return {
         id: product._id,
         name: product.name,
-        category: product.category,
+        category: product.category || '',
         price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
         priceValue: product.price_incl_tax,
         salesCount: product.salesCount || 0,
@@ -131,12 +139,23 @@ export function formatProduct(product) {
  */
 export async function fetchProductById(id) {
     try {
-        const response = await fetch(`/api/products/${id}`);
-
+        // Support both /product/[id] and /products/[id] for backward compatibility
+        let response = await fetch(`/api/product/${id}`);
         if (!response.ok) {
-            throw new Error(`Error fetching product: ${response.status}`);
+            // Try plural route if singular fails
+            response = await fetch(`/api/products/${id}`);
         }
-
+        if (!response.ok) {
+            let errorMessage = `Error fetching product: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error) {
+                    errorMessage += ` | ${errorData.error}`;
+                }
+            } catch { }
+            throw new Error(errorMessage);
+        }
+        // Return the raw product object, do not format
         const product = await response.json();
         return product;
     } catch (error) {
@@ -164,4 +183,4 @@ export async function fetchFeaturedProducts(limit = 8) {
         console.error('ProductService fetchFeaturedProducts error:', error);
         return [];
     }
-} 
+}

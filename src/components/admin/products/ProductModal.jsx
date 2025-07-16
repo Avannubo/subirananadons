@@ -447,53 +447,26 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             let additionalImages = [];
             if (productImages.length > 0) {
                 mainImage = productImages[0];
-                if (productImages.length > 1) {
-                    hoverImage = productImages[1];
-                    if (productImages.length > 2) {
-                        additionalImages = productImages.slice(2);
-                    }
-                }
+                if (productImages.length > 1) hoverImage = productImages[1];
+                if (productImages.length > 2) additionalImages = productImages.slice(2);
             }
             // Ensure category and brand are ObjectId (not name or empty string)
             let categoryId = formData.category;
             let brandId = formData.brand;
-            // Accept both string and ObjectId
-            const isObjectId = (val) => {
-                if (!val) return false;
-                if (typeof val === 'string') return /^[a-fA-F0-9]{24}$/.test(val);
-                if (typeof val === 'object' && val.toString) return /^[a-fA-F0-9]{24}$/.test(val.toString());
-                return false;
-            };
+            const isObjectId = (val) => typeof val === 'string' && /^[a-fA-F0-9]{24}$/.test(val);
             // Treat empty string as null for category/brand
             if (categoryId === "") categoryId = null;
             if (brandId === "") brandId = null;
             // Always convert to ObjectId string or null (never send object)
-            // Fix: Use categoryDisplayName if categoryId is not an ObjectId
             if (categoryId && !isObjectId(categoryId)) {
-                let foundCat = null;
-                if (formData.categoryDisplayName) {
-                    foundCat = categories.find(cat => getCategoryDisplayName(cat) === formData.categoryDisplayName);
-                }
-                if (!foundCat && categoryId) {
-                    foundCat = categories.find(cat => getCategoryDisplayName(cat) === categoryId);
-                }
-                if (!foundCat && categoryId) {
-                    foundCat = categories.find(cat => cat.name === categoryId);
-                }
+                let foundCat = categories.find(c => c.name === categoryId || c._id === categoryId);
                 if (foundCat && isObjectId(foundCat._id)) categoryId = foundCat._id;
                 else categoryId = null;
             }
             if (categoryId && typeof categoryId === 'object' && categoryId.toString) categoryId = categoryId.toString();
             if (!categoryId || !isObjectId(categoryId)) categoryId = null;
-            // Fix: Use brandDisplayName if brandId is not an ObjectId
             if (brandId && !isObjectId(brandId)) {
-                let foundBrand = null;
-                if (formData.brandDisplayName) {
-                    foundBrand = brands.find(b => b.name === formData.brandDisplayName);
-                }
-                if (!foundBrand && brandId) {
-                    foundBrand = brands.find(b => b.name === brandId);
-                }
+                let foundBrand = brands.find(b => b.name === brandId);
                 if (foundBrand && isObjectId(foundBrand._id)) brandId = foundBrand._id;
                 else brandId = null;
             }
@@ -514,7 +487,22 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 },
             };
             // Save the product and get the saved product
-            const savedProduct = await onSave(processedData);
+            let savedProduct;
+            try {
+                savedProduct = await onSave(processedData);
+            } catch (apiError) {
+                // If the API returns a message, show it
+                if (apiError && apiError.message) {
+                    toast.error(apiError.message);
+                } else if (apiError && apiError.error) {
+                    toast.error(apiError.error);
+                } else if (typeof apiError === 'string') {
+                    toast.error(apiError);
+                } else {
+                    toast.error('Error al guardar el producto');
+                }
+                throw apiError;
+            }
             // Notify stats context about the change
             if (stats.notifyChange) {
                 setTimeout(() => {
@@ -523,11 +511,52 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             }
         } catch (error) {
             console.error('Error saving product:', error);
-            toast.error('Error al guardar el producto');
+            // Only show toast if not already shown by API error block
         } finally {
             setLoading(false);
         }
     };
+
+    // Move image up in the list
+    const handleMoveImageUp = (index) => {
+        if (index <= 0) return;
+
+        const newImages = [...productImages];
+        const temp = newImages[index];
+        newImages[index] = newImages[index - 1];
+        newImages[index - 1] = temp;
+
+        setProductImages(newImages);
+
+        // Update selected image index if it was moved
+        if (selectedImageIndex === index) {
+            setSelectedImageIndex(index - 1);
+        } else if (selectedImageIndex === index - 1) {
+            setSelectedImageIndex(index);
+        }
+    };
+
+    // Move image down in the list
+    const handleMoveImageDown = (index) => {
+        if (index >= productImages.length - 1) return;
+
+        const newImages = [...productImages];
+        const temp = newImages[index];
+        newImages[index] = newImages[index + 1];
+        newImages[index + 1] = temp;
+
+        setProductImages(newImages);
+
+        // Update selected image index if it was moved
+        if (selectedImageIndex === index) {
+            setSelectedImageIndex(index + 1);
+        } else if (selectedImageIndex === index + 1) {
+            setSelectedImageIndex(index);
+        }
+    };
+  
+ 
+
     // Render category tree for dropdown with improved hierarchy indicators
     const getCategoryDisplayName = (cat) => {
         if (!cat) return '';
