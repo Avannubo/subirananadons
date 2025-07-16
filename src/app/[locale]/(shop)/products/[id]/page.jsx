@@ -62,14 +62,26 @@ export default function Page() {
                 // Translation logic for name and description
                 let translatedName = '';
                 let translatedDescription = '';
-                if (productById.translations && typeof productById.translations === 'object') {
-                    // Try .ca, .es, .name for name
-                    translatedName = productById.translations.ca?.name || productById.translations.es?.name || productById.name || t('noDescription');
-                    // Try .ca, .es, .description for description
-                    translatedDescription = productById.translations.ca?.description || productById.translations.es?.description || productById.description || t('noDescription');
+                const locale = params?.locale || 'es';
+                // Helper to get string value or fallback
+                const getString = (val, fallback) => typeof val === 'string' ? val : fallback;
+                // Handle translated name
+                if (productById.name && typeof productById.name === 'object') {
+                    translatedName = getString(productById.name[locale],
+                        getString(productById.name.es,
+                            getString(productById.name.ca,
+                                t('noDescription'))));
                 } else {
-                    translatedName = productById.name || t('noDescription');
-                    translatedDescription = productById.description || t('noDescription');
+                    translatedName = typeof productById.name === 'string' ? productById.name : t('noDescription');
+                }
+                // Handle translated description
+                if (productById.description && typeof productById.description === 'object') {
+                    translatedDescription = getString(productById.description[locale],
+                        getString(productById.description.es,
+                            getString(productById.description.ca,
+                                t('noDescription'))));
+                } else {
+                    translatedDescription = typeof productById.description === 'string' ? productById.description : t('noDescription');
                 }
                 const formattedProduct = {
                     id: productById._id,
@@ -84,7 +96,9 @@ export default function Page() {
                         brand: productById.brand || t('notAvailable')
                     },
                     images: [],
-                    category: productById.category || t('uncategorized')
+                    category: typeof productById.category === 'object' && productById.category !== null
+                        ? productById.category.name || t('uncategorized')
+                        : productById.category || t('uncategorized')
                 };
 
                 // Collect all product images
@@ -107,9 +121,14 @@ export default function Page() {
                     formattedProduct.images.push('/assets/images/Screenshot_4.png');
                 }
                 setProduct(formattedProduct);
-                // Fetch related products in the same category
+                // Get category ID for API call
+                let categoryId = productById.category;
+                if (typeof categoryId === 'object' && categoryId !== null) {
+                    // If category is a MongoDB object, get its $oid or _id
+                    categoryId = categoryId.$oid || categoryId._id || '';
+                }
                 const relatedResponse = await fetchProducts({
-                    category: productById.category,
+                    category: categoryId,
                     limit: 8,
                     status: 'active'
                 });
