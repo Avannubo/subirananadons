@@ -204,8 +204,9 @@ export default function ListasTabs({ userRole = 'user' }) {
         const emailMatch = userId.match(/\(([^)]+)\)/); // Matches content between parentheses
         const extractedEmail = emailMatch ? emailMatch[1] : '';
 
-        const selectedUser = users.find(u => u._id === userId || u.email === extractedEmail);
-
+        const selectedUser = users.find(u => u.email === extractedEmail);
+        console.log("Selected User:", selectedUser);
+        setSelectedUser(selectedUser);
         setFormData(prev => ({
             ...prev,
             userId,
@@ -213,6 +214,9 @@ export default function ListasTabs({ userRole = 'user' }) {
             userName: selectedUser ? selectedUser.name : userId.split('(')[0].trim(),
         }));
     };
+
+
+
 
     useEffect(() => {
         // Fetch lists from API
@@ -291,9 +295,19 @@ export default function ListasTabs({ userRole = 'user' }) {
                 priority: item.priority || 2
             }));
             // Create the birth list in the database
+            // Always use selected user as creator if admin
+            let creatorId = session?.user?.id;
+            let creatorEmail = session?.user?.email;
+            let creatorName = session?.user?.name;
+            if (userRole === 'admin' && selectedUser) {
+                creatorId = selectedUser._id;
+                creatorEmail = selectedUser.email;
+                creatorName = selectedUser.name;
+            }
             const birthListData = {
-                user: userRole === 'admin' && formData.userId ? formData.userId : session?.user?.id, // Use selected user for admin, else session user
-                userEmail: userRole === 'admin' && formData.userId ? formData.userEmail : session?.user?.email, // Always use selected user's email if admin and user selected
+                user: selectedUser,
+                userEmail: creatorEmail,
+                userName: creatorName,
                 title: formData.title,
                 description: formData.description || '',
                 babyName: formData.babyName,
@@ -303,8 +317,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                 theme: 'default', // Default theme
                 status: 'Activa' // Active status
             };
-            console.log("User Email: " + selectedUser);
-            console.log('Creating birth list with data:', JSON.stringify(birthListData, null, 2));
+            // console.log('Creating birth list with data:', JSON.stringify(birthListData, null, 2));
             const result = await createBirthList(birthListData);
             if (result.success) {
                 await loadBirthLists();

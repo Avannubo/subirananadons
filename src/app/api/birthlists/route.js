@@ -65,11 +65,15 @@ export async function POST(request) {
 
         // Parse request body
         const data = await request.json();
+        console.log('Creating birth list with data:', data);
 
-        // Determine the user for the list (admin can set userId, others use their own)
+        // Determine the user for the list (admin can set userId or user, others use their own)
         let userIdToUse = session.user.id;
-        if (session.user.role === 'admin' && data.userId) {
-            userIdToUse = data.userId;
+        if (session.user.role === 'admin') {
+            // Accept either data.user or data.userId for flexibility
+            if (data.user) {
+                userIdToUse = data.user.id;
+            }
         }
         // Ensure the user exists
         const user = await User.findById(userIdToUse);
@@ -104,8 +108,8 @@ export async function POST(request) {
         console.log('Creating birth list for user:', userIdToUse, 'with email:', userEmail, 'and name:', userName);
         const birthListData = {
             user: userIdToUse,
-            userEmail,
-            userName,
+            // userEmail,
+            // userName,
             email: userEmail, // legacy/compatibility
             Creator: userName, // legacy/compatibility
             title: data.title,
@@ -118,7 +122,7 @@ export async function POST(request) {
             status: data.status || 'Activa'
         };
         // Create the birth list in the database
-        const birthList = await BirthList.create(birthListData);
+         const birthList = await BirthList.create(birthListData);
 
         // Send confirmation emails
         try {

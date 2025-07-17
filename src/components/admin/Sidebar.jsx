@@ -13,8 +13,8 @@ import {
     ChartArea,
     LogOut
 } from 'lucide-react';
-import { useLocale } from 'next-intl'; 
-import { useSession } from 'next-auth/react';
+import { useLocale } from 'next-intl';
+import { useSession, signOut } from 'next-auth/react';
 import useShopSocials from "@/lib/useShopSocials";
 const getNavigationItems = (userRole, locale) => [
     {
@@ -108,7 +108,8 @@ export default function Sidebar() {
                 </nav>
                 <div className="mt-auto pt-6 border-t border-gray-200">
                     <button
-                       onClick={() => signOut({ callbackUrl: '/' })}
+                        type="button"
+                        onClick={() => signOut({ callbackUrl: '/' })}
                         className="w-full flex items-center justify-center gap-2 py-2 mb-4 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-[#00B0C8] hover:text-white rounded-lg transition-colors"
                     >
                         <LogOut size={20} />

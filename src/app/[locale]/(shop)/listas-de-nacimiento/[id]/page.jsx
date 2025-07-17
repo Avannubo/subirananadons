@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useTranslations } from 'next-intl';
 export default function BirthListPage({ params }) {
-    const id = use(params).id;
+    const { locale, id } = use(params);
     const t = useTranslations('BirthListDetailPage');
     const [selectedCategory, setSelectedCategory] = useState("Todos");
     const [sortBy, setSortBy] = useState("default");
@@ -30,14 +30,7 @@ export default function BirthListPage({ params }) {
         return totalItems > 0 ? Math.round((purchasedCount / totalItems) * 100) : 0;
     };
 
-    // Locale detection (default to 'ca')
-    let locale = 'ca';
-    if (typeof window !== 'undefined' && window.navigator) {
-        const lang = window.navigator.language || window.navigator.userLanguage;
-        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
-    }
-
-
+    // locale is now destructured from use(params) above
     // Fetch birth list data from API
     useEffect(() => {
         const fetchBirthList = async () => {
