@@ -517,6 +517,19 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }
     };
 
+    // Remove an image
+    const handleRemoveImage = (index) => {
+        const newImages = [...productImages];
+        newImages.splice(index, 1);
+        setProductImages(newImages);
+
+        // Update selected image if needed
+        if (selectedImageIndex >= newImages.length) {
+            setSelectedImageIndex(Math.max(0, newImages.length - 1));
+            setImagePreview(newImages.length > 0 ? newImages[Math.max(0, newImages.length - 1)] : '');
+        }
+    };
+
     // Move image up in the list
     const handleMoveImageUp = (index) => {
         if (index <= 0) return;
