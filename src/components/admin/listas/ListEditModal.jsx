@@ -93,9 +93,11 @@ export default function ListEditModal({
     const t = translations[locale];
     const fileInputRef = useRef(null);
     const [imagePreview, setImagePreview] = useState('/assets/images/Screenshot_4.png');
-    const [isDragging, setIsDragging] = useState(false); const [selectedProducts, setSelectedProducts] = useState([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const [selectedProducts, setSelectedProducts] = useState([]);
     const [listProductsKey, setListProductsKey] = useState(0); // Force re-render of ListProductsManager
     const [resetSelection, setResetSelection] = useState(false);
+    const [addBtnLoading, setAddBtnLoading] = useState(false);
 
     // Update image preview when the modal is opened with a new list
     useEffect(() => {
@@ -406,9 +408,21 @@ export default function ListEditModal({
                                             {selectedProducts.length > 0 && (
                                                 <button
                                                     type="button"
-                                                    onClick={handleAddProductsToList}
-                                                    className="px-3 py-1 bg-[#00B0C8] text-white text-sm rounded-md hover:bg-[#008da0] transition-colors"
+                                                    onClick={async () => {
+                                                        if (addBtnLoading) return;
+                                                        setAddBtnLoading(true);
+                                                        await handleAddProductsToList();
+                                                        setTimeout(() => setAddBtnLoading(false), 2000);
+                                                    }}
+                                                    className={`px-3 py-1 bg-[#00B0C8] text-white text-sm rounded-md hover:bg-[#008da0] transition-colors flex items-center justify-center ${addBtnLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                                    disabled={addBtnLoading}
                                                 >
+                                                    {addBtnLoading ? (
+                                                        <svg className="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                                        </svg>
+                                                    ) : null}
                                                     {t.addSelected(selectedProducts.length)}
                                                 </button>
                                             )}

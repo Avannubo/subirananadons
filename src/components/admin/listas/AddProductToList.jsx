@@ -104,10 +104,10 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
     const handleSelectProduct = (product) => {
         // Prevent adding duplicate products
         const isProductInList = selectedItems.some(item => item.product._id === product._id);
-        if (isProductInList) {
-            toast.error(`${getProductName(product, locale)} ya está en la lista`);
-            return;
-        }
+        // if (isProductInList) {
+        //     toast.error(`${getProductName(product, locale)} ya está en la lista`);
+        //     return;
+        // }
         const newItem = {
             _id: crypto.randomUUID(), // Add a unique ID for each selected item
             product,
