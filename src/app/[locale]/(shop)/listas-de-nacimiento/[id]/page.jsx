@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { use } from 'react';
@@ -9,15 +10,6 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useTranslations } from 'next-intl';
-// Categories for filtering
-const categories = [
-    "Todos",
-    "Habitación",
-    "Cochecitos",
-    "Alimentación",
-    "Baño",
-    "Esenciales"
-];
 export default function BirthListPage({ params }) {
     const id = use(params).id;
     const t = useTranslations('BirthListDetailPage');
@@ -37,6 +29,15 @@ export default function BirthListPage({ params }) {
         const totalItems = items.length;
         return totalItems > 0 ? Math.round((purchasedCount / totalItems) * 100) : 0;
     };
+
+    // Locale detection (default to 'ca')
+    let locale = 'ca';
+    if (typeof window !== 'undefined' && window.navigator) {
+        const lang = window.navigator.language || window.navigator.userLanguage;
+        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    }
+
+
     // Fetch birth list data from API
     useEffect(() => {
         const fetchBirthList = async () => {
@@ -58,7 +59,7 @@ export default function BirthListPage({ params }) {
                     id: birthListData._id,
                     userId: birthListData.user?._id,
                     babyName: birthListData.babyName,
-                    parents: birthListData.user ? birthListData.user.name : 'Anónimo',
+                    parents: birthListData.user ? birthListData.user.name : t('anonymous'),
                     dueDate: birthListData.dueDate,
                     title: birthListData.title,
                     description: birthListData.description,
@@ -66,29 +67,58 @@ export default function BirthListPage({ params }) {
                     status: birthListData.status,
                     isPublic: birthListData.isPublic,
                     progress: progress,
-                    message: birthListData.description || '¡Gracias por ayudarnos a preparar la llegada!',
-                    products: birthListData.items.map(item => ({
-                        id: item._id,
-                        productId: item.product._id,
-                        name: item.productSnapshot?.name || item.product.name,
-                        price: `${(item.productSnapshot?.price || item.product.price_incl_tax).toFixed(2).replace('.', ',')} €`,
-                        priceValue: item.productSnapshot?.price || item.product.price_incl_tax,
-                        image: item.productSnapshot?.image || item.product.image || '/assets/images/Screenshot_4.png',
-                        category: item.productSnapshot?.category || item.product.category,
-                        brand: item.productSnapshot?.brand || item.product.brand,
-                        reference: item.productSnapshot?.reference || item.product.reference, status: item.state === 2 ? 'purchased' : item.state === 1 ? 'reserved' : 'available',
-                        state: item.state || 0,
-                        priority: item.priority
-                    }))
+                    message: birthListData.description || t('defaultThankYou'),
+                    products: birthListData.items.map(item => {
+                        let name = '';
+                        const prod = item.product;
+                        if (prod && prod.name && typeof prod.name === 'object') {
+                            name = prod.name[locale] || prod.name.es || prod.name.ca || prod.name.name || 'N/D';
+                        } else if (prod && prod.name) {
+                            name = prod.name;
+                        } else {
+                            name = 'N/D';
+                        }
+                        return {
+                            id: item._id,
+                            productId: prod._id,
+                            name,
+                            price: `${(item.productSnapshot?.price || prod.price_incl_tax).toFixed(2).replace('.', ',')} €`,
+                            priceValue: item.productSnapshot?.price || prod.price_incl_tax,
+                            image: item.productSnapshot?.image || prod.image || '/assets/images/Screenshot_4.png',
+                            category: item.productSnapshot?.category || prod.category,
+                            brand: item.productSnapshot?.brand || prod.brand,
+                            reference: item.productSnapshot?.reference || prod.reference,
+                            status: item.state === 2 ? 'purchased' : item.state === 1 ? 'reserved' : 'available',
+                            state: item.state || 0,
+                            priority: item.priority
+                        };
+                    })
                 });
                 // Extract unique categories from products
-                const uniqueCategories = ['Todos'];
+                const uniqueCategoryIds = [];
                 birthListData.items.forEach(item => {
-                    if (item.product.category && !uniqueCategories.includes(item.product.category)) {
-                        uniqueCategories.push(item.product.category);
+                    const catId = item.product.category;
+                    if (catId && !uniqueCategoryIds.includes(catId)) {
+                        uniqueCategoryIds.push(catId);
                     }
                 });
-                setAvailableCategories(uniqueCategories);
+                // Fetch category objects from API
+                let categoriesObjs = [];
+                if (uniqueCategoryIds.length > 0) {
+                    try {
+                        const res = await fetch(`/api/categories?ids=${uniqueCategoryIds.join(',')}`);
+                        if (res.ok) {
+                            categoriesObjs = await res.json();
+                        } else {
+                            console.error('Failed to fetch category objects');
+                        }
+                    } catch (err) {
+                        console.error('Error fetching category objects:', err);
+                    }
+                }
+                // Always include 'Todos' as the first option
+                const availableCats = ['Todos', ...categoriesObjs];
+                setAvailableCategories(availableCats);
             } catch (error) {
                 console.error('Error fetching birth list:', error);
                 setError(error.message || 'Error al cargar la lista de nacimiento');
@@ -152,7 +182,7 @@ export default function BirthListPage({ params }) {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('errorLoadListTitle')}</h3>
-                        <p className="text-gray-500 mb-6">{error}</p>
+                        <p className="text-gray-500 mb-6">{t('errorLoadListDesc', { error })}</p>
                         <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors">
                             {t('backToListsBtn')}
                         </Link>
@@ -192,47 +222,48 @@ export default function BirthListPage({ params }) {
                 default:
                     return 0;
             }
-        }); const handleReserveClick = async (product) => {
-            try {
-                // Validate required gift information
-                if (!list.userId) {
-                    console.error('Missing list owner ID');
-                    // toast.error('Error: No se puede identificar el propietario de la lista');
-                    return;
-                }
-
-                // Format product for unified cart structure 
-                const productForCart = {
-                    id: product.productId,
-                    name: product.name,
-                    price: product.priceValue,
-                    image: product.image,
-                    brand: product.brand || '',
-                    category: product.category || '',
-                    type: 'gift',
-                    listInfo: {
-                        listId: id,
-                        itemId: product.id,
-                        babyName: list.babyName,
-                        listOwnerId: list.userId,
-                        status: 'reserved',
-                        state: 1, // 1 = reserved
-                        addedAt: new Date().toISOString(),
-                        price: product.priceValue,
-                        priority: product.priority || 0
-                    }
-                };
-
-                const success = await addToCart(productForCart, 1); if (success) {
-                    console.log('Regalo añadido al carrito');
-                } else {
-                    console.log('No se pudo añadir el regalo al carrito');
-                }
-            } catch (error) {
-                console.error('Error adding gift to cart:', error);
-                toast.error(error.message || 'Error al añadir el regalo al carrito');
+        });
+    const handleReserveClick = async (product) => {
+        try {
+            // Validate required gift information
+            if (!list.userId) {
+                console.error('Missing list owner ID');
+                // toast.error('Error: No se puede identificar el propietario de la lista');
+                return;
             }
-        };
+
+            // Format product for unified cart structure 
+            const productForCart = {
+                id: product.productId,
+                name: product.name,
+                price: product.priceValue,
+                image: product.image,
+                brand: product.brand || '',
+                category: product.category || '',
+                type: 'gift',
+                listInfo: {
+                    listId: id,
+                    itemId: product.id,
+                    babyName: list.babyName,
+                    listOwnerId: list.userId,
+                    status: 'reserved',
+                    state: 1, // 1 = reserved
+                    addedAt: new Date().toISOString(),
+                    price: product.priceValue,
+                    priority: product.priority || 0
+                }
+            };
+
+            const success = await addToCart(productForCart, 1); if (success) {
+                console.log('Regalo añadido al carrito');
+            } else {
+                console.log('No se pudo añadir el regalo al carrito');
+            }
+        } catch (error) {
+            console.error('Error adding gift to cart:', error);
+            toast.error(error.message || 'Error al añadir el regalo al carrito');
+        }
+    };
     const handleShareClick = async () => {
         const listUrl = window.location.href;
         try {
@@ -310,24 +341,41 @@ export default function BirthListPage({ params }) {
                     </div>
                     <p className="text-gray-600 text-center italic">{list.message}</p>
                 </div>
-                <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+                {/* <div className="flex flex-col md:flex-row justify-between items-center mb-8">
                     <div className="w-full md:w-auto mb-4 md:mb-0 overflow-x-auto">
                         <div className="inline-flex border border-gray-200 rounded-lg p-1 min-w-max bg-gray-50">
-                            {availableCategories.map((category) => (
-                                <button
-                                    key={category}
-                                    onClick={() => setSelectedCategory(category)}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${selectedCategory === category
-                                        ? 'bg-[#00B0C8] text-white shadow-sm'
-                                        : 'bg-transparent text-gray-600 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    {category}
-                                </button>
-                            ))}
+                            {availableCategories.map((category, idx) => {
+                                let label = '';
+                                if (category === 'Todos') {
+                                    label = 'Todos';
+                                } else if (category && category.name) {
+                                    label = getTranslatedName(category.name);
+                                } else if (typeof category === 'string') {
+                                    label = category;
+                                } else {
+                                    label = 'N/D';
+                                }
+                                const isSelected = (selectedCategory && category && typeof selectedCategory === 'object' && typeof category === 'object')
+                                    ? selectedCategory._id === category._id
+                                    : selectedCategory === category;
+                                return (
+                                    <button
+                                        key={category._id ? category._id : label + idx}
+                                        onClick={() => setSelectedCategory(category)}
+                                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isSelected
+                                            ? 'bg-[#00B0C8] text-white shadow-sm'
+                                            : 'bg-transparent text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
-                    {/* <select
+                   
+                </div> */}
+                {/* <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                         className="px-4 py-2 border border-gray-300 rounded-md"
@@ -337,7 +385,6 @@ export default function BirthListPage({ params }) {
                         <option value="price-desc">{t('sortPriceDesc')}</option>
                         <option value="name">{t('sortName')}</option>
                     </select> */}
-                </div>
                 {/* Products Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {filteredProducts.length > 0 ? (
@@ -368,7 +415,11 @@ export default function BirthListPage({ params }) {
                                 </div>
                                 <div className="p-3 flex flex-col flex-grow justify-between">
                                     <div>
-                                        <h3 className="text-sm font-medium mb-1 h-10 line-clamp-2">{product.name}</h3>
+                                        <h3 className="text-sm font-medium mb-1 h-10 line-clamp-2">
+                                            {product.name && typeof product.name === 'object'
+                                                ? (product.name[locale] || product.name.es || product.name.ca || product.name.name || 'N/D')
+                                                : product.name}
+                                        </h3>
                                         <p className="text-gray-600 text-sm mb-2">{product.price}</p>
                                     </div>
                                     <div>

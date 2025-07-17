@@ -262,7 +262,8 @@
     "addToCartBtn": "Co regal",
     "productPurchased": "Comprat",
     "productReserved": "Reservat",
-    "noProductsFound": "No s'han trobat productes en aquesta categoria."
+    "noProductsFound": "No s'han trobat productes en aquesta categoria.",
+    "defaultThankYou": "Gràcies per ajudar-nos a preparar l'arribada!"
   },
   "BrandsPage": {
     "title": "Marques",
