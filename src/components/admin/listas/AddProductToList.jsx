@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 // Translation object for Catalan and Spanish
 const translations = {
     ca: {
@@ -47,11 +47,20 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const debounceTimeout = useRef();
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [selectedItems, setSelectedItems] = useState(
         Array.isArray(selectedProducts) ? selectedProducts : []
     );
+
+    // Sync selectedItems with selectedProducts prop (for edit mode)
+    useEffect(() => {
+        if (Array.isArray(selectedProducts)) {
+            setSelectedItems(selectedProducts);
+        }
+    }, [selectedProducts]);
 
     // Reset selected items when resetSelection prop changes
     useEffect(() => {
@@ -59,6 +68,16 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             setSelectedItems([]);
         }
     }, [resetSelection]);
+    // Debounce search input and reset to first page
+    useEffect(() => {
+        if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = setTimeout(() => {
+            setDebouncedSearch(search);
+            setCurrentPage(1); // Always reset to first page on new search
+        }, 400);
+        return () => clearTimeout(debounceTimeout.current);
+    }, [search]);
+
     useEffect(() => {
         const loadProducts = async () => {
             try {
@@ -67,7 +86,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                     page: currentPage,
                     limit: 4,
                     status: 'active',
-                    search: search || undefined
+                    search: debouncedSearch && debouncedSearch.trim() !== '' ? debouncedSearch : undefined
                 });
                 setProducts(result.products || []);
                 setTotalPages(result.pagination?.totalPages || 1);
@@ -79,30 +98,27 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             }
         };
         loadProducts();
-    }, [currentPage, search]);
+    }, [currentPage, debouncedSearch]);
+
+
     const handleSelectProduct = (product) => {
-        // Check if product is already in the list
+        // Prevent adding duplicate products
         const isProductInList = selectedItems.some(item => item.product._id === product._id);
-
-        // if (isProductInList) {
-        //     toast.error(`${getProductName(product, locale)} ya está en la lista`);
-        //     return;
-        // }
-
+        if (isProductInList) {
+            toast.error(`${getProductName(product, locale)} ya está en la lista`);
+            return;
+        }
         const newItem = {
             _id: crypto.randomUUID(), // Add a unique ID for each selected item
             product,
             quantity: 1,
             state: 0 // default state: pending
         };
-
         const updatedItems = [...selectedItems, newItem];
         setSelectedItems(updatedItems);
-
         if (onProductSelect) {
             onProductSelect(updatedItems);
         }
-
         toast.success(`${getProductName(product, locale)} ${t.addSuccess}`);
     };
     const handleRemoveProduct = (itemId) => {
@@ -191,6 +207,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder={t.searchPlaceholder}
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
+                        autoComplete="off"
                     />
                     <button
                         className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"

@@ -22,8 +22,8 @@ export async function GET(request) {
 
         // Pagination parameters
         const page = parseInt(searchParams.get('page')) || 1;
-        const limit = parseInt(searchParams.get('limit')) || 5;
-        const skip = (page - 1) * limit;
+        let limit = parseInt(searchParams.get('limit')) || 5;
+        let skip = (page - 1) * limit;
 
         await dbConnect();
 
@@ -33,10 +33,10 @@ export async function GET(request) {
         // Handle combined search term
         if (search) {
             query.$or = [
-                { name: { $regex: search, $options: 'i' } },
-                { reference: { $regex: search, $options: 'i' } },
-                { category: { $regex: search, $options: 'i' } },
-                { brand: { $regex: search, $options: 'i' } }
+                { 'name.es': { $regex: search, $options: 'i' } },
+                { 'name.ca': { $regex: search, $options: 'i' } },
+                { reference: { $regex: search, $options: 'i' } }
+                // Optionally add category/brand name search if needed, but not brand ObjectId
             ];
         } else {
             // Individual field filters
@@ -123,8 +123,14 @@ export async function GET(request) {
             productsQuery = productsQuery.sort({ createdAt: -1 });
         }
 
-        // Apply pagination
-        productsQuery = productsQuery.skip(skip).limit(limit);
+        // If searching, remove limit to return all matches
+        if (search && search.trim() !== '') {
+            productsQuery = productsQuery;
+            skip = 0;
+            limit = 0;
+        } else {
+            productsQuery = productsQuery.skip(skip).limit(limit);
+        }
 
         // Populate brand and category fields
         const products = await productsQuery.populate('brand').populate('category');
@@ -141,7 +147,10 @@ export async function GET(request) {
         });
 
         // Calculate pagination info
-        const totalPages = Math.ceil(totalItems / limit);
+        let totalPages = 1;
+        if (!search || search.trim() === '') {
+            totalPages = Math.ceil(totalItems / (limit || 1));
+        }
 
         return NextResponse.json({
             products: productsWithNames,
