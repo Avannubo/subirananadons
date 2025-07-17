@@ -127,7 +127,7 @@ export default function ListStatusModal({
                             </select>
                         </div>
 
-                        <div>
+                        {/* <div>
                             <label htmlFor="privacyToggle" className="block text-sm font-medium text-gray-700 mb-1">
                                 {t.privacy}
                             </label>
@@ -144,7 +144,7 @@ export default function ListStatusModal({
                                     {t.publicToggle}
                                 </label>
                             </div>
-                        </div>
+                        </div> */}
 
                         <div className="mt-6 space-y-4">
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -174,7 +174,7 @@ export default function ListStatusModal({
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            {/* <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <div className="flex items-center">
                                     <div className={`w-3 h-3 rounded-full mr-3 ${isPublic ? 'bg-teal-500' : 'bg-purple-500'}`}></div>
                                     <div>
@@ -188,7 +188,7 @@ export default function ListStatusModal({
                                         </p>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className="border-t border-gray-200 pt-4 mt-6">
