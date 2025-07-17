@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import ListasTable from '@/components/admin/listas/ListasTable';
@@ -138,6 +139,9 @@ export default function ListasTabs({ userRole = 'user' }) {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
         title: '',
+        userId: '',
+        userEmail: '',
+        userName: '',
         description: '',
         babyName: '',
         dueDate: '',
@@ -173,6 +177,43 @@ export default function ListasTabs({ userRole = 'user' }) {
             setIsLoading(false);
         }
     };
+    // For admin: users dropdown
+    const [users, setUsers] = useState([]);
+    const [usersLoading, setUsersLoading] = useState(false);
+
+    // Fetch users for admin dropdown
+    useEffect(() => {
+        if (userRole === 'admin' && showCreateModal) {
+            setUsersLoading(true);
+            fetch('/api/clients?limit=1000')
+                .then(res => res.json())
+                .then(data => {
+                    // API returns data.clients
+                    if (data.success) setUsers(data.clients || []);
+                })
+                .catch(() => setUsers([]))
+                .finally(() => setUsersLoading(false));
+        }
+    }, [userRole, showCreateModal]);
+
+    const [selectedUser, setSelectedUser] = useState(null);
+    const handleUserSelect = (e) => {
+        const userId = e.target.value;
+
+        // Extract email from the string in format "Name (email)"
+        const emailMatch = userId.match(/\(([^)]+)\)/); // Matches content between parentheses
+        const extractedEmail = emailMatch ? emailMatch[1] : '';
+
+        const selectedUser = users.find(u => u._id === userId || u.email === extractedEmail);
+
+        setFormData(prev => ({
+            ...prev,
+            userId,
+            userEmail: selectedUser ? selectedUser.email : extractedEmail,
+            userName: selectedUser ? selectedUser.name : userId.split('(')[0].trim(),
+        }));
+    };
+
     useEffect(() => {
         // Fetch lists from API
         loadBirthLists();
@@ -193,6 +234,12 @@ export default function ListasTabs({ userRole = 'user' }) {
             [name]: value
         }));
     };
+    // Helper: Get the currently selected user object (admin only)
+    const getSelectedUser = () => {
+        if (userRole !== 'admin' || !formData.userId) return null;
+        return users.find(u => u._id === formData.userId) || null;
+    };
+
     // Refresh data
     const refreshData = async () => {
         await loadBirthLists();
@@ -245,7 +292,8 @@ export default function ListasTabs({ userRole = 'user' }) {
             }));
             // Create the birth list in the database
             const birthListData = {
-                user: session?.user?.id, // User ID from the session
+                user: userRole === 'admin' && formData.userId ? formData.userId : session?.user?.id, // Use selected user for admin, else session user
+                userEmail: userRole === 'admin' && formData.userId ? formData.userEmail : session?.user?.email, // Always use selected user's email if admin and user selected
                 title: formData.title,
                 description: formData.description || '',
                 babyName: formData.babyName,
@@ -255,15 +303,17 @@ export default function ListasTabs({ userRole = 'user' }) {
                 theme: 'default', // Default theme
                 status: 'Activa' // Active status
             };
-            // Create the birth list using the service
+            console.log("User Email: " + selectedUser);
+            console.log('Creating birth list with data:', JSON.stringify(birthListData, null, 2));
             const result = await createBirthList(birthListData);
             if (result.success) {
-                // Refresh the list of birth lists
                 await loadBirthLists();
                 toast.success(t.successCreate);
-                // Reset form and close modal
                 setFormData({
                     title: '',
+                    userId: '',
+                    userEmail: '',
+                    userName: '',
                     description: '',
                     babyName: '',
                     dueDate: '',
@@ -472,6 +522,34 @@ export default function ListasTabs({ userRole = 'user' }) {
                             {/* Step 1: Basic Information */}
                             {currentStep === 1 && (
                                 <form onSubmit={handleNextStep} className="space-y-6">
+                                    {/* Admin: Select user for the list */}
+                                    {userRole === 'admin' && (
+                                        <div>
+                                            <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
+                                                Selecciona un usuario para la lista
+                                            </label>
+                                            <select
+                                                id="userId"
+                                                name="userId"
+                                                value={formData.userId}
+                                                onChange={handleUserSelect}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
+                                                required
+                                                disabled={usersLoading}
+                                            >
+                                                <option value="">{usersLoading ? 'Cargando usuarios...' : 'Selecciona un usuario'}</option>
+                                                {users.map(user => (
+                                                    <option key={user._id || user.email} value={user._id}>
+                                                        {user.name} ({user.email})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {/* Show selected user email */}
+                                            {/* {formData.userEmail && (
+                                                <div className="text-xs text-gray-500 mt-1">Email: {formData.userEmail}</div>
+                                            )} */}
+                                        </div>
+                                    )}
                                     {/* Title */}
                                     <div>
                                         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import useShopParameter from '@/lib/useShopParameter';
 import { Dialog, DialogTitle } from '@headlessui/react';
 import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus, FiPackage, FiTrash2, FiMove, FiPlus } from 'react-icons/fi';
 import Image from 'next/image';
@@ -7,6 +8,8 @@ import { toast } from 'react-hot-toast';
 import { useStats } from '@/contexts/StatsContext';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
+    // Get IVA parameter from shop settings
+    const { value: ivaValue, loading: ivaLoading } = useShopParameter('iva');
     console.log(product);
     const [formData, setFormData] = useState({
         name: { es: '', ca: '' },
@@ -16,7 +19,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         categoryId: '',
         brand: '',
         brandId: '',
-        price_excl_tax: '',
         price_incl_tax: '',
         image: '',
         imageHover: '',
@@ -145,7 +147,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 brandId: product.brandId || '',
                 categoryDisplayName: product.categoryDisplayName || '',
                 brandDisplayName: product.brandDisplayName || '',
-                price_excl_tax: product.price_excl_tax || '',
                 price_incl_tax: product.price_incl_tax || '',
                 image: product.image || '',
                 imageHover: product.imageHover || '',
@@ -170,7 +171,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 categoryId: '',
                 brand: '',
                 brandId: '',
-                price_excl_tax: '',
                 price_incl_tax: '',
                 image: '',
                 imageHover: '',
@@ -417,12 +417,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         if (!formData.name) newErrors.name = 'El nombre es obligatorio';
         if (!formData.reference) newErrors.reference = 'La referencia es obligatoria';
         // if (!formData.category) newErrors.category = 'La categoría es obligatoria';
-        if (!formData.price_excl_tax) newErrors.price_excl_tax = 'El precio sin impuestos es obligatorio';
         if (!formData.price_incl_tax) newErrors.price_incl_tax = 'El precio con impuestos es obligatorio';
         // Validate numeric fields
-        if (formData.price_excl_tax && isNaN(parseFloat(formData.price_excl_tax))) {
-            newErrors.price_excl_tax = 'Debe ser un número válido';
-        }
         if (formData.price_incl_tax && isNaN(parseFloat(formData.price_incl_tax))) {
             newErrors.price_incl_tax = 'Debe ser un número válido';
         }
@@ -479,7 +475,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 image: mainImage,
                 imageHover: hoverImage,
                 additionalImages: additionalImages,
-                price_excl_tax: parseFloat(formData.price_excl_tax),
                 price_incl_tax: parseFloat(formData.price_incl_tax),
                 stock: {
                     available: parseInt(formData.stock.available || 0),
@@ -567,8 +562,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setSelectedImageIndex(index);
         }
     };
-  
- 
+
+
 
     // Render category tree for dropdown with improved hierarchy indicators
     const getCategoryDisplayName = (cat) => {
@@ -918,20 +913,24 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="price_excl_tax" className="block text-sm font-medium text-gray-700">
-                                            Preu sense impostos (€) *
+                                            Preu sense impostos (€)
                                         </label>
                                         <input
                                             type="text"
                                             id="price_excl_tax"
                                             name="price_excl_tax"
-                                            value={formData.price_excl_tax}
-                                            onChange={handleChange}
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.price_excl_tax ? 'border-red-300' : 'border-gray-300'
-                                                } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                            value={(() => {
+                                                const iva = parseFloat(ivaValue || '21');
+                                                const incl = parseFloat(formData.price_incl_tax || '');
+                                                if (!incl || isNaN(incl) || !iva || isNaN(iva)) return '';
+                                                return (incl / (1 + iva / 100)).toFixed(2);
+                                            })()}
+                                            readOnly
+                                            disabled
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 focus:outline-none"
+                                            placeholder={ivaLoading ? 'Carregant...' : 'Calculat automàticament'}
                                         />
-                                        {errors.price_excl_tax && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.price_excl_tax}</p>
-                                        )}
+                                        <p className="mt-1 text-xs text-gray-500">IVA actual: {ivaLoading ? 'Carregant...' : ivaValue ? ivaValue + '%' : 'No definit'}</p>
                                     </div>
                                     <div>
                                         <label htmlFor="price_incl_tax" className="block text-sm font-medium text-gray-700">

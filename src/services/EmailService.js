@@ -110,21 +110,20 @@ class EmailService {
                     <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.reserved || 0}</td>
                 </tr>`
             ).join('');
-            // Email to list owner
+            // Email to list owner <p>Hola ${list.Creator},</p> <p><strong>Estado:</strong> ${list.isPublic ? 'Pública' : 'Privada'}</p>
             const userMailOptions = {
                 from: "info@subirananadons.com",
-                to: user.email,
+                to: list.email,
                 subject: `Tu lista de nacimiento "${list.title}" ha sido creada - Subirana Nadons`,
                 html: `
                     <h1>¡Tu lista de nacimiento ha sido creada con éxito!</h1>
-                    <p>Hola ${user.name},</p>
+                    
                     <p>Tu lista de nacimiento ha sido creada y está lista para ser compartida.</p>
                     <h2>Detalles de la lista:</h2>
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Estado:</strong> ${list.isPublic ? 'Pública' : 'Privada'}</p>
-                    <p><strong>URL de la lista:</strong> <a>/lists/${list._id}</a></p> 
+                    <p><strong>ID de la lista:</strong> <a>${list._id}</a></p> 
                     <p>Puedes compartir el enlace de tu lista con familiares y amigos para que puedan ver los productos que has seleccionado.</p>
                     <p>Gracias por confiar en Subirana Nadons.</p>
                 `
@@ -141,7 +140,7 @@ class EmailService {
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Creada por:</strong> ${user.name} (${user.email})</p>
+                    <p><strong>Creada por:</strong> ${(user.Creator || '')} (${list.email || ''})</p>
                     <p><strong>Estado:</strong> ${list.isPublic ? 'Pública' : 'Privada'}</p>
                     <p><strong>URL de la lista:</strong> <a>/lists/${list._id}</a></p>
                 `

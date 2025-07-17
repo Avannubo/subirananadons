@@ -66,8 +66,13 @@ export async function POST(request) {
         // Parse request body
         const data = await request.json();
 
+        // Determine the user for the list (admin can set userId, others use their own)
+        let userIdToUse = session.user.id;
+        if (session.user.role === 'admin' && data.userId) {
+            userIdToUse = data.userId;
+        }
         // Ensure the user exists
-        const user = await User.findById(session.user.id);
+        const user = await User.findById(userIdToUse);
         if (!user) {
             return NextResponse.json(
                 { success: false, message: 'User not found' },
@@ -83,9 +88,26 @@ export async function POST(request) {
             );
         }
 
-        // Create new birth list with user ID from session
+        // Set userEmail and userName
+        let userEmail = undefined;
+        let userName = undefined;
+        if (session.user.role === 'admin' && data.userEmail) {
+            userEmail = data.userEmail;
+        } else if (user.email) {
+            userEmail = user.email;
+        }
+        if (session.user.role === 'admin' && data.userName) {
+            userName = data.userName;
+        } else if (user.name) {
+            userName = user.name;
+        }
+        console.log('Creating birth list for user:', userIdToUse, 'with email:', userEmail, 'and name:', userName);
         const birthListData = {
-            user: session.user.id,
+            user: userIdToUse,
+            userEmail,
+            userName,
+            email: userEmail, // legacy/compatibility
+            Creator: userName, // legacy/compatibility
             title: data.title,
             description: data.description || '',
             babyName: data.babyName,
@@ -94,7 +116,8 @@ export async function POST(request) {
             items: data.items || [],
             theme: data.theme || 'default',
             status: data.status || 'Activa'
-        };        // Create the birth list
+        };
+        // Create the birth list in the database
         const birthList = await BirthList.create(birthListData);
 
         // Send confirmation emails
