@@ -54,6 +54,8 @@ export default function StockManagement() {
             const data = await response.json();
 
             setProducts(data.products || []);
+            console.log('Fetched products:', data.products);
+            
             setPagination({
                 currentPage: data.pagination?.currentPage || page,
                 totalPages: data.pagination?.totalPages || 1,
@@ -181,6 +183,43 @@ export default function StockManagement() {
         }
     };
 
+
+    // Get NextIntl locale from Next.js
+    let locale = 'ca';
+    if (typeof window !== 'undefined') {
+        locale = (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca').split('-')[0];
+        if (locale !== 'ca' && locale !== 'es') locale = 'ca';
+    }
+
+    // Get translated product name
+    const getTranslatedProductName = (product) => {
+        if (!product) return 'N/D';
+        if (product.name && typeof product.name === 'object') {
+            return product.name[locale] || product.name.ca || product.name.es || 'N/D';
+        }
+        return product.name || 'N/D';
+    };
+
+    // Get translated category name
+    const getTranslatedCategoryName = (product) => {
+        if (!product || !product.category) return 'N/D';
+        // If category is an object with translations
+        if (typeof product.category === 'object' && product.category !== null) {
+            if (product.category && typeof product.category === 'object') {
+                return product.category[locale] || product.category.ca || product.category.es || 'N/D';
+            }
+            // If category itself is a string
+            if (typeof product.category === 'string') {
+                return product.category;
+            }
+        }
+        // If category is a string
+        if (typeof product.category === 'string') {
+            return product.category;
+        }
+        return 'N/D';
+    };
+
     // Get current available stock
     const getAvailableStock = (product) => {
         if (editingId === product._id) {
@@ -296,13 +335,13 @@ export default function StockManagement() {
                             {products.map((product) => (
                                 <tr key={product._id} className={isLowStock(product) ? 'bg-yellow-50' : ''}>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                        <div className="text-sm font-medium text-gray-900">{getTranslatedProductName(product)}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {product.reference}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {product.category || 'N/D'}
+                                        {getTranslatedCategoryName(product)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${product.status === 'active'
