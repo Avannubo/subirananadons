@@ -39,6 +39,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const [categorySearchTerm, setCategorySearchTerm] = useState('');
     const [brands, setBrands] = useState([]);
     const [loadingBrands, setLoadingBrands] = useState(false);
     const [showBrandDropdown, setShowBrandDropdown] = useState(false);
@@ -115,6 +116,32 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
     // Get hierarchical categories for the dropdown
     const hierarchicalCategories = organizeCategories(categories);
+
+    // Helper to recursively filter categories by name
+    const filterCategoriesByName = (categories, searchTerm) => {
+        if (!searchTerm) return categories;
+        const lowerSearch = searchTerm.toLowerCase();
+        return categories
+            .map(cat => {
+                // Support category.name as string or object (translations)
+                let catName = '';
+                if (typeof cat.name === 'string') {
+                    catName = cat.name;
+                } else if (typeof cat.name === 'object' && cat.name !== null) {
+                    // Try ca, es, name, or first available value
+                    catName = cat.name.ca || cat.name.es || cat.name.name || Object.values(cat.name)[0] || '';
+                }
+                const matches = typeof catName === 'string' && catName.toLowerCase().includes(lowerSearch);
+                const filteredChildren = filterCategoriesByName(cat.children || [], searchTerm);
+                if (matches || filteredChildren.length > 0) {
+                    return { ...cat, children: filteredChildren };
+                }
+                return null;
+            })
+            .filter(Boolean);
+    };
+
+    const filteredCategories = filterCategoriesByName(hierarchicalCategories, categorySearchTerm);
     // Load product data when editing
     useEffect(() => {
         if (isEditing && product) {
@@ -761,25 +788,45 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     ) : hierarchicalCategories.length === 0 ? (
                                                         <div className="p-4 text-gray-500">No hi ha categories disponibles</div>
                                                     ) : (
-                                                        <div className="py-1 category-dropdown">
-                                                            <style jsx global>{`
+                                                        <>
+                                                            <div className='p-2 border-b border-gray-200 sticky top-0 bg-white z-10'>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Cerca categoria..."
+                                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                                    value={categorySearchTerm}
+                                                                    onChange={e => setCategorySearchTerm(e.target.value)}
+                                                                />
+                                                            </div>
+
+                                                            <div className=" category-dropdown">
+                                                                <style jsx global>{`
                                                                     .category-dropdown .category-item {
                                                                         margin: 0;
                                                                         padding: 0;
-                                                                    }
-                                                                    .category-dropdown .subcategory-group {
-                                                                        margin: 0;
-                                                                        padding: 0;
+                                                                        }
+                                                                        .category-dropdown .subcategory-group {
+                                                                            margin: 0;
+                                                                            padding: 0;
                                                                     }
                                                                 `}</style>
-                                                            {hierarchicalCategories.map((category, index) =>
-                                                                renderCategoryOption(
-                                                                    category,
-                                                                    0,
-                                                                    index === hierarchicalCategories.length - 1
-                                                                )
-                                                            )}
-                                                        </div>
+                                                                {filteredCategories.length === 0 ? (
+                                                                    <div className="p-4 text-center text-gray-500">
+                                                                        {categorySearchTerm
+                                                                            ? `No s'han trobat categories amb "${categorySearchTerm}"`
+                                                                            : "No hi ha categories disponibles"}
+                                                                    </div>
+                                                                ) : (
+                                                                    filteredCategories.map((category, index) =>
+                                                                        renderCategoryOption(
+                                                                            category,
+                                                                            0,
+                                                                            index === filteredCategories.length - 1
+                                                                        )
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        </>
                                                     )}
                                                 </div>
                                             )}

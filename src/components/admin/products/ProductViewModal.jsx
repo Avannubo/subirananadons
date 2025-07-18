@@ -3,9 +3,12 @@ import { Dialog } from '@headlessui/react';
 import { FiX, FiPackage, FiDollarSign, FiTag, FiBox, FiImage } from 'react-icons/fi';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import useShopParameter from '@/lib/useShopParameter';
 
 
 export default function ProductViewModal({ isOpen, onClose, product, categories = [], brands = [] }) {
+    // Get IVA value from shop parameters
+    const { value: ivaValue, loading: ivaLoading } = useShopParameter('iva');
 
     // Language state for translation switcher
     const [lang, setLang] = useState('ca');
@@ -52,10 +55,20 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
         }
     }, [product]);
 
+
     // Format price with 2 decimal places and € symbol
     const formatPrice = (price) => {
+        if (price === '' || price === undefined || price === null || isNaN(price)) return 'N/D';
         return `${parseFloat(price).toFixed(2)} €`;
     };
+
+    // Auto-calculate price without IVA from price_incl_tax and IVA value
+    const autoPriceExclTax = (() => {
+        const iva = parseFloat(ivaValue || '21');
+        const incl = parseFloat(product.price_incl_tax || '');
+        if (!incl || isNaN(incl) || !iva || isNaN(iva)) return '';
+        return (incl / (1 + iva / 100)).toFixed(2);
+    })();
 
     // Calculate available stock
     const availableStock = product.stock?.available || 0;
@@ -233,7 +246,9 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                             <span className="text-sm font-medium text-gray-500">Preu (sense IVA):</span>
                                             <p className="text-base font-medium text-gray-800">
-                                                {product.price_excl_tax ? formatPrice(product.price_excl_tax) : 'N/D'}
+                                                {/* Show auto-calculated price excl tax if possible, fallback to product.price_excl_tax */}
+                                                {autoPriceExclTax ? formatPrice(autoPriceExclTax) : (product.price_excl_tax ? formatPrice(product.price_excl_tax) : 'N/D')}
+                                                {/* {ivaLoading && <span className="ml-2 text-xs text-gray-400">(calculant IVA...)</span>} */}
                                             </p>
                                         </div>
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
