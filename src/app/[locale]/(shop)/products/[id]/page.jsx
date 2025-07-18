@@ -311,13 +311,17 @@ export default function Page() {
                     {/* Product Info */}
                     <div className="space-y-6">
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{typeof product.name === 'object' ? product.name[locale] : product.name}</h1>
-                        <p className="text-xl sm:text-2xl font-semibold text-gray-900">{product.price_incl_tax || product.price}</p>
+                        <p className="text-xl sm:text-2xl font-semibold text-gray-900">
+                            {typeof product.price_incl_tax === 'number'
+                                ? product.price_incl_tax.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+                                : product.price_incl_tax}
+                        </p>
                         <div className="space-y-4">
                             <p className="text-gray-600 break-words">{typeof product.description === 'object' ? product.description[locale] : product.description}</p>
-                            <div className="py-4">
+                            {/* <div className="py-4">
                                 <h3 className="font-bold text-gray-900 mb-2">{t('detailsTitle')}</h3>
                                 <ul className="list-disc list-inside space-y-1 text-gray-600">
-                                    {/* {product.details.dimensions && (
+                                    {product.details.dimensions && (
                                         <li>{t('dimensions')}: {product.details.dimensions}</li>
                                     )}
                                     {product.details.washingInstructions && (
@@ -328,9 +332,9 @@ export default function Page() {
                                     )} 
                                     {product.details.brand && (
                                         <li>{t('brand')}: {product.details.brand}</li>
-                                    )}*/}
+                                    )}
                                 </ul>
-                            </div>
+                            </div>*/}
                             {/* Quantity Selector */}
                             <div className="flex flex-wrap items-center space-x-2 ">
                                 <span className="text-gray-700">{t('quantity')}:</span>
