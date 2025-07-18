@@ -85,7 +85,10 @@ export default function ProductCard({
         e.stopPropagation();
         try {
             await addToCart(product, 1);
-            // toast.success(`${product.name} añadido al carrito`);
+            // Import translation utility
+            const { getTranslatedField } = require('@/lib/getTranslatedField');
+            const locale = typeof window !== 'undefined' ? (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca').split('-')[0] : 'ca';
+            // toast.success(`${getTranslatedField(product, 'name', locale) || product.name} añadido al carrito`);
         } catch (error) {
             toast.error('Error al añadir al carrito');
             console.error('Error adding to cart:', error);

@@ -47,12 +47,21 @@ export async function GET(request) {
             // Handle multiple categories separated by commas
             if (category) {
                 const categoryList = category.split(',');
+                // If all are valid ObjectIds, use $in for exact match
+                const isAllObjectId = categoryList.every(cat => /^[a-f\d]{24}$/i.test(cat));
                 if (categoryList.length > 1) {
-                    // If multiple categories, use $in operator
-                    query.category = { $in: categoryList.map(cat => new RegExp(cat, 'i')) };
+                    if (isAllObjectId) {
+                        query.category = { $in: categoryList };
+                    } else {
+                        // Use $in with regex for non-ObjectId
+                        query.category = { $in: categoryList.map(cat => new RegExp(cat, 'i')) };
+                    }
                 } else {
-                    // Single category uses regex for partial matching
-                    query.category = { $regex: category, $options: 'i' };
+                    if (/^[a-f\d]{24}$/i.test(category)) {
+                        query.category = category;
+                    } else {
+                        query.category = { $regex: category, $options: 'i' };
+                    }
                 }
             }
 
@@ -181,18 +190,18 @@ export async function POST(request) {
         await dbConnect();
 
         const body = await request.json();
-console.log('Creating product with body:', body);
+        console.log('Creating product with body:', body);
         // Validate required fields
-        if (!body.name ||  body.price_incl_tax === undefined) {
+        if (!body.name || body.price_incl_tax === undefined) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
- 
+
         const product = await Product.create({
             name: body.name,
             reference: body.reference || '',
             description: body.description || '',
-            category: body.categoryId || null, 
-            brand: body.brandId || null, 
+            category: body.categoryId || null,
+            brand: body.brandId || null,
             price_excl_tax: parseFloat(body.price_excl_tax) || 0,
             price_incl_tax: parseFloat(body.price_incl_tax) || 0,
             image: body.image || 'https://res.cloudinary.com/dmv3sqzfp/image/upload/v1750843703/user_profiles/user_683edc32e0d409ba221b11a7_1750843701800.png',

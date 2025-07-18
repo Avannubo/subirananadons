@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
+import { getTranslatedField } from '@/lib/getTranslatedField';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import ProductSlider from '@/components/landing/ProductSlider';
 import { useCart } from '@/contexts/CartContext.jsx';
@@ -21,9 +22,10 @@ export default function Page() {
     const [activeTab, setActiveTab] = useState('DETALLES DEL PRODUCTO');
     const { addToCart } = useCart();
     const [dragConstraints, setDragConstraints] = useState({ right: 0, left: 0 });
-
-    // Reference for scrollable container
     const scrollContainerRef = useRef(null);
+
+    // Get current locale from params
+    const locale = useLocale();
 
     // Update drag constraints when container is available or product images change
     useEffect(() => {
@@ -56,71 +58,29 @@ export default function Page() {
                     throw new Error('Invalid product URL');
                 }
                 const productById = await fetchProductById(productId);
+                console.log('Fetched product:', productById);
+                // Ensure images array is always present
+                let images = [];
+                if (Array.isArray(productById.images) && productById.images.length > 0) {
+                    images = productById.images;
+                } else {
+                    // Fallback to main image and additionalImages
+                    if (productById.image) images.push(productById.image);
+                    if (Array.isArray(productById.additionalImages)) {
+                        images = images.concat(productById.additionalImages.filter(Boolean));
+                    }
+                    // Fallback to imageHover if available
+                    if (productById.imageHover) images.push(productById.imageHover);
+                }
+                // Patch product object to always have images array
+                setProduct({
+                    ...productById,
+                    images,
+                });
+
                 if (!productById) {
                     throw new Error('Product not found');
                 }
-                // Translation logic for name and description
-                let translatedName = '';
-                let translatedDescription = '';
-                const locale = params?.locale || 'es';
-                // Helper to get string value or fallback
-                const getString = (val, fallback) => typeof val === 'string' ? val : fallback;
-                // Handle translated name
-                if (productById.name && typeof productById.name === 'object') {
-                    translatedName = getString(productById.name[locale],
-                        getString(productById.name.es,
-                            getString(productById.name.ca,
-                                t('noDescription'))));
-                } else {
-                    translatedName = typeof productById.name === 'string' ? productById.name : t('noDescription');
-                }
-                // Handle translated description
-                if (productById.description && typeof productById.description === 'object') {
-                    translatedDescription = getString(productById.description[locale],
-                        getString(productById.description.es,
-                            getString(productById.description.ca,
-                                t('noDescription'))));
-                } else {
-                    translatedDescription = typeof productById.description === 'string' ? productById.description : t('noDescription');
-                }
-                const formattedProduct = {
-                    id: productById._id,
-                    name: translatedName,
-                    price: `${productById.price_incl_tax.toFixed(2).replace('.', ',')} €`,
-                    priceValue: productById.price_incl_tax,
-                    description: translatedDescription,
-                    details: {
-                        dimensions: productById.dimensions || t('notAvailable'),
-                        washingInstructions: productById.care_instructions || t('seeLabel'),
-                        reference: productById.reference || t('notAvailable'),
-                        brand: productById.brand || t('notAvailable')
-                    },
-                    images: [],
-                    category: typeof productById.category === 'object' && productById.category !== null
-                        ? productById.category.name || t('uncategorized')
-                        : productById.category || t('uncategorized')
-                };
-
-                // Collect all product images
-                if (productById.image) {
-                    formattedProduct.images.push(productById.image);
-                }
-
-                // Add hover image if different from main image
-                if (productById.imageHover && productById.imageHover !== productById.image) {
-                    formattedProduct.images.push(productById.imageHover);
-                }
-
-                // Add additional images if available
-                if (productById.additionalImages && Array.isArray(productById.additionalImages) && productById.additionalImages.length > 0) {
-                    formattedProduct.images.push(...productById.additionalImages);
-                }
-
-                // Ensure we have at least one image
-                if (formattedProduct.images.length === 0) {
-                    formattedProduct.images.push('/assets/images/Screenshot_4.png');
-                }
-                setProduct(formattedProduct);
                 // Get category ID for API call
                 let categoryId = productById.category;
                 if (typeof categoryId === 'object' && categoryId !== null) {
@@ -277,9 +237,9 @@ export default function Page() {
                     <ol className="hidden md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
                         <li><a href="/products" className="hover:text-gray-700">{t('breadcrumbProducts')}</a></li>
                         <li><span className="mx-2">/</span></li>
-                        <li><a href={`/products?category=${encodeURIComponent(product.category)}`} className="hover:text-gray-700">{product.category}</a></li>
+                        <li><a href={`/products?category=${encodeURIComponent(product.category?.slug || '')}`} className="hover:text-gray-700">{typeof product.category?.name === 'object' ? product.category.name[locale] : product.category?.name || ''}</a></li>
                         <li><span className="mx-2">/</span></li>
-                        <li className="text-gray-900 font-medium whitespace-nowrap">{product.name}</li>
+                        <li className="text-gray-900 font-medium whitespace-nowrap">{typeof product.name === 'object' ? product.name[locale] : product.name}</li>
                     </ol>
                 </nav>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -292,8 +252,8 @@ export default function Page() {
                             transition={{ duration: 0.3 }}
                         >
                             <Image
-                                src={product.images[selectedImage]}
-                                alt={product.name}
+                                src={product.images && product.images[selectedImage] ? product.images[selectedImage] : product.image}
+                                alt={typeof product.name === 'object' ? product.name[locale] : product.name}
                                 fill
                                 className="object-contain"
                                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -350,14 +310,14 @@ export default function Page() {
                     </div>
                     {/* Product Info */}
                     <div className="space-y-6">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{product.name}</h1>
-                        <p className="text-xl sm:text-2xl font-semibold text-gray-900">{product.price}</p>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{typeof product.name === 'object' ? product.name[locale] : product.name}</h1>
+                        <p className="text-xl sm:text-2xl font-semibold text-gray-900">{product.price_incl_tax || product.price}</p>
                         <div className="space-y-4">
-                            <p className="text-gray-600 break-words">{product.description}</p>
+                            <p className="text-gray-600 break-words">{typeof product.description === 'object' ? product.description[locale] : product.description}</p>
                             <div className="py-4">
                                 <h3 className="font-bold text-gray-900 mb-2">{t('detailsTitle')}</h3>
                                 <ul className="list-disc list-inside space-y-1 text-gray-600">
-                                    {product.details.dimensions && (
+                                    {/* {product.details.dimensions && (
                                         <li>{t('dimensions')}: {product.details.dimensions}</li>
                                     )}
                                     {product.details.washingInstructions && (
@@ -365,10 +325,10 @@ export default function Page() {
                                     )}
                                     {product.details.reference && (
                                         <li>{t('reference')}: {product.details.reference}</li>
-                                    )}
+                                    )} 
                                     {product.details.brand && (
                                         <li>{t('brand')}: {product.details.brand}</li>
-                                    )}
+                                    )}*/}
                                 </ul>
                             </div>
                             {/* Quantity Selector */}
@@ -428,13 +388,13 @@ export default function Page() {
                     <div className="mt-4 sm:mt-6 pb-10 sm:pb-16 border-b border-gray-200">
                         {activeTab === 'DESCRIPCIÓN' && (
                             <div className="prose max-w-none">
-                                <p className="text-gray-600">{product.description}</p>
+                                <p className="text-gray-600">{typeof product.description === 'object' ? product.description[locale] : product.description}</p>
                             </div>
                         )}
                         {activeTab === 'DETALLES DEL PRODUCTO' && (
                             <div className="prose max-w-none">
                                 <ul className="list-disc list-inside space-y-2 text-gray-600">
-                                    {product.details.dimensions && (
+                                    {/* {product.details.dimensions && (
                                         <li>{t('dimensions')}: {product.details.dimensions}</li>
                                     )}
                                     {product.details.washingInstructions && (
@@ -442,10 +402,10 @@ export default function Page() {
                                     )}
                                     {product.details.reference && (
                                         <li>{t('reference')}: {product.details.reference}</li>
-                                    )}
+                                    )} 
                                     {product.details.brand && (
                                         <li>{t('brand')}: {product.details.brand}</li>
-                                    )}
+                                    )}*/}
                                 </ul>
                             </div>
                         )}

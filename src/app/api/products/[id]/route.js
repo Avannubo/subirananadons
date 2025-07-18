@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import Product from '@/models/Product';
+import Category from '@/models/Category';
+import Brand from '@/models/Brand';
 import dbConnect from '@/lib/dbConnect';
 import mongoose from 'mongoose';
 
@@ -175,4 +177,4 @@ export async function DELETE(request, { params }) {
         console.error('Error deleting product:', error);
         return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
     }
-} 
+}
