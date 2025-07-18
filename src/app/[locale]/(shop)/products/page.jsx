@@ -13,19 +13,18 @@ import { useTranslations, useLocale } from 'next-intl';
 // Utility to get display name from category (handles translation and legacy)
 function getCategoryDisplayName(cat, locale = 'es') {
     if (!cat) return '';
-    // For menu nodes
     if (typeof cat === 'object' && cat !== null) {
-        if (cat.label) {
-            if (typeof cat.label === 'object') {
-                return cat.label[locale] || cat.label.ca || cat.label.es || Object.values(cat.label)[0] || '';
-            }
-            return cat.label;
-        }
         if (cat.name) {
             if (typeof cat.name === 'object') {
                 return cat.name[locale] || cat.name.ca || cat.name.es || Object.values(cat.name)[0] || '';
             }
             return cat.name;
+        }
+        if (cat.label) {
+            if (typeof cat.label === 'object') {
+                return cat.label[locale] || cat.label.ca || cat.label.es || Object.values(cat.label)[0] || '';
+            }
+            return cat.label;
         }
     }
     if (typeof cat === 'string') return cat;
@@ -72,7 +71,7 @@ export default function Page() {
     const [sortOrder, setSortOrder] = useState('sales-desc');
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     // Initialize with the root label from the DB
-    const [categoryPath, setCategoryPath] = useState(['Productos']);
+    const [categoryPath, setCategoryPath] = useState([{ slug: 'root', label: 'Productos' }]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -84,8 +83,7 @@ export default function Page() {
     // Access query parameters
     const searchParams = useSearchParams();
     const router = useRouter();
-    // Track if a brand filter is active
-    const [activeBrandFilter, setActiveBrandFilter] = useState(null);
+    // ...existing code...
     // Add useState for banner image
     const [bannerUrl, setBannerUrl] = useState(null);
     // Get the current category node based on the last item in the path
@@ -94,9 +92,9 @@ export default function Page() {
     // Helper to find a category node by path in the categories tree (handles translation)
     function findCategoryNodeByPath(categories, path, locale = 'es') {
         let node = { children: categories };
-        for (const label of path) {
+        for (const pathItem of path) {
             if (!node.children) return null;
-            node = node.children.find(cat => getCategoryDisplayName(cat, locale) === label);
+            node = node.children.find(cat => cat._id === pathItem._id);
             if (!node) return null;
         }
         return node;
@@ -106,53 +104,27 @@ export default function Page() {
 
     // Effect to handle URL parameters when the component mounts
     useEffect(() => {
-        const categoryParam = searchParams.get('category');
-        const brandParam = searchParams.get('brand');
-        console.log('URL Parameters:', { category: categoryParam, brand: brandParam });
-        if (categoryParam && categories && categories.length > 0) {
-            // Find the category path for the specified category in the DB-driven categories
-            function findPathByLabel(categories, label, path = []) {
+        const categoryId = searchParams.get('category');
+        if (categoryId && categories && categories.length > 0) {
+            // Support multiple category ids (comma separated)
+            const ids = categoryId.split(',');
+            // Find the first id for breadcrumb/path
+            function findPathById(categories, id, path = []) {
                 for (const cat of categories) {
-                    const catLabel = getCategoryDisplayName(cat, locale);
-                    const newPath = [...path, catLabel];
-                    if (catLabel === label) return newPath;
+                    const newPath = [...path, { _id: cat._id, label: getCategoryDisplayName(cat, locale) }];
+                    if (cat._id === id) return newPath;
                     if (cat.children) {
-                        const found = findPathByLabel(cat.children, label, newPath);
+                        const found = findPathById(cat.children, id, newPath);
                         if (found) return found;
                     }
                 }
                 return null;
             }
-            const foundPath = findPathByLabel(categories, categoryParam);
+            const foundPath = findPathById(categories, ids[0]);
             if (foundPath) {
-                setCategoryPath(['Productos', ...foundPath]);
-            } else {
-                // Try to match by case-insensitive partial match
-                const normalizedCategory = categoryParam.toLowerCase().trim();
-                function findPartialPath(categories, search, path = []) {
-                    for (const cat of categories) {
-                        const catLabel = getCategoryDisplayName(cat, locale);
-                        const newPath = [...path, catLabel];
-                        if (catLabel.toLowerCase().includes(search)) return newPath;
-                        if (cat.children) {
-                            const found = findPartialPath(cat.children, search, newPath);
-                            if (found) return found;
-                        }
-                    }
-                    return null;
-                }
-                const matchResult = findPartialPath(categories, normalizedCategory);
-                if (matchResult) {
-                    setCategoryPath(['Productos', ...matchResult]);
-                }
+                setCategoryPath([{ _id: 'root', label: 'Productos' }, ...foundPath]);
             }
         }
-        if (brandParam) {
-            setActiveBrandFilter(brandParam);
-            console.log('Filtering by brand:', brandParam);
-        }
-        // Only run this effect when the component mounts, not on every searchParams change
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [categories]);
     // Fetch active banner image on mount
     useEffect(() => {
@@ -238,23 +210,20 @@ export default function Page() {
                     limit: productsPerPage,
                     status: 'active'
                 };
-                // Get all leaf categories under the current node (including itself if it's a leaf)
+                // Get all leaf category ids under the current node (including itself if it's a leaf)
                 if (currentCategoryNode && categoryPath.length > 1) {
-                    function getAllLeafNames(node) {
+                    function getAllLeafIds(node) {
                         if (!node.children || node.children.length === 0) {
-                            return [getCategoryDisplayName(node, locale)];
+                            return [node._id];
                         } else {
-                            return node.children.flatMap(getAllLeafNames);
+                            return node.children.flatMap(getAllLeafIds);
                         }
                     }
-                    const allLeafNames = getAllLeafNames(currentCategoryNode);
-                    options.category = allLeafNames.join(',');
+                    const allLeafIds = getAllLeafIds(currentCategoryNode);
+                    options.category = allLeafIds.join(',');
                 }
-                // Add brand filter if present in URL
-                const brandParam = searchParams.get('brand');
-                if (brandParam) {
-                    options.brand = brandParam;
-                }
+                // ...existing code...
+                // Only use category filter, no brand
                 console.log('Fetching products with options:', options);
                 // Fetch products with category filtering
                 const data = await fetchProducts(options);
@@ -333,33 +302,7 @@ export default function Page() {
     const handleSortChange = (event) => {
         setSortOrder(event.target.value);
     };
-    // Navigate down the category tree by adding the new label to the path
-    const handleCategoryChange = (categoryLabel) => {
-        // We don't need findCategoryAndPath here, just append if it's a valid subcategory
-        const currentSubs = currentCategoryData?.node?.submenu || [];
-        const nextCategory = currentSubs.find(sub => sub.label === categoryLabel);
-        if (nextCategory) {
-            const newPath = [...categoryPath, categoryLabel];
-            setCategoryPath(newPath);
-            // Update URL parameters to reflect the category change
-            const newPathLast = newPath[newPath.length - 1];
-            // Create new URL with the updated category parameter
-            const params = new URLSearchParams(searchParams);
-            params.set('category', newPathLast);
-            router.push(`/products?${params.toString()}`);
-        }
-    };
-    // Handle sibling category selection - replaces last item in path
-    const handleSiblingCategoryChange = (siblingLabel) => {
-        // Replace the last element in the path with the selected sibling
-        const newPath = [...categoryPath.slice(0, -1), siblingLabel];
-        setCategoryPath(newPath);
-        // Update URL parameters to reflect the category change
-        const newPathLast = newPath[newPath.length - 1];
-        const params = new URLSearchParams(searchParams);
-        params.set('category', newPathLast);
-        router.push(`/products?${params.toString()}`);
-    };
+
     // Navigate back up using breadcrumbs
     const handleBreadcrumbClick = (index) => {
         // Slice the path up to and including the clicked index
@@ -372,7 +315,7 @@ export default function Page() {
             params.delete('category');
         } else {
             // Otherwise, update to the new category
-            params.set('category', newPath[newPath.length - 1]);
+            params.set('category', newPath[newPath.length - 1]._id);
         }
         router.push(`/products?${params.toString()}`);
     };
@@ -519,43 +462,21 @@ export default function Page() {
                 </div>
             )}
             <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-8 rounded-t-2xl mt-4 sm:mt-0 ">
-                {/* Active Brand Filter Indicator */}
-                {activeBrandFilter && (
-                    <div className="mb-4 bg-[#00B0C8]/10 px-4 py-3 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                        <div className="flex items-center">
-                            <span className="mr-2 text-[#00B0C8]">Filtrando por marca:</span>
-                            <span className="font-medium">{activeBrandFilter}</span>
-                        </div>
-                        <button
-                            onClick={() => {
-                                setActiveBrandFilter(null);
-                                // Remove the brand parameter and navigate to the products page
-                                const params = new URLSearchParams(searchParams);
-                                params.delete('brand');
-                                router.push(`/products${params.toString() ? `?${params.toString()}` : ''}`);
-                            }}
-                            className="text-gray-600 hover:text-gray-900"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                        </button>
-                    </div>
-                )}
+                {/* ...existing code... */}
                 {/* Breadcrumbs */}
                 <nav aria-label="Breadcrumb" className="hidden lg:flex mb-2 pl-2 overflow-x-auto">
                     <ol className="flex items-center space-x-1 text-sm sm:text-md text-gray-500 flex-wrap min-w-[200px]">
-                        {categoryPath.map((label, index) => (
-                            <li key={index} className="flex items-center">
+                        {categoryPath.map((cat, index) => (
+                            <li key={cat.slug || index} className="flex items-center">
                                 {index > 0 && (
                                     <svg className="w-3 h-3 mx-1 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path></svg>
                                 )}
                                 {index < categoryPath.length - 1 ? (
                                     <button onClick={() => handleBreadcrumbClick(index)} className="hover:underline hover:text-gray-700">
-                                        {label}
+                                        {cat.label}
                                     </button>
                                 ) : (
-                                    <span className="font-semibold text-gray-700">{label}</span>
+                                    <span className="font-semibold text-gray-700">{cat.label}</span>
                                 )}
                             </li>
                         ))}
@@ -587,13 +508,12 @@ export default function Page() {
                                     <li key={subCategory._id}>
                                         <button
                                             onClick={() => {
-                                                const subLabel = getCategoryDisplayName(subCategory, locale);
-                                                setCategoryPath([...categoryPath, subLabel]);
+                                                const newPath = [...categoryPath, { _id: subCategory._id, label: getCategoryDisplayName(subCategory, locale) }];
+                                                setCategoryPath(newPath);
                                                 // Update URL parameters
                                                 const params = new URLSearchParams(searchParams);
-                                                params.set('category', subLabel);
+                                                params.set('category', subCategory._id);
                                                 router.push(`/products?${params.toString()}`);
-                                                // router.push(`/products?${subCategory.slug}`);
                                             }}
                                             className={`w-full text-left px-2 py-1.5 rounded text-gray-600 hover:bg-gray-100 hover:font-semibold transition-colors duration-150`}
                                         >
@@ -616,16 +536,15 @@ export default function Page() {
                                                 <button
                                                     onClick={() => {
                                                         // Replace last in path with sibling
-                                                        const siblingLabel = getCategoryDisplayName(siblingCategory, locale);
-                                                        const newPath = [...categoryPath.slice(0, -1), siblingLabel];
+                                                        const newPath = [...categoryPath.slice(0, -1), { _id: siblingCategory._id, label: getCategoryDisplayName(siblingCategory, locale) }];
                                                         setCategoryPath(newPath);
                                                         // Update URL parameters
                                                         const params = new URLSearchParams(searchParams);
-                                                        params.set('category', siblingLabel);
+                                                        params.set('category', siblingCategory._id);
                                                         router.push(`/products?${params.toString()}`);
                                                     }}
                                                     className={`w-full text-left px-2 py-1.5 rounded transition-colors duration-150 
-                                                        ${getCategoryDisplayName(siblingCategory, locale) === currentCategoryLabel
+                                                        ${siblingCategory._id === currentCategoryLabel._id
                                                             ? 'text-[#00B0C8] font-semibold bg-gray-100'
                                                             : 'text-gray-600 hover:bg-gray-100 hover:font-semibold'
                                                         }`}
