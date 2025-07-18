@@ -164,10 +164,25 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 setImagePreview(allImages[0]);
                 setSelectedImageIndex(0);
             }
+
+            // Handle translation fallback for name and description
+            let name = { es: '', ca: '' };
+            if (typeof product.name === 'object' && product.name !== null) {
+                name = { es: product.name.es || '', ca: product.name.ca || '' };
+            } else if (typeof product.name === 'string') {
+                name = { es: product.name, ca: '' };
+            }
+            let description = { es: '', ca: '' };
+            if (typeof product.description === 'object' && product.description !== null) {
+                description = { es: product.description.es || '', ca: product.description.ca || '' };
+            } else if (typeof product.description === 'string') {
+                description = { es: product.description, ca: '' };
+            }
+
             setFormData({
-                name: product.name,
+                name,
                 reference: product.reference || '',
-                description: product.description,
+                description,
                 category: product.category,
                 categoryId: product.categoryId || '',
                 brand: product.brand,
@@ -179,8 +194,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 imageHover: product.imageHover || '',
                 additionalImages: product.additionalImages || [],
                 stock: {
-                    available: product.stock?.available || '',
-                    minStock: product.stock?.minStock || 5
+                    available: product.stock?.available || 0,
+                    minStock: product.stock?.minStock || 0
                 },
                 status: product.status || 'active',
                 featured: product.featured || false,
@@ -441,19 +456,20 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     // Form validation
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.name) newErrors.name = 'El nombre es obligatorio';
-        if (!formData.reference) newErrors.reference = 'La referencia es obligatoria';
-        // if (!formData.category) newErrors.category = 'La categoría es obligatoria';
-        if (!formData.price_incl_tax) newErrors.price_incl_tax = 'El precio con impuestos es obligatorio';
+        if (!formData.name) newErrors.name = 'El nom és obligatori';
+        if (!formData.reference) newErrors.reference = 'La referència és obligatòria';
+        if (!formData.category) newErrors.category = 'La categoria és obligatòria';
+        if (!formData.brand) newErrors.brand = 'La marca és obligatòria';
+        if (!formData.price_incl_tax) newErrors.price_incl_tax = 'El preu amb impostos és obligatori';
         // Validate numeric fields
         if (formData.price_incl_tax && isNaN(parseFloat(formData.price_incl_tax))) {
-            newErrors.price_incl_tax = 'Debe ser un número válido';
+            newErrors.price_incl_tax = 'Ha de ser un número vàlid';
         }
         if (formData.stock.available && isNaN(parseInt(formData.stock.available))) {
-            newErrors.available = 'Debe ser un número entero';
+            newErrors.available = 'Ha de ser un número enter';
         }
         if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
-            newErrors.minStock = 'Debe ser un número entero';
+            newErrors.minStock = 'Ha de ser un número enter';
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
