@@ -13,7 +13,6 @@ export default function Menu() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [menuVisible, setMenuVisible] = useState(false);
     const [openSubmenus, setOpenSubmenus] = useState({});
-
     const { socials } = useShopSocials();
     const { value: shopPhone } = useShopParameter('telephone');
     // Handles swipe animation for open/close
@@ -68,15 +67,14 @@ export default function Menu() {
             }
         ]
     };
-      const pathname = usePathname();
-        // Locale switcher component (only for localized routes)
-        const locales = [
-            { code: 'ca', label: 'CA' },
-            { code: 'es', label: 'ES' }
-        ];
+    const pathname = usePathname();
+    // Locale switcher component (only for localized routes)
+    const locales = [
+        { code: 'ca', label: 'CA' },
+        { code: 'es', label: 'ES' }
+    ];
     // Only show switcher if route is localized
     const currentLocale = /^\/(ca|es)(\/|$)/.test(pathname) ? pathname.split('/')[1] : null;
-
     const toggleSubmenu = (path) => {
         setOpenSubmenus(prev => ({
             ...prev,
@@ -176,22 +174,21 @@ export default function Menu() {
                             </nav>
                             <div className="flex flex-col justify-center mt-auto pt-4 md:pt-6 border-t border-gray-200">
                                 <div className='sm:hidden justify-center items-center flex space-x-2 mb-4'>
-                                     {currentLocale && (
-                                    <div className="flex items-center space-x-1">
-                                        {locales.map(locale => (
-                                            <a
-                                                key={locale.code}
-                                                href={pathname.replace(/^\/(ca|es)/, `/${locale.code}`)}
-                                                className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${currentLocale === locale.code ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                                                aria-current={currentLocale === locale.code ? 'page' : undefined}
-                                            >
-                                                {locale.label}
-                                            </a>
-                                        ))}
-                                    </div>
-                                )}
+                                    {currentLocale && (
+                                        <div className="flex items-center space-x-1">
+                                            {locales.map(locale => (
+                                                <a
+                                                    key={locale.code}
+                                                    href={pathname.replace(/^\/(ca|es)/, `/${locale.code}`)}
+                                                    className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${currentLocale === locale.code ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                                    aria-current={currentLocale === locale.code ? 'page' : undefined}
+                                                >
+                                                    {locale.label}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                               
                                 {/* <div className="flex space-x-2 justify-center my-2 md:my-4">
                                     {socials.map((social) => {
                                         const Icon = social.Icon;
