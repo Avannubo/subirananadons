@@ -430,7 +430,7 @@ export default function BrandsTable() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {brand.logo ? (
-                                                <img src={brand.logo} alt={brand.name} className="w-10 h-10 object-contain" />
+                                                <img src={brand.logo} alt={brand.name} className="w-20 h-20 object-contain" />
                                             ) : (
                                                 <span className="text-gray-400 italic text-sm">--</span>
                                             )}

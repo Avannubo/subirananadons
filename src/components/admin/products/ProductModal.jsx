@@ -456,7 +456,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     // Form validation
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.name) newErrors.name = 'El nom és obligatori';
+        if (!formData.name.ca || !formData.name.es) newErrors.name = 'El nom és obligatori en els dos idiomes.';
         if (!formData.reference) newErrors.reference = 'La referència és obligatòria';
         if (!formData.category) newErrors.category = 'La categoria és obligatòria';
         if (!formData.brand) newErrors.brand = 'La marca és obligatòria';
@@ -687,14 +687,14 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         </button>
                     </div>
                     <form onSubmit={handleSubmit} className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                             {/* Left Column */}
-                            <div className="space-y-6 md:col-span-2">
+                            <div className="space-y-4 md:col-span-2">
                                 <h3 className="text-md font-medium">Informació bàsica</h3>
                                 <div className="flex gap-4">
                                     <div className="flex-1">
                                         <label htmlFor="name-ca" className="block text-sm font-medium text-gray-700">
-                                            Nom (CA)
+                                            Nom (CA) *
                                         </label>
                                         <input
                                             type="text"
@@ -702,8 +702,12 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             name="name"
                                             value={formData.name.ca}
                                             onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+
                                         />
+                                        {errors.name && (
+                                            <p className=" text-sm text-red-600">{errors.name}</p>
+                                        )}
                                     </div>
                                     <div className="flex-1">
                                         <label htmlFor="name-es" className="block text-sm font-medium text-gray-700">
@@ -719,10 +723,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         />
                                     </div>
                                 </div>
-                                {errors.name && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                                )}
-                                <div className="flex gap-4 mt-4">
+                                
+                                <div className="flex gap-4 mt-2">
                                     <div className="flex-1">
                                         <label htmlFor="description-ca" className="block text-sm font-medium text-gray-700">
                                             Descripció (CA)
