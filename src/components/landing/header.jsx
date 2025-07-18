@@ -105,23 +105,28 @@ export default function Page() {
                     </Link>
                     <div className="w-[90px] md:w-[300px] flex justify-end space-x-2 md:space-x-4 text-gray-700">
                         {/* Locale Switcher: only show on localized routes */}
-                        {currentLocale && (
-                          <div className="flex items-center space-x-1">
-                            {locales.map(locale => (
-                              <a
-                                key={locale.code}
-                                href={pathname.replace(/^\/(ca|es)/, `/${locale.code}`)}
-                                className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${currentLocale === locale.code ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                                aria-current={currentLocale === locale.code ? 'page' : undefined}
-                              >
-                                {locale.label}
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                        <Link href="/search" className="p-2 flex justify-center items-center">
-                            <Search className="w-5 h-5 md:w-6 md:h-6" />
-                        </Link>
+                        <div className="hidden sm:flex items-center space-x-2">
+
+                            {currentLocale && (
+                                <div className="flex items-center space-x-1">
+                                    {locales.map(locale => (
+                                        <a
+                                            key={locale.code}
+                                            href={pathname.replace(/^\/(ca|es)/, `/${locale.code}`)}
+                                            className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${currentLocale === locale.code ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                            aria-current={currentLocale === locale.code ? 'page' : undefined}
+                                        >
+                                            {locale.label}
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
+                            <Link href="/search" className="p-2 flex justify-center items-center">
+                                <Search className="w-5 h-5 md:w-6 md:h-6" />
+                            </Link>
+                        </div>
+
+
                         {/* Locale Switcher */}
 
                         <Link href="/cart" className="p-2 text-sm text-gray-700 relative">
