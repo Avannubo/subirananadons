@@ -25,8 +25,7 @@ const productSchema = new mongoose.Schema({
         required: false
     },
     price_excl_tax: {
-        type: Number,
-        required: [true, 'Please provide a price'],
+        type: Number, 
         min: [0, 'Price cannot be negative']
     },
     price_incl_tax: {

@@ -448,6 +448,8 @@ export default function ListEditModal({
                                                     })));
                                                 }}
                                                 resetSelection={resetSelection}
+                                                // Pass a prop to enforce case-insensitive search
+                                                caseInsensitiveSearch={true}
                                             />
                                         </div>
                                     </div>

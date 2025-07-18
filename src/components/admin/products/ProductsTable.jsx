@@ -879,7 +879,7 @@ export default function ProductsTable(props) {
                     onClose={() => setShowConfirmModal(false)}
                     onConfirm={handleDeleteProduct}
                     title="Eliminar producte"
-                    message={`Estàs segur que vols eliminar el producte "${getLocaleString(selectedProduct?.name)}"? Aquesta acció no es pot desfer.`}
+                    message={`Estàs segur que vols eliminar aquest producte? Aquesta acció no es pot desfer.`}
                     confirmText="Eliminar"
                     cancelText="Cancel·lar"
                 />
