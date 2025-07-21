@@ -36,7 +36,9 @@ export default function ProductCard({
         >
             {children}
         </button>
-    ); const onAddToWishlist = async () => {
+    );
+    
+    const onAddToWishlist = async () => {
         if (isAddingToList) return;
         try {
             setIsAddingToList(true);

@@ -60,7 +60,7 @@ export default function Page() {
     const uploadImage = async () => {
         if (!selectedImage) return null;
         // Create a loading toast that can be updated
-        const toastId = toast.loading('Processing image...');
+        const toastId = toast.loading('Processant la imatge...');
         // Set updating state to show loading UI
         setIsUpdating(true);
         try {
@@ -81,7 +81,7 @@ export default function Page() {
             });
             if (!response.ok) {
                 // Get the error message
-                let errorMessage = 'Failed to upload image';
+                let errorMessage = 'No s\'ha pogut pujar la imatge';
                 try {
                     const errorData = await response.json();
                     errorMessage = errorData.error || errorMessage;
@@ -94,11 +94,11 @@ export default function Page() {
                 // but only in development to avoid database bloat in production
                 if (process.env.NODE_ENV === 'development') {
                     console.log('Using base64 image as fallback in development');
-                    toast.success('Using local image', { id: toastId });
+                    toast.success('S\'està utilitzant la imatge local', { id: toastId });
                     setIsUpdating(false);
                     return base64Image;
                 } else {
-                    toast.error('Image upload failed', { id: toastId });
+                    toast.error('No s\'ha pogut pujar la imatge', { id: toastId });
                     setIsUpdating(false);
                     return null;
                 }
@@ -106,7 +106,7 @@ export default function Page() {
             // If the request was successful, parse the response
             const data = await response.json();
             console.log('Server upload successful, Cloudinary URL:', data.url);
-            toast.success('Image uploaded successfully!', { id: toastId });
+            toast.success('Imatge pujada correctament!', { id: toastId });
             // Set the image preview directly from the Cloudinary URL to update UI immediately
             setImagePreview(data.url);
             // Record the time of the last update
@@ -116,7 +116,7 @@ export default function Page() {
             return data.url;
         } catch (error) {
             console.error('Error in image upload process:', error);
-            toast.error('Image upload failed', { id: toastId });
+            toast.error('No s\'ha pogut pujar la imatge', { id: toastId });
             // In development, use the base64 image as fallback
             if (process.env.NODE_ENV === 'development') {
                 console.log('Using base64 image as fallback due to error');
@@ -138,15 +138,8 @@ export default function Page() {
                 const uploadedImageUrl = await uploadImage();
                 // Only update the image URL if upload was successful
                 if (uploadedImageUrl) {
-                    console.log('Using uploaded image URL:', uploadedImageUrl);
                     imageUrl = uploadedImageUrl;
-                    // Update image in userData immediately for UI update
-                    setUserData(prev => ({
-                        ...prev,
-                        image: uploadedImageUrl
-                    }));
-                } else {
-                    console.log('Upload failed, keeping existing image:', imageUrl);
+                    setUserData(prev => ({ ...prev, image: uploadedImageUrl }));
                 }
             }
             // Prepare user data
@@ -158,17 +151,12 @@ export default function Page() {
                 newsletter: userData.newsletter,
                 partnerOffers: userData.partnerOffers
             };
-            console.log('Updating user profile with data:', updatedUserData);
-            // Add password if being changed
             if (showPasswordChange && newPassword) {
                 updatedUserData.password = newPassword;
             }
-            // Update user profile
             const response = await fetch('/api/user/profile', {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedUserData)
             });
             let responseData;
@@ -177,43 +165,27 @@ export default function Page() {
                 responseData = await response.json();
             } else {
                 const text = await response.text();
-                console.error('Non-JSON response:', text);
                 throw new Error('Server returned non-JSON response');
             }
             if (!response.ok) {
-                throw new Error(responseData.message || 'Failed to update profile');
+                throw new Error(responseData.message || 'Error en actualitzar el perfil');
             }
-            console.log('Profile update successful:', responseData);
-            // Update session to keep that in sync
-            await updateSession({
-                ...session,
-                user: {
-                    ...session.user,
-                    name: updatedUserData.name,
-                    image: imageUrl
-                }
-            });
-            // Update the global user context
-            updateUser({
-                name: updatedUserData.name,
-                image: imageUrl
-            });
-            // Record time of last update
             setLastUpdate(new Date().toISOString());
-            toast.success('Profile updated successfully');
+            toast.success('Perfil actualitzat correctament. Se tancarà la sessió.');
             // Reset state after successful update
             if (showPasswordChange && newPassword) {
                 setNewPassword('');
                 setShowPasswordChange(false);
             }
-            // Clear selected image after successful upload
             setSelectedImage(null);
-            // Don't clear the image preview so the user can see their new image
-            // Manually trigger a refresh of the user data across the application
-            refreshUser();
+            // Log out the user to force re-login with new session
+            if (typeof window !== 'undefined') {
+                // Use next-auth signOut
+                const { signOut } = await import('next-auth/react');
+                signOut({ callbackUrl: '/' });
+            }
         } catch (error) {
-            console.error('Error updating profile:', error);
-            toast.error(error.message || 'Error updating profile');
+            toast.error(error.message || 'Error en actualitzar el perfil');
         } finally {
             setLoading(false);
             setIsUpdating(false);
@@ -223,13 +195,13 @@ export default function Page() {
         <AuthCheck>
             <AdminLayout>
                 <div className="mx-auto p-6">
-                    <h1 className="text-2xl font-bold mb-6">Mi Cuenta</h1>
+                    <h1 className="text-2xl font-bold mb-6">El meu compte</h1>
                     <div className="bg-white rounded-lg p-6">
-                        <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Información personal</h2>
+                        <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Informació personal</h2>
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             {/* Profile Image */}
                             {/* <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 mb-6">
-                                 <div className="w-32 h-32 relative rounded-full overflow-hidden border-2 border-gray-200">
+                                <div className="w-32 h-32 relative rounded-full overflow-hidden border-2 border-gray-200">
                                     {isUpdating && (
                                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
                                             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
@@ -265,11 +237,12 @@ export default function Page() {
                                         Formatos recomendados: JPG, PNG. Máximo 5MB.
                                     </p>
                                 </div>
-                            </div> */}
-                            {/* Nombre */}
+                            // </div>
+                            
+                            // Nombre */}
                             <div>
                                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Nombre
+                                    Nom
                                 </label>
                                 <input
                                     type="text"
@@ -280,13 +253,13 @@ export default function Page() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                 />
                                 <p className="mt-1 text-xs text-gray-500">
-                                    Solo se permiten caracteres alfabéticos (letras) y el punto (.), seguidos de un espacio.
+                                    Només es permeten caràcters alfabètics (lletres) i el punt (.), seguits d'un espai.
                                 </p>
                             </div>
                             {/* Apellidos */}
                             <div>
                                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Apellidos
+                                    Cognoms
                                 </label>
                                 <input
                                     type="text"
@@ -297,13 +270,13 @@ export default function Page() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                 />
                                 <p className="mt-1 text-xs text-gray-500">
-                                    Solo se permiten caracteres alfabéticos (letras) y el punto (.), seguidos de un espacio.
+                                    Només es permeten caràcters alfabètics (lletres) i el punt (.), seguits d'un espai.
                                 </p>
                             </div>
                             {/* Email */}
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Dirección de correo electrónico
+                                    Correu electrònic
                                 </label>
                                 <input
                                     type="email"
@@ -317,7 +290,7 @@ export default function Page() {
                             {/* Current Password */}
                             <div>
                                 <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Contraseña
+                                    Contrasenya
                                 </label>
                                 <div className="relative">
                                     <input
@@ -332,7 +305,7 @@ export default function Page() {
                                         onClick={() => setShowPasswordChange(!showPasswordChange)}
                                         className="absolute right-2 top-2 text-[#00B0C8] text-sm font-medium"
                                     >
-                                        Cambiar
+                                        Canvia
                                     </button>
                                 </div>
                             </div>
@@ -340,26 +313,26 @@ export default function Page() {
                             {showPasswordChange && (
                                 <div>
                                     <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Nueva contraseña
+                                        Nova contrasenya
                                     </label>
                                     <input
                                         type="password"
                                         id="newPassword"
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
-                                        placeholder="Ingresa tu nueva contraseña"
+                                        placeholder="Introdueix la teva nova contrasenya"
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                         minLength={6}
                                     />
                                     <p className="mt-1 text-xs text-gray-500">
-                                        Mínimo 6 caracteres
+                                        Mínim 6 caràcters
                                     </p>
                                 </div>
                             )}
                             {/* Birth Date */}
                             <div>
                                 <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Fecha de nacimiento
+                                    Data de naixement
                                 </label>
                                 <input
                                     type="text"
@@ -367,7 +340,7 @@ export default function Page() {
                                     name="birthDate"
                                     value={userData.birthDate}
                                     onChange={handleInputChange}
-                                    placeholder="Ejemplo: 31/05/1970"
+                                    placeholder="Exemple: 31/05/1970"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                 />
                                 <p className="mt-1 text-xs text-gray-500">Opcional</p>
@@ -422,14 +395,14 @@ export default function Page() {
                                     className={`px-4 py-2 bg-[#00B0C8] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C860] ${(loading || isUpdating) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#00B0C890]'
                                         }`}
                                 >
-                                    {loading ? 'Guardando...' : isUpdating ? 'Actualizando...' : 'Guardar cambios'}
+                                    {loading ? 'Guardant...' : isUpdating ? 'Actualitzant...' : 'Desa els canvis'}
                                 </button>
                             </div>
                         </form>
                         {/* Add last update information if available */}
                         {lastUpdate && (
                             <p className="text-xs text-gray-500 mt-2">
-                                Last updated: {new Date(lastUpdate).toLocaleString()}
+                                Última actualització: {new Date(lastUpdate).toLocaleString()}
                             </p>
                         )}
                     </div>
