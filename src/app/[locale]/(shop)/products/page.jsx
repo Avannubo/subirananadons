@@ -9,6 +9,7 @@ import ProductQuickView from "@/components/products/product-quick-view";
 import { fetchProducts, formatProduct } from '@/services/ProductService';
 import { fetchCategories } from '@/services/CategoryService';
 import { useTranslations, useLocale } from 'next-intl';
+import { useSession } from 'next-auth/react';
 
 // Utility to get display name from category (handles translation and legacy)
 function getCategoryDisplayName(cat, locale = 'es') {
@@ -61,6 +62,10 @@ function getAllLeafCategoryLabels(node) {
     return labels;
 }
 export default function Page() {
+    // Birth list modal state
+    const [showBirthListModal, setShowBirthListModal] = useState(false);
+    const [birthListProduct, setBirthListProduct] = useState(null);
+    const { data: session } = useSession ? useSession() : { data: null };
     const locale = useLocale();
     // State and effect for categories (declare FIRST)
     const [categories, setCategories] = useState([]);
@@ -324,6 +329,13 @@ export default function Page() {
     };
     const handleCloseQuickView = () => {
         setQuickViewProduct(null);
+    };
+
+    const handleOpenBirthListSelectModal = (product) => {
+        setBirthListProduct(product);
+    };
+    const handleCloseBirthListSelectModal = () => {
+        setBirthListProduct(null);
     };
     // Pagination handlers
     const goToPage = (page) => {
@@ -665,6 +677,7 @@ export default function Page() {
                                             product={product}
                                             viewMode={viewMode}
                                             onQuickViewClick={handleOpenQuickView}
+                                            onOpenBirthListModal={handleOpenBirthListSelectModal}
                                         />
                                     ))}
                                 </AnimatePresence>
@@ -733,6 +746,21 @@ export default function Page() {
                     onClose={handleCloseQuickView}
                 />
             )}
+
+
+            {/* Render Birth List Modal with backdrop and scroll lock */}
+            {showBirthListModal && (
+                <BirthListModalWrapper
+                    show={showBirthListModal}
+                    onClose={handleCloseBirthListSelectModal}
+                    product={birthListProduct}
+                    userId={session?.user?.id}
+                />
+            )}
+
+
+
         </ShopLayout>
     );
 }
+ 

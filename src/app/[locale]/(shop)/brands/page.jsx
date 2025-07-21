@@ -30,7 +30,7 @@ export default function BrandsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const productsPerPage = 12;
+    const productsPerPage = 6;
     const t = useTranslations('BrandsPage');
     // Fetch brands
     useEffect(() => {
@@ -340,7 +340,7 @@ export default function BrandsPage() {
                                     {/* Brands list or skeleton */}
                                     {brandsLoading ? (
                                         // Show brand skeletons while loading
-                                        Array(10).fill(0).map((_, index) => (
+                                        Array(6).fill(0).map((_, index) => (
                                             <BrandSkeleton key={`brand-skeleton-${index}`} />
                                         ))
                                     ) : (

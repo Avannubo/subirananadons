@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from 'next-auth/react';
 import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
 import { fetchProductById, fetchProducts, formatProduct } from '@/services/ProductService';
+import BirthListSelectModal from '@/components/products/BirthListSelectModal.jsx';
 export default function Page() {
     const router = useRouter();
     const t = useTranslations('ProductPage');
@@ -31,51 +32,15 @@ export default function Page() {
     // Get current locale from params
     const locale = useLocale();
     const [isAddingToList, setIsAddingToList] = useState(false);
+    const [showBirthListModal, setShowBirthListModal] = useState(false);
     const { data: session } = useSession();
 
-const onAddToWishlist = async () => {
-        if (isAddingToList) return;
-        try {
-            setIsAddingToList(true);
-            // Case 1: Not logged in - Show AuthModal
-            if (!session) {
-                toast.error('Inicia sesión para añadir productos a las listas', { duration: 3000 });
-            }
-
-            // Get user's birth lists
-            const result = await fetchBirthLists();
-            if (!result.success) {
-                if (result.message.includes('Unauthorized')) {
-                    // Handle auth error specifically
-                    if (setShowAuthModal && setAuthModalData) {
-                        setAuthModalData({
-                            callback: () => onAddToWishlist(),
-                            message: 'Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.'
-                        });
-                        setShowAuthModal(true);
-                    } else {
-                        toast.success('Inicia sesión para añadir productos a las listas', { duration: 3000 });
-                    }
-                    return;
-                }
-                throw new Error(result.message);
-            }
-            const userLists = result.data;
-            // Case 2: No lists - Prompt to create list
-            if (!userLists || userLists.length === 0) {
-                router.push('/dashboard/listas');
-                toast.success('Crea tu primera lista para añadir productos', { duration: 5000 });
-                return;
-            }
-            // Case 3: Has lists - Go to lists page to select one
-            router.push('/dashboard/listas');
-            toast.success('Edita la lista para añadir productos', { duration: 5000 });
-        } catch (error) {
-            console.error('Error checking birth lists:', error);
-            toast.error(error.message || 'Error al comprobar las listas');
-        } finally {
-            setIsAddingToList(false);
+    const onAddToWishlist = async () => {
+        if (!session) {
+            toast.error('Inicia sesión para añadir productos a las listas', { duration: 3000 });
+            return;
         }
+        setShowBirthListModal(true);
     };
     // Update drag constraints when container is available or product images change
     useEffect(() => {
@@ -412,12 +377,21 @@ const onAddToWishlist = async () => {
                                 {t('addToCart')}
                             </button>
                             {/* Wishlist Button */}
-                            <button onClick={onAddToWishlist} className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center   mt-2">
+                            <button onClick={onAddToWishlist} className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center mt-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                                 {t('addToWishlist')}
                             </button>
+                            {/* Birth List Modal */}
+                            {showBirthListModal && (
+                                <BirthListSelectModal
+                                    show={showBirthListModal}
+                                    onClose={() => setShowBirthListModal(false)}
+                                    product={product}
+                                    userId={session?.user?.id}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
