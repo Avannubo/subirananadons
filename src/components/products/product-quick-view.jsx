@@ -4,11 +4,15 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import { getTranslatedField } from '@/lib/getTranslatedField';
+import { useCart } from '@/contexts/CartContext.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 export default function ProductQuickView({ product, onClose }) {
+    const { addToCart } = useCart();
+
+   
     // Get current locale from next-intl
     const locale = useLocale();
     console.log(product.description);
@@ -22,6 +26,18 @@ export default function ProductQuickView({ product, onClose }) {
             setSelectedImage(product.imageUrl);
         }
     }, [product]);
+    
+    const handleAddToCart = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await addToCart(product, quantity);
+            router.push('/cart');
+        } catch (error) {
+            toast.error('Error al añadir al carrito');
+            console.error('Error adding to cart:', error);
+        }
+    };
     // Handle clicks outside the modal content to close it
     const handleBackdropClick = (e) => {
         if (e.target === e.currentTarget) {
@@ -162,11 +178,15 @@ export default function ProductQuickView({ product, onClose }) {
                                 </div> */}
                                 {/* Comprar and Ver detalles side by side */}
                                 <div className="flex flex-row gap-2 mb-1">
-                                    <button className="w-1/2 bg-black text-white uppercase py-3 rounded font-semibold hover:bg-gray-800 transition duration-200">
+                                    <button
+                                        className="w-1/2 bg-black text-white uppercase py-3 rounded font-semibold hover:bg-gray-800 transition duration-200"
+                                        onClick={() => router.push(`/products/${product.id}`)}
+                                    >
                                         Ver detalles
                                     </button>
                                     <button
                                         className="w-1/2 bg-[#00B0C8] text-white uppercase py-3 rounded font-semibold hover:bg-[#0090a8] transition duration-200"
+                                        onClick={handleAddToCart}
                                     >
                                         Comprar
                                     </button>

@@ -9,7 +9,6 @@ export async function GET(request, { params }) {
     try {
         await dbConnect();
         const { id } = params;
-
         // First check if an invoice already exists for this order
         const existingInvoice = await Invoice.findOne({ order: id });
         if (existingInvoice) {
@@ -30,7 +29,6 @@ export async function GET(request, { params }) {
                 // If we can't read the existing PDF, continue to generate a new one
             }
         }
-
         const order = await Order.findById(id)
             .populate({
                 path: 'items.product',
@@ -38,7 +36,6 @@ export async function GET(request, { params }) {
                 select: 'name reference'
             })
             .lean();
-
         console.log('Order:', order);
         if (!order) {
             return new NextResponse('Order not found', { status: 404 });
@@ -151,14 +148,15 @@ export async function GET(request, { params }) {
                 </div>
                 </div>
                 <div class="info">
+            ${order.deliveryMethod === 'delivery' ? ` 
                 <div>
                     <h3>Datos de Facturación</h3>
                     <div>${order.shippingAddress.name} ${order.shippingAddress.lastName}</div>
-                    <div>${order.shippingAddress.address}</div>
-                    <div>${order.shippingAddress.city}, ${order.shippingAddress.province}</div>
-                    <div>${order.shippingAddress.postalCode}</div>
-                    <div>${order.shippingAddress.country}</div>
-                </div>
+                        <div>${order.shippingAddress.address}</div>
+                        <div>${order.shippingAddress.city}, ${order.shippingAddress.province}</div>
+                        <div>${order.shippingAddress.postalCode}</div>
+                        <div>${order.shippingAddress.country}</div>
+                </div> ` : ''}
                 <div>
                     <h3>Datos de Contacto</h3>
                     <div>Email: ${order.shippingAddress.email}</div>
@@ -177,7 +175,7 @@ export async function GET(request, { params }) {
                 </thead>                        <tbody>
                     ${order.items.map(item => `                    <tr class="${item.type === 'gift' ? 'gift-item' : ''}">
                         <td>
-                        ${item.product ? `${item.product.name}` : 'Producto'}
+                        ${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producto') : 'Producto'}
                         ${item.giftInfo ? `<br><small class="gift-info">(Lista: ${item.giftInfo.babyName})</small>` : ''}
                         </td>
                         <td class="item-type ${item.type === 'gift' ? 'gift-type' : 'personal-type'}">
@@ -218,12 +216,10 @@ export async function GET(request, { params }) {
         `;        // Create invoices directory if it doesn't exist
         const uploadsDir = join(process.cwd(), 'public', 'uploads', 'invoices');
         await mkdir(uploadsDir, { recursive: true });
-
         // Generate unique filename
         const fileName = `invoice-${order.orderNumber}.pdf`;
         const filePath = join(uploadsDir, fileName);
         const publicUrl = `/uploads/invoices/${fileName}`;
-
         // Launch Puppeteer and generate PDF
         const browser = await puppeteer.launch({
             headless: 'new'
@@ -241,20 +237,17 @@ export async function GET(request, { params }) {
             }
         });
         await browser.close();
-
         // Save PDF to file
         await writeFile(filePath, pdf);        // Generate invoice number
         const currentYear = new Date().getFullYear();
         const lastInvoice = await Invoice.findOne({
             invoiceNumber: new RegExp(`^${currentYear}-`, 'i')
         }).sort({ invoiceNumber: -1 });
-
         let sequence = 1;
         if (lastInvoice) {
             const lastSequence = parseInt(lastInvoice.invoiceNumber.split('-')[1]);
             sequence = lastSequence + 1;
         }
-
         // Format: YYYY-XXXXXX (e.g., 2025-000001)
         const invoiceNumber = `${currentYear}-${sequence.toString().padStart(6, '0')}`;        // Create invoice record in database with additional data for dashboard
         const invoice = await Invoice.create({
@@ -276,12 +269,10 @@ export async function GET(request, { params }) {
                 totalAmount: order.totalAmount
             }
         });
-
         // Update order with invoice reference
         await Order.findByIdAndUpdate(order._id, {
             $push: { invoices: invoice._id }
         });
-
         // Return PDF response
         return new NextResponse(pdf, {
             status: 200,
@@ -299,17 +290,14 @@ export async function GET(request, { params }) {
         }, { status: 500 });
     }
 }
-
 export async function DELETE(request, { params }) {
     try {
         await dbConnect();
         const { id } = params;
-
         const deletedInvoice = await Invoice.findByIdAndDelete(id);
         if (!deletedInvoice) {
             return new NextResponse('Invoice not found', { status: 404 });
         }
-
         return new NextResponse(null, { status: 200 });
     } catch (error) {
         console.error('Error deleting invoice:', error);

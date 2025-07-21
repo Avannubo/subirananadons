@@ -18,7 +18,7 @@ const translations = {
         inactive: 'Inactiva',
         viewShare: 'Veure/Compartir',
         documents: 'Documents',
-        action: 'Acció',
+        action: 'Quantity',
         noLists: 'No s’han trobat llistes de regals.',
         viewDetails: 'Veure detalls',
         copyLink: 'Copiar enllaç',
@@ -305,11 +305,13 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         }
     };
     const generateListHTML = (list) => {
+        // Use Catalan as default translation
+        const t = translations?.ca || {};
         return `
             <html>
                 <head>
                     <meta charset="UTF-8">
-                    <title>Lista de Regalos - ${list.name}</title>
+                    <title>${t.documents || 'Llista de Regals'} - ${list.name}</title>
                     <style>
                         body { 
                             font-family: Arial, sans-serif;
@@ -338,32 +340,45 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 </head>
                 <body>
                     <div class="header">
-                        <h1>Lista de Regalos</h1>
+                        <h1>${t.documents || 'Llista de Regals'}</h1>
                         <h2>${list.name}</h2>
                     </div>
                     <div class="list-info">
-                        <p><strong>Referencia:</strong> ${list.reference}</p>
-                        <p><strong>Nombre del Bebé:</strong> ${list.babyName}</p>
-                        <p><strong>Fecha de Creación:</strong> ${list.creationDate}</p>
-                        <p><strong>Fecha Prevista:</strong> ${list.dueDate}</p>
-                        <p><strong>Estado:</strong> ${list.status}</p>
+                        <p><strong>${t.reference || 'Referència'}:</strong> ${list.reference}</p>
+                        <p><strong>${t.babyName || 'Nom del nadó'}:</strong> ${list.babyName}</p>
+                        <p><strong>${t.creationDate || 'Data Creació'}:</strong> ${list.creationDate}</p>
+                        <p><strong>${t.dueDate || 'Data Prevista'}:</strong> ${list.dueDate}</p>
+                        <p><strong>${t.status || 'Estat'}:</strong> ${list.status}</p>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th>Producto</th>
-                                <th>Cantidad</th>
-                                <th>Estado</th>
+                                <th>${'Producte'}</th>
+                                <th>${'Quantitat'}</th>
+                                <th>${'Estat'}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${(list.rawData?.items || []).map(item => `
-                                <tr>
-                                    <td>${item.product?.name || ''}</td>
-                                    <td>${item.quantity || 0}</td>
-                                    <td>${item.status || 'Pendiente'}</td>
-                                </tr>
-                            `).join('')}
+                            ${(list.rawData?.items || []).map(item => {
+            // Fixed left-to-right priority: ca, es, name, 'N/D'
+            let prodName = 'N/D';
+            if (item.product) {
+                if (item.product.name.ca) prodName = item.product.name.ca;
+                else if (item.product.name.es) prodName = item.product.name.es;
+                else if (item.product.name) prodName = item.product.name;
+            }
+            // Map state: 0='Pendent', 1='Reservat', 2='Comprat'
+            let stateLabel = 'Pendent';
+            if (item.state === 1) stateLabel = 'Reservat';
+            else if (item.state === 2) stateLabel = 'Comprat';
+            return `
+                                    <tr>
+                                        <td>${prodName}</td>
+                                        <td>${item.quantity || 0}</td>
+                                        <td>${stateLabel}</td>
+                                    </tr>
+                                `;
+        }).join('')}
                         </tbody>
                     </table>
                 </body>
@@ -391,7 +406,9 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             console.error('Error printing list:', error);
             toast.error('Error al imprimir la lista');
         }
-    }; const handleDownloadPDF = async (list) => {
+    };
+
+    const handleDownloadPDF = async (list) => {
         try {
             const toastId = toast.loading('Generando PDF...');
             const response = await fetch(`/api/lists/${list.id}/pdf`, {

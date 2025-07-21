@@ -71,7 +71,7 @@ export default function ClientsTabs() {
             refreshSuccess: 'Datos actualizados correctamente',
             yes: 'Sí',
             no: 'No',
-            headers: ['ID', 'Nombre', 'Apellidos', 'Email', 'Ventas', 'Fecha de registro', 'Activo'],
+            headers: ['Nombre', 'Apellidos', 'Email','Fecha de registro'],
         }
     };
     const t = translations[locale];
@@ -320,15 +320,11 @@ export default function ClientsTabs() {
         const csvContent = [
             headers.join(','),
             ...clients.map(client => [
-                client.id,
+                // client.id,
                 client.name,
                 client.lastName,
-                client.email,
-                client.sales,
-                client.registrationDate,
-                client.active ? 'Sí' : 'No',
-                client.newsletter ? 'Sí' : 'No',
-                client.partnerOffers ? 'Sí' : 'No'
+                client.email, 
+                client.registrationDate
             ].join(','))
         ].join('\n');
 
@@ -350,11 +346,11 @@ export default function ClientsTabs() {
 
     return (
         <>
-            <TabNavigation
+            {/* <TabNavigation
                 tabs={tabs}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-            />
+            /> */}
 
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
