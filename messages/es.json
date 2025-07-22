@@ -106,6 +106,8 @@
   },
   "ContactPage": {
     "title": "Contacto",
+    "errorMessage": "Ha habido un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.",
+    "successMessage": "¡Tu mensaje se ha enviado correctamente!",
     "section1Title": "1. Información de contacto",
     "section1Text": "Por favor, utiliza el siguiente formulario o la información de contacto para ponerte en contacto con nosotros.",
     "formNameLabel": "Nombre",
@@ -119,7 +121,6 @@
     "phoneLabel": "Teléfono:",
     "emailLabel": "Correo electrónico:",
     "submitButton": "Enviar",
-    "successMessage": "¡Tu mensaje ha sido enviado correctamente!",
     "infoTitle": "Información de contacto",
     "addressTitle": "Dirección",
     "address": "Calle del Ejemplo, 123, 08001 Barcelona",

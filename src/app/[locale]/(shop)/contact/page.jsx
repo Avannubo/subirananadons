@@ -1,9 +1,9 @@
-'use client';
-import { useState, useEffect } from 'react';
+"use client";
+import { useState, useEffect } from "react";
 import ShopLayout from "@/components/Layouts/shop-layout";
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
 export default function ContactPage() {
     const t = useTranslations('ContactPage');
     const [formData, setFormData] = useState({
@@ -14,9 +14,24 @@ export default function ContactPage() {
         message: ''
     });
     const [bannerImage, setBannerImage] = useState(null);
+    const [shopParams, setShopParams] = useState({ address: '', telephone: '', email: '', horari: '' });
+
+    const [submitStatus, setSubmitStatus] = useState('');
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
+        setSubmitStatus("");
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
+            if (!res.ok) throw new Error("No se pudo enviar el mensaje");
+            setSubmitStatus("success");
+            setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+        } catch (err) {
+            setSubmitStatus("error");
+        }
     };
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -25,6 +40,7 @@ export default function ContactPage() {
             [name]: value
         }));
     };
+
     useEffect(() => {
         const fetchBanner = async () => {
             try {
@@ -39,6 +55,28 @@ export default function ContactPage() {
             }
         };
         fetchBanner();
+
+        // Fetch shop parameters
+        const fetchParams = async () => {
+            try {
+                const res = await fetch('/api/shop-parameters');
+                if (!res.ok) throw new Error('Failed to fetch shop parameters');
+                const params = await res.json();
+                const paramMap = {};
+                params.forEach(p => {
+                    paramMap[p.key] = p.value;
+                });
+                setShopParams({
+                    address: paramMap.address || '',
+                    telephone: paramMap.telephone || '',
+                    email: paramMap.email || '',
+                    horari: paramMap.horari || ''
+                });
+            } catch (err) {
+                setShopParams({ address: '', telephone: '', email: '', horari: '' });
+            }
+        };
+        fetchParams();
     }, []);
     return (
         <ShopLayout>
@@ -83,7 +121,7 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg mb-1">{t('addressTitle')}</h3>
-                                        <p className="text-gray-600">{t('address')}</p>
+                                        <p className="text-gray-600">{shopParams.address}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start space-x-4">
@@ -94,7 +132,7 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg mb-1">{t('phoneTitle')}</h3>
-                                        <p className="text-gray-600">{t('phone')}</p>
+                                        <p className="text-gray-600">{shopParams.telephone}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start space-x-4">
@@ -105,7 +143,7 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg mb-1">{t('emailTitle')}</h3>
-                                        <p className="text-gray-600">{t('email')}</p>
+                                        <p className="text-gray-600">{shopParams.email}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start space-x-4">
@@ -116,8 +154,7 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg mb-1">{t('hoursTitle')}</h3>
-                                        <p className="text-gray-600">{t('hours1')}</p>
-                                        <p className="text-gray-600">{t('hours2')}</p>
+                                        <p className="text-gray-600 whitespace-pre-line">{shopParams.horari}</p>
                                     </div>
                                 </div>
                             </div>
@@ -142,6 +179,12 @@ export default function ContactPage() {
                     >
                         <h2 className="text-2xl font-bold mb-6">{t('formTitle')}</h2>
                         <form onSubmit={handleSubmit} className="space-y-6">
+                            {submitStatus === 'success' && (
+                                <div className="text-green-600 font-semibold mb-2">{t('successMessage', { default: 'Mensaje enviado correctamente.' })}</div>
+                            )}
+                            {submitStatus === 'error' && (
+                                <div className="text-red-600 font-semibold mb-2">{t('errorMessage', { default: 'No se pudo enviar el mensaje. Inténtalo de nuevo.' })}</div>
+                            )}
                             <div>
                                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                                     {t('nameLabel')}

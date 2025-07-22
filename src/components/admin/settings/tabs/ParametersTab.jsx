@@ -133,6 +133,27 @@ export default function ParametersTab() {
                 return digits.slice(-9); // Take last 9 digits (in case user pastes with country code)
             }
         },
+        {
+            key: "address",
+            label: "Dirección",
+            type: "text",
+            description: "Dirección física de la tienda mostrada en la web",
+            unit: "",
+        },
+        {
+            key: "horari",
+            label: "Horario",
+            type: "text",
+            description: "Horario de apertura mostrado en la web",
+            unit: "",
+        },
+        {
+            key: "email",
+            label: "Email",
+            type: "email",
+            description: "Correo electrónico de contacto mostrado en la web",
+            unit: "",
+        },
     ];
 
     // Socials parameter state
@@ -218,23 +239,32 @@ export default function ParametersTab() {
                         )}
                     </div>
                     {editing[param.key] ? (
-                        <div className="flex-1 flex flex-row items-center gap-2">
-                            <Input
-                                type={param.type}
-                                min={param.min}
-                                max={param.max}
-                                value={edit[param.key] ?? ""}
-                                onChange={e => {
-                                    let val = e.target.value;
-                                    if (param.key === "whatsapp" && param.sanitize) {
-                                        val = param.sanitize(val);
-                                    } else if (param.type === "number") {
-                                        val = Number(val);
-                                    }
-                                    setEdit((prev) => ({ ...prev, [param.key]: val }));
-                                }}
-                                className="w-24"
-                            />
+                        <div className="flex-1 flex flex-row justify-end items-center gap-2">
+                            {param.key === "horari" ? (
+                                <textarea
+                                    value={edit[param.key] ?? ""}
+                                    onChange={e => setEdit((prev) => ({ ...prev, [param.key]: e.target.value }))}
+                                    className="w-64 h-20 border border-gray-300 rounded-md p-2 text-sm resize-y"
+                                    placeholder={locale === 'ca' ? 'Introdueix el horari' : 'Introduce el horario'}
+                                />
+                            ) : (
+                                <Input
+                                    type={param.type}
+                                    min={param.min}
+                                    max={param.max}
+                                    value={edit[param.key] ?? ""}
+                                    onChange={e => {
+                                        let val = e.target.value;
+                                        if (param.key === "whatsapp" && param.sanitize) {
+                                            val = param.sanitize(val);
+                                        } else if (param.type === "number") {
+                                            val = Number(val);
+                                        }
+                                        setEdit((prev) => ({ ...prev, [param.key]: val }));
+                                    }}
+                                    className="w-24"
+                                />
+                            )}
                             {param.unit && <span>{param.unit}</span>}
                             <button
                                 onClick={() => saveEdit(param.key, param.description)}
@@ -252,8 +282,12 @@ export default function ParametersTab() {
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-4">
-                            <span className="text-md">{parameters[param.key]} {param.unit}</span>
+                        <div className="flex items-center gap-4 justify-end">
+                            {param.key === "horari" ? (
+                                <span className="text-md whitespace-pre-line">{parameters[param.key]}</span>
+                            ) : (
+                                <span className="text-md">{parameters[param.key]} {param.unit}</span>
+                            )}
                             <button
                                 onClick={() => startEdit(param.key)}
                                 className="p-1 rounded hover:bg-[#e6f7fa] border border-[#F6A609] transition"

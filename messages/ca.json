@@ -129,6 +129,8 @@
   },
   "ContactPage": {
     "title": "Contacte",
+    "errorMessage": "Hi ha hagut un error en enviar el missatge. Si us plau, torna-ho a intentar més tard.",
+    "successMessage": "El teu missatge s'ha enviat correctament!",
     "formTitle": "Formulari de contacte",
     "section1Subtitle": "Ens encantaria escoltar-te!",
     "address": "Adreça",
