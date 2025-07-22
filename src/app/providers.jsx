@@ -26,9 +26,11 @@ export function Providers({ children }) {
             <UserProvider>
                 <CartProvider>
                     <StatsProvider>
-                        <ListStatsWithAuth>
-                            {children}
-                        </ListStatsWithAuth>
+                        <ClientStatsProvider>
+                            <ListStatsWithAuth>
+                                {children}
+                            </ListStatsWithAuth>
+                        </ClientStatsProvider>
                     </StatsProvider>
                 </CartProvider>
             </UserProvider>
