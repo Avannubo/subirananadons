@@ -33,11 +33,10 @@ export default function SearchPage() {
     const [viewMode, setViewMode] = useState('grid'); // Add view mode state
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false); // Add quick view modal state
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false); // Add filter modal state
-    // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [itemsPerPage, setItemsPerPage] = useState(999);
+    const [itemsPerPage, setItemsPerPage] = useState(6);
     const handleQuickView = (product) => {
         setQuickViewProduct(product);
         setIsQuickViewOpen(true);
@@ -46,18 +45,14 @@ export default function SearchPage() {
         setIsQuickViewOpen(false);
         setTimeout(() => setQuickViewProduct(null), 300); // Delay clearing product until animation finishes
     };
-    // Fetch products and categories on component mount
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
             setError(null);
             try {
-                // Fetch categories with children
                 const catResponse = await fetch('/api/categories?includeChildren=true');
                 if (!catResponse.ok) throw new Error('Failed to fetch categories');
                 const catData = await catResponse.json();
-                // Transform category data to include count and handle hierarchy
-                // Flatten categories and add product count
                 const flattenCategories = (categories) => {
                     let flat = [];
                     categories.forEach(cat => {
