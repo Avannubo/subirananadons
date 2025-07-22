@@ -1,4 +1,23 @@
 {
+  "SearchPage": {
+    "title": "Cercador",
+    "bannerAlt": "Banner del cercador",
+    "searchPlaceholder": "Cerca productes...",
+    "filterButton": "Filtrar",
+    "categoryLabel": "Categoria",
+    "allCategoriesOption": "Totes les categories",
+    "brandLabel": "Marca",
+    "allBrandsOption": "Totes les marques",
+    "priceLabel": "Preu",
+    "sortLabel": "Ordenar per:",
+    "sortDefault": "Per defecte",
+    "sortPriceAsc": "Preu ↑",
+    "sortPriceDesc": "Preu ↓",
+    "sortNameAsc": "Nom A-Z",
+    "sortNewest": "Més nous",
+    "noResults": "No s'han trobat productes que coincideixin amb la teva cerca.",
+    "showingText": "Mostrant {count} de {total} productes"
+  },
   "BannerTab": {
     "uploadTitle": "Pujar imatge",
     "uploadError": "Error en pujar la imatge",

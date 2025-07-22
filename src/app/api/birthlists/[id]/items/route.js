@@ -126,31 +126,19 @@ export async function POST(request, { params }) {
             category: productDetails.category
         };
 
-        // Check if product already exists in the list
-        const existingItemIndex = birthList.items.findIndex(
-            item => item.product.toString() === productId
-        );
+        // Always add a new product to the list, even if duplicates exist (for quantity 1)
+        birthList.items.push({
+            product: productId,
+            productSnapshot,
+            quantity: parseInt(quantity),
+            state: parseInt(state),
+            reserved: 0,
+            priority: parseInt(priority)
+        });
 
-        if (existingItemIndex !== -1) {
-            // Update quantity if product already exists
-            birthList.items[existingItemIndex].quantity = parseInt(quantity);
-            birthList.items[existingItemIndex].priority = parseInt(priority);
-            birthList.items[existingItemIndex].state = parseInt(state);
-            // Do not update product snapshot to preserve original data
-        } else {            // Add new product to the list with snapshot
-            birthList.items.push({
-                product: productId,
-                productSnapshot,
-                quantity: parseInt(quantity),
-                state: parseInt(state),
-                reserved: 0,
-                priority: parseInt(priority)
-            });
-
-            // If status is Completada and adding new item, change to Activa
-            if (birthList.status === 'Completada') {
-                birthList.status = 'Activa';
-            }
+        // If status is Completada and adding new item, change to Activa
+        if (birthList.status === 'Completada') {
+            birthList.status = 'Activa';
         }
 
         // Save the updated birth list - status will be automatically checked by pre-save hook

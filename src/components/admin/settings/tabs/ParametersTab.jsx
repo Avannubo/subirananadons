@@ -218,7 +218,7 @@ export default function ParametersTab() {
                         )}
                     </div>
                     {editing[param.key] ? (
-                        <div className="flex-1 items-center gap-2">
+                        <div className="flex-1 flex flex-row items-center gap-2">
                             <Input
                                 type={param.type}
                                 min={param.min}

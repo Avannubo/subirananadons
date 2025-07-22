@@ -467,7 +467,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                                 </div>
                                                                                 <div className="ml-4">
                                                                                     <div className="text-sm font-medium text-gray-900 flex flex-col">
-                                                                                        <span>{product?.name || `Producto ${index + 1}`}</span>
+                                                                                        <span>{product?.name.ca || product?.name || `Producto ${index + 1}`}</span>
                                                                                         {(item.listName || item.list || item.listTitle) && (
                                                                                             <span className="italic text-xs text-pink-600 mt-1">
                                                                                                 (Lista: {item.listName || item.list || item.listTitle})

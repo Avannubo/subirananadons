@@ -359,14 +359,14 @@ export default function OrdersTabs({ userRole = 'user' }) {
                         </button>
                     </div>
                     <div className="flex space-x-2">
-                        <button
+                        {/* <button
                             className="flex items-center px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors"
                             onClick={() => handleExport('pdf')}
                             disabled={isExporting || loading}
                             title={t.exportCSV}
                         >
                             <FiDownload className="mr-1" /> {t.export}
-                        </button>
+                        </button> */}
                         {/* {userRole === 'admin' && (
                             <button
                                 className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"

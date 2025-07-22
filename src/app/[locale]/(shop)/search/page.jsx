@@ -9,7 +9,14 @@ import ProductCard from "@/components/products/product-card";
 import ProductQuickView from "@/components/products/product-quick-view";
 import { toast } from 'react-hot-toast';
 import Pagination from "@/components/admin/shared/Pagination";
+import { useTranslations } from 'next-intl';
 export default function SearchPage() {
+    const t = useTranslations('SearchPage');
+    let locale = 'ca';
+    if (typeof window !== 'undefined' && window.navigator) {
+        const lang = window.navigator.language || window.navigator.userLanguage;
+        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    }
     const [searchTerm, setSearchTerm] = useState('');
     const [allProducts, setAllProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
@@ -50,18 +57,23 @@ export default function SearchPage() {
                 if (!catResponse.ok) throw new Error('Failed to fetch categories');
                 const catData = await catResponse.json();
                 // Transform category data to include count and handle hierarchy
-                const transformCategories = (categories, prefix = '') => {
-                    return categories.map(cat => ({
-                        id: cat._id,
-                        name: prefix ? `${prefix} > ${cat.name}` : cat.name,
-                        originalName: cat.name,
-                        count: 0,
-                        ...(cat.children?.length && {
-                            children: transformCategories(cat.children, cat.name)
-                        })
-                    }));
+                // Flatten categories and add product count
+                const flattenCategories = (categories) => {
+                    let flat = [];
+                    categories.forEach(cat => {
+                        flat.push({
+                            id: cat._id,
+                            name: cat.name,
+                            originalName: cat.name,
+                            count: 0
+                        });
+                        if (cat.children && cat.children.length) {
+                            flat = flat.concat(flattenCategories(cat.children));
+                        }
+                    });
+                    return flat;
                 };
-                const transformedCategories = transformCategories(catData);
+                const transformedCategories = flattenCategories(catData);
                 setCategories(transformedCategories);
                 // Fetch brands
                 const brandsResponse = await fetch('/api/brands?limit=100&enabled=true');
@@ -295,19 +307,19 @@ export default function SearchPage() {
                 <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
                     <Image
                         src={bannerImage}
-                        alt="banner"
+                        alt={t('bannerAlt')}
                         fill
                         className="object-cover"
                         priority
-                    /> 
+                    />
                     <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
                     <div className="absolute inset-0 flex items-center justify-center z-20">
-                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">Buscador</h1>
+                        <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 shadow-amber-50 mt-8 lg:mt-20 drop-shadow-lg">{t('title')}</h1>
                     </div>
                 </div>
             ) : (
                 <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white">
-                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">Buscador</h1>
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">{t('title')}</h1>
                 </div>
             )}
             <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-4 sm:py-8 rounded-t-2xl   mx-auto">
@@ -316,7 +328,7 @@ export default function SearchPage() {
                     <div className="relative flex-1">
                         <input
                             type="text"
-                            placeholder="Buscar productos..."
+                            placeholder={t('searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full focus:bg-white p-2 bg-[#FFFFFF80] rounded-xl border border-gray-200 focus:border-[#00B0C8] focus:outline-none text-base sm:text-lg shadow-sm"
@@ -333,7 +345,7 @@ export default function SearchPage() {
                             className="px-4 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition"
                             onClick={() => setIsFilterModalOpen(true)}
                         >
-                            Filtrar
+                            {t('filterButton')}
                         </button>
                     </div>
                 </div>
@@ -348,25 +360,26 @@ export default function SearchPage() {
                     >
                         <div className="sticky top-24 bg-white p-6 rounded-lg border border-gray-200">
                             <div className="mb-8">
-                                <h3 className="text-lg font-medium mb-4">Categoría</h3>
+                                <h3 className="text-lg font-medium mb-4">{t('categoryLabel')}</h3>
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                     className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
                                 >
-                                    <option value="">Todas las categorías</option>
-                                    {categories.map((category) => (
-                                        <React.Fragment key={category.id}>
-                                            <option value={category.originalName || category.name}>
-                                                {category.name} {category.count > 0 && `(${category.count})`}
+                                    <option value="">{t('allCategoriesOption')}</option>
+                                    {categories.map((category, index) => (
+                                        <React.Fragment key={category._id || `cat-${index}`}> {/* Unique key for category */}
+                                            <option key={category.id || `catopt-${index}`}
+                                                value={category.originalName || (typeof category.name === 'string' ? category.name : (category.name?.[locale] || category.name?.ca || category.name?.es || ''))}>
+                                                {typeof category.name === 'string' ? category.name : (category.name?.[locale] || category.name?.ca || category.name?.es || '')} {category.count > 0 && `(${category.count})`}
                                             </option>
-                                            {category.children?.map(child => (
+                                            {category.children?.map((child, childIdx) => (
                                                 <option
-                                                    key={child.id}
-                                                    value={child.originalName}
+                                                    key={child.id ? `${child.id}-child` : `childopt-${index}-${childIdx}`}
+                                                    value={child.originalName || (typeof child.name === 'string' ? child.name : (child.name?.[locale] || child.name?.ca || child.name?.es || ''))}
                                                     className="pl-4"
                                                 >
-                                                    {child.name}
+                                                    {typeof child.name === 'string' ? child.name : (child.name?.[locale] || child.name?.ca || child.name?.es || '')}
                                                 </option>
                                             ))}
                                         </React.Fragment>
@@ -375,16 +388,16 @@ export default function SearchPage() {
                             </div>
                             {/* Brands Selector */}
                             <div className="mb-8">
-                                <h3 className="text-lg font-medium mb-4">Marca</h3>
+                                <h3 className="text-lg font-medium mb-4">{t('brandLabel')}</h3>
                                 <select
                                     value={selectedBrand}
                                     onChange={(e) => setSelectedBrand(e.target.value)}
                                     className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
                                 >
-                                    <option value="">Todas las marcas</option>
+                                    <option value="">{t('allBrandsOption')}</option>
                                     {brands.map((brand) => (
-                                        <option key={brand._id} value={brand.name}>
-                                            {brand.name}
+                                        <option key={brand._id} value={typeof brand.name === 'string' ? brand.name : (brand.name?.[locale] || brand.name?.ca || brand.name?.es || '')}>
+                                            {typeof brand.name === 'string' ? brand.name : (brand.name?.[locale] || brand.name?.ca || brand.name?.es || '')}
                                         </option>
                                     ))}
                                 </select>
@@ -404,7 +417,7 @@ export default function SearchPage() {
                             </div> */}
                             {/* Price Range */}
                             <div className="mb-8">
-                                <h3 className="text-lg font-medium mb-4">Precio</h3>
+                                <h3 className="text-lg font-medium mb-4">{t('priceLabel')}</h3>
                                 <div className="px-2 py-4">
                                     <Range
                                         step={10}
@@ -471,18 +484,19 @@ export default function SearchPage() {
                                             className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
                                         >
                                             <option value="">Todas las categorías</option>
-                                            {categories.map((category) => (
-                                                <React.Fragment key={category.id}>
-                                                    <option value={category.originalName || category.name}>
-                                                        {category.name} {category.count > 0 && `(${category.count})`}
+                                            {categories.map((category, index) => (
+                                                <React.Fragment key={category.id || `cat-modal-${index}`}> {/* Unique key for category */}
+                                                    <option key={category.id || `catopt-modal-${index}`}
+                                                        value={category.originalName || (typeof category.name === 'string' ? category.name : (category.name?.[locale] || category.name?.ca || category.name?.es || ''))}>
+                                                        {typeof category.name === 'string' ? category.name : (category.name?.[locale] || category.name?.ca || category.name?.es || '')} {category.count > 0 && `(${category.count})`}
                                                     </option>
-                                                    {category.children?.map(child => (
+                                                    {category.children?.map((child, childIdx) => (
                                                         <option
-                                                            key={child.id}
-                                                            value={child.originalName}
+                                                            key={child.id ? `${child.id}-child-modal` : `childopt-modal-${index}-${childIdx}`}
+                                                            value={child.originalName || (typeof child.name === 'string' ? child.name : (child.name?.[locale] || child.name?.ca || child.name?.es || ''))}
                                                             className="pl-4"
                                                         >
-                                                            {child.name}
+                                                            {typeof child.name === 'string' ? child.name : (child.name?.[locale] || child.name?.ca || child.name?.es || '')}
                                                         </option>
                                                     ))}
                                                 </React.Fragment>
@@ -498,8 +512,8 @@ export default function SearchPage() {
                                         >
                                             <option value="">Todas las marcas</option>
                                             {brands.map((brand) => (
-                                                <option key={brand._id} value={brand.name}>
-                                                    {brand.name}
+                                                <option key={brand._id} value={typeof brand.name === 'string' ? brand.name : (brand.name?.[locale] || brand.name?.ca || brand.name?.es || '')}>
+                                                    {typeof brand.name === 'string' ? brand.name : (brand.name?.[locale] || brand.name?.ca || brand.name?.es || '')}
                                                 </option>
                                             ))}
                                         </select>
@@ -592,17 +606,17 @@ export default function SearchPage() {
                                 </button>
                             </div>
                             <div className="flex items-center">
-                                <span className="mr-2 text-sm text-gray-800">Ordenar por:</span>
+                                <span className="mr-2 text-sm text-gray-800">{t('sortLabel')}</span>
                                 <select
                                     className="border border-gray-600 rounded-md py-1 px-2 text-sm"
                                     onChange={(e) => setSortBy(e.target.value)}
                                     value={sortBy}
-                                > 
-                                    <option value="default">Por defecto</option>
-                                    <option value="price-asc">Precio ↑</option>
-                                    <option value="price-desc">Precio ↓</option>
-                                    <option value="name-asc">Nombre A-Z</option>
-                                    <option value="newest">Más nuevos</option>
+                                >
+                                    <option value="default">{t('sortDefault')}</option>
+                                    <option value="price-asc">{t('sortPriceAsc')}</option>
+                                    <option value="price-desc">{t('sortPriceDesc')}</option>
+                                    <option value="name-asc">{t('sortNameAsc')}</option>
+                                    <option value="newest">{t('sortNewest')}</option>
                                 </select>
                             </div>
                         </motion.div>
@@ -631,7 +645,7 @@ export default function SearchPage() {
                                 animate={{ opacity: 1 }}
                                 className="text-center py-12"
                             >
-                                <p className="text-gray-500 text-lg">No se encontraron productos que coincidan con tu búsqueda.</p>
+                                <p className="text-gray-500 text-lg">{t('noResults')}</p>
                             </motion.div>
                         )}
                         {/* Loading Skeleton */}
@@ -659,7 +673,7 @@ export default function SearchPage() {
                                         setItemsPerPage(value);
                                         setCurrentPage(1);
                                     }}
-                                    showingText="Mostrando {} de {} productos"
+                                    showingText={t('showingText', { count: filteredProducts.length, total: totalItems })}
                                 />
                             </div>
                         )}

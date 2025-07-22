@@ -121,9 +121,9 @@ export default function ListStatusModal({
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                 required
                             >
-                                <option value={t.active}>{t.active}</option>
-                                <option value={t.completed}>{t.completed}</option>
-                                <option value={t.inactive}>{t.inactive}</option>
+                                <option value="Activa">{t.active}</option>
+                                <option value="Completada">{t.completed}</option>
+                                <option value="InActiva">{t.inactive}</option>
                             </select>
                         </div>
 

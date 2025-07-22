@@ -1,4 +1,23 @@
 {
+  "SearchPage": {
+    "title": "Buscador",
+    "bannerAlt": "Banner del buscador",
+    "searchPlaceholder": "Buscar productos...",
+    "filterButton": "Filtrar",
+    "categoryLabel": "Categoría",
+    "allCategoriesOption": "Todas las categorías",
+    "brandLabel": "Marca",
+    "allBrandsOption": "Todas las marcas",
+    "priceLabel": "Precio",
+    "sortLabel": "Ordenar por:",
+    "sortDefault": "Por defecto",
+    "sortPriceAsc": "Precio ↑",
+    "sortPriceDesc": "Precio ↓",
+    "sortNameAsc": "Nombre A-Z",
+    "sortNewest": "Más nuevos",
+    "noResults": "No se encontraron productos que coincidan con tu búsqueda.",
+    "showingText": "Mostrando {count} de {total} productos"
+  },
   "Menu": {
     "products": "Productos",
     "brands": "Marcas",
