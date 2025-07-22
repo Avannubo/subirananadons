@@ -420,7 +420,7 @@ export default function SearchPage() {
                                 <h3 className="text-lg font-medium mb-4">{t('priceLabel')}</h3>
                                 <div className="px-2 py-4">
                                     <Range
-                                        step={10}
+                                        step={5}
                                         min={0}
                                         max={1000}
                                         values={priceRange}
@@ -431,10 +431,10 @@ export default function SearchPage() {
                                                 <div
                                                     key={key}
                                                     {...restProps}
-                                                    className="h-1 w-full bg-gray-200 rounded-full"
+                                                    className="h-2 w-full bg-gray-200 rounded-full"
                                                 >
                                                     <div
-                                                        className="h-1 bg-[#00B0C8]"
+                                                        className="h-0"
                                                         style={{
                                                             width: `${((priceRange[1] - priceRange[0]) / 1000) * 100}%`,
                                                             left: `${(priceRange[0] / 1000) * 100}%`
@@ -522,7 +522,7 @@ export default function SearchPage() {
                                         <h3 className="text-lg font-medium mb-4">Precio</h3>
                                         <div className="px-2 py-4">
                                             <Range
-                                                step={10}
+                                                step={5}
                                                 min={0}
                                                 max={1000}
                                                 values={priceRange}
@@ -533,10 +533,10 @@ export default function SearchPage() {
                                                         <div
                                                             key={key}
                                                             {...restProps}
-                                                            className="h-1 w-full bg-gray-200 rounded-full"
+                                                            className="h-2 w-full bg-gray-200 rounded-full"
                                                         >
                                                             <div
-                                                                className="h-1 bg-[#00B0C8]"
+                                                                className="h-0"
                                                                 style={{
                                                                     width: `${((priceRange[1] - priceRange[0]) / 1000) * 100}%`,
                                                                     left: `${(priceRange[0] / 1000) * 100}%`
