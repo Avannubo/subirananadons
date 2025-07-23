@@ -380,7 +380,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="relative">
+                        {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -390,7 +390,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
-                        </div>
+                        </div> */}
                         <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
@@ -413,7 +413,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                        <div className="relative">
+                        {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -423,7 +423,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 {/* Order data table */}
