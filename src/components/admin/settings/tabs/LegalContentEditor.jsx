@@ -66,10 +66,7 @@ export default function LegalContentEditor() {
                         ca: { value: edit[key].ca },
                         es: { value: edit[key].es }
                     },
-                    description: {
-                        ca: key,
-                        es: key
-                    }
+                    description: key // send as string, not object
                 }),
             });
             if (!res.ok) throw new Error();

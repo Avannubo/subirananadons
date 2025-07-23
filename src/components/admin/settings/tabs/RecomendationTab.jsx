@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function ProductosTab() {
     const [groups, setGroups] = useState([]);
@@ -12,6 +13,7 @@ export default function ProductosTab() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const locale = useLocale();
 
     useEffect(() => {
         fetchCategories();
@@ -45,17 +47,38 @@ export default function ProductosTab() {
     function handleEditGroup(idx) {
         const group = groups[idx];
         setEditGroupIdx(idx);
+        // Defensive: ensure groupTitle and category are always objects, and handle MongoDB ObjectId
         setForm({
-            groupTitle: group.title || { ca: '', es: '' },
+            groupTitle: typeof group.title === 'object' ? group.title : { ca: '', es: '' },
             name: { ca: '', es: '' },
             category: ''
         });
         setRecommendations(
-            (group.groups || []).map(g => ({
-                name: g.groupTitle || { ca: '', es: '' },
-                category: g.category?._id || g.category,
-                categoryName: g.category?.name || ''
-            }))
+            (group.groups || []).map(g => {
+                // Handle MongoDB ObjectId for category
+                let categoryId = '';
+                if (g.category) {
+                    if (typeof g.category === 'object' && g.category.$oid) {
+                        categoryId = g.category.$oid;
+                    } else if (g.category._id && typeof g.category._id === 'object' && g.category._id.$oid) {
+                        categoryId = g.category._id.$oid;
+                    } else if (typeof g.category === 'string') {
+                        categoryId = g.category;
+                    } else if (g.category._id) {
+                        categoryId = g.category._id;
+                    }
+                }
+                // Defensive: ensure groupTitle is always an object
+                let groupTitle = g.groupTitle;
+                if (typeof groupTitle !== 'object' || groupTitle === null) {
+                    groupTitle = { ca: '', es: '' };
+                }
+                return {
+                    name: groupTitle,
+                    category: categoryId,
+                    categoryName: '' // Will be filled when adding/editing
+                };
+            })
         );
     }
 
@@ -67,19 +90,29 @@ export default function ProductosTab() {
             return;
         }
         if (!form.name.ca || !form.name.es) return;
+        const selectedCategory = categories.find(c => {
+            // Defensive: handle MongoDB ObjectId
+            if (typeof c._id === 'object' && c._id.$oid) {
+                return c._id.$oid === form.category;
+            }
+            return c._id === form.category;
+        });
+        const categoryName = (selectedCategory && typeof selectedCategory.name === 'object')
+            ? (selectedCategory.name[locale] || selectedCategory.name.ca || selectedCategory.name.es || '')
+            : (selectedCategory?.name || '');
         if (editIdx !== null) {
             // Edit mode
             setRecommendations(prev => prev.map((r, idx) => idx === editIdx ? {
                 name: { ...form.name },
                 category: form.category,
-                categoryName: categories.find(c => c._id === form.category)?.name || ''
+                categoryName
             } : r));
             setEditIdx(null);
         } else {
             // Add mode
             setRecommendations(prev => [
                 ...prev,
-                { name: { ...form.name }, category: form.category, categoryName: categories.find(c => c._id === form.category)?.name || '' }
+                { name: { ...form.name }, category: form.category, categoryName }
             ]);
         }
         setForm(f => ({ ...f, name: { ca: '', es: '' }, category: '' }));
@@ -222,7 +255,7 @@ export default function ProductosTab() {
                         >
                             <option value="">Selecciona una categoria</option>
                             {categories.map(cat => (
-                                <option key={cat._id} value={cat._id}>{cat.name}</option>
+                                <option key={cat._id} value={cat._id}>{cat.name?.[locale]}</option>
                             ))}
                         </select>
                     </div>
@@ -305,7 +338,7 @@ export default function ProductosTab() {
                         className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 mt-2 md:mt-0"
                         onClick={() => {
                             setEditGroupIdx(null);
-                            setForm({ groupTitle: '', name: '', category: '' });
+                            setForm({ groupTitle: { ca: '', es: '' }, name: { ca: '', es: '' }, category: '' });
                             setRecommendations([]);
                         }}
                     >
@@ -354,17 +387,35 @@ export default function ProductosTab() {
 
                                     {container.groups && container.groups.length > 0 && (
                                         <ul className="space-y-2 mt-2">
-                                            {container.groups.map((g, gidx) => (
-                                                <li key={g._id || gidx}>
-                                                    <span className="font-medium">
-                                                        {g.groupTitle?.ca || ''}
-                                                        {g.groupTitle?.es ? ` / ${g.groupTitle.es}` : ''}
-                                                    </span>
-                                                    {g.category && g.category.name && (
-                                                        <span className="ml-2 text-sm text-gray-600">({g.category.name})</span>
-                                                    )}
-                                                </li>
-                                            ))}
+                                            {container.groups.map((g, gidx) => {
+                                                // Defensive: ensure groupTitle is always an object
+                                                let groupTitle = g.groupTitle;
+                                                if (typeof groupTitle !== 'object' || groupTitle === null) {
+                                                    groupTitle = { ca: '', es: '' };
+                                                }
+                                                // Defensive: handle MongoDB ObjectId for category
+                                                let categoryName = '';
+                                                if (g.category && g.category.name) {
+                                                    if (typeof g.category.name === 'object') {
+                                                        categoryName = g.category.name[locale] || g.category.name.ca || g.category.name.es || '';
+                                                    } else {
+                                                        categoryName = g.category.name;
+                                                    }
+                                                }
+                                                return (
+                                                    <li key={g._id || gidx}>
+                                                        <span className="font-medium">
+                                                            {groupTitle.ca || ''}
+                                                            {groupTitle.es ? ` / ${groupTitle.es}` : ''}
+                                                        </span>
+                                                        {categoryName && (
+                                                            <span className="ml-2 text-sm text-gray-600">
+                                                                ({categoryName})
+                                                            </span>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
                                         </ul>
                                     )}
                                 </div>

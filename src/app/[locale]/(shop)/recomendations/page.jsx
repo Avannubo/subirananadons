@@ -35,7 +35,7 @@ export default function RecommendationsPage() {
         const fetchGroups = async () => {
             setLoading(true);
             try {
-                const res = await fetch('/api/admin/recommendations');
+                const res = await fetch('/api/admin/recommendations', { cache: 'no-store' });
                 if (!res.ok) throw new Error('Failed to fetch recommendations');
                 const data = await res.json();
                 setGroups(data.containers || []);
@@ -110,14 +110,14 @@ export default function RecommendationsPage() {
                                                     className="text-gray-600 transition-colors"
                                                 >
                                                     <span className="font-medium">
-                                                        {g.groupTitle?.[locale] || ''}
+                                                        {g.groupTitle?.[locale] || g.groupTitle?.ca || g.groupTitle?.es||''}
                                                     </span>
-                                                    {g.category && g.category.name && (
+                                                    {g.category && g.category._id && (
                                                         <Link
-                                                            href={`/products?category=${g.category.name.replace(/\s+/g, "+")}`}
+                                                            href={`/products?category=${g.category._id}`}
                                                             className="text-[#0090a8] hover:underline"
                                                         >
-                                                            <span className="ml-2 text-sm text-[#0090a8]">({g.category.name})</span>
+                                                            <span className="ml-2 text-sm text-[#0090a8]">({g.category.name?.[locale]})</span>
                                                         </Link>
                                                     )}
 
