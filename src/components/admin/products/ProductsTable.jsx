@@ -8,13 +8,7 @@ import ConfirmModal from '@/components/shared/ConfirmModal';
 import Pagination from '@/components/admin/shared/Pagination';
 export default function ProductsTable(props) {
     // Pagination handlers
-    const handlePageChange = (page) => {
-        setPagination(p => ({ ...p, currentPage: page }));
-    };
 
-    const handleLimitChange = (limit) => {
-        setPagination(p => ({ ...p, limit, currentPage: 1 }));
-    };
     // Remove allProducts and filters, not needed for API-driven filtering
     // Next Intl: detect browser locale
     let locale = 'ca'; // default
@@ -26,7 +20,8 @@ export default function ProductsTable(props) {
     const [sortOrder, setSortOrder] = useState('newest'); // default: newest first
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [pagination, setPagination] = useState({ currentPage: 1, limit: 10 });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
     const [totalItems, setTotalItems] = useState(0);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -98,11 +93,21 @@ export default function ProductsTable(props) {
                 } else if (sortOrder === 'za') {
                     sorted.sort((a, b) => getName(b).localeCompare(getName(a)));
                 }
-                setTotalItems(sorted.length);
-                // Pagination
-                const start = (pagination.currentPage - 1) * pagination.limit;
-                const end = start + pagination.limit;
+                // Pagination logic: always use sorted.length for totalItems and totalPages
+                const total = sorted.length;
+                setTotalItems(total);
+                const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
+                // Clamp currentPage to valid range
+                let page = currentPage;
+                if (page > totalPages) page = totalPages;
+                if (page < 1) page = 1;
+                const start = (page - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
                 setProducts(sorted.slice(start, end));
+                // If currentPage was clamped, update currentPage state
+                if (page !== currentPage) {
+                    setCurrentPage(page);
+                }
             } else {
                 toast.error('Error: Invalid data format');
             }
@@ -114,20 +119,25 @@ export default function ProductsTable(props) {
         }
     };
 
+    // Reset to first page when search/filter/sort changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, sortOrder]);
+
     useEffect(() => {
         fetchProducts();
-    }, [searchTerm, pagination.currentPage, pagination.limit]);
+    }, [searchTerm, currentPage, itemsPerPage, sortOrder]);
 
     // Handle search input change
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
-        setPagination(p => ({ ...p, currentPage: 1 }));
+        setCurrentPage(1);
     };
 
     // Handle sort order change
     const handleSortOrderChange = (e) => {
         setSortOrder(e.target.value);
-        setPagination(p => ({ ...p, currentPage: 1 }));
+        setCurrentPage(1);
     };
 
     // Update the sortOrder useEffect to trigger a refresh
@@ -275,6 +285,11 @@ export default function ProductsTable(props) {
             toast.error('Error deleting product');
         }
     };
+    // Handle items per page change
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1);
+    };
     // Handle adding new product
     const handleAddProduct = () => {
         setSelectedProduct(null);
@@ -401,10 +416,10 @@ export default function ProductsTable(props) {
     }, []);
     // Removed duplicate sortOrder useEffect
     // For debugging
-    useEffect(() => {
-        console.log("Current pagination state:", pagination);
-        console.log("Products count:", products.length);
-    }, [pagination, products]);
+    // useEffect(() => {
+    //     console.log("Current pagination state:", pagination);
+    //     console.log("Products count:", products.length);
+    // }, [pagination, products]);
     return (
         <div className="bg-white rounded-lg shadow">
             {/* Table Header with Actions */}
@@ -644,14 +659,14 @@ export default function ProductsTable(props) {
             )}
             {/* Pagination */}
             {products.length > 0 && (
-                <div className="px-4 py-3 border-t border-gray-200">
+                <div className="px-6 py-4">
                     <Pagination
-                        currentPage={pagination.currentPage}
-                        totalPages={pagination.totalPages}
-                        totalItems={pagination.totalItems}
-                        itemsPerPage={pagination.limit}
-                        onPageChange={handlePageChange}
-                        onItemsPerPageChange={handleLimitChange}
+                        currentPage={currentPage}
+                        totalPages={Math.max(1, Math.ceil(totalItems / itemsPerPage))}
+                        totalItems={totalItems}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={setCurrentPage}
+                        onItemsPerPageChange={handleItemsPerPageChange}
                         showingText="Mostrant {} de {} productes"
                     />
                 </div>
