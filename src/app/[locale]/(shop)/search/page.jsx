@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { FiEdit, FiTrash2, FiEye, FiSearch, FiPlus } from 'react-icons/fi';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,11 +46,13 @@ export default function SearchPage() {
         setIsQuickViewOpen(false);
         setTimeout(() => setQuickViewProduct(null), 300); // Delay clearing product until animation finishes
     };
+    // Fetch categories, brands, and all products on mount
     useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            setError(null);
+        const fetchMetaAndProducts = async () => {
             try {
+                setIsLoading(true);
+                setError(null);
+                // Categories
                 const catResponse = await fetch('/api/categories?includeChildren=true');
                 if (!catResponse.ok) throw new Error('Failed to fetch categories');
                 const catData = await catResponse.json();
@@ -59,8 +62,7 @@ export default function SearchPage() {
                         flat.push({
                             id: cat._id,
                             name: cat.name,
-                            originalName: cat.name,
-                            count: 0
+                            originalName: cat.name
                         });
                         if (cat.children && cat.children.length) {
                             flat = flat.concat(flattenCategories(cat.children));
@@ -68,28 +70,22 @@ export default function SearchPage() {
                     });
                     return flat;
                 };
-                const transformedCategories = flattenCategories(catData);
-                setCategories(transformedCategories);
-                // Fetch brands
-                const brandsResponse = await fetch('/api/brands?limit=100&enabled=true');
+                setCategories(flattenCategories(catData));
+                // Brands
+                const brandsResponse = await fetch('/api/brands?limit=9999&enabled=true');
                 if (!brandsResponse.ok) throw new Error('Failed to fetch brands');
                 const brandsData = await brandsResponse.json();
                 setBrands(brandsData.brands || []);
-                // Fetch products with pagination
-                const queryParams = new URLSearchParams({
-                    page: currentPage.toString(),
-                    limit: itemsPerPage.toString(),
-                    status: 'active'
-                });
-                const prodResponse = await fetch(`/api/products?${queryParams.toString()}`);
+                // Products (fetch all, filter client-side)
+                const prodResponse = await fetch('/api/products?limit=99999&status=active');
                 if (!prodResponse.ok) throw new Error('Failed to fetch products');
                 const data = await prodResponse.json();
-                // Format products to include necessary fields
                 const formattedProducts = data.products.map(product => ({
+                    ...product,
                     id: product._id,
                     name: product.name,
                     category: product.category,
-                    price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
+                    price: `${product.price_incl_tax?.toFixed(2).replace('.', ',')} €`,
                     priceValue: product.price_incl_tax,
                     imageUrl: product.image || '/assets/images/Screenshot_4.png',
                     imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
@@ -101,175 +97,123 @@ export default function SearchPage() {
                     }
                 }));
                 setAllProducts(formattedProducts);
-                // Update pagination information
-                if (data.pagination) {
-                    setTotalPages(data.pagination.totalPages);
-                    setTotalItems(data.pagination.totalItems);
-                } else {
-                    setTotalPages(Math.ceil(formattedProducts.length / itemsPerPage));
-                    setTotalItems(formattedProducts.length);
-                }
-                // Update category counts
-                const catCounts = {};
-                formattedProducts.forEach(product => {
-                    if (product.category) {
-                        catCounts[product.category] = (catCounts[product.category] || 0) + 1;
-                    }
-                });
-                // Helper function to update counts recursively
-                const updateCategoryCounts = (categories) => {
-                    return categories.map(cat => ({
-                        ...cat,
-                        count: catCounts[cat.originalName || cat.name] || 0,
-                        ...(cat.children && {
-                            children: updateCategoryCounts(cat.children)
-                        })
-                    }));
-                };
-                setCategories(prevCats => updateCategoryCounts(prevCats));
-                setFilteredProducts(formattedProducts);
             } catch (err) {
-                console.error('Error fetching data:', err);
-                setError('Failed to load products and categories. Please try again later.');
-                toast.error('Error loading products and categories');
+                console.error('Error fetching meta/products:', err);
+                setError('Failed to load data. Please try again later.');
+                toast.error('Error loading data');
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchData();
-    }, [currentPage, itemsPerPage]);
-    // Filter products based on search term, categories, and price range
+        fetchMetaAndProducts();
+    }, []);
+
+    // Client-side filtering, sorting, and pagination (ProductsTable logic)
     useEffect(() => {
-        const fetchFilteredProducts = async () => {
-            setIsLoading(true);
-            try {
-                const queryParams = new URLSearchParams({
-                    page: currentPage.toString(),
-                    limit: itemsPerPage.toString(),
-                    status: 'active'
+        setIsLoading(true);
+        let filtered = allProducts;
+        // Search term (name, brand, category, reference)
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            filtered = filtered.filter(p => {
+                // Name
+                let name = '';
+                if (p.name && typeof p.name === 'object') {
+                    name = p.name[locale] || p.name.ca || p.name.es || '';
+                } else if (typeof p.name === 'string') {
+                    name = p.name;
+                }
+                // Brand
+                let brand = '';
+                if (p.brand && typeof p.brand === 'object') {
+                    brand = p.brand.name || p.brand.ca || p.brand.es || '';
+                } else if (typeof p.brand === 'string') {
+                    brand = p.brand;
+                }
+                // Category
+                let category = '';
+                if (p.category && typeof p.category === 'object') {
+                    category = p.category[locale] || p.category.ca || p.category.es || '';
+                } else if (typeof p.category === 'string') {
+                    category = p.category;
+                }
+                // Reference
+                const ref = p.reference || '';
+                return (
+                    (name && name.toLowerCase().includes(term)) ||
+                    (brand && brand.toLowerCase().includes(term)) ||
+                    (category && category.toLowerCase().includes(term)) ||
+                    (ref && ref.toLowerCase().includes(term))
+                );
+            });
+        }
+        // Category filter
+        if (selectedCategory) {
+            filtered = filtered.filter(p => {
+                let cat = '';
+                if (p.category && typeof p.category === 'object') {
+                    cat = p.category[locale] || p.category.ca || p.category.es || '';
+                } else if (typeof p.category === 'string') {
+                    cat = p.category;
+                }
+                return cat === selectedCategory;
+            });
+        }
+        // Brand filter
+        if (selectedBrand) {
+            filtered = filtered.filter(p => {
+                let brand = '';
+                if (p.brand && typeof p.brand === 'object') {
+                    brand = p.brand.name || p.brand.ca || p.brand.es || '';
+                } else if (typeof p.brand === 'string') {
+                    brand = p.brand;
+                }
+                return brand === selectedBrand;
+            });
+        }
+        // Stock status
+        if (stockStatus === 'in-stock') {
+            filtered = filtered.filter(p => p.stock && p.stock.available > 0);
+        } else if (stockStatus === 'out-of-stock') {
+            filtered = filtered.filter(p => !p.stock || p.stock.available <= 0);
+        }
+        // Price range
+        if (priceRange && priceRange.length === 2) {
+            filtered = filtered.filter(p => p.priceValue >= priceRange[0] && p.priceValue <= priceRange[1]);
+        }
+        // Sorting
+        let sorted = [...filtered];
+        switch (sortBy) {
+            case 'price-asc':
+                sorted.sort((a, b) => a.priceValue - b.priceValue);
+                break;
+            case 'price-desc':
+                sorted.sort((a, b) => b.priceValue - a.priceValue);
+                break;
+            case 'name-asc':
+                sorted.sort((a, b) => {
+                    const aName = typeof a.name === 'object' ? (a.name[locale] || a.name.ca || a.name.es || '') : a.name;
+                    const bName = typeof b.name === 'object' ? (b.name[locale] || b.name.ca || b.name.es || '') : b.name;
+                    return aName.localeCompare(bName);
                 });
-
-                // Add search filters
-                if (searchTerm) {
-                    queryParams.append('search', searchTerm);
-                }
-                if (selectedCategory) {
-                    queryParams.append('category', selectedCategory);
-                }
-                if (selectedBrand) {
-                    queryParams.append('brand', selectedBrand);
-                }
-
-                // Add stock status filter
-                if (stockStatus === 'in-stock') {
-                    queryParams.append('inStock', 'true');
-                } else if (stockStatus === 'out-of-stock') {
-                    queryParams.append('outOfStock', 'true');
-                }
-
-                // Add price range parameters
-                if (priceRange && priceRange.length === 2) {
-                    queryParams.append('minPrice', priceRange[0]);
-                    queryParams.append('maxPrice', priceRange[1]);
-                }
-
-                // Add sorting parameters
-                switch (sortBy) {
-                    case 'price-asc':
-                        queryParams.append('sort', 'price_incl_tax');
-                        queryParams.append('order', 'asc');
-                        break;
-                    case 'price-desc':
-                        queryParams.append('sort', 'price_incl_tax');
-                        queryParams.append('order', 'desc');
-                        break;
-                    case 'name-asc':
-                        queryParams.append('sort', 'name');
-                        queryParams.append('order', 'asc');
-                        break;
-                    case 'newest':
-                        queryParams.append('sort', 'createdAt');
-                        queryParams.append('order', 'desc');
-                        break;
-                    // default case will use the server's default sorting
-                }
-
-                const response = await fetch(`/api/products?${queryParams.toString()}`);
-                if (!response.ok) throw new Error('Failed to fetch products');
-                const data = await response.json();
-                // Format products
-                const formattedProducts = data.products.map(product => ({
-                    id: product._id,
-                    name: product.name,
-                    category: product.category,
-                    price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
-                    priceValue: product.price_incl_tax,
-                    imageUrl: product.image || '/assets/images/Screenshot_4.png',
-                    imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
-                    brand: product.brand || '',
-                    description: product.description || '',
-                    stock: {
-                        available: product.stock?.available || 0,
-                        minStock: product.stock?.minStock || 5
-                    }
-                }));
-                // Update state with new data
-                setFilteredProducts(formattedProducts);
-                setTotalPages(data.pagination?.totalPages || 1);
-                setTotalItems(data.pagination?.totalItems || formattedProducts.length);
-            } catch (err) {
-                console.error('Error fetching filtered products:', err);
-                toast.error('Error al cargar los productos filtrados');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchFilteredProducts();
-    }, [searchTerm, selectedCategory, selectedBrand, stockStatus, priceRange, sortBy, currentPage, itemsPerPage]);
-    // Pagination logic
-    useEffect(() => {
-        const fetchPaginatedData = async () => {
-            setIsLoading(true);
-            setError(null);
-            try {
-                // Calculate the range of items to fetch based on the current page and items per page
-                const start = (currentPage - 1) * itemsPerPage;
-                const end = start + itemsPerPage;
-                // Fetch products with pagination
-                const prodResponse = await fetch(`/api/products?start=${start}&limit=${itemsPerPage}`);
-                if (!prodResponse.ok) throw new Error('Failed to fetch products');
-                const data = await prodResponse.json();
-                // Format products to include necessary fields
-                const formattedProducts = data.products.map(product => ({
-                    id: product._id,
-                    name: product.name,
-                    category: product.category,
-                    price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
-                    priceValue: product.price_incl_tax,
-                    imageUrl: product.image || '/assets/images/Screenshot_4.png',
-                    imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
-                    brand: product.brand || '',
-                    description: product.description || '',
-                    stock: {
-                        available: product.stock?.available || 0,
-                        minStock: product.stock?.minStock || 5
-                    }
-                }));
-                setAllProducts(formattedProducts);
-                // Update total items count for pagination
-                setTotalItems(data.totalCount || 0);
-                // Calculate total pages
-                setTotalPages(Math.ceil(totalItems / itemsPerPage));
-            } catch (err) {
-                console.error('Error fetching paginated data:', err);
-                setError('Failed to load products. Please try again later.');
-                toast.error('Error loading products');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchPaginatedData();
-    }, [currentPage, itemsPerPage]);
+                break;
+            case 'newest':
+                sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                break;
+            default:
+                break;
+        }
+        // Pagination
+        const total = sorted.length;
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        setFilteredProducts(sorted.slice(start, end));
+        setTotalItems(total);
+        setTotalPages(Math.max(1, Math.ceil(total / itemsPerPage)));
+        setIsLoading(false);
+    }, [allProducts, searchTerm, selectedCategory, selectedBrand, stockStatus, priceRange, sortBy, currentPage, itemsPerPage, locale]);
+    // (Removed: all filtering is now in the above effect)
+    // Pagination logic is now handled in the main fetchFilteredProducts effect above
     // Reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
