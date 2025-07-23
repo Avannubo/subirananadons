@@ -13,67 +13,66 @@ import {
     ChartArea,
     LogOut
 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { useLocale } from 'next-intl';
+import { useSession, signOut } from 'next-auth/react';
 import useShopSocials from "@/lib/useShopSocials";
-const getNavigationItems = (userRole) => [
-    // {
-    //     href: "/dashboard",
-    //     icon: ChartArea,
-    //     label: "Estadísticas",
-    //     roles: ['admin']//'user',
-    // },
+const getNavigationItems = (userRole, locale) => [
     {
         href: "/dashboard/account",
         icon: CircleUserRound,
-        label: "Mi Cuenta",
+        label: locale === 'ca' ? "El Meu Compte" : "Mi Cuenta",
         roles: ['user', 'admin']
     },
     {
         href: "/dashboard/productos",
         icon: ShoppingBag,
-        label: "Productos",
+        label: locale === 'ca' ? "Productes" : "Productos",
         roles: ['admin']
     },
     {
         href: "/dashboard/featured-products",
         icon: Star,
-        label: "Destacados",
+        label: locale === 'ca' ? "Destacats" : "Destacados",
         roles: ['admin']
     },
     {
         href: "/dashboard/brands",
         icon: TagIcon,
-        label: "Marcas",
+        label: locale === 'ca' ? "Marques" : "Marcas",
         roles: ['admin']
     },
     {
         href: "/dashboard/orders",
         icon: ClipboardList,
-        label: userRole === 'admin' ? "Pedidos" : "Mis Pedidos",
+        label: userRole === 'admin'
+            ? (locale === 'ca' ? "Comandes" : "Pedidos")
+            : (locale === 'ca' ? "Les Meves Comandes" : "Mis Pedidos"),
         roles: ['user', 'admin']
     },
     {
         href: "/dashboard/clientes",
         icon: Users,
-        label: "Clientes",
+        label: locale === 'ca' ? "Clients" : "Clientes",
         roles: ['admin']
     },
     // {
     //     href: "/dashboard/facturas",
     //     icon: CreditCard,
-    //     label: "Facturas",
+    //     label: locale === 'ca' ? "Factures" : "Facturas",
     //     roles: ['admin']
     // },
     {
         href: "/dashboard/listas",
         icon: GiftIcon,
-        label: userRole === 'admin' ? "Listas" : "Mis Listas",
+        label: userRole === 'admin'
+            ? (locale === 'ca' ? "Llistes" : "Listas")
+            : (locale === 'ca' ? "Les Meves Llistes" : "Mis Listas"),
         roles: ['user', 'admin']
     },
     {
         href: "/dashboard/configuracion",
         icon: Settings,
-        label: "Configuraciones",
+        label: locale === 'ca' ? "Configuracions" : "Configuraciones",
         roles: ['admin']
     }
 ];
@@ -81,13 +80,14 @@ const getNavigationItems = (userRole) => [
 export default function Sidebar() {
     const { data: session } = useSession();
     const userRole = session?.user?.role || 'user';
-    const navigationItems = getNavigationItems(userRole);
+    const locale = useLocale();
+    const navigationItems = getNavigationItems(userRole, locale);
     return (
         <div className="w-64 h-[80vh] bg-white top-[100px] sticky">
             <div className="px-4 py-2 min-h-[88vh] flex flex-col justify-between">
                 <nav className="space-y-1">
                     <div className='flex items-center justify-center font-bold text-2xl border-b pb-2 border-gray-200'>
-                        <span className="font-medium">Hola! {session?.user.name}</span>
+                        <span className="font-medium">{locale === 'ca' ? 'Hola' : 'Hola'}! {session?.user.name}</span>
                     </div>
                     {navigationItems.map((item, index) => {
                         if (!item.roles.includes(userRole)) {
@@ -108,11 +108,12 @@ export default function Sidebar() {
                 </nav>
                 <div className="mt-auto pt-6 border-t border-gray-200">
                     <button
-                       onClick={() => signOut({ callbackUrl: '/' })}
+                        type="button"
+                        onClick={() => signOut({ callbackUrl: '/' })}
                         className="w-full flex items-center justify-center gap-2 py-2 mb-4 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-[#00B0C8] hover:text-white rounded-lg transition-colors"
                     >
                         <LogOut size={20} />
-                        Cerrar sesión
+                        {locale === 'ca' ? 'Tancar sessió' : 'Cerrar sesión'}
                     </button>
                     {/* <div className="flex space-x-5 justify-center my-4">
                         {useShopSocials().socials.map((social) => {

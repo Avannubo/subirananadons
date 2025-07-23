@@ -3,18 +3,23 @@
 import { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2, FiEye, FiSearch, FiFilter, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
-import Link from 'next/link';
 import ProductModal from './ProductModal';
 import ProductViewModal from './ProductViewModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import Pagination from '@/components/admin/shared/Pagination';
 
 export default function ProductsTable(props) {
+    // Next Intl: detect browser locale
+    let locale = 'ca'; // default
+    if (typeof window !== 'undefined' && window.navigator?.language) {
+        locale = window.navigator.language.split('-')[0];
+        if (!['ca', 'es'].includes(locale)) locale = 'es';
+    }
     const [products, setProducts] = useState("");
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
         name: '',
-        reference: '',
+        brand: '',
         category: '',
     });
     const [sortOrder, setSortOrder] = useState('newest'); // default: newest first
@@ -41,7 +46,7 @@ export default function ProductsTable(props) {
             const queryParams = new URLSearchParams();
 
             if (filters.name) queryParams.append('name', filters.name);
-            if (filters.reference) queryParams.append('reference', filters.reference);
+            if (filters.brand) queryParams.append('brand', filters.brand);
             if (filters.category) queryParams.append('category', filters.category);
 
             // Add the category filter from props if it exists
@@ -189,48 +194,104 @@ export default function ProductsTable(props) {
     // Handle filter change and run search instantly (client-side)
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
-        setFilters(prev => {
-            const newFilters = { ...prev, [name]: value };
-            // Always run search instantly on all products (client-side)
-            if (useClientPagination) {
-                // Reset to first page on filter change
-                const filteredProducts = filterProductsClientSide(allProducts, newFilters);
-                applyClientPagination(filteredProducts, 1, pagination.limit);
-            } else {
-                // If not client-side, fallback to server fetch
-                fetchProducts(1);
-            }
-            return newFilters;
-        });
+        setFilters(prev => ({ ...prev, [name]: value }));
+        // Filtering is now handled by useEffect on filters change
     };
 
     // Ensure table updates when filters change and pagination is client-side
     useEffect(() => {
         if (useClientPagination) {
+            // Always reset to first page on filter change
             const filteredProducts = filterProductsClientSide(allProducts, filters);
             applyClientPagination(filteredProducts, 1, pagination.limit);
+        } else {
+            // Server-side: refetch with new filters
+            fetchProducts(1);
         }
     }, [filters, allProducts, useClientPagination]);
 
     // Filter products client-side (accepts custom filters for instant search, left-side/startsWith for name)
+    // For category, always use CA if available, then ES, then fallback to string
+    // Show category name if cat is an ObjectId string by looking up in categories prop
+    const getCategoryString = (cat) => {
+        if (!cat) return '';
+        // Populated object with ca/es/name
+        if (typeof cat === 'object' && (cat.ca || cat.es || cat.name)) {
+            return cat.ca || cat.es || cat.name || '';
+        }
+        // Populated object with _id and name fields
+        if (typeof cat === 'object' && cat._id && (cat.name || cat.ca || cat.es)) {
+            return cat.ca || cat.es || cat.name || '';
+        }
+        // If cat is an object with $oid (MongoDB export)
+        if (typeof cat === 'object' && cat.$oid) {
+            const found = Array.isArray(props.categories) ? props.categories.find(c => c._id === cat.$oid || (c._id && c._id.$oid === cat.$oid)) : null;
+            if (found) return found.ca || found.es || found.name || '';
+            return cat.$oid;
+        }
+        // If cat is a string and looks like an ObjectId, try to find the category name
+        if (typeof cat === 'string' && /^[a-fA-F0-9]{24}$/.test(cat) && Array.isArray(props.categories)) {
+            const found = props.categories.find(c => c._id === cat || (c._id && c._id.$oid === cat));
+            if (found) return found.ca || found.es || found.name || '';
+        }
+        // Otherwise just return the string
+        return cat;
+    };
+
+    // Get brand display name from brand value (ObjectId, $oid, or object)
+    const getBrandString = (brand) => {
+        if (!brand) return '';
+        // Populated object with name
+        if (typeof brand === 'object' && brand.name) {
+            return brand.name;
+        }
+        // Populated object with _id and name
+        if (typeof brand === 'object' && brand._id && brand.name) {
+            return brand.name;
+        }
+        // If brand is an object with $oid (MongoDB export)
+        if (typeof brand === 'object' && brand.$oid) {
+            const found = Array.isArray(props.brands) ? props.brands.find(b => b._id === brand.$oid || (b._id && b._id.$oid === brand.$oid)) : null;
+            if (found) return found.name || '';
+            return brand.$oid;
+        }
+        // If brand is a string and looks like an ObjectId, try to find the brand name
+        if (typeof brand === 'string' && /^[a-fA-F0-9]{24}$/.test(brand) && Array.isArray(props.brands)) {
+            const found = props.brands.find(b => b._id === brand || (b._id && b._id.$oid === brand));
+            if (found) return found.name || '';
+        }
+        // Otherwise just return the string
+        return brand;
+    };
+
+    // Always use Catalan for name and category columns
+    const getCatalanString = (field) => {
+        if (!field) return '';
+        if (typeof field === 'string') return field;
+        if (typeof field === 'object' && (field.ca || field.es)) {
+            return field.ca || field.es || '';
+        }
+        return '';
+    };
+
     const filterProductsClientSide = (productsToFilter, customFilters = filters) => {
         return productsToFilter.filter(product => {
             // Name: startsWith (left-side, case-insensitive, ignore leading/trailing spaces)
             const nameFilter = (customFilters.name || '').trim().toLowerCase();
-            const nameMatch = !nameFilter ||
-                (product.name && product.name.toLowerCase().startsWith(nameFilter));
+            const nameValue = getLocaleString(product.name).toLowerCase();
+            const nameMatch = !nameFilter || nameValue.startsWith(nameFilter);
 
-            // Reference: startsWith
-            const referenceFilter = (customFilters.reference || '').trim().toLowerCase();
-            const referenceMatch = !referenceFilter ||
-                (product.reference && product.reference.toLowerCase().startsWith(referenceFilter));
+            // Brand: startsWith
+            const brandFilter = (customFilters.brand || '').trim().toLowerCase();
+            const brandValue = getLocaleString(product.brand).toLowerCase();
+            const brandMatch = !brandFilter || brandValue.startsWith(brandFilter);
 
-            // Category: startsWith
+            // Category: startsWith, use getCategoryString
             const categoryFilter = (customFilters.category || '').trim().toLowerCase();
-            const categoryMatch = !categoryFilter ||
-                (product.category && product.category.toLowerCase().startsWith(categoryFilter));
+            const categoryValue = getCategoryString(product.category).toLowerCase();
+            const categoryMatch = !categoryFilter || categoryValue.startsWith(categoryFilter);
 
-            return nameMatch && referenceMatch && categoryMatch;
+            return nameMatch && brandMatch && categoryMatch;
         });
     };
 
@@ -238,7 +299,7 @@ export default function ProductsTable(props) {
     const clearFilters = () => {
         setFilters({
             name: '',
-            reference: '',
+            brand: '',
             category: '',
         });
         if (useClientPagination) {
@@ -250,13 +311,33 @@ export default function ProductsTable(props) {
 
     // Handle product view
     const handleViewProduct = (product) => {
-        setSelectedProduct(product);
+        // If product.category or product.brand is an ObjectId, try to populate from props
+        let populatedProduct = { ...product };
+        if (populatedProduct.category && typeof populatedProduct.category === 'string' && Array.isArray(props.categories)) {
+            const foundCat = props.categories.find(c => c._id === populatedProduct.category || (c._id && c._id.$oid === populatedProduct.category));
+            if (foundCat) populatedProduct.category = foundCat;
+        }
+        if (populatedProduct.brand && typeof populatedProduct.brand === 'string' && Array.isArray(props.brands)) {
+            const foundBrand = props.brands.find(b => b._id === populatedProduct.brand || (b._id && b._id.$oid === populatedProduct.brand));
+            if (foundBrand) populatedProduct.brand = foundBrand;
+        }
+        setSelectedProduct(populatedProduct);
         setShowViewModal(true);
     };
 
     // Handle product edit
     const handleEditProduct = (product) => {
-        setSelectedProduct(product);
+        // If product.category or product.brand is an ObjectId, try to populate from props
+        let populatedProduct = { ...product };
+        if (populatedProduct.category && typeof populatedProduct.category === 'string' && Array.isArray(props.categories)) {
+            const foundCat = props.categories.find(c => c._id === populatedProduct.category || (c._id && c._id.$oid === populatedProduct.category));
+            if (foundCat) populatedProduct.category = foundCat;
+        }
+        if (populatedProduct.brand && typeof populatedProduct.brand === 'string' && Array.isArray(props.brands)) {
+            const foundBrand = props.brands.find(b => b._id === populatedProduct.brand || (b._id && b._id.$oid === populatedProduct.brand));
+            if (foundBrand) populatedProduct.brand = foundBrand;
+        }
+        setSelectedProduct(populatedProduct);
         setIsEditing(true);
         setShowModal(true);
     };
@@ -318,9 +399,42 @@ export default function ProductsTable(props) {
 
     // Handle form submission for add/edit
     const handleSaveProduct = async (formData) => {
-        try {
-            let response;
+        // Client-side validation for obligatory fields
+        const requiredFields = [
+            { key: 'name', label: 'Nom' },
+        ]
 
+        const missingFields = requiredFields.filter(f => {
+            const value = formData[f.key];
+            if (f.key === 'name') {
+                // name can be object or string
+                if (!value || (typeof value === 'object' && !value.es && !value.ca) || (typeof value === 'string' && !value.trim())) return true;
+            }
+            return false;
+        });
+        if (missingFields.length > 0) {
+            toast.error('Omple tots els camps obligatoris: ' + missingFields.map(f => f.label).join(', '));
+            return;
+        }
+        try {
+            // Defensive: always send category as an object with ca and es
+            let processedCategory = formData.category;
+            if (typeof processedCategory === 'string') {
+                processedCategory = { es: processedCategory, ca: '' };
+            } else if (!processedCategory || typeof processedCategory !== 'object') {
+                processedCategory = { es: '', ca: '' };
+            } else {
+                processedCategory = {
+                    es: processedCategory.es || '',
+                    ca: processedCategory.ca || ''
+                };
+            }
+            const processedData = {
+                ...formData,
+                category: processedCategory
+            };
+
+            let response;
             if (isEditing) {
                 // Update existing product
                 response = await fetch(`/api/products/${selectedProduct._id}`, {
@@ -328,7 +442,7 @@ export default function ProductsTable(props) {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify(processedData),
                 });
             } else {
                 // Create new product
@@ -337,13 +451,20 @@ export default function ProductsTable(props) {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify(processedData),
                 });
             }
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Operation failed');
+                let errorMsg = 'Operation failed';
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.error || errorData.message || errorMsg;
+                } catch (e) {
+                    // If response is not JSON, fallback to status text
+                    errorMsg = response.statusText || errorMsg;
+                }
+                throw new Error(errorMsg);
             }
 
             const savedProduct = await response.json();
@@ -453,14 +574,14 @@ export default function ProductsTable(props) {
         <div className="bg-white rounded-lg shadow">
             {/* Table Header with Actions */}
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-lg font-semibold">Productos</h2>
+                <h2 className="text-lg font-semibold">Productes</h2>
                 <div className="flex space-x-2">
                     <button
                         onClick={handleAddProduct}
                         className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] flex items-center"
                     >
                         <FiPlus className="mr-1" />
-                        Añadir producto
+                        Afegir producte
                     </button>
                 </div>
             </div>
@@ -473,11 +594,11 @@ export default function ProductsTable(props) {
                         onChange={e => setSortOrder(e.target.value)}
                         className="border border-gray-300 rounded w-full py-2 px-3 text-gray-700"
                     >
-                        <option value="newest">Más nuevos primero</option>
-                        <option value="oldest">Más antiguos primero</option>
-                        <option value="az">Alfabético A-Z</option>
-                        <option value="za">Alfabético Z-A</option>
-                        <option value="lastmodified">Última modificación</option>
+                        <option value="newest">Més nous primer</option>
+                        <option value="oldest">Més antics primer</option>
+                        <option value="az">Alfabètic A-Z</option>
+                        <option value="za">Alfabètic Z-A</option>
+                        <option value="lastmodified">Última modificació</option>
                     </select>
                 </div>
                 <div className="relative">
@@ -486,7 +607,7 @@ export default function ProductsTable(props) {
                         type="search"
                         name="name"
                         autoComplete="off"
-                        placeholder="Buscar por nombre (empieza por...)"
+                        placeholder="Cerca per nom"
                         value={filters.name}
                         onChange={handleFilterChange}
                         className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
@@ -496,10 +617,10 @@ export default function ProductsTable(props) {
                     <FiSearch className="absolute left-3 top-3 text-gray-400" />
                     <input
                         type="search"
-                        name="reference"
+                        name="brand"
                         autoComplete="off"
-                        placeholder="Buscar ref. (empieza por...)"
-                        value={filters.reference}
+                        placeholder="Cerca per marca"
+                        value={filters.brand}
                         onChange={handleFilterChange}
                         className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                     />
@@ -510,7 +631,7 @@ export default function ProductsTable(props) {
                         type="search"
                         name="category"
                         autoComplete="off"
-                        placeholder="Buscar categoría (empieza por...)"
+                        placeholder="Cerca per categoria"
                         value={filters.category}
                         onChange={handleFilterChange}
                         className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
@@ -580,31 +701,31 @@ export default function ProductsTable(props) {
                                     ID
                                 </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Imagen
+                                    Imatge
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nombre
+                                    Nom
                                 </th>
+                                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Referència
+                                </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Referencia
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Categoría
+                                    Categoria
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Marca
                                 </th>
                                 {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Precio (imp. excl.)
+                                    Preu (imp. excl.)
                                 </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Precio
+                                    Preu
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Estado
+                                    Estat
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Acciones
+                                    Accions
                                 </th>
                             </tr>
                         </thead>
@@ -619,23 +740,21 @@ export default function ProductsTable(props) {
                                             <div className="relative">
                                                 <img
                                                     src={product.image}
-                                                    alt={product.name}
+                                                    alt={typeof product.name === 'object' && product.name !== null ? product.name.es || product.name.ca || '' : product.name}
                                                     className="h-10 w-10 rounded object-cover cursor-pointer"
-                                                    onMouseEnter={() => handleImageMouseEnter(product.image)}
+                                                    onMouseEnter={() => handleImageMouseEnter(typeof product.image === 'object' && product.image !== null ? product.image.es || product.image.ca || '' : product.image)}
                                                     onMouseLeave={handleImageMouseLeave}
                                                 />
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-xs truncate" title={product.name}>
-                                            {product.name}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-xs truncate" title={getCatalanString(product.name)}>
+                                            {getCatalanString(product.name)}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.reference}>
-                                            {product.reference}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={getCatalanString(product.category)}>
+                                            {getCatalanString(product.category)}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.category}>
-                                            {product.category}
-                                        </td>                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={product.brand}>
-                                            {product.brand}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={getBrandString(product.brand)}>
+                                            {getBrandString(product.brand)}
                                         </td>
                                         {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {product.price_excl_tax.toFixed(2)} €
@@ -648,9 +767,9 @@ export default function ProductsTable(props) {
                                                 product.status === 'inactive' ? 'bg-yellow-100 text-yellow-800' :
                                                     'bg-red-100 text-red-800'
                                                 }`}>
-                                                {product.status === 'active' ? 'Activo' :
-                                                    product.status === 'inactive' ? 'Inactivo' :
-                                                        'Descontinuado'}
+                                                {product.status === 'active' ? 'Actiu' :
+                                                    product.status === 'inactive' ? 'Inactiu' :
+                                                        'Descatalogat'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -687,8 +806,8 @@ export default function ProductsTable(props) {
                                             <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            <p className="text-gray-600 text-lg">No se encontraron productos</p>
-                                            <p className="text-gray-500 text-sm mt-1">Prueba a cambiar los filtros o añade un nuevo producto</p>
+                                            <p className="text-gray-600 text-lg">No s'han trobat productes</p>
+                                            <p className="text-gray-500 text-sm mt-1">Prova de canviar els filtres o afegeix un nou producte</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -728,7 +847,7 @@ export default function ProductsTable(props) {
                         itemsPerPage={pagination.limit}
                         onPageChange={handlePageChange}
                         onItemsPerPageChange={handleLimitChange}
-                        showingText="Mostrando {} de {} productos"
+                        showingText="Mostrant {} de {} productes"
                     />
                 </div>
             )}
@@ -759,10 +878,10 @@ export default function ProductsTable(props) {
                     isOpen={showConfirmModal}
                     onClose={() => setShowConfirmModal(false)}
                     onConfirm={handleDeleteProduct}
-                    title="Eliminar Producto"
-                    message={`¿Estás seguro de que deseas eliminar el producto "${selectedProduct?.name}"? Esta acción no se puede deshacer.`}
+                    title="Eliminar producte"
+                    message={`Estàs segur que vols eliminar aquest producte? Aquesta acció no es pot desfer.`}
                     confirmText="Eliminar"
-                    cancelText="Cancelar"
+                    cancelText="Cancel·lar"
                 />
             )}
         </div>

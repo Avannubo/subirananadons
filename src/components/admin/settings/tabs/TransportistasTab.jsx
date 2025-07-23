@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { useLocale } from 'next-intl';
 export default function TransportistasTab() {
+    const locale = useLocale();
     const [transportistas, setTransportistas] = useState([]);
     const [preferences, setPreferences] = useState({
         gastosManipulacion: 2.00,
@@ -141,13 +143,13 @@ export default function TransportistasTab() {
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logotipo</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retraso</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Envío gratis</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posición</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Nom' : 'Nombre'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Logotip' : 'Logotipo'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Retard' : 'Retraso'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Estat' : 'Estado'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Enviament gratuït' : 'Envío gratis'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Posició' : 'Posición'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Accions' : 'Acciones'}</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -172,25 +174,25 @@ export default function TransportistasTab() {
         <div className="space-y-12">
             <div className="overflow-x-auto">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">Transportistas</h2>
+                    <h2 className="text-xl font-semibold">{locale === 'ca' ? 'Transportistes' : 'Transportistas'}</h2>
                     <button
                         onClick={handleNewCarrier}
                         className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#00b1c8ad]"
                     >
-                        Nuevo Transportista
+                        {locale === 'ca' ? 'Nou Transportista' : 'Nuevo Transportista'}
                     </button>
                 </div>
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logotipo</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retraso</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Envío gratis</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posición</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Nom' : 'Nombre'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Logotip' : 'Logotipo'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Retard' : 'Retraso'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Estat' : 'Estado'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Enviament gratuït' : 'Envío gratis'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Posició' : 'Posición'}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{locale === 'ca' ? 'Accions' : 'Acciones'}</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -204,7 +206,7 @@ export default function TransportistasTab() {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{t.retraso}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${t.estado ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                        {t.estado ? 'Activo' : 'Inactivo'}
+                                        {t.estado ? (locale === 'ca' ? 'Actiu' : 'Activo') : (locale === 'ca' ? 'Inactiu' : 'Inactivo')}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
@@ -218,13 +220,13 @@ export default function TransportistasTab() {
                                         onClick={() => handleEditClick(t)}
                                         className="text-[#00B0C8] hover:text-[#00b1c8ad] mr-3"
                                     >
-                                        Editar
+                                        {locale === 'ca' ? 'Editar' : 'Editar'}
                                     </button>
                                     <button
                                         onClick={() => handleDeleteCarrier(t._id)}
                                         className="text-red-600 hover:text-red-900"
                                     >
-                                        Eliminar
+                                        {locale === 'ca' ? 'Eliminar' : 'Eliminar'}
                                     </button>
                                 </td>
                             </tr>
@@ -238,11 +240,13 @@ export default function TransportistasTab() {
                 <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md">
                         <h3 className="text-lg font-medium mb-4">
-                            {editingCarrier._id ? 'Editar Transportista' : 'Nuevo Transportista'}
+                            {editingCarrier._id
+                                ? (locale === 'ca' ? 'Editar Transportista' : 'Editar Transportista')
+                                : (locale === 'ca' ? 'Nou Transportista' : 'Nuevo Transportista')}
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ca' ? 'Nom' : 'Nombre'}</label>
                                 <input
                                     type="text"
                                     value={editingCarrier.nombre}
@@ -251,7 +255,7 @@ export default function TransportistasTab() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">URL del Logotipo</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ca' ? 'URL del Logotip' : 'URL del Logotipo'}</label>
                                 <input
                                     type="text"
                                     value={editingCarrier.logo}
@@ -260,7 +264,7 @@ export default function TransportistasTab() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje de Retraso</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ca' ? 'Missatge de Retard' : 'Mensaje de Retraso'}</label>
                                 <input
                                     type="text"
                                     value={editingCarrier.retraso}
@@ -276,7 +280,7 @@ export default function TransportistasTab() {
                                     onChange={(e) => setEditingCarrier({ ...editingCarrier, estado: e.target.checked })}
                                     className="mr-2"
                                 />
-                                <label htmlFor="estado" className="text-sm font-medium text-gray-700">Activo</label>
+                                <label htmlFor="estado" className="text-sm font-medium text-gray-700">{locale === 'ca' ? 'Actiu' : 'Activo'}</label>
                             </div>
                             <div className="flex items-center">
                                 <input
@@ -286,10 +290,10 @@ export default function TransportistasTab() {
                                     onChange={(e) => setEditingCarrier({ ...editingCarrier, envioGratis: e.target.checked })}
                                     className="mr-2"
                                 />
-                                <label htmlFor="envioGratis" className="text-sm font-medium text-gray-700">Envío Gratis</label>
+                                <label htmlFor="envioGratis" className="text-sm font-medium text-gray-700">{locale === 'ca' ? 'Enviament Gratuït' : 'Envío Gratis'}</label>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Mínimo para envío gratis (€)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ca' ? 'Mínim per enviament gratuït (€)' : 'Mínimo para envío gratis (€)'}</label>
                                 <input
                                     type="number"
                                     value={editingCarrier.minimoEnvioGratis || 0}
@@ -299,7 +303,7 @@ export default function TransportistasTab() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Mínimo peso para envío gratis (kg)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ca' ? 'Pes mínim per enviament gratuït (kg)' : 'Mínimo peso para envío gratis (kg)'}</label>
                                 <input
                                     type="number"
                                     value={editingCarrier.minimoPesoGratis || 0}
@@ -317,13 +321,13 @@ export default function TransportistasTab() {
                                 }}
                                 className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
                             >
-                                Cancelar
+                                {locale === 'ca' ? 'Cancel·lar' : 'Cancelar'}
                             </button>
                             <button
                                 onClick={() => handleSaveCarrier(editingCarrier)}
                                 className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#00b1c8ad]"
                             >
-                                Guardar
+                                {locale === 'ca' ? 'Desar' : 'Guardar'}
                             </button>
                         </div>
                     </div>

@@ -6,7 +6,78 @@ import { useOrders } from '@/hooks/useOrders';
 import TabNavigation from '@/components/admin/shared/TabNavigation';
 import { toast } from 'react-hot-toast';
 export default function OrdersTabs({ userRole = 'user' }) {
-    const [activeTab, setActiveTab] = useState('Todos');
+    // Locale detection (default to 'ca')
+    let locale = 'ca';
+    if (typeof window !== 'undefined' && window.navigator) {
+        const lang = window.navigator.language || window.navigator.userLanguage;
+        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    }
+
+    // Translations
+    const translations = {
+        ca: {
+            all: 'Totes',
+            accepted: 'Acceptades',
+            cancelled: 'Cancel·lades',
+            orderManagement: 'Gestió de Comandes',
+            updated: 'Dades actualitzades correctament',
+            export: 'Exporta',
+            exportCSV: 'Exporta a CSV',
+            exportExcel: 'Exporta a Excel',
+            exportPDF: 'Exporta a PDF',
+            searchId: 'Cerca ID',
+            searchReference: 'Cerca Referència',
+            searchCustomer: 'Cerca Client',
+            searchTotal: 'Cerca Total',
+            loading: 'Carregant comandes...',
+            printPDF: 'Imprimeix PDF',
+            exportTitle: 'Llistat de Comandes',
+            exportDate: 'Data d\'exportació',
+            paymentMethod: 'Mètode de Pagament',
+            status: 'Estat',
+            client: 'Client',
+            reference: 'Referència',
+            date: 'Data',
+            total: 'Total',
+            email: 'Email',
+            id: 'ID',
+            refresh: 'Actualitza dades',
+            errorExport: 'Error en exportar les comandes: '
+        },
+        es: {
+            all: 'Todos',
+            accepted: 'Aceptadas',
+            cancelled: 'Canceladas',
+            orderManagement: 'Gestión de Pedidos',
+            updated: 'Datos actualizados correctamente',
+            export: 'Exportar',
+            exportCSV: 'Exportar a CSV',
+            exportExcel: 'Exportar a Excel',
+            exportPDF: 'Exportar a PDF',
+            searchId: 'Buscar ID',
+            searchReference: 'Buscar Referencia',
+            searchCustomer: 'Buscar Cliente',
+            searchTotal: 'Buscar Total',
+            loading: 'Cargando pedidos...',
+            printPDF: 'Imprimir PDF',
+            exportTitle: 'Listado de Pedidos',
+            exportDate: 'Fecha de exportación',
+            paymentMethod: 'Método de Pago',
+            status: 'Estado',
+            client: 'Cliente',
+            reference: 'Referencia',
+            date: 'Fecha',
+            total: 'Total',
+            email: 'Email',
+            id: 'ID',
+            refresh: 'Actualizar datos',
+            errorExport: 'Error al exportar los pedidos: '
+        }
+    };
+
+    const t = translations[locale];
+
+    const [activeTab, setActiveTab] = useState(t.all);
     const [isExporting, setIsExporting] = useState(false);
     const [rangeDropdownOpen, setRangeDropdownOpen] = useState(false);
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
@@ -32,20 +103,19 @@ export default function OrdersTabs({ userRole = 'user' }) {
         setCurrentPage,
         setLimit
     } = useOrders(userRole);
-    const tabs = ['Todos'];//, 'Acceptado', 'Cancelados'
+    const tabs = [t.all];//, t.accepted, t.cancelled
     // Initial fetch of all orders when component mounts
     useEffect(() => {
         console.log(`OrdersTabs mounted with userRole: ${userRole}`);
         fetchOrders(pagination.currentPage, pagination.limit);
-    }, [userRole]); // Adding userRole as a dependency to ensure re-fetch if user role changes
+    }, [userRole]);
     // Fetch orders when filters change
     useEffect(() => {
-        // We can add search parameters to the fetchOrders call
         fetchOrders(pagination.currentPage, pagination.limit, filters);
-    }, [filters.dateFrom, filters.dateTo]); // Refresh when date filters change
+    }, [filters.dateFrom, filters.dateTo]);
     const handleRefresh = async () => {
         await fetchOrders(pagination.currentPage, pagination.limit, filters);
-        toast.success('Datos actualizados correctamente');
+        toast.success(t.updated);
     };
     const handleExport = async (format) => {
         setIsExporting(true);
@@ -56,14 +126,14 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 const customerName = order.customer && order.customer.name ? order.customer.name : 'N/A';
                 const customerEmail = order.customer && order.customer.email ? order.customer.email : 'N/A';
                 return {
-                    ID: index + 1,
-                    Referencia: order.reference || 'N/A',
-                    Cliente: customerName,
-                    Email: customerEmail,
-                    Fecha: order.date || 'N/A',
-                    Total: order.total ? `${order.total}` : '0.00 €',
-                    Estado: order.status || 'N/A',
-                    'Método de Pago': order.payment_method || 'N/A'
+                    [t.id]: index + 1,
+                    [t.reference]: order.reference || 'N/A',
+                    [t.client]: customerName,
+                    [t.email]: customerEmail,
+                    [t.date]: order.date || 'N/A',
+                    [t.total]: order.total ? `${order.total}` : '0.00 €',
+                    [t.status]: order.status || 'N/A',
+                    [t.paymentMethod]: order.payment_method || 'N/A'
                 };
             });
             // Helper function for Excel and PDF to format the table
@@ -111,13 +181,10 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 `;
             };
             if (format === 'csv') {
-                // Create CSV string with proper escaping for values containing commas or quotes
                 const headers = Object.keys(exportData[0]);
-                // Function to escape CSV values
                 const escapeCSV = (value) => {
                     if (value === null || value === undefined) return '';
                     const str = String(value);
-                    // If the value contains commas, quotes, or newlines, wrap in quotes and escape any quotes
                     if (str.includes(',') || str.includes('"') || str.includes('\n')) {
                         return `"${str.replace(/"/g, '""')}"`;
                     }
@@ -128,39 +195,35 @@ export default function OrdersTabs({ userRole = 'user' }) {
                     headers.map(header => escapeCSV(row[header])).join(',')
                 );
                 const csvContent = [csvHeader, ...csvRows].join('\n');
-                // Create download link
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
-                triggerDownload(url, 'pedidos.csv');
+                triggerDownload(url, `${t.orderManagement.toLowerCase().replace(/ /g, '_')}.csv`);
             } else if (format === 'excel') {
-                // Simple HTML table export as alternative to xlsx library
                 const html = `
                     <html>
                         <head>
                             <meta charset="UTF-8">
-                            <title>Pedidos</title>
+                            <title>${t.exportTitle}</title>
                         </head>
                         <body>
-                            <h1>Listado de Pedidos</h1>
-                            <p>Fecha de exportación: ${new Date().toLocaleDateString()}</p>
+                            <h1>${t.exportTitle}</h1>
+                            <p>${t.exportDate}: ${new Date().toLocaleDateString()}</p>
                             ${generateTableHtml()}
                         </body>
                     </html>
                 `;
                 const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
-                triggerDownload(url, 'pedidos.xls');
+                triggerDownload(url, `${t.orderManagement.toLowerCase().replace(/ /g, '_')}.xls`);
             } else if (format === 'pdf') {
-                // Create a hidden iframe to print PDF
                 const iframe = document.createElement('iframe');
                 iframe.style.display = 'none';
                 document.body.appendChild(iframe);
-                // Create PDF content as HTML
                 const html = `
                     <html>
                         <head>
                             <meta charset="UTF-8">
-                            <title>Pedidos</title>
+                            <title>${t.exportTitle}</title>
                             <style>
                                 body { 
                                     font-family: Arial, sans-serif;
@@ -178,26 +241,23 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             </style>
                         </head>
                         <body>
-                            <h1>Listado de Pedidos</h1>
-                            <p>Fecha de exportación: ${new Date().toLocaleDateString()}</p>
+                            <h1>${t.exportTitle}</h1>
+                            <p>${t.exportDate}: ${new Date().toLocaleDateString()}</p>
                             ${generateTableHtml()}
                             <div style="text-align: center; margin-top: 30px;">
                                 <button onclick="window.print(); window.close();" style="padding: 10px 20px; background-color: #00B0C8; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                    Imprimir PDF
+                                    ${t.printPDF}
                                 </button>
                             </div>
                         </body>
                     </html>
                 `;
-                // Write to iframe and trigger print
                 iframe.contentWindow.document.open();
                 iframe.contentWindow.document.write(html);
                 iframe.contentWindow.document.close();
-                // Once it's loaded, print it
                 iframe.onload = function () {
                     setTimeout(() => {
                         iframe.contentWindow.print();
-                        // Clean up iframe after printing dialog is closed
                         setTimeout(() => {
                             document.body.removeChild(iframe);
                         }, 1000);
@@ -206,7 +266,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
             }
         } catch (err) {
             console.error('Error exporting orders:', err);
-            alert('Error al exportar los pedidos: ' + err.message);
+            alert(t.errorExport + err.message);
         } finally {
             setIsExporting(false);
         }
@@ -264,49 +324,49 @@ export default function OrdersTabs({ userRole = 'user' }) {
     };
     // Filter orders based on active tab
     const filteredOrders = orders.filter(order => {
-        if (activeTab === 'Todos') return true;
-        if (activeTab === 'Acceptado') return order.status === 'Acceptado';
-        if (activeTab === 'Cancelados') return order.status === 'Cancelados';
+        if (activeTab === t.all) return true;
+        if (activeTab === t.accepted) return order.status === t.accepted;
+        if (activeTab === t.cancelled) return order.status === t.cancelled;
         return false;
     });
 
     // Prepare counts for the TabNavigation component
     const orderCounts = {
-        'Todos': orders.length,
-        'Acceptado': orders.filter(order => order.status === 'Acceptado').length,
-        'Cancelados': orders.filter(order => order.status === 'Cancelados').length
+        [t.all]: orders.length,
+        [t.accepted]: orders.filter(order => order.status === t.accepted).length,
+        [t.cancelled]: orders.filter(order => order.status === t.cancelled).length
     };
     console.log('Order tab counts:', orderCounts);
     return (
         <>
-            <TabNavigation
+            {/* <TabNavigation
                 tabs={tabs}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 counts={orderCounts}
-            />
+            /> */}
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">
-                        <h2 className="text-lg font-medium">Gestión de Pedidos ({pagination.totalItems || filteredOrders.length})</h2>
+                        <h2 className="text-lg font-medium">{t.orderManagement} ({pagination.totalItems || filteredOrders.length})</h2>
                         <button
                             className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
                             onClick={handleRefresh}
                             disabled={loading}
-                            title="Actualizar datos"
+                            title={t.refresh}
                         >
                             <FiRefreshCw className={loading ? 'animate-spin' : ''} />
                         </button>
                     </div>
                     <div className="flex space-x-2">
-                        <button
+                        {/* <button
                             className="flex items-center px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors"
                             onClick={() => handleExport('pdf')}
                             disabled={isExporting || loading}
-                            title="Exportar a CSV"
+                            title={t.exportCSV}
                         >
-                            <FiDownload className="mr-1" /> Exportar
-                        </button>
+                            <FiDownload className="mr-1" /> {t.export}
+                        </button> */}
                         {/* {userRole === 'admin' && (
                             <button
                                 className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
@@ -324,7 +384,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar ID"
+                                placeholder={t.searchId}
                                 name="searchId"
                                 value={filters.searchId}
                                 onChange={handleFilterChange}
@@ -335,7 +395,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar Referencia"
+                                placeholder={t.searchReference}
                                 name="searchReference"
                                 value={filters.searchReference}
                                 onChange={handleFilterChange}
@@ -346,7 +406,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar Cliente"
+                                placeholder={t.searchCustomer}
                                 name="searchCustomer"
                                 value={filters.searchCustomer}
                                 onChange={handleFilterChange}
@@ -357,7 +417,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar Total"
+                                placeholder={t.searchTotal}
                                 name="searchTotal"
                                 value={filters.searchTotal}
                                 onChange={handleFilterChange}
@@ -370,7 +430,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 {loading ? (
                     <div className="py-20 text-center">
                         <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
-                        <p className="mt-3 text-gray-600">Cargando pedidos...</p>
+                        <p className="mt-3 text-gray-600">{t.loading}</p>
                     </div>
                 ) : (
                     <OrdersTable

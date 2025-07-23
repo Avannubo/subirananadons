@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import Product from '@/models/Product';
+import Category from '@/models/Category';
+import Brand from '@/models/Brand';
 import dbConnect from '@/lib/dbConnect';
 import mongoose from 'mongoose';
 
@@ -17,7 +19,9 @@ export async function GET(request, { params }) {
 
         await dbConnect();
 
-        const product = await Product.findById(id);
+        const product = await Product.findById(id)
+            .populate('category')
+            .populate('brand');
 
         if (!product) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -58,12 +62,48 @@ export async function PUT(request, { params }) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 });
         }
 
+
         // Update product fields
         if (body.name) product.name = body.name;
         if (body.reference !== undefined) product.reference = body.reference;
         if (body.description !== undefined) product.description = body.description;
-        if (body.category) product.category = body.category;
-        if (body.brand !== undefined) product.brand = body.brand;
+
+
+        // Always set category and brand, accepting ObjectId, $oid, or string
+        const getValidObjectId = (val) => {
+            if (!val) return null;
+            // If MongoDB export object { $oid: ... }
+            if (typeof val === 'object' && val.$oid) {
+                return mongoose.Types.ObjectId.isValid(val.$oid) ? val.$oid : null;
+            }
+            // If object with es/ca/name (should not be used for ObjectId fields)
+            if (typeof val === 'object' && (val.es || val.ca || val.name)) {
+                // Try to use es or ca if they look like ObjectId
+                if (val.es && mongoose.Types.ObjectId.isValid(val.es)) return val.es;
+                if (val.ca && mongoose.Types.ObjectId.isValid(val.ca)) return val.ca;
+                // Otherwise, fallback to null
+                return null;
+            }
+            // If string
+            if (typeof val === 'string' && mongoose.Types.ObjectId.isValid(val)) {
+                return val;
+            }
+            // If object with toString
+            if (typeof val === 'object' && val.toString) {
+                const str = val.toString();
+                return mongoose.Types.ObjectId.isValid(str) ? str : null;
+            }
+            return null;
+        };
+
+        const newCategory = getValidObjectId(body.category);
+        if (newCategory) product.category = newCategory;
+        // If not valid, do not overwrite (prevents nulling on edit)
+
+        const newBrand = getValidObjectId(body.brand);
+        if (newBrand) product.brand = newBrand;
+        // If not valid, do not overwrite
+
         if (body.price_excl_tax !== undefined) product.price_excl_tax = parseFloat(body.price_excl_tax);
         if (body.price_incl_tax !== undefined) product.price_incl_tax = parseFloat(body.price_incl_tax);
         if (body.image) product.image = body.image;
@@ -82,7 +122,13 @@ export async function PUT(request, { params }) {
         // Save the updated product
         const updatedProduct = await product.save();
 
-        return NextResponse.json(updatedProduct);
+        // Populate category and brand before returning
+        // Fix: Use correct model names for population (should match Mongoose model registration)
+        const populatedProduct = await Product.findById(updatedProduct._id)
+            .populate('category')
+            .populate('brand');
+
+        return NextResponse.json(populatedProduct);
     } catch (error) {
         console.error('Error updating product:', error);
 
@@ -131,4 +177,4 @@ export async function DELETE(request, { params }) {
         console.error('Error deleting product:', error);
         return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
     }
-} 
+}

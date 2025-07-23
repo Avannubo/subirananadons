@@ -1,5 +1,42 @@
 'use client';
 import { FiX, FiAlertCircle } from 'react-icons/fi';
+// Translation object for Catalan and Spanish
+const translations = {
+    ca: {
+        title: 'Eliminar Llista',
+        confirm: 'Estàs segur que vols eliminar la llista',
+        irreversible: 'Aquesta acció no es pot desfer.',
+        info: 'Informació de la llista:',
+        reference: 'Referència:',
+        babyName: 'Nom del nadó:',
+        creationDate: 'Data de creació:',
+        status: 'Estat:',
+        cancel: 'Cancel·lar',
+        deleting: 'Eliminant...',
+        delete: 'Eliminar Llista',
+    },
+    es: {
+        title: 'Eliminar Lista',
+        confirm: '¿Estás seguro de que deseas eliminar la lista',
+        irreversible: 'Esta acción no se puede deshacer.',
+        info: 'Información de la lista:',
+        reference: 'Referencia:',
+        babyName: 'Nombre del bebé:',
+        creationDate: 'Fecha de creación:',
+        status: 'Estado:',
+        cancel: 'Cancelar',
+        deleting: 'Eliminando...',
+        delete: 'Eliminar Lista',
+    }
+};
+
+function getLocale() {
+    if (typeof window !== 'undefined') {
+        const lang = window.navigator.language || 'es';
+        return lang.startsWith('ca') ? 'ca' : 'es';
+    }
+    return 'es';
+}
 
 export default function ListDeleteModal({
     showModal,
@@ -8,6 +45,8 @@ export default function ListDeleteModal({
     handleDeleteList,
     loading
 }) {
+    const locale = getLocale();
+    const t = translations[locale];
     if (!showModal || !selectedList) return null;
 
     return (
@@ -19,7 +58,7 @@ export default function ListDeleteModal({
                             <span className="text-red-500 mr-2">
                                 <FiAlertCircle size={24} />
                             </span>
-                            <h2 className="text-xl font-bold text-gray-800">Eliminar Lista</h2>
+                            <h2 className="text-xl font-bold text-gray-800">{t.title}</h2>
                         </div>
                         <button
                             onClick={() => setShowModal(false)}
@@ -36,18 +75,18 @@ export default function ListDeleteModal({
                             </div>
                             <div className="ml-3">
                                 <p className="text-sm text-red-700">
-                                    ¿Estás seguro de que deseas eliminar la lista "{selectedList.name}"? Esta acción no se puede deshacer.
+                                    {t.confirm} "{selectedList.name}"? {t.irreversible}
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                        <h3 className="text-sm font-medium text-gray-700 mb-2">Información de la lista:</h3>
-                        <p className="text-sm text-gray-600"><span className="font-medium">Referencia:</span> {selectedList.reference}</p>
-                        <p className="text-sm text-gray-600"><span className="font-medium">Nombre del bebé:</span> {selectedList.babyName}</p>
-                        <p className="text-sm text-gray-600"><span className="font-medium">Fecha de creación:</span> {selectedList.creationDate}</p>
-                        <p className="text-sm text-gray-600"><span className="font-medium">Estado:</span> {selectedList.status}</p>
+                        <h3 className="text-sm font-medium text-gray-700 mb-2">{t.info}</h3>
+                        <p className="text-sm text-gray-600"><span className="font-medium">{t.reference}</span> {selectedList.reference}</p>
+                        <p className="text-sm text-gray-600"><span className="font-medium">{t.babyName}</span> {selectedList.babyName}</p>
+                        <p className="text-sm text-gray-600"><span className="font-medium">{t.creationDate}</span> {selectedList.creationDate}</p>
+                        <p className="text-sm text-gray-600"><span className="font-medium">{t.status}</span> {selectedList.status}</p>
                     </div>
 
                     <div className="border-t border-gray-200 pt-4">
@@ -57,7 +96,7 @@ export default function ListDeleteModal({
                                 onClick={() => setShowModal(false)}
                                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                             >
-                                Cancelar
+                                {t.cancel}
                             </button>
                             <button
                                 type="button"
@@ -65,7 +104,7 @@ export default function ListDeleteModal({
                                 disabled={loading}
                                 className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
                             >
-                                {loading ? 'Eliminando...' : 'Eliminar Lista'}
+                                {loading ? t.deleting : t.delete}
                             </button>
                         </div>
                     </div>
@@ -73,4 +112,4 @@ export default function ListDeleteModal({
             </div>
         </div>
     );
-} 
+}

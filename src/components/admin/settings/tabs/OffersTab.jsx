@@ -8,11 +8,11 @@ export default function OffersTab() {
     const [loading, setLoading] = useState(true);
     const [form, setForm] = useState({
         imageUrl: '',
-        title: '',
-        description: '',
-        brand: '', // brand name 
-        brandLogo: '', // brand logo URL
-        discount: '' // discount %
+        title: { es: '', ca: '' },
+        description: { es: '', ca: '' },
+        brand: '',
+        brandLogo: '',
+        discount: ''
     });
     const [editingId, setEditingId] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -29,6 +29,8 @@ export default function OffersTab() {
                 const res = await fetch('/api/offers');
                 const data = await res.json();
                 setOffers(data);
+                console.log(data);
+
             } catch (err) {
                 toast.error('Error al cargar las ofertas');
             } finally {
@@ -53,12 +55,23 @@ export default function OffersTab() {
     const handleChange = e => {
         const { name, value } = e.target;
         if (name === 'brand') {
-            // When brand changes, find the brand logo
             const selectedBrand = brands.find(b => b.id === value || b.name === value);
             setForm(f => ({
                 ...f,
                 [name]: value,
                 brandLogo: selectedBrand?.logo || ''
+            }));
+        } else if (name.startsWith('title.')) {
+            const lang = name.split('.')[1];
+            setForm(f => ({
+                ...f,
+                title: { ...f.title, [lang]: value }
+            }));
+        } else if (name.startsWith('description.')) {
+            const lang = name.split('.')[1];
+            setForm(f => ({
+                ...f,
+                description: { ...f.description, [lang]: value }
             }));
         } else {
             setForm(f => ({ ...f, [name]: value }));
@@ -125,18 +138,20 @@ export default function OffersTab() {
 
             // Find the selected brand from the brands list
             const selectedBrand = brands.find(b => b.id === form.brand || b.name === form.brand);
+            if (!selectedBrand) {
+                toast.error('Selecciona una marca válida.');
+                return;
+            }
             // Always use the logo from the selectedBrand if available
-            const brandLogo = selectedBrand && selectedBrand.logo ? selectedBrand.logo : '';
-            console.log('Selected brand:', selectedBrand);
-            console.log('Brand logo to save:', brandLogo);
-            // Prepare the offer data with brand information
+            const brandLogo = selectedBrand.logo ? selectedBrand.logo : '';
+            // Prepare the offer data with brand ObjectId
             const offerData = {
                 imageUrl: imageUrl || form.imageUrl,
                 title: form.title,
                 description: form.description,
                 discount: form.discount,
-                brand: selectedBrand?.name || form.brand, // Use the brand name
-                brandLogo // Always set brandLogo
+                brand: selectedBrand.id, // Send ObjectId
+                brandLogo
             };
 
             // Add _id if editing
@@ -164,8 +179,8 @@ export default function OffersTab() {
             // Reset form
             setForm({
                 imageUrl: '',
-                title: '',
-                description: '',
+                title: { es: '', ca: '' },
+                description: { es: '', ca: '' },
                 brand: '',
                 brandLogo: '',
                 discount: ''
@@ -181,11 +196,18 @@ export default function OffersTab() {
     };
 
     const handleEdit = offer => {
+        // Determine the brand id for the select input
+        let brandId = '';
+        if (offer.brand && typeof offer.brand === 'object') {
+            brandId = offer.brand._id || offer.brand.id || '';
+        } else if (typeof offer.brand === 'string') {
+            brandId = offer.brand;
+        }
         setForm({
             imageUrl: offer.imageUrl || '',
-            title: offer.title || '',
-            description: offer.description || '',
-            brand: offer.brand || '',
+            title: offer.title || { es: '', ca: '' },
+            description: offer.description || { es: '', ca: '' },
+            brand: brandId,
             brandLogo: offer.brandLogo || '',
             discount: offer.discount || ''
         });
@@ -212,7 +234,7 @@ export default function OffersTab() {
 
     return (
         <div className="p-6 bg-white rounded-xl">
-            <h2 className="font-bold mb-6 text-lg text-gray-800">Ofertas Destacadas</h2>
+            <h2 className="font-bold mb-6 text-lg text-gray-800">Ofertes Destacades</h2>
             {error && <div className="text-red-500 mb-2">{error}</div>}
 
             <form onSubmit={handleSubmit} className="mb-8 space-y-6">
@@ -228,18 +250,18 @@ export default function OffersTab() {
                         ) : (
                             <div className="flex flex-col items-center justify-center h-full">
                                 <FiUpload className="w-10 h-10 text-gray-400" />
-                                <p className="mt-2 text-sm text-gray-500">No image selected</p>
+                                <p className="mt-2 text-sm text-gray-500">No s'ha seleccionat cap imatge</p>
                             </div>
                         )}
                     </div>
                     <div className="w-full grid grid-cols-2 gap-2">
                         <div>
-                            <label htmlFor="offerImage" className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'}`}>{isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}</label>
+                            <label htmlFor="offerImage" className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'}`}>{isUploading ? 'Pujant...' : 'Selecciona Imatge'}</label>
                             <input type="file" id="offerImage" accept="image/*" onChange={handleImageChange} disabled={isUploading} className="hidden" />
                         </div>
                         <button type="button" onClick={() => { if (form.imageUrl) { setImagePreview(form.imageUrl); } }} disabled={isUploading || !form.imageUrl} className={`w-full px-4 py-2 text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || !form.imageUrl ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>
                             <FiPlus size={16} />
-                            <span>Vista previa URL</span>
+                            <span>Previsualitza URL</span>
                         </button>
                         <button
                             type="button"
@@ -247,7 +269,7 @@ export default function OffersTab() {
                             disabled={isUploading}
                             className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
                         >
-                            Seleccionar existente
+                            Selecciona existent
                         </button>
                     </div>
                     {showImageSelector && (
@@ -260,19 +282,23 @@ export default function OffersTab() {
                             onClose={() => setShowImageSelector(false)}
                         />
                     )}
-                    <p className="mt-1 text-xs text-gray-500 text-center">Formatos: JPG, PNG. Máx: 5MB</p>
+                    <p className="mt-1 text-xs text-gray-500 text-center">Formats: JPG, PNG. Màx: 5MB</p>
                     <div className="w-full">
-                        <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">URL de la imagen (opcional)</label>
+                        <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">URL de la imatge (opcional)</label>
                         <div className="flex mt-1">
                             <input type="text" id="imageUrl" name="imageUrl" value={form.imageUrl} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]" placeholder="https://example.com/image.jpg" />
                             <button type="button" onClick={() => { if (form.imageUrl) { setImagePreview(form.imageUrl); } }} className="text-nowrap bg-gray-200 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-300">Vista previa</button>
                         </div>
-                        <p className="mt-1 text-xs text-gray-500">O pega la URL directamente aquí</p>
+                        <p className="mt-1 text-xs text-gray-500">O enganxa la URL directament aquí</p>
                     </div>
                 </div>
                 <div className="flex flex-col md:flex-row gap-2">
-                    <input name="title" value={form.title} onChange={handleChange} placeholder="Título" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
-                    <input name="description" value={form.description} onChange={handleChange} placeholder="Descripción" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
+                    <input name="title.ca" value={form.title.ca} onChange={handleChange} placeholder="Títol (CA)" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
+                    <input name="title.es" value={form.title.es} onChange={handleChange} placeholder="Título (ES)" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
+                </div>
+                <div className="flex flex-col md:flex-row gap-2 mt-2">
+                    <input name="description.ca" value={form.description.ca} onChange={handleChange} placeholder="Descripció (CA)" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
+                    <input name="description.es" value={form.description.es} onChange={handleChange} placeholder="Descripción (ES)" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
                 </div>
 
                 {/* Brand selector and discount */}
@@ -280,18 +306,18 @@ export default function OffersTab() {
                     <select name="brand" value={form.brand} onChange={handleChange} className="border border-gray-300 p-2 rounded w-full bg-gray-50">
                         <option value="">Selecciona una marca</option>
                         {brands.map(b => (
-                            <option key={b.id} value={b.name}>{b.name}</option>
+                            <option key={b.id} value={b.id}>{b.name}</option>
                         ))}
                     </select>
-                    <input name="discount" type="number" value={form.discount ?? ''} onChange={handleChange} placeholder="% Descuento" className="border border-gray-300 p-2 rounded w-full bg-gray-50" min="0" max="100" />
+                    <input name="discount" type="number" value={form.discount ?? ''} onChange={handleChange} placeholder="% Descompte" className="border border-gray-300 p-2 rounded w-full bg-gray-50" min="0" max="100" />
                 </div>
                 <div className="flex gap-2">
-                    <button type="submit" className="bg-[#00B0C8] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm" disabled={isUploading || (offers.length >= maxOffers && !editingId)}>{editingId ? 'Actualizar' : 'Agregar'} Oferta</button>
+                    <button type="submit" className="bg-[#00B0C8] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm" disabled={isUploading || (offers.length >= maxOffers && !editingId)}>{editingId ? 'Actualitza' : 'Afegeix'} Oferta</button>
                     {editingId && (
-                        <button type="button" onClick={() => { setEditingId(null); setForm({ imageUrl: '', title: '', description: '', brand: '', brandLogo: '', discount: '' }); setImagePreview(''); }} className="px-4 py-2 text-gray-700 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200">Cancelar</button>
+                        <button type="button" onClick={() => { setEditingId(null); setForm({ imageUrl: '', title: '', description: '', brand: '', brandLogo: '', discount: '' }); setImagePreview(''); }} className="px-4 py-2 text-gray-700 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200">Cancel·la</button>
                     )}
                     {offers.length >= maxOffers && !editingId && (
-                        <div className="text-red-500 text-center align-middle">*Solo puedes agregar hasta 4 ofertas. Elimina una para agregar otra.</div>
+                        <div className="text-red-500 text-center align-middle">*Només pots afegir fins a 4 ofertes. Elimina una per afegir-ne una altra.</div>
                     )}
                 </div>
             </form>
@@ -300,12 +326,12 @@ export default function OffersTab() {
                     <table className="w-full text-sm bg-white rounded-xl shadow border border-gray-200 animate-pulse">
                         <thead>
                             <tr className="bg-gray-50 text-gray-700 uppercase text-xs">
-                                <th className="py-3 px-2 font-semibold text-left">Imagen</th>
-                                <th className="py-3 px-2 font-semibold text-left">Título</th>
-                                <th className="py-3 px-2 font-semibold text-left">Descripción</th>
+                                <th className="py-3 px-2 font-semibold text-left">Imatge</th>
+                                <th className="py-3 px-2 font-semibold text-left">Títol</th>
+                                <th className="py-3 px-2 font-semibold text-left">Descripció</th>
                                 <th className="py-3 px-2 font-semibold text-left">Marca</th>
-                                <th className="py-3 px-2 font-semibold text-left">Desc. %</th>
-                                <th className="py-3 px-2 font-semibold text-left">Acciones</th>
+                                <th className="py-3 px-2 font-semibold text-left">Descompte %</th>
+                                <th className="py-3 px-2 font-semibold text-left">Accions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -358,14 +384,34 @@ export default function OffersTab() {
                                             <img src={offer.imageUrl} alt="offer" className="h-12 w-20 object-cover rounded-lg border border-gray-200 bg-gray-100" />
                                         )}
                                     </td>
-                                    <td className="py-2 px-2">{offer.title}</td>
-                                    <td className="py-2 px-2">{offer.description}</td>
                                     <td className="py-2 px-2">
-                                        <a href={`/brands?brand=` + offer.brand} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{offer.brand}</a></td>
+                                        <span className="block"><span className="font-semibold">CA:</span> {offer.title?.ca || ''}</span>
+                                        <span className="block text-xs text-gray-400"><span className="font-semibold">ES:</span> {offer.title?.es || ''}</span>
+                                    </td>
+                                    <td className="py-2 px-2">
+                                        <span className="block"><span className="font-semibold">CA:</span> {offer.description?.ca || ''}</span>
+                                        <span className="block text-xs text-gray-400"><span className="font-semibold">ES:</span> {offer.description?.es || ''}</span>
+                                    </td>
+                                    <td className="py-2 px-2">
+                                        <a
+                                            href={
+                                                offer.brand && typeof offer.brand === 'object' && offer.brand._id
+                                                    ? `/brands?brand=${offer.brand._id}`
+                                                    : `/brands?brand=${offer.brand}`
+                                            }
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 underline"
+                                        >
+                                            {offer.brand && typeof offer.brand === 'object'
+                                                ? offer.brand.name
+                                                : (brands.find(b => b.id === offer.brand)?.name || offer.brand)}
+                                        </a>
+                                    </td>
                                     <td className="py-2 px-2">{offer.discount ? `${offer.discount}%` : ''}</td>
                                     <td className="py-2 px-2 flex gap-2">
-                                        <button onClick={() => handleEdit(offer)} className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 border border-blue-100 text-xs">Editar</button>
-                                        <button onClick={() => handleDelete(offer._id)} className="bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100 border border-red-100 text-xs">Eliminar</button>
+                                        <button onClick={() => handleEdit(offer)} className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 border border-blue-100 text-xs">Edita</button>
+                                        <button onClick={() => handleDelete(offer._id)} className="bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100 border border-red-100 text-xs">Elimina</button>
                                     </td>
                                 </tr>
                             ))}

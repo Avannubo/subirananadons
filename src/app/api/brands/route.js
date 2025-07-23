@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
+import dbConnect from '@/lib/dbConnect';
+import Brand from '@/models/Brand';
 
 // GET /api/brands - Get all brands with optional filtering
 export async function GET(request) {
@@ -9,17 +9,21 @@ export async function GET(request) {
         const search = searchParams.get('search');
         const status = searchParams.get('status');
         const preventSort = searchParams.get('preventSort') === 'true';
+        const id = searchParams.get('id');
 
         // Pagination parameters
         const page = parseInt(searchParams.get('page')) || 1;
         const limit = parseInt(searchParams.get('limit')) || 5;
         const skip = (page - 1) * limit;
 
-        // Connect to database
-        const { db } = await connectToDatabase();
+        await dbConnect();
 
         // Build query based on search parameters
         const query = {};
+
+        if (id) {
+            query._id = id;
+        }
 
         if (search) {
             query.$or = [
@@ -33,10 +37,10 @@ export async function GET(request) {
         }
 
         // Get total count for pagination
-        const totalItems = await db.collection('brands').countDocuments(query);
+        const totalItems = await Brand.countDocuments(query);
 
         // Build the query with optional sorting
-        let brandsQuery = db.collection('brands').find(query);
+        let brandsQuery = Brand.find(query);
 
         // Apply sorting only if preventSort is false
         if (!preventSort) {
@@ -47,7 +51,7 @@ export async function GET(request) {
         brandsQuery = brandsQuery.skip(skip).limit(limit);
 
         // Execute the query
-        const brands = await brandsQuery.toArray();
+        const brands = await brandsQuery.exec();
 
         // Calculate pagination info
         const totalPages = Math.ceil(totalItems / limit);
@@ -80,8 +84,7 @@ export async function POST(request) {
             );
         }
 
-        // Connect to database
-        const { db } = await connectToDatabase();
+        await dbConnect();
 
         // Generate slug if not provided
         let slug = data.slug || '';
@@ -95,7 +98,7 @@ export async function POST(request) {
 
         // Check if the slug is unique
         if (slug) {
-            const existingBrand = await db.collection('brands').findOne({ slug });
+            const existingBrand = await Brand.findOne({ slug });
             if (existingBrand) {
                 // Append a timestamp to make the slug unique
                 slug = `${slug}-${Date.now()}`;
@@ -103,7 +106,7 @@ export async function POST(request) {
         }
 
         // Prepare brand document
-        const brand = {
+        const brand = new Brand({
             name: data.name,
             slug: slug,
             logo: data.logo || '',
@@ -114,24 +117,12 @@ export async function POST(request) {
             enabled: data.enabled !== undefined ? data.enabled : true,
             createdAt: new Date(),
             updatedAt: new Date()
-        };
+        });
 
         // Insert brand
-        const result = await db.collection('brands').insertOne(brand);
+        await brand.save();
 
-        // Get the created brand with the _id
-        const createdBrand = await db
-            .collection('brands')
-            .findOne({ _id: result.insertedId });
-
-        if (!createdBrand) {
-            return NextResponse.json(
-                { error: 'Failed to create brand - could not retrieve the created document' },
-                { status: 500 }
-            );
-        }
-
-        return NextResponse.json(createdBrand, { status: 201 });
+        return NextResponse.json(brand, { status: 201 });
     } catch (error) {
         console.error('Error creating brand:', error);
         return NextResponse.json(

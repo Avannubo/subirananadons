@@ -2,6 +2,14 @@
 import mongoose from 'mongoose';
 
 const birthListSchema = new mongoose.Schema({
+    email: {
+        type: String,
+        default: ''
+    },
+    Creator: {
+        type: String,
+        default: ''
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

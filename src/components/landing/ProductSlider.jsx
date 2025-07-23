@@ -22,17 +22,26 @@ export default function ProductSlider({
         mobile: 1
     }
 }) {
+    const [showBirthListModal, setShowBirthListModal] = useState(false);
+
     const [hoveredProduct, setHoveredProduct] = useState(null);
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
     const swiperRef = useRef(null);
-    const handleQuickView = (product) => {
+    const [viewMode, setViewMode] = useState('grid');
+
+    const handleOpenQuickView = (product) => {
         setQuickViewProduct(product);
-        setIsQuickViewOpen(true);
     };
     const handleCloseQuickView = () => {
-        setIsQuickViewOpen(false);
         setQuickViewProduct(null);
+    };
+
+    const handleOpenBirthListSelectModal = (product) => {
+        setBirthListProduct(product);
+    };
+    const handleCloseBirthListSelectModal = () => {
+        setBirthListProduct(null);
     };
     const handleAddToCart = (product) => {
         // Implement add to cart functionality
@@ -101,11 +110,11 @@ export default function ProductSlider({
                         {products.map((product) => (
                             <SwiperSlide key={product.id} className="h-full">
                                 <ProductCard
+                                    key={product.id}
                                     product={product}
-                                    onQuickViewClick={() => handleQuickView(product)}
-                                    onAddToCartClick={() => handleAddToCart(product)}
-                                    isHovered={hoveredProduct === product.id}
-                                    setIsHovered={setHoveredProduct}
+                                    viewMode={viewMode}
+                                    onQuickViewClick={handleOpenQuickView}
+                                    onOpenBirthListModal={handleOpenBirthListSelectModal}
                                 />
                             </SwiperSlide>
                         ))}
@@ -116,14 +125,25 @@ export default function ProductSlider({
                     <div className="custom-pagination flex justify-center items-center mt-4 md:mt-8"></div>
                 </div>
             </div>
-            {/* Quick View Modal */}
-            {isQuickViewOpen && quickViewProduct && (
+            {/* Render Quick View Modal */}
+            {quickViewProduct && (
                 <ProductQuickView
                     product={quickViewProduct}
-                    isOpen={isQuickViewOpen}
                     onClose={handleCloseQuickView}
                 />
             )}
+
+
+            {/* Render Birth List Modal with backdrop and scroll lock */}
+            {showBirthListModal && (
+                <BirthListModalWrapper
+                    show={showBirthListModal}
+                    onClose={handleCloseBirthListSelectModal}
+                    product={birthListProduct}
+                    userId={session?.user?.id}
+                />
+            )}
+
             {/* Add custom styles for pagination bullets */}
             <style jsx global>{`
                 .custom-bullet {

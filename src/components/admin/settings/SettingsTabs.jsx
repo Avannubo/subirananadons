@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useLocale } from 'next-intl';
 import TransportistasTab from "@/components/admin/settings/tabs/TransportistasTab";
 import OffersTab from "@/components/admin/settings/tabs/OffersTab";
 import SliderTab from "@/components/admin/settings/tabs/SliderTab";
@@ -11,19 +12,20 @@ import EquipoTab from "@/components/admin/settings/tabs/EquipoTab";
 import TabNavigation from "@/components/admin/shared/TabNavigation";
 export default function SettingsTabs() {
     const [activeTab, setActiveTab] = useState('transportistas');
+    const locale = useLocale();
     const tabs = [
-        { id: 'transportistas', label: 'Transportistas' },
-        { id: 'slider', label: 'Slider Conf.' },
-        { id: 'images', label: 'Ofertas Conf.' },
-        { id: 'banner', label: 'Banner Img.' },
-        { id: 'recomendation', label: 'Recomendation Conf.' },
-        { id: 'politicas', label: 'Textos de politicas' },
-        { id: 'parameters', label: 'Parametros' },
-        // { id: 'rendimiento', label: 'Rendimiento' },
-        // { id: 'administracion', label: 'Administración' },
-        // { id: 'email', label: 'Dirección de correo electrónico' },
-        // { id: 'importar', label: 'Importar' },
-        //{ id: 'equipo', label: 'Equipo' }
+        { id: 'transportistas', label: locale === 'ca' ? 'Transportistes' : 'Transportistas' },
+        { id: 'slider', label: locale === 'ca' ? 'Slider Conf.' : 'Slider Conf.' },
+        { id: 'images', label: locale === 'ca' ? 'Ofertes Conf.' : 'Ofertas Conf.' },
+        { id: 'banner', label: locale === 'ca' ? 'Banner Img.' : 'Banner Img.' },
+        { id: 'recomendation', label: locale === 'ca' ? 'Conf. Recomanació' : 'Recomendation Conf.' },
+        { id: 'politicas', label: locale === 'ca' ? 'Textos de polítiques' : 'Textos de politicas' },
+        { id: 'parameters', label: locale === 'ca' ? 'Paràmetres' : 'Parametros' },
+        // { id: 'rendimiento', label: locale === 'ca' ? 'Rendiment' : 'Rendimiento' },
+        // { id: 'administracion', label: locale === 'ca' ? 'Administració' : 'Administración' },
+        // { id: 'email', label: locale === 'ca' ? 'Adreça electrònica' : 'Dirección de correo electrónico' },
+        // { id: 'importar', label: locale === 'ca' ? 'Importar' : 'Importar' },
+        // { id: 'equipo', label: locale === 'ca' ? 'Equip' : 'Equipo' }
     ];
     // Format tabs for the TabNavigation component
     const tabNavItems = tabs.map(tab => tab.label);

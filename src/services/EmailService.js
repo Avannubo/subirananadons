@@ -110,21 +110,20 @@ class EmailService {
                     <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.reserved || 0}</td>
                 </tr>`
             ).join('');
-            // Email to list owner
+            // Email to list owner <p>Hola ${list.Creator},</p> <p><strong>Estado:</strong> ${list.isPublic ? 'Pública' : 'Privada'}</p>
             const userMailOptions = {
                 from: "info@subirananadons.com",
-                to: user.email,
+                to: list.email,
                 subject: `Tu lista de nacimiento "${list.title}" ha sido creada - Subirana Nadons`,
                 html: `
                     <h1>¡Tu lista de nacimiento ha sido creada con éxito!</h1>
-                    <p>Hola ${user.name},</p>
+                    
                     <p>Tu lista de nacimiento ha sido creada y está lista para ser compartida.</p>
                     <h2>Detalles de la lista:</h2>
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Estado:</strong> ${list.isPublic ? 'Pública' : 'Privada'}</p>
-                    <p><strong>URL de la lista:</strong> <a>/lists/${list._id}</a></p> 
+                    <p><strong>ID de la lista:</strong> <a>${list._id}</a></p> 
                     <p>Puedes compartir el enlace de tu lista con familiares y amigos para que puedan ver los productos que has seleccionado.</p>
                     <p>Gracias por confiar en Subirana Nadons.</p>
                 `
@@ -141,7 +140,7 @@ class EmailService {
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Creada por:</strong> ${user.name} (${user.email})</p>
+                    <p><strong>Creada por:</strong> ${(user.Creator || '')} (${list.email || ''})</p>
                     <p><strong>Estado:</strong> ${list.isPublic ? 'Pública' : 'Privada'}</p>
                     <p><strong>URL de la lista:</strong> <a>/lists/${list._id}</a></p>
                 `
@@ -159,18 +158,23 @@ class EmailService {
     }
     static async sendContactFormEmail(formData) {
         try {
-            const templateParams = {
-                from_name: formData.name,
-                from_email: formData.email,
-                message: formData.message,
-                phone: formData.phone || 'No proporcionado',
-                subject: formData.subject || 'Consulta general'
+            const mailOptions = {
+                from: "info@subirananadons.com",
+                to: "info@subirananadons.com",
+                subject: formData.subject || "Consulta general desde el formulario de contacto",
+                html: `
+                    <h1 style="color:#00B0C8;">Nuevo mensaje de contacto</h1>
+                    <p><strong>Nombre:</strong> ${formData.name}</p>
+                    <p><strong>Email:</strong> ${formData.email}</p>
+                    <p><strong>Teléfono:</strong> ${formData.phone || 'No proporcionado'}</p>
+                    <p><strong>Asunto:</strong> ${formData.subject || 'Consulta general'}</p>
+                    <h2 style="margin-top:24px;">Mensaje:</h2>
+                    <div style="background:#f8f9fa; padding:16px; border-radius:8px; border:1px solid #eee; font-size:16px;">${formData.message.replace(/\n/g, '<br>')}</div>
+                    <br>
+                    <p style="font-size:13px;color:#888;">Este mensaje ha sido enviado desde el formulario de contacto de Subirana Nadons.</p>
+                `
             };
-            await emailjs.send(
-                EMAILJS_SERVICE_ID,
-                TEMPLATES.CONTACT_FORM,
-                templateParams
-            );
+            await transporter.sendMail(mailOptions);
         } catch (error) {
             console.error('Error sending contact form email:', error);
             throw error;

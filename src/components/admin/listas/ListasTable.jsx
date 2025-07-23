@@ -1,5 +1,98 @@
 'use client';
 import { useState, useRef } from 'react';
+// Translation object for Catalan and Spanish
+const translations = {
+    ca: {
+        id: 'ID',
+        reference: 'Referència',
+        name: 'Nom',
+        creator: 'Usuari',
+        creationDate: 'Data Creació',
+        dueDate: 'Data Prevista',
+        privacy: 'Privacitat',
+        public: 'Pública',
+        private: 'Privada',
+        status: 'Estat',
+        active: 'Activa',
+        completed: 'Completada',
+        inactive: 'Inactiva',
+        viewShare: 'Veure/Compartir',
+        documents: 'Documents',
+        action: 'Quantity',
+        noLists: 'No s’han trobat llistes de regals.',
+        viewDetails: 'Veure detalls',
+        copyLink: 'Copiar enllaç',
+        linkCopied: 'Enllaç copiat al porta-retalls',
+        linkCopyError: 'Error en copiar l’enllaç',
+        downloadPDF: 'Descarregar PDF',
+        printList: 'Imprimir llista',
+        editList: 'Editar llista',
+        changeStatus: 'Canviar estat',
+        deleteList: 'Eliminar llista',
+        listUpdated: 'Llista actualitzada amb èxit',
+        listUpdateError: 'Error en actualitzar la llista',
+        listDeleted: 'Llista eliminada amb èxit',
+        listDeleteError: 'Error en eliminar la llista',
+        pdfGenerating: 'Generant PDF...',
+        pdfDownloadSuccess: 'Llista descarregada correctament',
+        pdfDownloadError: 'Error en descarregar el PDF',
+        printError: 'Error en imprimir la llista',
+        loadingItemsError: 'Error en carregar els productes de la llista',
+        uploadingImage: 'Pujant imatge...',
+        imageUploadSuccess: 'Imatge pujada correctament',
+        imageUploadError: 'Error en pujar la imatge. Es desarà la llista sense la nova imatge.',
+        requiredFields: 'Si us plau, completa tots els camps obligatoris',
+    },
+    es: {
+        id: 'ID',
+        reference: 'Referencia',
+        name: 'Nombre',
+        creator: 'Usuario',
+        creationDate: 'Fecha Creación',
+        dueDate: 'Fecha Prevista',
+        privacy: 'Privacidad',
+        public: 'Pública',
+        private: 'Privada',
+        status: 'Estado',
+        active: 'Activa',
+        completed: 'Completada',
+        inactive: 'InActiva',
+        viewShare: 'Ver/Compartir',
+        documents: 'Documentos',
+        action: 'Acción',
+        noLists: 'No se encontraron listas de regalos.',
+        viewDetails: 'Ver detalles',
+        copyLink: 'Copiar enlace',
+        linkCopied: 'Enlace copiado al portapapeles',
+        linkCopyError: 'Error al copiar el enlace',
+        downloadPDF: 'Descargar PDF',
+        printList: 'Imprimir lista',
+        editList: 'Editar lista',
+        changeStatus: 'Cambiar estado',
+        deleteList: 'Eliminar lista',
+        listUpdated: 'Lista actualizada con éxito',
+        listUpdateError: 'Error al actualizar la lista',
+        listDeleted: 'Lista eliminada con éxito',
+        listDeleteError: 'Error al eliminar la lista',
+        pdfGenerating: 'Generando PDF...',
+        pdfDownloadSuccess: 'Lista descargada correctamente',
+        pdfDownloadError: 'Error al descargar el PDF',
+        printError: 'Error al imprimir la lista',
+        loadingItemsError: 'Error al cargar los productos de la lista',
+        uploadingImage: 'Subiendo imagen...',
+        imageUploadSuccess: 'Imagen subida correctamente',
+        imageUploadError: 'Error al subir la imagen. Se guardará la lista sin la nueva imagen.',
+        requiredFields: 'Por favor complete todos los campos obligatorios',
+    }
+};
+
+function getLocale() {
+    if (typeof window !== 'undefined') {
+        const lang = window.navigator.language || 'es';
+        return lang.startsWith('ca') ? 'ca' : 'es';
+    }
+    return 'es';
+}
 import { FiEdit, FiTrash2, FiEye, FiToggleLeft, FiDownload, FiPrinter, FiLink } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import { deleteBirthList, updateBirthList, fetchBirthListItems } from '@/services/BirthListService';
@@ -8,6 +101,8 @@ import ListDeleteModal from './ListDeleteModal';
 import ListViewModal from './ListViewModal';
 import ListStatusModal from './ListStatusModal';
 export default function ListasTable({ lists, filters, setFilters, userRole = 'user', onUpdate }) {
+    const locale = getLocale();
+    const t = translations[locale];
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
@@ -210,11 +305,13 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         }
     };
     const generateListHTML = (list) => {
+        // Use Catalan as default translation
+        const t = translations?.ca || {};
         return `
             <html>
                 <head>
                     <meta charset="UTF-8">
-                    <title>Lista de Regalos - ${list.name}</title>
+                    <title>${t.documents || 'Llista de Regals'} - ${list.name}</title>
                     <style>
                         body { 
                             font-family: Arial, sans-serif;
@@ -243,32 +340,45 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 </head>
                 <body>
                     <div class="header">
-                        <h1>Lista de Regalos</h1>
+                        <h1>${t.documents || 'Llista de Regals'}</h1>
                         <h2>${list.name}</h2>
                     </div>
                     <div class="list-info">
-                        <p><strong>Referencia:</strong> ${list.reference}</p>
-                        <p><strong>Nombre del Bebé:</strong> ${list.babyName}</p>
-                        <p><strong>Fecha de Creación:</strong> ${list.creationDate}</p>
-                        <p><strong>Fecha Prevista:</strong> ${list.dueDate}</p>
-                        <p><strong>Estado:</strong> ${list.status}</p>
+                        <p><strong>${t.reference || 'Referència'}:</strong> ${list.reference}</p>
+                        <p><strong>${t.babyName || 'Nom del nadó'}:</strong> ${list.babyName}</p>
+                        <p><strong>${t.creationDate || 'Data Creació'}:</strong> ${list.creationDate}</p>
+                        <p><strong>${t.dueDate || 'Data Prevista'}:</strong> ${list.dueDate}</p>
+                        <p><strong>${t.status || 'Estat'}:</strong> ${list.status}</p>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th>Producto</th>
-                                <th>Cantidad</th>
-                                <th>Estado</th>
+                                <th>${'Producte'}</th>
+                                <th>${'Quantitat'}</th>
+                                <th>${'Estat'}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${(list.rawData?.items || []).map(item => `
-                                <tr>
-                                    <td>${item.product?.name || ''}</td>
-                                    <td>${item.quantity || 0}</td>
-                                    <td>${item.status || 'Pendiente'}</td>
-                                </tr>
-                            `).join('')}
+                            ${(list.rawData?.items || []).map(item => {
+            // Fixed left-to-right priority: ca, es, name, 'N/D'
+            let prodName = 'N/D';
+            if (item.product) {
+                if (item.product.name.ca) prodName = item.product.name.ca;
+                else if (item.product.name.es) prodName = item.product.name.es;
+                else if (item.product.name) prodName = item.product.name;
+            }
+            // Map state: 0='Pendent', 1='Reservat', 2='Comprat'
+            let stateLabel = 'Pendent';
+            if (item.state === 1) stateLabel = 'Reservat';
+            else if (item.state === 2) stateLabel = 'Comprat';
+            return `
+                                    <tr>
+                                        <td>${prodName}</td>
+                                        <td>${item.quantity || 0}</td>
+                                        <td>${stateLabel}</td>
+                                    </tr>
+                                `;
+        }).join('')}
                         </tbody>
                     </table>
                 </body>
@@ -296,7 +406,9 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             console.error('Error printing list:', error);
             toast.error('Error al imprimir la lista');
         }
-    }; const handleDownloadPDF = async (list) => {
+    };
+
+    const handleDownloadPDF = async (list) => {
         try {
             const toastId = toast.loading('Generando PDF...');
             const response = await fetch(`/api/lists/${list.id}/pdf`, {
@@ -329,17 +441,17 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 <table className="w-full whitespace-nowrap">
                     <thead className="bg-gray-50 text-gray-700 uppercasªe text-xs">
                         <tr>
-                            <th className="px-6 py-3 text-left">ID</th>
-                            <th className="px-6 py-3 text-left">Referencia</th>
-                            <th className="px-6 py-3 text-left">Nombre</th>
-                            {userRole === 'admin' && <th className="px-6 py-3 text-left">Creador</th>}
-                            <th className="px-6 py-3 text-left">Fecha Creación</th>
-                            <th className="px-6 py-3 text-left">Fecha Prevista</th>
-                            <th className="px-6 py-3 text-left">Privacidad</th>
-                            <th className="px-6 py-3 text-left">Estado</th>
-                            <th className="px-6 py-3 text-left">Ver/Compartir</th>
-                            <th className="px-6 py-3 text-left">Documentos</th>
-                            <th className="px-6 py-3 text-left">Acción</th>
+                            <th className="px-6 py-3 text-left">{t.id}</th>
+                            <th className="px-6 py-3 text-left">{t.reference}</th>
+                            <th className="px-6 py-3 text-left">{t.name}</th>
+                            {userRole === 'admin' && <th className="px-6 py-3 text-left">{t.creator}</th>}
+                            <th className="px-6 py-3 text-left">{t.creationDate}</th>
+                            <th className="px-6 py-3 text-left">{t.dueDate}</th>
+                            <th className="px-6 py-3 text-left">{t.privacy}</th>
+                            <th className="px-6 py-3 text-left">{t.status}</th>
+                            <th className="px-6 py-3 text-left">{t.viewShare}</th>
+                            <th className="px-6 py-3 text-left">{t.documents}</th>
+                            <th className="px-6 py-3 text-left">{t.action}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -354,31 +466,31 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                     <td className="px-6 py-4 w-[120px]">{list.dueDate}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.isPublic ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'}`}>
-                                            {list.isPublic ? 'Pública' : 'Privada'}
+                                            {list.isPublic ? t.public : t.private}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.status === 'Activa' ? 'bg-green-100 text-green-800' : list.status === 'Completada' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.status === t.active ? 'bg-green-100 text-green-800' : list.status === t.completed ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
                                             {list.status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm">
                                         <div className="flex items-center justify-center space-x-3">
-                                            <button className="text-[#00B0C8] hover:text-[#008da0]" onClick={() => openViewModal(list)} title="Ver detalles"><FiEye size={22} /></button>
-                                            <button className="text-indigo-600 hover:text-indigo-900" onClick={() => { const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`; navigator.clipboard.writeText(url).then(() => toast.success('Enlace copiado al portapapeles')).catch(() => toast.error('Error al copiar el enlace')); }} title="Copiar enlace"><FiLink size={22} /></button>
+                                            <button className="text-[#00B0C8] hover:text-[#008da0]" onClick={() => openViewModal(list)} title={t.viewDetails}><FiEye size={22} /></button>
+                                            <button className="text-indigo-600 hover:text-indigo-900" onClick={() => { const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`; navigator.clipboard.writeText(url).then(() => toast.success(t.linkCopied)).catch(() => toast.error(t.linkCopyError)); }} title={t.copyLink}><FiLink size={22} /></button>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-sm">
                                         <div className="flex items-center justify-center space-x-3">
-                                            <button className="text-green-600 hover:text-green-900" onClick={() => handleDownloadPDF(list)} title="Descargar PDF"><FiDownload size={22} /></button>
-                                            <button className="text-blue-600 hover:text-blue-900" onClick={() => handlePrintPDF(list)} title="Imprimir lista"><FiPrinter size={22} /></button>
+                                            <button className="text-green-600 hover:text-green-900" onClick={() => handleDownloadPDF(list)} title={t.downloadPDF}><FiDownload size={22} /></button>
+                                            <button className="text-blue-600 hover:text-blue-900" onClick={() => handlePrintPDF(list)} title={t.printList}><FiPrinter size={22} /></button>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-sm">
                                         <div className="flex items-center justify-center space-x-3">
-                                            <button className="text-yellow-600 hover:text-yellow-900" onClick={() => openEditModal(list)} title="Editar lista"><FiEdit size={22} /></button>
-                                            <button className="text-purple-600 hover:text-purple-900" onClick={() => openStatusModal(list)} title="Cambiar estado"><FiToggleLeft size={22} /></button>
-                                            <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)} title="Eliminar lista"><FiTrash2 size={22} /></button>
+                                            <button className="text-yellow-600 hover:text-yellow-900" onClick={() => openEditModal(list)} title={t.editList}><FiEdit size={22} /></button>
+                                            <button className="text-purple-600 hover:text-purple-900" onClick={() => openStatusModal(list)} title={t.changeStatus}><FiToggleLeft size={22} /></button>
+                                            <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)} title={t.deleteList}><FiTrash2 size={22} /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -387,7 +499,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                             ) : (
                                 <tr>
                                     <td colSpan={userRole === 'admin' ? 11 : 10} className="px-6 py-4 text-center text-gray-500">
-                                        No se encontraron listas de regalos.
+                                        {t.noLists}
                                     </td>
                                 </tr>)}
                     </tbody>

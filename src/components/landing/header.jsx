@@ -6,11 +6,12 @@ import UserAuth from "@/components/ui/UserAuthModal";
 import Link from "next/link";
 import { useSession } from 'next-auth/react';
 import { ShoppingCart, Search } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { InstagramIcon } from "lucide-react";
 export default function Page() {
-// Get cart item count directly from localStorage
-    const [cartItemsCount, setCartItemsCount] = React.useState(0);
+    // Get cart item count directly from localStorage
+    const [cartItemsCount, setCartItemsCount] = useState(0);
     const [whatsappNumber, setWhatsappNumber] = useState("");
     const [Instagram, setInstagram] = useState("");
 
@@ -53,13 +54,22 @@ export default function Page() {
                 if (instagramParam && instagramParam.value) {
                     setInstagram(instagramParam.value);
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
         fetchWhatsapp();
     }, []);
     // Helper to dispatch cartUpdated event when cart is changed in this tab
     // You should call this after updating cart in localStorage elsewhere in your app:
     // window.dispatchEvent(new Event('cartUpdated'));
+    const pathname = usePathname();
+    // Locale switcher component (only for localized routes)
+    const locales = [
+        { code: 'ca', label: 'CA' },
+        { code: 'es', label: 'ES' }
+    ];
+    // Only show switcher if route is localized
+    const currentLocale = /^\/(ca|es)(\/|$)/.test(pathname) ? pathname.split('/')[1] : null;
+
     return (
         <div className="fixed top-0 z-40 w-full bg-white shadow-md px-2 md:px-5 py-2 ">
             <div className="flex flex-col justify-center w-full">
@@ -93,10 +103,32 @@ export default function Page() {
                             className="md:w-[250px] md:h-[70px] w-[120px] h-[40px] object-contain"
                         />
                     </Link>
-                    <div className="w-[90px] md:w-[300px] flex justify-end space-x-2 md:space-x-4 text-gray-700"> 
-                        <Link href="/search" className="p-2 flex justify-center items-center">
-                            <Search className="w-5 h-5 md:w-6 md:h-6" />
-                        </Link> 
+                    <div className="w-[90px] md:w-[300px] flex justify-end space-x-2 md:space-x-4 text-gray-700">
+                        {/* Locale Switcher: only show on localized routes */}
+                        <div className="hidden sm:flex items-center space-x-2">
+
+                            {currentLocale && (
+                                <div className="flex items-center space-x-1">
+                                    {locales.map(locale => (
+                                        <a
+                                            key={locale.code}
+                                            href={pathname.replace(/^\/(ca|es)/, `/${locale.code}`)}
+                                            className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${currentLocale === locale.code ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                            aria-current={currentLocale === locale.code ? 'page' : undefined}
+                                        >
+                                            {locale.label}
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
+                            <Link href="/search" className="p-2 flex justify-center items-center">
+                                <Search className="w-5 h-5 md:w-6 md:h-6" />
+                            </Link>
+                        </div>
+
+
+                        {/* Locale Switcher */}
+
                         <Link href="/cart" className="p-2 text-sm text-gray-700 relative">
                             <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
                             <span
@@ -107,7 +139,7 @@ export default function Page() {
                             >
                                 {cartItemsCount}
                             </span>
-                        </Link> 
+                        </Link>
                         <UserAuth title="" />
                     </div>
                 </div>

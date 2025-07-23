@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
+import dbConnect from '@/lib/dbConnect';
+import Brand from '@/models/Brand';
 
 // GET /api/brands/[id] - Get a single brand by ID
 export async function GET(request, { params }) {
@@ -15,29 +15,17 @@ export async function GET(request, { params }) {
             );
         }
 
-        // Connect to database
-        const { db } = await connectToDatabase();
-
-        // Find brand
-        let brand;
-        if (ObjectId.isValid(id)) {
-            // Try to find by MongoDB ObjectId
-            brand = await db.collection('brands').findOne({ _id: new ObjectId(id) });
+        await dbConnect();
+        let brand = null;
+        if (id && id.length === 24) {
+            brand = await Brand.findById(id);
         }
-
-        // If not found by ObjectId, try to find by numeric ID
         if (!brand) {
-            brand = await db.collection('brands').findOne({ id: parseInt(id) });
+            brand = await Brand.findOne({ id: parseInt(id) });
         }
-
-        // If still not found, return 404
         if (!brand) {
-            return NextResponse.json(
-                { error: 'Brand not found' },
-                { status: 404 }
-            );
+            return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
         }
-
         return NextResponse.json(brand);
     } catch (error) {
         console.error('Error fetching brand:', error);
@@ -62,64 +50,31 @@ export async function PUT(request, { params }) {
             );
         }
 
-        // Connect to database
-        const { db } = await connectToDatabase();
-
-        // Validate required fields
+        await dbConnect();
         if (!data.name) {
-            return NextResponse.json(
-                { error: 'Brand name is required' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: 'Brand name is required' }, { status: 400 });
         }
-
-        // First, check if the brand exists
-        let existingBrand;
-        if (ObjectId.isValid(id)) {
-            existingBrand = await db.collection('brands').findOne({ _id: new ObjectId(id) });
+        let brand = null;
+        if (id && id.length === 24) {
+            brand = await Brand.findById(id);
         }
-
-        if (!existingBrand) {
-            existingBrand = await db.collection('brands').findOne({ id: parseInt(id) });
+        if (!brand) {
+            brand = await Brand.findOne({ id: parseInt(id) });
         }
-
-        if (!existingBrand) {
-            return NextResponse.json(
-                { error: 'Brand not found' },
-                { status: 404 }
-            );
+        if (!brand) {
+            return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
         }
-
-        // Prepare update data
-        const updateData = {
-            name: data.name,
-            slug: data.slug || '',
-            logo: data.logo || '',
-            description: data.description || '',
-            website: data.website || '',
-            addresses: data.addresses || '',
-            products: data.products || 0,
-            enabled: data.enabled !== undefined ? data.enabled : true,
-            updatedAt: new Date()
-        };
-
-        // Update based on the found document's ID
-        let result;
-        if (ObjectId.isValid(existingBrand._id)) {
-            await db.collection('brands').updateOne(
-                { _id: existingBrand._id },
-                { $set: updateData }
-            );
-            result = await db.collection('brands').findOne({ _id: existingBrand._id });
-        } else {
-            await db.collection('brands').updateOne(
-                { id: existingBrand.id },
-                { $set: updateData }
-            );
-            result = await db.collection('brands').findOne({ id: existingBrand.id });
-        }
-
-        return NextResponse.json(result);
+        brand.name = data.name;
+        brand.slug = data.slug || '';
+        brand.logo = data.logo || '';
+        brand.description = data.description || '';
+        brand.website = data.website || '';
+        brand.addresses = data.addresses || '';
+        brand.products = data.products || 0;
+        brand.enabled = data.enabled !== undefined ? data.enabled : true;
+        brand.updatedAt = new Date();
+        await brand.save();
+        return NextResponse.json(brand);
     } catch (error) {
         console.error('Error updating brand:', error);
         return NextResponse.json(
@@ -142,32 +97,19 @@ export async function DELETE(request, { params }) {
             );
         }
 
-        // Connect to database
-        const { db } = await connectToDatabase();
-
-        // Delete brand
-        let result;
-        if (ObjectId.isValid(id)) {
-            result = await db.collection('brands').deleteOne({ _id: new ObjectId(id) });
+        await dbConnect();
+        let brand = null;
+        if (id && id.length === 24) {
+            brand = await Brand.findById(id);
         }
-
-        // If not deleted by ObjectId, try to delete by numeric ID
-        if (!result?.deletedCount) {
-            result = await db.collection('brands').deleteOne({ id: parseInt(id) });
+        if (!brand) {
+            brand = await Brand.findOne({ id: parseInt(id) });
         }
-
-        // If still not deleted, return 404
-        if (!result?.deletedCount) {
-            return NextResponse.json(
-                { error: 'Brand not found' },
-                { status: 404 }
-            );
+        if (!brand) {
+            return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
         }
-
-        return NextResponse.json(
-            { message: 'Brand deleted successfully' },
-            { status: 200 }
-        );
+        await Brand.deleteOne({ _id: brand._id });
+        return NextResponse.json({ message: 'Brand deleted successfully' }, { status: 200 });
     } catch (error) {
         console.error('Error deleting brand:', error);
         return NextResponse.json(

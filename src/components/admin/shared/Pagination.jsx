@@ -8,7 +8,7 @@ export default function Pagination({
     itemsPerPage = 2,
     onPageChange,
     onItemsPerPageChange,
-    showingText = "Mostrando {} de {} productos"
+    showingText = "Mostrant {} de {} productes"
 }) {
     // Calculate visible pages range (improved for ellipsis and style)
     const getVisiblePages = () => {
@@ -63,7 +63,7 @@ export default function Pagination({
         <div className="flex flex-col items-center justify-center gap-3 mt-4 mb-2 px-4">
             <div className="text-sm text-gray-600 mb-2">{formattedShowingText}</div>
             <div className="flex justify-center mt-4">
-                <nav className="flex items-center space-x-1" aria-label="Pagination">
+                <nav className="flex items-center space-x-1" aria-label="Paginació">
                     {/* Previous page button */}
                     <button
                         onClick={goToPreviousPage}
@@ -101,9 +101,9 @@ export default function Pagination({
                         className={`px-3 py-2 rounded-md ${currentPage === totalPages
                             ? 'text-gray-400 cursor-not-allowed'
                             : 'text-gray-700 hover:bg-gray-100'}`}
-                        aria-label="Siguiente"
+                        aria-label="Següent"
                     >
-                        <span className="sr-only">Siguiente</span>
+                        <span className="sr-only">Següent</span>
                         <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                         </svg>
@@ -111,7 +111,7 @@ export default function Pagination({
                 </nav>
             </div>
             <div className="flex items-center mt-2">
-                <span className="text-sm text-gray-600 mr-2">Items por página:</span>
+                <span className="text-sm text-gray-600 mr-2">Ítems per pàgina:</span>
                 <select
                     value={itemsPerPage}
                     onChange={(e) => handleItemsPerPageChange(e.target.value)}

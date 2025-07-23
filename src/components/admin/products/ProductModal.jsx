@@ -1,22 +1,24 @@
 'use client';
 import { useState, useEffect } from 'react';
+import useShopParameter from '@/lib/useShopParameter';
 import { Dialog, DialogTitle } from '@headlessui/react';
 import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus, FiPackage, FiTrash2, FiMove, FiPlus } from 'react-icons/fi';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { useStats } from '@/contexts/StatsContext';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
-
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
+    // Get IVA parameter from shop settings
+    const { value: ivaValue, loading: ivaLoading } = useShopParameter('iva');
+    console.log(product);
     const [formData, setFormData] = useState({
-        name: '',
+        name: { es: '', ca: '' },
         reference: '',
-        description: '',
+        description: { es: '', ca: '' },
         category: '',
         categoryId: '',
         brand: '',
         brandId: '',
-        price_excl_tax: '',
         price_incl_tax: '',
         image: '',
         imageHover: '',
@@ -37,6 +39,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const [categorySearchTerm, setCategorySearchTerm] = useState('');
     const [brands, setBrands] = useState([]);
     const [loadingBrands, setLoadingBrands] = useState(false);
     const [showBrandDropdown, setShowBrandDropdown] = useState(false);
@@ -44,7 +47,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [productImages, setProductImages] = useState([]);
     const [showImageSelector, setShowImageSelector] = useState(false);
     const stats = useStats();
-
     // Fetch all categories and brands when modal opens
     useEffect(() => {
         if (isOpen) {
@@ -52,7 +54,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             fetchBrands();
         }
     }, [isOpen]);
-
     // Fetch categories for the dropdown
     const fetchCategories = async () => {
         try {
@@ -70,7 +71,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setLoadingCategories(false);
         }
     };
-
     // Fetch brands for the dropdown
     const fetchBrands = async () => {
         try {
@@ -91,7 +91,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setLoadingBrands(false);
         }
     };
-
     // Organize categories into a proper hierarchy for the dropdown
     const organizeCategories = (allCategories) => {
         const categoriesMap = {};
@@ -115,54 +114,88 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         });
         return rootCategories;
     };
-
     // Get hierarchical categories for the dropdown
     const hierarchicalCategories = organizeCategories(categories);
 
+    // Helper to recursively filter categories by name
+    const filterCategoriesByName = (categories, searchTerm) => {
+        if (!searchTerm) return categories;
+        const lowerSearch = searchTerm.toLowerCase();
+        return categories
+            .map(cat => {
+                // Support category.name as string or object (translations)
+                let catName = '';
+                if (typeof cat.name === 'string') {
+                    catName = cat.name;
+                } else if (typeof cat.name === 'object' && cat.name !== null) {
+                    // Try ca, es, name, or first available value
+                    catName = cat.name.ca || cat.name.es || cat.name.name || Object.values(cat.name)[0] || '';
+                }
+                const matches = typeof catName === 'string' && catName.toLowerCase().includes(lowerSearch);
+                const filteredChildren = filterCategoriesByName(cat.children || [], searchTerm);
+                if (matches || filteredChildren.length > 0) {
+                    return { ...cat, children: filteredChildren };
+                }
+                return null;
+            })
+            .filter(Boolean);
+    };
+
+    const filteredCategories = filterCategoriesByName(hierarchicalCategories, categorySearchTerm);
     // Load product data when editing
     useEffect(() => {
         if (isEditing && product) {
             // Format all images into a single array for the UI
             const allImages = [];
-
             // Add main image
             if (product.image) {
                 allImages.push(product.image);
             }
-
             // Add hover image if different from main image
             if (product.imageHover && product.imageHover !== product.image) {
                 allImages.push(product.imageHover);
             }
-
             // Add additional images
             if (product.additionalImages && Array.isArray(product.additionalImages)) {
                 allImages.push(...product.additionalImages);
             }
-
             setProductImages(allImages);
-
             if (allImages.length > 0) {
                 setImagePreview(allImages[0]);
                 setSelectedImageIndex(0);
             }
 
+            // Handle translation fallback for name and description
+            let name = { es: '', ca: '' };
+            if (typeof product.name === 'object' && product.name !== null) {
+                name = { es: product.name.es || '', ca: product.name.ca || '' };
+            } else if (typeof product.name === 'string') {
+                name = { es: product.name, ca: '' };
+            }
+            let description = { es: '', ca: '' };
+            if (typeof product.description === 'object' && product.description !== null) {
+                description = { es: product.description.es || '', ca: product.description.ca || '' };
+            } else if (typeof product.description === 'string') {
+                description = { es: product.description, ca: '' };
+            }
+
             setFormData({
-                name: product.name || '',
+                name,
                 reference: product.reference || '',
-                description: product.description || '',
-                category: product.category || '',
+                description,
+                category: product.category,
                 categoryId: product.categoryId || '',
-                brand: product.brand || '',
+                brand: product.brand,
                 brandId: product.brandId || '',
-                price_excl_tax: product.price_excl_tax || '',
+                categoryDisplayName: product.categoryDisplayName || '',
+                brandDisplayName: product.brandDisplayName || '',
                 price_incl_tax: product.price_incl_tax || '',
                 image: product.image || '',
                 imageHover: product.imageHover || '',
                 additionalImages: product.additionalImages || [],
                 stock: {
-                    available: product.stock?.available || '',
-                    minStock: product.stock?.minStock || 5
+                    available: product.stock?.available || 0,
+                    minStock: product.stock?.minStock || 0
                 },
                 status: product.status || 'active',
                 featured: product.featured || false,
@@ -172,13 +205,48 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setProductImages([]);
             setSelectedImageIndex(-1);
             setImagePreview('');
+            setFormData({
+                name: { es: '', ca: '' },
+                reference: '',
+                description: { es: '', ca: '' },
+                category: '',
+                categoryId: '',
+                brand: '',
+                brandId: '',
+                price_incl_tax: '',
+                image: '',
+                imageHover: '',
+                additionalImages: [],
+                stock: {
+                    available: '',
+                    minStock: 5
+                },
+                status: 'active',
+                featured: false,
+            });
         }
     }, [isEditing, product]);
-
     // Handle form input changes
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        if (name === 'available' || name === 'minStock') {
+        const { name, value, type, checked, id } = e.target;
+        // Handle translation fields for name and description
+        if (name === 'name') {
+            setFormData(prev => ({
+                ...prev,
+                name: {
+                    ...prev.name,
+                    [id === 'name-ca' ? 'ca' : 'es']: value
+                }
+            }));
+        } else if (name === 'description') {
+            setFormData(prev => ({
+                ...prev,
+                description: {
+                    ...prev.description,
+                    [id === 'description-ca' ? 'ca' : 'es']: value
+                }
+            }));
+        } else if (name === 'available' || name === 'minStock') {
             setFormData(prev => ({
                 ...prev,
                 stock: {
@@ -193,54 +261,53 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             }));
         }
     };
-
     // Handle category selection from the dropdown
-    const handleCategorySelect = (categoryName, categoryId) => {
+    // Fix: handleCategorySelect should update category (ObjectId) and categoryDisplayName (string)
+    // If user selects a new category, set ObjectId; otherwise, keep legacy string until changed
+    const handleCategorySelect = (categoryObj) => {
         setFormData(prev => ({
             ...prev,
-            category: categoryName,
-            categoryId: categoryId
+            category: categoryObj._id,
+            categoryDisplayName: getCategoryDisplayName(categoryObj),
+            _categoryChanged: true // flag to indicate user changed category
         }));
         setShowCategoryDropdown(false);
     };
-
     // Handle brand selection
-    const handleBrandSelect = (brandName, brandId) => {
+    // Fix: handleBrandSelect should update brand (ObjectId) and brandDisplayName (string)
+    // If user selects a new brand, set ObjectId; otherwise, keep legacy string until changed
+    const handleBrandSelect = (brandObj) => {
         setFormData(prev => ({
             ...prev,
-            brand: brandName,
-            brandId: brandId
+            brand: brandObj._id,
+            brandDisplayName: brandObj.name,
+            _brandChanged: true // flag to indicate user changed brand
         }));
         setShowBrandDropdown(false);
     };
-
     // Handle image selection
     const handleImageChange = (e) => {
         const files = e.target.files;
         if (files && files.length > 0) {
             setSelectedImage(files);
-
             // Show preview of the first file
             const fileReader = new FileReader();
             fileReader.onload = () => {
                 setImagePreview(fileReader.result);
             };
             fileReader.readAsDataURL(files[0]);
-
             // If multiple files selected, upload them immediately
             if (files.length > 1) {
                 handleAddImage();
             }
         }
     };
-
     // Add image to product images array
     const handleAddImage = async () => {
         if (!selectedImage && !formData.image) {
             toast.error('Por favor seleccione una imagen o proporcione una URL');
             return;
         }
-
         // If URL provided, add it directly
         if (formData.image && !selectedImage) {
             // Check if this URL already exists in the product images
@@ -248,10 +315,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 toast.error('Esta imagen ya ha sido añadida');
                 return;
             }
-
             const newImages = [...productImages, formData.image];
             setProductImages(newImages);
-
             // Clear inputs for next image
             setSelectedImage(null);
             setImagePreview('');
@@ -259,20 +324,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 ...prev,
                 image: ''
             }));
-
             toast.success('Imagen añadida correctamente');
             return;
         }
-
         // Handle multiple files upload
         if (selectedImage && selectedImage.length) {
             setIsUploading(true);
             const toastId = toast.loading(`Subiendo ${selectedImage.length} imágenes...`);
-
             try {
                 const uploadPromises = [];
                 const filesArray = Array.from(selectedImage);
-
                 // Process each file for upload
                 for (const file of filesArray) {
                     uploadPromises.push(
@@ -284,7 +345,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     reader.onloadend = () => resolveBase64(reader.result);
                                     reader.readAsDataURL(file);
                                 });
-
                                 // Upload to server
                                 const response = await fetch('/api/cloudinary/upload', {
                                     method: 'POST',
@@ -293,12 +353,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     },
                                     body: JSON.stringify({ image: base64Image })
                                 });
-
                                 if (!response.ok) {
                                     const errorData = await response.json();
                                     throw new Error(errorData.error || `Error al subir la imagen ${file.name}`);
                                 }
-
                                 const data = await response.json();
                                 resolve(data.url);
                             } catch (error) {
@@ -308,15 +366,12 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         })
                     );
                 }
-
                 // Wait for all uploads to complete
                 const uploadedUrls = await Promise.all(uploadPromises);
                 const validUrls = uploadedUrls.filter(url => url !== null);
-
                 if (validUrls.length > 0) {
                     // Filter out any URLs that already exist in the product images
                     const newUrls = validUrls.filter(url => !productImages.includes(url));
-
                     if (newUrls.length === 0) {
                         toast.warning('Todas las imágenes ya han sido añadidas', { id: toastId });
                     } else {
@@ -326,11 +381,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 } else {
                     toast.error('Error al subir las imágenes', { id: toastId });
                 }
-
                 // Clear inputs for next upload
                 setSelectedImage(null);
                 setImagePreview('');
-
             } catch (error) {
                 console.error('Error uploading images:', error);
                 toast.error('Error al subir las imágenes', { id: toastId });
@@ -339,7 +392,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             }
             return;
         }
-
         // Handle single file upload (legacy path)
         if (selectedImage) {
             const imageUrl = await uploadImage();
@@ -349,17 +401,157 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     toast.error('Esta imagen ya ha sido añadida');
                     return;
                 }
-
                 // Add the new image to the array
                 const newImages = [...productImages, imageUrl];
                 setProductImages(newImages);
-
                 // Clear inputs for next image
                 setSelectedImage(null);
                 setImagePreview('');
-
                 toast.success('Imagen añadida correctamente');
             }
+        }
+    };
+    // Remove an image
+    // (This block was a duplicate and has been removed to fix the redeclaration error)
+    // Select an image to view
+    const handleSelectImage = (index) => {
+        setSelectedImageIndex(index);
+        setImagePreview(productImages[index]);
+    };
+    // Upload image to Cloudinary (legacy method for single image, kept for compatibility)
+    const uploadImage = async () => {
+        if (!selectedImage) return formData.image;
+        setIsUploading(true);
+        const toastId = toast.loading('Subiendo imagen...');
+        try {
+            // Convert image to base64
+            const base64Image = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(selectedImage instanceof FileList ? selectedImage[0] : selectedImage);
+            });
+            // Upload to server
+            const response = await fetch('/api/cloudinary/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: base64Image })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al subir la imagen');
+            }
+            const data = await response.json();
+            toast.success('Imagen subida correctamente', { id: toastId });
+            return data.url;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            toast.error('Error al subir la imagen', { id: toastId });
+            return formData.image;
+        } finally {
+            setIsUploading(false);
+        }
+    };
+    // Form validation
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.name.ca || !formData.name.es) newErrors.name = 'El nom és obligatori en els dos idiomes.';
+        if (!formData.reference) newErrors.reference = 'La referència és obligatòria';
+        if (!formData.category) newErrors.category = 'La categoria és obligatòria';
+        if (!formData.brand) newErrors.brand = 'La marca és obligatòria';
+        if (!formData.price_incl_tax) newErrors.price_incl_tax = 'El preu amb impostos és obligatori';
+        // Validate numeric fields
+        if (formData.price_incl_tax && isNaN(parseFloat(formData.price_incl_tax))) {
+            newErrors.price_incl_tax = 'Ha de ser un número vàlid';
+        }
+        if (formData.stock.available && isNaN(parseInt(formData.stock.available))) {
+            newErrors.available = 'Ha de ser un número enter';
+        }
+        if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
+            newErrors.minStock = 'Ha de ser un número enter';
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+        setLoading(true);
+        try {
+            // Prepare images for submission
+            let mainImage = '';
+            let hoverImage = '';
+            let additionalImages = [];
+            if (productImages.length > 0) {
+                mainImage = productImages[0];
+                if (productImages.length > 1) hoverImage = productImages[1];
+                if (productImages.length > 2) additionalImages = productImages.slice(2);
+            }
+            // Ensure category and brand are ObjectId (not name or empty string)
+            let categoryId = formData.category;
+            let brandId = formData.brand;
+            const isObjectId = (val) => typeof val === 'string' && /^[a-fA-F0-9]{24}$/.test(val);
+            // Treat empty string as null for category/brand
+            if (categoryId === "") categoryId = null;
+            if (brandId === "") brandId = null;
+            // Always convert to ObjectId string or null (never send object)
+            if (categoryId && !isObjectId(categoryId)) {
+                let foundCat = categories.find(c => c.name === categoryId || c._id === categoryId);
+                if (foundCat && isObjectId(foundCat._id)) categoryId = foundCat._id;
+                else categoryId = null;
+            }
+            if (categoryId && typeof categoryId === 'object' && categoryId.toString) categoryId = categoryId.toString();
+            if (!categoryId || !isObjectId(categoryId)) categoryId = null;
+            if (brandId && !isObjectId(brandId)) {
+                let foundBrand = brands.find(b => b.name === brandId);
+                if (foundBrand && isObjectId(foundBrand._id)) brandId = foundBrand._id;
+                else brandId = null;
+            }
+            if (brandId && typeof brandId === 'object' && brandId.toString) brandId = brandId.toString();
+            if (!brandId || !isObjectId(brandId)) brandId = null;
+            const processedData = {
+                ...formData,
+                category: categoryId,
+                brand: brandId,
+                image: mainImage,
+                imageHover: hoverImage,
+                additionalImages: additionalImages,
+                price_incl_tax: parseFloat(formData.price_incl_tax),
+                stock: {
+                    available: parseInt(formData.stock.available || 0),
+                    minStock: parseInt(formData.stock.minStock || 5),
+                },
+            };
+            // Save the product and get the saved product
+            let savedProduct;
+            try {
+                savedProduct = await onSave(processedData);
+            } catch (apiError) {
+                // If the API returns a message, show it
+                if (apiError && apiError.message) {
+                    toast.error(apiError.message);
+                } else if (apiError && apiError.error) {
+                    toast.error(apiError.error);
+                } else if (typeof apiError === 'string') {
+                    toast.error(apiError);
+                } else {
+                    toast.error('Error al guardar el producto');
+                }
+                throw apiError;
+            }
+            // Notify stats context about the change
+            if (stats.notifyChange) {
+                setTimeout(() => {
+                    stats.notifyChange();
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Error saving product:', error);
+            // Only show toast if not already shown by API error block
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -414,148 +606,43 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }
     };
 
-    // Select an image to view
-    const handleSelectImage = (index) => {
-        setSelectedImageIndex(index);
-        setImagePreview(productImages[index]);
-    };
 
-    // Upload image to Cloudinary (legacy method for single image, kept for compatibility)
-    const uploadImage = async () => {
-        if (!selectedImage) return formData.image;
-        setIsUploading(true);
-        const toastId = toast.loading('Subiendo imagen...');
-        try {
-            // Convert image to base64
-            const base64Image = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(selectedImage instanceof FileList ? selectedImage[0] : selectedImage);
-            });
-            // Upload to server
-            const response = await fetch('/api/cloudinary/upload', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ image: base64Image })
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Error al subir la imagen');
-            }
-            const data = await response.json();
-            toast.success('Imagen subida correctamente', { id: toastId });
-            return data.url;
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            toast.error('Error al subir la imagen', { id: toastId });
-            return formData.image;
-        } finally {
-            setIsUploading(false);
-        }
-    };
-
-    // Form validation
-    const validateForm = () => {
-        const newErrors = {};
-        if (!formData.name) newErrors.name = 'El nombre es obligatorio';
-        if (!formData.reference) newErrors.reference = 'La referencia es obligatoria';
-        if (!formData.category) newErrors.category = 'La categoría es obligatoria';
-        if (!formData.price_excl_tax) newErrors.price_excl_tax = 'El precio sin impuestos es obligatorio';
-        if (!formData.price_incl_tax) newErrors.price_incl_tax = 'El precio con impuestos es obligatorio';
-        // Validate numeric fields
-        if (formData.price_excl_tax && isNaN(parseFloat(formData.price_excl_tax))) {
-            newErrors.price_excl_tax = 'Debe ser un número válido';
-        }
-        if (formData.price_incl_tax && isNaN(parseFloat(formData.price_incl_tax))) {
-            newErrors.price_incl_tax = 'Debe ser un número válido';
-        }
-        if (formData.stock.available && isNaN(parseInt(formData.stock.available))) {
-            newErrors.available = 'Debe ser un número entero';
-        }
-        if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
-            newErrors.minStock = 'Debe ser un número entero';
-        }
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-        setLoading(true);
-
-        try {
-            // Prepare images for submission
-            let mainImage = '';
-            let hoverImage = '';
-            let additionalImages = [];
-
-            if (productImages.length > 0) {
-                mainImage = productImages[0];
-
-                if (productImages.length > 1) {
-                    hoverImage = productImages[1];
-
-                    if (productImages.length > 2) {
-                        additionalImages = productImages.slice(2);
-                    }
-                }
-            }
-
-            // Convert string values to numbers
-            const processedData = {
-                ...formData,
-                image: mainImage,
-                imageHover: hoverImage,
-                additionalImages: additionalImages,
-                price_excl_tax: parseFloat(formData.price_excl_tax),
-                price_incl_tax: parseFloat(formData.price_incl_tax),
-                brandId: formData.brandId || '',
-                stock: {
-                    available: parseInt(formData.stock.available || 0),
-                    minStock: parseInt(formData.stock.minStock || 5)
-                }
-            };
-
-            // Save the product and get the saved product
-            const savedProduct = await onSave(processedData);
-
-            // Notify stats context about the change
-            if (stats.notifyChange) {
-                // Use setTimeout to ensure the API has time to process the change
-                setTimeout(() => {
-                    stats.notifyChange();
-                }, 500);
-            }
-        } catch (error) {
-            console.error('Error saving product:', error);
-            toast.error('Error al guardar el producto');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // Render category tree for dropdown with improved hierarchy indicators
+    const getCategoryDisplayName = (cat) => {
+        if (!cat) return '';
+        if (cat.name) {
+            if (typeof cat.name === 'object') {
+                return cat.name.ca || cat.name.es || cat.name.name || '';
+            }
+            return cat.name;
+        }
+        // fallback for legacy
+        return cat.ca || cat.es || cat.name || '';
+    };
+    // Handle brand search input
+    const handleBrandSearch = (e) => {
+        setBrandSearchTerm(e.target.value);
+        // Keep the dropdown open
+        if (!showBrandDropdown) {
+            setShowBrandDropdown(true);
+        }
+    };
     const renderCategoryOption = (category, level = 0, isLast = false, prefix = '') => {
-        // Determine the prefix for this category based on its position in the hierarchy
         const currentPrefix = level === 0 ? '' : isLast ? `${prefix}└─ ` : `${prefix}├─ `;
-        // Determine the prefix for child categories
         const childPrefix = level === 0 ? '' : isLast ? `${prefix}   ` : `${prefix}│  `;
         return (
             <div key={category._id} className="category-item">
                 <div
                     className={`px-3  hover:bg-gray-100 cursor-pointer flex items-center ${level > 0 ? 'border-l border-gray-200' : ''}`}
-                    onClick={() => handleCategorySelect(category.name, category._id)}
+                    onClick={() => handleCategorySelect(category)}
                 >
                     {level > 0 && (
                         <span className="text-gray-400 font-mono mr-1">{currentPrefix}</span>
                     )}
                     <div className="flex items-center">
                         <FiFolder className={`mr-1 ${level === 0 ? 'text-[#00B0C8]' : 'text-gray-400'}`} size={14} />
-                        <span className={`${level === 0 ? 'font-medium' : ''} text-sm`}>{category.name}</span>
+                        <span className={`${level === 0 ? 'font-medium' : ''} text-sm`}>{getCategoryDisplayName(category)}</span>
                     </div>
                 </div>
                 {category.children && category.children.length > 0 && (
@@ -573,28 +660,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             </div>
         );
     };
-
     // Filter brands based on search term
     const filteredBrands = brands.filter(brand =>
-        brand.name.toLowerCase().includes(brandSearchTerm.toLowerCase())
+        (brand.name || '').toLowerCase().includes(brandSearchTerm.toLowerCase())
     );
-
     // Reset search when dropdown closes
     useEffect(() => {
         if (!showBrandDropdown) {
             setBrandSearchTerm('');
         }
     }, [showBrandDropdown]);
-
-    // Handle brand search input
-    const handleBrandSearch = (e) => {
-        setBrandSearchTerm(e.target.value);
-        // Keep the dropdown open
-        if (!showBrandDropdown) {
-            setShowBrandDropdown(true);
-        }
-    };
-
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -602,7 +677,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 <Dialog.Panel className="w-full max-w-7xl bg-white rounded-lg shadow-xl overflow-hidden">
                     <div className="flex justify-between items-center p-4 border-b border-gray-300">
                         <DialogTitle className="text-lg font-medium">
-                            {isEditing ? 'Editar Producto' : 'Añadir Nuevo Producto'}
+                            {isEditing ? 'Editar producte' : 'Afegir nou producte'}
                         </DialogTitle>
                         <button
                             onClick={onClose}
@@ -612,30 +687,74 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         </button>
                     </div>
                     <form onSubmit={handleSubmit} className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                             {/* Left Column */}
-                            <div className="space-y-6 md:col-span-2">
-                                <h3 className="text-md font-medium">Información Básica</h3>
-                                <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                        Nombre *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'
-                                            } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                    />
-                                    {errors.name && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                                    )}
+                            <div className="space-y-4 md:col-span-2">
+                                <h3 className="text-md font-medium">Informació bàsica</h3>
+                                <div className="flex gap-4">
+                                    <div className="flex-1">
+                                        <label htmlFor="name-ca" className="block text-sm font-medium text-gray-700">
+                                            Nom (CA) *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="name-ca"
+                                            name="name"
+                                            value={formData.name.ca}
+                                            onChange={handleChange}
+                                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+
+                                        />
+                                        {errors.name && (
+                                            <p className=" text-sm text-red-600">{errors.name}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex-1">
+                                        <label htmlFor="name-es" className="block text-sm font-medium text-gray-700">
+                                            Nom (ES) *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="name-es"
+                                            name="name"
+                                            value={formData.name.es}
+                                            onChange={handleChange}
+                                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-4 mt-2">
+                                    <div className="flex-1">
+                                        <label htmlFor="description-ca" className="block text-sm font-medium text-gray-700">
+                                            Descripció (CA)
+                                        </label>
+                                        <textarea
+                                            id="description-ca"
+                                            name="description"
+                                            rows={2}
+                                            value={formData.description.ca}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label htmlFor="description-es" className="block text-sm font-medium text-gray-700">
+                                            Descripció (ES)
+                                        </label>
+                                        <textarea
+                                            id="description-es"
+                                            name="description"
+                                            rows={2}
+                                            value={formData.description.es}
+                                            onChange={handleChange}
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <label htmlFor="reference" className="block text-sm font-medium text-gray-700">
-                                        Referencia *
+                                        Referència *
                                     </label>
                                     <input
                                         type="text"
@@ -650,30 +769,31 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <p className="mt-1 text-sm text-red-600">{errors.reference}</p>
                                     )}
                                 </div>
-                                <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                                        Descripción
-                                    </label>
-                                    <textarea
-                                        id="description"
-                                        name="description"
-                                        rows={3}
-                                        value={formData.description}
-                                        onChange={handleChange}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                    />
-                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                                            Categoría *
+                                            Categoria :
+                                            {isEditing && (
+                                                <span className='font-bold'>{
+                                                    product.category && typeof product.category === 'object'
+                                                        ? (
+                                                            // If category has a name object (populated)
+                                                            product.category.name && typeof product.category.name === 'object'
+                                                                ? (product.category.name.ca || product.category.name.es || product.category.name.name || 'N/D')
+                                                                // If category is a translation object itself (like { ca, es })
+                                                                : (product.category.ca || product.category.es || product.category.name || 'N/D')
+                                                        )
+                                                        : (product.category || 'N/D')
+                                                }</span>)}
                                         </label>
                                         <div className="relative">
                                             <div
                                                 className={`mt-1 block w-full px-3 py-2 border ${errors.category ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none cursor-pointer flex justify-between items-center`}
                                                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                                             >
-                                                <span className="truncate">{formData.category || 'Seleccionar categoría'}</span>
+                                                <span className="truncate">{
+                                                    formData.categoryDisplayName || 'Selecciona categoria'
+                                                }</span>
                                                 <FiChevronRight className={`transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
                                             </div>
                                             {showCategoryDropdown && (
@@ -681,30 +801,50 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     {loadingCategories ? (
                                                         <div className="flex justify-center p-4">
                                                             <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                                                            <span className="ml-2">Cargando categorías...</span>
+                                                            <span className="ml-2">Carregant categories...</span>
                                                         </div>
                                                     ) : hierarchicalCategories.length === 0 ? (
-                                                        <div className="p-4 text-gray-500">No hay categorías disponibles</div>
+                                                        <div className="p-4 text-gray-500">No hi ha categories disponibles</div>
                                                     ) : (
-                                                        <div className="py-1 category-dropdown">
-                                                            <style jsx global>{`
-                                                                .category-dropdown .category-item {
-                                                                    margin: 0;
-                                                                    padding: 0;
-                                                                }
-                                                                .category-dropdown .subcategory-group {
-                                                                    margin: 0;
-                                                                    padding: 0;
-                                                                }
-                                                            `}</style>
-                                                            {hierarchicalCategories.map((category, index) =>
-                                                                renderCategoryOption(
-                                                                    category,
-                                                                    0,
-                                                                    index === hierarchicalCategories.length - 1
-                                                                )
-                                                            )}
-                                                        </div>
+                                                        <>
+                                                            <div className='p-2 border-b border-gray-200 sticky top-0 bg-white z-10'>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Cerca categoria..."
+                                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                                    value={categorySearchTerm}
+                                                                    onChange={e => setCategorySearchTerm(e.target.value)}
+                                                                />
+                                                            </div>
+
+                                                            <div className=" category-dropdown">
+                                                                <style jsx global>{`
+                                                                    .category-dropdown .category-item {
+                                                                        margin: 0;
+                                                                        padding: 0;
+                                                                        }
+                                                                        .category-dropdown .subcategory-group {
+                                                                            margin: 0;
+                                                                            padding: 0;
+                                                                    }
+                                                                `}</style>
+                                                                {filteredCategories.length === 0 ? (
+                                                                    <div className="p-4 text-center text-gray-500">
+                                                                        {categorySearchTerm
+                                                                            ? `No s'han trobat categories amb "${categorySearchTerm}"`
+                                                                            : "No hi ha categories disponibles"}
+                                                                    </div>
+                                                                ) : (
+                                                                    filteredCategories.map((category, index) =>
+                                                                        renderCategoryOption(
+                                                                            category,
+                                                                            0,
+                                                                            index === filteredCategories.length - 1
+                                                                        )
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        </>
                                                     )}
                                                 </div>
                                             )}
@@ -715,7 +855,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     </div>
                                     <div>
                                         <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
-                                            Marca
+                                            Marca :
+                                            {isEditing && (<span className='font-bold'> {product.brand || 'N/D'}</span>)}
                                         </label>
                                         <div className="relative">
                                             <div
@@ -725,7 +866,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 {formData.brand ? (
                                                     <div className="flex items-center space-x-3 truncate">
                                                         {(() => {
-                                                            const selectedBrand = brands.find(b => b._id === formData.brandId || b.name === formData.brand);
+                                                            const selectedBrand = brands.find(b => b._id === formData.brand);
                                                             if (selectedBrand?.logo) {
                                                                 return (
                                                                     <div className="w-6 h-6 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
@@ -745,12 +886,17 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                 </div>
                                                             );
                                                         })()}
-                                                        <span className="truncate text-gray-700 font-medium">{formData.brand}</span>
+                                                        <span className="truncate text-gray-700 font-medium">{
+                                                            (() => {
+                                                                const selectedBrand = brands.find(b => b._id === formData.brand);
+                                                                return selectedBrand ? selectedBrand.name : ' Selecciona nova marca';
+                                                            })()
+                                                        }</span>
                                                     </div>
                                                 ) : (
                                                     <div className="flex items-center space-x-2">
                                                         <FiPackage size={16} className="text-gray-400" />
-                                                        <span className="truncate text-gray-500">Seleccionar marca</span>
+                                                        <span className="truncate text-gray-500">Selecciona marca</span>
                                                     </div>
                                                 )}
                                                 <FiChevronRight className={`transition-transform ${showBrandDropdown ? 'rotate-90' : ''}`} />
@@ -761,7 +907,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     <div className="p-2 border-b border-gray-200 sticky top-0 bg-white z-10">
                                                         <input
                                                             type="text"
-                                                            placeholder="Buscar marca..."
+                                                            placeholder="Cerca marca..."
                                                             value={brandSearchTerm}
                                                             onChange={handleBrandSearch}
                                                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
@@ -773,27 +919,27 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         {loadingBrands ? (
                                                             <div className="flex justify-center p-4">
                                                                 <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                                                                <span className="ml-2">Cargando marcas...</span>
+                                                                <span className="ml-2">Carregant marques...</span>
                                                             </div>
                                                         ) : filteredBrands.length === 0 ? (
                                                             <div className="p-4 text-center text-gray-500">
                                                                 {brandSearchTerm ?
-                                                                    `No se encontraron marcas con "${brandSearchTerm}"` :
-                                                                    "No hay marcas disponibles"}
+                                                                    `No s'han trobat marques amb "${brandSearchTerm}"` :
+                                                                    "No hi ha marques disponibles"}
                                                             </div>
                                                         ) : (
                                                             <div className="p-2  brand-dropdown">
                                                                 <style jsx global>{`
-                                                                    .brand-dropdown .brand-item {
-                                                                        margin: 0;
-                                                                        padding: 0;
-                                                                    }
-                                                                `}</style>
+                                                                        .brand-dropdown .brand-item {
+                                                                            margin: 0;
+                                                                            padding: 0;
+                                                                        }
+                                                                    `}</style>
                                                                 {filteredBrands.map((brand, index) =>
                                                                     <div
                                                                         key={brand._id}
                                                                         className="brand-item px-3 py-2   cursor-pointer flex items-center  space-x-3 my-2"
-                                                                        onClick={() => handleBrandSelect(brand.name, brand._id)}
+                                                                        onClick={() => handleBrandSelect(brand)}
                                                                     >
                                                                         {brand.logo ? (
                                                                             <div className="w-10 h-10 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
@@ -832,24 +978,28 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="price_excl_tax" className="block text-sm font-medium text-gray-700">
-                                            Precio sin Impuestos (€) *
+                                            Preu sense impostos (€)
                                         </label>
                                         <input
                                             type="text"
                                             id="price_excl_tax"
                                             name="price_excl_tax"
-                                            value={formData.price_excl_tax}
-                                            onChange={handleChange}
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.price_excl_tax ? 'border-red-300' : 'border-gray-300'
-                                                } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                            value={(() => {
+                                                const iva = parseFloat(ivaValue || '21');
+                                                const incl = parseFloat(formData.price_incl_tax || '');
+                                                if (!incl || isNaN(incl) || !iva || isNaN(iva)) return '';
+                                                return (incl / (1 + iva / 100)).toFixed(2);
+                                            })()}
+                                            readOnly
+                                            disabled
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 focus:outline-none"
+                                            placeholder={ivaLoading ? 'Carregant...' : 'Calculat automàticament'}
                                         />
-                                        {errors.price_excl_tax && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.price_excl_tax}</p>
-                                        )}
+                                        <p className="mt-1 text-xs text-gray-500">IVA actual: {ivaLoading ? 'Carregant...' : ivaValue ? ivaValue + '%' : 'No definit'}</p>
                                     </div>
                                     <div>
                                         <label htmlFor="price_incl_tax" className="block text-sm font-medium text-gray-700">
-                                            Precio con Impuestos (€) *
+                                            Preu amb impostos (€) *
                                         </label>
                                         <input
                                             type="text"
@@ -865,11 +1015,11 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         )}
                                     </div>
                                 </div>
-                                <h3 className="text-md font-medium mt-6">Inventario</h3>
+                                <h3 className="text-md font-medium mt-6">Inventari</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="available" className="block text-sm font-medium text-gray-700">
-                                            Stock
+                                            Estoc
                                         </label>
                                         <input
                                             type="number"
@@ -887,7 +1037,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     </div>
                                     <div>
                                         <label htmlFor="minStock" className="block text-sm font-medium text-gray-700">
-                                            Stock Mínimo
+                                            Estoc mínim
                                         </label>
                                         <input
                                             type="number"
@@ -906,7 +1056,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                                            Estado
+                                            Estat
                                         </label>
                                         <select
                                             id="status"
@@ -915,9 +1065,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             onChange={handleChange}
                                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                         >
-                                            <option value="active">Activo</option>
-                                            <option value="inactive">Inactivo</option>
-                                            <option value="discontinued">Descontinuado</option>
+                                            <option value="active">Actiu</option>
+                                            <option value="inactive">Inactiu</option>
+                                            <option value="discontinued">Descatalogat</option>
                                         </select>
                                     </div>
                                     <div className="flex items-center h-full pt-6">
@@ -930,33 +1080,32 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
                                         />
                                         <label htmlFor="featured" className="ml-2 block text-sm font-medium text-gray-700">
-                                            Destacado
+                                            Destacat
                                         </label>
                                     </div>
                                 </div>
                             </div>
                             {/* Right Column - Multiple Image Upload */}
                             <div className="space-y-6">
-                                <h3 className="text-md font-medium">Imágenes del Producto</h3>
-
+                                <h3 className="text-md font-medium">Imatges del producte</h3>
                                 {/* Current Images */}
                                 {productImages.length > 0 && (
                                     <div className="mb-6">
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Imágenes Actuales</h4>
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Imatges actuals</h4>
                                         <p className="text-xs text-gray-500 mb-2">
-                                            La primera imagen será la principal, la segunda será la de hover (opcional).
+                                            La primera imatge serà la principal, la segona serà la de hover (opcional).
                                         </p>
                                         <div className="flex overflow-x-auto p-1 space-x-4">
                                             {productImages.map((img, index) => (
                                                 <div
                                                     key={index}
                                                     className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden 
-                                                        ${selectedImageIndex === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}`}
+                                                            ${selectedImageIndex === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}`}
                                                 >
                                                     <div className="relative cursor-pointer" onClick={() => handleSelectImage(index)}>
                                                         <Image
                                                             src={img || '/assets/images/product-placeholder.jpg'}
-                                                            alt={`Imagen de producto ${index + 1}`}
+                                                            alt={`Imatge de producte ${index + 1}`}
                                                             width={500}
                                                             height={500}
                                                             className="h-28 w-28 object-cover"
@@ -968,7 +1117,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         )}
                                                         {index === 1 && (
                                                             <div className="absolute top-0 left-0 bg-indigo-500 text-white text-xs px-2 py-1">
-                                                                Secundaria
+                                                                Secundària
                                                             </div>
                                                         )}
                                                     </div>
@@ -978,7 +1127,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             onClick={() => handleMoveImageUp(index)}
                                                             disabled={index === 0}
                                                             className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                            title="Mover a la izquierda"
+                                                            title="Mou a l'esquerra"
                                                         >
                                                             <FiChevronRight className="transform rotate-180" size={16} />
                                                         </button>
@@ -986,7 +1135,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             type="button"
                                                             onClick={() => handleRemoveImage(index)}
                                                             className="text-red-500 p-1 rounded hover:bg-gray-200"
-                                                            title="Eliminar imagen"
+                                                            title="Elimina imatge"
                                                         >
                                                             <FiTrash2 size={16} />
                                                         </button>
@@ -995,7 +1144,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             onClick={() => handleMoveImageDown(index)}
                                                             disabled={index === productImages.length - 1}
                                                             className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                            title="Mover a la derecha"
+                                                            title="Mou a la dreta"
                                                         >
                                                             <FiChevronRight size={16} />
                                                         </button>
@@ -1005,7 +1154,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         </div>
                                     </div>
                                 )}
-
                                 {/* Image Upload */}
                                 <div className="flex flex-col items-center space-y-4">
                                     <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
@@ -1025,16 +1173,15 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         ) : (
                                             <div className="flex flex-col items-center justify-center h-full">
                                                 <FiUpload className="w-10 h-10 text-gray-400" />
-                                                <p className="mt-2 text-sm text-gray-500">No hay imagen seleccionada</p>
+                                                <p className="mt-2 text-sm text-gray-500">No hi ha imatge seleccionada</p>
                                                 <p className="mt-1 text-xs text-gray-400">
                                                     {productImages.length === 0
-                                                        ? "Añada al menos una imagen principal"
-                                                        : "Añada más imágenes (opcional)"}
+                                                        ? "Afegeix almenys una imatge principal"
+                                                        : "Afegeix més imatges (opcional)"}
                                                 </p>
                                             </div>
                                         )}
                                     </div>
-
                                     <div className="w-full grid grid-cols-2 gap-2">
                                         <div>
                                             <label
@@ -1044,7 +1191,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
                                                     }`}
                                             >
-                                                {isUploading ? 'Subiendo...' : 'Seleccionar imágenes'}
+                                                {isUploading ? 'Pujant...' : 'Selecciona imatges'}
                                             </label>
                                             <input
                                                 type="file"
@@ -1066,7 +1213,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 }`}
                                         >
                                             <FiPlus size={16} />
-                                            <span>Añadir a Galería</span>
+                                            <span>Afegeix a galeria</span>
                                         </button>
                                         <button
                                             type="button"
@@ -1074,7 +1221,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             disabled={isUploading}
                                             className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
                                         >
-                                            Seleccionar existente
+                                            Selecciona existent
                                         </button>
                                     </div>
                                     {showImageSelector && (
@@ -1088,13 +1235,12 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         />
                                     )}
                                     <p className="mt-1 text-xs text-gray-500 text-center">
-                                        Formatos: JPG, PNG. Max: 5MB
+                                        Formats: JPG, PNG. Màx: 5MB
                                     </p>
-
                                     {/* Manual URL input */}
                                     <div className="w-full mt-4">
                                         <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-                                            URL de Imagen (opcional)
+                                            URL d'imatge (opcional)
                                         </label>
                                         <div className="flex mt-1">
                                             <input
@@ -1104,7 +1250,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 value={formData.image}
                                                 onChange={handleChange}
                                                 className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                                placeholder="https://ejemplo.com/imagen.jpg"
+                                                placeholder="https://exemple.com/imatge.jpg"
                                             />
                                             <button
                                                 type="button"
@@ -1115,31 +1261,30 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 }}
                                                 className="text-nowrap bg-gray-200 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-300"
                                             >
-                                                Vista previa
+                                                Vista prèvia
                                             </button>
                                         </div>
                                         <p className="mt-1 text-xs text-gray-500">
-                                            O pegue la URL directamente aquí
+                                            O enganxa la URL directament aquí
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <div className="mt-8 flex justify-end space-x-3">
                             <button
                                 type="button"
                                 onClick={onClose}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                             >
-                                Cancelar
+                                Cancel·la
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading || isUploading}
                                 className="px-4 py-2 bg-[#00B0C8] text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] disabled:opacity-50"
                             >
-                                {loading ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
+                                {loading ? 'Desant...' : isEditing ? 'Actualitza' : 'Crea'}
                             </button>
                         </div>
                     </form>

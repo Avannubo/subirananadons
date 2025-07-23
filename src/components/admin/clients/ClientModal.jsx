@@ -6,6 +6,88 @@ import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { useClientStats } from '@/contexts/ClientStatsContext';
 export default function ClientModal({ isOpen, onClose, client, onSave }) {
+    // Locale detection (default to 'ca')
+    let locale = 'ca';
+    if (typeof window !== 'undefined' && window.navigator) {
+        const lang = window.navigator.language || window.navigator.userLanguage;
+        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    }
+    // Translations
+    const translations = {
+        ca: {
+            edit: 'Editar Client',
+            add: 'Afegir Nou Client',
+            profile: 'Perfil de Client',
+            status: 'Estat:',
+            active: 'Actiu',
+            inactive: 'Inactiu',
+            subscriptions: 'Subscripcions:',
+            newsletter: 'Newsletter',
+            offers: 'Ofertes de socis',
+            contact: 'Informació de Contacte',
+            name: 'Nom',
+            lastName: 'Cognoms',
+            email: 'Email',
+            required: '*',
+            nameRequired: 'El nom és obligatori',
+            lastNameRequired: 'Els cognoms són obligatoris',
+            emailRequired: 'El correu electrònic és obligatori',
+            emailInvalid: 'El format del correu electrònic no és vàlid',
+            password: 'Nova Contrasenya',
+            confirmPassword: 'Confirmar Contrasenya',
+            passwordPlaceholder: 'Deixa en blanc per mantenir l\'actual',
+            passwordShort: 'La contrasenya ha de tenir almenys 6 caràcters',
+            passwordMismatch: 'Les contrasenyes no coincideixen',
+            preferences: 'Preferències',
+            accountActive: 'Compte actiu',
+            subscribed: 'Subscriure al newsletter',
+            receiveOffers: 'Rebre ofertes de socis',
+            cancel: 'Cancel·lar',
+            save: 'Desar',
+            saving: 'Desant...',
+            successAdd: 'Client afegit correctament',
+            successEdit: 'Client actualitzat correctament',
+            error: 'Error en desar el client',
+            passwordSection: 'Canviar Contrasenya',
+        },
+        es: {
+            edit: 'Editar Cliente',
+            add: 'Añadir Nuevo Cliente',
+            profile: 'Perfil de Cliente',
+            status: 'Estado:',
+            active: 'Activo',
+            inactive: 'Inactivo',
+            subscriptions: 'Suscripciones:',
+            newsletter: 'Newsletter',
+            offers: 'Ofertas de socios',
+            contact: 'Información de Contacto',
+            name: 'Nombre',
+            lastName: 'Apellidos',
+            email: 'Email',
+            required: '*',
+            nameRequired: 'El nombre es obligatorio',
+            lastNameRequired: 'Los apellidos son obligatorios',
+            emailRequired: 'El email es obligatorio',
+            emailInvalid: 'El formato del email no es válido',
+            password: 'Nueva Contraseña',
+            confirmPassword: 'Confirmar Contraseña',
+            passwordPlaceholder: 'Dejar en blanco para mantener la actual',
+            passwordShort: 'La contraseña debe tener al menos 6 caracteres',
+            passwordMismatch: 'Las contraseñas no coinciden',
+            preferences: 'Preferencias',
+            accountActive: 'Cuenta activa',
+            subscribed: 'Suscrito al newsletter',
+            receiveOffers: 'Recibir ofertas de socios',
+            cancel: 'Cancelar',
+            save: 'Guardar',
+            saving: 'Guardando...',
+            successAdd: 'Cliente añadido correctamente',
+            successEdit: 'Cliente actualizado correctamente',
+            error: 'Error al guardar el cliente',
+            passwordSection: 'Cambiar Contraseña',
+        }
+    };
+    const t = translations[locale];
     const { notifyChange } = useClientStats(); const [formData, setFormData] = useState({
         name: '',
         lastName: '',
@@ -69,25 +151,26 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
     // Form validation
     const validateForm = () => {
         const newErrors = {};
+
         if (!formData.name) {
-            newErrors.name = 'El nombre es obligatorio';
+            newErrors.name = t.nameRequired;
         }
         if (!formData.lastName) {
-            newErrors.lastName = 'Los apellidos son obligatorios';
+            newErrors.lastName = t.lastNameRequired;
         }
         if (!formData.email) {
-            newErrors.email = 'El email es obligatorio';
+            newErrors.email = t.emailRequired;
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'El formato del email no es válido';
+            newErrors.email = t.emailInvalid;
         }
 
         // Only validate password if either password field is filled
         if (formData.password || formData.confirmPassword) {
             if (formData.password.length < 6) {
-                newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+                newErrors.password = t.passwordShort;
             }
             if (formData.password !== formData.confirmPassword) {
-                newErrors.confirmPassword = 'Las contraseñas no coinciden';
+                newErrors.confirmPassword = t.passwordMismatch;
             }
         }
 
@@ -108,13 +191,13 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             delete dataToSend.confirmPassword; // Remove confirmPassword as it's not needed by the API
 
             await onSave(dataToSend);
-            toast.success(client ? 'Cliente actualizado correctamente' : 'Cliente añadido correctamente');
+            toast.success(client ? t.successEdit : t.successAdd);
             // Notify the stats context that changes have been made
             await notifyChange();
             onClose();
         } catch (error) {
             console.error('Error saving client:', error);
-            toast.error('Error al guardar el cliente');
+            toast.error(t.error);
         } finally {
             setLoading(false);
         }
@@ -128,7 +211,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                     <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
                         <DialogTitle className="text-lg font-medium text-gray-800 flex items-center">
                             <FiUser className="mr-2 text-[#00B0C8]" />
-                            {client ? 'Editar Cliente' : 'Añadir Nuevo Cliente'}
+                            {client ? t.edit : t.add}
                         </DialogTitle>
                         <button
                             onClick={onClose}
@@ -143,7 +226,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                             <div className="md:col-span-1">
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col items-center">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-4 flex items-center">
-                                        <FiUser className="mr-2 text-[#00B0C8]" /> Perfil de Cliente
+                                        <FiUser className="mr-2 text-[#00B0C8]" /> {t.profile}
                                     </h3>
                                     <div className="w-32 h-32 bg-gray-200 rounded-full overflow-hidden mb-4 flex items-center justify-center">
                                         {imagePreview ? (
@@ -160,26 +243,14 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                     </div>
                                     <div className="w-full mt-4">
                                         <div className="bg-white p-3 rounded-lg border border-gray-200 mb-2">
-                                            <p className="text-sm font-medium text-gray-700">Estado:</p>
+                                            <p className="text-sm font-medium text-gray-700">{t.status}</p>
                                             <div className="flex items-center mt-1">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${formData.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                    {formData.active ? 'Activo' : 'Inactivo'}
+                                                    {formData.active ? t.active : t.inactive}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="bg-white p-3 rounded-lg border border-gray-200">
-                                            <p className="text-sm font-medium text-gray-700">Suscripciones:</p>
-                                            <div className="flex flex-col space-y-1 mt-1">
-                                                <span className={`flex items-center text-xs ${formData.newsletter ? 'text-green-600' : 'text-gray-500'}`}>
-                                                    {formData.newsletter ? <FiCheck className="mr-1" /> : null}
-                                                    Newsletter
-                                                </span>
-                                                <span className={`flex items-center text-xs ${formData.partnerOffers ? 'text-green-600' : 'text-gray-500'}`}>
-                                                    {formData.partnerOffers ? <FiCheck className="mr-1" /> : null}
-                                                    Ofertas de socios
-                                                </span>
-                                            </div>
-                                        </div>
+                                        {/* Removed subscriptions summary (newsletter, offers) */}
                                     </div>
                                 </div>
                             </div>
@@ -188,12 +259,12 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                 {/* Contact Information */}
                                 <section className="space-y-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
-                                        <FiMail className="mr-2 text-[#00B0C8]" /> Información de Contacto
+                                        <FiMail className="mr-2 text-[#00B0C8]" /> {t.contact}
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                                Nombre <span className="text-red-500">*</span>
+                                                {t.name} <span className="text-red-500">{t.required}</span>
                                             </label>
                                             <input
                                                 type="text"
@@ -207,7 +278,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                         </div>
                                         <div>
                                             <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                                                Apellidos <span className="text-red-500">*</span>
+                                                {t.lastName} <span className="text-red-500">{t.required}</span>
                                             </label>
                                             <input
                                                 type="text"
@@ -221,7 +292,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                     </div>
                                     <div>
                                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                            Email <span className="text-red-500">*</span>
+                                            {t.email} <span className="text-red-500">{t.required}</span>
                                         </label>
                                         <input
                                             type="email"
@@ -237,12 +308,12 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                 {/* Password Change Section */}
                                 <section className="space-y-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
-                                        <FiUser className="mr-2 text-[#00B0C8]" /> Cambiar Contraseña
+                                        <FiUser className="mr-2 text-[#00B0C8]" /> {t.passwordSection}
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                                Nueva Contraseña
+                                                {t.password}
                                             </label>
                                             <input
                                                 type="password"
@@ -251,13 +322,13 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 value={formData.password || ''}
                                                 onChange={handleChange}
                                                 className={`mt-1 block w-full rounded-md border-gray-300 border-1 p-2 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.password ? 'border-red-500' : ''}`}
-                                                placeholder="Dejar en blanco para mantener la actual"
+                                                placeholder={t.passwordPlaceholder}
                                             />
                                             {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
                                         </div>
                                         <div>
                                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                                                Confirmar Contraseña
+                                                {t.confirmPassword}
                                             </label>
                                             <input
                                                 type="password"
@@ -266,7 +337,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 value={formData.confirmPassword || ''}
                                                 onChange={handleChange}
                                                 className={`mt-1 block w-full rounded-md border-gray-300 border-1 p-2 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.confirmPassword ? 'border-red-500' : ''}`}
-                                                placeholder="Dejar en blanco para mantener la actual"
+                                                placeholder={t.passwordPlaceholder}
                                             />
                                             {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
                                         </div>
@@ -276,7 +347,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                 {/* Preferences */}
                                 <section className="space-y-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
-                                        <FiBell className="mr-2 text-[#00B0C8]" /> Preferencias
+                                        <FiBell className="mr-2 text-[#00B0C8]" /> {t.preferences}
                                     </h3>
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <div className="flex items-center mb-3">
@@ -289,35 +360,10 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-1  rounded"
                                             />
                                             <label htmlFor="active" className="ml-2 block text-sm text-gray-700">
-                                                Cuenta activa
+                                                {t.accountActive}
                                             </label>
                                         </div>
-                                        <div className="flex items-center mb-3">
-                                            <input
-                                                id="newsletter"
-                                                name="newsletter"
-                                                type="checkbox"
-                                                checked={formData.newsletter}
-                                                onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-1  rounded"
-                                            />
-                                            <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-700">
-                                                Suscrito al newsletter
-                                            </label>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <input
-                                                id="partnerOffers"
-                                                name="partnerOffers"
-                                                type="checkbox"
-                                                checked={formData.partnerOffers}
-                                                onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-1  rounded"
-                                            />
-                                            <label htmlFor="partnerOffers" className="ml-2 block text-sm text-gray-700">
-                                                Recibir ofertas de socios
-                                            </label>
-                                        </div>
+                                        {/* Removed newsletter and partnerOffers checkboxes */}
                                     </div>
                                 </section>
                             </div>
@@ -328,14 +374,14 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                 onClick={onClose}
                                 className="px-4 py-2  border-gray-300 border-1  rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
                             >
-                                Cancelar
+                                {t.cancel}
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
                                 className="px-4 py-2 border border-transparent rounded-md  text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#00B0C890] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
                             >
-                                {loading ? 'Guardando...' : 'Guardar'}
+                                {loading ? t.saving : t.save}
                             </button>
                         </div>
                     </form>

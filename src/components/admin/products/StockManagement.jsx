@@ -54,6 +54,8 @@ export default function StockManagement() {
             const data = await response.json();
 
             setProducts(data.products || []);
+            console.log('Fetched products:', data.products);
+            
             setPagination({
                 currentPage: data.pagination?.currentPage || page,
                 totalPages: data.pagination?.totalPages || 1,
@@ -62,7 +64,7 @@ export default function StockManagement() {
             });
         } catch (error) {
             console.error('Error fetching products:', error);
-            toast.error('Error al cargar los productos');
+            toast.error('Error en carregar els productes');
             setProducts([]);
         } finally {
             setLoading(false);
@@ -106,7 +108,7 @@ export default function StockManagement() {
             // Find the current product in our products array
             const product = products.find(p => p._id === productId);
             if (!product) {
-                toast.error('Producto no encontrado');
+                toast.error('Producte no trobat');
                 setEditingId(null);
                 return;
             }
@@ -114,11 +116,11 @@ export default function StockManagement() {
             // Show confirmation modal
             setConfirmModal({
                 isOpen: true,
-                title: 'Confirmar Cambio de Stock',
-                message: `¿Estás seguro de que deseas actualizar el stock disponible del producto? Esta acción no se puede deshacer.`,
+                title: 'Confirmar canvi d\'estoc',
+                message: `Estàs segur que vols actualitzar l\'estoc disponible del producte? Aquesta acció no es pot desfer.`,
                 onConfirm: async () => {
                     try {
-                        const toastId = toast.loading('Actualizando stock...');
+                        const toastId = toast.loading('Actualitzant estoc...');
 
                         // Get the new values from quantities
                         const newAvailable = quantities[productId].available;
@@ -139,7 +141,7 @@ export default function StockManagement() {
 
                         if (!response.ok) {
                             const error = await response.json();
-                            throw new Error(error.message || 'Error al actualizar el stock');
+                            throw new Error(error.message || 'Error en actualitzar l\'estoc');
                         }
 
                         // Update product in the local state
@@ -164,10 +166,10 @@ export default function StockManagement() {
                             }, 500);
                         }
 
-                        toast.success('Stock actualizado correctamente', { id: toastId });
+                        toast.success('Estoc actualitzat correctament', { id: toastId });
                     } catch (error) {
                         console.error('Error updating stock:', error);
-                        toast.error(error.message || 'Error al actualizar el stock');
+                        toast.error(error.message || 'Error en actualitzar l\'estoc');
                     } finally {
                         setEditingId(null);
                         setConfirmModal(prev => ({ ...prev, isOpen: false }));
@@ -176,9 +178,46 @@ export default function StockManagement() {
             });
         } catch (error) {
             console.error('Error preparing stock update:', error);
-            toast.error('Error al preparar la actualización de stock');
+            toast.error('Error en preparar l\'actualització d\'estoc');
             setEditingId(null);
         }
+    };
+
+
+    // Get NextIntl locale from Next.js
+    let locale = 'ca';
+    if (typeof window !== 'undefined') {
+        locale = (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca').split('-')[0];
+        if (locale !== 'ca' && locale !== 'es') locale = 'ca';
+    }
+
+    // Get translated product name
+    const getTranslatedProductName = (product) => {
+        if (!product) return 'N/D';
+        if (product.name && typeof product.name === 'object') {
+            return product.name[locale] || product.name.ca || product.name.es || 'N/D';
+        }
+        return product.name || 'N/D';
+    };
+
+    // Get translated category name
+    const getTranslatedCategoryName = (product) => {
+        if (!product || !product.category) return 'N/D';
+        // If category is an object with translations
+        if (typeof product.category === 'object' && product.category !== null) {
+            if (product.category && typeof product.category === 'object') {
+                return product.category[locale] || product.category.ca || product.category.es || 'N/D';
+            }
+            // If category itself is a string
+            if (typeof product.category === 'string') {
+                return product.category;
+            }
+        }
+        // If category is a string
+        if (typeof product.category === 'string') {
+            return product.category;
+        }
+        return 'N/D';
     };
 
     // Get current available stock
@@ -198,7 +237,7 @@ export default function StockManagement() {
     // Handle export of stock data
     const handleExportStock = () => {
         // Create CSV content
-        const headers = ['ID', 'Referencia', 'Nombre', 'Disponible', 'Stock Mínimo', 'Estado'];
+        const headers = ['ID', 'Referència', 'Nom', 'Disponible', 'Estoc mínim', 'Estat'];
         const csvContent = [
             headers.join(','),
             ...products.map(product => [
@@ -229,7 +268,7 @@ export default function StockManagement() {
         <div className="bg-white rounded-lg shadow">
             {/* Header with title and actions */}
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-lg font-semibold">Gestión de stock</h2>
+                <h2 className="text-lg font-semibold">Gestió d'estoc</h2>
                 {/* <div className="flex space-x-2">
                     <button
                         className="flex items-center px-3 py-1 border border-gray-300 rounded hover:bg-gray-50"
@@ -248,7 +287,7 @@ export default function StockManagement() {
                         <FiSearch className="absolute left-3 top-3 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Búsqueda de productos (por nombre, referencia, categoría)"
+                            placeholder="Cerca de productes (per nom, referència, categoria)"
                             className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -262,7 +301,7 @@ export default function StockManagement() {
                                 onChange={() => setShowLowStock(!showLowStock)}
                                 className="rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
                             />
-                            <span>Mostrar solo productos con stock bajo</span>
+                            <span>Mostrar només productes amb estoc baix</span>
                         </label>
                     </div>
                 </div>
@@ -273,36 +312,36 @@ export default function StockManagement() {
                 {loading ? (
                     <div className="flex justify-center items-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                        <span className="ml-2">Cargando productos...</span>
+                        <span className="ml-2">Carregant productes...</span>
                     </div>
                 ) : products.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                        No se encontraron productos que coincidan con los criterios de búsqueda
+                        No s'han trobat productes que coincideixin amb els criteris de cerca
                     </div>
                 ) : (
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referencia</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Disponible</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Mínimo</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producte</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referència</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estat</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estoc disponible</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estoc mínim</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {products.map((product) => (
                                 <tr key={product._id} className={isLowStock(product) ? 'bg-yellow-50' : ''}>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                        <div className="text-sm font-medium text-gray-900">{getTranslatedProductName(product)}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {product.reference}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {product.category || 'N/A'}
+                                        {getTranslatedCategoryName(product)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${product.status === 'active'
@@ -312,10 +351,10 @@ export default function StockManagement() {
                                                 : 'bg-red-100 text-red-800'
                                             }`}>
                                             {product.status === 'active'
-                                                ? 'Activo'
+                                                ? 'Actiu'
                                                 : product.status === 'inactive'
-                                                    ? 'Inactivo'
-                                                    : 'Descontinuado'}
+                                                    ? 'Inactiu'
+                                                    : 'Descatalogat'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -332,7 +371,7 @@ export default function StockManagement() {
                                                 <>
                                                     {getAvailableStock(product)}
                                                     {isLowStock(product) && (
-                                                        <FiAlertCircle className="ml-1 text-amber-500" title="Stock bajo" />
+                                                        <FiAlertCircle className="ml-1 text-amber-500" title="Estoc baix" />
                                                     )}
                                                 </>
                                             )}
@@ -358,13 +397,13 @@ export default function StockManagement() {
                                                     onClick={() => saveStockChanges(product._id)}
                                                     className="text-[#00B0C8] hover:text-[#00B0C870]"
                                                 >
-                                                    Guardar
+                                                    Desa
                                                 </button>
                                                 <button
                                                     onClick={() => setEditingId(null)}
                                                     className="text-gray-500 hover:text-gray-700"
                                                 >
-                                                    Cancelar
+                                                    Cancel·la
                                                 </button>
                                             </div>
                                         ) : (
@@ -373,7 +412,7 @@ export default function StockManagement() {
                                                 className="flex items-center text-gray-600 hover:text-gray-900"
                                             >
                                                 <FiEdit className="mr-1" />
-                                                Editar
+                                                Edita
                                             </button>
                                         )}
                                     </td>
@@ -394,7 +433,7 @@ export default function StockManagement() {
                         itemsPerPage={pagination.limit}
                         onPageChange={handlePageChange}
                         onItemsPerPageChange={handleLimitChange}
-                        showingText="Mostrando {} de {} productos"
+                        showingText="Mostrant {} de {} productes"
                     />
                 </div>
             )}
@@ -406,8 +445,8 @@ export default function StockManagement() {
                 onConfirm={confirmModal.onConfirm}
                 title={confirmModal.title}
                 message={confirmModal.message}
-                confirmText="Confirmar"
-                cancelText="Cancelar"
+                confirmText="Confirma"
+                cancelText="Cancel·la"
             />
         </div>
     );

@@ -85,7 +85,7 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
     const [loading, setLoading] = useState(true);
     const [usingSampleData, setUsingSampleData] = useState(false);
     const [error, setError] = useState(null);
- 
+
     useEffect(() => {
         const getProducts = async () => {
             try {
@@ -142,11 +142,18 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
         getProducts();
     }, [limit, forceUseSampleData]);
 
+    // Get locale from URL or default to 'ca'
+    let locale = 'ca';
+    if (typeof window !== 'undefined') {
+        const pathLocale = window.location.pathname.split('/')[1];
+        if (["ca", "es"].includes(pathLocale)) locale = pathLocale;
+    }
+
     if (loading) {
         return (
             <div className="w-full py-8">
                 <div className="container mx-auto px-2">
-                    <h2 className="text-2xl md:text-3xl text-black font-bold mb-6 md:mb-8">Productos Destacados</h2>
+                    <h2 className="text-2xl md:text-3xl text-black font-bold mb-6 md:mb-8">{locale === 'ca' ? 'Productes Destacats' : 'Productos Destacados'}</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                         {[...Array(Math.min(limit, 4))].map((_, index) => (
                             <div key={index} className="bg-gray-100 animate-pulse rounded-lg h-48 md:h-64"></div>
@@ -165,7 +172,7 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
         <div className="w-full py-8">
             <div className="container mx-auto px-2">
                 <ProductSlider
-                    title="Productos Destacados"
+                    title={locale === 'ca' ? 'Productes Destacats' : 'Productos Destacados'}
                     products={products}
                     className="w-full"
                     slidesPerView={{
@@ -177,7 +184,9 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
                 {usingSampleData && (
                     <div className="mt-2">
                         <p className="text-xs text-gray-500 text-center">
-                            Mostrando datos de ejemplo. {error ? `Error: ${error}` : 'No se encontraron productos destacados en la base de datos.'}
+                            {locale === 'ca'
+                                ? `Mostrant dades d'exemple. ${error ? `Error: ${error}` : 'No s\'han trobat productes destacats a la base de dades.'}`
+                                : `Mostrando datos de ejemplo. ${error ? `Error: ${error}` : 'No se encontraron productos destacados en la base de datos.'}`}
                         </p>
                     </div>
                 )}

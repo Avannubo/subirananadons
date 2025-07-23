@@ -2,10 +2,8 @@ import mongoose from 'mongoose';
 
 const categorySchema = new mongoose.Schema({
     name: {
-        type: String,
-        required: [true, 'Please provide a category name'],
-        maxlength: [100, 'Name cannot be more than 100 characters'],
-        trim: true
+        es: { type: String, required: true, maxlength: 100, trim: true },
+        ca: { type: String, required: true, maxlength: 100, trim: true }
     },
     slug: {
         type: String,
@@ -13,10 +11,10 @@ const categorySchema = new mongoose.Schema({
         lowercase: true,
         trim: true
     },
-    description: {
-        type: String,
-        maxlength: [500, 'Description cannot be more than 500 characters']
-    },
+    // description: {
+    //     es: { type: String, required: true, maxlength: 500 },
+    //     ca: { type: String, required: true, maxlength: 500 }
+    // },
     parent: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
