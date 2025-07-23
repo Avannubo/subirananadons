@@ -399,23 +399,23 @@ export default function ConfiguracionTab() {
                         </thead>
                         <tbody>
                             {[...Array(5)].map((_, i) => (
-                                <tr key={i} className="border-b border-gray-100 align-middle justify-center hover:bg-gray-50 transition">
-                                    <td className="py-2 px-2 flex items-center justify-center">
+                                <tr key={i} className="border-b   border-gray-100  hover:bg-gray-50  ">
+                                    <td className="py-2 px-2   ">
                                         <div className="h-12 w-20 bg-gray-200 rounded-lg" />
                                     </td>
-                                    <td className="py-2 px-2 flex items-center justify-center">
+                                    <td className="py-2 px-2    ">
                                         <div className="h-4 w-32 bg-gray-200 rounded" />
                                     </td>
-                                    <td className="py-2 px-2 flex items-center justify-center">
+                                    <td className="py-2 px-2  ">
                                         <div className="h-4 w-32 bg-gray-200 rounded" />
                                     </td>
-                                    <td className="flex flex-row items-center gap-1 justify-center">
+                                    <td className="  py-2 px-2  ">
                                         <div className="h-4 w-8 bg-gray-200 rounded" />
                                     </td>
-                                    <td className="py-2 px-2 flex items-center justify-center">
+                                    <td className="py-2 px-2   ">
                                         <div className="h-4 w-10 bg-gray-200 rounded-full" />
                                     </td>
-                                    <td className="py-2 px-2 flex items-center gap-2 justify-center">
+                                    <td className="py-2 px-2 flex flex-row gap-2  ">
                                         <div className="h-8 w-12 bg-gray-200 rounded-full" />
                                         <div className="h-8 w-12 bg-gray-200 rounded-full" />
                                     </td>

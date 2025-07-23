@@ -12,8 +12,12 @@ const OfferSchema = new mongoose.Schema({
     },
     link: { type: String, required: false },
     order: { type: Number, default: 0 },
-    brand: { type: String },
-    brandLogo: { type: String }, 
+    brand: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Brand',
+        required: true
+    },
+    brandLogo: { type: String },
     discount: { type: Number, min: 0, max: 100 },
 }, { timestamps: true });
 

@@ -29,6 +29,8 @@ export default function OffersTab() {
                 const res = await fetch('/api/offers');
                 const data = await res.json();
                 setOffers(data);
+                console.log(data);
+
             } catch (err) {
                 toast.error('Error al cargar las ofertas');
             } finally {
@@ -136,17 +138,19 @@ export default function OffersTab() {
 
             // Find the selected brand from the brands list
             const selectedBrand = brands.find(b => b.id === form.brand || b.name === form.brand);
+            if (!selectedBrand) {
+                toast.error('Selecciona una marca válida.');
+                return;
+            }
             // Always use the logo from the selectedBrand if available
-            const brandLogo = selectedBrand && selectedBrand.logo ? selectedBrand.logo : '';
-            console.log('Selected brand:', selectedBrand);
-            console.log('Brand logo to save:', brandLogo);
-            // Prepare the offer data with brand information
+            const brandLogo = selectedBrand.logo ? selectedBrand.logo : '';
+            // Prepare the offer data with brand ObjectId
             const offerData = {
                 imageUrl: imageUrl || form.imageUrl,
                 title: form.title,
                 description: form.description,
                 discount: form.discount,
-                brand: selectedBrand?.name || form.brand,
+                brand: selectedBrand.id, // Send ObjectId
                 brandLogo
             };
 
@@ -192,11 +196,18 @@ export default function OffersTab() {
     };
 
     const handleEdit = offer => {
+        // Determine the brand id for the select input
+        let brandId = '';
+        if (offer.brand && typeof offer.brand === 'object') {
+            brandId = offer.brand._id || offer.brand.id || '';
+        } else if (typeof offer.brand === 'string') {
+            brandId = offer.brand;
+        }
         setForm({
             imageUrl: offer.imageUrl || '',
             title: offer.title || { es: '', ca: '' },
             description: offer.description || { es: '', ca: '' },
-            brand: offer.brand || '',
+            brand: brandId,
             brandLogo: offer.brandLogo || '',
             discount: offer.discount || ''
         });
@@ -295,7 +306,7 @@ export default function OffersTab() {
                     <select name="brand" value={form.brand} onChange={handleChange} className="border border-gray-300 p-2 rounded w-full bg-gray-50">
                         <option value="">Selecciona una marca</option>
                         {brands.map(b => (
-                            <option key={b.id} value={b.name}>{b.name}</option>
+                            <option key={b.id} value={b.id}>{b.name}</option>
                         ))}
                     </select>
                     <input name="discount" type="number" value={form.discount ?? ''} onChange={handleChange} placeholder="% Descompte" className="border border-gray-300 p-2 rounded w-full bg-gray-50" min="0" max="100" />
@@ -382,7 +393,21 @@ export default function OffersTab() {
                                         <span className="block text-xs text-gray-400"><span className="font-semibold">ES:</span> {offer.description?.es || ''}</span>
                                     </td>
                                     <td className="py-2 px-2">
-                                        <a href={`/brands?brand=` + offer.brand} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{offer.brand}</a></td>
+                                        <a
+                                            href={
+                                                offer.brand && typeof offer.brand === 'object' && offer.brand._id
+                                                    ? `/brands?brand=${offer.brand._id}`
+                                                    : `/brands?brand=${offer.brand}`
+                                            }
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 underline"
+                                        >
+                                            {offer.brand && typeof offer.brand === 'object'
+                                                ? offer.brand.name
+                                                : (brands.find(b => b.id === offer.brand)?.name || offer.brand)}
+                                        </a>
+                                    </td>
                                     <td className="py-2 px-2">{offer.discount ? `${offer.discount}%` : ''}</td>
                                     <td className="py-2 px-2 flex gap-2">
                                         <button onClick={() => handleEdit(offer)} className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 border border-blue-100 text-xs">Edita</button>
