@@ -5,7 +5,6 @@ import Product from '@/models/Product';
 import '@/models/Brand';
 import '@/models/Category';
 import dbConnect from '@/lib/dbConnect';
-
 // Get all products or filtered products
 export async function GET(request) {
     try {
@@ -19,17 +18,13 @@ export async function GET(request) {
         const preventSort = searchParams.get('preventSort') === 'true';
         const minPrice = parseFloat(searchParams.get('minPrice'));
         const maxPrice = parseFloat(searchParams.get('maxPrice'));
-
         // Pagination parameters
         const page = parseInt(searchParams.get('page')) || 1;
         let limit = parseInt(searchParams.get('limit')) || 5;
         let skip = (page - 1) * limit;
-
         await dbConnect();
-
         // Build query based on search parameters
         const query = {};
-
         // Handle combined search term
         if (search) {
             // Match anywhere in the string (contains search)
@@ -43,7 +38,6 @@ export async function GET(request) {
             // Individual field filters
             if (name) query.name = { $regex: name, $options: 'i' };
             if (reference) query.reference = { $regex: reference, $options: 'i' };
-
             // Handle multiple categories separated by commas
             if (category) {
                 const categoryList = category.split(',').filter(cat => /^[a-f\d]{24}$/i.test(cat));
@@ -51,12 +45,10 @@ export async function GET(request) {
                     query.category = { $in: categoryList };
                 }
             }
-
             if (brand) {
                 // ...existing code... (brand filter logic remains, but can be removed if not needed)
             }
         } if (status) query.status = status;
-
         // Low stock filter
         if (lowStock === 'true') {
             // Products where available is less than minStock
@@ -67,7 +59,6 @@ export async function GET(request) {
                 ]
             };
         }
-
         // Add price range filter
         if (!isNaN(minPrice) || !isNaN(maxPrice)) {
             query.price_incl_tax = {};
@@ -79,14 +70,11 @@ export async function GET(request) {
             }
         }// Get total count for pagination
         const totalItems = await Product.countDocuments(query);
-
         // Build the query with optional sorting
         let productsQuery = Product.find(query);
-
         // Handle sort parameters
         const sortField = searchParams.get('sort');
         const sortOrderParam = searchParams.get('order');
-
         if (sortField) {
             // Support explicit sort field and order
             let order = -1; // default to descending
@@ -113,7 +101,6 @@ export async function GET(request) {
             // Default: sort by createdAt descending (newest first)
             productsQuery = productsQuery.sort({ createdAt: -1 });
         }
-
         // If searching, remove limit to return all matches
         if (search && search.trim() !== '') {
             productsQuery = productsQuery;
@@ -122,10 +109,8 @@ export async function GET(request) {
         } else {
             productsQuery = productsQuery.skip(skip).limit(limit);
         }
-
         // Populate brand and category fields
         const products = await productsQuery.populate('brand').populate('category');
-
         // Map products to include brand and category names
         const productsWithNames = products.map(product => {
             // Convert to plain object if needed
@@ -136,13 +121,11 @@ export async function GET(request) {
                 category: prod.category && typeof prod.category === 'object' && prod.category !== null ? (prod.category.name || prod.category) : prod.category
             };
         });
-
         // Calculate pagination info
         let totalPages = 1;
         if (!search || search.trim() === '') {
             totalPages = Math.ceil(totalItems / (limit || 1));
         }
-
         return NextResponse.json({
             products: productsWithNames,
             pagination: {
@@ -157,26 +140,21 @@ export async function GET(request) {
         return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
     }
 }
-
 // Create a new product
 export async function POST(request) {
     try {
         const session = await getServerSession(authOptions);
-
         // Check if user is admin
         if (!session?.user || session.user.role !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
         }
-
         await dbConnect();
-
         const body = await request.json();
         console.log('Creating product with body:', body);
         // Validate required fields
         if (!body.name || body.price_incl_tax === undefined) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
-
         const product = await Product.create({
             name: body.name,
             reference: body.reference || '',
@@ -203,16 +181,13 @@ export async function POST(request) {
                 userName: session.user.name || 'Admin user'
             }]
         });
-
         return NextResponse.json(product, { status: 201 });
     } catch (error) {
         console.error('Error creating product:', error);
-
         // Handle duplicate reference error
         if (error.code === 11000) {
             return NextResponse.json({ error: 'Product reference already exists' }, { status: 400 });
         }
-
         return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
     }
 }

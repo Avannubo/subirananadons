@@ -3,10 +3,8 @@ import FadeSlider from "@/components/landing/FadeSlider";
 import ImageGallery from "@/components/landing/ofertas";
 import FeaturedProducts from "@/components/landing/FeaturedProducts";
 import ShopLayout from "../../../components/Layouts/shop-layout";
-
 export default function Home() {
     const t = useTranslations('HomePage');
-
     return (
         <ShopLayout>
             <div className="w-full h-full flex flex-col justify-start items-start">

@@ -28,13 +28,11 @@ export default function Page() {
     const { addToCart } = useCart();
     const [dragConstraints, setDragConstraints] = useState({ right: 0, left: 0 });
     const scrollContainerRef = useRef(null);
-
     // Get current locale from params
     const locale = useLocale();
     const [isAddingToList, setIsAddingToList] = useState(false);
     const [showBirthListModal, setShowBirthListModal] = useState(false);
     const { data: session } = useSession();
-
     const onAddToWishlist = async () => {
         if (!session) {
             toast.error('Inicia sesión para añadir productos a las listas', { duration: 3000 });
@@ -51,7 +49,6 @@ export default function Page() {
             setDragConstraints({ right: 0, left: leftConstraint });
         }
     }, [product?.images?.length, scrollContainerRef.current]);
-
     // Custom scroll handler for thumbnail navigation
     const scrollThumbnails = (direction) => {
         if (scrollContainerRef.current) {
@@ -60,7 +57,6 @@ export default function Page() {
             scrollContainerRef.current.scrollLeft = newScrollPosition;
         }
     };
-
     // Get product ID from the URL
     // URLs are in the format: /products/category-slug/product-slug
     // We need to find the product by its slug
@@ -92,7 +88,6 @@ export default function Page() {
                     ...productById,
                     images,
                 });
-
                 if (!productById) {
                     throw new Error('Product not found');
                 }
@@ -156,12 +151,10 @@ export default function Page() {
                             <div className="h-4 w-40 bg-gray-200 rounded animate-pulse"></div>
                         </div>
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Skeleton Product Image */}
                         <div className="space-y-4">
                             <div className="relative w-full h-[600px] rounded-lg bg-gray-200 animate-pulse"></div>
-
                             {/* Skeleton Thumbnails */}
                             <div className="flex space-x-4 overflow-hidden">
                                 {[...Array(4)].map((_, index) => (
@@ -169,35 +162,29 @@ export default function Page() {
                                 ))}
                             </div>
                         </div>
-
                         {/* Skeleton Product Info */}
                         <div className="space-y-6">
                             <div className="h-8 w-3/4 bg-gray-200 rounded animate-pulse"></div>
                             <div className="h-7 w-32 bg-gray-200 rounded animate-pulse"></div>
-
                             <div className="space-y-4">
                                 <div className="h-20 bg-gray-200 rounded animate-pulse"></div>
-
                                 <div className="py-4 space-y-3">
                                     <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
                                     {[...Array(4)].map((_, index) => (
                                         <div key={index} className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
                                     ))}
                                 </div>
-
                                 {/* Skeleton Quantity Selector */}
                                 <div className="flex items-center space-x-4">
                                     <div className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
                                     <div className="h-10 w-32 bg-gray-200 rounded animate-pulse"></div>
                                 </div>
-
                                 {/* Skeleton Buttons */}
                                 <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
                                 <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
                             </div>
                         </div>
                     </div>
-
                     {/* Skeleton Tabs */}
                     <div className="mt-16">
                         <div className="border-b border-gray-200">
@@ -214,7 +201,6 @@ export default function Page() {
                             </div>
                         </div>
                     </div>
-
                     {/* Skeleton Related Products */}
                     <div className="mt-16">
                         <div className="h-8 w-44 bg-gray-200 rounded animate-pulse mb-8"></div>
@@ -274,7 +260,6 @@ export default function Page() {
                                 sizes="(max-width: 768px) 100vw, 50vw"
                             />
                         </motion.div>
-
                         {/* Thumbnails */}
                         {product.images.length > 1 && (
                             <div className="space-y-2">
