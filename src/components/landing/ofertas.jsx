@@ -27,9 +27,9 @@ const ImageGallery = () => {
     return (
         <div className="w-full overflow-hidden bg-white">
             <div className="container mx-auto mt-4 md:mt-20 py-8 md:pt-4 md:pb-12 relative px-2 md:px-0">
-                <h2 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8 text-gray-800">
+                {/* <h2 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8 text-gray-800">
                     {locale === 'ca' ? 'Ofertes' : 'Ofertas'}
-                </h2>
+                </h2> */}
                 {/* First row with 2 offers */}
                 <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4 md:mb-6">
                     {offers.slice(0, 2).map((item, idx) => {

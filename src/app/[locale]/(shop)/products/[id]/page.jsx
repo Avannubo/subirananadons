@@ -252,7 +252,7 @@ export default function Page() {
                     <ol className="hidden md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
                         <li><a href="/products" className="hover:text-gray-700">{t('breadcrumbProducts')}</a></li>
                         <li><span className="mx-2">/</span></li>
-                        <li><a href={`/products?category=${encodeURIComponent(product.category?.slug || '')}`} className="hover:text-gray-700">{typeof product.category?.name === 'object' ? product.category.name[locale] : product.category?.name || ''}</a></li>
+                        <li><a href={`/products?category=${encodeURIComponent(product.category?._id || '')}`} className="hover:text-gray-700">{typeof product.category?.name === 'object' ? product.category.name[locale] : product.category?.name || ''}</a></li>
                         <li><span className="mx-2">/</span></li>
                         <li className="text-gray-900 font-medium whitespace-nowrap">{typeof product.name === 'object' ? product.name[locale] : product.name}</li>
                     </ol>
