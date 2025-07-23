@@ -13,7 +13,7 @@ export default function FeaturedProductsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(99999);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
     const [totalItems, setTotalItems] = useState(0);
     const [totalFeaturedCount, setTotalFeaturedCount] = useState(0);
 
