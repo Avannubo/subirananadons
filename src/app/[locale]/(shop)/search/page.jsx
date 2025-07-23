@@ -156,7 +156,8 @@ export default function SearchPage() {
                 } else if (typeof p.category === 'string') {
                     cat = p.category;
                 }
-                return cat === selectedCategory;
+                // Normalize both for comparison
+                return String(cat).trim().toLowerCase() === String(selectedCategory).trim().toLowerCase();
             });
         }
         // Brand filter
@@ -306,23 +307,33 @@ export default function SearchPage() {
                                     className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
                                 >
                                     <option value="">{t('allCategoriesOption')}</option>
-                                    {categories.map((category, index) => (
-                                        <React.Fragment key={category._id || `cat-${index}`}> {/* Unique key for category */}
-                                            <option key={category.id || `catopt-${index}`}
-                                                value={category.originalName || (typeof category.name === 'string' ? category.name : (category.name?.[locale] || category.name?.ca || category.name?.es || ''))}>
-                                                {typeof category.name === 'string' ? category.name : (category.name?.[locale] || category.name?.ca || category.name?.es || '')} {category.count > 0 && `(${category.count})`}
-                                            </option>
-                                            {category.children?.map((child, childIdx) => (
-                                                <option
-                                                    key={child.id ? `${child.id}-child` : `childopt-${index}-${childIdx}`}
-                                                    value={child.originalName || (typeof child.name === 'string' ? child.name : (child.name?.[locale] || child.name?.ca || child.name?.es || ''))}
-                                                    className="pl-4"
-                                                >
-                                                    {typeof child.name === 'string' ? child.name : (child.name?.[locale] || child.name?.ca || child.name?.es || '')}
+                                    {categories.map((category, index) => {
+                                        const catValue = typeof category.name === 'string'
+                                            ? category.name
+                                            : (category.name?.[locale] || category.name?.ca || category.name?.es || '');
+                                        return (
+                                            <React.Fragment key={category._id || `cat-${index}`}>
+                                                <option key={category.id || `catopt-${index}`}
+                                                    value={catValue}>
+                                                    {catValue}
                                                 </option>
-                                            ))}
-                                        </React.Fragment>
-                                    ))}
+                                                {category.children?.map((child, childIdx) => {
+                                                    const childValue = typeof child.name === 'string'
+                                                        ? child.name
+                                                        : (child.name?.[locale] || child.name?.ca || child.name?.es || '');
+                                                    return (
+                                                        <option
+                                                            key={child.id ? `${child.id}-child` : `childopt-${index}-${childIdx}`}
+                                                            value={childValue}
+                                                            className="pl-4"
+                                                        >
+                                                            {childValue}
+                                                        </option>
+                                                    );
+                                                })}
+                                            </React.Fragment>
+                                        );
+                                    })}
                                 </select>
                             </div>
                             {/* Brands Selector */}
