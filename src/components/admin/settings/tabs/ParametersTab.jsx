@@ -284,7 +284,7 @@ export default function ParametersTab() {
                     ) : (
                         <div className="flex items-center gap-4 justify-end">
                             {param.key === "horari" ? (
-                                <span className="text-md whitespace-pre-line">{parameters[param.key]}</span>
+                                <span className="text-md whitespace-pre-line text-right block">{parameters[param.key]}</span>
                             ) : (
                                 <span className="text-md">{parameters[param.key]} {param.unit}</span>
                             )}
