@@ -365,27 +365,10 @@ export default function ProductsTable(props) {
             const savedProduct = await response.json();
             toast.success(isEditing ? 'Product updated successfully' : 'Product added successfully');
             setShowModal(false);
-            if (useClientPagination) {
-                let updatedProducts;
-                if (isEditing) {
-                    // Replace the updated product in the array
-                    updatedProducts = allProducts.map(p =>
-                        p._id === savedProduct._id ? savedProduct : p
-                    );
-                } else {
-                    // Add the new product to the array
-                    updatedProducts = [savedProduct, ...allProducts];
-                }
-                setAllProducts(updatedProducts);
-                // When adding, go to first page. When editing, stay on current page
-                const newPage = isEditing ? pagination.currentPage : 1;
-                applyClientPagination(updatedProducts, newPage, pagination.limit);
-            } else {
-                // When adding a new product, go to first page to see it
-                // When editing, stay on current page
-                setPagination(p => ({ ...p, currentPage: isEditing ? p.currentPage : 1 }));
-                fetchProducts();
-            }
+            // When adding a new product, go to first page to see it
+            // When editing, stay on current page
+            setCurrentPage(isEditing ? currentPage : 1);
+            fetchProducts();
         } catch (error) {
             console.error('Error saving product:', error);
             toast.error(error.message || 'Error saving product');
