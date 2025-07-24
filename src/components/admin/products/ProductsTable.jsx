@@ -262,24 +262,13 @@ export default function ProductsTable(props) {
             }
             toast.success('Product deleted successfully');
             setShowConfirmModal(false);
-            if (useClientPagination) {
-                // Update local state for client-side pagination
-                const updatedProducts = allProducts.filter(p => p._id !== selectedProduct._id);
-                setAllProducts(updatedProducts);
-                // Calculate new page (go to previous page if this was the last item on the page)
-                const newPage = products.length === 1 && pagination.currentPage > 1
-                    ? pagination.currentPage - 1
-                    : pagination.currentPage;
-                applyClientPagination(updatedProducts, newPage, pagination.limit);
-            } else {
-                // Refresh the product list while maintaining the current page if possible
-                // If the deleted product was the last one on the page, go to the previous page
-                const newPage = products.length === 1 && pagination.currentPage > 1
-                    ? pagination.currentPage - 1
-                    : pagination.currentPage;
-                setPagination(p => ({ ...p, currentPage: newPage }));
-                fetchProducts();
-            }
+            // Refresh the product list while maintaining the current page if possible
+            // If the deleted product was the last one on the page, go to the previous page
+            const newPage = products.length === 1 && currentPage > 1
+                ? currentPage - 1
+                : currentPage;
+            setCurrentPage(newPage);
+            fetchProducts();
         } catch (error) {
             console.error('Error deleting product:', error);
             toast.error('Error deleting product');

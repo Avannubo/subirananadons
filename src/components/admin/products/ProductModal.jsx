@@ -10,7 +10,7 @@ import ImageSelector from '@/components/admin/shared/ImageSelector';
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
     // Get IVA parameter from shop settings
     const { value: ivaValue, loading: ivaLoading } = useShopParameter('iva');
-    console.log(product);
+    // console.log(product);
     const [formData, setFormData] = useState({
         name: { es: '', ca: '' },
         reference: '',
@@ -312,7 +312,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         if (formData.image && !selectedImage) {
             // Check if this URL already exists in the product images
             if (productImages.includes(formData.image)) {
-                toast.error('Esta imagen ya ha sido añadida');
+                // toast.error('Esta imagen ya ha sido añadida');
                 return;
             }
             const newImages = [...productImages, formData.image];
