@@ -2,12 +2,26 @@
 import { useState, useEffect } from 'react';
 import useShopParameter from '@/lib/useShopParameter';
 import { Dialog, DialogTitle } from '@headlessui/react';
-import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus, FiPackage, FiTrash2, FiMove, FiPlus } from 'react-icons/fi';
+import { FiX, FiUpload, FiChevronRight, FiFolder, FiFolderPlus, FiPackage, FiTrash2, FiMove, FiPlus, FiChevronsUp } from 'react-icons/fi';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { useStats } from '@/contexts/StatsContext';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
+    // Validate form before submit
+    const validateForm = () => {
+        const newErrors = {};
+        // Example validation: required fields
+        if (!formData.name || !formData.name.ca) newErrors.name = 'El nom en català és obligatori';
+        if (!formData.reference) newErrors.reference = 'La referència és obligatòria';
+        if (!formData.price_incl_tax || isNaN(parseFloat(formData.price_incl_tax))) newErrors.price_incl_tax = 'Preu amb impostos obligatori';
+        if (!formData.category) newErrors.category = 'Categoria obligatòria';
+        if (!formData.brand) newErrors.brand = 'Marca obligatòria';
+        if (!formData.stock || isNaN(parseInt(formData.stock.available))) newErrors.available = 'Estoc obligatori';
+        if (!formData.stock || isNaN(parseInt(formData.stock.minStock))) newErrors.minStock = 'Estoc mínim obligatori';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
     // Get IVA parameter from shop settings
     const { value: ivaValue, loading: ivaLoading } = useShopParameter('iva');
     // console.log(product);
@@ -120,7 +134,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
     // Get hierarchical categories for the dropdown
     const hierarchicalCategories = organizeCategories(categories);
-
     // Helper to recursively filter categories by name
     const filterCategoriesByName = (categories, searchTerm) => {
         if (!searchTerm) return categories;
@@ -144,7 +157,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             })
             .filter(Boolean);
     };
-
     const filteredCategories = filterCategoriesByName(hierarchicalCategories, categorySearchTerm);
     // Load product data when editing
     useEffect(() => {
@@ -168,7 +180,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 setImagePreview(allImages[0]);
                 setSelectedImageIndex(0);
             }
-
             // Handle translation fallback for name and description
             let name = { es: '', ca: '' };
             if (typeof product.name === 'object' && product.name !== null) {
@@ -182,7 +193,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             } else if (typeof product.description === 'string') {
                 description = { es: product.description, ca: '' };
             }
-
             setFormData({
                 name,
                 reference: product.reference || '',
@@ -550,31 +560,25 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setLoading(false);
         }
     };
-
     // Remove an image
     const handleRemoveImage = (index) => {
         const newImages = [...productImages];
         newImages.splice(index, 1);
         setProductImages(newImages);
-
         // Update selected image if needed
         if (selectedImageIndex >= newImages.length) {
             setSelectedImageIndex(Math.max(0, newImages.length - 1));
             setImagePreview(newImages.length > 0 ? newImages[Math.max(0, newImages.length - 1)] : '');
         }
     };
-
     // Move image up in the list
     const handleMoveImageUp = (index) => {
         if (index <= 0) return;
-
         const newImages = [...productImages];
         const temp = newImages[index];
         newImages[index] = newImages[index - 1];
         newImages[index - 1] = temp;
-
         setProductImages(newImages);
-
         // Update selected image index if it was moved
         if (selectedImageIndex === index) {
             setSelectedImageIndex(index - 1);
@@ -582,18 +586,14 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setSelectedImageIndex(index);
         }
     };
-
     // Move image down in the list
     const handleMoveImageDown = (index) => {
         if (index >= productImages.length - 1) return;
-
         const newImages = [...productImages];
         const temp = newImages[index];
         newImages[index] = newImages[index + 1];
         newImages[index + 1] = temp;
-
         setProductImages(newImages);
-
         // Update selected image index if it was moved
         if (selectedImageIndex === index) {
             setSelectedImageIndex(index + 1);
@@ -601,7 +601,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setSelectedImageIndex(index);
         }
     };
-
     // Render category tree for dropdown with improved hierarchy indicators
     const getCategoryDisplayName = (cat) => {
         if (!cat) return '';
@@ -697,7 +696,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             value={formData.name.ca}
                                             onChange={handleChange}
                                             className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-
                                         />
                                         {errors.name && (
                                             <p className=" text-sm text-red-600">{errors.name}</p>
@@ -717,7 +715,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         />
                                     </div>
                                 </div>
-
                                 <div className="flex gap-4 mt-2">
                                     <div className="flex-1">
                                         <label htmlFor="description-ca" className="block text-sm font-medium text-gray-700">
@@ -810,7 +807,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                     onChange={e => setCategorySearchTerm(e.target.value)}
                                                                 />
                                                             </div>
-
                                                             <div className=" category-dropdown">
                                                                 <style jsx global>{`
                                                                     .category-dropdown .category-item {
@@ -1093,10 +1089,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             {productImages.map((img, index) => (
                                                 <div
                                                     key={index}
-                                                    className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden 
-                                                            ${selectedImageIndex === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}`}
+                                                    className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200`}
                                                 >
-                                                    <div className="relative cursor-pointer" onClick={() => handleSelectImage(index)}>
+                                                    <div className="relative cursor-pointer" >
+                                                        {/* onClick={() => handleSelectImage(index)} */}
                                                         <Image
                                                             src={img || '/assets/images/product-placeholder.jpg'}
                                                             alt={`Imatge de producte ${index + 1}`}
@@ -1105,12 +1101,12 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             className="h-28 w-28 object-cover"
                                                         />
                                                         {index === 0 && (
-                                                            <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1">
+                                                            <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">
                                                                 Principal
                                                             </div>
                                                         )}
                                                         {index === 1 && (
-                                                            <div className="absolute top-0 left-0 bg-indigo-500 text-white text-xs px-2 py-1">
+                                                            <div className="absolute top-0 left-0 rounded-br-md bg-[#00B0C8] text-white text-xs px-2 py-1">
                                                                 Secundària
                                                             </div>
                                                         )}
@@ -1146,9 +1142,37 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 </div>
                                             ))}
                                         </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (selectedImages && selectedImages.length > 0) {
+                                                    // Only add images not already in productImages
+                                                    const newImages = selectedImages.filter(img => !productImages.includes(img));
+                                                    if (newImages.length > 0) {
+                                                        setProductImages(prev => [...prev, ...newImages]);
+                                                        setSelectedImages([]);
+                                                        setSelectedFiles([]);
+                                                        toast.success('Imatges afegides a la galeria');
+                                                    } else {
+                                                        toast.warning('Totes les imatges ja són a la galeria');
+                                                    }
+                                                } else {
+                                                    handleAddImage();
+                                                }
+                                            }}
+                                            disabled={isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)}
+                                            className={`w-full my-2 px-4 py-2 text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-green-600 hover:bg-green-700'
+                                                }`}
+                                        >
+                                            <FiChevronsUp size={16} />
+                                            <span>Afegeix a la galeria</span>
+                                        </button>
                                         {/* Use preview images array as preview below uploaded images */}
                                         {selectedImages && selectedImages.length > 0 && (
-                                            <div className="mt-4">
+                                            <div className="mt-2">
                                                 <h4 className="text-sm font-medium text-gray-700 mb-2">Previsualització d'imatges seleccionades</h4>
                                                 <div className="flex overflow-x-auto p-1 space-x-4">
                                                     {selectedImages.map((img, index) => (
@@ -1165,26 +1189,28 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                     className="h-28 w-28 object-cover"
                                                                 />
                                                                 {/* Badge for new or selected images */}
-                                                                <div className="absolute top-0 left-0">
+                                                                <div className="absolute -top-0.5 left-0">
                                                                     {img.startsWith('data:') ? (
-                                                                        <span className="bg-green-600 text-white text-xs px-2 py-1">Nova</span>
+                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
                                                                     ) : (
-                                                                        <span className="bg-blue-600 text-white text-xs px-2 py-1">Seleccionada</span>
+                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Seleccionada</span>
                                                                     )}
                                                                 </div>
-                                                                {/* Delete button for selected image */}
+                                                            </div>
+                                                            <div className="flex justify-between bg-gray-50 p-1 gap-1">
+                                                                <div className="w-6"></div>
                                                                 <button
                                                                     type="button"
-                                                                    className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 text-red-500 hover:bg-red-100 shadow"
-                                                                    title="Elimina imatge seleccionada"
                                                                     onClick={() => {
-                                                                        // Remove preview and file at index
                                                                         setSelectedImages(prev => prev.filter((_, i) => i !== index));
                                                                         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
                                                                     }}
+                                                                    className="text-red-500 p-1 rounded hover:bg-gray-200"
+                                                                    title="Elimina imatge seleccionada"
                                                                 >
                                                                     <FiTrash2 size={16} />
                                                                 </button>
+                                                                <div className="w-6"></div>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -1221,8 +1247,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             </div>
                                         )}
                                     </div> */}
-                                    <div className="w-full grid grid-cols-2 gap-2">
-                                        <div>
+                                    <div className="w-full grid grid-row-2 gap-2">
+
+                                        <div className='flex flex-row gap-2'>
                                             <label
                                                 htmlFor="productImage"
                                                 className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading
@@ -1240,28 +1267,15 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 disabled={isUploading}
                                                 className="hidden"
                                                 multiple
-                                            />
+                                            />   <button
+                                                type="button"
+                                                onClick={() => setShowImageSelector(true)}
+                                                disabled={isUploading}
+                                                className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                                            >
+                                                Selecciona existent
+                                            </button>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={handleAddImage}
-                                            disabled={isUploading || (!selectedImage && !formData.image)}
-                                            className={`w-full px-4 py-2 text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (!selectedImage && !formData.image)
-                                                ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-green-600 hover:bg-green-700'
-                                                }`}
-                                        >
-                                            <FiPlus size={16} />
-                                            <span>Afegeix a galeria</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowImageSelector(true)}
-                                            disabled={isUploading}
-                                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
-                                        >
-                                            Selecciona existent
-                                        </button>
                                     </div>
                                     {showImageSelector && (
                                         <ImageSelector
@@ -1275,9 +1289,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             onClose={() => setShowImageSelector(false)}
                                         />
                                     )}
-                                    <p className="mt-1 text-xs text-gray-500 text-center">
+                                    {/* <p className="mt-1 text-xs text-gray-500 text-center">
                                         Formats: JPG, PNG. Màx: 5MB
-                                    </p>
+                                    </p> */}
                                     {/* Manual URL input */}
                                     <div className="w-full mt-4">
                                         <label htmlFor="image" className="block text-sm font-medium text-gray-700">
@@ -1297,10 +1311,11 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 type="button"
                                                 onClick={() => {
                                                     if (formData.image) {
-                                                        setImagePreview(formData.image);
+                                                        setSelectedImages(prev => [...prev, formData.image]);
+                                                        setFormData(f => ({ ...f, image: '' }));
                                                     }
                                                 }}
-                                                className="text-nowrap bg-gray-200 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-300"
+                                                className="text-nowrap bg-[#00B0C8] text-white px-3 py-2 border border-l-0 border-[#00B0C8] rounded-r-md hover:bg-[#008A9B]"
                                             >
                                                 Vista prèvia
                                             </button>
