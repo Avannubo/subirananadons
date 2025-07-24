@@ -45,6 +45,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [showBrandDropdown, setShowBrandDropdown] = useState(false);
     const [brandSearchTerm, setBrandSearchTerm] = useState('');
     const [productImages, setProductImages] = useState([]);
+    // selectedImages: array of preview URLs for selected files
+    const [selectedImages, setSelectedImages] = useState([]);
+    // selectedFiles: array of File objects for selected files
+    const [selectedFiles, setSelectedFiles] = useState([]);
     const [showImageSelector, setShowImageSelector] = useState(false);
     const stats = useStats();
     // Fetch all categories and brands when modal opens
@@ -286,20 +290,28 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         setShowBrandDropdown(false);
     };
     // Handle image selection
+    // Handle image selection and preview for multiple files
     const handleImageChange = (e) => {
-        const files = e.target.files;
+        const files = Array.from(e.target.files);
         if (files && files.length > 0) {
             setSelectedImage(files);
+            setSelectedFiles(files);
+            // Generate preview URLs for all selected files
+            Promise.all(files.map(file => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
+            })).then(previews => {
+                setSelectedImages(previews);
+            });
             // Show preview of the first file
             const fileReader = new FileReader();
             fileReader.onload = () => {
                 setImagePreview(fileReader.result);
             };
             fileReader.readAsDataURL(files[0]);
-            // If multiple files selected, upload them immediately
-            if (files.length > 1) {
-                handleAddImage();
-            }
         }
     };
     // Add image to product images array
@@ -393,81 +405,65 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             return;
         }
         // Handle single file upload (legacy path)
-        if (selectedImage) {
-            const imageUrl = await uploadImage();
-            if (imageUrl) {
-                // Check if this URL already exists
-                if (productImages.includes(imageUrl)) {
-                    toast.error('Esta imagen ya ha sido añadida');
+        // Add selected images to productImages (upload to server)
+        const handleAddImage = async () => {
+            if ((!selectedFiles || selectedFiles.length === 0) && !formData.image) {
+                toast.error('Por favor seleccione una imagen o proporcione una URL');
+                return;
+            }
+            // If URL provided, add it directly
+            if (formData.image && (!selectedFiles || selectedFiles.length === 0)) {
+                if (productImages.includes(formData.image)) {
+                    toast.error('La imagen ya existe en la galería');
                     return;
                 }
-                // Add the new image to the array
-                const newImages = [...productImages, imageUrl];
-                setProductImages(newImages);
-                // Clear inputs for next image
-                setSelectedImage(null);
+                setProductImages(prev => [...prev, formData.image]);
+                setFormData(prev => ({ ...prev, image: '' }));
                 setImagePreview('');
                 toast.success('Imagen añadida correctamente');
+                return;
             }
-        }
-    };
-    // Remove an image
-    // (This block was a duplicate and has been removed to fix the redeclaration error)
-    // Select an image to view
-    const handleSelectImage = (index) => {
-        setSelectedImageIndex(index);
-        setImagePreview(productImages[index]);
-    };
-    // Upload image to Cloudinary (legacy method for single image, kept for compatibility)
-    const uploadImage = async () => {
-        if (!selectedImage) return formData.image;
-        setIsUploading(true);
-        const toastId = toast.loading('Subiendo imagen...');
-        try {
-            // Convert image to base64
-            const base64Image = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(selectedImage instanceof FileList ? selectedImage[0] : selectedImage);
-            });
-            // Upload to server
-            const response = await fetch('/api/cloudinary/upload', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ image: base64Image })
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Error al subir la imagen');
+            // Handle multiple files upload
+            if (selectedFiles && selectedFiles.length > 0) {
+                setIsUploading(true);
+                const toastId = toast.loading(`Subiendo ${selectedFiles.length} imágenes...`);
+                try {
+                    // Upload each file and collect URLs
+                    const uploadedUrls = [];
+                    for (let i = 0; i < selectedFiles.length; i++) {
+                        const file = selectedFiles[i];
+                        const base64Image = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(file);
+                        });
+                        const response = await fetch('/api/cloudinary/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ image: base64Image })
+                        });
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            toast.error(errorData.error || 'Error al subir la imagen', { id: toastId });
+                            continue;
+                        }
+                        const data = await response.json();
+                        uploadedUrls.push(data.url);
+                    }
+                    setProductImages(prev => [...prev, ...uploadedUrls]);
+                    toast.success('Imágenes añadidas correctamente', { id: toastId });
+                } catch (error) {
+                    toast.error('Error al subir las imágenes', { id: toastId });
+                } finally {
+                    setIsUploading(false);
+                    setSelectedFiles([]);
+                    setSelectedImages([]);
+                    setSelectedImage(null);
+                    setImagePreview('');
+                }
+                return;
             }
-            const data = await response.json();
-            toast.success('Imagen subida correctamente', { id: toastId });
-            return data.url;
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            toast.error('Error al subir la imagen', { id: toastId });
-            return formData.image;
-        } finally {
-            setIsUploading(false);
-        }
-    };
-    // Form validation
-    const validateForm = () => {
-        const newErrors = {};
-        if (!formData.name.ca || !formData.name.es) newErrors.name = 'El nom és obligatori en els dos idiomes.';
-        if (!formData.reference) newErrors.reference = 'La referència és obligatòria';
-        if (!formData.category) newErrors.category = 'La categoria és obligatòria';
-        if (!formData.brand) newErrors.brand = 'La marca és obligatòria';
-        if (!formData.price_incl_tax) newErrors.price_incl_tax = 'El preu amb impostos és obligatori';
-        // Validate numeric fields
-        if (formData.price_incl_tax && isNaN(parseFloat(formData.price_incl_tax))) {
-            newErrors.price_incl_tax = 'Ha de ser un número vàlid';
-        }
-        if (formData.stock.available && isNaN(parseInt(formData.stock.available))) {
-            newErrors.available = 'Ha de ser un número enter';
-        }
+        };
         if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
             newErrors.minStock = 'Ha de ser un número enter';
         }
@@ -606,8 +602,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }
     };
 
-
-
     // Render category tree for dropdown with improved hierarchy indicators
     const getCategoryDisplayName = (cat) => {
         if (!cat) return '';
@@ -723,7 +717,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         />
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex gap-4 mt-2">
                                     <div className="flex-1">
                                         <label htmlFor="description-ca" className="block text-sm font-medium text-gray-700">
@@ -1152,11 +1146,56 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 </div>
                                             ))}
                                         </div>
+                                        {/* Use preview images array as preview below uploaded images */}
+                                        {selectedImages && selectedImages.length > 0 && (
+                                            <div className="mt-4">
+                                                <h4 className="text-sm font-medium text-gray-700 mb-2">Previsualització d'imatges seleccionades</h4>
+                                                <div className="flex overflow-x-auto p-1 space-x-4">
+                                                    {selectedImages.map((img, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200"
+                                                        >
+                                                            <div className="relative">
+                                                                <Image
+                                                                    src={img || '/assets/images/product-placeholder.jpg'}
+                                                                    alt={`Imatge seleccionada ${index + 1}`}
+                                                                    width={500}
+                                                                    height={500}
+                                                                    className="h-28 w-28 object-cover"
+                                                                />
+                                                                {/* Badge for new or selected images */}
+                                                                <div className="absolute top-0 left-0">
+                                                                    {img.startsWith('data:') ? (
+                                                                        <span className="bg-green-600 text-white text-xs px-2 py-1">Nova</span>
+                                                                    ) : (
+                                                                        <span className="bg-blue-600 text-white text-xs px-2 py-1">Seleccionada</span>
+                                                                    )}
+                                                                </div>
+                                                                {/* Delete button for selected image */}
+                                                                <button
+                                                                    type="button"
+                                                                    className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 text-red-500 hover:bg-red-100 shadow"
+                                                                    title="Elimina imatge seleccionada"
+                                                                    onClick={() => {
+                                                                        // Remove preview and file at index
+                                                                        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+                                                                        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+                                                                    }}
+                                                                >
+                                                                    <FiTrash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                                 {/* Image Upload */}
                                 <div className="flex flex-col items-center space-y-4">
-                                    <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
+                                    {/* <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
                                         {isUploading && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
                                                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
@@ -1170,10 +1209,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 height={1000}
                                                 className="w-full h-full object-contain rounded-lg"
                                             />
-                                        ) : (
+                                        ) : ( 
                                             <div className="flex flex-col items-center justify-center h-full">
                                                 <FiUpload className="w-10 h-10 text-gray-400" />
-                                                <p className="mt-2 text-sm text-gray-500">No hi ha imatge seleccionada</p>
+                                                <p className="mt-2 text-sm text-gray-500">No hi ha imatge leccionada</p>
                                                 <p className="mt-1 text-xs text-gray-400">
                                                     {productImages.length === 0
                                                         ? "Afegeix almenys una imatge principal"
@@ -1181,7 +1220,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 </p>
                                             </div>
                                         )}
-                                    </div>
+                                    </div> */}
                                     <div className="w-full grid grid-cols-2 gap-2">
                                         <div>
                                             <label
@@ -1227,7 +1266,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                     {showImageSelector && (
                                         <ImageSelector
                                             onSelect={(url) => {
-                                                setFormData(f => ({ ...f, image: url }));
+                                                // Add selected image URL to preview list (selectedImages), do not upload
+                                                setSelectedImages(prev => [...prev, url]);
+                                                setFormData(f => ({ ...f, image: '' }));
                                                 setImagePreview(url);
                                                 setShowImageSelector(false);
                                             }}

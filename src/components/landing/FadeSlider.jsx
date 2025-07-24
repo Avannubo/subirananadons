@@ -49,13 +49,13 @@ export default function FadeSlider() {
             >
                 {slides.map((slide) => (
                     <SwiperSlide key={slide.id} className="relative w-full h-full ">
-                        <div className="absolute inset-0 bg-black/20 flex rounded-lg   p-3 md:p-6 group-hover:bg-black/30 transition-colors duration-300 z-10 flex-col items-center justify-center text-center px-2 md:px-0">
-                            <h2 className="text-2xl md:text-5xl font-bold text-white mb-2 md:mb-4 animate-fadeIn drop-shadow-lg">
+                        <div className="absolute inset-0 flex rounded-lg   p-3 md:p-6   transition-colors duration-300 z-10 flex-col items-center justify-center text-center px-2 md:px-0">
+                            {/* <h2 className="text-2xl md:text-5xl font-bold text-white mb-2 md:mb-4 animate-fadeIn drop-shadow-lg">
                                 {slide.title}
-                            </h2>
-                            <p className="text-base md:text-2xl text-white/90 animate-fadeIn delay-100 drop-shadow-md">
+                            </h2> */}
+                            {/* <p className="text-base md:text-2xl text-white/90 animate-fadeIn delay-100 drop-shadow-md">
                                 {slide.subtitle}
-                            </p>
+                            </p> */}
                         </div>
                         <Image
                             src={slide.imageUrl}
@@ -72,12 +72,12 @@ export default function FadeSlider() {
                                 className="flex items-center uppercase  text-white rounded-md transition-colors text-lg font-bold md:text-4xl mx-auto relative group"
                             >
                                 <span
-                                    className="relative z-10"
+                                    className="relative z-10 font-bold text-shadow-lg"
                                 >
                                     {(slide.btnText && slide.btnText[locale]) || 'Learn More'}
                                 </span>
                                 <span
-                                    className="absolute left-0 -bottom-1 w-0 h-[3px] bg-white transition-all duration-500 group-hover:w-full"
+                                    className="absolute left-0 -bottom-1 w-0 h-[3px] bg-white transition-all duration-500 group-hover:w-full "
                                     aria-hidden="true"
                                 />
                             </Link>
