@@ -8,7 +8,8 @@ import { toast } from 'react-hot-toast';
 import { useStats } from '@/contexts/StatsContext';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
 export default function ProductModal({ isOpen, onClose, product, isEditing, onSave }) {
-    // Validate form before submit
+    // --- State and Context Setup ---
+    // --- Form Validation ---
     const validateForm = () => {
         const newErrors = {};
         // Example validation: required fields
@@ -22,7 +23,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-    // Get IVA parameter from shop settings
+    // --- Shop Parameter (IVA) ---
     const { value: ivaValue, loading: ivaLoading } = useShopParameter('iva');
     // console.log(product);
     const [formData, setFormData] = useState({
@@ -65,7 +66,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [showImageSelector, setShowImageSelector] = useState(false);
     const stats = useStats();
-    // Fetch all categories and brands when modal opens
+    // --- Data Fetching: Categories and Brands ---
     useEffect(() => {
         if (isOpen) {
             fetchCategories();
@@ -109,7 +110,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setLoadingBrands(false);
         }
     };
-    // Organize categories into a proper hierarchy for the dropdown
+    // --- Category Hierarchy Helpers ---
     const organizeCategories = (allCategories) => {
         const categoriesMap = {};
         const rootCategories = [];
@@ -134,7 +135,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
     // Get hierarchical categories for the dropdown
     const hierarchicalCategories = organizeCategories(categories);
-    // Helper to recursively filter categories by name
+    // --- Category Search Filter ---
     const filterCategoriesByName = (categories, searchTerm) => {
         if (!searchTerm) return categories;
         const lowerSearch = searchTerm.toLowerCase();
@@ -158,7 +159,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             .filter(Boolean);
     };
     const filteredCategories = filterCategoriesByName(hierarchicalCategories, categorySearchTerm);
-    // Load product data when editing
+    // --- Load Product Data (Edit/New) ---
     useEffect(() => {
         if (isEditing && product) {
             // Format all images into a single array for the UI
@@ -240,7 +241,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             });
         }
     }, [isEditing, product]);
-    // Handle form input changes
+    // --- Form Input Change Handler ---
     const handleChange = (e) => {
         const { name, value, type, checked, id } = e.target;
         // Handle translation fields for name and description
@@ -275,7 +276,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             }));
         }
     };
-    // Handle category selection from the dropdown
+    // --- Category Selection Handler ---
     // Fix: handleCategorySelect should update category (ObjectId) and categoryDisplayName (string)
     // If user selects a new category, set ObjectId; otherwise, keep legacy string until changed
     const handleCategorySelect = (categoryObj) => {
@@ -287,7 +288,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }));
         setShowCategoryDropdown(false);
     };
-    // Handle brand selection
+    // --- Brand Selection Handler ---
     // Fix: handleBrandSelect should update brand (ObjectId) and brandDisplayName (string)
     // If user selects a new brand, set ObjectId; otherwise, keep legacy string until changed
     const handleBrandSelect = (brandObj) => {
@@ -299,7 +300,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }));
         setShowBrandDropdown(false);
     };
-    // Handle image selection
+    // --- Image Selection and Preview ---
     // Handle image selection and preview for multiple files
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -324,7 +325,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             fileReader.readAsDataURL(files[0]);
         }
     };
-    // Add image to product images array
+    // --- Add Image to Product Gallery ---
     const handleAddImage = async () => {
         if (!selectedImage && !formData.image) {
             toast.error('Por favor seleccione una imagen o proporcione una URL');
@@ -480,7 +481,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-    // Handle form submission
+    // --- Form Submission Handler ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) return;
@@ -560,7 +561,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setLoading(false);
         }
     };
-    // Remove an image
+    // --- Remove Image from Gallery ---
     const handleRemoveImage = (index) => {
         const newImages = [...productImages];
         newImages.splice(index, 1);
@@ -571,7 +572,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setImagePreview(newImages.length > 0 ? newImages[Math.max(0, newImages.length - 1)] : '');
         }
     };
-    // Move image up in the list
+    // --- Move Image Up in Gallery ---
     const handleMoveImageUp = (index) => {
         if (index <= 0) return;
         const newImages = [...productImages];
@@ -586,7 +587,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setSelectedImageIndex(index);
         }
     };
-    // Move image down in the list
+    // --- Move Image Down in Gallery ---
     const handleMoveImageDown = (index) => {
         if (index >= productImages.length - 1) return;
         const newImages = [...productImages];
@@ -601,7 +602,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             setSelectedImageIndex(index);
         }
     };
-    // Render category tree for dropdown with improved hierarchy indicators
+    // --- Category Dropdown Render Helper ---
     const getCategoryDisplayName = (cat) => {
         if (!cat) return '';
         if (cat.name) {
@@ -613,7 +614,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         // fallback for legacy
         return cat.ca || cat.es || cat.name || '';
     };
-    // Handle brand search input
+    // --- Brand Search Input Handler ---
     const handleBrandSearch = (e) => {
         setBrandSearchTerm(e.target.value);
         // Keep the dropdown open
@@ -653,11 +654,11 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             </div>
         );
     };
-    // Filter brands based on search term
+    // --- Brand Search Filter ---
     const filteredBrands = brands.filter(brand =>
         (brand.name || '').toLowerCase().includes(brandSearchTerm.toLowerCase())
     );
-    // Reset search when dropdown closes
+    // --- Brand Dropdown Reset ---
     useEffect(() => {
         if (!showBrandDropdown) {
             setBrandSearchTerm('');
@@ -1193,7 +1194,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                     {img.startsWith('data:') ? (
                                                                         <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
                                                                     ) : (
-                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Seleccionada</span>
+                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Existent</span>
                                                                     )}
                                                                 </div>
                                                             </div>
