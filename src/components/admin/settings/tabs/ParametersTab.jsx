@@ -111,30 +111,21 @@ export default function ParametersTab() {
             type: "number",
             min: 0,
             max: 100,
-            description: {
-                ca: "Percentatge d'IVA aplicat a la botiga",
-                es: "Porcentaje de IVA aplicado en la tienda"
-            },
+            description: "Porcentaje de IVA aplicado en la tienda",
             unit: "%",
         },
         {
             key: "telephone",
-            label: "Telèfon",
+            label: "Teléfono",
             type: "text",
-            description: {
-                ca: "Telèfon de contacte mostrat al web",
-                es: "Teléfono de contacto mostrado en la web"
-            },
+            description: "Teléfono de contacto mostrado en la web",
             unit: "",
         },
         {
             key: "whatsapp",
             label: "WhatsApp",
             type: "text",
-            description: {
-                ca: "Número de WhatsApp mostrat al web (només els 9 dígits, sense prefix ni espais)",
-                es: "Número de WhatsApp mostrado en la web (solo los 9 dígitos, sin prefijo ni espacios)"
-            },
+            description: "Número de WhatsApp mostrado en la web (solo los 9 dígitos, sin prefijo ni espacios)",
             unit: "",
             sanitize: (value) => {
                 // Remove country code, non-digits, and keep first 9 digits
@@ -144,32 +135,23 @@ export default function ParametersTab() {
         },
         {
             key: "address",
-            label: "Adreça",
+            label: "Dirección",
             type: "text",
-            description: {
-                ca: "Adreça física de la botiga mostrada al web",
-                es: "Dirección física de la tienda mostrada en la web"
-            },
+            description: "Dirección física de la tienda mostrada en la web",
             unit: "",
         },
         {
             key: "horari",
-            label: "Horari",
+            label: "Horario",
             type: "text",
-            description: {
-                ca: "Horari d'obertura mostrat al web",
-                es: "Horario de apertura mostrado en la web"
-            },
+            description: "Horario de apertura mostrado en la web",
             unit: "",
         },
         {
             key: "email",
             label: "Email",
             type: "email",
-            description: {
-                ca: "Correu electrònic de contacte mostrat al web",
-                es: "Correo electrónico de contacto mostrado en la web"
-            },
+            description: "Correo electrónico de contacto mostrado en la web",
             unit: "",
         },
     ];
@@ -252,8 +234,8 @@ export default function ParametersTab() {
                 <div key={param.key} className="bg-gray-50 p-4 flex flex-row justify-between items-center rounded-lg border border-gray-200">
                     <div className="flex-1 flex-col w-full">
                         <h2 className="text-lg font-semibold mb-2">{param.label}</h2>
-                        {param.description && (
-                            <span className="text-xs text-gray-500 mb-2 block">{typeof param.description === 'object' ? param.description[locale] : param.description}</span>
+                        {param.key === "whatsapp" && (
+                            <span className="text-xs text-gray-500 mb-2">{locale === 'ca' ? "Introdueix només el número espanyol, sense prefix internacional ni espais. Exemple: 612345678" : "Introduce solo el número español, sin prefijo internacional ni espacios. Ejemplo: 612345678"}</span>
                         )}
                     </div>
                     {editing[param.key] ? (
