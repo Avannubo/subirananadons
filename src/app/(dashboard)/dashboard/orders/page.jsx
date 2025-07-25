@@ -3,12 +3,12 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout'; 
-import OrdersTable from '@/components/admin/orders/OrdersTable'; 
+// import OrdersTable from '@/components/admin/orders/OrdersTable'; 
 import { useOrders } from '@/hooks/useOrders';
 
 export default function PedidosPage() {
     const { data: session, status } = useSession();
-    const userRole = session?.user?.role || 'user';
+    const userRole = session?.user?.role || 'user';  
     useEffect(() => {
         console.log('Pedidos Page - Session Status:', status);
         console.log('Pedidos Page - User Role:', userRole);
@@ -104,8 +104,7 @@ export default function PedidosPage() {
             refresh: 'Actualizar datos',
             errorExport: 'Error al exportar los pedidos: '
         }
-    };
-    const t = translations[locale];
+    }; 
     const heading = userRole === 'admin' ? translations[locale].admin : translations[locale].user;
 
     useEffect(() => {
