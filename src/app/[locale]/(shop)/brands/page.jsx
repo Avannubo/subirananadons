@@ -18,10 +18,10 @@ export default function BrandsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [brands, setBrands] = useState([]);
-    const [selectedBrand, setSelectedBrand] = useState('');
-    const [selectedBrandId, setSelectedBrandId] = useState('all');
+    // Remove local state for selectedBrand and selectedBrandId
     const [viewMode, setViewMode] = useState('grid');
     const [sortBy, setSortBy] = useState('default');
+    const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -43,17 +43,6 @@ export default function BrandsPage() {
                     // Sort brands alphabetically by name
                     const sortedBrands = [...data.brands].sort((a, b) => a.name.localeCompare(b.name));
                     setBrands(sortedBrands);
-                    // Get brand from URL parameters (should be brand _id)
-                    const urlBrandId = searchParams.get('brand');
-                    if (urlBrandId) {
-                        setSelectedBrandId(urlBrandId);
-                        // Find brand by id to set selectedBrand name for display
-                        const found = sortedBrands.find(b => b._id === urlBrandId);
-                        setSelectedBrand(found ? found.name : 'all');
-                    } else {
-                        setSelectedBrand('all');
-                        setSelectedBrandId('all');
-                    }
                 }
             } catch (error) {
                 console.error('Error fetching brands:', error);
@@ -63,6 +52,13 @@ export default function BrandsPage() {
         };
         fetchBrands();
     }, [searchParams]);
+    // Get selectedBrandId from searchParams
+    const selectedBrandId = searchParams.get('brand') || 'all';
+    // Get selectedBrand name from brands list
+    const selectedBrand = selectedBrandId === 'all'
+        ? 'all'
+        : (brands.find(b => b._id === selectedBrandId)?.name || '');
+
     // Fetch products for selected brand
     useEffect(() => {
         const fetchProducts = async () => {
@@ -75,9 +71,11 @@ export default function BrandsPage() {
                     : `/api/products?brand=${selectedBrandId}&limit=${productsPerPage}&page=${currentPage}&status=active`;
                 const response = await fetch(endpoint);
                 const data = await response.json();
-                let products = data.products || [];
+                let fetchedProducts = data.products || [];
+                console.log('Fetched products:', fetchedProducts);
+
                 // Format products to match the expected structure
-                products = products.map(product => ({
+                fetchedProducts = fetchedProducts.map(product => ({
                     id: product._id,
                     name: product.name,
                     category: product.category,
@@ -89,12 +87,12 @@ export default function BrandsPage() {
                     brand: product.brand,
                     description: product.description || ''
                 }));
+                setProducts(fetchedProducts);
                 // Update pagination information
                 if (data.pagination) {
                     setTotalPages(data.pagination.totalPages);
                     setTotalItems(data.pagination.totalItems);
                 }
-                sortProducts(products);
                 // Scroll to top when brand or page changes
                 window.scrollTo({
                     top: 0,
@@ -102,39 +100,72 @@ export default function BrandsPage() {
                 });
             } catch (error) {
                 console.error('Error fetching products:', error);
-                setFilteredProducts([]);
+                setProducts([]);
             } finally {
                 setLoading(false);
             }
         };
         fetchProducts();
-    }, [selectedBrandId, currentPage, productsPerPage]);
+    }, [selectedBrandId, currentPage, productsPerPage, brands]);
     // Reset to page 1 when changing brands
     useEffect(() => {
-        if (selectedBrandId) {
-            setCurrentPage(1);
-        }
+        setCurrentPage(1);
     }, [selectedBrandId]);
     // Sort products when sortBy changes
+    // Filter and sort products whenever products, sortBy, or selectedBrandId changes
     useEffect(() => {
-        if (filteredProducts.length > 0) {
-            sortProducts(filteredProducts);
+        let filtered = products;
+        if (selectedBrandId !== 'all') {
+            filtered = filtered.filter(product => {
+                if (!product.brand) return false;
+                if (typeof product.brand === 'object' && product.brand._id) {
+                    return String(product.brand._id) === String(selectedBrandId);
+                }
+                if (typeof product.brand === 'string') {
+                    return String(product.brand) === String(selectedBrandId);
+                }
+                if (product.brand instanceof Object && product.brand.toString) {
+                    return product.brand.toString() === String(selectedBrandId);
+                }
+                return false;
+            });
         }
-    }, [sortBy]);
+        let sorted = [...filtered];
+        switch (sortBy) {
+            case 'price-asc':
+                sorted.sort((a, b) => a.priceValue - b.priceValue);
+                break;
+            case 'price-desc':
+                sorted.sort((a, b) => b.priceValue - a.priceValue);
+                break;
+            case 'name-asc':
+                sorted.sort((a, b) => a.name.localeCompare(b.name));
+                break;
+            case 'newest':
+                sorted.sort((a, b) => b.salesCount - a.salesCount);
+                break;
+            default:
+                break;
+        }
+        setFilteredProducts(sorted);
+    }, [products, sortBy, selectedBrandId]);
+
+    // Debug: log filteredProducts before render
+    useEffect(() => {
+        console.log('filteredProducts state:', filteredProducts);
+    }, [filteredProducts]);
     // Scroll to selected brand in sidebar
     useEffect(() => {
-        if (selectedBrand && !brandsLoading) {
-            // Find the selected brand button element
-            const selectedBrandElement = document.querySelector(`button[data-brand="${selectedBrand}"]`);
+        if (selectedBrandId && !brandsLoading) {
+            const selectedBrandElement = document.querySelector(`button[data-brand="${selectedBrandId}"]`);
             if (selectedBrandElement) {
-                // Scroll the brand into view with smooth behavior
                 selectedBrandElement.scrollIntoView({
                     behavior: 'smooth',
                     block: 'center'
                 });
             }
         }
-    }, [selectedBrand, brandsLoading]);
+    }, [selectedBrandId, brandsLoading]);
     // Fetch banner image
     useEffect(() => {
         const fetchBanner = async () => {
@@ -152,25 +183,7 @@ export default function BrandsPage() {
         fetchBanner();
     }, []);
     const sortProducts = (products) => {
-        let sorted = [...products];
-        switch (sortBy) {
-            case 'price-asc':
-                sorted.sort((a, b) => a.priceValue - b.priceValue);
-                break;
-            case 'price-desc':
-                sorted.sort((a, b) => b.priceValue - a.priceValue);
-                break;
-            case 'name-asc':
-                sorted.sort((a, b) => a.name.localeCompare(b.name));
-                break;
-            case 'newest':
-                // Assuming newer products have higher salesCount for now
-                sorted.sort((a, b) => b.salesCount - a.salesCount);
-                break;
-            default:
-                break;
-        }
-        setFilteredProducts(sorted);
+        // No longer needed, logic moved to useEffect above
     };
     const handleOpenQuickView = (product) => {
         setQuickViewProduct(product);
@@ -185,16 +198,15 @@ export default function BrandsPage() {
         const params = new URLSearchParams(searchParams.toString());
         if (brandId === 'all') {
             params.delete('brand');
-            setSelectedBrand('all');
-            setSelectedBrandId('all');
         } else {
             params.set('brand', brandId);
-            setSelectedBrandId(brandId);
-            // Find brand name for display
-            const found = brands.find(b => b._id === brandId);
-            setSelectedBrand(found ? found.name : '');
         }
-        router.replace(`/brands?${params.toString()}`);
+        // Get locale from current path
+        const localeMatch = window.location.pathname.match(/^\/([^\/]+)\//);
+        const locale = localeMatch ? localeMatch[1] : '';
+        // Build new path with locale
+        const newPath = locale ? `/${locale}/brands?${params.toString()}` : `/brands?${params.toString()}`;
+        router.push(newPath);
     };
 
     // Go to previous page
@@ -321,7 +333,7 @@ export default function BrandsPage() {
                                             <button
                                                 onClick={() => handleBrandSelect('all')}
                                                 data-brand="all"
-                                                className={`w-full text-left px-4 py-2 transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-3 ${selectedBrand === 'all'
+                                                className={`w-full text-left px-4 py-2 transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-3 ${selectedBrandId === 'all'
                                                     ? 'bg-gray-50 font-medium text-[#00B0C8]'
                                                     : ''
                                                     }`}
@@ -431,7 +443,7 @@ export default function BrandsPage() {
                                     </svg>
                                 </button>
                             </div>
-                            <div className="flex flex-row justify-end items-center w-full">
+                            {/* <div className="flex flex-row justify-end items-center w-full">
                                 {loading ? (
                                     <div className="flex items-center animate-pulse">
                                         <div className="h-4 w-28 bg-gray-200 rounded mr-2"></div>
@@ -453,14 +465,14 @@ export default function BrandsPage() {
                                         </select>
                                     </>
                                 )}
-                            </div>
+                            </div> */}
                         </motion.div>
                         {/* Products count - show skeleton if loading */}
                         {loading ? (
                             <div className="h-5 w-40 bg-gray-200 rounded animate-pulse mb-4"></div>
                         ) : (
                             <p className="text-sm text-gray-500 mb-4 p-2">
-                                {t('showingProducts', { count: filteredProducts.length, total: totalItems })}
+                                {t('showingProducts', { count: products.length, total: totalItems })}
                                 {selectedBrand !== 'all' ? ` ${t('showingForBrand', { brand: selectedBrand })}` : ''}
                             </p>
                         )}
@@ -480,8 +492,12 @@ export default function BrandsPage() {
                             </motion.div>
                         ) : (
                             <>
+                                {/* Debug: show filteredProducts in UI for troubleshooting */}
+                                {/* <pre style={{ color: 'red', fontSize: '12px', marginBottom: '8px' }}>
+                                    {JSON.stringify(filteredProducts, null, 2)}
+                                </pre> */}
                                 {/* No products message */}
-                                {filteredProducts.length === 0 && (
+                                {products.length === 0 && (
                                     <div className="py-12 text-center">
                                         <p className="text-gray-500">
                                             {t('noProductsForBrand')}
@@ -496,7 +512,7 @@ export default function BrandsPage() {
                                         : 'space-y-6'
                                         }`}
                                 >
-                                    {filteredProducts.map((product, index) => (
+                                        {products.map((product, index) => (
                                         <ProductCard
                                             key={product.id}
                                             product={product}

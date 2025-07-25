@@ -69,32 +69,7 @@
     "notAvailable": "N/D",
     "seeLabel": "Veure etiqueta",
     "uncategorized": "Sense categoria"
-  },
-  "LegalPage": {
-    "title": "Avís Legal",
-    "section1Title": "1. Informació del Titular",
-    "section1Text": "En compliment de la Llei 34/2002, d'11 de juliol, de Serveis de la Societat de la Informació i Comerç Electrònic, l'informem que:",
-    "companyNameLabel": "Denominació social:",
-    "nifLabel": "NIF:",
-    "addressLabel": "Domicili social:",
-    "emailLabel": "Email:",
-    "phoneLabel": "Telèfon:",
-    "registrationLabel": "Inscripció:",
-    "section2Title": "2. Condicions d'Ús",
-    "section2Text1": "L'accés i ús d'aquest lloc web està subjecte a aquestes condicions d'ús i a totes les lleis i reglaments aplicables. L'accés a aquest lloc web i el seu ús implica l'acceptació plena i sense reserves de totes les condicions incloses en aquest Avís Legal.",
-    "section2Text2": "Subirana es reserva el dret de modificar en qualsevol moment les condicions aquí establertes, així com qualsevol altra condició general o particular. Igualment, es reserva el dret a suspendre, interrompre o deixar d'operar aquest lloc en qualsevol moment.",
-    "section3Title": "3. Propietat Intel·lectual i Industrial",
-    "section3Text1": "Tots els continguts del lloc web, com textos, fotografies, gràfics, imatges, icones, tecnologia, programari, així com el seu disseny gràfic i codis font, constitueixen una obra la propietat de la qual pertany a Subirana, sense que puguin entendre's cedits a l'usuari cap dels drets d'explotació reconeguts per la normativa vigent en matèria de propietat intel·lectual sobre els mateixos.",
-    "section3Text2": "Les marques, noms comercials o signes distintius són titularitat de Subirana, sense que pugui entendre's que l'accés al lloc web atribueixi cap dret sobre les esmentades marques, noms comercials i/o signes distintius.",
-    "section4Title": "4. Enllaços (Links)",
-    "section4Text": "La presència d'enllaços (links) en aquest lloc web cap a altres llocs d'internet té finalitat merament informativa i en cap cas suposa suggeriment, invitació o recomanació sobre els mateixos. Subirana no assumeix responsabilitat pels continguts d'un enllaç pertanyent a un lloc web aliè, ni garanteix la fiabilitat, exactitud, amplitud, veracitat, validesa i disponibilitat tècnica.",
-    "section5Title": "5. Exclusió de Garanties i Responsabilitat",
-    "section5Text1": "Subirana no garanteix la disponibilitat i continuïtat del funcionament del lloc web. Quan sigui raonablement possible, Subirana advertirà prèviament de les interrupcions en el funcionament del lloc web.",
-    "section5Text2": "Subirana exclou qualsevol responsabilitat pels danys i perjudicis de tota naturalesa que puguin deure's a la manca de disponibilitat o de continuïtat del funcionament del lloc web, a la defraudació de la utilitat que els usuaris haguessin pogut atribuir al lloc web, a la fal·libilitat del mateix, i en particular, encara que no de manera exclusiva, a les fallades en l'accés a les diferents pàgines web o a aquelles des de les quals es presten els serveis.",
-    "section6Title": "6. Llei Aplicable i Jurisdicció",
-    "section6Text1": "Les presents condicions es regeixen per la legislació espanyola. Per a la resolució de qualsevol controvèrsia que pogués sorgir per l'accés a aquesta pàgina web, l'usuari i Subirana acorden sotmetre's als Jutjats i Tribunals de Barcelona (Espanya), amb renúncia expressa a qualsevol altre fur que pogués correspondre'ls.",
-    "section6Text2": "Darrera actualització: Maig 2023"
-  },
+  }, 
   "CookiesPage": {
     "title": "Política de Cookies",
     "section1Title": "1. Què són les cookies?",
@@ -362,5 +337,29 @@
   "RecommendationsPage": {
     "title": "Recomanacions",
     "noRecommendations": "No hi ha recomanacions disponibles."
-  }
+  }, 
+    "legalPage": {
+      "title": "Avís Legal",
+      "companySection": "Denominació de la societat",
+      "companyText": "El domini subirananadons.com pertany a la companyia mercantil MORRAL-CORS, SL, amb domicili social al Carrer Nou, 9, de Manresa, i inscrita en el Registre Mercantil de Barcelona al volum 29.076, foli 14, full B-148407, inscripció 1ª.",
+      "cifText": "El CIF de la societat és el número B-61.095.998.",
+      "emailText": "El correu electrònic de la societat és: info@subirananadons.com",
+      "domainSection": "Inscripció del domini en el Registre Mercantil",
+      "domainText": "De l'existència de la web www.subirananadons.com en té degut coneixement el Registre Mercantil de Barcelona.",
+      "ipSection": "Propietat intel·lectual",
+      "ipText": "La totalitat dels drets de propietat intel·lectual de la web subirananadons.com pertanyen a la companyia \"MORRAL-CORS, S.L.\".",
+      "rightsSection": "Reserva de drets",
+      "rightsText1": "Els usuaris que accedeixin a qualsevol tipus de servei o informació continguda a la web només ho poden fer per emprar les dades a títol personal, quedant prohibida la seva utilització amb caràcter publicitari o comercial.",
+      "rightsText2": "Queda prohibida qualsevol reproducció, difusió, publicació o comunicació de qualsevol part o element de la web, sigui quin sigui el mitjà, encara que es citi la seva procedència, sense l'autorització prèvia, expressa i per escrit de la propietària de la web.",
+      "rightsText3": "Queda prohibit l'establiment de qualsevol vincle o hiperenllaç des de qualsevol altra web sense el consentiment previ, exprés i per escrit de MORRAL-CORS, S.L.",
+      "webSection": "Dades de la web",
+      "webText": "Les dades tècniques i els preus que apareixen en aquesta pàgina web s'entenen que són correctes llevat d'error o omissió tipogràfica.",
+      "dataSection": "Informació sobre protecció de dades de caràcter personal",
+      "dataText1": "De conformitat amb el que preveu la Llei orgànica 15/1999, de 13 de desembre, de protecció de dades de caràcter personal, i normativa concordant, s'informa que les dades personals que s'hagin de facilitar per accedir a determinats espais o seccions de la web seran incloses dins un fitxer automatitzat de dades de caràcter personal, i es protegirà la seva confidencialitat.",
+      "dataText2": "La recollida de dades de caràcter personal és necessària per a facilitar i tramitar les comandes, per facturar les vendes i per a garantir els eventuals serveis de postvenda. Les dades de caràcter personal només podran ser recollides pel compliment de les anteriors finalitats, sense que siguin emmagatzemades per cap altra motiu. Les esmentades dades personals no seran utilitzades per a les finalitats incompatibles amb aquelles per a les que haguessin estat recollides, havent-se de cancel·lar quan hagin deixat d’ésser necessàries o pertinents.",
+      "dataText3": "Tanmateix s'informa que els usuaris de la web disposen del dret d'accés, oposició, rectificació i cancel·lació de les seves dades, que podran exercitar per mitjà d'un comunicat escrit a l'adreça electrònica facilitada a l'encapçalament del present, quan ho cregui oportú, rebent un justificant de recepció del missatge amb resposta inclosa sobre la petició formulada.",
+      "responsibilitySection": "Exoneració i assumpció de responsabilitats",
+      "responsibilityText1": "La companyia MORRAL-CORS, S.L. no es fa responsable del funcionament incorrecte de la web per problemes tècnics derivats del seu ús indegut, per no seguir les instruccions que es donin als usuaris a cada moment, així com també per problemes tècnics derivats de factors externs o de qualsevol altra causa de caire tècnic que impedeixi d'alguna manera la correcta prestació dels serveis que s'ofereixen, declinant qualsevol responsabilitat al respecte",
+      "responsibilityText2": "La companyia MORRAL-CORS, S.L. respondrà únicament dels danys que els usuaris de la web puguin patir per la utilització de la mateixa quan els referits danys siguin conseqüència d'una actuació dolosa d'aquesta companyia."
+    } 
 }
