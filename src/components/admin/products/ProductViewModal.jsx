@@ -134,7 +134,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                             <div className="md:col-span-1 flex flex-col items-start">
                                 <div className="bg-gray-50 p-1 rounded-lg border border-gray-200 w-full">
                                     <div className="relative h-56 w-full">
-                                        <Image
+                                        <img
                                             src={selectedImage || '/assets/images/product-placeholder.jpg'}
                                             alt={product.name || 'Product image'}
                                             fill
@@ -158,7 +158,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                                         ? 'border-[#00B0C8] ring-2 ring-[#00B0C8]/30'
                                                         : 'border-gray-200 hover:border-gray-300'}`}
                                                 >
-                                                    <Image
+                                                    <img
                                                         src={img || '/assets/images/product-placeholder.jpg'}
                                                         alt={`Thumbnail ${index + 1}`}
                                                         fill

@@ -83,7 +83,7 @@ export default function ContactPage() {
             {/* Hero Section */}
             {bannerImage ? (
                 <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
-                    <Image
+                    <img
                         src={bannerImage}
                         alt="banner"
                         fill

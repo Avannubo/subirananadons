@@ -89,7 +89,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                     <div className="flex justify-center mb-4">
                                         <div className="relative h-32 w-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                                             {client.image ? (
-                                                <Image
+                                                <img
                                                     src={client.image}
                                                     alt={`${client.name} ${client.lastName}`}
                                                     fill

@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 export default function ProductQuickView({ product, onClose }) {
     const { addToCart } = useCart();
 
-   
+
     // Get current locale from next-intl
     const locale = useLocale();
     console.log(product.description);
@@ -26,7 +26,7 @@ export default function ProductQuickView({ product, onClose }) {
             setSelectedImage(product.imageUrl);
         }
     }, [product]);
-    
+
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -111,7 +111,7 @@ export default function ProductQuickView({ product, onClose }) {
                         {/* Image Section */}
                         <div className="w-full md:w-1/2 pb-4 px-2 sm:px-6 flex flex-col items-center">
                             <div className="relative w-full h-56 sm:h-80 mb-4 mt-2">
-                                <Image
+                                <img
                                     key={selectedImage}
                                     src={selectedImage || '/placeholder.png'}
                                     alt={product.name}
@@ -128,7 +128,7 @@ export default function ProductQuickView({ product, onClose }) {
                                         className={`relative w-12 h-12 sm:w-16 sm:h-16 border rounded overflow-hidden cursor-pointer ${selectedImage === thumb ? 'border-[#00B0C8] border-2' : 'border-gray-200'}`}
                                         onClick={() => handleThumbnailClick(thumb)}
                                     >
-                                        <Image
+                                        <img
                                             src={thumb}
                                             alt={`Thumbnail ${index + 1}`}
                                             fill

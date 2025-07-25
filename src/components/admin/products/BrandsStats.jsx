@@ -146,7 +146,7 @@ export default function BrandsStats() {
                     <div className="flex items-center">
                         <div className="flex-shrink-0 mr-3">
                             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                                <Image className="text-red-500" size={24} />
+                                <img className="text-red-500" size={24} />
                             </div>
                         </div>
                         <div>

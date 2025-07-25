@@ -290,7 +290,7 @@ export default function BrandsPage() {
             {/* Header Image */}
             {bannerImage ? (
                 <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
-                    <Image
+                    <img
                         src={bannerImage}
                         alt={t('bannerAlt')}
                         fill
@@ -375,7 +375,7 @@ export default function BrandsPage() {
                                                 >
                                                     <div className="relative">
                                                         {brand.logo ? (
-                                                            <Image
+                                                            <img
                                                                 src={brand.logo}
                                                                 alt={brand.name}
                                                                 width={100}
@@ -512,7 +512,7 @@ export default function BrandsPage() {
                                         : 'space-y-6'
                                         }`}
                                 >
-                                        {products.map((product, index) => (
+                                    {products.map((product, index) => (
                                         <ProductCard
                                             key={product.id}
                                             product={product}

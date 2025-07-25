@@ -504,7 +504,7 @@ export default function CartPage() {
                                         {regularItems.map((item, index) => (
                                             <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
                                                 <div className="relative w-20 h-20">
-                                                    <Image
+                                                    <img
                                                         src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
                                                         alt={item.name || 'Producto'}
                                                         fill
@@ -569,7 +569,7 @@ export default function CartPage() {
                                         {giftItems.map((item, index) => (
                                             <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
                                                 <div className="relative w-20 h-20">
-                                                    <Image
+                                                    <img
                                                         src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
                                                         alt={item.name || 'Producto'}
                                                         fill

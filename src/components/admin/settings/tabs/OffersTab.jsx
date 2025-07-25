@@ -273,7 +273,7 @@ export default function OffersTab() {
                         </button>
                     </div>
                     {showImageSelector && (
-                        <ImageSelector
+                        <imgSelector
                             onSelect={(url) => {
                                 setForm(f => ({ ...f, imageUrl: url }));
                                 setImagePreview(url);

@@ -22,7 +22,7 @@ export default function Footer() {
                         {/* Logo Column */}
                         <div className="flex flex-col items-center md:items-start">
                             <div className="mb-4 md:mb-6 w-full flex justify-center md:justify-start">
-                                <Image
+                                <img
                                     src="/assets/logo-header.svg"
                                     alt="logo"
                                     width={160}
@@ -72,8 +72,8 @@ export default function Footer() {
                                     <span className=" text-xs md:text-sm   text-center md:text-left   transition-colors cursor-pointer">
                                         {/* {t('poweredBy')}     */}
                                         Powered by:
-                                        </span>
-                                    <Image
+                                    </span>
+                                    <img
                                         src="/assets/images/Avan.png"
 
                                         alt="footer logo"

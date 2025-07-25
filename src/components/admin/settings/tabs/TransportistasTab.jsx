@@ -361,7 +361,7 @@ export default function TransportistasTab() {
                                     </button>
                                 </div>
                                 {showImageSelector && (
-                                    <ImageSelector
+                                    <imgSelector
                                         onSelect={(url) => {
                                             setEditingCarrier(prev => ({ ...prev, logo: url }));
                                             setImagePreview(url);

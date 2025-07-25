@@ -95,7 +95,7 @@ export default function Page() {
                         {/* <Link href="#" className="hidden md:block text-gray-700 font-semibold text-sm ml-2 hover:text-[#00B0C8] cursor-pointer">Tel: 938 751 567</Link> */}
                     </div>
                     <Link href="/" className="flex justify-center items-center w-[120px] md:w-[300px]">
-                        <Image
+                        <img
                             src="/assets/logo-header.svg"
                             alt="logo"
                             width={120}

@@ -213,7 +213,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                     <div className="flex items-center">
                                                         <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md overflow-hidden">
                                                             {item.product.image && (
-                                                                <Image
+                                                                <img
                                                                     src={item.product.image}
                                                                     alt={item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
                                                                     width={40}

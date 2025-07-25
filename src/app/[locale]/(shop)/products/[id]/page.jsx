@@ -252,7 +252,7 @@ export default function Page() {
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <Image
+                            <img
                                 src={product.images && product.images[selectedImage] ? product.images[selectedImage] : product.image}
                                 alt={typeof product.name === 'object' ? product.name[locale] : product.name}
                                 fill
@@ -292,7 +292,7 @@ export default function Page() {
                                                         className="relative h-20 xs:h-28 sm:h-32 md:h-44 cursor-pointer"
                                                         onClick={() => setSelectedImage(index)}
                                                     >
-                                                        <Image
+                                                        <img
                                                             src={image}
                                                             alt={`${product.name} ${index + 1}`}
                                                             fill

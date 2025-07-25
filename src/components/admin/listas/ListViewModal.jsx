@@ -365,7 +365,7 @@ export default function ListViewModal({
                 <div className="flex items-start">
                     <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded-md overflow-hidden mr-3">
                         {item.product?.image && (
-                            <Image
+                            <img
                                 src={item.product.image}
                                 alt={productName}
                                 width={64}

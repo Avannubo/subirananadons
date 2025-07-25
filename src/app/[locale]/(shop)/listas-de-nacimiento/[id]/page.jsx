@@ -271,7 +271,7 @@ export default function BirthListPage({ params }) {
         <ShopLayout>
             {/* Hero Section */}
             <div className="relative w-full h-[35vh] bg-gray-100">
-                <Image
+                <img
                     src="/assets/images/bg-beagrumb.jpg"
                     alt={list?.babyName}
                     fill
@@ -390,7 +390,7 @@ export default function BirthListPage({ params }) {
                                 whileHover={{ y: -3 }}
                             >
                                 <div className="relative w-full" style={{ aspectRatio: '1/0.8' }}>
-                                    <Image
+                                    <img
                                         src={product.image}
                                         alt={product.name}
                                         fill

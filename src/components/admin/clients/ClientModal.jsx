@@ -230,7 +230,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                     </h3>
                                     <div className="w-32 h-32 bg-gray-200 rounded-full overflow-hidden mb-4 flex items-center justify-center">
                                         {imagePreview ? (
-                                            <Image
+                                            <img
                                                 src={imagePreview}
                                                 alt="Client preview"
                                                 width={128}

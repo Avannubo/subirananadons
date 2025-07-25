@@ -57,7 +57,7 @@ export default function FadeSlider() {
                                 {slide.subtitle}
                             </p> */}
                         </div>
-                        <Image
+                        <img
                             src={slide.imageUrl}
                             alt="img"
                             fill

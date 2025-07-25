@@ -63,7 +63,7 @@ const ImageGallery = () => {
                                             />
                                         </div>
                                     )}
-                                    <Image
+                                    <img
                                         src={item.imageUrl}
                                         alt={title}
                                         fill
@@ -114,7 +114,7 @@ const ImageGallery = () => {
                                             />
                                         </div>
                                     )}
-                                    <Image
+                                    <img
                                         src={item.imageUrl}
                                         alt={title}
                                         fill

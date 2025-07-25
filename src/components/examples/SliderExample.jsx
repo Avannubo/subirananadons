@@ -8,7 +8,7 @@ const SliderExample = () => {
     // Example slides data
     const slides = [
         <div key="1" className="relative w-full h-[500px]">
-            <Image
+            <img
                 src="/assets/slide1.jpg"
                 alt="Slide 1"
                 fill
@@ -22,7 +22,7 @@ const SliderExample = () => {
             </div>
         </div>,
         <div key="2" className="relative w-full h-[500px]">
-            <Image
+            <img
                 src="/assets/slide2.jpg"
                 alt="Slide 2"
                 fill
@@ -36,7 +36,7 @@ const SliderExample = () => {
             </div>
         </div>,
         <div key="3" className="relative w-full h-[500px]">
-            <Image
+            <img
                 src="/assets/slide3.jpg"
                 alt="Slide 3"
                 fill

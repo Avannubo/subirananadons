@@ -148,7 +148,7 @@ export default function Menu() {
                         <div className="p-4 md:p-6 h-full flex flex-col">
                             <div className="flex justify-between items-center mb-4 md:mb-6">
                                 <Link href="/" className="flex items-center" onClick={closeMenu}>
-                                    <Image
+                                    <img
                                         src="/assets/logo-header.svg"
                                         alt="logo"
                                         width={120}

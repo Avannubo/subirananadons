@@ -207,7 +207,7 @@ export default function Page() {
                                             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
                                         </div>
                                     )}
-                                    <Image
+                                    <img
                                         src={imagePreview || userData.image || '/assets/images/joie.png'}
                                         alt="Profile"
                                         width={128}

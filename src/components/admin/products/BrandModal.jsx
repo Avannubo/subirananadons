@@ -270,7 +270,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 </button>
                             </div>
                             {showImageSelector && (
-                                <ImageSelector
+                                <imgSelector
                                     onSelect={(url) => {
                                         setFormData(prev => ({ ...prev, logo: url }));
                                         setImagePreview(url);

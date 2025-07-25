@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
 import React from 'react';
 import { useLocale } from 'next-intl';
-import { getTranslatedField } from '@/lib/getTranslatedField'; 
+import { getTranslatedField } from '@/lib/getTranslatedField';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useSession } from 'next-auth/react';
 import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
@@ -102,7 +102,7 @@ export default function ProductCard({
         >
             <Link href={productUrl} className="w-full flex flex-col items-center">
                 <div className="relative w-full h-64 mb-4">
-                    <Image
+                    <img
                         src={currentImageUrl}
                         alt={product.name.ca || product.name.es || product.name}
                         fill
@@ -152,7 +152,7 @@ export default function ProductCard({
         >
             <Link href={productUrl} className="flex flex-row w-full">
                 <div className="relative w-1/4 h-40 mr-4 flex-shrink-0">
-                    <Image
+                    <img
                         src={currentImageUrl}
                         alt={translatedName}
                         fill
