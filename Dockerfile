@@ -6,8 +6,7 @@ WORKDIR /app
 # Copy package files (only those that exist)
 COPY package.json ./
 COPY package-lock.json ./
-COPY yarn.lock ./
-COPY pnpm-lock.yaml ./
+# Do not copy pnpm-lock.yaml if it does not exist
 
 # Install dependencies
 RUN npm install
