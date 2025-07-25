@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import OrdersTable from '@/components/admin/orders/OrdersTable';
 import { FiDownload, FiRefreshCw, FiCalendar, FiChevronDown, FiFilter, FiSearch, FiPlus } from 'react-icons/fi';
 import { useOrders } from '@/hooks/useOrders';
-import TabNavigation from '@/components/admin/shared/TabNavigation';
+import TabNavigation from '@/components/admin/orders/TabNavigation';
 import { toast } from 'react-hot-toast';
 export default function OrdersTabs({ userRole = 'user' }) {
     // Locale detection (default to 'ca')
