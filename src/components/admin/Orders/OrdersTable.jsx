@@ -10,15 +10,13 @@ import OrderEditModal from './OrderEditModal';
 import OrderViewModal from './OrderViewModal';
 export default function OrdersTable({
     orders,
-    filters,
-    setFilters,
+    filters, 
     userRole = 'user',
     onStatusChange,
     onDelete,
     pagination,
     onPageChange,
-    onLimitChange,
-    showPagination
+    onLimitChange, 
 }) {
     const [selectedOrders, setSelectedOrders] = useState([]);
     // Locale detection (default to 'ca')
@@ -353,8 +351,8 @@ export default function OrdersTable({
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {filteredOrders.length > 0 ? (
-                            filteredOrders.map((order, index) => (
+                        {orders.length > 0 ? (
+                            orders.map((order, index) => (
                                 <tr key={order.id} className="hover:bg-gray-50">
                                     {userRole === 'admin' && (
                                         <td className="px-4 py-4">
