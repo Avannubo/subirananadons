@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import OrdersTabs from '@/components/admin/orders/OrdersTabs';
-import OrdersStats from '@/components/admin/orders/OrdersStats';
+// import OrdersStats from '@/components/admin/orders/OrdersStats';
 export default function PedidosPage() {
     const { data: session, status } = useSession();
     const userRole = session?.user?.role || 'user';
@@ -29,11 +29,11 @@ export default function PedidosPage() {
 
     const heading = userRole === 'admin' ? translations[locale].admin : translations[locale].user;
 
-    useEffect(() => {
-        console.log('Pedidos Page - Session Status:', status);
-        console.log('Pedidos Page - User Role:', userRole);
-        console.log('Pedidos Page - Session Data:', session);
-    }, [session, status, userRole]);
+    // useEffect(() => {
+    //     console.log('Pedidos Page - Session Status:', status);
+    //     console.log('Pedidos Page - User Role:', userRole);
+    //     console.log('Pedidos Page - Session Data:', session);
+    // }, [session, status, userRole]);
 
     return (
         <AuthCheck>
