@@ -6,8 +6,8 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 // Configure Cloudinary with your credentials
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dmv3sqzfp',
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    api_key: process.env.CLOUDINARY_API_KEY || '544412284116647',
+    api_secret: process.env.CLOUDINARY_API_SECRET || 'HCTqDgizlCuVT2hFf2tTCiFYWbA',
 });
 
 export async function POST(request) {
