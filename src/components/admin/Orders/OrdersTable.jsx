@@ -4,7 +4,7 @@ import { FiEye, FiTrash2, FiEdit } from 'react-icons/fi';
 import { FaRegFilePdf } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import Pagination from '../shared/Pagination';
+import Pagination from '@/components/admin/shared/Pagination';
 import OrderDeleteModal from '@/components/admin/orders/OrderDeleteModal';
 import OrderEditModal from '@/components/admin/orders/OrderEditModal';
 import OrderViewModal from '@/components/admin/orders/OrderViewModal';
@@ -197,18 +197,7 @@ export default function OrdersTable({
                     setBulkStatusValue("");
                 });
         }
-    };
-    const toggleStatusDropdown = (id) => {
-        if (statusDropdown === id) {
-            setStatusDropdown(null);
-        } else {
-            setStatusDropdown(id);
-        }
-    };
-    const changeOrderStatus = (id, newStatus) => {
-        onStatusChange(id, newStatus);
-        setStatusDropdown(null);
-    };
+    }; 
     // View order details
     const handleViewOrder = (order) => {
         setSelectedOrder(order);

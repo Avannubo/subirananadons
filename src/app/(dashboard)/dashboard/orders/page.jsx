@@ -125,7 +125,7 @@ export default function PedidosPage() {
                         {/* filters searcg */}
 </div>
                 
-                    {loading ? (
+                    {/* {loading ? (
                         <div className="py-20 text-center">
                             <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
                             <p className="mt-3 text-gray-600">{t.loading}</p>
@@ -143,7 +143,7 @@ export default function PedidosPage() {
                             onPageChange={setCurrentPage}
                             onLimitChange={setLimit}
                         />
-                    )}
+                    )} */}
                 </div>
             </AdminLayout>
         </AuthCheck >
