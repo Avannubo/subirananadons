@@ -37,11 +37,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files first for better caching
-COPY package*.json ./
-COPY .npmrc ./
-
-# Install dependencies (including devDependencies)
-RUN npm ci
+COPY package*.json ./ 
 
 # Copy all files
 COPY . .
