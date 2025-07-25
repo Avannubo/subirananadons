@@ -1,32 +1,33 @@
-# Use the official Node.js image as base
-FROM node:18-alpine AS builder
 
+# Use official Node.js image for build
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy package files (only those that exist)
-COPY package.json ./
-COPY package-lock.json ./
-# Do not copy pnpm-lock.yaml if it does not exist
+# Copy package files
+COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --prefer-offline
 
 # Copy all files
 COPY . .
 
-# Build the application
+# Build Next.js app with standalone output (Next.js 14 best practice)
 RUN npm run build
 
 # Production image
 FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Copy built files and production dependencies
-COPY --from=builder /app/.next .next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+# Only copy necessary files for standalone output
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+# Optionally copy .env if present
+COPY --from=builder /app/.env* ./
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Start Next.js standalone server
+CMD ["node", "server.js"]
