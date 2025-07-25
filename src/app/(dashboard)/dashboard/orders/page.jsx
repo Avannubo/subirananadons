@@ -9,7 +9,6 @@ import { useOrders } from '@/hooks/useOrders';
 export default function PedidosPage() {
     const { data: session, status } = useSession();
     const userRole = session?.user?.role || 'user';
-    const [filters, setFilters] = useState({}); // Add this line
     useEffect(() => {
         console.log('Pedidos Page - Session Status:', status);
         console.log('Pedidos Page - User Role:', userRole);
@@ -33,6 +32,14 @@ export default function PedidosPage() {
         setCurrentPage,
         setLimit
     } = useOrders(userRole);
+    // Add filters state
+    const [filters, setFilters] = useState({
+        searchId: '',
+        searchReference: '',
+        searchCustomer: '',
+        searchTotal: '',
+        searchPayment: ''
+    });
     // Translations
     const translations = {  
         ca: {

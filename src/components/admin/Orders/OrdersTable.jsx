@@ -5,9 +5,9 @@ import { FaRegFilePdf } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import Pagination from '../shared/Pagination';
-import OrderDeleteModal from './OrderDeleteModal';
-import OrderEditModal from './OrderEditModal';
-import OrderViewModal from './OrderViewModal';
+import OrderDeleteModal from '@/components/admin/orders/OrderDeleteModal';
+import OrderEditModal from '@/components/admin/orders/OrderEditModal';
+import OrderViewModal from '@/components/admin/orders/OrderViewModal';
 export default function OrdersTable({
     orders,
     filters, 
