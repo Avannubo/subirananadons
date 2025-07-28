@@ -484,7 +484,7 @@ export default function Page() {
                                     <svg className="w-3 h-3 mx-1 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path></svg>
                                 )}
                                 {index < categoryPath.length - 1 ? (
-                                    <button onClick={() => handleBreadcrumbClick(index)} className="hover:underline hover:text-gray-700">
+                                    <button onClick={() => handleBreadcrumbClick(index)} className="hover:underline hover:text-gray-700 cursor-pointer">
                                         {cat.label}
                                     </button>
                                 ) : (
@@ -527,7 +527,7 @@ export default function Page() {
                                                 params.set('category', subCategory._id);
                                                 router.push(`/products?${params.toString()}`);
                                             }}
-                                            className={`w-full text-left px-2 py-1.5 rounded text-gray-600 hover:bg-gray-100 hover:font-semibold transition-colors duration-150`}
+                                            className={`w-full cursor-pointer text-left px-2 py-1.5 rounded text-gray-600 hover:bg-gray-100 hover:font-semibold transition-colors duration-150`}
                                         >
                                             {getCategoryDisplayName(subCategory, locale)}
                                         </button>
@@ -555,7 +555,7 @@ export default function Page() {
                                                         params.set('category', siblingCategory._id);
                                                         router.push(`/products?${params.toString()}`);
                                                     }}
-                                                    className={`w-full text-left px-2 py-1.5 rounded transition-colors duration-150 
+                                                    className={`w-full cursor-pointer text-left px-2 py-1.5 rounded transition-colors duration-150 
                                                         ${siblingCategory._id === currentCategoryLabel._id
                                                             ? 'text-[#00B0C8] font-semibold bg-gray-100'
                                                             : 'text-gray-600 hover:bg-gray-100 hover:font-semibold'
@@ -593,7 +593,7 @@ export default function Page() {
                                     <label htmlFor="sort-by" className="mr-1 text-gray-600 text-xs whitespace-nowrap">{t('sortLabelMobile')}</label>
                                     <select
                                         id="sort-by"
-                                        className="border border-gray-300 rounded p-1 text-xs text-gray-600"
+                                        className="border border-gray-300 rounded p-1 text-xs text-gray-600 cursor-pointer"
                                         value={sortOrder}
                                         onChange={handleSortChange}
                                     >
@@ -611,7 +611,7 @@ export default function Page() {
                                     <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">{t('sortLabelDesktop')}</label>
                                     <select
                                         id="sort-by"
-                                        className="border border-gray-300 w-full text-start rounded p-2 text-gray-600"
+                                        className="border border-gray-300 w-full text-start rounded p-2 text-gray-600 cursor-pointer"
                                         value={sortOrder}
                                         onChange={handleSortChange}
                                     >
@@ -632,13 +632,13 @@ export default function Page() {
                                         onClick={() => setViewMode('grid')}
                                         className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black`}
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                                     </button>
                                     <button
                                         onClick={() => setViewMode('list')}
                                         className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black`}
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                                     </button>
                                 </div>
                                 {!loading && totalProducts > 0 && (
@@ -695,7 +695,7 @@ export default function Page() {
                                     <button
                                         onClick={goToPreviousPage}
                                         disabled={currentPage === 1}
-                                        className={`px-3 py-2 rounded-md ${currentPage === 1
+                                        className={`px-3 py-2 rounded-md cursor-pointer ${currentPage === 1
                                             ? 'text-gray-400 cursor-not-allowed'
                                             : 'text-gray-700 hover:bg-gray-100'}`}
                                     >
@@ -710,7 +710,7 @@ export default function Page() {
                                             key={index}
                                             onClick={() => typeof page === 'number' ? goToPage(page) : null}
                                             disabled={page === '...'}
-                                            className={`px-4 py-2 rounded-md ${page === currentPage
+                                            className={`px-4 py-2 rounded-md cursor-pointer ${page === currentPage
                                                 ? 'bg-[#00B0C8] text-white'
                                                 : page === '...'
                                                     ? 'text-gray-500'
@@ -724,7 +724,7 @@ export default function Page() {
                                     <button
                                         onClick={goToNextPage}
                                         disabled={currentPage === totalPages}
-                                        className={`px-3 py-2 rounded-md ${currentPage === totalPages
+                                        className={`px-3 py-2 rounded-md cursor-pointer ${currentPage === totalPages
                                             ? 'text-gray-400 cursor-not-allowed'
                                             : 'text-gray-700 hover:bg-gray-100'}`}
                                     >

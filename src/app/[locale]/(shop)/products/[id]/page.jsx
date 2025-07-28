@@ -256,8 +256,8 @@ export default function Page() {
                                 src={product.images && product.images[selectedImage] ? product.images[selectedImage] : product.image}
                                 alt={typeof product.name === 'object' ? product.name[locale] : product.name}
                                 fill
-                                className="object-contain"
-                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className="object-contain h-full w-full"
+                                
                             />
                         </motion.div>
                         {/* Thumbnails */}

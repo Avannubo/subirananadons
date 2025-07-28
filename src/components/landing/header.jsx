@@ -121,8 +121,8 @@ export default function Page() {
                                     ))}
                                 </div>
                             )}
-                            <Link href="/search" className="p-2 flex justify-center items-center">
-                                <Search className="w-5 h-5 md:w-6 md:h-6" />
+                            <Link href="/search" className="p-2 ml-6 flex justify-center items-center">
+                                <Search className="w-5 h-5 md:w-6 md:h-6 text-gray-700 hover:text-[#00B0C8]" />
                             </Link>
                         </div>
 
@@ -130,7 +130,7 @@ export default function Page() {
                         {/* Locale Switcher */}
 
                         <Link href="/cart" className="p-2 text-sm text-gray-700 relative">
-                            <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
+                            <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 text-gray-700 hover:text-[#00B0C8]" />
                             <span
                                 className={
                                     `absolute top-1 -right-1 z-30 bg-[#00B0C8] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-white shadow
@@ -140,7 +140,7 @@ export default function Page() {
                                 {cartItemsCount}
                             </span>
                         </Link>
-                        <UserAuth title="" />
+                        <UserAuth title="" className="text-gray-700 hover:text-[#00B0C8]" />
                     </div>
                 </div>
             </div>

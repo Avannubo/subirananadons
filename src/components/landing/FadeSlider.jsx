@@ -61,10 +61,9 @@ export default function FadeSlider() {
                             src={slide.imageUrl}
                             alt="img"
                             fill
-                            className="object-cover object-center"
+                            className="object-cover object-center h-screen w-screen"
                             priority
                             quality={100}
-                            sizes="100vw"
                         />
                         <div className="absolute bottom-15 left-1/2 -translate-x-1/2 z-20 flex justify-center w-full md:w-auto md:font-semibold   md:left-50 md:translate-x-0 md:justify-center md:items-center">
                             <Link

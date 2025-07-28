@@ -198,7 +198,7 @@ export default function AuthModal({ title }) {
             {title ? (
                 <button
                     onClick={openLogin}
-                    className="py-2.5 w-full font-medium text-[#353535] hover:text-[#00B0C8] hover:bg-gray-50 px-4 rounded transition-colors uppercase flex items-center"
+                    className="py-2.5 w-full cursor-pointer font-medium text-[#353535] hover:text-[#00B0C8] hover:bg-gray-50 px-4 rounded transition-colors uppercase flex items-center"
                 >
                     <UserRound className="mr-3" size={20} />
                     {title.toUpperCase()}
@@ -206,7 +206,7 @@ export default function AuthModal({ title }) {
             ) : (
                 <button
                     onClick={openLogin}
-                    className="p-2  transition-colors flex items-center justify-center"
+                        className="p-2  transition-colors flex items-center justify-center cursor-pointer text-gray-700 hover:text-[#00B0C8]"
                     aria-label="Abrir modal de autenticación"
                 >
                     <UserRound size={24} />
