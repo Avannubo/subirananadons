@@ -27,11 +27,11 @@ export default function Footer() {
                                     alt="logo"
                                     width={160}
                                     height={60}
-                                    className="w-[160px] md:w-[250px] h-auto"
+                                    className="w-[160px] md:w-[180px] h-auto"
                                 />
                             </div>
                             {/* Socials from DB */}
-                            <div className="flex justify-center items-center gap-6 mt-4 md:mt-2">
+                            <div className="flex justify-center items-center gap-4 mt-4 md:mt-2">
                                 {/* Socials icons */}
                                 {socials && socials.map(({ key, link, Icon, name }) => (
                                     <Link key={key} href={link} aria-label={name} className="text-[#333] hover:text-[#00B0C8] transition-colors cursor-pointer" target="_blank" rel="noopener noreferrer">
@@ -77,14 +77,14 @@ export default function Footer() {
                                         src="/assets/images/Avan.png"
 
                                         alt="footer logo"
-                                        width={140}
+                                        width={120}
                                         height={60} />
 
                                 </Link>
 
                             </div>
                         </div>
-                        <div className="flex flex-col justify-end items-end w-[300px] ">
+                        <div className="flex flex-col justify-end items-end w-[240px] ">
                             <img
                                 src="/assets/images/pago.png"
 

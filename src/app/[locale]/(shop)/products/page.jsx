@@ -76,7 +76,7 @@ export default function Page() {
     const [sortOrder, setSortOrder] = useState('sales-desc');
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     // Initialize with the root label from the DB
-    const [categoryPath, setCategoryPath] = useState([{ slug: 'root', label: 'Productos' }]);
+    const [categoryPath, setCategoryPath] = useState([{ slug: 'root', label: 'Productes' }]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -94,6 +94,8 @@ export default function Page() {
     // Get the current category node based on the last item in the path
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
     const t = useTranslations('ProductsPage');
+
+
     // Helper to find a category node by path in the categories tree (handles translation)
     function findCategoryNodeByPath(categories, path, locale = 'es') {
         let node = { children: categories };
@@ -101,11 +103,13 @@ export default function Page() {
             if (!node.children) return null;
             node = node.children.find(cat => cat._id === pathItem._id);
             if (!node) return null;
+
         }
         return node;
     }
     const currentCategoryNode = useMemo(() => findCategoryNodeByPath(categories, categoryPath.slice(1), locale), [categories, categoryPath, locale]);
     const currentSubcategories = currentCategoryNode?.children || [];
+
 
     // Effect to handle URL parameters when the component mounts
     useEffect(() => {
@@ -131,6 +135,8 @@ export default function Page() {
             }
         }
     }, [categories]);
+
+    console.log('CCATEGORIES', categories)
     // Fetch active banner image on mount
     useEffect(() => {
         async function fetchBanner() {
@@ -473,10 +479,10 @@ export default function Page() {
                     <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">{t('title')}</h1>
                 </div>
             )}
-            <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-8 rounded-t-2xl mt-4 sm:mt-0 ">
+            <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-2 rounded-t-2xl sm:mt-0 ">
                 {/* ...existing code... */}
                 {/* Breadcrumbs */}
-                <nav aria-label="Breadcrumb" className="hidden lg:flex mb-2 pl-2 overflow-x-auto">
+                <nav aria-label="Breadcrumb" className="hidden lg:flex mb-4 pb-2 pl-2 overflow-x-auto border-b border-[#00B0C8]">
                     <ol className="flex items-center space-x-1 text-sm sm:text-md text-gray-500 flex-wrap min-w-[200px]">
                         {categoryPath.map((cat, index) => (
                             <li key={cat.slug || index} className="flex items-center">

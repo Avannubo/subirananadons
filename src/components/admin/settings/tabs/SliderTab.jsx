@@ -375,7 +375,7 @@ export default function ConfiguracionTab() {
                 </div>
             </form>
             {showImageSelector && (
-                <imgSelector
+                <ImageSelector
                     onSelect={(url) => {
                         setForm(f => ({ ...f, imageUrl: url }));
                         setImagePreview(url);

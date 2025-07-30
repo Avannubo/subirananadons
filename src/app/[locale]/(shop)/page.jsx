@@ -9,7 +9,7 @@ export default function Home() {
         <ShopLayout>
             <div className="w-full h-full flex flex-col justify-start items-start">
                 <FadeSlider />
-                <imgGallery />
+                <ImageGallery />
                 <FeaturedProducts />
                 {/* New Section with Background */}
                 <div

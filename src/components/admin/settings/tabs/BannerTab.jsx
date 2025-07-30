@@ -184,7 +184,7 @@ export default function BannerTab() {
                             </button>
                         </div>
                         {showImageSelector && (
-                            <imgSelector
+                            <ImageSelector
                                 onSelect={(url) => {
                                     setSelectedImageUrl(url);
                                     setShowImageSelector(false);
