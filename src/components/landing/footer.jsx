@@ -18,10 +18,10 @@ export default function Footer() {
         <footer className="bg-white text-[#333] w-full pt-10 md:pt-20">
             <div className="pt-6 md:pt-10" style={{ boxShadow: "0px -5px 5px -3px rgba(0, 0, 0, 0.1)" }}>
                 <div className="container mx-auto px-4 md:px-6 py-8 md:py-6">
-                    <div className="flex flex-col md:flex-row justify-between items-end">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-end items-center justify-center text-center gap-2 md:gap-0">
                         {/* Logo Column */}
-                        <div className="flex flex-col items-center md:items-start">
-                            <div className="mb-4 md:mb-0 w-full flex justify-center md:justify-start">
+                        <div className="flex flex-col items-center md:items-start w-full md:w-auto">
+                            <div className="mb-2 w-full flex justify-center md:justify-start">
                                 <img
                                     src="/assets/logo-header.svg"
                                     alt="logo"
@@ -31,7 +31,7 @@ export default function Footer() {
                                 />
                             </div>
                             {/* Socials from DB */}
-                            <div className="flex justify-center items-center gap-4 mt-4 md:mt-2">
+                            <div className="flex justify-center items-center gap-[12px] mt-4 md:mt-2">
                                 {/* Socials icons */}
                                 {socials && socials.map(({ key, link, Icon, name }) => (
                                     <Link key={key} href={link} aria-label={name} className="text-[#333] hover:text-[#00B0C8] transition-colors cursor-pointer" target="_blank" rel="noopener noreferrer">
@@ -54,7 +54,7 @@ export default function Footer() {
                                 )}
                                 {/* Email icon */}
                                 {email && (
-                                    <Link href={`mailto:${email}`} aria-label="Email" className="text-[#333] hover:text-[#00B0C8] transition-colors cursor-pointer">
+                                    <Link href={`mailto:${email}`} aria-label="Email" className="text-[#333] ml-1 mt-[1px] hover:text-[#00B0C8] transition-colors cursor-pointer">
                                         <Mail className="h-[25px] w-[25px]" />
                                     </Link>
                                 )}
@@ -62,43 +62,49 @@ export default function Footer() {
 
                             <p className="text-xs md:text-sm mt-4 text-center md:text-left">{t('copyright')}</p>
 
-                            <div>
+                            <div className="w-full flex justify-center md:justify-start">
                                 <Link
                                     href="https://avannubo.com/"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center justify-center md:justify-start mt-2 space-x-2"
                                 >
-                                    <span className=" text-xs md:text-sm   text-center md:text-left   transition-colors cursor-pointer">
-                                        {/* {t('poweredBy')}     */}
+                                    <span className="text-xs md:text-sm text-center md:text-left transition-colors cursor-pointer">
                                         Powered by:
                                     </span>
                                     <img
                                         src="/assets/images/Avan.png"
-
                                         alt="footer logo"
                                         width={120}
-                                        height={60} />
-
+                                        height={60}
+                                    />
                                 </Link>
-
                             </div>
                         </div>
-                        <div className="flex flex-col justify-end items-end w-[240px] ">
+                        <div className="hidden md:flex flex-col justify-end items-center md:items-end w-full md:w-[240px] mt-6 md:mt-0">
                             <img
                                 src="/assets/images/pago.png"
-
                                 alt="footer logo"
-                                />
+                                width={320}
+                                height={60}
+                            />
                         </div>
                         {/* Middle Links Column */}
-                        <div className="flex flex-row justify-end items-center">
-                            <ul className="space-y-2 md:space-y-2 text-center md:text-left">
+                        <div className="flex flex-row justify-center md:justify-end items-center w-full md:w-auto mt-6 md:mt-0">
+                            <ul className="space-y-2 md:space-y-2 text-center md:text-left w-full">
                                 <li><Link href="/terms" className="hover:text-[#00B0C8] font-medium transition-colors cursor-pointer">{t('terms')}</Link></li>
                                 <li><Link href="/privacy" className="hover:text-[#00B0C8] font-medium transition-colors cursor-pointer">{t('privacy')}</Link></li>
                                 <li><Link href="/cookies" className="hover:text-[#00B0C8] font-medium transition-colors cursor-pointer">{t('cookies')}</Link></li>
                                 <li><Link href="/legal" className="hover:text-[#00B0C8] font-medium transition-colors cursor-pointer">{t('legal')}</Link></li>
                             </ul>
+                        </div>
+                        <div className="md:hidden flex flex-col justify-end items-center md:items-end w-full md:w-[240px] mt-6 md:mt-0">
+                            <img
+                                src="/assets/images/pago.png"
+                                alt="footer logo"
+                                width={320}
+                                height={60}
+                            />
                         </div>
                         {/* Right Links & Contact Column */}
                         {/* <div className="flex flex-col items-center md:items-end">

@@ -101,7 +101,7 @@ export default function ProductQuickView({ product, onClose }) {
                     {/* Close Button */}
                     <button
                         onClick={onClose}
-                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 z-50 bg-white rounded-full p-1 sm:top-3 sm:right-3"
+                        className="cursor-pointer absolute top-2 right-2 text-gray-500 hover:text-gray-800 z-50 bg-white rounded-full p-1 sm:top-3 sm:right-3"
                         aria-label="Cerrar vista rápida"
                     >
                         <X className="h-6 w-6" />
@@ -153,7 +153,7 @@ export default function ProductQuickView({ product, onClose }) {
                                 <div className="flex items-center mb-4">
                                     <span className="text-xs sm:text-sm font-medium text-gray-600 mr-4 uppercase">Cantidad</span>
                                     <div className="flex items-center border border-gray-300 rounded">
-                                        <button onClick={decrementQuantity} className="px-2 sm:px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l focus:outline-none">
+                                        <button onClick={decrementQuantity} className="cursor-pointer px-2 sm:px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l focus:outline-none">
                                             <Minus className="h-4 w-4" />
                                         </button>
                                         <input
@@ -162,7 +162,7 @@ export default function ProductQuickView({ product, onClose }) {
                                             readOnly
                                             className="w-10 sm:w-12 text-center border-l border-r border-gray-300 focus:outline-none"
                                         />
-                                        <button onClick={incrementQuantity} className="px-2 sm:px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r focus:outline-none">
+                                        <button onClick={incrementQuantity} className="cursor-pointer px-2 sm:px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r focus:outline-none">
                                             <Plus className="h-4 w-4" />
                                         </button>
                                     </div>
@@ -179,16 +179,16 @@ export default function ProductQuickView({ product, onClose }) {
                                 {/* Comprar and Ver detalles side by side */}
                                 <div className="flex flex-row gap-2 mb-1">
                                     <button
-                                        className="w-1/2 bg-black text-white uppercase py-3 rounded font-semibold hover:bg-gray-800 transition duration-200"
+                                        className="cursor-pointer w-1/2 bg-black text-white py-3 rounded font-medium hover:bg-gray-700 transition duration-200"
                                         onClick={() => router.push(`/products/${product.id}`)}
                                     >
-                                        Ver detalles
+                                        Més informació
                                     </button>
                                     <button
-                                        className="w-1/2 bg-[#00B0C8] text-white uppercase py-3 rounded font-semibold hover:bg-[#0090a8] transition duration-200"
+                                        className="cursor-pointer w-1/2 bg-[#00B0C8] text-white py-3 rounded font-medium hover:bg-[#0090a8] transition duration-200"
                                         onClick={handleAddToCart}
                                     >
-                                        Comprar
+                                        Afegir al carret
                                     </button>
                                 </div>
                             </div>

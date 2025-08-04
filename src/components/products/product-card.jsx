@@ -105,7 +105,6 @@ export default function ProductCard({
                     <img
                         src={currentImageUrl}
                         alt={product.name.ca || product.name.es || product.name}
-                        fill
                         className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
                     />
                     {/* Hover Overlay Buttons - Grid View */}
@@ -154,7 +153,6 @@ export default function ProductCard({
                     <img
                         src={currentImageUrl}
                         alt={translatedName}
-                        fill
                         className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
                     />
                 </div>

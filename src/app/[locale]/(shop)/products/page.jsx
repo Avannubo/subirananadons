@@ -7,10 +7,9 @@ import ProductCard from "@/components/products/product-card";
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductQuickView from "@/components/products/product-quick-view";
 import { fetchProducts, formatProduct } from '@/services/ProductService';
-import { fetchCategories } from '@/services/CategoryService';
+// import { fetchCategories } from '@/services/CategoryService';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
-
 // Utility to get display name from category (handles translation and legacy)
 function getCategoryDisplayName(cat, locale = 'es') {
     if (!cat) return '';
@@ -31,7 +30,6 @@ function getCategoryDisplayName(cat, locale = 'es') {
     if (typeof cat === 'string') return cat;
     return '';
 }
-
 // Helper function to find a category node and its path by label (handles translation)
 function findCategoryAndPath(node, labelToFind, currentPath = [], locale = 'es') {
     const nodeLabel = getCategoryDisplayName(node, locale);
@@ -68,75 +66,78 @@ export default function Page() {
     const { data: session } = useSession ? useSession() : { data: null };
     const locale = useLocale();
     // State and effect for categories (declare FIRST)
-    const [categories, setCategories] = useState([]);
+    const [categories, setCategories] = useState([]); // tree
+    const [categoriesFlat, setCategoriesFlat] = useState([]); // flat
     const [categoriesLoading, setCategoriesLoading] = useState(true);
     const [categoriesError, setCategoriesError] = useState(null);
-
     const [viewMode, setViewMode] = useState('grid');
     const [sortOrder, setSortOrder] = useState('sales-desc');
     const [quickViewProduct, setQuickViewProduct] = useState(null);
-    // Initialize with the root label from the DB
     const [categoryPath, setCategoryPath] = useState([{ slug: 'root', label: 'Productes' }]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalProducts, setTotalProducts] = useState(0);
     const productsPerPage = 6;
-    // Access query parameters
     const searchParams = useSearchParams();
     const router = useRouter();
-    // ...existing code...
-    // Add useState for banner image
     const [bannerUrl, setBannerUrl] = useState(null);
-    // Get the current category node based on the last item in the path
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
     const t = useTranslations('ProductsPage');
-
-
-    // Helper to find a category node by path in the categories tree (handles translation)
+    function findCategoryPathById(categories, id, locale = 'es', path = []) {
+        for (const cat of categories) {
+            const newPath = [...path, { _id: cat._id, label: getCategoryDisplayName(cat, locale) }];
+            if (cat._id === id) return { node: cat, path: newPath };
+            if (cat.children) {
+                const found = findCategoryPathById(cat.children, id, locale, newPath);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
     function findCategoryNodeByPath(categories, path, locale = 'es') {
         let node = { children: categories };
         for (const pathItem of path) {
             if (!node.children) return null;
             node = node.children.find(cat => cat._id === pathItem._id);
             if (!node) return null;
-
         }
         return node;
     }
+    // Compute current node and subcategories
     const currentCategoryNode = useMemo(() => findCategoryNodeByPath(categories, categoryPath.slice(1), locale), [categories, categoryPath, locale]);
     const currentSubcategories = currentCategoryNode?.children || [];
-
-
-    // Effect to handle URL parameters when the component mounts
+    // State for expanded categories in sidebar (array of _id)
+    const [expandedCategories, setExpandedCategories] = useState([]);
+    // Toggle expand/collapse for a category in sidebar
+    const handleSidebarCategoryToggle = (catId) => {
+        setExpandedCategories((prev) =>
+            prev.includes(catId)
+                ? prev.filter((id) => id !== catId)
+                : [...prev, catId]
+        );
+    };
+    // Sync breadcrumbs (categoryPath) with current selected category (from URL or UI)
     useEffect(() => {
         const categoryId = searchParams.get('category');
         if (categoryId && categories && categories.length > 0) {
             // Support multiple category ids (comma separated)
             const ids = categoryId.split(',');
-            // Find the first id for breadcrumb/path
-            function findPathById(categories, id, path = []) {
-                for (const cat of categories) {
-                    const newPath = [...path, { _id: cat._id, label: getCategoryDisplayName(cat, locale) }];
-                    if (cat._id === id) return newPath;
-                    if (cat.children) {
-                        const found = findPathById(cat.children, id, newPath);
-                        if (found) return found;
-                    }
-                }
-                return null;
+            // Use the first id for path
+            const found = findCategoryPathById(categories, ids[0], locale);
+            if (found) {
+                setCategoryPath([{ _id: 'root', label: 'Productes' }, ...found.path]);
+            } else {
+                // If not found, fallback to root
+                setCategoryPath([{ _id: 'root', label: 'Productes' }]);
             }
-            const foundPath = findPathById(categories, ids[0]);
-            if (foundPath) {
-                setCategoryPath([{ _id: 'root', label: 'Productos' }, ...foundPath]);
-            }
+        } else {
+            setCategoryPath([{ _id: 'root', label: 'Productes' }]);
         }
-    }, [categories]);
-
-    console.log('CCATEGORIES', categories)
+    }, [categories, searchParams, locale]);
+    console.log('CATEGORIES', categories)
     // Fetch active banner image on mount
     useEffect(() => {
         async function fetchBanner() {
@@ -150,67 +151,102 @@ export default function Page() {
         }
         fetchBanner();
     }, []);
-    // Fetch categories from DB on mount
+    // Organize categories into a tree (from CategoriesTree.jsx)
+    function organizeCategories(allCategories) {
+        const categoriesMap = {};
+        const rootCategories = [];
+        allCategories.forEach(category => {
+            // Migrate name if needed: if name is a string, convert to { es, ca }
+            let migratedName = category.name;
+            if (typeof category.name === 'string') {
+                migratedName = { es: category.name, ca: '' };
+            } else if (!category.name?.es && category.name?.ca) {
+                migratedName = { es: '', ca: category.name.ca };
+            } else if (!category.name?.ca && category.name?.es) {
+                migratedName = { es: category.name.es, ca: '' };
+            } else if (!category.name?.es && !category.name?.ca) {
+                migratedName = { es: '', ca: '' };
+            }
+            categoriesMap[category._id] = {
+                ...category,
+                name: migratedName,
+                children: []
+            };
+        });
+        allCategories.forEach(category => {
+            if (category.parent && categoriesMap[category.parent]) {
+                categoriesMap[category.parent].children.push(categoriesMap[category._id]);
+            } else {
+                rootCategories.push(categoriesMap[category._id]);
+            }
+        });
+        return rootCategories;
+    }
+    // Fetch categories from DB on mount (flat, then organize)
     useEffect(() => {
         async function loadCategories() {
             setCategoriesLoading(true);
             try {
-                const cats = await fetchCategories({ parent: 'null', includeChildren: true });
-                setCategories(cats);
+                const res = await fetch('/api/categories?flat=true');
+                if (!res.ok) throw new Error('Error loading categories');
+                const cats = await res.json();
+                setCategoriesFlat(cats);
+                setCategories(organizeCategories(cats));
                 setCategoriesError(null);
             } catch (err) {
                 setCategoriesError('Error loading categories');
                 setCategories([]);
+                setCategoriesFlat([]);
             } finally {
                 setCategoriesLoading(false);
             }
         }
         loadCategories();
     }, []);
-    // Helper function to find a category in the category tree
-    function findCategoryInTree(rootNode, categoryToFind) {
-        // First try direct lookup
-        const result = findCategoryAndPath(rootNode, categoryToFind);
-        if (result) return result;
-        // If not found directly, try case-insensitive search or exact matches
-        function searchRecursively(node, target, currentPath = []) {
-            const targetLower = target.toLowerCase();
-            const pathWithCurrent = [...currentPath, node.label];
-            // Check if current node matches (case insensitive)
-            if (node.label.toLowerCase() === targetLower) {
-                return { node, path: pathWithCurrent };
-            }
-            // Check submenu
-            if (node.submenu) {
-                for (const child of node.submenu) {
-                    const result = searchRecursively(child, target, pathWithCurrent);
-                    if (result) return result;
-                }
-            }
-            return null;
-        }
-        return searchRecursively(rootNode, categoryToFind);
-    }
-    // Helper function to find a category by partial match (case insensitive)
-    function findCategoryByPartialMatch(rootNode, partialName) {
-        function searchNodeRecursively(node, search, currentPath = []) {
-            const nodePath = [...currentPath, node.label];
-            // Check if current node contains the search term
-            if (node.label.toLowerCase().includes(search)) {
-                return { node, path: nodePath };
-            }
-            // Search in submenu
-            if (node.submenu) {
-                for (const subNode of node.submenu) {
-                    const result = searchNodeRecursively(subNode, search, nodePath);
-                    if (result) return result;
-                }
-            }
-            return null;
-        }
-        return searchNodeRecursively(rootNode, partialName);
-    }
-    // Fetch products from the database
+    // // Helper function to find a category in the category tree
+    // function findCategoryInTree(rootNode, categoryToFind) {
+    //     // First try direct lookup
+    //     const result = findCategoryAndPath(rootNode, categoryToFind);
+    //     if (result) return result;
+    //     // If not found directly, try case-insensitive search or exact matches
+    //     function searchRecursively(node, target, currentPath = []) {
+    //         const targetLower = target.toLowerCase();
+    //         const pathWithCurrent = [...currentPath, node.label];
+    //         // Check if current node matches (case insensitive)
+    //         if (node.label.toLowerCase() === targetLower) {
+    //             return { node, path: pathWithCurrent };
+    //         }
+    //         // Check submenu
+    //         if (node.submenu) {
+    //             for (const child of node.submenu) {
+    //                 const result = searchRecursively(child, target, pathWithCurrent);
+    //                 if (result) return result;
+    //             }
+    //         }
+    //         return null;
+    //     }
+    //     return searchRecursively(rootNode, categoryToFind);
+    // }
+    // // Helper function to find a category by partial match (case insensitive)
+    // function findCategoryByPartialMatch(rootNode, partialName) {
+    //     function searchNodeRecursively(node, search, currentPath = []) {
+    //         const nodePath = [...currentPath, node.label];
+    //         // Check if current node contains the search term
+    //         if (node.label.toLowerCase().includes(search)) {
+    //             return { node, path: nodePath };
+    //         }
+    //         // Search in submenu
+    //         if (node.submenu) {
+    //             for (const subNode of node.submenu) {
+    //                 const result = searchNodeRecursively(subNode, search, nodePath);
+    //                 if (result) return result;
+    //             }
+    //         }
+    //         return null;
+    //     }
+    //     return searchNodeRecursively(rootNode, partialName);
+    // }
+    // // Fetch products from the database
     useEffect(() => {
         async function loadProducts() {
             try {
@@ -233,8 +269,6 @@ export default function Page() {
                     const allLeafIds = getAllLeafIds(currentCategoryNode);
                     options.category = allLeafIds.join(',');
                 }
-                // ...existing code...
-                // Only use category filter, no brand
                 console.log('Fetching products with options:', options);
                 // Fetch products with category filtering
                 const data = await fetchProducts(options);
@@ -313,19 +347,15 @@ export default function Page() {
     const handleSortChange = (event) => {
         setSortOrder(event.target.value);
     };
-
     // Navigate back up using breadcrumbs
+    // Breadcrumb click: go to any level, update path and URL
     const handleBreadcrumbClick = (index) => {
-        // Slice the path up to and including the clicked index
         const newPath = categoryPath.slice(0, index + 1);
         setCategoryPath(newPath);
-        // Update URL parameters or remove category parameter if we go back to root
         const params = new URLSearchParams(searchParams);
         if (index === 0) {
-            // If going back to root, remove the category parameter
             params.delete('category');
         } else {
-            // Otherwise, update to the new category
             params.set('category', newPath[newPath.length - 1]._id);
         }
         router.push(`/products?${params.toString()}`);
@@ -336,7 +366,6 @@ export default function Page() {
     const handleCloseQuickView = () => {
         setQuickViewProduct(null);
     };
-
     const handleOpenBirthListSelectModal = (product) => {
         setBirthListProduct(product);
     };
@@ -401,57 +430,45 @@ export default function Page() {
         }
         return pages;
     };
-    function flattenCategories(node, parentPath = []) {
-        let flat = [];
-        const currentPath = [...parentPath, node.label];
-        if (!node.submenu || node.submenu.length === 0) {
-            flat.push({ label: currentPath.join(' > '), value: node.label });
-        } else {
-            node.submenu.forEach(sub => {
-                flat = flat.concat(flattenCategories(sub, currentPath));
-            });
-        }
-        return flat;
-    }
-    // Memoize all categories for dropdown
+    // Flatten all categories for mobile selector (all leaves, all levels)
     function flattenCategoriesFromDb(categories, parentPath = [], locale = 'es') {
         let flat = [];
         for (const cat of categories) {
             const catLabel = getCategoryDisplayName(cat, locale);
-            const currentPath = [...parentPath, catLabel];
+            const currentPath = [...parentPath, { _id: cat._id, label: catLabel }];
             if (!cat.children || cat.children.length === 0) {
-                flat.push({ label: currentPath.join(' > '), value: catLabel });
+                flat.push({
+                    label: currentPath.map(p => p.label).join(' > '),
+                    value: cat._id,
+                    path: currentPath
+                });
             } else {
+                // Also allow non-leaf categories to be selectable in mobile
+                flat.push({
+                    label: currentPath.map(p => p.label).join(' > '),
+                    value: cat._id,
+                    path: currentPath
+                });
                 flat = flat.concat(flattenCategoriesFromDb(cat.children, currentPath, locale));
             }
         }
         return flat;
     }
-    const allCategories = useMemo(() => flattenCategoriesFromDb(categories, [], locale), [categories, locale]);
+    const allCategories = useMemo(() => flattenCategoriesFromDb(categories, [{ _id: 'root', label: 'Productes' }], locale), [categories, locale]);
     // Handler for mobile dropdown change
     const handleMobileCategoryChange = (e) => {
-        const selectedLabel = e.target.value;
-        // Find the path for the selected label in the DB categories
-        function findPathByLabel(categories, label, path = []) {
-            for (const cat of categories) {
-                const newPath = [...path, cat.name];
-                if (cat.name === label) return newPath;
-                if (cat.children) {
-                    const found = findPathByLabel(cat.children, label, newPath);
-                    if (found) return found;
-                }
-            }
-            return null;
-        }
-        const foundPath = findPathByLabel(categories, selectedLabel);
-        if (foundPath) {
-            setCategoryPath(['Productos', ...foundPath]);
+        const selectedId = e.target.value;
+        // Find the selected option in allCategories
+        const selectedOption = allCategories.find(cat => cat.value === selectedId);
+        if (selectedOption) {
+            // Always update breadcrumbs to full path from root to selected
+            setCategoryPath(selectedOption.path);
             // Update URL params
             const params = new URLSearchParams(searchParams);
-            if (selectedLabel === 'Productos') {
+            if (selectedId === 'root') {
                 params.delete('category');
             } else {
-                params.set('category', selectedLabel);
+                params.set('category', selectedId);
             }
             router.push(`/products?${params.toString()}`);
         }
@@ -464,9 +481,7 @@ export default function Page() {
                     <img
                         src={bannerUrl}
                         alt={t('bannerAlt')}
-                        fill
                         className="object-cover"
-                        priority
                     />
                     {/* Overlay for contrast */}
                     <div className="absolute inset-0 bg-white/70 z-10 pointer-events-none" />
@@ -480,8 +495,6 @@ export default function Page() {
                 </div>
             )}
             <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-2 rounded-t-2xl sm:mt-0 ">
-                {/* ...existing code... */}
-                {/* Breadcrumbs */}
                 <nav aria-label="Breadcrumb" className="hidden lg:flex mb-4 pb-2 pl-2 overflow-x-auto border-b border-[#00B0C8]">
                     <ol className="flex items-center space-x-1 text-sm sm:text-md text-gray-500 flex-wrap min-w-[200px]">
                         {categoryPath.map((cat, index) => (
@@ -507,7 +520,7 @@ export default function Page() {
                         <select
                             id="mobile-category-select"
                             className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition"
-                            value={currentCategoryLabel}
+                            value={categoryPath[categoryPath.length - 1]?._id || 'root'}
                             onChange={handleMobileCategoryChange}
                         >
                             {allCategories.map(cat => (
@@ -516,10 +529,7 @@ export default function Page() {
                         </select>
                     </div>
                     <aside className="hidden lg:flex w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 mb-6 lg:mb-0">
-                        {/*   <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-                            {currentCategoryLabel === 'Productos' ? "Categorías" : `Subcategorías de ${categoryPath[categoryPath.length - 2] || "Productos"}`}
-                        </h3> */}
-                        {/* Show subcategories if available, otherwise show siblings */}
+                        {/* Category selector: show current subcategories, or siblings if no subcategories */}
                         {currentSubcategories && currentSubcategories.length > 0 ? (
                             <ul className="space-y-1">
                                 {currentSubcategories.map((subCategory) => (
@@ -629,8 +639,6 @@ export default function Page() {
                                     </select>
                                 </div>
                             </div>
-
-
                             <div className="hidden sm:flex items-center justify-between space-x-4 w-full sm:w-auto mt-2 sm:mt-0">
                                 <div className="flex items-center space-x-2">
                                     {/* Grid/List view toggle icons */}
@@ -752,8 +760,6 @@ export default function Page() {
                     onClose={handleCloseQuickView}
                 />
             )}
-
-
             {/* Render Birth List Modal with backdrop and scroll lock */}
             {showBirthListModal && (
                 <BirthListModalWrapper
@@ -763,9 +769,28 @@ export default function Page() {
                     userId={session?.user?.id}
                 />
             )}
-
-
-
         </ShopLayout>
+    );
+}
+// Recursive accordion component for sidebar categories
+function CategoryAccordion({ categories, locale, expandedCategories, onSelectCategory, selectedId, level = 0 }) {
+    return (
+        <ul className="space-y-1">
+            {categories.map((cat) => {
+                const isSelected = selectedId === cat._id;
+                return (
+                    <li key={cat._id}>
+                        <div className="flex items-center">
+                            <button
+                                onClick={() => onSelectCategory(cat)}
+                                className={`w-full text-left px-2 py-1.5 rounded transition-colors duration-150 ${isSelected ? 'text-[#00B0C8] font-semibold bg-gray-100' : 'text-gray-600 hover:bg-gray-100 hover:font-semibold'}`}
+                            >
+                                {getCategoryDisplayName(cat, locale)}
+                            </button>
+                        </div>
+                    </li>
+                );
+            })}
+        </ul>
     );
 }

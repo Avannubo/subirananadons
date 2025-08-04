@@ -26,18 +26,18 @@ export function ClientStatsProvider({ children, refreshInterval = 30000 }) {
                 setRefreshing(true);
             }
 
-            // const response = await fetch('/api/clients/stats');
-            // if (!response.ok) {
-            //     throw new Error('Failed to fetch client stats');
-            // }
+            const response = await fetch('/api/clients/stats');
+            if (!response.ok) {
+                throw new Error('Failed to fetch client stats');
+            }
 
-            // const data = await response.json();
+            const data = await response.json();
 
-            // if (!data.success) {
-            //     throw new Error(data.message || 'Failed to fetch client stats');
-            // }
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to fetch client stats');
+            }
 
-            // Check if data has changed
+            //Check if data has changed
             const hasChanged = JSON.stringify(data.stats) !== JSON.stringify(stats);
 
             if (hasChanged) {

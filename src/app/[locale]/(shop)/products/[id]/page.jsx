@@ -130,7 +130,7 @@ export default function Page() {
         if (!product) return;
         try {
             await addToCart(product, quantity);
-            toast.success(`${quantity} ${product.name} añadido al carrito`);
+            toast.success(`${quantity} ${product.name} ${t(addedToCart)} `);//añadido al carrito
         } catch (error) {
             toast.error('Error al añadir al carrito');
             console.error('Error adding to cart:', error);
@@ -341,14 +341,14 @@ export default function Page() {
                                 <div className="flex items-center border border-gray-300 rounded-md mt-2 sm:mt-0">
                                     <button
                                         onClick={() => handleQuantityChange(-1)}
-                                        className="px-3 py-1 text-gray-600"
+                                        className="cursor-pointer px-3 py-1 text-gray-600"
                                     >
                                         -
                                     </button>
                                     <span className="px-4 py-1 border-x border-gray-300">{quantity}</span>
                                     <button
                                         onClick={() => handleQuantityChange(1)}
-                                        className="px-3 py-1 text-gray-600 "
+                                        className="cursor-pointer px-3 py-1 text-gray-600 "
                                     >
                                         +
                                     </button>
@@ -357,13 +357,13 @@ export default function Page() {
                             {/* Add to Cart Button */}
                             <button
                                 onClick={handleAddToCart}
-                                className="w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200 mt-2"
+                                className="cursor-pointer w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200 mt-2"
                             >
                                 {t('addToCart')}
                             </button>
                             {/* Wishlist Button */}
-                            <button onClick={onAddToWishlist} className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center mt-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <button onClick={onAddToWishlist} className="cursor-pointer w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center mt-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                                 {t('addToWishlist')}
@@ -383,12 +383,12 @@ export default function Page() {
                 {/* Product Details Tabs */}
                 <div className="mt-10 sm:mt-16">
                     <div className="border-b border-gray-200">
-                        <nav className="-mb-px flex flex-wrap space-x-4 sm:space-x-8 overflow-x-auto">
+                        <nav className="-mb-px  flex flex-wrap space-x-4 sm:space-x-8 overflow-x-auto">
                             {[t('tabDescription'), t('tabDetails')].map((tab, idx) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(idx === 0 ? 'DESCRIPCIÓN' : 'DETALLES DEL PRODUCTO')}
-                                    className={`pb-4 px-1 text-xs sm:text-sm font-medium ${activeTab === (idx === 0 ? 'DESCRIPCIÓN' : 'DETALLES DEL PRODUCTO')
+                                    className={`pb-4 px-1 cursor-pointer text-xs sm:text-sm font-medium ${activeTab === (idx === 0 ? 'DESCRIPCIÓN' : 'DETALLES DEL PRODUCTO')
                                         ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
                                         : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
