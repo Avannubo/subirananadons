@@ -270,13 +270,7 @@ export default function BirthListPage({ params }) {
     return (
         <ShopLayout>
             {/* Hero Section */}
-            <div className="relative w-full h-[35vh] bg-gray-100">
-                <Image
-                    src="/assets/images/bg-beagrumb.jpg"
-                    alt={list?.babyName}
-                    fill
-                    className="object-cover"
-                />
+            <div className="relative w-full h-[35vh] bg-gray-50">
                 <div className="absolute inset-0 mt-20 font-medium">
                     <div className="container mx-auto h-full flex flex-col items-center justify-center px-4 text-center">
                         <motion.h1
@@ -300,8 +294,16 @@ export default function BirthListPage({ params }) {
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2 }}
                         >
-                            {t('dueDateLabel')}: {list && new Date(list.dueDate).toLocaleDateString('es-ES')}
+                            {t('dueDateLabel')} {list && new Date(list.dueDate).toLocaleDateString('es-ES')}
                         </motion.p>
+                        <motion.div
+                            className="text-zinc-900 "
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <h4 className="text-gray-600 text-center italic mt-4 text-xl">{list.message}</h4>
+                        </motion.div>
                     </div>
                 </div>
             </div>
@@ -323,7 +325,7 @@ export default function BirthListPage({ params }) {
                         <div className="flex space-x-4 relative">
                             <button
                                 onClick={handleShareClick}
-                                className="px-4 py-2 bg-[#00B0C8] text-white rounded-full hover:bg-[#0090a8] transition-colors flex items-center gap-2"
+                                className="cursor-pointer px-4 py-2 bg-[#00B0C8] text-white rounded-full hover:bg-[#0090a8] transition-colors flex items-center gap-2"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
@@ -332,7 +334,6 @@ export default function BirthListPage({ params }) {
                             </button>
                         </div>
                     </div>
-                    <p className="text-gray-600 text-center italic">{list.message}</p>
                 </div>
                 {/* <div className="flex flex-col md:flex-row justify-between items-center mb-8">
                     <div className="w-full md:w-auto mb-4 md:mb-0 overflow-x-auto">
@@ -390,10 +391,9 @@ export default function BirthListPage({ params }) {
                                 whileHover={{ y: -3 }}
                             >
                                 <div className="relative w-full" style={{ aspectRatio: '1/0.8' }}>
-                                    <Image
+                                    <img
                                         src={product.image}
                                         alt={product.name}
-                                        fill
                                         className="object-contain"
                                     />
                                     {product.status !== 'available' && (
@@ -419,7 +419,7 @@ export default function BirthListPage({ params }) {
                                         {product.status === 'available' ? (
                                             <button
                                                 onClick={() => handleReserveClick(product)}
-                                                className="w-full bg-[#00B0C8] text-white py-1.5 text-sm rounded-md hover:bg-[#0090a8] transition-colors"
+                                                className="cursor-pointer w-full bg-[#00B0C8] text-white py-1.5 text-sm rounded-md hover:bg-[#0090a8] transition-colors"
                                             >
                                                 {t('addToCartBtn')}
                                             </button>

@@ -124,7 +124,12 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         const items = list.rawData?.items || [];
         const hasMatchingProduct = !filters.searchProduct ||
             items.some(item => {
-                const productName = item.product?.name || '';
+                let productName = item.product?.name || '';
+                // Handle translation object or string
+                if (typeof productName === 'object' && productName !== null) {
+                    productName = productName[locale] || productName['es'] || productName['ca'] || Object.values(productName)[0] || '';
+                }
+                if (typeof productName !== 'string') productName = '';
                 const productRef = item.product?.reference || '';
                 const searchTerm = (filters.searchProduct || '').toLowerCase();
                 return productName.toLowerCase().includes(searchTerm) ||

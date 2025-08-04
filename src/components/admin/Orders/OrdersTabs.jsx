@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import OrdersTable from '@/components/admin/orders/OrdersTable';
 import { FiDownload, FiRefreshCw, FiCalendar, FiChevronDown, FiFilter, FiSearch, FiPlus } from 'react-icons/fi';
 import { useOrders } from '@/hooks/useOrders';
-import TabNavigation from '@/components/admin/shared/TabNavigation';
 import { toast } from 'react-hot-toast';
 export default function OrdersTabs({ userRole = 'user' }) {
     // Locale detection (default to 'ca')
@@ -77,7 +76,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
 
     const t = translations[locale];
 
-    const [activeTab, setActiveTab] = useState(t.all);
+    // Removed tab navigation logic
     const [isExporting, setIsExporting] = useState(false);
     const [rangeDropdownOpen, setRangeDropdownOpen] = useState(false);
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
@@ -103,7 +102,8 @@ export default function OrdersTabs({ userRole = 'user' }) {
         setCurrentPage,
         setLimit
     } = useOrders(userRole);
-    const tabs = [t.all];//, t.accepted, t.cancelled
+
+
     // Initial fetch of all orders when component mounts
     useEffect(() => {
         console.log(`OrdersTabs mounted with userRole: ${userRole}`);
@@ -322,44 +322,25 @@ export default function OrdersTabs({ userRole = 'user' }) {
             dateTo: ''
         });
     };
-    // Filter orders based on active tab
-    const filteredOrders = orders.filter(order => {
-        if (activeTab === t.all) return true;
-        if (activeTab === t.accepted) return order.status === t.accepted;
-        if (activeTab === t.cancelled) return order.status === t.cancelled;
-        return false;
-    });
+    // No tab filtering, show all orders
+    const filteredOrders = orders;
 
-    // Prepare counts for the TabNavigation component
-    const orderCounts = {
-        [t.all]: orders.length,
-        [t.accepted]: orders.filter(order => order.status === t.accepted).length,
-        [t.cancelled]: orders.filter(order => order.status === t.cancelled).length
-    };
-    console.log('Order tab counts:', orderCounts);
     return (
-        <>
-            {/* <TabNavigation
-                tabs={tabs}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                counts={orderCounts}
-            /> */}
-            <div className="bg-white rounded-lg shadow">
-                <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div className="flex items-center">
-                        <h2 className="text-lg font-medium">{t.orderManagement} ({pagination.totalItems || filteredOrders.length})</h2>
-                        <button
-                            className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
-                            onClick={handleRefresh}
-                            disabled={loading}
-                            title={t.refresh}
-                        >
-                            <FiRefreshCw className={loading ? 'animate-spin' : ''} />
-                        </button>
-                    </div>
-                    <div className="flex space-x-2">
-                        {/* <button
+        <div className="bg-white rounded-lg shadow">
+            <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="flex items-center">
+                    <h2 className="text-lg font-medium">{t.orderManagement} ({pagination.totalItems || filteredOrders.length})</h2>
+                    <button
+                        className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                        onClick={handleRefresh}
+                        disabled={loading}
+                        title={t.refresh}
+                    >
+                        <FiRefreshCw className={loading ? 'animate-spin' : ''} />
+                    </button>
+                </div>
+                <div className="flex space-x-2">
+                    {/* <button
                             className="flex items-center px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors"
                             onClick={() => handleExport('pdf')}
                             disabled={isExporting || loading}
@@ -367,7 +348,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                         >
                             <FiDownload className="mr-1" /> {t.export}
                         </button> */}
-                        {/* {userRole === 'admin' && (
+                    {/* {userRole === 'admin' && (
                             <button
                                 className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
                                 onClick={() =>  }
@@ -375,12 +356,12 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             >
                                 <FiPlus className="mr-1" /> Nuevo Pedido
                             </button>)} */}
-                    </div>
                 </div>
-                {/* Search and Filters */}
-                <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
-                    <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="relative">
+            </div>
+            {/* Search and Filters */}
+            <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
+                <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -390,30 +371,30 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
-                        </div>
-                        <div className="relative">
-                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder={t.searchReference}
-                                name="searchReference"
-                                value={filters.searchReference}
-                                onChange={handleFilterChange}
-                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                            />
-                        </div>
-                        <div className="relative">
-                            <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder={t.searchCustomer}
-                                name="searchCustomer"
-                                value={filters.searchCustomer}
-                                onChange={handleFilterChange}
-                                className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                            />
-                        </div>
-                        <div className="relative">
+                        </div> */}
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder={t.searchReference}
+                            name="searchReference"
+                            value={filters.searchReference}
+                            onChange={handleFilterChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder={t.searchCustomer}
+                            name="searchCustomer"
+                            value={filters.searchCustomer}
+                            onChange={handleFilterChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
+                    {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -423,30 +404,29 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
-                        </div>
-                    </div>
+                        </div> */}
                 </div>
-                {/* Order data table */}
-                {loading ? (
-                    <div className="py-20 text-center">
-                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
-                        <p className="mt-3 text-gray-600">{t.loading}</p>
-                    </div>
-                ) : (
-                    <OrdersTable
-                        orders={filteredOrders}
-                        filters={filters}
-                        setFilters={setFilters}
-                        userRole={userRole}
-                        isLoading={loading}
-                        onStatusChange={updateOrderStatus}
-                        onDelete={deleteOrder}
-                        pagination={pagination}
-                        onPageChange={setCurrentPage}
-                        onLimitChange={setLimit}
-                    />
-                )}
             </div>
-        </>
+            {/* Order data table */}
+            {loading ? (
+                <div className="py-20 text-center">
+                    <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
+                    <p className="mt-3 text-gray-600">{t.loading}</p>
+                </div>
+            ) : (
+                <OrdersTable
+                    orders={filteredOrders}
+                    filters={filters}
+                    setFilters={setFilters}
+                    userRole={userRole}
+                    isLoading={loading}
+                    onStatusChange={updateOrderStatus}
+                    onDelete={deleteOrder}
+                    pagination={pagination}
+                    onPageChange={setCurrentPage}
+                    onLimitChange={setLimit}
+                />
+            )}
+        </div>
     );
 }

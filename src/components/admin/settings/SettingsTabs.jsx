@@ -15,11 +15,11 @@ export default function SettingsTabs() {
     const locale = useLocale();
     const tabs = [
         { id: 'transportistas', label: locale === 'ca' ? 'Transportistes' : 'Transportistas' },
-        { id: 'slider', label: locale === 'ca' ? 'Slider Conf.' : 'Slider Conf.' },
-        { id: 'images', label: locale === 'ca' ? 'Ofertes Conf.' : 'Ofertas Conf.' },
-        { id: 'banner', label: locale === 'ca' ? 'Banner Img.' : 'Banner Img.' },
-        { id: 'recomendation', label: locale === 'ca' ? 'Conf. Recomanació' : 'Recomendation Conf.' },
-        { id: 'politicas', label: locale === 'ca' ? 'Textos de polítiques' : 'Textos de politicas' },
+        { id: 'slider', label: locale === 'ca' ? 'Slider Portada' : 'Slider Portada' },
+        { id: 'images', label: locale === 'ca' ? 'Ofertes' : 'Ofertas' },
+        { id: 'banner', label: locale === 'ca' ? 'Banner' : 'Banner' },
+        { id: 'recomendation', label: locale === 'ca' ? 'Recomanacións' : 'Recomendaciones' },
+        { id: 'politicas', label: locale === 'ca' ? 'Textos Legals' : 'Textos Legales' },
         { id: 'parameters', label: locale === 'ca' ? 'Paràmetres' : 'Parametros' },
         // { id: 'rendimiento', label: locale === 'ca' ? 'Rendiment' : 'Rendimiento' },
         // { id: 'administracion', label: locale === 'ca' ? 'Administració' : 'Administración' },

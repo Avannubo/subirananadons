@@ -95,7 +95,7 @@ export default function Page() {
                         {/* <Link href="#" className="hidden md:block text-gray-700 font-semibold text-sm ml-2 hover:text-[#00B0C8] cursor-pointer">Tel: 938 751 567</Link> */}
                     </div>
                     <Link href="/" className="flex justify-center items-center w-[120px] md:w-[300px]">
-                        <Image
+                        <img
                             src="/assets/logo-header.svg"
                             alt="logo"
                             width={120}
@@ -113,7 +113,7 @@ export default function Page() {
                                         <a
                                             key={locale.code}
                                             href={pathname.replace(/^\/(ca|es)/, `/${locale.code}`)}
-                                            className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${currentLocale === locale.code ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                            className={`px-1 py-1 rounded text-[15px] mt-2 font-semibold transition-colors ${currentLocale === locale.code ? ' text-[#00B0C8]' : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100'}`}
                                             aria-current={currentLocale === locale.code ? 'page' : undefined}
                                         >
                                             {locale.label}
@@ -121,16 +121,14 @@ export default function Page() {
                                     ))}
                                 </div>
                             )}
-                            <Link href="/search" className="p-2 flex justify-center items-center">
-                                <Search className="w-5 h-5 md:w-6 md:h-6" />
+                            <Link href="/search" className="p-2 ml-6 flex justify-center items-center">
+                                <Search className="w-5 h-5 md:w-6 md:h-6 text-gray-700 hover:text-[#00B0C8]" />
                             </Link>
                         </div>
-
-
                         {/* Locale Switcher */}
 
                         <Link href="/cart" className="p-2 text-sm text-gray-700 relative">
-                            <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
+                            <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 text-gray-700 hover:text-[#00B0C8]" />
                             <span
                                 className={
                                     `absolute top-1 -right-1 z-30 bg-[#00B0C8] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-white shadow
@@ -140,7 +138,7 @@ export default function Page() {
                                 {cartItemsCount}
                             </span>
                         </Link>
-                        <UserAuth title="" />
+                        <UserAuth title="" className="text-gray-700 hover:text-[#00B0C8]" />
                     </div>
                 </div>
             </div>

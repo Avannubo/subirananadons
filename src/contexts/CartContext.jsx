@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
 import PropTypes from 'prop-types';
 
 // Export the context so it can be used by TypeScript for type checking
@@ -12,6 +13,7 @@ CartProvider.propTypes = {
 };
 
 export function CartProvider({ children }) {
+    const t = useTranslations('CartToasts');
     const [cart, setCart] = useState({
         items: [],
         total: 0,
@@ -75,7 +77,7 @@ export function CartProvider({ children }) {
             });
 
             if (showToast) {
-                toast.success('Carrito actualizado');
+                toast.success(t('updated'));
             }
 
             return true;
@@ -83,7 +85,7 @@ export function CartProvider({ children }) {
             console.error('Error fetching cart:', error);
             setCart(prev => ({ ...prev, loading: false }));
             if (showToast) {
-                toast.error('Error al actualizar el carrito');
+                toast.error(t('updateError'));
             }
             return false;
         }
@@ -133,7 +135,7 @@ export function CartProvider({ children }) {
 
             // For gift products, prevent adding if it already exists
             if (productData.type === 'gift' && existingItemIndex > -1) {
-                toast.error('Este producto de regalo ya está en el carrito');
+                toast.error(t('giftAlreadyInCart'));
                 return false;
             }            // Get current cart from localStorage to ensure we have the latest data
             const currentCart = localStorage.getItem('cart');
@@ -186,11 +188,11 @@ export function CartProvider({ children }) {
                 count: calculateCount(updatedItems),
             }));
 
-            toast.success('Producto añadido al carrito');
+            toast.success(t('added'));
             return true;
         } catch (error) {
             console.error('Error adding to cart:', error);
-            toast.error('Error al añadir al carrito');
+            toast.error(t('addError'));
             return false;
         }
     }, [cart, calculateTotal, calculateCount]);
@@ -214,7 +216,7 @@ export function CartProvider({ children }) {
                     loading: false,
                     generalNote: ''
                 });
-                toast.success('Carrito vaciado');
+                toast.success(t('emptied'));
                 return true;
             }
 
@@ -231,165 +233,165 @@ export function CartProvider({ children }) {
                 total: calculateTotal(updatedItems),
                 count: calculateCount(updatedItems)
             }));
-            toast.success('Producto eliminado del carrito');
+            toast.success(t('removed'));
             return true;
-         // Closing brace for the try block
-    } catch (error) {
-        console.error('Error removing from cart:', error);
-        toast.error('Error al eliminar del carrito');
-        return false;
-    }
-}, [cart, calculateTotal, calculateCount]);
+            // Closing brace for the try block
+        } catch (error) {
+            console.error('Error removing from cart:', error);
+            toast.error(t('removeError'));
+            return false;
+        }
+    }, [cart, calculateTotal, calculateCount]);
 
-// Update quantity
+    // Update quantity
 
-const updateQuantity = useCallback(async (productId, quantity) => {
-    try {
-        if (cart.loading) return false;
+    const updateQuantity = useCallback(async (productId, quantity) => {
+        try {
+            if (cart.loading) return false;
 
-        const updatedItems = cart.items.map(item =>
-            item.id === productId
-                ? { ...item, quantity: Math.max(1, parseInt(quantity)) }
-                : item
-        );
+            const updatedItems = cart.items.map(item =>
+                item.id === productId
+                    ? { ...item, quantity: Math.max(1, parseInt(quantity)) }
+                    : item
+            );
 
-        // Update local storage
-        localStorage.setItem('cart', JSON.stringify({
-            items: updatedItems,
-            timestamp: Date.now()
-        }));
+            // Update local storage
+            localStorage.setItem('cart', JSON.stringify({
+                items: updatedItems,
+                timestamp: Date.now()
+            }));
 
-        // Update state
-        setCart(prev => ({
-            ...prev,
-            items: updatedItems,
-            total: calculateTotal(updatedItems),
-            count: calculateCount(updatedItems)
-        })); toast.success('Cantidad actualizada');
-        return true;
-    } catch (error) {
-        console.error('Error updating quantity:', error); toast.error('Error al actualizar la cantidad');
-        return false;
-    }
-}, [cart, calculateTotal, calculateCount]);    // Clear cart
-const clearCart = useCallback(async () => {
-    try {
-        if (cart.loading) return false;
+            // Update state
+            setCart(prev => ({
+                ...prev,
+                items: updatedItems,
+                total: calculateTotal(updatedItems),
+                count: calculateCount(updatedItems)
+            })); toast.success(t('quantityUpdated'));
+            return true;
+        } catch (error) {
+            console.error('Error updating quantity:', error); toast.error(t('quantityUpdateError'));
+            return false;
+        }
+    }, [cart, calculateTotal, calculateCount]);    // Clear cart
+    const clearCart = useCallback(async () => {
+        try {
+            if (cart.loading) return false;
 
-        // Clear all cart data from localStorage
-        clearLocalCartData();
+            // Clear all cart data from localStorage
+            clearLocalCartData();
 
-        // Reset state completely
-        setCart({
-            items: [],
-            total: 0,
-            count: 0,
-            loading: false,
-            generalNote: ''
-        });
+            // Reset state completely
+            setCart({
+                items: [],
+                total: 0,
+                count: 0,
+                loading: false,
+                generalNote: ''
+            });
 
-        toast.success('Carrito vaciado');
-        return true;
-    } catch (error) {
-        console.error('Error clearing cart:', error);
-        toast.error('Error al vaciar el carrito');
-        return false;
-    }
-}, [cart.loading, clearLocalCartData]);
+            toast.success(t('emptied'));
+            return true;
+        } catch (error) {
+            console.error('Error clearing cart:', error);
+            toast.error(t('emptyError'));
+            return false;
+        }
+    }, [cart.loading, clearLocalCartData]);
 
-// Update gift note
-const updateItemNote = useCallback(async (itemId, note) => {
-    try {
-        if (cart.loading) return false;
+    // Update gift note
+    const updateItemNote = useCallback(async (itemId, note) => {
+        try {
+            if (cart.loading) return false;
 
-        const updatedItems = cart.items.map(item =>
-            item.id === itemId
-                ? {
-                    ...item,
-                    listInfo: {
-                        ...(item.listInfo || {}),
-                        note
+            const updatedItems = cart.items.map(item =>
+                item.id === itemId
+                    ? {
+                        ...item,
+                        listInfo: {
+                            ...(item.listInfo || {}),
+                            note
+                        }
                     }
-                }
-                : item
-        );
+                    : item
+            );
 
-        // Update local storage
+            // Update local storage
+            localStorage.setItem('cart', JSON.stringify({
+                items: updatedItems,
+                timestamp: Date.now()
+            }));
+
+            // Update state
+            setCart(prev => ({
+                ...prev,
+                items: updatedItems
+            })); toast.success(t('noteUpdated'));
+            return true;
+        } catch (error) {
+            console.error('Error updating note:', error); toast.error(t('noteUpdateError'));
+            return false;
+        }
+    }, [cart]);
+
+    // Update general note for all cart items
+    const updateGeneralNote = useCallback(async (note) => {
+        try {
+            if (cart.loading) return false;
+
+            // Update cart state with new note
+            const updatedCart = {
+                ...cart,
+                generalNote: note
+            };
+
+            // Update local storage with all cart data
+            localStorage.setItem('cart', JSON.stringify({
+                items: cart.items,
+                timestamp: Date.now(),
+                generalNote: note
+            }));
+
+            // Update state
+            setCart(updatedCart);
+            toast.success(t('generalNoteUpdated'));
+            return true;
+        } catch (error) {
+            console.error('Error updating general note:', error);
+            toast.error(t('generalNoteUpdateError'));
+            return false;
+        }
+    }, [cart]);
+
+    // Helper function to save cart to localStorage
+    const saveCartToStorage = useCallback((items, note = cart.generalNote) => {
         localStorage.setItem('cart', JSON.stringify({
-            items: updatedItems,
-            timestamp: Date.now()
-        }));
-
-        // Update state
-        setCart(prev => ({
-            ...prev,
-            items: updatedItems
-        })); toast.success('Nota actualizada');
-        return true;
-    } catch (error) {
-        console.error('Error updating note:', error); toast.error('Error al actualizar la nota');
-        return false;
-    }
-}, [cart]);
-
-// Update general note for all cart items
-const updateGeneralNote = useCallback(async (note) => {
-    try {
-        if (cart.loading) return false;
-
-        // Update cart state with new note
-        const updatedCart = {
-            ...cart,
-            generalNote: note
-        };
-
-        // Update local storage with all cart data
-        localStorage.setItem('cart', JSON.stringify({
-            items: cart.items,
+            items,
             timestamp: Date.now(),
             generalNote: note
         }));
+    }, [cart.generalNote]);
 
-        // Update state
-        setCart(updatedCart);
-        toast.success('Nota general actualizada');
-        return true;
-    } catch (error) {
-        console.error('Error updating general note:', error);
-        toast.error('Error al actualizar la nota general');
-        return false;
-    }
-}, [cart]);
+    const value = {
+        items: cart.items,
+        total: cart.total,
+        count: cart.count,
+        loading: cart.loading,
+        generalNote: cart.generalNote,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        updateItemNote,
+        updateGeneralNote,
+        refreshCart: fetchCart
+    };
 
-// Helper function to save cart to localStorage
-const saveCartToStorage = useCallback((items, note = cart.generalNote) => {
-    localStorage.setItem('cart', JSON.stringify({
-        items,
-        timestamp: Date.now(),
-        generalNote: note
-    }));
-}, [cart.generalNote]);
-
-const value = {
-    items: cart.items,
-    total: cart.total,
-    count: cart.count,
-    loading: cart.loading,
-    generalNote: cart.generalNote,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    updateItemNote,
-    updateGeneralNote,
-    refreshCart: fetchCart
-};
-
-return (
-    <CartContext.Provider value={value}>
-        {children}
-    </CartContext.Provider>
-);
+    return (
+        <CartContext.Provider value={value}>
+            {children}
+        </CartContext.Provider>
+    );
 }
 
 // Custom hook to use the cart context

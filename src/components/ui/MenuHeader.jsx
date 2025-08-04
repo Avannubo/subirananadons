@@ -4,7 +4,7 @@ import Image from 'next/image';
 import UserAuth from "@/components/ui/UserAuthModal";
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { InstagramIcon, UserRound, Search, ShoppingBag, TagIcon, Gift, Mail } from "lucide-react";
+import { InstagramIcon, UserRound, Search, ShoppingBag, TagIcon, Gift, Mail, ShoppingCart } from "lucide-react";
 import useShopSocials from "@/lib/useShopSocials";
 import useShopParameter from "@/lib/useShopParameter";
 import { useTranslations } from 'next-intl';
@@ -63,7 +63,7 @@ export default function Menu() {
             {
                 label: t('cart'),
                 href: "/cart",
-                icon: ShoppingBag
+                icon: ShoppingCart
             }
         ]
     };
@@ -127,12 +127,25 @@ export default function Menu() {
         <div className="relative">
             <header className="bg-white flex justify-between items-center">
                 <button
-                    className="w-12 h-12 flex flex-row items-center justify-center md:justify-start space-x-2 focus:outline-none"
+                    className="w-12 h-12 flex flex-row items-center justify-center md:justify-start space-x-2 focus:outline-none cursor-pointer"
                     onClick={toggleMenu}
                     aria-label="Abrir menú"
                 >
-                    <svg width="34px" height="34px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 6H20M4 12H20M4 18H20" stroke="#353535" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                    <svg
+                        width="34px"
+                        height="34px"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="text-gray-700 hover:text-[#00B0C8] transition-colors duration-200"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M4 6H20M4 12H20M4 18H20"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
                     </svg>
                 </button>
             </header>
@@ -148,7 +161,7 @@ export default function Menu() {
                         <div className="p-4 md:p-6 h-full flex flex-col">
                             <div className="flex justify-between items-center mb-4 md:mb-6">
                                 <Link href="/" className="flex items-center" onClick={closeMenu}>
-                                    <Image
+                                    <img
                                         src="/assets/logo-header.svg"
                                         alt="logo"
                                         width={120}
@@ -158,7 +171,7 @@ export default function Menu() {
                                 </Link>
                                 <button
                                     onClick={toggleMenu}
-                                    className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                                    className="p-1 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
                                     aria-label="Cerrar menú"
                                 >
                                     <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -21,8 +21,16 @@ export default function TermsPage() {
     }, []);
     function formatNumberedHeadings(text) {
         if (!text) return '';
+        // Third-level subsection: 1.1.1 Title
+        // Subsection: 1.1 Title
+        // Main section: 1. Title
         return text
-            .replace(/^(\d+\.[^\n]*)/gm, '<span style="display:block;font-size:1.5em;font-weight:bold;margin-top:1.2em;">$1</span>')
+            // Third-level subsection headings (e.g. 1.1.1 Title)
+            .replace(/^(\d+\.\d+\.\d+[^\d][^\n]*)/gm, '<span style="display:block;font-size:0.95em;font-weight:500;margin-top:0.8em;">$1</span>')
+            // Subsection headings (e.g. 1.1 Title, 2.2 Title)
+            .replace(/^(\d+\.\d+[^\d][^\n]*)/gm, '<span style="display:block;font-size:1em;font-weight:600;margin-top:1em;">$1</span>')
+            // Main section headings (e.g. 1. Title)
+            .replace(/^(\d+\.[^\d][^\n]*)/gm, '<span style="display:block;font-size:1.5em;font-weight:bold;margin-top:1.2em;">$1</span>')
             .replace(/\n/g, '<br/>');
     }
     // termsText is expected to be an object with language keys (es, ca, ...)
@@ -39,7 +47,7 @@ export default function TermsPage() {
         <ShopLayout>
             {bannerUrl ? (
                 <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
-                    <Image
+                    <img
                         src={bannerUrl}
                         alt="banner"
                         fill

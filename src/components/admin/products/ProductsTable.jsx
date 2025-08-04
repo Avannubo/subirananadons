@@ -7,20 +7,22 @@ import ProductViewModal from './ProductViewModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import Pagination from '@/components/admin/shared/Pagination';
 export default function ProductsTable(props) {
+    // Pagination handlers
+
+    // Remove allProducts and filters, not needed for API-driven filtering
     // Next Intl: detect browser locale
     let locale = 'ca'; // default
     if (typeof window !== 'undefined' && window.navigator?.language) {
         locale = window.navigator.language.split('-')[0];
         if (!['ca', 'es'].includes(locale)) locale = 'es';
     }
-    const [products, setProducts] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [filters, setFilters] = useState({
-        name: '',
-        brand: '',
-        category: '',
-    });
+    const [products, setProducts] = useState([]);
     const [sortOrder, setSortOrder] = useState('newest'); // default: newest first
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [totalItems, setTotalItems] = useState(0);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
@@ -28,169 +30,127 @@ export default function ProductsTable(props) {
     const [isEditing, setIsEditing] = useState(false);
     const [hoveredImage, setHoveredImage] = useState(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const [pagination, setPagination] = useState({
-        currentPage: 1,
-        totalPages: 1,
-        totalItems: 0,
-        limit: 5
-    });
-    const [allProducts, setAllProducts] = useState([]); // Store all products for client-side pagination
-    const [useClientPagination, setUseClientPagination] = useState(false); // Flag to determine pagination mode
-    // Update the fetchProducts function to include sortOrder in API calls
-    const fetchProducts = async (page = 1, limit = pagination.limit) => {
+    // Unified fetchProducts logic (instant search, translation support, client-side pagination)
+    const fetchProducts = async () => {
         try {
             setLoading(true);
-            const queryParams = new URLSearchParams();
-            if (filters.name) queryParams.append('name', filters.name);
-            if (filters.brand) queryParams.append('brand', filters.brand);
-            if (filters.category) queryParams.append('category', filters.category);
-            // Add the category filter from props if it exists
-            if (props.categoryFilter) queryParams.append('categoryId', props.categoryFilter);
-            // Add sort order parameter
-            queryParams.append('sort', sortOrder);
-            // For server-side pagination
-            if (!useClientPagination) {
-                // Add pagination parameters
-                queryParams.append('page', page);
-                queryParams.append('limit', limit);
-            }
-            const response = await fetch(`/api/products?${queryParams.toString()}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch products');
-            }
+            const params = new URLSearchParams({
+                limit: '99999',
+                preventSort: 'true'
+            });
+            const response = await fetch(`/api/products?${params}`);
+            if (!response.ok) throw new Error('Failed to fetch products');
             const data = await response.json();
-            // Check for different possible API response structures
-            if (Array.isArray(data)) {
-                // If we get a full array, use client-side pagination
-                setAllProducts(data);
-                setUseClientPagination(true);
-                // Apply client-side sorting and pagination
-                applyClientPagination(data, page, limit);
-            } else if (data.products && Array.isArray(data.products)) {
-                // Handle case where API returns {products: [...], pagination: {...}}
-                if (data.pagination) {
-                    // Server pagination is working
-                    setUseClientPagination(false);
-                    setProducts(data.products);
-                    setPagination({
-                        currentPage: data.pagination.currentPage || page,
-                        totalPages: data.pagination.totalPages || Math.ceil(data.products.length / limit) || 1,
-                        totalItems: data.pagination.totalItems || data.products.length,
-                        limit: limit
+            if (data && Array.isArray(data.products)) {
+                // Search logic: support translation objects for name, brand, category
+                const getName = (prod) => {
+                    if (!prod.name) return '';
+                    if (typeof prod.name === 'object') {
+                        return prod.name.ca || prod.name.es || '';
+                    }
+                    return prod.name;
+                };
+                const getBrand = (prod) => {
+                    if (!prod.brand) return '';
+                    if (typeof prod.brand === 'object') {
+                        return prod.brand.ca || prod.brand.es || '';
+                    }
+                    return prod.brand;
+                };
+                const getCategory = (prod) => {
+                    if (!prod.category) return '';
+                    if (typeof prod.category === 'object') {
+                        return prod.category.ca || prod.category.es || '';
+                    }
+                    return prod.category;
+                };
+                const search = searchTerm.trim().toLowerCase();
+                let filtered = data.products;
+                if (search) {
+                    filtered = data.products.filter(prod => {
+                        const name = getName(prod).toLowerCase();
+                        const brand = getBrand(prod).toLowerCase();
+                        const category = getCategory(prod).toLowerCase();
+                        const ref = (prod.reference || '').toLowerCase();
+                        return (
+                            name.includes(search) ||
+                            brand.includes(search) ||
+                            category.includes(search) ||
+                            ref.includes(search)
+                        );
                     });
-                } else {
-                    // No pagination info from server, use client-side
-                    setAllProducts(data.products);
-                    setUseClientPagination(true);
-                    applyClientPagination(data.products, page, limit);
+                }
+                // Sort client-side
+                let sorted = [...filtered];
+                if (sortOrder === 'newest') {
+                    sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                } else if (sortOrder === 'oldest') {
+                    sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                } else if (sortOrder === 'lastmodified') {
+                    sorted.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                } else if (sortOrder === 'az') {
+                    sorted.sort((a, b) => getName(a).localeCompare(getName(b)));
+                } else if (sortOrder === 'za') {
+                    sorted.sort((a, b) => getName(b).localeCompare(getName(a)));
+                }
+                // Pagination logic: always use sorted.length for totalItems and totalPages
+                const total = sorted.length;
+                setTotalItems(total);
+                const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
+                // Clamp currentPage to valid range
+                let page = currentPage;
+                if (page > totalPages) page = totalPages;
+                if (page < 1) page = 1;
+                const start = (page - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                setProducts(sorted.slice(start, end));
+                // If currentPage was clamped, update currentPage state
+                if (page !== currentPage) {
+                    setCurrentPage(page);
                 }
             } else {
-                // Fallback for unexpected response structure
-                console.warn('Unexpected API response format:', data);
-                const productsArray = data.products || data || [];
-                setAllProducts(productsArray);
-                setUseClientPagination(true);
-                applyClientPagination(productsArray, page, limit);
+                toast.error('Error: Invalid data format');
             }
         } catch (error) {
             console.error('Error fetching products:', error);
-            toast.error('Error loading products');
+            toast.error(`Error: ${error.message}`);
         } finally {
             setLoading(false);
         }
     };
+
+    // Reset to first page when search/filter/sort changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, sortOrder]);
+
+    useEffect(() => {
+        fetchProducts();
+    }, [searchTerm, currentPage, itemsPerPage, sortOrder]);
+
+    // Handle search input change
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
+    };
+
+    // Handle sort order change
+    const handleSortOrderChange = (e) => {
+        setSortOrder(e.target.value);
+        setCurrentPage(1);
+    };
+
     // Update the sortOrder useEffect to trigger a refresh
     useEffect(() => {
-        if (useClientPagination) {
-            applyClientPagination(allProducts, pagination.currentPage, pagination.limit);
-        } else {
-            // When using server-side, refetch with new sort order
-            fetchProducts(pagination.currentPage);
-        }
+        fetchProducts();
     }, [sortOrder]);
-    // Apply client-side pagination with sorting
-    const applyClientPagination = (productsArray, page, limit) => {
-        let sortedProducts = [...productsArray];
-        if (sortOrder === 'newest') {
-            sortedProducts.sort((a, b) => {
-                // Always sort by createdAt descending, fallback to _id if missing
-                if (a.createdAt && b.createdAt) {
-                    return new Date(b.createdAt) - new Date(a.createdAt);
-                } else if (a.createdAt) {
-                    return -1;
-                } else if (b.createdAt) {
-                    return 1;
-                } else {
-                    return a._id > b._id ? -1 : 1;
-                }
-            });
-        } else if (sortOrder === 'oldest') {
-            sortedProducts.sort((a, b) => {
-                if (a.createdAt && b.createdAt) {
-                    return new Date(a.createdAt) - new Date(b.createdAt);
-                } else if (a.createdAt) {
-                    return -1;
-                } else if (b.createdAt) {
-                    return 1;
-                } else {
-                    return a._id > b._id ? 1 : -1;
-                }
-            });
-        } else if (sortOrder === 'lastmodified') {
-            sortedProducts.sort((a, b) => {
-                if (a.updatedAt && b.updatedAt) return new Date(b.updatedAt) - new Date(a.updatedAt);
-                return 0;
-            });
-        } else if (sortOrder === 'az') {
-            sortedProducts.sort((a, b) => {
-                const nameA = (a.name || '').toLowerCase();
-                const nameB = (b.name || '').toLowerCase();
-                if (nameA < nameB) return -1;
-                if (nameA > nameB) return 1;
-                return 0;
-            });
-        } else if (sortOrder === 'za') {
-            sortedProducts.sort((a, b) => {
-                const nameA = (a.name || '').toLowerCase();
-                const nameB = (b.name || '').toLowerCase();
-                if (nameA > nameB) return -1;
-                if (nameA < nameB) return 1;
-                return 0;
-            });
-        }
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedProducts = sortedProducts.slice(startIndex, endIndex);
-        setProducts(paginatedProducts);
-        setPagination({
-            currentPage: page,
-            totalPages: Math.ceil(sortedProducts.length / limit) || 1,
-            totalItems: sortedProducts.length,
-            limit: limit
-        });
-        console.log(`Client pagination: showing items ${startIndex + 1}-${Math.min(endIndex, sortedProducts.length)} of ${sortedProducts.length}`);
-    };
-    // Load products on component mount
+    // Removed applyClientPagination, all logic is API-driven
+    // Load products on component mount or when category filter changes
     useEffect(() => {
-        fetchProducts(1); // Always start at page 1 when category filter changes
+        fetchProducts();
     }, [props.categoryFilter]);
-    // Handle filter change and run search instantly (client-side)
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters(prev => ({ ...prev, [name]: value }));
-        // Filtering is now handled by useEffect on filters change
-    };
-    // Ensure table updates when filters change and pagination is client-side
-    useEffect(() => {
-        if (useClientPagination) {
-            // Always reset to first page on filter change
-            const filteredProducts = filterProductsClientSide(allProducts, filters);
-            applyClientPagination(filteredProducts, 1, pagination.limit);
-        } else {
-            // Server-side: refetch with new filters
-            fetchProducts(1);
-        }
-    }, [filters, allProducts, useClientPagination]);
+    // Removed handleFilterChange, not needed
+    // Removed filter-related useEffect
     // Filter products client-side (accepts custom filters for instant search, left-side/startsWith for name)
     // For category, always use CA if available, then ES, then fallback to string
     // Show category name if cat is an ObjectId string by looking up in categories prop
@@ -252,36 +212,8 @@ export default function ProductsTable(props) {
         }
         return '';
     };
-    const filterProductsClientSide = (productsToFilter, customFilters = filters) => {
-        return productsToFilter.filter(product => {
-            // Name: startsWith (left-side, case-insensitive, ignore leading/trailing spaces)
-            const nameFilter = (customFilters.name || '').trim().toLowerCase();
-            const nameValue = getLocaleString(product.name).toLowerCase();
-            const nameMatch = !nameFilter || nameValue.startsWith(nameFilter);
-            // Brand: startsWith
-            const brandFilter = (customFilters.brand || '').trim().toLowerCase();
-            const brandValue = getLocaleString(product.brand).toLowerCase();
-            const brandMatch = !brandFilter || brandValue.startsWith(brandFilter);
-            // Category: startsWith, use getCategoryString
-            const categoryFilter = (customFilters.category || '').trim().toLowerCase();
-            const categoryValue = getCategoryString(product.category).toLowerCase();
-            const categoryMatch = !categoryFilter || categoryValue.startsWith(categoryFilter);
-            return nameMatch && brandMatch && categoryMatch;
-        });
-    };
-    // Clear filters (not used anymore, but keep for possible future use)
-    const clearFilters = () => {
-        setFilters({
-            name: '',
-            brand: '',
-            category: '',
-        });
-        if (useClientPagination) {
-            applyClientPagination(allProducts, 1, pagination.limit);
-        } else {
-            fetchProducts(1);
-        }
-    };
+    // Removed filterProductsClientSide
+    // Removed clearFilters
     // Handle product view
     const handleViewProduct = (product) => {
         // If product.category or product.brand is an ObjectId, try to populate from props
@@ -330,27 +262,22 @@ export default function ProductsTable(props) {
             }
             toast.success('Product deleted successfully');
             setShowConfirmModal(false);
-            if (useClientPagination) {
-                // Update local state for client-side pagination
-                const updatedProducts = allProducts.filter(p => p._id !== selectedProduct._id);
-                setAllProducts(updatedProducts);
-                // Calculate new page (go to previous page if this was the last item on the page)
-                const newPage = products.length === 1 && pagination.currentPage > 1
-                    ? pagination.currentPage - 1
-                    : pagination.currentPage;
-                applyClientPagination(updatedProducts, newPage, pagination.limit);
-            } else {
-                // Refresh the product list while maintaining the current page if possible
-                // If the deleted product was the last one on the page, go to the previous page
-                const newPage = products.length === 1 && pagination.currentPage > 1
-                    ? pagination.currentPage - 1
-                    : pagination.currentPage;
-                fetchProducts(newPage);
-            }
+            // Refresh the product list while maintaining the current page if possible
+            // If the deleted product was the last one on the page, go to the previous page
+            const newPage = products.length === 1 && currentPage > 1
+                ? currentPage - 1
+                : currentPage;
+            setCurrentPage(newPage);
+            fetchProducts();
         } catch (error) {
             console.error('Error deleting product:', error);
             toast.error('Error deleting product');
         }
+    };
+    // Handle items per page change
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1);
     };
     // Handle adding new product
     const handleAddProduct = () => {
@@ -427,59 +354,16 @@ export default function ProductsTable(props) {
             const savedProduct = await response.json();
             toast.success(isEditing ? 'Product updated successfully' : 'Product added successfully');
             setShowModal(false);
-            if (useClientPagination) {
-                let updatedProducts;
-                if (isEditing) {
-                    // Replace the updated product in the array
-                    updatedProducts = allProducts.map(p =>
-                        p._id === savedProduct._id ? savedProduct : p
-                    );
-                } else {
-                    // Add the new product to the array
-                    updatedProducts = [savedProduct, ...allProducts];
-                }
-                setAllProducts(updatedProducts);
-                // When adding, go to first page. When editing, stay on current page
-                const newPage = isEditing ? pagination.currentPage : 1;
-                applyClientPagination(updatedProducts, newPage, pagination.limit);
-            } else {
-                // When adding a new product, go to first page to see it
-                // When editing, stay on current page
-                fetchProducts(isEditing ? pagination.currentPage : 1);
-            }
+            // When adding a new product, go to first page to see it
+            // When editing, stay on current page
+            setCurrentPage(isEditing ? currentPage : 1);
+            fetchProducts();
         } catch (error) {
             console.error('Error saving product:', error);
             toast.error(error.message || 'Error saving product');
         }
     };
     // Handle page change
-    const handlePageChange = (page) => {
-        console.log(`Changing to page ${page}`);
-        if (useClientPagination) {
-            applyClientPagination(allProducts, page, pagination.limit);
-        } else {
-            fetchProducts(page);
-        }
-    };
-    // Handle items per page change
-    const handleLimitChange = (valueOrEvent) => {
-        // Handle both direct value (number) or event object
-        let newLimit;
-        if (typeof valueOrEvent === 'number') {
-            newLimit = valueOrEvent;
-        } else if (valueOrEvent && valueOrEvent.target && valueOrEvent.target.value) {
-            newLimit = parseInt(valueOrEvent.target.value);
-        } else {
-            console.error('Invalid value passed to handleLimitChange:', valueOrEvent);
-            return; // Exit if we can't determine the value
-        }
-        console.log(`Changing limit to ${newLimit}`);
-        if (useClientPagination) {
-            applyClientPagination(allProducts, 1, newLimit);
-        } else {
-            fetchProducts(1, newLimit); // Reset to page 1 when changing limit
-        }
-    };
     // Handle mouse over image
     const handleImageMouseEnter = (imageUrl) => {
         setHoveredImage(imageUrl);
@@ -502,17 +386,12 @@ export default function ProductsTable(props) {
             window.removeEventListener('mousemove', handleMouseMove);
         };
     }, []);
-    // Re-apply sorting when sortOrder changes (client-side)
-    useEffect(() => {
-        if (useClientPagination) {
-            applyClientPagination(allProducts, pagination.currentPage, pagination.limit);
-        }
-    }, [sortOrder]);
+    // Removed duplicate sortOrder useEffect
     // For debugging
-    useEffect(() => {
-        console.log("Current pagination state:", pagination);
-        console.log("Products count:", products.length);
-    }, [pagination, products]);
+    // useEffect(() => {
+    //     console.log("Current pagination state:", pagination);
+    //     console.log("Products count:", products.length);
+    // }, [pagination, products]);
     return (
         <div className="bg-white rounded-lg shadow">
             {/* Table Header with Actions */}
@@ -528,12 +407,12 @@ export default function ProductsTable(props) {
                     </button>
                 </div>
             </div>
-            {/* Search, Filters, and Sort (instant search, no apply/clean btns) */}
-            <div className="p-4 border-b border-gray-200 grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="relative">
+            {/* Unified Search and Sort */}
+            <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center gap-4">
+                <div className="w-full md:w-1/4">
                     <select
                         value={sortOrder}
-                        onChange={e => setSortOrder(e.target.value)}
+                        onChange={handleSortOrderChange}
                         className="border border-gray-300 rounded w-full py-2 px-3 text-gray-700"
                     >
                         <option value="newest">Més nous primer</option>
@@ -543,43 +422,17 @@ export default function ProductsTable(props) {
                         <option value="lastmodified">Última modificació</option>
                     </select>
                 </div>
-                <div className="relative">
+                <div className="relative flex-1 w-full">
                     <FiSearch className="absolute left-3 top-3 text-gray-400" />
                     <input
                         type="search"
-                        name="name"
                         autoComplete="off"
-                        placeholder="Cerca per nom"
-                        value={filters.name}
-                        onChange={handleFilterChange}
+                        placeholder="Cerca per nom, marca, categoria o referència"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
                         className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                     />
                 </div>
-                <div className="relative">
-                    <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                    <input
-                        type="search"
-                        name="brand"
-                        autoComplete="off"
-                        placeholder="Cerca per marca"
-                        value={filters.brand}
-                        onChange={handleFilterChange}
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                    />
-                </div>
-                <div className="relative">
-                    <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                    <input
-                        type="search"
-                        name="category"
-                        autoComplete="off"
-                        placeholder="Cerca per categoria"
-                        value={filters.category}
-                        onChange={handleFilterChange}
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                    />
-                </div>
-                {/* No apply/clean buttons, search runs instantly */}
             </div>
             {/* Products Table */}
             <div className="overflow-x-auto">
@@ -778,14 +631,14 @@ export default function ProductsTable(props) {
             )}
             {/* Pagination */}
             {products.length > 0 && (
-                <div className="px-4 py-3 border-t border-gray-200">
+                <div className="px-6 py-4">
                     <Pagination
-                        currentPage={pagination.currentPage}
-                        totalPages={pagination.totalPages}
-                        totalItems={pagination.totalItems}
-                        itemsPerPage={pagination.limit}
-                        onPageChange={handlePageChange}
-                        onItemsPerPageChange={handleLimitChange}
+                        currentPage={currentPage}
+                        totalPages={Math.max(1, Math.ceil(totalItems / itemsPerPage))}
+                        totalItems={totalItems}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={setCurrentPage}
+                        onItemsPerPageChange={handleItemsPerPageChange}
                         showingText="Mostrant {} de {} productes"
                     />
                 </div>

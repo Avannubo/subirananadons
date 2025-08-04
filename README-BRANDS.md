@@ -13,7 +13,7 @@ This document provides instructions for importing brand data into MongoDB and us
 Create a `.env` file in the root of your project with the following variables:
 
 ```
-MONGODB_URI=mongodb://localhost:27017
+MONGODB_URI=mongodb://193.176.230.24:27017/test
 MONGODB_DB=your_database_name
 ```
 

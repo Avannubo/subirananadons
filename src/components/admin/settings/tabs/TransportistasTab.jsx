@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import ImageSelector from '@/components/admin/shared/ImageSelector';
 import { toast } from 'react-hot-toast';
 import { useLocale } from 'next-intl';
 export default function TransportistasTab() {
@@ -15,6 +16,52 @@ export default function TransportistasTab() {
     const [loading, setLoading] = useState(true);
     const [editingCarrier, setEditingCarrier] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
+    // Image upload state for edit modal
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [showImageSelector, setShowImageSelector] = useState(false);
+    const fileInputRef = useRef(null);
+
+    // Handlers for image upload/drag
+    const handleImageClick = () => {
+        if (fileInputRef.current) fileInputRef.current.click();
+    };
+    const handleImageUpload = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setImagePreview(ev.target.result);
+                setEditingCarrier(prev => ({ ...prev, logo: ev.target.result }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    const handleRemoveImage = () => {
+        setImagePreview(null);
+        setEditingCarrier(prev => ({ ...prev, logo: '' }));
+    };
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setImagePreview(ev.target.result);
+                setEditingCarrier(prev => ({ ...prev, logo: ev.target.result }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
     useEffect(() => {
         fetchData();
     }, []);
@@ -112,6 +159,7 @@ export default function TransportistasTab() {
     };
     const handleEditClick = (carrier) => {
         setEditingCarrier(carrier);
+        setImagePreview(carrier.logo || null);
         setShowEditModal(true);
     };
     const handlePreferenceChange = (e) => {
@@ -254,15 +302,76 @@ export default function TransportistasTab() {
                                     className="border border-gray-200 rounded px-3 py-2 w-full"
                                 />
                             </div>
+                            {/* Logo image upload/selector */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ca' ? 'URL del Logotip' : 'URL del Logotipo'}</label>
-                                <input
-                                    type="text"
-                                    value={editingCarrier.logo}
-                                    onChange={(e) => setEditingCarrier({ ...editingCarrier, logo: e.target.value })}
-                                    className="border border-gray-200 rounded px-3 py-2 w-full"
-                                />
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Logotip</label>
+                                <div className="flex flex-col items-center gap-2">
+                                    <div
+                                        className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer h-40 flex flex-col items-center justify-center ${isDragging
+                                            ? 'border-[#00B0C8] bg-blue-50'
+                                            : 'border-gray-300 hover:border-gray-400'
+                                            }`}
+                                        onClick={handleImageClick}
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={handleDrop}
+                                    >
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                        />
+                                        {imagePreview ? (
+                                            <div className="relative h-full w-full flex items-center justify-center">
+                                                <img
+                                                    src={imagePreview}
+                                                    alt="Previsualització del logotip"
+                                                    className="max-h-full max-w-full object-contain"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRemoveImage}
+                                                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                                                >
+                                                    {/* You may need to import FiX from react-icons/fi */}
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {/* You may need to import FiImage from react-icons/fi */}
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect width="20" height="14" x="2" y="5" rx="2" /><circle cx="8.5" cy="11.5" r="1.5" /><path d="M21 19l-5.5-5.5a2 2 0 0 0-2.8 0L3 19" /></svg>
+                                                <span className="text-sm text-gray-500">
+                                                    Arrossega i deixa anar una imatge o fes clic per seleccionar
+                                                </span>
+                                                <span className="text-xs text-gray-400 mt-1">
+                                                    PNG, JPG, GIF fins a 5MB
+                                                </span>
+                                            </>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowImageSelector(true)}
+                                        className="w-full px-4 py-2 text-white text-sm rounded-md bg-[#00B0C8] hover:bg-[#008A9B]"
+                                    >
+                                        Selecciona existent
+                                    </button>
+                                </div>
+                                {showImageSelector && (
+                                    <ImageSelector
+                                        onSelect={(url) => {
+                                            setEditingCarrier(prev => ({ ...prev, logo: url }));
+                                            setImagePreview(url);
+                                            setShowImageSelector(false);
+                                        }}
+                                        onClose={() => setShowImageSelector(false)}
+                                    />
+                                )}
                             </div>
+                            {/* End logo image upload/selector */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ca' ? 'Missatge de Retard' : 'Mensaje de Retraso'}</label>
                                 <input
@@ -302,7 +411,7 @@ export default function TransportistasTab() {
                                     step="0.01"
                                 />
                             </div>
-                            <div>
+                            {/* <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ca' ? 'Pes mínim per enviament gratuït (kg)' : 'Mínimo peso para envío gratis (kg)'}</label>
                                 <input
                                     type="number"
@@ -311,7 +420,7 @@ export default function TransportistasTab() {
                                     className="border border-gray-200 rounded px-3 py-2 w-full"
                                     step="0.1"
                                 />
-                            </div>
+                            </div> */}
                         </div>
                         <div className="mt-6 flex justify-end space-x-3">
                             <button

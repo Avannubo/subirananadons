@@ -2,13 +2,13 @@
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import Header from '@/components/landing/header';
-import Footer from '@/components/landing/footer'; 
+import Footer from '@/components/landing/footer';
 import { useState, useEffect } from 'react';
 
 export default function CookiesPage() {
     const t = useTranslations('CookiesPage');
-        const [bannerUrl, setBannerImage] = useState(null);
-    
+    const [bannerUrl, setBannerImage] = useState(null);
+
 
     useEffect(() => {
         const fetchBanner = async () => {
@@ -25,14 +25,14 @@ export default function CookiesPage() {
         };
         fetchBanner();
     }, []);
-    
+
 
     return (
         <>
             <Header />
             {bannerUrl ? (
                 <div className="relative w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl overflow-hidden shadow-md">
-                    <Image
+                    <img
                         src={bannerUrl}
                         alt="bannerUrl"
                         fill

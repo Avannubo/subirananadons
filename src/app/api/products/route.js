@@ -46,7 +46,16 @@ export async function GET(request) {
                 }
             }
             if (brand) {
-                // ...existing code... (brand filter logic remains, but can be removed if not needed)
+                // Filter by brand ObjectId if valid
+                if (/^[a-f\d]{24}$/i.test(brand)) {
+                    query.brand = brand;
+                } else {
+                    // fallback: filter by brand name (case-insensitive)
+                    query.$or = query.$or || [];
+                    query.$or.push({
+                        'brand.name': { $regex: brand, $options: 'i' }
+                    });
+                }
             }
         } if (status) query.status = status;
         // Low stock filter

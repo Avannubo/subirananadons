@@ -4,22 +4,19 @@ import { FiEye, FiTrash2, FiEdit } from 'react-icons/fi';
 import { FaRegFilePdf } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import Pagination from '../shared/Pagination';
-
-import OrderDeleteModal from './OrderDeleteModal';
-import OrderEditModal from './OrderEditModal';
-import OrderViewModal from './OrderViewModal';
+import Pagination from '@/components/admin/shared/Pagination';
+import OrderDeleteModal from '@/components/admin/orders/OrderDeleteModal';
+import OrderEditModal from '@/components/admin/orders/OrderEditModal';
+import OrderViewModal from '@/components/admin/orders/OrderViewModal';
 export default function OrdersTable({
     orders,
-    filters,
-    setFilters,
+    filters, 
     userRole = 'user',
     onStatusChange,
     onDelete,
     pagination,
     onPageChange,
-    onLimitChange,
-    showPagination
+    onLimitChange, 
 }) {
     const [selectedOrders, setSelectedOrders] = useState([]);
     // Locale detection (default to 'ca')
@@ -200,18 +197,7 @@ export default function OrdersTable({
                     setBulkStatusValue("");
                 });
         }
-    };
-    const toggleStatusDropdown = (id) => {
-        if (statusDropdown === id) {
-            setStatusDropdown(null);
-        } else {
-            setStatusDropdown(id);
-        }
-    };
-    const changeOrderStatus = (id, newStatus) => {
-        onStatusChange(id, newStatus);
-        setStatusDropdown(null);
-    };
+    }; 
     // View order details
     const handleViewOrder = (order) => {
         setSelectedOrder(order);
@@ -354,8 +340,8 @@ export default function OrdersTable({
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {filteredOrders.length > 0 ? (
-                            filteredOrders.map((order, index) => (
+                        {orders.length > 0 ? (
+                            orders.map((order, index) => (
                                 <tr key={order.id} className="hover:bg-gray-50">
                                     {userRole === 'admin' && (
                                         <td className="px-4 py-4">

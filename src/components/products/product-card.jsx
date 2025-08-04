@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
 import React from 'react';
 import { useLocale } from 'next-intl';
-import { getTranslatedField } from '@/lib/getTranslatedField'; 
+import { getTranslatedField } from '@/lib/getTranslatedField';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useSession } from 'next-auth/react';
 import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
@@ -102,17 +102,15 @@ export default function ProductCard({
         >
             <Link href={productUrl} className="w-full flex flex-col items-center">
                 <div className="relative w-full h-64 mb-4">
-                    <Image
+                    <img
                         src={currentImageUrl}
                         alt={product.name.ca || product.name.es || product.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="transition-opacity duration-300 ease-in-out rounded-lg object-contain"
+                        className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
                     />
                     {/* Hover Overlay Buttons - Grid View */}
                     <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 px-3 py-2 transition-all duration-300 z-10">
                         <HoverButton onClick={handleAddToCart}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         </HoverButton>
                         <HoverButton onClick={(e) => {
                             e.preventDefault();
@@ -120,7 +118,7 @@ export default function ProductCard({
                             setIsHovered(false);
                             onQuickViewClick(product);
                         }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         </HoverButton>
                         <HoverButton onClick={(e) => {
                             e.preventDefault();
@@ -128,7 +126,7 @@ export default function ProductCard({
                             setIsHovered(false);
                             setShowBirthListModal(true);
                         }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                         </HoverButton>
@@ -151,13 +149,11 @@ export default function ProductCard({
             onMouseLeave={() => setIsHovered(false)}
         >
             <Link href={productUrl} className="flex flex-row w-full">
-                <div className="relative w-1/4 h-40 mr-4 flex-shrink-0">
-                    <Image
+                <div className="relative w-1/4 h-60 mr-4 flex-shrink-0">
+                    <img
                         src={currentImageUrl}
                         alt={translatedName}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="transition-opacity duration-300 ease-in-out rounded-lg object-contain"
+                        className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
                     />
                 </div>
                 <div className="flex flex-col justify-start w-3/4">
@@ -170,7 +166,7 @@ export default function ProductCard({
                     {/* Action Icons Below Text - List View */}
                     <div className="flex items-center justify-start space-x-3 mt-2">
                         <HoverButton onClick={handleAddToCart}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         </HoverButton>
                         <HoverButton onClick={(e) => {
                             e.preventDefault();
@@ -178,7 +174,7 @@ export default function ProductCard({
                             setIsHovered(false);
                             onQuickViewClick(product);
                         }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         </HoverButton>
                         <HoverButton
                             onClick={(e) => {
@@ -187,7 +183,7 @@ export default function ProductCard({
                                 setIsHovered(false);
                                 setShowBirthListModal(true);
                             }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                         </HoverButton>

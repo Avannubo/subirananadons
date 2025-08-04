@@ -37,7 +37,7 @@ export function ClientStatsProvider({ children, refreshInterval = 30000 }) {
                 throw new Error(data.message || 'Failed to fetch client stats');
             }
 
-            // Check if data has changed
+            //Check if data has changed
             const hasChanged = JSON.stringify(data.stats) !== JSON.stringify(stats);
 
             if (hasChanged) {

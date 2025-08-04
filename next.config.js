@@ -5,7 +5,7 @@ const withNextIntl = createNextIntlPlugin();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['res.cloudinary.com', 'subirananadons.com'],
+        domains: ['res.cloudinary.com', 'subirananadons.com, subirana.avannubo.net'],
         remotePatterns: [
             {
                 protocol: 'https',

@@ -142,7 +142,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                     <div className="flex items-center">
                                         <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden mr-3">
                                             {item.product.image && (
-                                                <Image
+                                                <img
                                                     src={item.product.image}
                                                     alt={getProductName(item.product)}
                                                     width={40}
@@ -226,7 +226,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                     <div className="flex-1">
                                         {product.image && (
                                             <div className=" bg-white overflow-hidden">
-                                                <Image
+                                                <img
                                                     src={product.image}
                                                     alt={getProductName(product)}
                                                     width={300}

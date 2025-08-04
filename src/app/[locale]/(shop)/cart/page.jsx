@@ -504,10 +504,10 @@ export default function CartPage() {
                                         {regularItems.map((item, index) => (
                                             <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
                                                 <div className="relative w-20 h-20">
-                                                    <Image
+                                                    <img
                                                         src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
                                                         alt={item.name || 'Producto'}
-                                                        fill
+                                                        fill="true"
                                                         className="object-contain rounded-md z-0"
                                                         onError={(e) => {
                                                             e.target.src = '/assets/images/Screenshot_4.png';
@@ -533,7 +533,7 @@ export default function CartPage() {
                                                 <div className="flex items-center gap-2">
                                                     <button
                                                         onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
+                                                        className="cursor-pointer w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
                                                         disabled={item.quantity <= 1}
                                                     >
                                                         -
@@ -541,7 +541,7 @@ export default function CartPage() {
                                                     <span className="w-8 text-center">{item.quantity}</span>
                                                     <button
                                                         onClick={() => updateQuantity(item.id, Math.min(99, item.quantity + 1))}
-                                                        className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
+                                                        className="cursor-pointer w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-100"
                                                         disabled={item.quantity >= 99}
                                                     >
                                                         +
@@ -549,7 +549,7 @@ export default function CartPage() {
                                                 </div>
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}
-                                                    className="text-red-500 hover:text-red-700"
+                                                    className="text-red-500 hover:text-red-700 cursor-pointer"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -569,10 +569,10 @@ export default function CartPage() {
                                         {giftItems.map((item, index) => (
                                             <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
                                                 <div className="relative w-20 h-20">
-                                                    <Image
+                                                    <img
                                                         src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
                                                         alt={item.name || 'Producto'}
-                                                        fill
+                                                        fill="true"
                                                         className="object-contain rounded-md"
                                                         onError={(e) => {
                                                             e.target.src = '/assets/images/Screenshot_4.png';
@@ -600,7 +600,7 @@ export default function CartPage() {
                                                         <div className="flex items-center space-x-2 justify-between">                                            <p className="text-sm text-gray-500">Cantidad: 1</p>
                                                             <button
                                                                 onClick={() => removeFromCart(item.id)}
-                                                                className="text-sm text-red-600 hover:text-red-900"
+                                                                className="cursor-pointer text-sm text-red-600 hover:text-red-900"
                                                             >
                                                                 {t('remove')}
                                                             </button>
@@ -744,7 +744,7 @@ export default function CartPage() {
                                                 }}
                                                 type="button"
                                                 disabled={isSubmitting}
-                                                className={`w-full ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#0090a8]'} text-white py-3 px-6 rounded-md transition-colors duration-300`}
+                                                className={`w-full ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#0090a8] cursor-pointer'} text-white py-3 px-6 rounded-md transition-colors duration-300`}
                                             >
                                                 {isSubmitting ? t('processing') : t('checkout')}
                                             </button>
