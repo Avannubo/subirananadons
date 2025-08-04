@@ -23,20 +23,17 @@ export default function ProductSlider({
     }
 }) {
     const [showBirthListModal, setShowBirthListModal] = useState(false);
-
     const [hoveredProduct, setHoveredProduct] = useState(null);
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
     const swiperRef = useRef(null);
     const [viewMode, setViewMode] = useState('grid');
-
     const handleOpenQuickView = (product) => {
         setQuickViewProduct(product);
     };
     const handleCloseQuickView = () => {
         setQuickViewProduct(null);
     };
-
     const handleOpenBirthListSelectModal = (product) => {
         setBirthListProduct(product);
     };
@@ -93,7 +90,7 @@ export default function ProductSlider({
                         }}
                         modules={[Pagination, Navigation]}
                         breakpoints={{
-                            320: { slidesPerView: 1 },
+                            0: { slidesPerView: slidesPerView.mobile || 1 },
                             640: { slidesPerView: slidesPerView.tablet || 3 },
                             1024: { slidesPerView: slidesPerView.desktop || 4 },
                         }}
@@ -132,8 +129,6 @@ export default function ProductSlider({
                     onClose={handleCloseQuickView}
                 />
             )}
-
-
             {/* Render Birth List Modal with backdrop and scroll lock */}
             {showBirthListModal && (
                 <BirthListModalWrapper
@@ -143,8 +138,6 @@ export default function ProductSlider({
                     userId={session?.user?.id}
                 />
             )}
-
-            {/* Add custom styles for pagination bullets */}
             <style jsx global>{`
                 .custom-bullet {
                     width: 8px;

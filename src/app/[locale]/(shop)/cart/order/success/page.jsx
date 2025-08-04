@@ -195,16 +195,16 @@ export default function CartSuccessPage() {
                         <p className="mb-2">{t('thanks')}</p>
                         {/* <p className="mb-2 font-semibold">{t('total', {amount: order.totalAmount})}</p> */}
                         <div className="flex gap-4 mt-6">
-                            <button onClick={handleDownloadInvoice} className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors">{t('downloadInvoice')}</button>
-                            <button onClick={handleSendEmail} className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors">{t('sendEmail')}</button>
+                            <button onClick={handleDownloadInvoice} className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">{t('downloadInvoice')}</button>
+                            <button onClick={handleSendEmail} className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">{t('sendEmail')}</button>
                         </div>
                     </>
                 ) : (
                     <p>{t('notFound')}</p>
                 )}
                 <div className="flex gap-4 mt-6">
-                    <Link href="/products" className="bg-[#00B0C8] text-white px-6 py-2 rounded-md">{t('continueShopping')}</Link>
-                    <Link href="/" className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md">{t('home')}</Link>
+                    <Link href="/products" className="bg-[#00B0C8] text-white px-6 py-2 rounded-md cursor-pointer">{t('continueShopping')}</Link>
+                    <Link href="/" className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md cursor-pointer">{t('home')}</Link>
                 </div>
             </div>
         </ShopLayout>

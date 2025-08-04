@@ -66,9 +66,8 @@ const ImageGallery = () => {
                                     <img
                                         src={item.imageUrl}
                                         alt={title}
-                                        fill
                                         className="object-cover transition-transform duration-500 group-hover:scale-105 w-full h-full"
-                                        unoptimized={item.imageUrl.startsWith('data:image')}
+                                        {...(item.imageUrl.startsWith('data:image') ? { unoptimized: 'true' } : {})}
                                     />
                                     <div className="absolute inset-0 bg-black/20 flex items-end p-3 md:p-6 transition-colors duration-300 group-hover:bg-black/30">
                                         <div className="text-white w-full">
@@ -116,9 +115,8 @@ const ImageGallery = () => {
                                     <img
                                         src={item.imageUrl}
                                         alt={title}
-                                        fill
                                         className="object-cover rounded-lg transition-transform duration-500 group-hover:scale-105 w-full h-full"
-                                        unoptimized={item.imageUrl.startsWith('data:image')}
+                                        {...(item.imageUrl.startsWith('data:image') ? { unoptimized: 'true' } : {})}
                                     />
                                     <div className="absolute inset-0 bg-black/20 flex rounded-lg items-end p-3 md:p-6 group-hover:bg-black/30 transition-colors duration-300">
                                         <div className="text-white w-full">

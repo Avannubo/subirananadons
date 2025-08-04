@@ -2,13 +2,12 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import AuthCheck from '@/components/auth/AuthCheck';
-import AdminLayout from '@/components/Layouts/admin-layout'; 
-// import OrdersTable from '@/components/admin/orders/OrdersTable'; 
+import AdminLayout from '@/components/Layouts/admin-layout';
+import OrdersTable from '@/components/admin/orders/OrdersTable'; 
 import { useOrders } from '@/hooks/useOrders';
-
 export default function PedidosPage() {
     const { data: session, status } = useSession();
-    const userRole = session?.user?.role || 'user';  
+    const userRole = session?.user?.role || 'user';
     useEffect(() => {
         console.log('Pedidos Page - Session Status:', status);
         console.log('Pedidos Page - User Role:', userRole);
@@ -19,7 +18,7 @@ export default function PedidosPage() {
     if (typeof window !== 'undefined' && window.navigator) {
         const lang = window.navigator.language || window.navigator.userLanguage;
         if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
-    } 
+    }
     const {
         orders,
         loading,
@@ -41,7 +40,7 @@ export default function PedidosPage() {
         searchPayment: ''
     });
     // Translations
-    const translations = {  
+    const translations = {
         ca: {
             admin: 'Gestió de Comandes',
             user: 'Les Meves Comandes',
@@ -104,15 +103,13 @@ export default function PedidosPage() {
             refresh: 'Actualizar datos',
             errorExport: 'Error al exportar los pedidos: '
         }
-    }; 
+    };
     const heading = userRole === 'admin' ? translations[locale].admin : translations[locale].user;
-
     useEffect(() => {
         console.log('Pedidos Page - Session Status:', status);
         console.log('Pedidos Page - User Role:', userRole);
         console.log('Pedidos Page - Session Data:', session);
     }, [session, status, userRole]);
-
     return (
         <AuthCheck>
             <AdminLayout>
@@ -122,12 +119,11 @@ export default function PedidosPage() {
                     </h1>
                     <div>
                         {/* filters searcg */}
-</div>
-                
-                    {/* {loading ? (
+                    </div>
+                    {loading ? (
                         <div className="py-20 text-center">
                             <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
-                            <p className="mt-3 text-gray-600">{t.loading}</p>
+                            <p className="mt-3 text-gray-600">loading...</p>
                         </div>
                     ) : (
                         <OrdersTable
@@ -142,7 +138,7 @@ export default function PedidosPage() {
                             onPageChange={setCurrentPage}
                             onLimitChange={setLimit}
                         />
-                    )} */}
+                    )}
                 </div>
             </AdminLayout>
         </AuthCheck >

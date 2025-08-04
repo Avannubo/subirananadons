@@ -431,30 +431,29 @@ export default function Page() {
         return pages;
     };
     // Flatten all categories for mobile selector (all leaves, all levels)
-    function flattenCategoriesFromDb(categories, parentPath = [], locale = 'es') {
+    // For mobile: show only unique category names (no path, just the name)
+    function flattenCategoriesForMobile(categories, locale = 'es') {
         let flat = [];
         for (const cat of categories) {
             const catLabel = getCategoryDisplayName(cat, locale);
-            const currentPath = [...parentPath, { _id: cat._id, label: catLabel }];
-            if (!cat.children || cat.children.length === 0) {
-                flat.push({
-                    label: currentPath.map(p => p.label).join(' > '),
-                    value: cat._id,
-                    path: currentPath
-                });
-            } else {
-                // Also allow non-leaf categories to be selectable in mobile
-                flat.push({
-                    label: currentPath.map(p => p.label).join(' > '),
-                    value: cat._id,
-                    path: currentPath
-                });
-                flat = flat.concat(flattenCategoriesFromDb(cat.children, currentPath, locale));
+            flat.push({
+                label: catLabel,
+                value: cat._id,
+                path: [{ _id: cat._id, label: catLabel }]
+            });
+            if (cat.children && cat.children.length > 0) {
+                flat = flat.concat(flattenCategoriesForMobile(cat.children, locale));
             }
         }
-        return flat;
+        // Remove duplicates by label (in case of repeated names)
+        const seen = new Set();
+        return flat.filter(cat => {
+            if (seen.has(cat.label)) return false;
+            seen.add(cat.label);
+            return true;
+        });
     }
-    const allCategories = useMemo(() => flattenCategoriesFromDb(categories, [{ _id: 'root', label: 'Productes' }], locale), [categories, locale]);
+    const allCategories = useMemo(() => flattenCategoriesForMobile(categories, locale), [categories, locale]);
     // Handler for mobile dropdown change
     const handleMobileCategoryChange = (e) => {
         const selectedId = e.target.value;
@@ -594,13 +593,13 @@ export default function Page() {
                                 <div className="flex items-center gap-1">
                                     <button
                                         onClick={() => setViewMode('grid')}
-                                        className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                        className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black cursor-pointer`}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                                     </button>
                                     <button
                                         onClick={() => setViewMode('list')}
-                                        className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                        className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black cursor-pointer`}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                                     </button>
@@ -644,13 +643,13 @@ export default function Page() {
                                     {/* Grid/List view toggle icons */}
                                     <button
                                         onClick={() => setViewMode('grid')}
-                                        className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                        className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} hover:text-black cursor-pointer`}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                                     </button>
                                     <button
                                         onClick={() => setViewMode('list')}
-                                        className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black`}
+                                        className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} hover:text-black cursor-pointer`}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                                     </button>

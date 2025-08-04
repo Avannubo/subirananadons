@@ -25,13 +25,13 @@ export function Providers({ children }) {
         <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={true}>
             <UserProvider>
                 <CartProvider>
-                    <StatsProvider>
-                        <ClientStatsProvider>
+                    {/* <StatsProvider> */}
+                        {/* <ClientStatsProvider> */}
                             <ListStatsWithAuth>
                                 {children}
                             </ListStatsWithAuth>
-                        </ClientStatsProvider>
-                    </StatsProvider>
+                        {/* </ClientStatsProvider> */}
+                    {/* </StatsProvider> */}
                 </CartProvider>
             </UserProvider>
             <Toaster position="bottom-right" />

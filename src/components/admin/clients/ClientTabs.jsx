@@ -76,7 +76,7 @@ export default function ClientsTabs() {
     };
     const t = translations[locale];
     const tabs = t.tabs;
-    const { refreshStats } = useClientStats();
+    // const { refreshStats } = useClientStats();
     const [activeTab, setActiveTab] = useState('Todos');
     const [filters, setFilters] = useState({
         searchId: '',
@@ -206,7 +206,7 @@ export default function ClientsTabs() {
     // Refresh data
     const refreshData = async () => {
         await fetchClients();
-        await refreshStats();
+        // await refreshStats();
         toast.success(t.refreshSuccess);
     };
 

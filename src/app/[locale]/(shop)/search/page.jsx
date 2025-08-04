@@ -273,7 +273,7 @@ export default function SearchPage() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full focus:bg-white p-2 bg-[#FFFFFF80] rounded-xl border border-gray-200 focus:border-[#00B0C8] focus:outline-none text-base sm:text-lg shadow-sm"
                         />
-                        <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                        <button className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer">
                             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
@@ -282,7 +282,7 @@ export default function SearchPage() {
                     {/* Filter Button for mobile */}
                     <div className="md:hidden flex justify-end">
                         <button
-                            className="px-4 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition"
+                            className="px-4 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition cursor-pointer"
                             onClick={() => setIsFilterModalOpen(true)}
                         >
                             {t('filterButton')}
@@ -418,7 +418,7 @@ export default function SearchPage() {
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000050] bg-opacity-40">
                             <div className="bg-white rounded-lg p-6 w-11/12 max-w-sm relative animate-fadeInUp">
                                 <button
-                                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold cursor-pointer"
                                     onClick={() => setIsFilterModalOpen(false)}
                                     aria-label="Cerrar"
                                 >
@@ -514,7 +514,7 @@ export default function SearchPage() {
                                         </div>
                                     </div>
                                     <button
-                                        className="w-full mt-2 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition"
+                                        className="w-full mt-2 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition cursor-pointer"
                                         onClick={() => setIsFilterModalOpen(false)}
                                     >
                                         Aplicar Filtros
@@ -540,7 +540,7 @@ export default function SearchPage() {
                             <div className="flex items-center space-x-2">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'}`}
+                                    className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} cursor-pointer`}
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -548,7 +548,7 @@ export default function SearchPage() {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'}`}
+                                    className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} cursor-pointer`}
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />

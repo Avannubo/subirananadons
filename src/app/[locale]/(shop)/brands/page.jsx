@@ -336,7 +336,7 @@ export default function BrandsPage() {
                                                 className={`w-full text-left px-4 py-2 transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-3 ${selectedBrandId === 'all'
                                                     ? 'bg-gray-50 font-medium text-[#00B0C8]'
                                                     : ''
-                                                    }`}
+                                                    } cursor-pointer`}
                                             >
                                                 <div className="relative">
                                                     <div className="w-10 h-10 rounded-lg bg-gray-100 bg-opacity-10 flex items-center justify-center">
@@ -368,10 +368,10 @@ export default function BrandsPage() {
                                                 <button
                                                     onClick={() => handleBrandSelect(brand._id)}
                                                     data-brand={brand._id}
-                                                    className={`w-full text-left px-4 py-2 transition-colors cursor-pointer hover:bg-gray-50 flex items-center gap-3 ${selectedBrandId === brand._id
+                                                    className={`w-full text-left px-4 py-2 transition-colors hover:bg-gray-50 flex items-center gap-3 ${selectedBrandId === brand._id
                                                         ? 'bg-gray-50 font-medium text-[#00B0C8]'
                                                         : ''
-                                                        }`}
+                                                        } cursor-pointer`}
                                                 >
                                                     <div className="relative">
                                                         {brand.logo ? (
@@ -428,7 +428,7 @@ export default function BrandsPage() {
                             <div className="flex items-center">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 cursor-pointer ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'}`}
+                                    className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'} cursor-pointer`}
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -436,7 +436,7 @@ export default function BrandsPage() {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 cursor-pointer ${viewMode === 'list' ? 'text-black' : 'text-gray-400'}`}
+                                    className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'} cursor-pointer`}
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -540,7 +540,7 @@ export default function BrandsPage() {
                                     <button
                                         onClick={handlePrevPage}
                                         disabled={currentPage === 1}
-                                        className={`p-2 cursor-pointer ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'}`}
+                                        className={`p-2 ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'} cursor-pointer`}
                                         aria-label={t('prevPageAria')}
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -554,10 +554,9 @@ export default function BrandsPage() {
                                             <button
                                                 key={`page-${page}`}
                                                 onClick={() => goToPage(page)}
-                                                    className={`min-w-[40px] px-4 py-2 cursor-pointer ${currentPage === page
+                                                className={`min-w-[40px] px-4 py-2 ${currentPage === page
                                                     ? 'bg-[#00B0C8] text-white font-medium'
-                                                    : 'text-gray-700 hover:bg-gray-50'
-                                                    }`}
+                                                    : 'text-gray-700 hover:bg-gray-50'} cursor-pointer`}
                                             >
                                                 {page}
                                             </button>
@@ -566,7 +565,7 @@ export default function BrandsPage() {
                                     <button
                                         onClick={handleNextPage}
                                         disabled={currentPage === totalPages}
-                                            className={`p-2 cursor-pointer ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'}`}
+                                        className={`p-2 ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'} cursor-pointer`}
                                         aria-label={t('nextPageAria')}
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

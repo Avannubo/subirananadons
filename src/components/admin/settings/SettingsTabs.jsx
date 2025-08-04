@@ -18,7 +18,7 @@ export default function SettingsTabs() {
         { id: 'slider', label: locale === 'ca' ? 'Slider Portada' : 'Slider Portada' },
         { id: 'images', label: locale === 'ca' ? 'Ofertes' : 'Ofertas' },
         { id: 'banner', label: locale === 'ca' ? 'Banner' : 'Banner' },
-        { id: 'recomendation', label: locale === 'ca' ? 'Recomanacións' : 'Recomendaciones' },
+        { id: 'recomendation', label: locale === 'ca' ? 'Recomanacions' : 'Recomendaciones' },
         { id: 'politicas', label: locale === 'ca' ? 'Textos Legals' : 'Textos Legales' },
         { id: 'parameters', label: locale === 'ca' ? 'Paràmetres' : 'Parametros' },
         // { id: 'rendimiento', label: locale === 'ca' ? 'Rendiment' : 'Rendimiento' },

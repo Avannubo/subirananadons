@@ -176,7 +176,7 @@ export default function BirthListPage({ params }) {
                         </svg>
                         <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('errorLoadListTitle')}</h3>
                         <p className="text-gray-500 mb-6">{t('errorLoadListDesc', { error })}</p>
-                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors">
+                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>
                     </div>
@@ -194,7 +194,7 @@ export default function BirthListPage({ params }) {
                         </svg>
                         <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('listNotFoundTitle')}</h3>
                         <p className="text-gray-500 mb-6">{t('listNotFoundDesc')}</p>
-                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors">
+                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>
                     </div>

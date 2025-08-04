@@ -88,8 +88,7 @@ export default function Footer() {
                                 width={320}
                                 height={60}
                             />
-                        </div>
-                        {/* Middle Links Column */}
+                        </div> 
                         <div className="flex flex-row justify-center md:justify-end items-center w-full md:w-auto mt-6 md:mt-0">
                             <ul className="space-y-2 md:space-y-2 text-center md:text-left w-full">
                                 <li><Link href="/terms" className="hover:text-[#00B0C8] font-medium transition-colors cursor-pointer">{t('terms')}</Link></li>
@@ -102,27 +101,10 @@ export default function Footer() {
                             <img
                                 src="/assets/images/pago.png"
                                 alt="footer logo"
-                                width={320}
-                                height={60}
+                                width={200}
+                                height={40}
                             />
-                        </div>
-                        {/* Right Links & Contact Column */}
-                        {/* <div className="flex flex-col items-center md:items-end">
-                            <ul className="space-y-2 md:space-y-3 w-full text-center md:text-right">
-                                <li className="flex items-center justify-center md:justify-end gap-2">
-                                    <Phone size={18} className="text-[#00B0C8]" />
-                                    <span className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('phone')}</span>
-                                </li>
-                                <li className="flex items-center justify-center md:justify-end gap-2 mt-2 md:mt-4">
-                                    <Mail size={18} className="text-[#00B0C8]" />
-                                    <Link href="mailto:info@example.com" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('email')}</Link>
-                                </li>
-                                <li className="flex items-center justify-center md:justify-end gap-2 mt-2 md:mt-4">
-                                    <ExternalLink size={18} className="text-[#00B0C8]" />
-                                    <Link href="/contact" className="hover:text-[#00B0C8] transition-colors cursor-pointer">{t('contact')}</Link>
-                                </li>
-                            </ul>
-                        </div> */}
+                        </div> 
                     </div>
                 </div>
             </div>

@@ -1,24 +1,21 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react';
-import ShopLayout from "@/components/Layouts/shop-layout";
-
-
-import Image from "next/image";
+import ShopLayout from "@/components/Layouts/shop-layout"; 
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
-import { ShoppingCart, Mail } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { OrderService } from '@/services/OrderService';
-import { useTranslations } from 'next-intl';
+import { ShoppingCart } from 'lucide-react';
+import dynamic from 'next/dynamic'; 
+import { useTranslations } from 'next-intl'; 
 
 const ModalTPV = dynamic(() => import('@/components/cart/ModalTPV'), { ssr: false });
 
 export default function CartPage() {
     const t = useTranslations('CartPage');
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
+    console.log('Cart items:', cartItems);
     const { user, loading: userLoading } = useUser();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
@@ -45,6 +42,7 @@ export default function CartPage() {
 
     // Separate regular and gift items once cartItems is available
     const regularItems = useMemo(() => cartItems?.filter(item => item.type !== 'gift') ?? [], [cartItems]);
+
     const giftItems = useMemo(() => cartItems?.filter(item => item.type === 'gift') ?? [], [cartItems]);
     // Check if cart has any gift items
     const hasGiftItems = useMemo(() => {
@@ -520,8 +518,8 @@ export default function CartPage() {
                                                     )}
                                                 </div>
                                                 <div className="flex-grow">
-                                                    <h3 className="font-medium">{item.name}</h3>
-                                                    <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
+                                                    <h3 className="font-medium">{typeof item.name === 'object' ?  item.name.es || item.name.ca : item.name}</h3>
+                                                    {/* <p className="text-gray-500 text-sm">{item.brand.name} - {typeof item.category === 'object' ? item.category.name.es || item.category.name.ca : item.category.name}</p> */}
                                                     <p className="text-[#00B0C8] font-medium">{item.price}€</p>
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
@@ -585,8 +583,8 @@ export default function CartPage() {
                                                     )}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <h3 className="font-medium">{item.name}</h3>
-                                                    <p className="text-gray-500 text-sm">{item.brand} - {item.category}</p>
+                                                    <h3 className="font-medium">{typeof item.name === 'object' ? item.name[t('locale')] || item.name['es'] || item.name['ca'] : item.name}</h3>
+                                                    <p className="text-gray-500 text-sm">{item.brand} - {typeof item.category === 'object' ? item.category[t('locale')] || item.category['es'] || item.category['ca'] : item.category}</p>
                                                     <p className="text-[#00B0C8] font-medium">{item.price}€</p>
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">

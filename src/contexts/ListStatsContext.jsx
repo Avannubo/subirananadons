@@ -188,9 +188,9 @@ export function ListStatsProvider({ children, refreshInterval = 30000, userRole 
 export function useListStats() {
     const context = useContext(ListStatsContext);
 
-    if (!context) {
-        throw new Error('useListStats must be used within a ListStatsProvider');
-    }
+    // if (!context) {
+    //     throw new Error('useListStats must be used within a ListStatsProvider');
+    // }
 
     return context;
 } 

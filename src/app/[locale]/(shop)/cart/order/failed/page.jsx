@@ -11,8 +11,8 @@ export default function CartFailedPage() {
                 <h1 className="text-3xl font-bold text-red-600 mb-4">{t('title')}</h1>
                 <p className="mb-2">{t('description')}</p>
                 <div className="flex gap-4 mt-6">
-                    <Link href="/cart" className="bg-[#00B0C8] text-white px-6 py-2 rounded-md">{t('backToCart')}</Link>
-                    <Link href="/products" className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md">{t('continueShopping')}</Link>
+                    <Link href="/cart" className="bg-[#00B0C8] text-white px-6 py-2 rounded-md cursor-pointer">{t('backToCart')}</Link>
+                    <Link href="/products" className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md cursor-pointer">{t('continueShopping')}</Link>
                 </div>
             </div>
         </ShopLayout>

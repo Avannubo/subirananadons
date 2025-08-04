@@ -12,7 +12,7 @@ export async function GET(request, { params }) {
 
         // Validate MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: 'Invalid category ID' }, { status: 400 });
+            return NextResponse.json({ error: 'ID de categoria no vàlid' }, { status: 400 });
         }
 
         await dbConnect();
@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
         const category = await Category.findById(id);
 
         if (!category) {
-            return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Categoria no trobada' }, { status: 404 });
         }
 
         // Check if we need to include children
@@ -37,7 +37,7 @@ export async function GET(request, { params }) {
         return NextResponse.json(category);
     } catch (error) {
         console.error('Error fetching category:', error);
-        return NextResponse.json({ error: 'Failed to fetch category' }, { status: 500 });
+        return NextResponse.json({ error: 'No s\'ha pogut obtenir la categoria' }, { status: 500 });
     }
 }
 
@@ -48,14 +48,14 @@ export async function PUT(request, { params }) {
 
         // Check if user is admin
         if (!session?.user || session.user.role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
+            return NextResponse.json({ error: 'No autoritzat - Cal accés d\'administrador' }, { status: 401 });
         }
 
         const { id } = params;
 
         // Validate MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: 'Invalid category ID' }, { status: 400 });
+            return NextResponse.json({ error: 'ID de categoria no vàlid' }, { status: 400 });
         }
 
         await dbConnect();
@@ -66,7 +66,7 @@ export async function PUT(request, { params }) {
         const category = await Category.findById(id);
 
         if (!category) {
-            return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Categoria no trobada' }, { status: 404 });
         }
 
         // Check for parent changes
@@ -78,7 +78,7 @@ export async function PUT(request, { params }) {
                     const parentCategory = await Category.findById(body.parent);
 
                     if (!parentCategory) {
-                        return NextResponse.json({ error: 'Parent category not found' }, { status: 400 });
+                        return NextResponse.json({ error: 'Categoria pare no trobada' }, { status: 400 });
                     }
 
                     // Update level based on new parent
@@ -101,10 +101,10 @@ export async function PUT(request, { params }) {
         console.error('Error updating category:', error);
 
         if (error.code === 11000) {
-            return NextResponse.json({ error: 'Category with this slug already exists' }, { status: 400 });
+            return NextResponse.json({ error: 'Ja existeix una categoria amb aquest slug' }, { status: 400 });
         }
 
-        return NextResponse.json({ error: 'Failed to update category' }, { status: 500 });
+        return NextResponse.json({ error: 'No s\'ha pogut actualitzar la categoria' }, { status: 500 });
     }
 }
 
@@ -115,14 +115,14 @@ export async function DELETE(request, { params }) {
 
         // Check if user is admin
         if (!session?.user || session.user.role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
+            return NextResponse.json({ error: 'No autoritzat - Cal accés d\'administrador' }, { status: 401 });
         }
 
         const { id } = params;
 
         // Validate MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: 'Invalid category ID' }, { status: 400 });
+            return NextResponse.json({ error: 'ID de categoria no vàlid' }, { status: 400 });
         }
 
         await dbConnect();
@@ -131,7 +131,7 @@ export async function DELETE(request, { params }) {
         const category = await Category.findById(id);
 
         if (!category) {
-            return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Categoria no trobada' }, { status: 404 });
         }
 
         // Check if category has children
@@ -139,7 +139,7 @@ export async function DELETE(request, { params }) {
 
         if (childrenCount > 0) {
             return NextResponse.json({
-                error: 'Cannot delete category with subcategories. Delete all subcategories first or reassign them.'
+                error: 'No es pot eliminar una categoria amb subcategories. Elimina primer totes les subcategories o reassigna-les.'
             }, { status: 400 });
         }
 
@@ -149,9 +149,9 @@ export async function DELETE(request, { params }) {
         // Delete the category
         await Category.findByIdAndDelete(id);
 
-        return NextResponse.json({ message: 'Category deleted successfully' });
+        return NextResponse.json({ message: 'Categoria eliminada correctament' });
     } catch (error) {
         console.error('Error deleting category:', error);
-        return NextResponse.json({ error: 'Failed to delete category' }, { status: 500 });
+        return NextResponse.json({ error: 'No s\'ha pogut eliminar la categoria' }, { status: 500 });
     }
 } 

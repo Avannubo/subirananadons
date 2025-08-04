@@ -25,7 +25,7 @@ export default function StockManagement() {
         message: '',
         onConfirm: () => { }
     });
-    const { notifyChange } = useStats();
+    // const { notifyChange } = useStats();
 
     // Fetch products from the API
     const fetchProducts = useCallback(async (page = 1, limit = pagination.limit) => {
@@ -160,11 +160,11 @@ export default function StockManagement() {
                         });
 
                         // Notify stats context about the change
-                        if (notifyChange) {
-                            setTimeout(() => {
-                                notifyChange();
-                            }, 500);
-                        }
+                        // if (notifyChange) {
+                        //     setTimeout(() => {
+                        //         notifyChange();
+                        //     }, 500);
+                        // }
 
                         toast.success('Estoc actualitzat correctament', { id: toastId });
                     } catch (error) {

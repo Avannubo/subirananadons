@@ -142,9 +142,9 @@ export function StatsProvider({ children, refreshInterval = 30000 }) {
 export function useStats() {
     const context = useContext(StatsContext);
 
-    if (!context) {
-        throw new Error('useStats must be used within a StatsProvider');
-    }
+    // if (!context) {
+    //     throw new Error('useStats must be used within a StatsProvider');
+    // }
 
     return context;
 } 
