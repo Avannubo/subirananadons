@@ -724,10 +724,11 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <textarea
                                             id="description-ca"
                                             name="description"
-                                            rows={2}
+                                            rows={6}
                                             value={formData.description.ca}
                                             onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
+                                            style={{ whiteSpace: 'pre-line' }}
                                         />
                                     </div>
                                     <div className="flex-1">
@@ -737,10 +738,11 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         <textarea
                                             id="description-es"
                                             name="description"
-                                            rows={2}
+                                            rows={6}
                                             value={formData.description.es}
                                             onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
+                                            style={{ whiteSpace: 'pre-line' }}
                                         />
                                     </div>
                                 </div>

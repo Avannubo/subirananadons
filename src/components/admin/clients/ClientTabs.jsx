@@ -5,11 +5,8 @@ import ClientsTable from '@/components/admin/clients/ClientTable';
 import ClientModal from '@/components/admin/clients/ClientModal';
 import ClientViewModal from '@/components/admin/clients/ClientViewModal';
 import ConfirmDeleteModal from '@/components/admin/clients/ConfirmDeleteModal';
-import { toast } from 'react-hot-toast';
-import { useClientStats } from '@/contexts/ClientStatsContext';
-import TabNavigation from '@/components/admin/shared/TabNavigation';
+import { toast } from 'react-hot-toast'; 
 import Pagination from '@/components/admin/shared/Pagination';
-
 export default function ClientsTabs() {
     // Locale detection (default to 'ca')
     let locale = 'ca';
@@ -100,55 +97,43 @@ export default function ClientsTabs() {
         totalItems: 0,
         limit: 5
     });
-
     // const tabs = ['Todos', 'Activos', 'Inactivos', 'Newsletter', 'Ofertas'];
-
     // Load clients when component mounts
     useEffect(() => {
         fetchClients();
     }, [activeTab, pagination.currentPage]);
-
     // Calculate status counts
     const statusCounts = {
         [t.tabs[0]]: clients.length,
         [t.tabs[1]]: clients.filter(c => c.active).length,
         [t.tabs[2]]: clients.filter(c => !c.active).length
     };
-
     // Fetch clients from API
     const fetchClients = async () => {
         try {
             setIsLoading(true);
             const queryParams = new URLSearchParams();
-
             // Add pagination parameters
             queryParams.append('page', pagination.currentPage);
             queryParams.append('limit', pagination.limit);
-
             // Add search filters
             if (filters.searchId) queryParams.append('searchId', filters.searchId);
             if (filters.searchName) queryParams.append('searchName', filters.searchName);
             if (filters.searchLastName) queryParams.append('searchLastName', filters.searchLastName);
             if (filters.searchEmail) queryParams.append('searchEmail', filters.searchEmail);
-
             // Add tab filters
             if (activeTab === 'Activos') queryParams.append('active', 'true');
             if (activeTab === 'Inactivos') queryParams.append('active', 'false');
             // if (activeTab === 'Newsletter') queryParams.append('newsletter', 'true');
             // if (activeTab === 'Ofertas') queryParams.append('partnerOffers', 'true');
-
             const url = `/api/clients?${queryParams.toString()}`;
             console.log('Fetching clients with URL:', url);
-
             const response = await fetch(url);
-
             if (!response.ok) {
                 throw new Error('Error fetching clients');
             }
-
             const data = await response.json();
             console.log('API response:', data);
-
             if (data.success) {
                 setClients(data.clients || []);
                 setPagination(data.pagination || {
@@ -167,10 +152,8 @@ export default function ClientsTabs() {
             setIsLoading(false);
         }
     };
-
     // Filter clients - now handled on the server side through API calls
     const filteredClients = clients;
-
     // Handle filter changes
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -179,13 +162,11 @@ export default function ClientsTabs() {
             [name]: value
         }));
     };
-
     // Apply filters
     const applyFilters = () => {
         setPagination(prev => ({ ...prev, currentPage: 1 })); // Reset to first page
         fetchClients();
     };
-
     // Clear all filters
     const clearFilters = () => {
         setFilters({
@@ -197,48 +178,40 @@ export default function ClientsTabs() {
             registrationDateFrom: '',
             registrationDateTo: ''
         });
-
         // Reset page and fetch
         setPagination(prev => ({ ...prev, currentPage: 1 }));
         fetchClients();
     };
-
     // Refresh data
     const refreshData = async () => {
         await fetchClients();
         // await refreshStats();
         toast.success(t.refreshSuccess);
     };
-
     // Handle client view
     const handleViewClient = (client) => {
         setSelectedClient(client);
         setShowViewModal(true);
     };
-
     // Handle client edit
     const handleEditClient = (client) => {
         setSelectedClient(client);
         setShowClientModal(true);
     };
-
     // Handle new client
     const handleAddNewClient = () => {
         setSelectedClient(null);
         setShowClientModal(true);
     };
-
     // Handle client delete
     const handleDeleteClient = (client) => {
         setSelectedClient(client);
         setShowDeleteModal(true);
     };
-
     // Save client (new or edit)
     const handleSaveClient = async (formData) => {
         try {
             let response;
-
             if (selectedClient) {
                 // Edit existing client
                 response = await fetch(`/api/clients/${selectedClient.id}`, {
@@ -258,40 +231,30 @@ export default function ClientsTabs() {
                     body: JSON.stringify(formData),
                 });
             }
-
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.message || 'Operation failed');
             }
-
             // Refresh the client list
             fetchClients();
-
             return data.client;
         } catch (error) {
             console.error('Error saving client:', error);
             throw error;
         }
     };
-
     // Confirm client deletion
     const confirmDeleteClient = async () => {
         if (!selectedClient) return;
-
         setIsDeleting(true);
-
         try {
             const response = await fetch(`/api/clients/${selectedClient.id}`, {
                 method: 'DELETE',
             });
-
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.message || 'Failed to delete client');
             }
-
             // Close modal and refresh data
             setShowDeleteModal(false);
             fetchClients();
@@ -303,7 +266,6 @@ export default function ClientsTabs() {
             setIsDeleting(false);
         }
     };
-
     // Handle pagination change
     const handlePageChange = (newPage) => {
         setPagination(prev => ({
@@ -311,12 +273,10 @@ export default function ClientsTabs() {
             currentPage: newPage
         }));
     };
-
     // Export clients to CSV
     const exportToCSV = () => {
         // Create CSV content
         const headers = t.headers;
-
         const csvContent = [
             headers.join(','),
             ...clients.map(client => [
@@ -327,23 +287,18 @@ export default function ClientsTabs() {
                 client.registrationDate
             ].join(','))
         ].join('\n');
-
         // Create a blob and download link
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-
         link.setAttribute('href', url);
         link.setAttribute('download', `clientes_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
-
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
         toast.success(t.exportSuccess);
     };
-
     return (
         <>
             {/* <TabNavigation
@@ -351,7 +306,6 @@ export default function ClientsTabs() {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
             /> */}
-
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">
@@ -382,7 +336,6 @@ export default function ClientsTabs() {
                         </button>
                     </div>
                 </div>
-
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
@@ -431,7 +384,6 @@ export default function ClientsTabs() {
                             />
                         </div>
                     </div>
-
                     <div className="flex sm:flex-row flex-col justify-start gap-2">
                         <button
                             className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]"
@@ -450,7 +402,6 @@ export default function ClientsTabs() {
                         </button>
                     </div>
                 </div>
-
                 {/* Client data table */}
                 {isLoading ? (
                     <div className="py-20 text-center">
@@ -465,7 +416,6 @@ export default function ClientsTabs() {
                             onDeleteClient={handleDeleteClient}
                             onViewClient={handleViewClient}
                         />
-
                         {/* Pagination */}
                         {!isLoading && pagination.totalPages > 0 && (
                             <div className="p-4 border-t border-gray-200">
@@ -490,7 +440,6 @@ export default function ClientsTabs() {
                     </>
                 )}
             </div>
-
             {/* Client Modal for Add/Edit */}
             {showClientModal && (
                 <ClientModal
@@ -500,7 +449,6 @@ export default function ClientsTabs() {
                     onSave={handleSaveClient}
                 />
             )}
-
             {/* Client View Modal */}
             {showViewModal && (
                 <ClientViewModal
@@ -509,7 +457,6 @@ export default function ClientsTabs() {
                     client={selectedClient}
                 />
             )}
-
             {/* Confirmation Modal for Delete */}
             {showDeleteModal && (
                 <ConfirmDeleteModal

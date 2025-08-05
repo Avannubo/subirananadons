@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import ShopLayout from "@/components/Layouts/shop-layout";
@@ -14,17 +14,52 @@ import { useSession } from 'next-auth/react';
 import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
 import { fetchProductById, fetchProducts, formatProduct } from '@/services/ProductService';
 import BirthListSelectModal from '@/components/products/BirthListSelectModal.jsx';
+// Helper to get display name from category (handles translation and legacy)
+function getCategoryDisplayName(cat, locale = 'es') {
+    if (!cat) return '';
+    if (typeof cat === 'object' && cat !== null) {
+        if (cat.name) {
+            if (typeof cat.name === 'object') {
+                return cat.name[locale] || cat.name.ca || cat.name.es || Object.values(cat.name)[0] || '';
+            }
+            return cat.name;
+        }
+        if (cat.label) {
+            if (typeof cat.label === 'object') {
+                return cat.label[locale] || cat.label.ca || cat.label.es || Object.values(cat.label)[0] || '';
+            }
+            return cat.label;
+        }
+    }
+    if (typeof cat === 'string') return cat;
+    return '';
+}
+
+// Helper to find the full path from root to a category
+function findCategoryPath(categories, targetId, locale = 'es', path = []) {
+    for (const cat of categories) {
+        const newPath = [...path, cat];
+        if (cat._id === targetId) return newPath;
+        if (cat.children && cat.children.length > 0) {
+            const found = findCategoryPath(cat.children, targetId, locale, newPath);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
 export default function Page() {
     const router = useRouter();
     const t = useTranslations('ProductPage');
     const params = useParams();
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
+    const [categories, setCategories] = useState([]); // for breadcrumb path
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
-    const [activeTab, setActiveTab] = useState('DETALLES DEL PRODUCTO');
+    const [activeTab, setActiveTab] = useState('DESCRIPCIÓN');
     const { addToCart } = useCart();
     const [dragConstraints, setDragConstraints] = useState({ right: 0, left: 0 });
     const scrollContainerRef = useRef(null);
@@ -69,7 +104,6 @@ export default function Page() {
                     throw new Error('Invalid product URL');
                 }
                 const productById = await fetchProductById(productId);
-                console.log('Fetched product:', productById);
                 // Ensure images array is always present
                 let images = [];
                 if (Array.isArray(productById.images) && productById.images.length > 0) {
@@ -120,6 +154,48 @@ export default function Page() {
         }
         loadProduct();
     }, [params]);
+
+    // Fetch all categories for breadcrumb path
+    useEffect(() => {
+        async function loadCategories() {
+            try {
+                const res = await fetch('/api/categories?flat=true');
+                if (!res.ok) throw new Error('Error loading categories');
+                const cats = await res.json();
+                // Organize categories into a tree
+                const categoriesMap = {};
+                const rootCategories = [];
+                cats.forEach(category => {
+                    let migratedName = category.name;
+                    if (typeof category.name === 'string') {
+                        migratedName = { es: category.name, ca: '' };
+                    } else if (!category.name?.es && category.name?.ca) {
+                        migratedName = { es: '', ca: category.name.ca };
+                    } else if (!category.name?.ca && category.name?.es) {
+                        migratedName = { es: category.name.es, ca: '' };
+                    } else if (!category.name?.es && !category.name?.ca) {
+                        migratedName = { es: '', ca: '' };
+                    }
+                    categoriesMap[category._id] = {
+                        ...category,
+                        name: migratedName,
+                        children: []
+                    };
+                });
+                cats.forEach(category => {
+                    if (category.parent && categoriesMap[category.parent]) {
+                        categoriesMap[category.parent].children.push(categoriesMap[category._id]);
+                    } else {
+                        rootCategories.push(categoriesMap[category._id]);
+                    }
+                });
+                setCategories(rootCategories);
+            } catch (err) {
+                setCategories([]);
+            }
+        }
+        loadCategories();
+    }, []);
     const handleQuantityChange = (change) => {
         const newQuantity = quantity + change;
         if (newQuantity >= 1) {
@@ -136,6 +212,13 @@ export default function Page() {
             console.error('Error adding to cart:', error);
         }
     };
+    // Compute category path for breadcrumb (move useMemo out of render)
+    let categoryId = product && product.category;
+    if (typeof categoryId === 'object' && categoryId !== null) {
+        categoryId = categoryId.$oid || categoryId._id || '';
+    }
+    const categoryPath = useMemo(() => findCategoryPath(categories, categoryId, locale), [categories, categoryId, locale]);
+
     // Loading state
     if (loading) {
         return (
@@ -237,8 +320,13 @@ export default function Page() {
                 <nav className="mb-6 sm:mb-8 overflow-x-auto mt-10">
                     <ol className="hidden md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
                         <li><a href="/products" className="hover:text-gray-700">{t('breadcrumbProducts')}</a></li>
-                        <li><span className="mx-2">/</span></li>
-                        <li><a href={`/products?category=${encodeURIComponent(product.category?._id || '')}`} className="hover:text-gray-700">{typeof product.category?.name === 'object' ? product.category.name[locale] : product.category?.name || ''}</a></li>
+                        {/* Render full category path if possible */}
+                        {categoryPath && categoryPath.length > 0 && categoryPath.map((cat) => [
+                            <li key={cat._id}><span className="mx-2">/</span></li>,
+                            <li key={cat._id + '-cat'}>
+                                <a href={`/products?category=${cat._id}`} className="hover:text-gray-700 whitespace-nowrap">{getCategoryDisplayName(cat, locale)}</a>
+                            </li>
+                        ])}
                         <li><span className="mx-2">/</span></li>
                         <li className="text-gray-900 font-medium whitespace-nowrap">{typeof product.name === 'object' ? product.name[locale] : product.name}</li>
                     </ol>
@@ -255,9 +343,7 @@ export default function Page() {
                             <img
                                 src={product.images && product.images[selectedImage] ? product.images[selectedImage] : product.image}
                                 alt={typeof product.name === 'object' ? product.name[locale] : product.name}
-                                fill
                                 className="object-contain h-full w-full"
-                                
                             />
                         </motion.div>
                         {/* Thumbnails */}
@@ -295,7 +381,6 @@ export default function Page() {
                                                         <img
                                                             src={image}
                                                             alt={`${product.name} ${index + 1}`}
-                                                            fill
                                                             className="object-contain"
                                                             draggable={false}
                                                         />
@@ -317,7 +402,20 @@ export default function Page() {
                                 : product.price_incl_tax}
                         </p>
                         <div className="space-y-4">
-                            <p className="text-gray-600 break-words">{typeof product.description === 'object' ? product.description[locale] : product.description}</p>
+                            {/* Only show the first two plain lines of the description, remove the rest */}
+                            {(() => {
+                                let desc = typeof product.description === 'object' ? product.description[locale] : product.description;
+                                if (!desc) return null;
+                                // Split by line breaks or bullet points, keep only first 2 non-empty lines
+                                const lines = desc
+                                    .split(/\n|•|\u2022|\r/)
+                                    .map(line => line.trim())
+                                    .filter(Boolean)
+                                    .slice(0, 2);
+                                return lines.map((line, idx) => (
+                                    <p key={idx} className="text-gray-600 break-words">{line}</p>
+                                ));
+                            })()}
                             {/* <div className="py-4">
                                 <h3 className="font-bold text-gray-900 mb-2">{t('detailsTitle')}</h3>
                                 <ul className="list-disc list-inside space-y-1 text-gray-600">
@@ -382,7 +480,7 @@ export default function Page() {
                 </div>
                 {/* Product Details Tabs */}
                 <div className="mt-10 sm:mt-16">
-                    <div className="border-b border-gray-200">
+                    {/* <div className="border-b border-gray-200">
                         <nav className="-mb-px  flex flex-wrap space-x-4 sm:space-x-8 overflow-x-auto">
                             {[t('tabDescription'), t('tabDetails')].map((tab, idx) => (
                                 <button
@@ -397,17 +495,39 @@ export default function Page() {
                                 </button>
                             ))}
                         </nav>
-                    </div>
+                    </div> */}
                     <div className="mt-4 sm:mt-6 pb-10 sm:pb-16 border-b border-gray-200">
-                        {activeTab === 'DESCRIPCIÓN' && (
-                            <div className="prose max-w-none">
-                                <p className="text-gray-600">{typeof product.description === 'object' ? product.description[locale] : product.description}</p>
-                            </div>
-                        )}
-                        {activeTab === 'DETALLES DEL PRODUCTO' && (
+
+                        <div className="prose max-w-none">
+                            {(() => {
+                                let desc = typeof product.description === 'object' ? product.description[locale] : product.description;
+                                if (!desc) return null;
+                                // Find the first bullet (• or -) and split
+                                const bulletRegex = /[•]/;
+                                const firstBulletIdx = desc.search(bulletRegex);
+                                let intro = desc;
+                                let bullets = [];
+                                if (firstBulletIdx !== -1) {
+                                    intro = desc.slice(0, firstBulletIdx).trim();
+                                    bullets = desc.slice(firstBulletIdx)
+                                        .split(/[•]/)
+                                        .map(line => line.trim())
+                                        .filter(Boolean);
+                                }
+                                return <>
+                                    {intro && <p className="text-gray-600 break-words">{intro}</p>}
+                                    {bullets.length > 0 && (
+                                        <ul className="list-disc list-inside space-y-1 text-gray-600">
+                                            {bullets.map((line, idx) => <li key={idx}>{line}</li>)}
+                                        </ul>
+                                    )}
+                                </>;
+                            })()}
+                        </div>
+                        {/* {activeTab === 'DETALLES DEL PRODUCTO' && (
                             <div className="prose max-w-none">
                                 <ul className="list-disc list-inside space-y-2 text-gray-600">
-                                    {/* {product.details.dimensions && (
+                                {product.details.dimensions && (
                                         <li>{t('dimensions')}: {product.details.dimensions}</li>
                                     )}
                                     {product.details.washingInstructions && (
@@ -418,10 +538,10 @@ export default function Page() {
                                     )} 
                                     {product.details.brand && (
                                         <li>{t('brand')}: {product.details.brand}</li>
-                                    )}*/}
+                                    )} 
                                 </ul>
                             </div>
-                        )}
+                        )} */}
                     </div>
                 </div>
                 {/* Related Products */}

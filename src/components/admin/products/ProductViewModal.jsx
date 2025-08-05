@@ -230,9 +230,27 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                         <section>
                                             <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                                 <h3 className="text-sm font-medium text-gray-500">Descripció:</h3>
-                                                <p className="text-sm text-gray-700">
-                                                    {getTranslated(product.description)}
-                                                </p>
+                                                {(() => {
+                                                    const desc = getTranslated(product.description);
+                                                    if (!desc) return null;
+                                                    // Split by new lines
+                                                    const lines = desc.split(/\r?\n/);
+                                                    // Find first bullet point (• or -)
+                                                    let firstBulletIdx = lines.findIndex(line => /^\s*[•\-]/.test(line));
+                                                    if (firstBulletIdx === -1) firstBulletIdx = lines.length;
+                                                    const intro = lines.slice(0, firstBulletIdx).join(' ').trim();
+                                                    const bullets = lines.slice(firstBulletIdx)
+                                                        .map(line => line.replace(/^\s*[•\-]\s*/, '').trim())
+                                                        .filter(line => line.length > 0);
+                                                    return <>
+                                                        {intro && <p className="text-sm text-gray-700 whitespace-pre-line">{intro}</p>}
+                                                        {bullets.length > 0 && (
+                                                            <ul className="list-disc list-inside space-y-1 text-gray-700 mt-2 text-sm">
+                                                                {bullets.map((line, idx) => <li key={idx}>{line}</li>)}
+                                                            </ul>
+                                                        )}
+                                                    </>;
+                                                })()}
                                             </div>
                                         </section>
                                     )}
