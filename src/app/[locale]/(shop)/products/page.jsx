@@ -120,7 +120,9 @@ export default function Page() {
         );
     };
     // Sync breadcrumbs (categoryPath) with current selected category (from URL or UI)
+    // Only set categoryPath after categories are loaded
     useEffect(() => {
+        if (categoriesLoading) return;
         const categoryId = searchParams.get('category');
         if (categoryId && categories && categories.length > 0) {
             // Support multiple category ids (comma separated)
@@ -136,7 +138,7 @@ export default function Page() {
         } else {
             setCategoryPath([{ _id: 'root', label: 'Productes' }]);
         }
-    }, [categories, searchParams, locale]);
+    }, [categoriesLoading, categories, searchParams, locale]);
     console.log('CATEGORIES', categories)
     // Fetch active banner image on mount
     useEffect(() => {
@@ -248,6 +250,8 @@ export default function Page() {
     // }
     // // Fetch products from the database
     useEffect(() => {
+        // Only load products after categories, categoryPath, and currentCategoryNode are ready
+        if (categoriesLoading || !categoryPath || categoryPath.length === 0 || (categoryPath.length > 1 && !currentCategoryNode)) return;
         async function loadProducts() {
             try {
                 setLoading(true);
@@ -269,7 +273,6 @@ export default function Page() {
                     const allLeafIds = getAllLeafIds(currentCategoryNode);
                     options.category = allLeafIds.join(',');
                 }
-                console.log('Fetching products with options:', options);
                 // Fetch products with category filtering
                 const data = await fetchProducts(options);
                 // Safely access data properties with checks for undefined/null
@@ -304,7 +307,7 @@ export default function Page() {
             }
         }
         loadProducts();
-    }, [categoryPath, currentCategoryNode, currentPage, searchParams]);
+    }, [categoriesLoading, categoryPath, currentCategoryNode, currentPage, searchParams]);
     // Reset to page 1 when category changes
     useEffect(() => {
         setCurrentPage(1);

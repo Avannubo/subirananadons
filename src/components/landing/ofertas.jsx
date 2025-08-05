@@ -49,7 +49,7 @@ const ImageGallery = () => {
                         return (
                             <Link
                                 key={item._id || idx}
-                                href={`/brands?brand=${encodeURIComponent(item._id)}`}
+                                href={`/brands?brand=${encodeURIComponent(item.brand)}`}
                                 className={`relative rounded-lg overflow-hidden w-full ${idx === 0 ? 'md:w-3/5' : 'md:w-2/5'} min-h-[220px] h-[45vw] max-h-[340px] md:max-h-[420px]`}
                             >
                                 <div className="relative w-full h-full group">

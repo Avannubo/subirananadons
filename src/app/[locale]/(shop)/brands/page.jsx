@@ -37,7 +37,7 @@ export default function BrandsPage() {
         const fetchBrands = async () => {
             try {
                 setBrandsLoading(true);
-                const response = await fetch('/api/brands?limit=100&enabled=true');
+                const response = await fetch('/api/brands?limit=1000&enabled=true');
                 const data = await response.json();
                 if (data.brands && data.brands.length > 0) {
                     // Sort brands alphabetically by name
@@ -61,6 +61,7 @@ export default function BrandsPage() {
 
     // Fetch products for selected brand
     useEffect(() => {
+        // Always fetch products for the selected brandId, even if brands are not loaded yet
         const fetchProducts = async () => {
             if (!selectedBrandId) return;
             try {
@@ -72,8 +73,6 @@ export default function BrandsPage() {
                 const response = await fetch(endpoint);
                 const data = await response.json();
                 let fetchedProducts = data.products || [];
-                console.log('Fetched products:', fetchedProducts);
-
                 // Format products to match the expected structure
                 fetchedProducts = fetchedProducts.map(product => ({
                     id: product._id,
@@ -106,7 +105,7 @@ export default function BrandsPage() {
             }
         };
         fetchProducts();
-    }, [selectedBrandId, currentPage, productsPerPage, brands]);
+    }, [selectedBrandId, currentPage, productsPerPage]);
     // Reset to page 1 when changing brands
     useEffect(() => {
         setCurrentPage(1);
@@ -151,9 +150,9 @@ export default function BrandsPage() {
     }, [products, sortBy, selectedBrandId]);
 
     // Debug: log filteredProducts before render
-    useEffect(() => {
-        console.log('filteredProducts state:', filteredProducts);
-    }, [filteredProducts]);
+    // useEffect(() => {
+    //     console.log('filteredProducts state:', filteredProducts);
+    // }, [filteredProducts]);
     // Scroll to selected brand in sidebar
     useEffect(() => {
         if (selectedBrandId && !brandsLoading) {
@@ -181,19 +180,13 @@ export default function BrandsPage() {
             }
         };
         fetchBanner();
-    }, []);
-    const sortProducts = (products) => {
-        // No longer needed, logic moved to useEffect above
-    };
+    }, []); 
     const handleOpenQuickView = (product) => {
         setQuickViewProduct(product);
     };
     const handleCloseQuickView = () => {
         setQuickViewProduct(null);
-    };
-    const handleSortChange = (e) => {
-        setSortBy(e.target.value);
-    };
+    }; 
     const handleBrandSelect = (brandId) => {
         const params = new URLSearchParams(searchParams.toString());
         if (brandId === 'all') {
