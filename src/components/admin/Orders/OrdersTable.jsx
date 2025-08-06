@@ -281,7 +281,7 @@ export default function OrdersTable({
                     <span className="text-sm mr-4">{selectedOrders.length} {t.selected}</span>
                     <button
                         onClick={() => handleBulkAction('archivar')}
-                        className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded mr-2"
+                        className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded mr-2 cursor-pointer"
                     >
                         {t.archive}
                     </button>
@@ -300,7 +300,7 @@ export default function OrdersTable({
                         <option value="cancelado">{statusLabelMap.cancelado}</option>
                     </select>
                     <button
-                        className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded mr-2"
+                        className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded mr-2 cursor-pointer"
                         disabled={!bulkStatusValue}
                         onClick={() => {
                             if (bulkStatusValue) handleBulkAction('estado', bulkStatusValue);
@@ -310,7 +310,7 @@ export default function OrdersTable({
                     </button>
                     <button
                         onClick={() => handleBulkAction('eliminar')}
-                        className="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded"
+                        className="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded cursor-pointer"
                     >
                         {t.delete}
                     </button>
@@ -394,13 +394,13 @@ export default function OrdersTable({
                                     <td className="px-6 py-4 text-sm flex flex-row items-center space-x-4 justify-center">
                                         <button
                                             onClick={() => viewPdf("/uploads/invoices/invoice-" + order.reference + ".pdf")}
-                                            className="text-green-600 hover:text-green-800 flex items-center"
+                                            className="text-green-600 hover:text-green-800 flex items-center cursor-pointer"
                                             title={t.viewPDF}
                                         >
                                             <FaRegFilePdf size={20} />
                                         </button>
                                         <button
-                                            className="text-[#00B0C8] hover:text-[#008A9B] mr-4 text-center"
+                                            className="text-[#00B0C8] hover:text-[#008A9B] mr-4 text-center cursor-pointer"
                                             title={t.viewDetails}
                                             onClick={() => handleViewOrder(order)}
                                         >
@@ -409,14 +409,14 @@ export default function OrdersTable({
                                         {userRole === 'admin' && (
                                             <>
                                                 <button
-                                                    className="text-yellow-600 hover:text-yellow-900 mr-4 text-center"
+                                                    className="text-yellow-600 hover:text-yellow-900 mr-4 text-center cursor-pointer"
                                                     title={t.editOrder}
                                                     onClick={() => handleEditOrder(order)}
                                                 >
                                                     <FiEdit size={20} />
                                                 </button>
                                                 <button
-                                                    className="text-red-600 hover:text-red-900 text-center"
+                                                    className="text-red-600 hover:text-red-900 text-center cursor-pointer"
                                                     title={t.deleteOrder}
                                                     onClick={() => handleDeleteOrder(order)}
                                                 >

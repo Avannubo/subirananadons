@@ -75,21 +75,21 @@ export default function ClientsTable({ clients, onEditClient, onDeleteClient, on
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
                                     <button
                                         onClick={() => onViewClient(client)}
-                                        className="text-[#00B0C8] hover:text-[#008A9B]"
+                                        className="text-[#00B0C8] hover:text-[#008A9B] cursor-pointer"
                                         title={t.view}
                                     >
                                         <FiEye size={20} />
                                     </button>
                                     <button
                                         onClick={() => onEditClient(client)}
-                                        className="text-yellow-600 hover:text-yellow-900"
+                                        className="text-yellow-600 hover:text-yellow-900 cursor-pointer"
                                         title={t.edit}
                                     >
                                         <FiEdit size={20} />
                                     </button>
                                     <button
                                         onClick={() => onDeleteClient(client)}
-                                        className="text-red-600 hover:text-red-900"
+                                        className="text-red-600 hover:text-red-900 cursor-pointer"
                                         title={t.delete}
                                     >
                                         <FiTrash2 size={20} />

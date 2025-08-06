@@ -1094,14 +1094,14 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     key={index}
                                                     className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200`}
                                                 >
-                                                    <div className="relative cursor-pointer" >
+                                                    <div className="relative " >
                                                         {/* onClick={() => handleSelectImage(index)} */}
-                                                        <Image
+                                                        <img
                                                             src={img || '/assets/images/product-placeholder.jpg'}
                                                             alt={`Imatge de producte ${index + 1}`}
-                                                            width={500}
-                                                            height={500}
-                                                            className="h-28 w-28 object-cover"
+                                                            width={100}
+                                                            height={100}
+                                                            className="h-[100px] w-[100px] object-cover"
                                                         />
                                                         {index === 0 && (
                                                             <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">
@@ -1119,7 +1119,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             type="button"
                                                             onClick={() => handleMoveImageUp(index)}
                                                             disabled={index === 0}
-                                                            className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                            className={`text-gray-500 p-1 cursor-pointer rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
                                                             title="Mou a l'esquerra"
                                                         >
                                                             <FiChevronRight className="transform rotate-180" size={16} />
@@ -1127,7 +1127,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         <button
                                                             type="button"
                                                             onClick={() => handleRemoveImage(index)}
-                                                            className="text-red-500 p-1 rounded hover:bg-gray-200"
+                                                            className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
                                                             title="Elimina imatge"
                                                         >
                                                             <FiTrash2 size={16} />
@@ -1136,7 +1136,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             type="button"
                                                             onClick={() => handleMoveImageDown(index)}
                                                             disabled={index === productImages.length - 1}
-                                                            className={`text-gray-500 p-1 rounded hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                            className={`text-gray-500 p-1 rounded cursor-pointer hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
                                                             title="Mou a la dreta"
                                                         >
                                                             <FiChevronRight size={16} />
@@ -1165,7 +1165,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 }
                                             }}
                                             disabled={isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)}
-                                            className={`w-full my-2 px-4 py-2 text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)
+                                            className={`w-full my-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)
                                                 ? 'bg-gray-400 cursor-not-allowed'
                                                 : 'bg-green-600 hover:bg-green-700'
                                                 }`}
@@ -1208,7 +1208,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                         setSelectedImages(prev => prev.filter((_, i) => i !== index));
                                                                         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
                                                                     }}
-                                                                    className="text-red-500 p-1 rounded hover:bg-gray-200"
+                                                                    className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
                                                                     title="Elimina imatge seleccionada"
                                                                 >
                                                                     <FiTrash2 size={16} />
@@ -1274,7 +1274,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 type="button"
                                                 onClick={() => setShowImageSelector(true)}
                                                 disabled={isUploading}
-                                                className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                                                className={`w-full col-span-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
                                             >
                                                 Selecciona existent
                                             </button>
@@ -1318,7 +1318,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         setFormData(f => ({ ...f, image: '' }));
                                                     }
                                                 }}
-                                                className="text-nowrap bg-[#00B0C8] text-white px-3 py-2 border border-l-0 border-[#00B0C8] rounded-r-md hover:bg-[#008A9B]"
+                                                className="text-nowrap bg-[#00B0C8] cursor-pointer text-white px-3 py-2 border border-l-0 border-[#00B0C8] rounded-r-md hover:bg-[#008A9B]"
                                             >
                                                 Vista prèvia
                                             </button>
@@ -1334,14 +1334,14 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                className="px-4 py-2 border border-gray-300 rounded-md cursor-pointer text-sm font-medium text-gray-700 hover:bg-gray-50"
                             >
                                 Cancel·la
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading || isUploading}
-                                className="px-4 py-2 bg-[#00B0C8] text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] disabled:opacity-50"
+                                className="px-4 py-2 bg-[#00B0C8] cursor-pointer text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] disabled:opacity-50"
                             >
                                 {loading ? 'Desant...' : isEditing ? 'Actualitza' : 'Crea'}
                             </button>

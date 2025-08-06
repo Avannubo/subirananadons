@@ -377,7 +377,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                     <div className="flex items-center">
                         <h2 className="text-lg font-medium">{t.heading} ({displayLists.length})</h2>
                         <button
-                            className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                            className="ml-2 text-gray-500 cursor-pointer hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
                             onClick={refreshData}
                             disabled={isLoading}
                             title={t.update}
@@ -391,7 +391,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 setShowCreateModal(true);
                                 setCurrentStep(1);
                             }}
-                            className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
+                            className="flex items-center px-3 py-2 cursor-pointer bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
                         >
                             <FiPlus className="mr-1" /> {t.newList}
                         </button>
@@ -496,7 +496,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 <h2 className="text-2xl font-bold text-gray-800">{t.createTitle}</h2>
                                 <button
                                     onClick={() => setShowCreateModal(false)}
-                                    className="text-gray-500 hover:text-gray-700"
+                                    className="text-gray-500 hover:text-gray-700 cursor-pointer"
                                 >
                                     <FiX size={24} />
                                 </button>
@@ -643,13 +643,13 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         <button
                                             type="button"
                                             onClick={() => setShowCreateModal(false)}
-                                            className="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                            className="px-6 py-2 cursor-pointer border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                                         >
                                             {t.cancel}
                                         </button>
                                         <button
                                             type="submit"
-                                            className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none"
+                                            className="px-6 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none"
                                         >
                                             {t.continue}
                                         </button>
@@ -678,14 +678,14 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         <button
                                             type="button"
                                             onClick={handlePrevStep}
-                                            className="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                            className="px-6 py-2 border cursor-pointer border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                                         >
                                             {t.previous}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={handleNextStep}
-                                            className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none"
+                                            className="px-6 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none"
                                         >
                                             {t.continue}
                                         </button>
@@ -738,14 +738,14 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         <button
                                             type="button"
                                             onClick={handlePrevStep}
-                                            className="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                            className="px-6 py-2 border cursor-pointer border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                                         >
                                             {t.previous}
                                         </button>
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                                            className={`px-6 py-2 border cursor-pointer border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
                                         >
                                             {loading ? t.creating : t.createList}
                                         </button>

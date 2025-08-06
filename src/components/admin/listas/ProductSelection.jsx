@@ -160,7 +160,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                 e.stopPropagation();
                                                 handleRemoveProduct(item._id);
                                             }}
-                                            className="text-red-500 hover:text-red-700"
+                                            className="text-red-500 cursor-pointer hover:text-red-700"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -183,7 +183,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                     />
                     <button
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+                        className="absolute right-2 top-1/2 cursor-pointer transform -translate-y-1/2 text-gray-400"
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -255,7 +255,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                         setCurrentPage(Math.max(1, currentPage - 1));
                                     }}
                                     disabled={currentPage === 1}
-                                    className={`px-3 py-1 rounded-md ${currentPage === 1
+                                    className={`px-3 cursor-pointer py-1 rounded-md ${currentPage === 1
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}

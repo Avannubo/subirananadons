@@ -368,8 +368,8 @@ export default function ListViewModal({
                             <img
                                 src={item.product.image}
                                 alt={productName}
-                                width={64}
-                                height={64}
+                                width="auto"
+                                height="auto"
                                 className="object-cover w-full h-full"
                             />
                         )}

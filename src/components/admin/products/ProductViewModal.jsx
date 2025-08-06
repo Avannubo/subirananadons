@@ -157,13 +157,15 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                                     className={`flex-shrink-0 w-14 h-14 relative rounded border ${selectedImage === img
                                                         ? 'border-[#00B0C8] ring-2 ring-[#00B0C8]/30'
                                                         : 'border-gray-200 hover:border-gray-300'}`}
+                                                    style={{ minWidth: '3.5rem', minHeight: '3.5rem', maxWidth: '3.5rem', maxHeight: '3.5rem', overflow: 'hidden' }}
                                                 >
                                                     <img
                                                         src={img || '/assets/images/product-placeholder.jpg'}
                                                         alt={`Thumbnail ${index + 1}`}
-                                                        fill
-                                                        style={{ objectFit: 'contain' }}
-                                                        className="rounded"
+                                                        height={56}
+                                                        width={56}
+                                                        className="rounded object-contain"
+                                                        style={{ maxWidth: '100%', maxHeight: '100%', minWidth: 0, minHeight: 0, display: 'block' }}
                                                     />
                                                     {index === 0 && (
                                                         <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-[8px] px-1">
@@ -314,4 +316,4 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
             </div >
         </Dialog >
     );
-} 
+}

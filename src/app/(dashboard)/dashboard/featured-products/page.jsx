@@ -197,7 +197,7 @@ export default function FeaturedProductsPage() {
                                     />
                                     {searchTerm && (
                                         <button
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                                             onClick={() => setSearchTerm('')}
                                         >
                                             <FiXCircle />
@@ -297,7 +297,7 @@ export default function FeaturedProductsPage() {
                                                         <div className="flex items-center">
                                                             <button
                                                                 onClick={() => toggleFeatured(product._id)}
-                                                                className={`flex items-center px-3 py-1 rounded-full text-sm ${product.featured
+                                                                className={`flex items-center px-3 py-1 rounded-full cursor-pointer text-sm ${product.featured
                                                                     ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                                                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                                     }`}

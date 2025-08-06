@@ -331,7 +331,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 <div className="flex items-center">
                     <h2 className="text-lg font-medium">{t.orderManagement} ({pagination.totalItems || filteredOrders.length})</h2>
                     <button
-                        className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                        className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer"
                         onClick={handleRefresh}
                         disabled={loading}
                         title={t.refresh}
@@ -359,7 +359,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                 </div>
             </div>
             {/* Search and Filters */}
-            <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
+            {/* <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                 <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                     {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
@@ -372,7 +372,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div> */}
-                    <div className="relative">
+                    {/* <div className="relative">
                         <FiSearch className="absolute left-3 top-3 text-gray-400" />
                         <input
                             type="text"
@@ -393,7 +393,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             onChange={handleFilterChange}
                             className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                         />
-                    </div>
+                    </div> */}
                     {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
@@ -404,9 +404,10 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
-                        </div> */}
+                        </div>  
                 </div>
             </div>
+             */}
             {/* Order data table */}
             {loading ? (
                 <div className="py-20 text-center">

@@ -3,8 +3,9 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
-import OrdersTable from '@/components/admin/orders/OrdersTable'; 
+import OrdersTable from '@/components/admin/orders/OrdersTable';
 import { useOrders } from '@/hooks/useOrders';
+import OrdersTabs from '@/components/admin/orders/OrdersTabs';
 export default function PedidosPage() {
     const { data: session, status } = useSession();
     const userRole = session?.user?.role || 'user';
@@ -126,18 +127,7 @@ export default function PedidosPage() {
                             <p className="mt-3 text-gray-600">loading...</p>
                         </div>
                     ) : (
-                        <OrdersTable
-                            orders={orders}
-                            filters={filters}
-                            setFilters={setFilters}
-                            userRole={userRole}
-                            isLoading={loading}
-                            onStatusChange={updateOrderStatus}
-                            onDelete={deleteOrder}
-                            pagination={pagination}
-                            onPageChange={setCurrentPage}
-                            onLimitChange={setLimit}
-                        />
+                        <OrdersTabs userRole={userRole} filters={filters} setFilters={setFilters} />
                     )}
                 </div>
             </AdminLayout>

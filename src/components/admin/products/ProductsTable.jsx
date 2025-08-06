@@ -400,7 +400,7 @@ export default function ProductsTable(props) {
                 <div className="flex space-x-2">
                     <button
                         onClick={handleAddProduct}
-                        className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] flex items-center"
+                        className="px-3 py-1 bg-[#00B0C8] cursor-pointer text-white rounded hover:bg-[#008A9B] flex items-center"
                     >
                         <FiPlus className="mr-1" />
                         Afegir producte
@@ -569,21 +569,21 @@ export default function ProductsTable(props) {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
                                                 <button
-                                                    className="text-[#00B0C8] hover:text-[#008A9B]"
+                                                    className="text-[#00B0C8] hover:text-[#008A9B] cursor-pointer"
                                                     onClick={() => handleViewProduct(product)}
                                                     title="Ver detalles"
                                                 >
                                                     <FiEye size={20} />
                                                 </button>
                                                 <button
-                                                    className="text-yellow-600 hover:text-yellow-900"
+                                                    className="text-yellow-600 hover:text-yellow-900 cursor-pointer"
                                                     onClick={() => handleEditProduct(product)}
                                                     title="Editar producto"
                                                 >
                                                     <FiEdit size={20} />
                                                 </button>
                                                 <button
-                                                    className="text-red-600 hover:text-red-900"
+                                                    className="text-red-600 hover:text-red-900 cursor-pointer"
                                                     onClick={() => handleDeleteConfirm(product)}
                                                     title="Eliminar producto"
                                                 >

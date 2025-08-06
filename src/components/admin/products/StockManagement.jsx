@@ -395,13 +395,13 @@ export default function StockManagement() {
                                             <div className="flex space-x-2">
                                                 <button
                                                     onClick={() => saveStockChanges(product._id)}
-                                                    className="text-[#00B0C8] hover:text-[#00B0C870]"
+                                                    className="text-[#00B0C8] hover:text-[#00B0C870] cursor-pointer"
                                                 >
                                                     Desa
                                                 </button>
                                                 <button
                                                     onClick={() => setEditingId(null)}
-                                                    className="text-gray-500 hover:text-gray-700"
+                                                    className="text-gray-500 hover:text-gray-700 cursor-pointer"
                                                 >
                                                     Cancel·la
                                                 </button>
@@ -409,7 +409,7 @@ export default function StockManagement() {
                                         ) : (
                                             <button
                                                 onClick={() => setEditingId(product._id)}
-                                                className="flex items-center text-gray-600 hover:text-gray-900"
+                                                className="flex items-center text-gray-600 hover:text-gray-900 cursor-pointer"
                                             >
                                                 <FiEdit className="mr-1" />
                                                 Edita

@@ -215,7 +215,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                         </DialogTitle>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-500"
+                            className="text-gray-400 hover:text-gray-500 cursor-pointer"
                         >
                             <FiX className="h-5 w-5" />
                         </button>
@@ -372,14 +372,14 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2  border-gray-300 border-1  rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
+                                className="px-4 py-2 cursor-pointer border-gray-300 border-1  rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
                             >
                                 {t.cancel}
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-4 py-2 border border-transparent rounded-md  text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#00B0C890] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
+                                className="px-4 py-2 cursor-pointer border border-transparent rounded-md  text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#00B0C890] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
                             >
                                 {loading ? t.saving : t.save}
                             </button>

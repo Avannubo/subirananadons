@@ -257,7 +257,7 @@ export default function CategoriesTree() {
                 >
                     {hasChildren ? (
                         <button
-                            className="mr-1 focus:outline-none p-1 hover:bg-gray-200 rounded-full"
+                            className="mr-1 focus:outline-none p-1 hover:bg-gray-200 rounded-full cursor-pointer"
                             onClick={(e) => toggleCategory(category._id, e)}
                         >
                             {isExpanded ?
@@ -277,21 +277,21 @@ export default function CategoriesTree() {
                     </span>
                     <div className="flex items-center space-x-1 invisible group-hover:visible transition-all absolute right-2">
                         <button
-                            className="p-1 text-[#00abc2] hover:text-[#00B0C8] rounded"
+                            className="p-1 text-[#00abc2] hover:text-[#00B0C8] rounded cursor-pointer"
                             onClick={(e) => handleAddCategory(category, e)}
                             title="Afegir subcategoria"
                         >
                             <FiFolderPlus size={20} />
                         </button>
                         <button
-                            className="p-1 text-yellow-600 hover:text-yellow-700 rounded"
+                            className="p-1 text-yellow-600 hover:text-yellow-700 rounded cursor-pointer"
                             onClick={(e) => handleEditCategory(category, e)}
                             title="Editar categoria"
                         >
                             <FiEdit size={20} />
                         </button>
                         <button
-                            className="p-1 text-red-600 hover:text-red-700 rounded"
+                            className="p-1 text-red-600 hover:text-red-700 rounded cursor-pointer"
                             onClick={(e) => handleDeleteCategory(category, e)}
                             title="Eliminar categoria"
                         >
@@ -322,14 +322,14 @@ export default function CategoriesTree() {
                     <div className="flex border border-gray-300 rounded overflow-hidden">
                         <button
                             onClick={() => toggleAllCategories(true)}
-                            className="flex items-center text-xs p-1 text-gray-700 bg-gray-100 hover:bg-gray-200 border-r border-gray-300"
+                            className="flex items-center text-xs p-1 text-gray-700 bg-gray-100 hover:bg-gray-200 border-r border-gray-300 cursor-pointer"
                             title="Expandeix totes"
                         >
                             <FiPlusSquare size={14} className="mr-1" /> Expandeix
                         </button>
                         <button
                             onClick={() => toggleAllCategories(false)}
-                            className="flex items-center text-xs p-1 text-gray-700 bg-gray-100 hover:bg-gray-200"
+                            className="flex items-center text-xs p-1 text-gray-700 bg-gray-100 hover:bg-gray-200 cursor-pointer"
                             title="Col·lapsa totes"
                         >
                             <FiMinusSquare size={14} className="mr-1" /> Col·lapsa
@@ -337,7 +337,7 @@ export default function CategoriesTree() {
                     </div>
                     <button
                         onClick={() => handleAddCategory(null)}
-                        className="flex items-center text-sm px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B]"
+                        className="flex items-center text-sm px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] cursor-pointer"
                     >
                         <FiPlus className="mr-1" /> Afegir categoria
                     </button>

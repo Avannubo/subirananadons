@@ -317,7 +317,7 @@ export default function BrandsTable() {
                 <div className="flex space-x-2">
                     <button
                         onClick={handleAddBrand}
-                        className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] flex items-center"
+                        className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] flex items-center cursor-pointer"
                     >
                         <FiPlus className="mr-1" />
                         Afegir marca
@@ -451,21 +451,21 @@ export default function BrandsTable() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
                                                 <button
-                                                    className="text-[#00B0C8] hover:text-[#008A9B]"
+                                                    className="text-[#00B0C8] hover:text-[#008A9B] cursor-pointer"
                                                     onClick={() => handleViewBrand(brand)}
                                                     title="Veure detalls"
                                                 >
                                                     <FiEye size={20} />
                                                 </button>
                                                 <button
-                                                    className="text-yellow-600 hover:text-yellow-900"
+                                                    className="text-yellow-600 hover:text-yellow-900 cursor-pointer"
                                                     onClick={() => handleEditBrand(brand)}
                                                     title="Edita marca"
                                                 >
                                                     <FiEdit size={20} />
                                                 </button>
                                                 <button
-                                                    className="text-red-600 hover:text-red-900"
+                                                    className="text-red-600 hover:text-red-900 cursor-pointer"
                                                     onClick={() => handleDeleteConfirm(brand)}
                                                     title="Elimina marca"
                                                 >

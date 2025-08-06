@@ -311,7 +311,7 @@ export default function ClientsTabs() {
                     <div className="flex items-center">
                         <h2 className="text-lg font-medium">{t.adminTitle} ({pagination.totalItems})</h2>
                         <button
-                            className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                            className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer"
                             onClick={refreshData}
                             disabled={isLoading}
                             title={t.update}
@@ -321,14 +321,14 @@ export default function ClientsTabs() {
                     </div>
                     <div className="flex  space-x-2">
                         <button
-                            className="flex items-center px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors"
+                            className="flex items-center px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                             onClick={exportToCSV}
                             title={t.exportTitle}
                         >
                             <FiDownload className="mr-1" /> {t.export}
                         </button>
                         <button
-                            className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
+                            className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors cursor-pointer"
                             onClick={handleAddNewClient}
                             title={t.addTitle}
                         >
@@ -386,7 +386,7 @@ export default function ClientsTabs() {
                     </div>
                     <div className="flex sm:flex-row flex-col justify-start gap-2">
                         <button
-                            className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]"
+                            className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890] cursor-pointer"
                             onClick={applyFilters}
                             title={t.filterTitle}
                         >
@@ -394,7 +394,7 @@ export default function ClientsTabs() {
                             {t.filter}
                         </button>
                         <button
-                            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 cursor-pointer"
                             onClick={clearFilters}
                             title={t.clearTitle}
                         >
