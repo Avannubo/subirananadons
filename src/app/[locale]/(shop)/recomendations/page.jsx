@@ -1,20 +1,16 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import { motion } from 'framer-motion';
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations, useLocale } from 'next-intl';
-
-
 export default function RecommendationsPage() {
     const t = useTranslations('RecommendationsPage');
     const locale = useLocale();
     const [groups, setGroups] = useState([]);
     const [bannerUrl, setBannerImage] = useState(null);
     const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         const fetchBanner = async () => {
             try {
@@ -30,7 +26,6 @@ export default function RecommendationsPage() {
         };
         fetchBanner();
     }, []);
-
     useEffect(() => {
         const fetchGroups = async () => {
             setLoading(true);
@@ -40,7 +35,6 @@ export default function RecommendationsPage() {
                 const data = await res.json();
                 setGroups(data.containers || []);
                 console.log("Fetched recommendation groups:", data.containers);
-                
             } catch (err) {
                 setGroups([]);
             } finally {
@@ -49,7 +43,6 @@ export default function RecommendationsPage() {
         };
         fetchGroups();
     }, []);
-
     return (
         <ShopLayout>
             {bannerUrl ? (
@@ -122,7 +115,6 @@ export default function RecommendationsPage() {
                                                             <span className="ml-2 text-sm text-[#0090a8]">({g.category.name?.[locale]})</span>
                                                         </Link>
                                                     )}
-
                                                 </motion.li>
                                             ))}
                                         </ul>

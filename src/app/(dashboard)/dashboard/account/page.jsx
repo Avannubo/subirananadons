@@ -194,7 +194,7 @@ export default function Page() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="mx-auto p-6">
+                <div className="mx-auto p-6 min-h-[90vh]">
                     <h1 className="text-2xl font-bold mb-6">El meu compte</h1>
                     <div className="bg-white rounded-lg p-6">
                         <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Informació personal</h2>
@@ -330,7 +330,7 @@ export default function Page() {
                                 </div>
                             )}
                             {/* Birth Date */}
-                            <div>
+                            {/* <div>
                                 <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
                                     Data de naixement
                                 </label>
@@ -344,7 +344,7 @@ export default function Page() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                 />
                                 <p className="mt-1 text-xs text-gray-500">Opcional</p>
-                            </div>
+                            </div> */}
                             {/* Privacy Section */}
                             {/* <div className="pt-4 border-t border-gray-200">
                                 <div className="flex items-start mb-4">

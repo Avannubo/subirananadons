@@ -107,7 +107,6 @@ export default function SearchPage() {
         };
         fetchMetaAndProducts();
     }, []);
-
     // Client-side filtering, sorting, and pagination (ProductsTable logic)
     useEffect(() => {
         setIsLoading(true);

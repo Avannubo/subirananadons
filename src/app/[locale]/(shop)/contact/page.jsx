@@ -15,7 +15,6 @@ export default function ContactPage() {
     });
     const [bannerImage, setBannerImage] = useState(null);
     const [shopParams, setShopParams] = useState({ address: '', telephone: '', email: '', horari: '' });
-
     const [submitStatus, setSubmitStatus] = useState('');
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -40,7 +39,6 @@ export default function ContactPage() {
             [name]: value
         }));
     };
-
     useEffect(() => {
         const fetchBanner = async () => {
             try {
@@ -55,7 +53,6 @@ export default function ContactPage() {
             }
         };
         fetchBanner();
-
         // Fetch shop parameters
         const fetchParams = async () => {
             try {

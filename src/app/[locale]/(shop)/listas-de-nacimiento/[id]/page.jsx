@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import { use } from 'react';
@@ -29,7 +28,6 @@ export default function BirthListPage({ params }) {
         const totalItems = items.length;
         return totalItems > 0 ? Math.round((purchasedCount / totalItems) * 100) : 0;
     };
-
     // locale is now destructured from use(params) above
     // Fetch birth list data from API
     useEffect(() => {
@@ -224,7 +222,6 @@ export default function BirthListPage({ params }) {
                 // toast.error('Error: No se puede identificar el propietario de la lista');
                 return;
             }
-
             // Format product for unified cart structure 
             const productForCart = {
                 id: product.productId,
@@ -246,7 +243,6 @@ export default function BirthListPage({ params }) {
                     priority: product.priority || 0
                 }
             };
-
             const success = await addToCart(productForCart, 1); if (success) {
                 console.log('Regalo añadido al carrito');
             } else {
@@ -367,7 +363,6 @@ export default function BirthListPage({ params }) {
                             })}
                         </div>
                     </div>
-                   
                 </div> */}
                 {/* <select
                         value={sortBy}

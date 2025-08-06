@@ -9,9 +9,7 @@ import { toast } from 'react-hot-toast';
 import { ShoppingCart } from 'lucide-react';
 import dynamic from 'next/dynamic'; 
 import { useTranslations } from 'next-intl'; 
-
 const ModalTPV = dynamic(() => import('@/components/cart/ModalTPV'), { ssr: false });
-
 export default function CartPage() {
     const t = useTranslations('CartPage');
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
@@ -39,16 +37,13 @@ export default function CartPage() {
     const [showTPVModal, setShowTPVModal] = useState(false);
     const [tpvOrderData, setTpvOrderData] = useState(null);
     const [tpvTotal, setTpvTotal] = useState(0);
-
     // Separate regular and gift items once cartItems is available
     const regularItems = useMemo(() => cartItems?.filter(item => item.type !== 'gift') ?? [], [cartItems]);
-
     const giftItems = useMemo(() => cartItems?.filter(item => item.type === 'gift') ?? [], [cartItems]);
     // Check if cart has any gift items
     const hasGiftItems = useMemo(() => {
         return cartItems?.some(item => item.type === 'gift') ?? false;
     }, [cartItems]);
-
     // Check if cart has only gift items
     const hasOnlyGiftItems = useMemo(() => {
         return cartItems?.length > 0 && cartItems?.every(item => item.type === 'gift');
@@ -148,7 +143,6 @@ export default function CartPage() {
             return sum + (price * (item.quantity || 1));
         }, 0);
     };
-
     // Subtotal for only regular (personal) items
     const calculateRegularSubtotal = () => {
         return regularItems.reduce((sum, item) => {
@@ -206,7 +200,6 @@ export default function CartPage() {
             setOrderError('Por favor, completa todos los campos obligatorios');
             return;
         }
-
         // Build orderData as requested
         const buyerInfo = {
             name: `${formData.name} ${formData.lastName}`.trim(),
@@ -246,7 +239,6 @@ export default function CartPage() {
                 total: calculateTotal()
             }
         };
-
         // Save orderData as 'orderpending' in localStorage
         if (typeof window !== 'undefined') {
             try {
@@ -255,12 +247,10 @@ export default function CartPage() {
                 // Ignore localStorage errors
             }
         }
-
         setTpvOrderData(prepareTPVOrderData());
         setTpvTotal(calculateTotal());
         setShowTPVModal(true);
     };
-
     // Helper to prepare TPV order data
     const prepareTPVOrderData = () => {
         return {
@@ -268,7 +258,6 @@ export default function CartPage() {
             cartProducts: cartItems,
         };
     };
-
     // In the return JSX, after the main ShopLayout content:
     return (
         <ShopLayout>
@@ -301,7 +290,6 @@ export default function CartPage() {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
                                                     {t('loginInfo')}
-
                                                 </p>
                                                 <p className="text-xs text-gray-600">
                                                     {t('loginPanelInfo')}
@@ -775,7 +763,6 @@ export default function CartPage() {
                     </motion.div>
                 )}
             </div>
-
             <ModalTPV
                 isOpen={showTPVModal}
                 onClose={() => setShowTPVModal(false)}

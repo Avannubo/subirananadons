@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ShopLayout from "@/components/Layouts/shop-layout";
@@ -7,15 +6,12 @@ import Image from "next/image";
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-
 import { useTranslations } from 'next-intl';
-
 export default function BirthListsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [bannerImage, setBannerImage] = useState(null);
     const router = useRouter();
     const t = useTranslations('BirthListsPage');
-
     useEffect(() => {
         const fetchBanner = async () => {
             try {
@@ -31,14 +27,12 @@ export default function BirthListsPage() {
         };
         fetchBanner();
     }, []);
-
     const handleSearch = (e) => {
         e.preventDefault();
         if (!searchTerm) {
             toast.error(t('searchErrorEmpty'));
             return;
         }
-
         try {
             // Extract the ID from the URL
             let id;
@@ -50,19 +44,16 @@ export default function BirthListsPage() {
                 // Treat the input as a direct ID
                 id = searchTerm.trim();
             }
-
             if (!id) {
                 toast.error(t('searchErrorInvalid'));
                 return;
             }
-
             // Navigate to the birth list page
             router.push(`/listas-de-nacimiento/${id}`);
         } catch (error) {
             toast.error(t('searchErrorInvalid'));
         }
     };
-
     return (
         <ShopLayout>
             {bannerImage ? (

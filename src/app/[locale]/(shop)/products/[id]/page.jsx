@@ -34,7 +34,6 @@ function getCategoryDisplayName(cat, locale = 'es') {
     if (typeof cat === 'string') return cat;
     return '';
 }
-
 // Helper to find the full path from root to a category
 function findCategoryPath(categories, targetId, locale = 'es', path = []) {
     for (const cat of categories) {
@@ -47,7 +46,6 @@ function findCategoryPath(categories, targetId, locale = 'es', path = []) {
     }
     return null;
 }
-
 export default function Page() {
     const router = useRouter();
     const t = useTranslations('ProductPage');
@@ -154,7 +152,6 @@ export default function Page() {
         }
         loadProduct();
     }, [params]);
-
     // Fetch all categories for breadcrumb path
     useEffect(() => {
         async function loadCategories() {
@@ -218,7 +215,6 @@ export default function Page() {
         categoryId = categoryId.$oid || categoryId._id || '';
     }
     const categoryPath = useMemo(() => findCategoryPath(categories, categoryId, locale), [categories, categoryId, locale]);
-
     // Loading state
     if (loading) {
         return (
@@ -497,7 +493,6 @@ export default function Page() {
                         </nav>
                     </div> */}
                     <div className="mt-4 sm:mt-6 pb-10 sm:pb-16 border-b border-gray-200">
-
                         <div className="prose max-w-none">
                             {(() => {
                                 let desc = typeof product.description === 'object' ? product.description[locale] : product.description;

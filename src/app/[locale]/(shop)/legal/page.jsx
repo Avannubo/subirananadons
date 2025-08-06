@@ -4,11 +4,9 @@ import React from 'react';
 import Header from '@/components/landing/header';
 import Footer from '@/components/landing/footer';
 import { useState, useEffect } from 'react';
-
 export default function LegalPage() {
     const t = useTranslations('legalPage');
     const [bannerUrl, setBannerImage] = useState(null);
-
     useEffect(() => {
         const fetchBanner = async () => {
             try {
@@ -24,7 +22,6 @@ export default function LegalPage() {
         };
         fetchBanner();
     }, []);
-
     return (
         <>
             <Header />

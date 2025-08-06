@@ -4,12 +4,9 @@ import React from 'react';
 import Header from '@/components/landing/header';
 import Footer from '@/components/landing/footer';
 import { useState, useEffect } from 'react';
-
 export default function CookiesPage() {
     const t = useTranslations('CookiesPage');
     const [bannerUrl, setBannerImage] = useState(null);
-
-
     useEffect(() => {
         const fetchBanner = async () => {
             try {
@@ -25,8 +22,6 @@ export default function CookiesPage() {
         };
         fetchBanner();
     }, []);
-
-
     return (
         <>
             <Header />
@@ -52,7 +47,6 @@ export default function CookiesPage() {
             )}
             <div className="container mx-auto px-4 py-12 max-w-[1500px]">
                 <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
-
                 <div className="prose max-w-none">
                     <section className="mb-8">
                         <div className="flex items-center mb-4">
@@ -60,31 +54,25 @@ export default function CookiesPage() {
                         </div>
                         <p>{t('section1Text')}</p>
                     </section>
-
                     <section className="mb-8">
                         <div className="flex items-center mb-4">
                             <h2 className="text-2xl font-semibold">{t('section2Title')}</h2>
                         </div>
                         <h3 className="text-xl font-medium mt-6 mb-3">{t('essentialCookiesTitle')}</h3>
                         <p>{t('essentialCookiesText')}</p>
-
                         <h3 className="text-xl font-medium mt-6 mb-3">{t('performanceCookiesTitle')}</h3>
                         <p>{t('performanceCookiesText')}</p>
-
                         <h3 className="text-xl font-medium mt-6 mb-3">{t('functionalityCookiesTitle')}</h3>
                         <p>{t('functionalityCookiesText')}</p>
-
                         <h3 className="text-xl font-medium mt-6 mb-3">{t('advertisingCookiesTitle')}</h3>
                         <p>{t('advertisingCookiesText')}</p>
                     </section>
-
                     <section className="mb-8">
                         <div className="flex items-center mb-4">
                             <h2 className="text-2xl font-semibold">{t('section3Title')}</h2>
                         </div>
                         <p>{t('section3Text')}</p>
                     </section>
-
                     <section className="mb-8">
                         <div className="flex items-center mb-4">
                             <h2 className="text-2xl font-semibold">{t('section4Title')}</h2>
@@ -92,14 +80,12 @@ export default function CookiesPage() {
                         <p>{t('section4Text1')}</p>
                         <p className="mt-4">{t('section4Text2')}</p>
                     </section>
-
                     <section className="mb-8">
                         <div className="flex items-center mb-4">
                             <h2 className="text-2xl font-semibold">{t('section5Title')}</h2>
                         </div>
                         <p>{t('section5Text')}</p>
                     </section>
-
                     <section>
                         <div className="flex items-center mb-4">
                             <h2 className="text-2xl font-semibold">{t('section6Title')}</h2>

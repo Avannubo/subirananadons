@@ -1,4 +1,3 @@
-
 "use client";
 import React from 'react';
 import useShopParameter from '@/lib/useShopParameter';
@@ -7,7 +6,6 @@ import Footer from '@/components/landing/footer';
 import { Info, Database, FileText, Shield, User, Contact, RefreshCw } from 'lucide-react';
 // Removed export const metadata because it is not allowed in a client component
 import { useTranslations, useLocale } from 'next-intl';
-
 export default function PrivacyPage() {
     const { value: privacyText, loading } = useShopParameter('privacy_policy');
     const [bannerUrl, setBanner] = React.useState(null);
@@ -40,7 +38,6 @@ export default function PrivacyPage() {
     } else if (typeof privacyText === 'string') {
         translatedText = privacyText;
     }
-
     return (
         <ShopLayout>
             {bannerUrl ? (
@@ -74,7 +71,6 @@ export default function PrivacyPage() {
                     )}
                 </div>
             </div>
-
         </ShopLayout>
     );
 }
