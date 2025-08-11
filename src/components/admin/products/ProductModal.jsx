@@ -277,26 +277,25 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }
     };
     // --- Category Selection Handler ---
-    // Fix: handleCategorySelect should update category (ObjectId) and categoryDisplayName (string)
-    // If user selects a new category, set ObjectId; otherwise, keep legacy string until changed
     const handleCategorySelect = (categoryObj) => {
         setFormData(prev => ({
             ...prev,
             category: categoryObj._id,
+            categoryId: categoryObj._id, // Set both category and categoryId
             categoryDisplayName: getCategoryDisplayName(categoryObj),
-            _categoryChanged: true // flag to indicate user changed category
+            _categoryChanged: true
         }));
         setShowCategoryDropdown(false);
     };
+
     // --- Brand Selection Handler ---
-    // Fix: handleBrandSelect should update brand (ObjectId) and brandDisplayName (string)
-    // If user selects a new brand, set ObjectId; otherwise, keep legacy string until changed
     const handleBrandSelect = (brandObj) => {
         setFormData(prev => ({
             ...prev,
             brand: brandObj._id,
+            brandId: brandObj._id, // Set both brand and brandId
             brandDisplayName: brandObj.name,
-            _brandChanged: true // flag to indicate user changed brand
+            _brandChanged: true
         }));
         setShowBrandDropdown(false);
     };
@@ -499,6 +498,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             // Ensure category and brand are ObjectId (not name or empty string)
             let categoryId = formData.category;
             let brandId = formData.brand;
+
+            console.log(categoryId, brandId);
+
             const isObjectId = (val) => typeof val === 'string' && /^[a-fA-F0-9]{24}$/.test(val);
             // Treat empty string as null for category/brand
             if (categoryId === "") categoryId = null;
@@ -549,11 +551,11 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 throw apiError;
             }
             // Notify stats context about the change
-            if (stats.notifyChange) {
-                setTimeout(() => {
-                    stats.notifyChange();
-                }, 500);
-            }
+            // if (stats.notifyChange) {
+            //     setTimeout(() => {
+            //         stats.notifyChange();
+            //     }, 500);
+            // }
         } catch (error) {
             console.error('Error saving product:', error);
             // Only show toast if not already shown by API error block
@@ -1082,146 +1084,150 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                             <div className="space-y-6">
                                 <h3 className="text-md font-medium">Imatges del producte</h3>
                                 {/* Current Images */}
-                                {productImages.length > 0 && (
-                                    <div className="mb-6">
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Imatges actuals</h4>
-                                        <p className="text-xs text-gray-500 mb-2">
-                                            La primera imatge serà la principal, la segona serà la de hover (opcional).
-                                        </p>
-                                        <div className="flex overflow-x-auto p-1 space-x-4">
-                                            {productImages.map((img, index) => (
-                                                <div
-                                                    key={index}
-                                                    className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200`}
-                                                >
-                                                    <div className="relative " >
-                                                        {/* onClick={() => handleSelectImage(index)} */}
-                                                        <img
-                                                            src={img || '/assets/images/product-placeholder.jpg'}
-                                                            alt={`Imatge de producte ${index + 1}`}
-                                                            width={100}
-                                                            height={100}
-                                                            className="h-[100px] w-[100px] object-cover"
-                                                        />
-                                                        {index === 0 && (
-                                                            <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">
-                                                                Principal
-                                                            </div>
-                                                        )}
-                                                        {index === 1 && (
-                                                            <div className="absolute top-0 left-0 rounded-br-md bg-[#00B0C8] text-white text-xs px-2 py-1">
-                                                                Secundària
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex justify-between bg-gray-50 p-1 gap-1">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleMoveImageUp(index)}
-                                                            disabled={index === 0}
-                                                            className={`text-gray-500 p-1 cursor-pointer rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                            title="Mou a l'esquerra"
-                                                        >
-                                                            <FiChevronRight className="transform rotate-180" size={16} />
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleRemoveImage(index)}
-                                                            className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
-                                                            title="Elimina imatge"
-                                                        >
-                                                            <FiTrash2 size={16} />
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleMoveImageDown(index)}
-                                                            disabled={index === productImages.length - 1}
-                                                            className={`text-gray-500 p-1 rounded cursor-pointer hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                            title="Mou a la dreta"
-                                                        >
-                                                            <FiChevronRight size={16} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                if (selectedImages && selectedImages.length > 0) {
-                                                    // Only add images not already in productImages
-                                                    const newImages = selectedImages.filter(img => !productImages.includes(img));
-                                                    if (newImages.length > 0) {
-                                                        setProductImages(prev => [...prev, ...newImages]);
-                                                        setSelectedImages([]);
-                                                        setSelectedFiles([]);
-                                                        toast.success('Imatges afegides a la galeria');
-                                                    } else {
-                                                        toast.warning('Totes les imatges ja són a la galeria');
-                                                    }
-                                                } else {
-                                                    handleAddImage();
-                                                }
-                                            }}
-                                            disabled={isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)}
-                                            className={`w-full my-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)
-                                                ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-green-600 hover:bg-green-700'
-                                                }`}
-                                        >
-                                            <FiChevronsUp size={16} />
-                                            <span>Afegeix a la galeria</span>
-                                        </button>
-                                        {/* Use preview images array as preview below uploaded images */}
-                                        {selectedImages && selectedImages.length > 0 && (
-                                            <div className="mt-2">
-                                                <h4 className="text-sm font-medium text-gray-700 mb-2">Previsualització d'imatges seleccionades</h4>
-                                                <div className="flex overflow-x-auto p-1 space-x-4">
-                                                    {selectedImages.map((img, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className="relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200"
-                                                        >
-                                                            <div className="relative">
-                                                                <Image
-                                                                    src={img || '/assets/images/product-placeholder.jpg'}
-                                                                    alt={`Imatge seleccionada ${index + 1}`}
-                                                                    width={500}
-                                                                    height={500}
-                                                                    className="h-28 w-28 object-cover"
-                                                                />
-                                                                {/* Badge for new or selected images */}
-                                                                <div className="absolute -top-0.5 left-0">
-                                                                    {img.startsWith('data:') ? (
-                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
-                                                                    ) : (
-                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Existent</span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex justify-between bg-gray-50 p-1 gap-1">
-                                                                <div className="w-6"></div>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        setSelectedImages(prev => prev.filter((_, i) => i !== index));
-                                                                        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-                                                                    }}
-                                                                    className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
-                                                                    title="Elimina imatge seleccionada"
-                                                                >
-                                                                    <FiTrash2 size={16} />
-                                                                </button>
-                                                                <div className="w-6"></div>
-                                                            </div>
+                                {/* productImages.length > 0 && ( */}
+                                <div className="mb-6">
+                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Imatges actuals</h4>
+                                    <p className="text-xs text-gray-500 mb-2">
+                                        La primera imatge serà la principal, la segona serà la de hover (opcional).
+                                    </p>
+                                    <div className="flex overflow-x-auto p-1 space-x-4">
+                                        {productImages.map((img, index) => (
+                                            <div
+                                                key={index}
+                                                className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200`}
+                                            >
+                                                <div className="relative " >
+                                                    {/* onClick={() => handleSelectImage(index)} */}
+                                                    <img
+                                                        src={img || '/assets/images/product-placeholder.jpg'}
+                                                        alt={`Imatge de producte ${index + 1}`}
+                                                        width={100}
+                                                        height={100}
+                                                        className="h-[100px] w-[100px] object-cover"
+                                                    />
+                                                    {index === 0 && (
+                                                        <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">
+                                                            Principal
                                                         </div>
-                                                    ))}
+                                                    )}
+                                                    {index === 1 && (
+                                                        <div className="absolute top-0 left-0 rounded-br-md bg-[#00B0C8] text-white text-xs px-2 py-1">
+                                                            Secundària
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex justify-between bg-gray-50 p-1 gap-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleMoveImageUp(index)}
+                                                        disabled={index === 0}
+                                                        className={`text-gray-500 p-1 cursor-pointer rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                        title="Mou a l'esquerra"
+                                                    >
+                                                        <FiChevronRight className="transform rotate-180" size={16} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveImage(index)}
+                                                        className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
+                                                        title="Elimina imatge"
+                                                    >
+                                                        <FiTrash2 size={16} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleMoveImageDown(index)}
+                                                        disabled={index === productImages.length - 1}
+                                                        className={`text-gray-500 p-1 rounded cursor-pointer hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                        title="Mou a la dreta"
+                                                    >
+                                                        <FiChevronRight size={16} />
+                                                    </button>
                                                 </div>
                                             </div>
-                                        )}
+                                        ))}
                                     </div>
-                                )}
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (selectedImages && selectedImages.length > 0) {
+                                                // Only add images not already in productImages
+                                                const newImages = selectedImages.filter(img => !productImages.includes(img));
+                                                if (newImages.length > 0) {
+                                                    setProductImages(prev => [...prev, ...newImages]);
+                                                    setSelectedImages([]);
+                                                    setSelectedFiles([]);
+                                                    toast.success('Imatges afegides a la galeria');
+                                                } else {
+                                                    toast.warning('Totes les imatges ja són a la galeria');
+                                                }
+                                            } else {
+                                                handleAddImage();
+                                            }
+                                        }}
+                                        disabled={isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)}
+                                        className={`w-full my-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-green-600 hover:bg-green-700'
+                                            }`}
+                                    >
+                                        <FiChevronsUp size={16} />
+                                        <span>Afegeix a la galeria</span>
+                                    </button>
+                                    {/* Use preview images array as preview below uploaded images */}
+                                    {selectedImages && selectedImages.length > 0 ? (
+                                        <div className="mt-2">
+                                            <h4 className="text-sm font-medium text-gray-700 mb-2">Previsualització d'imatges seleccionades</h4>
+                                            <div className="flex overflow-x-auto p-1 space-x-4">
+                                                {selectedImages.map((img, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200"
+                                                    >
+                                                        <div className="relative">
+                                                            <Image
+                                                                src={img || '/assets/images/product-placeholder.jpg'}
+                                                                alt={`Imatge seleccionada ${index + 1}`}
+                                                                width={500}
+                                                                height={500}
+                                                                className="h-28 w-28 object-cover"
+                                                            />
+                                                            {/* Distintiu per imatges noves o seleccionades */}
+                                                            <div className="absolute -top-0.5 left-0">
+                                                                {img.startsWith('data:') ? (
+                                                                    <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
+                                                                ) : (
+                                                                    <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Existent</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex justify-between bg-gray-50 p-1 gap-1">
+                                                            <div className="w-6"></div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+                                                                    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+                                                                }}
+                                                                className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
+                                                                title="Elimina imatge seleccionada"
+                                                            >
+                                                                <FiTrash2 size={16} />
+                                                            </button>
+                                                            <div className="w-6"></div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-2 text-center text-gray-500">
+                                            <p>Cap imatge seleccionada</p>
+                                        </div>
+                                    )}
+                                </div>
+                                {/* )} */}
                                 {/* Image Upload */}
                                 <div className="flex flex-col items-center space-y-4">
                                     {/* <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
