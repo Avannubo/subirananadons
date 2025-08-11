@@ -203,7 +203,17 @@ class EmailService {
     }
     static async sendPasswordResetEmail(email, resetToken) {
         try {
-            const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+            // Determine base URL based on environment
+            let baseUrl;
+            if (process.env.NODE_ENV === 'development') {
+                baseUrl = 'http://localhost:3000';
+            } else {
+                // Use your production domain (prefer HTTPS)
+                baseUrl = 'https://subirana.avannubo.net';
+                // If you want to support both, you could add logic here
+                // baseUrl = process.env.PROD_URL || 'https://subirana.avannubo.net';
+            }
+            const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
             const mailOptions = {
                 from: "info@subirananadons.com",
                 to: email,

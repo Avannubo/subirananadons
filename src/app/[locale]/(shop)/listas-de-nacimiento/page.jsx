@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import Image from "next/image";
@@ -8,6 +9,7 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 export default function BirthListsPage() {
+    const { data: session } = useSession();
     const [searchTerm, setSearchTerm] = useState('');
     const [bannerImage, setBannerImage] = useState(null);
     const router = useRouter();
@@ -115,7 +117,13 @@ export default function BirthListsPage() {
                                 <p className="text-white/90">{t('expectingDesc')}</p>
                             </div>
                             <button
-                                onClick={() => router.push('/dashboard/listas')}
+                                onClick={() => {
+                                    if (!session) {
+                                        toast.error(t('notLoggedIn'));
+                                    } else {
+                                        router.push('/dashboard/listas');
+                                    }
+                                }}
                                 className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
                             >
                                 {t('createListBtn')}
@@ -144,49 +152,49 @@ export default function BirthListsPage() {
                 </div>
                 {/* How It Works Section */}
                 <motion.div
-                    className="mt-8 md:mt-16 py-8 md:py-12 bg-gray-50 rounded-lg"
+                    className="mt-8 md:mt-16 py-8 md:py-12  rounded-lg"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6 }}
                 >
                     <div className="container mx-auto px-2 md:px-4">
                         <h2 className="text-2xl font-bold text-center mb-8 md:mb-12">{t('howWorksTitle')}</h2>
-                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-8 md:space-y-0 overflow-x-auto">
-                            <div className="flex-1 min-w-[220px] text-center">
-                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep1Title')}</h3>
-                                <p className="text-gray-600">{t('howWorksStep1Desc')}</p>
-                            </div>
-                            <div className="flex-1 min-w-[220px] text-center">
-                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex flex-col p-4 md:flex-row md:space-x-4 space-y-8 md:space-y-0 overflow-x-auto">
+                            <div className="flex-1 min-w-[220px] shadow-md p-6 rounded-lg text-center">
+                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">
+                                    <svg className="w-8 h-8 text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep2Title')}</h3>
-                                <p className="text-gray-600">{t('howWorksStep2Desc')}</p>
+                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep1Title', { default: 'Crea tu lista / Crea la teva llista' })}</h3>
+                                <p className="text-gray-600">{t('howWorksStep1Desc', { default: 'Inicia sesión con tu usuario, accede a tu perfil y crea y personaliza tu lista / Inicia sesió amb el teu usuari, accedeix al teu perfil i crea i personalitza la teva llista' })}</p>
                             </div>
-                            <div className="flex-1 min-w-[220px] text-center">
-                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            <div className="flex-1 min-w-[220px] shadow-md p-6 rounded-lg  text-center">
+                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">
+                                    <svg className="w-8 h-8  text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep3Title')}</h3>
-                                <p className="text-gray-600">{t('howWorksStep3Desc')}</p>
+                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep2Title', { default: 'Añade los productos / Afegeix els productes' })}</h3>
+                                <p className="text-gray-600">{t('howWorksStep2Desc', { default: 'Elige tus productos favoritos entre todo el catalogo de nuestra tienda / Eligeix els teus productes favorits entre tot el cataleg de la nostra botiga' })}</p>
                             </div>
-                            <div className="flex-1 min-w-[220px] text-center">
-                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#00B0C8] text-white">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8 4-8-4V5l8 4 8-4v2zM4 13.8V7.2l8 4 8-4v6.6" />
+                            <div className="flex-1 min-w-[220px] shadow-md p-6 rounded-lg  text-center">
+                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">
+                                    <svg className="w-8 h-8  text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep4Title')}</h3>
-                                <p className="text-gray-600">{t('howWorksStep4Desc')}</p>
+                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep3Title', { default: 'Comparte tu lista / Comparteix la teva llista' })}</h3>
+                                <p className="text-gray-600">{t('howWorksStep3Desc', { default: 'Envía el enlace generado para que tus amigos y familiares compren tus regalos / Enviía l’enllaç generat per a que els teus amics i familiars comprin els teus regals' })}</p>
+                            </div>
+                            <div className="flex-1 min-w-[220px] shadow-md  p-6 rounded-lg  text-center">
+                                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">
+                                    <svg className="w-8 h-8  text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m8-8v13m-8 0V8m-8 8v13" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-lg font-semibold mb-2">{t('howWorksStep4Title', { default: 'Adquiere tus regalos / Adquireix els teus regals' })}</h3>
+                                <p className="text-gray-600">{t('howWorksStep4Desc', { default: 'Cuando la lista esté finalizada, podrás recoger todos los regalos en la tienda / Quan la llista estigui finalitzada podràs recollir tots els teus regals a la botiga' })}</p>
                             </div>
                         </div>
                     </div>

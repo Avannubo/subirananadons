@@ -17,7 +17,7 @@ export default withAuth(
             path.startsWith('/dashboard/configuracion');
         const userRole = req.nextauth.token?.role || 'user';
         if (isAdminRoute && userRole !== 'admin') {
-            return NextResponse.redirect(new URL('/dashboard/orders', req.url));
+            return NextResponse.redirect(new URL('/dashboard', req.url));
         }
         return NextResponse.next();
     },

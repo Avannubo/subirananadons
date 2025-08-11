@@ -18,7 +18,7 @@ export default function AuthModal({ title }) {
     const [resetEmail, setResetEmail] = useState('');
     const openLogin = () => {
         if (session) {
-            router.push("/dashboard/orders");
+            router.push("/dashboard");
         } else {
             setActiveView('login');
             setIsOpen(true);
@@ -95,15 +95,19 @@ export default function AuthModal({ title }) {
             if (result?.error) {
                 let errorMessage = t('loginError') + ' ';
                 console.log('Login error:', result.error);
-                switch (result.error) {
-                    case 'No user found with this email':
-                        errorMessage += t('loginEmailNotFound');
-                        break;
-                    case 'Invalid password':
-                        errorMessage += t('loginPasswordIncorrect');
-                        break;
-                    default:
-                        errorMessage += t('loginCheckCredentials');
+                if (result.error === 'Account not active') {
+                    errorMessage = t('loginAccountNotActive') || 'Tu cuenta no está activa. Contacta con el propietario de la tienda.';
+                } else {
+                    switch (result.error) {
+                        case 'No user found with this email':
+                            errorMessage += t('loginEmailNotFound');
+                            break;
+                        case 'Invalid password':
+                            errorMessage += t('loginPasswordIncorrect');
+                            break;
+                        default:
+                            errorMessage += t('loginCheckCredentials');
+                    }
                 }
                 toast.error(errorMessage);
                 return;
@@ -112,7 +116,7 @@ export default function AuthModal({ title }) {
             console.log('Login successful, redirecting to dashboard...');
             setTimeout(() => {
                 closeModal();
-                router.push('/dashboard/orders');
+                router.push('/dashboard');
             }, 1000);
         } catch (error) {
             console.error('Login error:', error);
@@ -145,12 +149,13 @@ export default function AuthModal({ title }) {
                 toast.error(t('registerPasswordLength'));
                 return;
             }
+            // Set user as active on creation
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, email, password }),
+                body: JSON.stringify({ name, email, password, IsActive: true }),
             });
             const data = await response.json();
             if (!response.ok) {
@@ -169,7 +174,11 @@ export default function AuthModal({ title }) {
                 password,
             });
             if (signInResult?.error) {
-                toast.error(t('registerLoginError'));
+                if (signInResult.error === 'Account not active') {
+                    toast.error(t('loginAccountNotActive') || 'Tu cuenta no está activa. Contacta con el propietario de la tienda.');
+                } else {
+                    toast.error(t('registerLoginError'));
+                }
                 toggleView('login');
             } else {
                 setTimeout(() => {
@@ -205,8 +214,9 @@ export default function AuthModal({ title }) {
                 </button>
             ) : (
                 <button
-                    onClick={openLogin}
-                        className="p-2  transition-colors flex items-center justify-center cursor-pointer text-gray-700 hover:text-[#00B0C8]"
+                        onClick={openLogin}
+                        id='login-button'
+                    className="p-2  transition-colors flex items-center justify-center cursor-pointer text-gray-700 hover:text-[#00B0C8]"
                     aria-label="Abrir modal de autenticación"
                 >
                     <UserRound size={24} />

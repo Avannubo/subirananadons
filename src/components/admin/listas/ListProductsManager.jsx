@@ -56,6 +56,8 @@ export default function ListProductsManager({ listId, onUpdate }) {
             setLoading(true);
             const result = await fetchBirthListItems(listId);
             if (result.success) {
+                // console.log('Birth list items loaded:', result.data);
+                
                 setItems(result.data || []);
             } else {
                 toast.error(t.errorLoad);
@@ -226,9 +228,9 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                             <div className="text-sm font-medium text-gray-900">
                                                                 {item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
                                                             </div>
-                                                            <div className="text-sm text-gray-500">
-                                                                {item.product.brand}
-                                                            </div>
+                                                            {/* <div className="text-sm text-gray-500">
+                                                                {item.product.brand.name}
+                                                            </div> */}
                                                         </div>
                                                     </div>
                                                 </td>

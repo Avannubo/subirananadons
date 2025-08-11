@@ -93,7 +93,16 @@ export default function ParametersTab() {
         setLoading(true);
         setError("");
         try {
-            const saved = await saveParameter(key, edit[key], description);
+            let value = edit[key];
+            // Always extract src if this is the googleMapsSrc param
+            if (key === "googleMapsSrc") {
+                if (typeof value === "string") {
+                    const match = value.match(/src=["']([^"']+)["']/);
+                    if (match) value = match[1];
+                    else value = value.trim();
+                }
+            }
+            const saved = await saveParameter(key, value, description);
             setParameters((prev) => ({ ...prev, [key]: saved.value }));
             setEditing((prev) => ({ ...prev, [key]: false }));
         } catch (e) {
@@ -146,6 +155,23 @@ export default function ParametersTab() {
             type: "text",
             description: "Horario de apertura mostrado en la web",
             unit: "",
+        },
+        {
+            key: "googleMapsSrc",
+            label: locale === 'ca' ? 'Google Maps' : 'Google Maps',
+            type: "text",
+            description: locale === 'ca'
+                ? "Afegeix aquí l'enllaç src de l'iframe de Google Maps. Només la part src, no tot l'iframe. Exemple: https://www.google.com/maps/embed?..."
+                : "Agrega aquí el enlace src del iframe de Google Maps. Solo la parte src, no todo el iframe. Ejemplo: https://www.google.com/maps/embed?...",
+            unit: "",
+            sanitize: (value) => {
+                // If user pastes the whole iframe, extract the src attribute
+                if (!value) return "";
+                const match = value.match(/src=["']([^"']+)["']/);
+                if (match) return match[1];
+                // If user pastes only the src, return as is
+                return value.trim();
+            }
         },
         {
             key: "email",
@@ -229,8 +255,8 @@ export default function ParametersTab() {
     return (
         <div className="space-y-8 mx-auto ">
             {error && <div className="text-red-500">{error}</div>}
-            {/* General Parameters */}
-            {parameterDefs.map((param) => (
+            {/* General Parameters (except Google Maps) */}
+            {parameterDefs.filter(param => param.key !== "googleMapsSrc").map((param) => (
                 <div key={param.key} className="bg-gray-50 p-4 flex flex-row justify-between items-center rounded-lg border border-gray-200">
                     <div className="flex-1 flex-col w-full">
                         <h2 className="text-lg font-semibold mb-2">{param.label}</h2>
@@ -299,7 +325,6 @@ export default function ParametersTab() {
                     )}
                 </div>
             ))}
-
             {/* Socials Parameters */}
             <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
                 <h2 className="text-lg font-bold mb-4 flex items-center justify-between">{locale === 'ca' ? 'Xarxes Socials' : 'Redes Sociales'}
@@ -408,6 +433,75 @@ export default function ParametersTab() {
                     })}
                 </div>
             </div>
+
+            {/* Google Maps Parameter at the end */}
+            {(() => {
+                const param = parameterDefs.find(p => p.key === "googleMapsSrc");
+                if (!param) return null;
+                return (
+                    <div key={param.key} className="bg-gray-50 p-4 flex flex-row justify-between items-start rounded-lg border border-gray-200">
+                        <div className="flex-1 flex-col w-full">
+                            <h2 className="text-lg font-semibold mb-2 ">{param.label}</h2>
+                        </div>
+                        {editing[param.key] ? (
+                            <div className="flex-1 flex flex-row justify-end items-center gap-2">
+                                <Input
+                                    type={param.type}
+                                    value={edit[param.key] ?? ""}
+                                    onChange={e => {
+                                        let val = e.target.value;
+                                        if (param.sanitize) {
+                                            val = param.sanitize(val);
+                                        }
+                                        setEdit((prev) => ({ ...prev, [param.key]: val }));
+                                    }}
+                                    className="w-64"
+                                />
+                                <button
+                                    onClick={() => saveEdit(param.key, param.description)}
+                                    className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8]"
+                                    disabled={loading}
+                                >
+                                    {locale === 'ca' ? 'Desar' : 'Guardar'}
+                                </button>
+                                <button
+                                    onClick={() => cancelEdit(param.key)}
+                                    className="px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                    disabled={loading}
+                                >
+                                    {locale === 'ca' ? 'Cancel·lar' : 'Cancelar'}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-4 justify-end">
+                                {parameters[param.key] ? (
+                                    <div className="h-[300px] bg-gray-100 rounded-lg overflow-hidden min-w-[300px] w-[600px]">
+                                        <iframe
+                                            src={parameters[param.key]}
+                                            width="100%"
+                                            height="100%"
+                                            style={{ border: 0 }}
+                                            allowFullScreen=""
+                                            loading="lazy"
+                                        ></iframe>
+                                    </div>
+                                ) : (
+                                    <span className="text-md text-gray-400">{locale === 'ca' ? 'No configurat' : 'No configurado'}</span>
+                                )}
+                                <button
+                                    onClick={() => startEdit(param.key)}
+                                    className="p-1 rounded hover:bg-[#e6f7fa] border border-[#F6A609] transition"
+                                    title="Editar"
+                                >
+                                    <Pencil size={18} className="text-[#F6A609]" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
+
+            
         </div>
     );
 }

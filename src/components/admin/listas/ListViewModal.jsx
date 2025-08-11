@@ -2,9 +2,7 @@
 import { FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Image from 'next/image';
 import { useUser } from '@/contexts/UserContext';
-
 import { useState, useCallback, useEffect } from 'react';
-
 // Helper to get product name in correct locale with fallback
 function getProductName(product, locale = 'es') {
     console.log('getProductName called with:', product, locale);
@@ -54,7 +52,7 @@ const translations = {
         errorProductData: 'Error: Dades del producte no disponibles',
         productId: 'ID de l’article:',
         cancel: 'Cancel·lar',
-        save: 'Desar',
+        save: 'Tancar',
         buyerData: 'Dades del comprador',
         name: 'Nom *',
         email: 'Email *',
@@ -107,7 +105,7 @@ const translations = {
         errorProductData: 'Error: Datos del producto no disponibles',
         productId: 'ID del artículo:',
         cancel: 'Cancelar',
-        save: 'Guardar',
+        save: 'Cerrar',
         buyerData: 'Datos del comprador',
         name: 'Nombre *',
         email: 'Email *',
@@ -125,7 +123,6 @@ const translations = {
         guardarCambios: 'Guardar',
     }
 };
-
 function getLocale() {
     if (typeof window !== 'undefined') {
         const lang = window.navigator.language || 'es';
@@ -136,7 +133,6 @@ function getLocale() {
 import { updateBirthListItems, fetchBirthListItems, updateBirthListItemState, updateBirthList } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
 import { stringify } from 'querystring';
-
 export default function ListViewModal({
     showModal,
     setShowModal,
@@ -152,7 +148,6 @@ export default function ListViewModal({
     const [loading, setLoading] = useState(false);
     const [items, setItems] = useState([]);
     const { user, loading: userLoading } = useUser();
-
     const [showDataModal, setShowDataModal] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [direction, setDirection] = useState(null);
@@ -162,7 +157,6 @@ export default function ListViewModal({
         phone: '',
         message: ''
     });
-
     // Reset userData when modal closes or changes item
     useEffect(() => {
         if (!showModal || !currentItem) {
@@ -182,7 +176,6 @@ export default function ListViewModal({
             });
         }
     }, [showModal, currentItem]);
-
     const handleUserDataChange = (e) => {
         const { name, value } = e.target;
         setUserData(prev => ({
@@ -190,16 +183,13 @@ export default function ListViewModal({
             [name]: value
         }));
     };
-
     const calculatePurchasedProducts = useCallback(() => {
         return items.filter(item => item.state === 2).length;
     }, [items]);
-
     const calculateProgress = useCallback(() => {
         if (items.length === 0) return 0;
         return Math.round((calculatePurchasedProducts() / items.length) * 100);
     }, [items.length, calculatePurchasedProducts]);
-
     useEffect(() => {
         if (!showModal) {
             setItems([]);
@@ -208,20 +198,16 @@ export default function ListViewModal({
             setItems(listItems);
         }
     }, [listItems, showModal]);
-
     const getPendingItems = useCallback(() => items.filter(item => item.state === 0), [items]);
     const getReservedItems = useCallback(() => items.filter(item => item.state === 1), [items]);
     const getBoughtItems = useCallback(() => items.filter(item => item.state === 2), [items]);
-
     const confirmStateChange = async () => {
         if (!currentItem) return;
         const listId = selectedList.rawData?._id || selectedList._id;
-
         if (!listId) {
             toast.error('Error: ID de lista no encontrado');
             return;
         }
-
         try {
             // Get the new state based on direction
             let newState;
@@ -238,22 +224,18 @@ export default function ListViewModal({
                 default:
                     return;
             }
-
             // Validate state change
             if (newState === currentItem.state) {
                 return toast.error('El producto ya está en este estado');
             }
-
             // Check required fields for reserve/buy actions
             if ((direction === 'reserve' || direction === 'buy') && (!userData.name || !userData.email)) {
                 toast.error('Por favor complete los campos obligatorios (nombre y email)');
                 return;
             }
-
             setLoading(true);
             // Update the item's state
             const result = await updateBirthListItemState(listId, currentItem._id, newState, userData);
-
             if (result.success) {
                 // Update the item in the local state
                 const updatedItems = items.map(item =>
@@ -276,7 +258,6 @@ export default function ListViewModal({
             setLoading(false);
         }
     };
-
     const moveItem = (item, dir) => {
         setCurrentItem(item);
         setDirection(dir);
@@ -297,7 +278,6 @@ export default function ListViewModal({
             }
         }
     };
-
     const renderStateLabel = (state) => {
         switch (state) {
             case 0: return t.statePending;
@@ -306,7 +286,6 @@ export default function ListViewModal({
             default: return t.stateUnknown;
         }
     };
-
     const handleSaveList = async () => {
         try {
             const listId = selectedList.rawData?._id || selectedList._id;
@@ -318,7 +297,6 @@ export default function ListViewModal({
             // Check if all items are in state 2 (bought)
             const allBought = items.every(item => item.state === 2);
             const newStatus = allBought ? 'Completada' : 'Activa';
-
             const result = await updateBirthList(listId, { status: newStatus });
             if (result.success) {
                 // Update local state
@@ -339,7 +317,6 @@ export default function ListViewModal({
             setLoading(false);
         }
     };
-
     const renderProduct = (item, index) => {
         if (!item?.product?._id) {
             console.warn('Missing product data for item:', item);
@@ -354,7 +331,6 @@ export default function ListViewModal({
                 </div>
             );
         }
-
         // Hide reserver client info for owner if reserved (state === 1)
         const isOwner = user && selectedList && user._id === selectedList.ownerId;
         const hideUserData = isOwner && item.state === 1;
@@ -486,9 +462,7 @@ export default function ListViewModal({
             </div>
         );
     };
-
     if (!showModal || !selectedList) return null;
-
     return (
         <>
             <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
@@ -513,7 +487,6 @@ export default function ListViewModal({
                                 </button>
                             </div>
                         </div>
-
                         {/* Main information cards */}
                         <div>
                             <div className="flex items-center mb-4 ">
@@ -613,7 +586,6 @@ export default function ListViewModal({
                                 </div>
                             </div>
                         </div>
-
                         {/* Products sections */}
                         <div className="grid grid-cols-3 gap-4 flex-1 h-full">
                             {/* Pending Items - Always shown, but for owner also show reserved with tag */}
@@ -677,7 +649,6 @@ export default function ListViewModal({
                                     })()}
                                 </div>
                             </div>
-
                             {/* Bought Items - Always shown */}
                             <div className="flex flex-col">
                                 <div className="flex items-center mb-4">
@@ -704,7 +675,6 @@ export default function ListViewModal({
                                     )}
                                 </div>
                             </div>
-
                             {/* Third column - Different based on user role */}
                             {user.role === 'admin' ? (
                                 /* Admin view - Reserved Items */

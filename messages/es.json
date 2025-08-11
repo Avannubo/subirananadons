@@ -78,7 +78,16 @@
     "feature1": "Crea lista",
     "feature2": "Añade tus favoritos",
     "feature3": "Comparte la lista",
-    "feature4": "Recibe los regalos"
+    "feature4": "Recibe los regalos",
+    "howWorksTitle": "¿Cómo funciona?",
+    "howWorksStep1Title": "Crea tu lista",
+    "howWorksStep1Desc": "Inicia sesión con tu usuario, accede a tu perfil y crea y personaliza tu lista.",
+    "howWorksStep2Title": "Añade los productos",
+    "howWorksStep2Desc": "Elige tus productos favoritos entre todo el catálogo de nuestra tienda.",
+    "howWorksStep3Title": "Comparte tu lista",
+    "howWorksStep3Desc": "Envía el enlace generado para que tus amigos y familiares compren tus regalos.",
+    "howWorksStep4Title": "Adquiere tus regalos",
+    "howWorksStep4Desc": "Cuando la lista esté finalizada, podrás recoger todos los regalos en la tienda."
   },
   "ContactPage": {
     "title": "Contacto",
@@ -207,13 +216,14 @@
     "recommendBtn": "Ver recomendaciones",
     "howWorksTitle": "¿Cómo funciona?",
     "howWorksStep1Title": "Crea tu lista",
-    "howWorksStep1Desc": "Personaliza la lista con los productos que quieres recibir.",
-    "howWorksStep2Title": "Añade productos",
-    "howWorksStep2Desc": "Elige entre miles de artículos para bebés y mamás.",
-    "howWorksStep3Title": "Comparte con familiares y amigos",
-    "howWorksStep3Desc": "Envía el enlace de la lista para que puedan ver y reservar regalos.",
-    "howWorksStep4Title": "Recibe los regalos",
-    "howWorksStep4Desc": "Los regalos se marcan como reservados o comprados y podrás recogerlos en la tienda."
+    "howWorksStep1Desc": "Inicia sesión con tu usuario, accede a tu perfil y crea y personaliza tu lista.",
+    "howWorksStep2Title": "Añade los productos",
+    "howWorksStep2Desc": "Elige tus productos favoritos entre todo el catálogo de nuestra tienda.",
+    "howWorksStep3Title": "Comparte tu lista",
+    "howWorksStep3Desc": "Envía el enlace generado para que tus amigos y familiares compren tus regalos.",
+    "howWorksStep4Title": "Adquiere tus regalos",
+    "howWorksStep4Desc": "Cuando la lista esté finalizada, podrás recoger todos los regalos en la tienda.",
+    "notLoggedIn": "Debes iniciar sesión para crear o ver tu listas de nacimiento."
   },
   "BirthListDetailPage": {
     "listTitle": "Lista de nacimiento de {babyName}",

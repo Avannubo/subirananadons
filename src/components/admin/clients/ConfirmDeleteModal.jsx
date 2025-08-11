@@ -30,11 +30,11 @@ const translations = {
     }
 };
 const t = translations[locale];
-const { notifyChange } = useClientStats();
+// const { notifyChange } = useClientStats();
 
 const handleConfirm = async () => {
     await onConfirm();
-    await notifyChange();
+    // await notifyChange();
 };
 
 return (

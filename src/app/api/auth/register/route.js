@@ -25,11 +25,13 @@ export async function POST(request) {
             );
         }
 
-        // Create new user
+        // Create new user, set emailVerified to now (auto-verify)
         const user = await User.create({
             name,
             email,
             password,
+            emailVerified: new Date(),
+            IsActive: true, // Set user as active by default
         });
 
         // Remove password from response

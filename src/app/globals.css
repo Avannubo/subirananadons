@@ -62,6 +62,6 @@ body {
   /* Firefox */
 }
 
-button{
+button, a{
   cursor: pointer; 
 }

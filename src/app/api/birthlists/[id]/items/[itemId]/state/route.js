@@ -18,7 +18,7 @@ export async function PUT(request, { params }) {
         // Validate ID formats
         if (!isValidObjectId(id) || !isValidObjectId(itemId)) {
             return NextResponse.json(
-                { success: false, message: 'Invalid ID format' },
+                { success: false, message: 'Format d\'ID invàlid' },
                 { status: 400 }
             );
         }
@@ -30,7 +30,7 @@ export async function PUT(request, { params }) {
 
         if (!birthList) {
             return NextResponse.json(
-                { success: false, message: 'Birth list not found' },
+                { success: false, message: 'Llista de naixement no trobada' },
                 { status: 404 }
             );
         }
@@ -40,7 +40,7 @@ export async function PUT(request, { params }) {
 
         if (itemIndex === -1) {
             return NextResponse.json(
-                { success: false, message: 'Item not found in birth list' },
+                { success: false, message: 'Producte no trobat a la llista de naixement' },
                 { status: 404 }
             );
         }
@@ -51,7 +51,7 @@ export async function PUT(request, { params }) {
         // Validate state
         if (typeof state !== 'number' || state < 0 || state > 2) {
             return NextResponse.json(
-                { success: false, message: 'Invalid state value. Must be 0, 1, or 2.' },
+                { success: false, message: 'Valor d\'estat invàlid. Ha de ser 0, 1 o 2.' },
                 { status: 400 }
             );
         }
@@ -60,7 +60,7 @@ export async function PUT(request, { params }) {
         if (state > 0) {
             if (!userData || !userData.name || !userData.email) {
                 return NextResponse.json(
-                    { success: false, message: 'User data (name and email) required for reservations and purchases' },
+                    { success: false, message: 'Les dades de l\'usuari (nom i correu electrònic) són necessàries per a reserves i compres' },
                     { status: 400 }
                 );
             }
@@ -85,14 +85,14 @@ export async function PUT(request, { params }) {
 
         return NextResponse.json({
             success: true,
-            message: 'Item state updated successfully',
+            message: 'Estat del producte actualitzat correctament',
             data: updatedBirthList.items[itemIndex]
         });
 
     } catch (error) {
-        console.error('Error updating item state:', error);
+        console.error('Error actualitzant l\'estat del producte:', error);
         return NextResponse.json(
-            { success: false, message: 'Error updating item state', error: error.message },
+            { success: false, message: 'Error actualitzant l\'estat del producte', error: error.message },
             { status: 500 }
         );
     }

@@ -1,12 +1,28 @@
 'use client';
 import { Dialog } from '@headlessui/react';
-import { FiX, FiUser, FiMail, FiCalendar, FiShoppingBag, FiBell } from 'react-icons/fi';
-import Image from 'next/image';
+import { FiX, FiUser, FiMail, FiShoppingBag } from 'react-icons/fi'; 
 import { useState, useEffect } from 'react';
-
 export default function ClientViewModal({ isOpen, onClose, client }) {
+    const [orderCount, setOrderCount] = useState(0);
+    useEffect(() => {
+        if (!client?._id && !client?.id) return;
+        // Fetch order count for this client
+        const fetchOrderCount = async () => {
+            try {
+                // Try both _id and id for compatibility
+                const userId = client._id || client.id;
+                const res = await fetch(`/api/orders/count?userId=${userId}`);
+                if (!res.ok) throw new Error('Failed to fetch order count');
+                const data = await res.json();
+                console.log(data);
+                setOrderCount(data.count ?? 0);
+            } catch (err) {
+                setOrderCount(0);
+            }
+        };
+        fetchOrderCount();
+    }, [client]);
     if (!client) return null;
-
     // Locale detection (default to 'ca')
     let locale = 'ca';
     if (typeof window !== 'undefined' && window.navigator) {
@@ -51,7 +67,6 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
         }
     };
     const t = translations[locale];
-
     // Format date to local format
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
@@ -62,7 +77,6 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
             day: 'numeric',
         });
     };
-
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -105,18 +119,17 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                         <h3 className="text-xl font-semibold text-gray-800">
                                             {client.name} {client.lastName}
                                         </h3>
-                                        <p className="text-sm text-gray-500 mt-1">
+                                        {/* <p className="text-sm text-gray-500 mt-1">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${client.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                                 {client.active ? t.active : t.inactive}
                                             </span>
-                                        </p>
+                                        </p> */}
                                         <p className="text-sm text-gray-600 mt-2">
                                             {t.clientSince} {formatDate(client.registrationDate)}
                                         </p>
                                     </div>
                                 </div>
                             </div>
-
                             {/* Right column - Detailed Information */}
                             <div className="md:col-span-2 space-y-6">
                                 {/* Contact Information */}
@@ -135,29 +148,6 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                         </div>
                                     </div>
                                 </section>
-
-                                {/* Preferences Information */}
-                                <section className="border-b border-gray-200 pb-4">
-                                    <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiBell className="mr-2 text-[#00B0C8]" /> {t.preferences}
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                            <span className="text-sm font-medium text-gray-500">{t.newsletter}:</span>
-                                            <p className={`text-sm ${client.newsletter ? 'text-green-600' : 'text-red-600'}`}>
-                                                {client.newsletter ? t.subscribed : t.notSubscribed}
-                                            </p>
-                                        </div>
-                                        <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                            <span className="text-sm font-medium text-gray-500">{t.offers}:</span>
-                                            <p className={`text-sm ${client.partnerOffers ? 'text-green-600' : 'text-red-600'}`}>
-                                                {client.partnerOffers ? t.subscribed : t.notSubscribed}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                {/* Purchase Information */}
                                 <section>
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
                                         <FiShoppingBag className="mr-2 text-[#00B0C8]" /> {t.purchaseHistory}
@@ -165,7 +155,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                     <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                         <span className="text-sm font-medium text-gray-500">{t.totalOrders}:</span>
                                         <p className="text-base font-medium text-gray-800">
-                                            {client.sales || 0} {t.orders}
+                                            {orderCount} {t.orders}
                                         </p>
                                     </div>
                                 </section>

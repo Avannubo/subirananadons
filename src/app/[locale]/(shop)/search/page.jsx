@@ -59,6 +59,7 @@ export default function SearchPage() {
                 const flattenCategories = (categories) => {
                     let flat = [];
                     categories.forEach(cat => {
+                        // console.log('Flattening category:', cat);
                         flat.push({
                             id: cat._id,
                             name: cat.name,
@@ -146,8 +147,27 @@ export default function SearchPage() {
                 );
             });
         }
-        // Category filter
+        // Category filter (include subcategories' products in parent)
         if (selectedCategory) {
+            // Find all subcategory names/ids for the selected category
+            const getAllSubCatValues = (catList, parentValue) => {
+                let values = [];
+                for (const cat of catList) {
+                    const catValue = typeof cat.name === 'string'
+                        ? cat.name
+                        : (cat.name?.[locale] || cat.name?.ca || cat.name?.es || '');
+                    if (String(catValue).trim().toLowerCase() === String(parentValue).trim().toLowerCase()) {
+                        values.push(catValue);
+                        if (cat.children && cat.children.length) {
+                            values = values.concat(getAllSubCatValues(cat.children, null));
+                        }
+                    } else if (cat.children && cat.children.length) {
+                        values = values.concat(getAllSubCatValues(cat.children, parentValue));
+                    }
+                }
+                return values;
+            };
+            const allCatValues = getAllSubCatValues(categories, selectedCategory);
             filtered = filtered.filter(p => {
                 let cat = '';
                 if (p.category && typeof p.category === 'object') {
@@ -155,8 +175,8 @@ export default function SearchPage() {
                 } else if (typeof p.category === 'string') {
                     cat = p.category;
                 }
-                // Normalize both for comparison
-                return String(cat).trim().toLowerCase() === String(selectedCategory).trim().toLowerCase();
+                // Normalize for comparison
+                return allCatValues.some(val => String(cat).trim().toLowerCase() === String(val).trim().toLowerCase());
             });
         }
         // Brand filter
@@ -306,33 +326,35 @@ export default function SearchPage() {
                                     className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
                                 >
                                     <option value="">{t('allCategoriesOption')}</option>
-                                    {categories.map((category, index) => {
-                                        const catValue = typeof category.name === 'string'
-                                            ? category.name
-                                            : (category.name?.[locale] || category.name?.ca || category.name?.es || '');
-                                        return (
-                                            <React.Fragment key={category._id || `cat-${index}`}>
-                                                <option key={category.id || `catopt-${index}`}
-                                                    value={catValue}>
-                                                    {catValue}
-                                                </option>
-                                                {category.children?.map((child, childIdx) => {
-                                                    const childValue = typeof child.name === 'string'
-                                                        ? child.name
-                                                        : (child.name?.[locale] || child.name?.ca || child.name?.es || '');
-                                                    return (
-                                                        <option
-                                                            key={child.id ? `${child.id}-child` : `childopt-${index}-${childIdx}`}
-                                                            value={childValue}
-                                                            className="pl-4"
-                                                        >
-                                                            {childValue}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </React.Fragment>
-                                        );
-                                    })}
+                                    {categories
+                                        // .filter(category => category.children ) // Ensure category has a name
+                                        .map((category, index) => {
+                                            const catValue = typeof category.name === 'string'
+                                                ? category.name
+                                                : (category.name?.[locale] || category.name?.ca || category.name?.es || '');
+                                            return (
+                                                <React.Fragment key={category._id || `cat-${index}`}>
+                                                    <option key={category.id || `catopt-${index}`}
+                                                        value={catValue}>
+                                                        {catValue}
+                                                    </option>
+                                                    {category.children?.map((child, childIdx) => {
+                                                        const childValue = typeof child.name === 'string'
+                                                            ? child.name
+                                                            : (child.name?.[locale] || child.name?.ca || child.name?.es || '');
+                                                        return (
+                                                            <option
+                                                                key={child.id ? `${child.id}-child` : `childopt-${index}-${childIdx}`}
+                                                                value={childValue}
+                                                                className="pl-4"
+                                                            >
+                                                                {childValue}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </React.Fragment>
+                                            );
+                                        })}
                                 </select>
                             </div>
                             {/* Brands Selector */}

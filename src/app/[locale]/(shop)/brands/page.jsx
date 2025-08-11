@@ -297,21 +297,23 @@ export default function BrandsPage() {
                     </div>
                 </div>
             ) : (
-                <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white">
+                    <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white ">
                     <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">{t('title')}</h1>
                 </div>
             )}
+                    {/* <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">{t('sidebarTitle')}</h2> */}
             <div className="container mx-auto px-2 sm:px-4 py-4 ">
-                <div className="flex flex-col lg:flex-row gap-2  ">
+
+                <div className="flex flex-col lg:flex-row gap-2 border-t border-[#00B0C8] pb-2">
+
                     {/* Brands Sidebar */}
                     <motion.div
-                        className="w-full lg:w-1/6 mb-2 md:mb-0"
+                        className="w-full lg:w-1/6 mb-2 md:mb-0 pt-6"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
                     >
                         <div className="sticky top-24 bg-white">
-                            <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">{t('sidebarTitle')}</h2>
                             <div className="hidden lg:block max-h-[calc(100vh-650px)] lg:max-h-[65vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                 <ul className="space-y-1">
                                     {/* All Products option - always show this */}
@@ -406,7 +408,7 @@ export default function BrandsPage() {
                     </motion.div>
                     {/* Products Section */}
                     <motion.div
-                        className="w-full  lg:w-5/6"
+                        className="w-full  lg:w-5/6 pt-6"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4, duration: 0.5 }}

@@ -1,9 +1,7 @@
 "use client";
 import React from 'react';
 import useShopParameter from '@/lib/useShopParameter';
-import Header from '@/components/landing/header';
-import Footer from '@/components/landing/footer';
-import { Info, Database, FileText, Shield, User, Contact, RefreshCw } from 'lucide-react';
+import ShopLayout from '@/components/Layouts/shop-layout'; 
 // Removed export const metadata because it is not allowed in a client component
 import { useTranslations, useLocale } from 'next-intl';
 export default function PrivacyPage() {

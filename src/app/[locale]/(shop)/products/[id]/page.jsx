@@ -57,7 +57,7 @@ export default function Page() {
     const [error, setError] = useState(null);
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
-    const [activeTab, setActiveTab] = useState('DESCRIPCIÓN');
+    const [activeTab, setActiveTab] = useState('DETALLES DEL PRODUCTO');
     const { addToCart } = useCart();
     const [dragConstraints, setDragConstraints] = useState({ right: 0, left: 0 });
     const scrollContainerRef = useRef(null);
@@ -203,7 +203,7 @@ export default function Page() {
         if (!product) return;
         try {
             await addToCart(product, quantity);
-            toast.success(`${quantity} ${product.name} ${t(addedToCart)} `);//añadido al carrito
+            // toast.success(`${quantity} ${product.name} ${t(addedToCart)} `);//añadido al carrito
         } catch (error) {
             toast.error('Error al añadir al carrito');
             console.error('Error adding to cart:', error);
@@ -313,18 +313,18 @@ export default function Page() {
         <ShopLayout>
             <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 mt-20">
                 {/* Breadcrumb */}
-                <nav className="mb-6 sm:mb-8 overflow-x-auto mt-10">
-                    <ol className="hidden md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
+                <nav className="mb-6   sm:mb-8 overflow-x-auto mt-10 border-b border-[#00B0C8]">
+                    <ol className="hidden pl-2 md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
                         <li><a href="/products" className="hover:text-gray-700">{t('breadcrumbProducts')}</a></li>
                         {/* Render full category path if possible */}
                         {categoryPath && categoryPath.length > 0 && categoryPath.map((cat) => [
-                            <li key={cat._id}><span className="mx-2">/</span></li>,
+                            <li key={cat._id}><span className="mx-2"><svg className="w-3 h-3 mx-1 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path></svg></span></li>,
                             <li key={cat._id + '-cat'}>
                                 <a href={`/products?category=${cat._id}`} className="hover:text-gray-700 whitespace-nowrap">{getCategoryDisplayName(cat, locale)}</a>
                             </li>
                         ])}
-                        <li><span className="mx-2">/</span></li>
-                        <li className="text-gray-900 font-medium whitespace-nowrap">{typeof product.name === 'object' ? product.name[locale] : product.name}</li>
+                        <li><span className="mx-2"> <svg className="w-3 h-3 mx-1 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path></svg></span></li>
+                        <li className="text-gray-600 font-bold whitespace-nowrap">{typeof product.name === 'object' ? product.name[locale] : product.name}</li>
                     </ol>
                 </nav>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -476,36 +476,37 @@ export default function Page() {
                 </div>
                 {/* Product Details Tabs */}
                 <div className="mt-10 sm:mt-16">
-                    {/* <div className="border-b border-gray-200">
+                    <div className="border-b border-gray-200">
                         <nav className="-mb-px  flex flex-wrap space-x-4 sm:space-x-8 overflow-x-auto">
-                            {[t('tabDescription'), t('tabDetails')].map((tab, idx) => (
-                                <button
+                            {[t('tabDetails')].map((tab, idx) => (//t('tabDescription'), 
+                                <div
                                     key={tab}
-                                    onClick={() => setActiveTab(idx === 0 ? 'DESCRIPCIÓN' : 'DETALLES DEL PRODUCTO')}
-                                    className={`pb-4 px-1 cursor-pointer text-xs sm:text-sm font-medium ${activeTab === (idx === 0 ? 'DESCRIPCIÓN' : 'DETALLES DEL PRODUCTO')
+                                    // onClick={() => setActiveTab(idx === 0 ? 'DETALLES DEL PRODUCTO' : 'DETALLES DEL PRODUCTO')}
+                                    className={`pb-4 px-1 select-none text-xs sm:text-sm font-medium ${activeTab === (idx === 0 ? 'DETALLES DEL PRODUCTO' : 'DETALLES DEL PRODUCTO')
                                         ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
                                         : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
                                 >
                                     {tab}
-                                </button>
+                                </div>
                             ))}
                         </nav>
-                    </div> */}
+                    </div>
                     <div className="mt-4 sm:mt-6 pb-10 sm:pb-16 border-b border-gray-200">
                         <div className="prose max-w-none">
                             {(() => {
                                 let desc = typeof product.description === 'object' ? product.description[locale] : product.description;
                                 if (!desc) return null;
                                 // Find the first bullet (• or -) and split
-                                const bulletRegex = /[•]/;
+                                // Only split on hyphens surrounded by spaces or bullet (•)
+                                const bulletRegex = /\s-\s|\s-|-\s|\s-|\u2022/;
                                 const firstBulletIdx = desc.search(bulletRegex);
                                 let intro = desc;
                                 let bullets = [];
                                 if (firstBulletIdx !== -1) {
                                     intro = desc.slice(0, firstBulletIdx).trim();
                                     bullets = desc.slice(firstBulletIdx)
-                                        .split(/[•]/)
+                                        .split(/\s-\s|\s-|-\s|\s-|\u2022/)
                                         .map(line => line.trim())
                                         .filter(Boolean);
                                 }

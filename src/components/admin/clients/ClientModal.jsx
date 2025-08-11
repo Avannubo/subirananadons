@@ -4,7 +4,7 @@ import { Dialog, DialogTitle } from '@headlessui/react';
 import { FiX, FiUser, FiMail, FiBell, FiCheck } from 'react-icons/fi';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
-import { useClientStats } from '@/contexts/ClientStatsContext';
+// import { useClientStats } from '@/contexts/ClientStatsContext';
 export default function ClientModal({ isOpen, onClose, client, onSave }) {
     // Locale detection (default to 'ca')
     let locale = 'ca';
@@ -88,7 +88,8 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
         }
     };
     const t = translations[locale];
-    const { notifyChange } = useClientStats(); const [formData, setFormData] = useState({
+    // const { notifyChange } = useClientStats();
+    const [formData, setFormData] = useState({
         name: '',
         lastName: '',
         email: '',
@@ -193,7 +194,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             await onSave(dataToSend);
             toast.success(client ? t.successEdit : t.successAdd);
             // Notify the stats context that changes have been made
-            await notifyChange();
+            // await notifyChange();
             onClose();
         } catch (error) {
             console.error('Error saving client:', error);
@@ -345,7 +346,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                 </section>
 
                                 {/* Preferences */}
-                                <section className="space-y-4">
+                                {/* <section className="space-y-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
                                         <FiBell className="mr-2 text-[#00B0C8]" /> {t.preferences}
                                     </h3>
@@ -362,10 +363,9 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                             <label htmlFor="active" className="ml-2 block text-sm text-gray-700">
                                                 {t.accountActive}
                                             </label>
-                                        </div>
-                                        {/* Removed newsletter and partnerOffers checkboxes */}
+                                        </div> 
                                     </div>
-                                </section>
+                                </section> */}
                             </div>
                         </div>
                         <div className="mt-8 flex justify-end space-x-3 border-t border-gray-200 pt-4">

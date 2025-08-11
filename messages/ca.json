@@ -101,7 +101,16 @@
     "feature1": "Crea llista",
     "feature2": "Afegeix els teus favorits",
     "feature3": "Comparteix la llista",
-    "feature4": "Rep els regals"
+    "feature4": "Rep els regals",
+    "howWorksTitle": "Com funciona?",
+    "howWorksStep1Title": "Crea la teva llista",
+    "howWorksStep1Desc": "Inicia sessió amb el teu usuari, accedeix al teu perfil i crea i personalitza la teva llista.",
+    "howWorksStep2Title": "Afegeix els productes",
+    "howWorksStep2Desc": "Eligeix els teus productes favorits entre tot el catàleg de la nostra botiga.",
+    "howWorksStep3Title": "Comparteix la teva llista",
+    "howWorksStep3Desc": "Envia l’enllaç generat per a que els teus amics i familiars comprin els teus regals.",
+    "howWorksStep4Title": "Adquireix els teus regals",
+    "howWorksStep4Desc": "Quan la llista estigui finalitzada podràs recollir tots els teus regals a la botiga."
   },
   "ContactPage": {
     "title": "Contacte",
@@ -238,13 +247,14 @@
     "recommendBtn": "Veure recomanacions",
     "howWorksTitle": "Com funciona?",
     "howWorksStep1Title": "Crea la teva llista",
-    "howWorksStep1Desc": "Personalitza la llista amb els productes que vols rebre.",
-    "howWorksStep2Title": "Afegeix productes",
-    "howWorksStep2Desc": "Tria entre milers d'articles per a nadons i mares.",
-    "howWorksStep3Title": "Comparteix amb familiars i amics",
-    "howWorksStep3Desc": "Envia l'enllaç de la llista perquè puguin veure i reservar regals.",
-    "howWorksStep4Title": "Rep els regals",
-    "howWorksStep4Desc": "Els regals es marquen com a reservats o comprats i podràs recollir-los a la botiga."
+    "howWorksStep1Desc": "Inicia sessió amb el teu usuari, accedeix al teu perfil i crea i personalitza la teva llista.",
+    "howWorksStep2Title": "Afegeix els productes",
+    "howWorksStep2Desc": "Eligeix els teus productes favorits entre tot el catàleg de la nostra botiga.",
+    "howWorksStep3Title": "Comparteix la teva llista",
+    "howWorksStep3Desc": "Envia l’enllaç generat per a que els teus amics i familiars comprin els teus regals.",
+    "howWorksStep4Title": "Adquireix els teus regals",
+    "howWorksStep4Desc": "Quan la llista estigui finalitzada podràs recollir tots els teus regals a la botiga.",
+    "notLoggedIn": "Has d'iniciar sessió per crear o veure les teves llistes de naixement."
   },
   "BirthListDetailPage": {
     "listTitle": "Llista de naixement de {babyName}",

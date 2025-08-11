@@ -14,7 +14,7 @@ export default function ContactPage() {
         message: ''
     });
     const [bannerImage, setBannerImage] = useState(null);
-    const [shopParams, setShopParams] = useState({ address: '', telephone: '', email: '', horari: '' });
+    const [shopParams, setShopParams] = useState({ address: '', telephone: '', email: '', horari: '', googleMapsSrc: '' });
     const [submitStatus, setSubmitStatus] = useState('');
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -67,10 +67,11 @@ export default function ContactPage() {
                     address: paramMap.address || '',
                     telephone: paramMap.telephone || '',
                     email: paramMap.email || '',
-                    horari: paramMap.horari || ''
+                    horari: paramMap.horari || '',
+                    googleMapsSrc: paramMap.googleMapsSrc || ''
                 });
             } catch (err) {
-                setShopParams({ address: '', telephone: '', email: '', horari: '' });
+                setShopParams({ address: '', telephone: '', email: '', horari: '', googleMapsSrc: '' });
             }
         };
         fetchParams();
@@ -158,14 +159,18 @@ export default function ContactPage() {
                         </div>
                         {/* Map */}
                         <div className="h-[300px] bg-gray-100 rounded-lg overflow-hidden">
-                            <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2991.995084292646!2d2.1859399999999997!3d41.4336699!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12a4bd4e4c1b7e2f%3A0x48f88c6c4d88f861!2sCarrer%20de%20Sant%20Sebasti%C3%A0%2C%2055%2C%2008030%20Barcelona!5e0!3m2!1sen!2ses!4v1629789012345!5m2!1sen!2ses"
-                                width="100%"
-                                height="100%"
-                                style={{ border: 0 }}
-                                allowFullScreen=""
-                                loading="lazy"
-                            ></iframe>
+                            {shopParams.googleMapsSrc ? (
+                                <iframe
+                                    src={shopParams.googleMapsSrc}
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen=""
+                                    loading="lazy"
+                                ></iframe>
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-gray-400">Mapa no configurado</div>
+                            )}
                         </div>
                     </motion.div>
                     {/* Contact Form */}
