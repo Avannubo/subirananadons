@@ -188,7 +188,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                             />
                         </div>
 
-                        <div>
+                        {/* <div>
                             <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
                                 Slug
                             </label>
@@ -209,7 +209,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 </button>
                             </div>
                             <p className="text-xs text-gray-500 mt-1">S'utilitza a les URLs. Es generarà automàticament si es deixa en blanc.</p>
-                        </div>
+                        </div> */}
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">

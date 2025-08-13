@@ -279,7 +279,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                             </div>
 
                             {/* Slug */}
-                            <div>
+                            {/* <div>
                                 <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
                                     Slug
                                 </label>
@@ -303,7 +303,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                 <p className="mt-1 text-xs text-gray-500">
                                     Se usa en URLs. Se generará automáticamente si se deja en blanco.
                                 </p>
-                            </div>
+                            </div> */}
 
                             {/* Description */}
                             {/* <div>

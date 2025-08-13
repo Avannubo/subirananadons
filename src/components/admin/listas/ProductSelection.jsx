@@ -132,7 +132,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
     return (
         <div>
             {selectedItems.length > 0 && (
-                <div className="mb-6   bg-gray-50 rounded-lg min-w-[600px] p-4 shadow-md">
+                <div className="mb-6 bg-gray-50 rounded-lg min-w-[600px] p-4 shadow-md">
                     <h3 className="font-medium text-gray-900 mb-2">{t.selected} ({selectedItems.length})</h3>
                     <div className="space-y-2 max-h-[100px] overflow-y-auto">
                         {selectedItems
@@ -151,7 +151,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                 />
                                             )}
                                         </div>
-                                        <span className="text-sm font-medium">{getProductName(item.product)}</span>
+                                        <span className="text-sm font-medium truncate max-w-[400px]">{getProductName(item.product)}</span>
                                     </div>
                                     <div className="flex items-center space-x-3">
                                         <button
@@ -237,7 +237,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                         )}
                                     </div>
                                     <div className="p-4 pt-2 pb-3 bg-white">
-                                        <h3 className="font-medium text-gray-900 text-center truncate">{getProductName(product)}</h3>
+                                        <h3 className="font-medium text-gray-900 text-center w-[200px] truncate">{getProductName(product)}</h3>
                                         <p className="text-[#00B0C8] font-bold text-center text-md mt-2">{product.price_incl_tax?.toFixed(2).replace('.', ',')} €</p>
                                     </div>
                                 </div>

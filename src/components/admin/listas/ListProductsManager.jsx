@@ -153,7 +153,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                 <h4 className="text-gray-700">
                     {showAddProducts ? (locale === 'ca' ? 'Seleccionar Productes' : 'Seleccionar Productos') : `${t.product} (${items.length})`}
                 </h4>
-                <button
+                {/* <button
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -168,7 +168,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                             <FiPlus className="mr-1" />{locale === 'ca' ? 'Afegir Productes' : 'Añadir Productos'}
                         </>
                     )}
-                </button>
+                </button> */}
             </div>
             {loading && !showAddProducts && (
                 <div className="flex justify-center items-center py-10">
@@ -195,13 +195,13 @@ export default function ListProductsManager({ listId, onUpdate }) {
                             <table className="flex-1 min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th scope="col" className="px-6 py-3 text-start min-w-[300px] w-[300px] truncate text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             {t.product}
                                         </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             {t.price}
                                         </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             {t.actions}
                                         </th>
                                     </tr>
@@ -225,7 +225,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                             )}
                                                         </div>
                                                         <div className="ml-4">
-                                                            <div className="text-sm font-medium text-gray-900">
+                                                            <div className="text-sm text-start min-w-[300px] w-[300px] truncate font-medium text-gray-900">
                                                                 {item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
                                                             </div>
                                                             {/* <div className="text-sm text-gray-500">
@@ -234,10 +234,10 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                                                     {item.product.price_incl_tax?.toFixed(2).replace('.', ',')} €
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                     <button
                                                         onClick={() => handleRemoveProduct(item._id)}
                                                         className="text-red-600 hover:text-red-900"
