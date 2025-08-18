@@ -508,7 +508,7 @@ export default function CartPage() {
                                                 <div className="flex-grow">
                                                     <h3 className="font-medium">{typeof item.name === 'object' ?  item.name.es || item.name.ca : item.name}</h3>
                                                     {/* <p className="text-gray-500 text-sm">{item.brand.name} - {typeof item.category === 'object' ? item.category.name.es || item.category.name.ca : item.category.name}</p> */}
-                                                    <p className="text-[#00B0C8] font-medium">{item.price}€</p>
+                                                    <p className="text-[#00B0C8] font-medium">{item.price}</p>
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
                                                             Lista de regalo: {item.listOwner}

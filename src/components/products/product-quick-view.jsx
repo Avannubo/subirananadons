@@ -110,14 +110,13 @@ export default function ProductQuickView({ product, onClose }) {
                     <div className="flex flex-col md:flex-row overflow-y-auto pt-8 md:pt-8">
                         {/* Image Section */}
                         <div className="w-full md:w-1/2 pb-4 px-2 sm:px-6 flex flex-col items-center">
-                            <div className="relative w-full h-56 sm:h-80 mb-4 mt-2">
+                            <div className="relative w-full h-56 sm:h-80 mb-4 mt-2 flex items-center justify-center">
                                 <img
                                     key={selectedImage}
                                     src={selectedImage || '/placeholder.png'}
                                     alt={product.name}
-                                    fill
-                                    className="rounded-lg object-contain"
-                                    priority
+                                    className="rounded-lg object-contain max-w-full max-h-full h-auto w-auto"
+                                    loading="eager"
                                 />
                             </div>
                             {/* Thumbnails */}
@@ -131,8 +130,7 @@ export default function ProductQuickView({ product, onClose }) {
                                         <img
                                             src={thumb}
                                             alt={`Thumbnail ${index + 1}`}
-                                            fill
-                                            className="object-cover"
+                                            className="w-full h-full object-cover"
                                         />
                                     </div>
                                 ))}

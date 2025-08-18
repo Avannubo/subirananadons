@@ -1,25 +1,50 @@
 'use client';
 import { Dialog } from '@headlessui/react';
-import { FiX, FiUser, FiMail, FiShoppingBag } from 'react-icons/fi'; 
+import { FiX, FiUser, FiMail, FiShoppingBag } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 export default function ClientViewModal({ isOpen, onClose, client }) {
     const [orderCount, setOrderCount] = useState(0);
     useEffect(() => {
-        if (!client?._id && !client?.id) return;
-        // Fetch order count for this client
+        if (!client) return;
+
         const fetchOrderCount = async () => {
             try {
-                // Try both _id and id for compatibility
+                // Get all possible ID forms from the client object
                 const userId = client._id || client.id;
-                const res = await fetch(`/api/orders/count?userId=${userId}`);
-                if (!res.ok) throw new Error('Failed to fetch order count');
+                console.log('[ClientViewModal] Fetching orders for userId:', userId, 'Client:', client);
+                if (!userId) {
+                    console.error('[ClientViewModal] No valid user ID found:', client);
+                    return;
+                }
+
+                const res = await fetch(`/api/orders/count`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        email: client.email,
+                        client: {
+                            id: userId,
+                            email: client.email
+                        }
+                    })
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Failed to fetch order count: ${res.status} ${res.statusText}`);
+                }
+
                 const data = await res.json();
-                console.log(data);
-                setOrderCount(data.count ?? 0);
+                console.log('[ClientViewModal] Order count response:', data);
+                setOrderCount(data.count || 0);
             } catch (err) {
+                console.error('[ClientViewModal] Error fetching order count:', err);
                 setOrderCount(0);
             }
         };
+
         fetchOrderCount();
     }, [client]);
     if (!client) return null;

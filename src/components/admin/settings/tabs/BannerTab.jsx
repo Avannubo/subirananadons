@@ -102,7 +102,7 @@ export default function BannerTab() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ _id: imgId, active: true })
             });
-            if (!res.ok) throw new Error(t('updateBannerError'));
+            // if (!res.ok) throw new Error(t('updateBannerError'));
             setUploadedImages(images => images.map(img => ({ ...img, active: img._id === imgId })));
             // alert('Portada actualizada');
             toast.success(t('bannerUpdated'));
