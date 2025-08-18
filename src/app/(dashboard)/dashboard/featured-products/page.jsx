@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import AuthCheck from '@/components/auth/AuthCheck';
 import { FiStar, FiXCircle, FiCheck, FiAlertCircle } from 'react-icons/fi';
+import ImageHoverPreview from '@/components/shared/ImageHoverPreview';
 import { toast } from 'react-hot-toast';
 import Pagination from '@/components/admin/shared/Pagination';
 
@@ -256,10 +257,10 @@ export default function FeaturedProductsPage() {
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="h-10 w-10 rounded overflow-hidden bg-gray-100">
                                                             {product.image ? (
-                                                                <img
+                                                                <ImageHoverPreview
                                                                     src={product.image}
                                                                     alt={product.name}
-                                                                    className="h-full w-full object-cover"
+                                                                    className="w-10 h-10 object-contain"
                                                                 />
                                                             ) : (
                                                                 <div className="h-full w-full flex items-center justify-center text-gray-400">

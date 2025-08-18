@@ -438,10 +438,10 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                 </th>
                                                                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                     {t.type}
-                                                                </th> <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                </th>
+                                                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                     {t.price}
                                                                 </th>
-
                                                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                     {t.subtotal}
                                                                 </th>

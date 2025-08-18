@@ -182,7 +182,7 @@ export default function BirthListPage({ params }) {
             </ShopLayout>
         );
     }
-    if (!list) {
+    if (!list || list.status === 'InActiva') {
         return (
             <ShopLayout>
                 <div className="container mx-auto px-4 py-36">
@@ -190,8 +190,32 @@ export default function BirthListPage({ params }) {
                         <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('listNotFoundTitle')}</h3>
-                        <p className="text-gray-500 mb-6">{t('listNotFoundDesc')}</p>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                            {!list ? t('listNotFoundTitle') : t('listInactiveTitle')}
+                        </h3>
+                        <p className="text-gray-500 mb-6">
+                            {!list ? t('listNotFoundDesc') : t('listInactiveDesc')}
+                        </p>
+                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
+                            {t('backToListsBtn')}
+                        </Link>
+                    </div>
+                </div>
+            </ShopLayout>
+        );
+    }
+
+    // Show a different message for completed lists
+    if (list.status === 'Completada') {
+        return (
+            <ShopLayout>
+                <div className="container mx-auto px-4 py-36">
+                    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 text-center">
+                        <svg className="w-16 h-16 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('listCompletedTitle')}</h3>
+                        <p className="text-gray-500 mb-6">{t('listCompletedDesc')}</p>
                         <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>

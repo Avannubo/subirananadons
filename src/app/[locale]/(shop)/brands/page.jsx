@@ -32,17 +32,34 @@ export default function BrandsPage() {
     const [totalItems, setTotalItems] = useState(0);
     const productsPerPage = 6;
     const t = useTranslations('BrandsPage');
-    // Fetch brands
+    // Fetch brands with product counts
     useEffect(() => {
-        const fetchBrands = async () => {
+        const fetchBrandsWithProducts = async () => {
             try {
                 setBrandsLoading(true);
-                const response = await fetch('/api/brands?limit=1000&enabled=true');
-                const data = await response.json();
-                if (data.brands && data.brands.length > 0) {
-                    // Sort brands alphabetically by name
-                    const sortedBrands = [...data.brands].sort((a, b) => a.name.localeCompare(b.name));
-                    setBrands(sortedBrands);
+                // First fetch all brands
+                const brandsResponse = await fetch('/api/brands?limit=1000&enabled=true');
+                const brandsData = await brandsResponse.json();
+
+                if (brandsData.brands && brandsData.brands.length > 0) {
+                    // For each brand, check if it has active products
+                    const brandsWithProductCounts = await Promise.all(
+                        brandsData.brands.map(async (brand) => {
+                            const productCountResponse = await fetch(`/api/products?brand=${brand._id}&status=active&limit=1`);
+                            const productData = await productCountResponse.json();
+                            return {
+                                ...brand,
+                                hasProducts: productData.pagination?.totalItems > 0
+                            };
+                        })
+                    );
+
+                    // Filter out brands with no products and sort alphabetically
+                    const filteredBrands = brandsWithProductCounts
+                        .filter(brand => brand.hasProducts)
+                        .sort((a, b) => a.name.localeCompare(b.name));
+
+                    setBrands(filteredBrands);
                 }
             } catch (error) {
                 console.error('Error fetching brands:', error);
@@ -50,7 +67,7 @@ export default function BrandsPage() {
                 setBrandsLoading(false);
             }
         };
-        fetchBrands();
+        fetchBrandsWithProducts();
     }, [searchParams]);
     // Get selectedBrandId from searchParams
     const selectedBrandId = searchParams.get('brand') || 'all';
@@ -59,7 +76,7 @@ export default function BrandsPage() {
         ? 'all'
         : (brands.find(b => b._id === selectedBrandId)?.name || '');
 
-    // Fetch products for selected brand
+    // Fetch products for selected brand    
     useEffect(() => {
         // Always fetch products for the selected brandId, even if brands are not loaded yet
         const fetchProducts = async () => {
@@ -180,13 +197,13 @@ export default function BrandsPage() {
             }
         };
         fetchBanner();
-    }, []); 
+    }, []);
     const handleOpenQuickView = (product) => {
         setQuickViewProduct(product);
     };
     const handleCloseQuickView = () => {
         setQuickViewProduct(null);
-    }; 
+    };
     const handleBrandSelect = (brandId) => {
         const params = new URLSearchParams(searchParams.toString());
         if (brandId === 'all') {
@@ -297,11 +314,11 @@ export default function BrandsPage() {
                     </div>
                 </div>
             ) : (
-                    <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white ">
+                <div className="w-full mt-10 h-[30vw] min-h-[120px] max-h-[180px] sm:h-[40vh] flex flex-col justify-center items-center rounded-b-2xl bg-white ">
                     <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mt-8 lg:mt-20">{t('title')}</h1>
                 </div>
             )}
-                    {/* <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">{t('sidebarTitle')}</h2> */}
+            {/* <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">{t('sidebarTitle')}</h2> */}
             <div className="container mx-auto px-2 sm:px-4 py-4 ">
 
                 <div className="flex flex-col lg:flex-row gap-2 border-t border-[#00B0C8] pb-2">

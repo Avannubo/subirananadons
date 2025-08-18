@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { FiFilter, FiSearch, FiUpload, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '@/components/shared/ConfirmModal';
+import ImageHoverPreview from '@/components/shared/ImageHoverPreview';
 import BrandModal from './BrandModal';
 import BrandViewModal from './BrandViewModal';
 import Pagination from '@/components/admin/shared/Pagination';
@@ -430,7 +431,11 @@ export default function BrandsTable() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {brand.logo ? (
-                                                <img src={brand.logo} alt={brand.name} className="w-20 h-20 object-contain" />
+                                                <ImageHoverPreview
+                                                    src={brand.logo}
+                                                    alt={brand.name}
+                                                    className="w-10 h-10 object-contain"
+                                                />
                                             ) : (
                                                 <span className="text-gray-400 italic text-sm">--</span>
                                             )}

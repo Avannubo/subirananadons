@@ -591,44 +591,38 @@ export default function SearchPage() {
                                 </select>
                             </div>
                         </motion.div>
-                        {/* Products Grid/List */}
-                        <motion.div
-                            layout
-                            className={`${viewMode === 'grid'
-                                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
-                                : 'space-y-6'
-                                }`}
-                        >
-                            {filteredProducts.map((product, index) => (
-                                <ProductCard
-                                    key={index}
-                                    product={product}
-                                    viewMode={viewMode}
-                                    onQuickViewClick={handleQuickView}
-                                    addToCart={handleAddToCart}
-                                />
-                            ))}
-                        </motion.div>
-                        {/* No Results Message */}
-                        {filteredProducts.length === 0 && !isLoading && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="text-center py-12"
-                            >
-                                <p className="text-gray-500 text-lg">{t('noResults')}</p>
-                            </motion.div>
-                        )}
-                        {/* Loading Skeleton */}
-                        {isLoading && (
+                        {/* Loading State or Products */}
+                        {isLoading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[...Array(6)].map((_, index) => (
-                                    <div key={index} className="animate-pulse">
+                                    <div key={index} className="animate-pulse"> 
                                         <div className="bg-gray-200 h-48 rounded-lg mb-2"></div>
                                         <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                                         <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                                     </div>
                                 ))}
+                            </div>
+                        ) : filteredProducts.length > 0 ? (
+                            <motion.div
+                                layout
+                                className={`${viewMode === 'grid'
+                                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
+                                    : 'space-y-6'
+                                    }`}
+                            >
+                                {filteredProducts.map((product, index) => (
+                                    <ProductCard
+                                        key={index}
+                                        product={product}
+                                        viewMode={viewMode}
+                                        onQuickViewClick={handleQuickView}
+                                        addToCart={handleAddToCart}
+                                    />
+                                ))}
+                            </motion.div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <p className="text-gray-500">{t('noProductsFound')}</p>
                             </div>
                         )}
                         {/* Pagination */}

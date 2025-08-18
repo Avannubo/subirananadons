@@ -2,16 +2,14 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import ShopLayout from "@/components/Layouts/shop-layout";
-import Image from "next/image";
-import { getTranslatedField } from '@/lib/getTranslatedField';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import ShopLayout from "@/components/Layouts/shop-layout"; 
+import { motion, AnimatePresence } from 'framer-motion';
 import ProductSlider from '@/components/landing/ProductSlider';
+import FullscreenImagePreview from '@/components/products/FullscreenImagePreview';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { toast } from 'react-hot-toast';
 import { useRouter } from "next/navigation";
-import { useSession } from 'next-auth/react';
-import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
+import { useSession } from 'next-auth/react'; 
 import { fetchProductById, fetchProducts, formatProduct } from '@/services/ProductService';
 import BirthListSelectModal from '@/components/products/BirthListSelectModal.jsx';
 // Helper to get display name from category (handles translation and legacy)
@@ -58,6 +56,7 @@ export default function Page() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('DETALLES DEL PRODUCTO');
+    const [showFullscreen, setShowFullscreen] = useState(false);
     const { addToCart } = useCart();
     const [dragConstraints, setDragConstraints] = useState({ right: 0, left: 0 });
     const scrollContainerRef = useRef(null);
@@ -331,17 +330,35 @@ export default function Page() {
                     {/* Product Images */}
                     <div className="space-y-4">
                         <motion.div
-                            className="relative w-full h-[320px] xs:h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden rounded-lg bg-white"
+                            className="relative w-full h-[320px] xs:h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden rounded-lg bg-white cursor-pointer"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.3 }}
+                            onClick={() => setShowFullscreen(true)}
                         >
                             <img
                                 src={product.images && product.images[selectedImage] ? product.images[selectedImage] : product.image}
                                 alt={typeof product.name === 'object' ? product.name[locale] : product.name}
                                 className="object-contain h-full w-full"
                             />
+                            {/* Mobile fullscreen indicator */}
+                            <div className="md:hidden absolute bottom-2 right-2 bg-black/50 text-white rounded-full p-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                                </svg>
+                            </div>
                         </motion.div>
+
+                        {/* Fullscreen Preview Modal */}
+                        <AnimatePresence>
+                            {showFullscreen && (
+                                <FullscreenImagePreview
+                                    images={product.images}
+                                    initialIndex={selectedImage}
+                                    onClose={() => setShowFullscreen(false)}
+                                />
+                            )}
+                        </AnimatePresence>
                         {/* Thumbnails */}
                         {product.images.length > 1 && (
                             <div className="space-y-2">
@@ -407,7 +424,7 @@ export default function Page() {
                                     .split(/\n|•|\u2022|\r/)
                                     .map(line => line.trim())
                                     .filter(Boolean)
-                                    .slice(0, 2);
+                                    .slice(0, 1);
                                 return lines.map((line, idx) => (
                                     <p key={idx} className="text-gray-600 break-words">{line}</p>
                                 ));

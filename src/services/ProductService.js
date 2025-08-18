@@ -196,3 +196,30 @@ export async function fetchFeaturedProducts(limit = 8) {
         return [];
     }
 }
+
+/**
+ * Toggle product status between active and inactive
+ * @param {string} productId - ID of the product to toggle
+ * @returns {Promise<Object>} - Updated product data
+ */
+export async function toggleProductStatus(productId) {
+    try {
+        const response = await fetch('/api/products/toggle-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error toggling product status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.product;
+    } catch (error) {
+        console.error('ProductService toggleProductStatus error:', error);
+        throw error;
+    }
+}

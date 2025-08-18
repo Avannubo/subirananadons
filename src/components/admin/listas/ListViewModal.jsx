@@ -105,7 +105,7 @@ const translations = {
         errorProductData: 'Error: Datos del producto no disponibles',
         productId: 'ID del artículo:',
         cancel: 'Cancelar',
-        save: 'Cerrar',
+        save: 'Guardar',
         buyerData: 'Datos del comprador',
         name: 'Nombre *',
         email: 'Email *',
@@ -372,7 +372,7 @@ export default function ListViewModal({
                                                     setDirection('reserve');
                                                     setShowDataModal(true);
                                                 }}
-                                                className="px-3 py-1 text-sm rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-colors duration-200"
+                                                className="px-3 py-1 text-sm rounded-md bg-blue-50 text-[#00B0C8] hover:bg-blue-100 border border-blue-200 transition-colors duration-200"
                                                 title={t.reservar || 'Reservar producto'}
                                             >
                                                 {t.reservar || 'Reservar'}
@@ -416,7 +416,7 @@ export default function ListViewModal({
                                         className={`font-medium ${item.state === 0
                                             ? "text-yellow-500"
                                             : item.state === 1
-                                                ? "text-blue-500"
+                                                ? "text-[#00B0C8]"
                                                 : item.state === 2
                                                     ? "text-green-600"
                                                     : "text-gray-500"
@@ -557,7 +557,7 @@ export default function ListViewModal({
                                         </div>
                                         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                             <div className="flex items-center mb-2">
-                                                <span className="text-blue-500 mr-2">
+                                                <span className="text-[#00B0C8] mr-2">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
@@ -567,7 +567,7 @@ export default function ListViewModal({
                                             <div>
                                                 <span
                                                     className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${selectedList.status === 'Activa' ? 'bg-green-100 text-green-800' :
-                                                        selectedList.status === 'Completada' ? 'bg-blue-100 text-blue-800' :
+                                                        selectedList.status === 'Completada' ? 'bg-blue-100 text-[#00B0C8]' :
                                                             'bg-red-100 text-red-800'
                                                         }`}
                                                 >
@@ -813,7 +813,7 @@ export default function ListViewModal({
                                     name="name"
                                     value={userData.name}
                                     onChange={handleUserDataChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm p-2 border"
                                     required
                                 />
                             </div>
@@ -827,7 +827,7 @@ export default function ListViewModal({
                                     name="email"
                                     value={userData.email}
                                     onChange={handleUserDataChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm p-2 border"
                                     required
                                 />
                             </div>
@@ -841,7 +841,7 @@ export default function ListViewModal({
                                     name="phone"
                                     value={userData.phone}
                                     onChange={handleUserDataChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm p-2 border"
                                 />
                             </div>
                             <div>
@@ -854,21 +854,19 @@ export default function ListViewModal({
                                     value={userData.message}
                                     onChange={handleUserDataChange}
                                     rows={3}
-                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm p-2 border"
                                 ></textarea>
                             </div>
                         </div>
                         <div className="mt-6 flex justify-end space-x-3">
                             <button
                                 onClick={() => setShowDataModal(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                            >
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"> 
                                 {t.cancel}
                             </button>
                             <button
                                 onClick={confirmStateChange}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                            >
+                                className="px-4 py-2 text-sm font-medium text-white bg-[#00B0C8] border border-transparent rounded-md hover:bg-[#00B0C8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"> 
                                 {t.save}
                             </button>
                         </div>

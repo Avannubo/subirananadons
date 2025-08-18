@@ -1,10 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { FiEdit2, FiTrash2, FiEye } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiEye, FiToggleLeft, FiToggleRight } from 'react-icons/fi';
 import ProductModal from './ProductModal';
 import ProductViewModal from './ProductViewModal';
 import DeleteConfirmationModal from '../DeleteConfirmationModal';
-import { fetchProducts, deleteProduct } from '@/services/ProductService';
+import { fetchProducts, deleteProduct, toggleProductStatus } from '@/services/ProductService';
 import { toast } from 'react-hot-toast';
 
 export default function ProductsList() {
@@ -70,6 +70,19 @@ export default function ProductsList() {
     const handleDelete = (product) => {
         setCurrentProduct(product);
         setIsDeleteModalOpen(true);
+    };
+
+    const handleToggleStatus = async (product) => {
+        try {
+            const updatedProduct = await toggleProductStatus(product.id || product._id);
+            toast.success(`Producto ${updatedProduct.status === 'active' ? 'activado' : 'desactivado'} con éxito`);
+
+            // Update the product in the list without changing order
+            updateProductInList(updatedProduct);
+        } catch (error) {
+            console.error('Error toggling product status:', error);
+            toast.error('Error al cambiar el estado del producto');
+        }
     };
 
     const confirmDelete = async () => {
@@ -224,6 +237,17 @@ export default function ProductsList() {
                                                 className="text-blue-600 hover:text-blue-900 mr-3"
                                             >
                                                 <FiEye className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleToggleStatus(product)}
+                                                className={`${product.status === 'active' ? 'text-green-600 hover:text-green-900' : 'text-gray-600 hover:text-gray-900'} mr-3`}
+                                                title={product.status === 'active' ? 'Desactivar producto' : 'Activar producto'}
+                                            >
+                                                {product.status === 'active' ? (
+                                                    <FiToggleRight className="h-4 w-4" />
+                                                ) : (
+                                                    <FiToggleLeft className="h-4 w-4" />
+                                                )}
                                             </button>
                                             <button
                                                 onClick={() => handleEdit(product)}
