@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { useTranslations, useLocale } from 'next-intl';
 
 export default function ProductosTab() {
+    const locale = useLocale();
     const [groups, setGroups] = useState([]);
     const [editGroupIdx, setEditGroupIdx] = useState(null);
     const [categories, setCategories] = useState([]);
@@ -11,9 +12,6 @@ export default function ProductosTab() {
     const [recommendations, setRecommendations] = useState([]);
     const [editIdx, setEditIdx] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const locale = useLocale();
 
     useEffect(() => {
         fetchCategories();
@@ -86,7 +84,7 @@ export default function ProductosTab() {
     function handleAddRecommendation(e) {
         e.preventDefault();
         if (!form.category) {
-            toast.error('Has de seleccionar una categoria');
+            toast.error(locale === 'es' ? 'Debes seleccionar una categoría' : locale === 'en' ? 'You must select a category' : 'Has de seleccionar una categoria');
             return;
         }
         if (!form.name.ca || !form.name.es) return;
@@ -136,8 +134,6 @@ export default function ProductosTab() {
     async function handleSaveGroup(e) {
         e.preventDefault();
         setLoading(true);
-        setError('');
-        setSuccess('');
         try {
             let res;
             if (editGroupIdx !== null && groups[editGroupIdx]) {
@@ -163,27 +159,26 @@ export default function ProductosTab() {
                 });
             }
             if (!res.ok) throw new Error();
-            setSuccess(editGroupIdx !== null ? 'Grupo actualizado' : 'Grupo añadido');
+            toast.success(editGroupIdx !== null ?
+                (locale === 'es' ? 'Grupo actualizado' : locale === 'en' ? 'Group updated' : 'Grup actualitzat') :
+                (locale === 'es' ? 'Grupo añadido' : locale === 'en' ? 'Group added' : 'Grup afegit'));
             setForm({ groupTitle: { ca: '', es: '' }, name: { ca: '', es: '' }, category: '' });
             setRecommendations([]);
             setEditGroupIdx(null);
             fetchGroups();
         } catch {
-            setError('Error al guardar grupo');
+            toast.error(locale === 'es' ? 'Error al guardar el grupo' : locale === 'en' ? 'Error saving group' : 'Error al desar el grup');
         } finally {
             setLoading(false);
-            setTimeout(() => setSuccess(''), 1500);
         }
     }
 
     // Delete group handler
     async function handleDeleteGroup(idx) {
-        if (!window.confirm('Segur que vols eliminar aquest grup?')) return;
+        if (!window.confirm(locale === 'es' ? '¿Seguro que quieres eliminar este grupo?' : locale === 'en' ? 'Are you sure you want to delete this group?' : 'Segur que vols eliminar aquest grup?')) return;
         const group = groups[idx];
         if (!group || !group._id) return;
         setLoading(true);
-        setError('');
-        setSuccess('');
         try {
             const res = await fetch('/api/admin/recommendations', {
                 method: 'DELETE',
@@ -191,10 +186,10 @@ export default function ProductosTab() {
                 body: JSON.stringify({ id: group._id })
             });
             if (!res.ok) throw new Error();
-            setSuccess('Grup eliminat');
+            toast.success(locale === 'es' ? 'Grupo eliminado' : locale === 'en' ? 'Group deleted' : 'Grup eliminat');
             fetchGroups();
         } catch (e) {
-            setError('Error al eliminar el grup');
+            toast.error(locale === 'es' ? 'Error al eliminar el grupo' : locale === 'en' ? 'Error deleting group' : 'Error al eliminar el grup');
         } finally {
             setLoading(false);
             setTimeout(() => setSuccess(''), 1500);
@@ -203,11 +198,11 @@ export default function ProductosTab() {
 
     return (
         <div className="p-4 bg-gray-50 rounded-lg">
-            <h2 className="text-xl font-bold mb-4">Grups de Recomanacions</h2>
+            <h2 className="text-xl font-bold mb-4">{locale === 'es' ? 'Grupos de Recomendaciones' : locale === 'en' ? 'Recommendation Groups' : 'Grups de Recomanacions'}</h2>
             <form className="mb-6 flex flex-col gap-2" onSubmit={handleSaveGroup}>
                 <div className='flex-1 flex felx-col mb-2 space-x-4'>
                     <div className='flex-1'>
-                        <label className="block text-sm font-medium">Títol del Grup (CA)</label>
+                        <label className="block text-sm font-medium">{locale === 'es' ? 'Título del Grupo (CA)' : locale === 'en' ? 'Group Title (CA)' : 'Títol del Grup (CA)'}</label>
 
                         <input
                             className="border border-gray-300 rounded px-2 py-1 w-full mb-1"
@@ -217,7 +212,7 @@ export default function ProductosTab() {
                         />
                     </div>
                     <div className='flex-1'>
-                        <label className="block text-sm font-medium">Títol del Grup (ES)</label>
+                        <label className="block text-sm font-medium">{locale === 'es' ? 'Título del Grupo (ES)' : locale === 'en' ? 'Group Title (ES)' : 'Títol del Grup (ES)'}</label>
                         <input
                             className="border border-gray-300 rounded px-2 py-1 w-full"
                             value={form.groupTitle.es}
@@ -229,7 +224,7 @@ export default function ProductosTab() {
                 </div>
                 <div className='flex flex-row gap-2 space-x-2 items-end'>
                     <div className='flex-1'>
-                        <label className="block text-sm font-medium">Nom de Recomanació (CA)</label>
+                        <label className="block text-sm font-medium">{locale === 'es' ? 'Nombre de Recomendación (CA)' : locale === 'en' ? 'Recommendation Name (CA)' : 'Nom de Recomanació (CA)'}</label>
                         <input
                             className="border border-gray-300 rounded px-2 py-1 w-full mb-1"
                             value={form.name.ca}
@@ -239,7 +234,7 @@ export default function ProductosTab() {
 
                     <div className='flex-1'>
 
-                        <label className="block text-sm font-medium">Nom de Recomanació (ES)</label>
+                        <label className="block text-sm font-medium">{locale === 'es' ? 'Nombre de Recomendación (ES)' : locale === 'en' ? 'Recommendation Name (ES)' : 'Nom de Recomanació (ES)'}</label>
                         <input
                             className="border border-gray-300 rounded px-2 py-1 w-full"
                             value={form.name.es}
@@ -247,13 +242,13 @@ export default function ProductosTab() {
                         />
                     </div>
                     <div className='flex-1'>
-                        <label className="block text-sm font-medium">Categoria</label>
+                        <label className="block text-sm font-medium">{locale === 'es' ? 'Categoría' : locale === 'en' ? 'Category' : 'Categoria'}</label>
                         <select
                             className="border border-gray-300 rounded px-2 py-1 w-full"
                             value={form.category}
                             onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
                         >
-                            <option value="">Selecciona una categoria</option>
+                            <option value="">{locale === 'es' ? 'Selecciona una categoría' : locale === 'en' ? 'Select a category' : 'Selecciona una categoria'}</option>
                             {categories.map(cat => (
                                 <option key={cat._id} value={cat._id}>{cat.name?.[locale]}</option>
                             ))}
@@ -265,13 +260,13 @@ export default function ProductosTab() {
                         type="button"
                         disabled={!form.name.ca || !form.name.es || !form.category}
                     >
-                        Afegir
+                        {locale === 'es' ? 'Añadir' : locale === 'en' ? 'Add' : 'Afegir'}
                     </button>
                 </div>
                 {/* Llista de recomanacions a afegir al grup */}
                 {recommendations.length > 0 && (
                     <div className="mt-4">
-                        <h4 className="font-semibold mb-2">Recomanacions en aquest grup:</h4>
+                        <h4 className="font-semibold mb-2">{locale === 'es' ? 'Recomendaciones en este grupo:' : locale === 'en' ? 'Recommendations in this group:' : 'Recomanacions en aquest grup:'}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
                             <ul className="list-disc ml-6">
                                 {recommendations.filter((_, idx) => idx % 2 === 0).map((r, idx) => {
@@ -283,7 +278,7 @@ export default function ProductosTab() {
                                                     {r.name?.ca || ''}
                                                     {r.name?.es ? ` / ${r.name.es}` : ''}
                                                 </span>
-                                                <span className="text-sm text-gray-500"> ({r.categoryName})</span>
+                                                {/* <span className="text-sm text-gray-500"> ({r.categoryName[locale]})</span> */}
                                             </span>
                                             <button
                                                 type="button"
@@ -306,7 +301,7 @@ export default function ProductosTab() {
                                                     {r.name?.ca || ''}
                                                     {r.name?.es ? ` / ${r.name.es}` : ''}
                                                 </span>
-                                                <span className="text-sm text-gray-500"> ({r.categoryName})</span>
+                                                {/* <span className="text-sm text-gray-500"> {r.categoryName}</span> */}
                                             </span>
                                             <button
                                                 type="button"
@@ -321,7 +316,13 @@ export default function ProductosTab() {
                             </ul>
                         </div>
                         {editIdx !== null && (
-                            <div className="text-xs text-blue-600 mt-2">Editant recomanació, desa o cancel·la per continuar.</div>
+                            <div className="text-xs text-blue-600 mt-2">
+                                {locale === 'es'
+                                    ? 'Editando recomendación, guarda o cancela para continuar.'
+                                    : locale === 'en'
+                                        ? 'Editing recommendation, save or cancel to continue.'
+                                        : 'Editant recomanació, desa o cancel·la per continuar.'}
+                            </div>
                         )}
                     </div>
                 )}
@@ -330,7 +331,10 @@ export default function ProductosTab() {
                     className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#0090a8] mt-2 md:mt-0"
                     disabled={loading || !form.groupTitle || recommendations.length === 0}
                 >
-                    {editGroupIdx !== null ? 'Actualitzar Grup' : 'Crear Grup'}
+                    {editGroupIdx !== null
+                        ? (locale === 'es' ? 'Actualizar Grupo' : locale === 'en' ? 'Update Group' : 'Actualitzar Grup')
+                        : (locale === 'es' ? 'Crear Grupo' : locale === 'en' ? 'Create Group' : 'Crear Grup')
+                    }
                 </button>
                 {editGroupIdx !== null && (
                     <button
@@ -342,14 +346,13 @@ export default function ProductosTab() {
                             setRecommendations([]);
                         }}
                     >
-                        Cancel·lar Edició
+                        {locale === 'es' ? 'Cancelar Edición' : locale === 'en' ? 'Cancel Editing' : 'Cancel·lar Edició'}
                     </button>
                 )}
             </form>
-            {error && <div className="text-red-500 mb-2">{error}</div>}
-            {success && <div className="text-green-600 mb-2">{success}</div>}
+
             <div>
-                <h3 className="text-lg font-semibold mb-2">Grups desats</h3>
+                <h3 className="text-lg font-semibold mb-2">{locale === 'es' ? 'Grupos guardados' : locale === 'en' ? 'Saved Groups' : 'Grups desats'}</h3>
                 {loading ? (
                     <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {Array.from({ length: 6 }).map((_, idx) => (
@@ -375,13 +378,13 @@ export default function ProductosTab() {
                                             className="text-xs text-[#00B0C8] border border-[#00B0C820] rounded px-2 py-1 hover:bg-[#00B0C810]"
                                             onClick={() => handleEditGroup(idx)}
                                         >
-                                            Editar
+                                            {locale === 'es' ? 'Editar' : locale === 'en' ? 'Edit' : 'Editar'}
                                         </button>
                                         <button
                                             className="text-xs text-red-500 border border-red-200 rounded px-2 py-1 hover:bg-red-50"
                                             onClick={() => handleDeleteGroup(idx)}
                                         >
-                                            Eliminar
+                                            {locale === 'es' ? 'Eliminar' : locale === 'en' ? 'Delete' : 'Eliminar'}
                                         </button>
                                     </div>
 

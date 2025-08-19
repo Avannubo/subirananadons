@@ -38,13 +38,14 @@ export default function BrandsPage() {
             try {
                 setBrandsLoading(true);
                 // First fetch all brands
-                const brandsResponse = await fetch('/api/brands?limit=1000&enabled=true');
+                const brandsResponse = await fetch('/api/brands?limit=1000&enabled=true&isActive=true');
                 const brandsData = await brandsResponse.json();
-
                 if (brandsData.brands && brandsData.brands.length > 0) {
-                    // For each brand, check if it has active products
+                    // Filter out inactive brands first
+                    const activeBrands = brandsData.brands.filter(brand => brand.enabled !== false);
+                    // For each active brand, check if it has active products
                     const brandsWithProductCounts = await Promise.all(
-                        brandsData.brands.map(async (brand) => {
+                        activeBrands.map(async (brand) => {
                             const productCountResponse = await fetch(`/api/products?brand=${brand._id}&status=active&limit=1`);
                             const productData = await productCountResponse.json();
                             return {
@@ -53,12 +54,10 @@ export default function BrandsPage() {
                             };
                         })
                     );
-
                     // Filter out brands with no products and sort alphabetically
                     const filteredBrands = brandsWithProductCounts
                         .filter(brand => brand.hasProducts)
                         .sort((a, b) => a.name.localeCompare(b.name));
-
                     setBrands(filteredBrands);
                 }
             } catch (error) {
@@ -75,7 +74,6 @@ export default function BrandsPage() {
     const selectedBrand = selectedBrandId === 'all'
         ? 'all'
         : (brands.find(b => b._id === selectedBrandId)?.name || '');
-
     // Fetch products for selected brand    
     useEffect(() => {
         // Always fetch products for the selected brandId, even if brands are not loaded yet
@@ -165,7 +163,6 @@ export default function BrandsPage() {
         }
         setFilteredProducts(sorted);
     }, [products, sortBy, selectedBrandId]);
-
     // Debug: log filteredProducts before render
     // useEffect(() => {
     //     console.log('filteredProducts state:', filteredProducts);
@@ -218,7 +215,6 @@ export default function BrandsPage() {
         const newPath = locale ? `/${locale}/brands?${params.toString()}` : `/brands?${params.toString()}`;
         router.push(newPath);
     };
-
     // Go to previous page
     const handlePrevPage = () => {
         if (currentPage > 1) {
@@ -320,9 +316,7 @@ export default function BrandsPage() {
             )}
             {/* <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">{t('sidebarTitle')}</h2> */}
             <div className="container mx-auto px-2 sm:px-4 py-4 ">
-
                 <div className="flex flex-col lg:flex-row gap-2 border-t border-[#00B0C8] pb-2">
-
                     {/* Brands Sidebar */}
                     <motion.div
                         className="w-full lg:w-1/6 mb-2 md:mb-0 pt-6"
@@ -416,7 +410,7 @@ export default function BrandsPage() {
                                     disabled={brandsLoading}
                                 >
                                     <option value="all">{t('allBrandsOption')}</option>
-                                    {brands.map((brand) => (
+                                    {brands.filter(brand => brand.enabled !== false).map((brand) => (
                                         <option key={brand._id} value={brand._id}>{brand.name}</option>
                                     ))}
                                 </select>

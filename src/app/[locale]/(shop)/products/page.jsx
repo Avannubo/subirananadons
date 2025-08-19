@@ -29,36 +29,7 @@ function getCategoryDisplayName(cat, locale = 'es') {
     }
     if (typeof cat === 'string') return cat;
     return '';
-}
-// Helper function to find a category node and its path by label (handles translation)
-function findCategoryAndPath(node, labelToFind, currentPath = [], locale = 'es') {
-    const nodeLabel = getCategoryDisplayName(node, locale);
-    const pathIncludingSelf = [...currentPath, nodeLabel];
-    if (nodeLabel === labelToFind) {
-        return { node, path: pathIncludingSelf };
-    }
-    if (node.submenu) {
-        for (const subNode of node.submenu) {
-            const result = findCategoryAndPath(subNode, labelToFind, pathIncludingSelf, locale);
-            if (result) return result;
-        }
-    }
-    return null;
-}
-// Helper function to get all LEAF category labels under a given node
-function getAllLeafCategoryLabels(node) {
-    let labels = [];
-    if (!node.submenu || node.submenu.length === 0) {
-        // Only add if it's a leaf node (has no submenu)
-        labels.push(node.label);
-    } else {
-        // If it has a submenu, recurse
-        node.submenu.forEach(subNode => {
-            labels = labels.concat(getAllLeafCategoryLabels(subNode));
-        });
-    }
-    return labels;
-}
+} 
 export default function Page() {
     // Birth list modal state
     const [showBirthListModal, setShowBirthListModal] = useState(false);
@@ -157,7 +128,7 @@ export default function Page() {
             setCategoryPath([{ _id: 'root', label: 'Productes' }]);
         }
     }, [categoriesLoading, categories, searchParams, locale]);
-    console.log('CATEGORIES', categories)
+    // console.log('CATEGORIES', categories)
     // Fetch active banner image on mount
     useEffect(() => {
         async function fetchBanner() {
@@ -226,7 +197,7 @@ export default function Page() {
                 setCategories(organizeCategories(filteredCats));
                 setCategoriesError(null);
             } catch (err) {
-                console.error('Error loading categories:', err);
+                // console.error('Error loading categories:', err);
                 setCategoriesError('Error loading categories');
                 setCategories([]);
                 setCategoriesFlat([]);
@@ -328,7 +299,7 @@ export default function Page() {
                     setError('No products found. Please try again later.');
                 }
             } catch (err) {
-                console.error('Error fetching products:', err);
+                // console.error('Error fetching products:', err);
                 setError('Failed to load products. Please try again later.');
                 setProducts([]);
                 setTotalPages(1);

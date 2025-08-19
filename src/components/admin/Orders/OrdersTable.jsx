@@ -10,13 +10,13 @@ import OrderEditModal from '@/components/admin/orders/OrderEditModal';
 import OrderViewModal from '@/components/admin/orders/OrderViewModal';
 export default function OrdersTable({
     orders,
-    filters, 
+    filters,
     userRole = 'user',
     onStatusChange,
     onDelete,
     pagination,
     onPageChange,
-    onLimitChange, 
+    onLimitChange,
 }) {
     const [selectedOrders, setSelectedOrders] = useState([]);
     // Locale detection (default to 'ca')
@@ -25,7 +25,6 @@ export default function OrdersTable({
         const lang = window.navigator.language || window.navigator.userLanguage;
         if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
     }
-
     // Translations
     const translations = {
         ca: {
@@ -112,14 +111,10 @@ export default function OrdersTable({
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
-
     useEffect(() => {
         console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
         console.log('Orders data:', orders);
     }, [orders, userRole]);
-
-
-
     const viewPdf = async (pdfUrl) => {
         if (!pdfUrl || pdfUrl === '#') {
             toast.error('PDF no disponible');
@@ -131,29 +126,7 @@ export default function OrdersTable({
             console.error('Error viewing PDF:', error);
             toast.error('Error al visualizar el PDF');
         }
-    };
-
-    // const downloadPdf = async (orderId) => {
-    //     try {
-    //         const response = await fetch(`/api/orders/${orderId}/invoice`);
-    //         if (!response.ok) throw new Error('Error downloading invoice');
-
-    //         const blob = await response.blob();
-    //         const url = window.URL.createObjectURL(blob);
-    //         const link = document.createElement('a');
-    //         link.href = url;
-    //         link.download = `ticket.pdf`;
-    //         document.body.appendChild(link);
-    //         link.click();
-    //         link.remove();
-    //         window.URL.revokeObjectURL(url);
-    //         toast.success('Ticket descargada correctamente');
-    //     } catch (error) {
-    //         console.error('Error downloading invoice:', error);
-    //         toast.error('Error al descargar la ticket');
-    //     }
-    // };
-
+    }; 
     // Filter the orders based on search criteria
     const filteredOrders = orders.filter((order) => {
         return (
@@ -197,7 +170,7 @@ export default function OrdersTable({
                     setBulkStatusValue("");
                 });
         }
-    }; 
+    };
     // View order details
     const handleViewOrder = (order) => {
         setSelectedOrder(order);
@@ -333,7 +306,7 @@ export default function OrdersTable({
                             <th className="px-6 py-3 text-left">{t.reference}</th>
                             {userRole === 'admin' && <th className="px-6 py-3 text-left">{t.client}</th>}
                             <th className="px-6 py-3 text-left">{t.total}</th>
-                            <th className="px-6 py-3 text-left">{t.payment}</th>
+                            {/* <th className="px-6 py-3 text-left">{t.payment}</th> */}
                             <th className="px-6 py-3 text-left">{t.status}</th>
                             <th className="px-6 py-3 text-left">{t.date}</th>
                             <th className="px-6 py-3 text-left">{t.actions}</th>
@@ -355,7 +328,7 @@ export default function OrdersTable({
                                     <td className="px-6 py-4">{order.reference}</td>
                                     {userRole === 'admin' && <td className="px-6 py-4">{order.customer}</td>}
                                     <td className="px-6 py-4">{order.total}</td>
-                                    <td className="px-6 py-4">{order.payment}</td>
+                                    {/* <td className="px-6 py-4">{order.payment}</td> */}
                                     <td className="px-6 py-4">
                                         {(() => {
                                             const rawStatus = (order.status || '').toLowerCase().trim();

@@ -50,7 +50,7 @@ export async function GET(request) {
         return NextResponse.json(categories);
     } catch (error) {
         console.error('Error fetching categories:', error);
-        return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
+        return NextResponse.json({ error: 'Error al obtenir les categories' }, { status: 500 });
     }
 }
 
@@ -61,7 +61,7 @@ export async function POST(request) {
 
         // Check if user is admin
         if (!session?.user || session.user.role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
+            return NextResponse.json({ error: 'No autoritzat - Es requereix accés d\'administrador' }, { status: 401 });
         }
 
         await dbConnect();
@@ -70,7 +70,7 @@ export async function POST(request) {
 
         // Validate required fields
         if (!body.name) {
-            return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
+            return NextResponse.json({ error: 'El nom de la categoria és obligatori' }, { status: 400 });
         }
 
         // Determine level based on parent
@@ -80,7 +80,7 @@ export async function POST(request) {
             const parentCategory = await Category.findById(body.parent);
 
             if (!parentCategory) {
-                return NextResponse.json({ error: 'Parent category not found' }, { status: 400 });
+                return NextResponse.json({ error: 'No s\'ha trobat la categoria pare' }, { status: 400 });
             }
 
             level = parentCategory.level + 1;
@@ -97,10 +97,10 @@ export async function POST(request) {
         console.error('Error creating category:', error);
 
         if (error.code === 11000) {
-            return NextResponse.json({ error: 'Category with this slug already exists' }, { status: 400 });
+            return NextResponse.json({ error: 'Ja existeix una categoria amb aquest nom' }, { status: 400 });
         }
 
-        return NextResponse.json({ error: 'Failed to create category' }, { status: 500 });
+        return NextResponse.json({ error: 'Error al crear la categoria' }, { status: 500 });
     }
 }
 
@@ -119,7 +119,7 @@ export async function PUT(request) {
         const { categories } = await request.json();
 
         if (!Array.isArray(categories)) {
-            return NextResponse.json({ error: 'Invalid categories data' }, { status: 400 });
+            return NextResponse.json({ error: 'Dades de categories no vàlides' }, { status: 400 });
         }
 
         // Update each category
@@ -129,9 +129,9 @@ export async function PUT(request) {
 
         await Promise.all(updatePromises);
 
-        return NextResponse.json({ message: 'Categories updated successfully' });
+        return NextResponse.json({ message: 'Categories actualitzades correctament' });
     } catch (error) {
         console.error('Error updating categories:', error);
-        return NextResponse.json({ error: 'Failed to update categories' }, { status: 500 });
+        return NextResponse.json({ error: 'Error en actualitzar les categories' }, { status: 500 });
     }
 } 

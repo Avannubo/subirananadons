@@ -1,9 +1,8 @@
-import nodemailer from 'nodemailer';
-// Create nodemailer transporter
+import nodemailer from 'nodemailer'; 
 const transporter = nodemailer.createTransport({
     service: 'outlook',
     port: 587,
-    secure: false, // true for 465, false for other ports
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER || "info@subirananadons.com",
         pass: process.env.EMAIL_PASS || "Ton38060"
@@ -80,7 +79,6 @@ class EmailService {
             throw error;
         }
     }
-
     static async sendOrderFailedNotification(order, error) {
         try {
             const templateParams = {
@@ -99,7 +97,6 @@ class EmailService {
             throw error;
         }
     }
-
     static async sendListCreationConfirmation(list, user) {
         try {
             const items_list = list.items.map(item =>
@@ -117,7 +114,6 @@ class EmailService {
                 subject: `Tu lista de nacimiento "${list.title}" ha sido creada - Subirana Nadons`,
                 html: `
                     <h1>¡Tu lista de nacimiento ha sido creada con éxito!</h1>
-                    
                     <p>Tu lista de nacimiento ha sido creada y está lista para ser compartida.</p>
                     <h2>Detalles de la lista:</h2>
                     <p><strong>Título:</strong> ${list.title}</p>
@@ -145,7 +141,6 @@ class EmailService {
                     <p><strong>URL de la lista:</strong> <a>/lists/${list._id}</a></p>
                 `
             };
-
             // Send both emails
             await Promise.all([
                 transporter.sendMail(userMailOptions),

@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { fetchBirthLists, addProductToBirthList } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
+import { useLocale } from 'next-intl';
 
 export default function BirthListSelectModal({ show, onClose, product, userId }) {
+    const locale = useLocale();
     const [lists, setLists] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedList, setSelectedList] = useState(null);
@@ -16,7 +18,7 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
                     setLists(res.data || []);
                 })
                 .catch(() => {
-                    toast.error('Error carregant les llistes');
+                    toast.error(locale === 'es' ? 'Error cargando las listas' : locale === 'en' ? 'Error loading lists' : 'Error carregant les llistes');
                 })
                 .finally(() => setLoading(false));
         }
@@ -27,10 +29,10 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
             setLoading(true);
             setSelectedList(listId);
             await addProductToBirthList(listId, product.id || product._id);
-            toast.success('Producte afegit a la llista!');
+            toast.success(locale === 'es' ? '¡Producto añadido a la lista!' : locale === 'en' ? 'Product added to the list!' : 'Producte afegit a la llista!');
             onClose();
         } catch (error) {
-            toast.error('Error afegint el producte');
+            toast.error(locale === 'es' ? 'Error añadiendo el producto' : locale === 'en' ? 'Error adding the product' : 'Error afegint el producte');
         } finally {
             setLoading(false);
             setSelectedList(null);
@@ -60,7 +62,7 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
         <AnimatePresence>
             {show && (
                 <motion.div
-                    className="fixed inset-0 bg-[#00000050] rounded-2xl z-[9999] flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-[#00000050] z-[9999] flex items-center justify-center p-4"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -84,7 +86,11 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
                         </button>
 
                         <div className="p-6">
-                            <h2 className="text-xl font-bold mb-4 text-gray-800">Selecciona una llista de naixement</h2>
+                            <h2 className="text-xl font-bold mb-4 text-gray-800">
+                                {locale === 'es' ? 'Selecciona una lista de nacimiento' :
+                                    locale === 'en' ? 'Select a birth list' :
+                                        'Selecciona una llista de naixement'}
+                            </h2>
 
                             {loading && !selectedList ? (
                                 <div className="flex justify-center items-center py-10">
@@ -94,11 +100,15 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
                                 <ul className="divide-y divide-gray-200 max-h-[200px] overflow-y-auto">
                                     {(!userId) ? (
                                         <li className="py-4 text-center text-gray-500">
-                                            Has d'iniciar sessió per veure o crear llistes
+                                            {locale === 'es' ? 'Debes iniciar sesión para ver o crear listas' :
+                                                locale === 'en' ? 'You must log in to view or create lists' :
+                                                    'Has d\'iniciar sessió per veure o crear llistes'}
                                         </li>
                                     ) : lists.length === 0 ? (
                                         <li className="py-4 text-center text-gray-500">
-                                            No tens cap llista creada. Crea una llista per afegir productes.
+                                            {locale === 'es' ? 'No tienes ninguna lista creada. Crea una lista para añadir productos.' :
+                                                locale === 'en' ? 'You don\'t have any lists created. Create a list to add products.' :
+                                                    'No tens cap llista creada. Crea una llista per afegir productes.'}
                                         </li>
                                     ) : (
                                         lists.map(list => (
