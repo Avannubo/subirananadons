@@ -86,6 +86,24 @@ export default function Page() {
     const [bannerUrl, setBannerUrl] = useState(null);
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
     const t = useTranslations('ProductsPage');
+
+    // Utility function to filter inactive categories and their children
+    const filterActiveCategories = (categories) => {
+        return categories.filter(category => {
+            // If category is explicitly marked as inactive, filter it out
+            if (category.isActive === false) return false;
+
+            // If category has children, recursively filter them
+            if (category.children && category.children.length > 0) {
+                category.children = filterActiveCategories(category.children);
+                // If all children were filtered out and category has no other data, filter out the category
+                return category.children.length > 0 || category.name;
+            }
+
+            return true;
+        });
+    };
+
     function findCategoryPathById(categories, id, locale = 'es', path = []) {
         for (const cat of categories) {
             const newPath = [...path, { _id: cat._id, label: getCategoryDisplayName(cat, locale) }];
@@ -189,13 +207,26 @@ export default function Page() {
         async function loadCategories() {
             setCategoriesLoading(true);
             try {
-                const res = await fetch('/api/categories?flat=true');
+                // Update the API call to specifically request active categories
+                const res = await fetch('/api/categories?flat=true&status=active');
                 if (!res.ok) throw new Error('Error loading categories');
                 const cats = await res.json();
-                setCategoriesFlat(cats);
-                setCategories(organizeCategories(cats));
+
+                // Filter out inactive categories and their children
+                const filterInactiveCategories = (categories) => {
+                    return categories.filter(cat => {
+                        // Keep only active categories
+                        if (cat.isActive === false) return false;
+                        return true;
+                    });
+                };
+
+                const filteredCats = filterInactiveCategories(cats);
+                setCategoriesFlat(filteredCats);
+                setCategories(organizeCategories(filteredCats));
                 setCategoriesError(null);
             } catch (err) {
+                console.error('Error loading categories:', err);
                 setCategoriesError('Error loading categories');
                 setCategories([]);
                 setCategoriesFlat([]);
@@ -438,6 +469,7 @@ export default function Page() {
     function flattenCategoriesForMobile(categories, locale = 'es') {
         let flat = [];
         for (const cat of categories) {
+
             const catLabel = getCategoryDisplayName(cat, locale);
             flat.push({
                 label: catLabel,
@@ -607,7 +639,7 @@ export default function Page() {
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                                     </button>
                                 </div>
-                                <div className="flex items-center">
+                                {/* <div className="flex items-center">
                                     <label htmlFor="sort-by" className="mr-1 text-gray-600 text-xs whitespace-nowrap">{t('sortLabelMobile')}</label>
                                     <select
                                         id="sort-by"
@@ -621,10 +653,10 @@ export default function Page() {
                                         <option value="name-asc">{t('sortNameAsc')}</option>
                                         <option value="name-desc">{t('sortNameDesc')}</option>
                                     </select>
-                                </div>
+                                </div> */}
                             </div>
                             {/* Desktop controls */}
-                            <div className="hidden sm:flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto gap-2 sm:gap-0">
+                            {/* <div className="hidden sm:flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto gap-2 sm:gap-0">
                                 <div className="flex items-center space-x-2">
                                     <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">{t('sortLabelDesktop')}</label>
                                     <select
@@ -640,7 +672,7 @@ export default function Page() {
                                         <option value="name-desc">{t('sortNameDesc')}</option>
                                     </select>
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="hidden sm:flex items-center justify-between space-x-4 w-full sm:w-auto mt-2 sm:mt-0">
                                 <div className="flex items-center space-x-2">
                                     {/* Grid/List view toggle icons */}
@@ -773,26 +805,4 @@ export default function Page() {
             )}
         </ShopLayout>
     );
-}
-// Recursive accordion component for sidebar categories
-function CategoryAccordion({ categories, locale, expandedCategories, onSelectCategory, selectedId, level = 0 }) {
-    return (
-        <ul className="space-y-1">
-            {categories.map((cat) => {
-                const isSelected = selectedId === cat._id;
-                return (
-                    <li key={cat._id}>
-                        <div className="flex items-center">
-                            <button
-                                onClick={() => onSelectCategory(cat)}
-                                className={`w-full text-left px-2 py-1.5 rounded transition-colors duration-150 ${isSelected ? 'text-[#00B0C8] font-semibold bg-gray-100' : 'text-gray-600 hover:bg-gray-100 hover:font-semibold'}`}
-                            >
-                                {getCategoryDisplayName(cat, locale)}
-                            </button>
-                        </div>
-                    </li>
-                );
-            })}
-        </ul>
-    );
-}
+} 

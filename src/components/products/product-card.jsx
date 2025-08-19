@@ -30,6 +30,7 @@ export default function ProductCard({
     // Get translated name/description
     const translatedName = getTranslatedField(product, 'name', locale);
     const translatedDescription = getTranslatedField(product, 'description', locale);
+    console.log(translatedDescription);
     const HoverButton = ({ children, onClick, disabled }) => (
         <button
             className={`bg-white rounded-full p-2 shadow text-gray-700 hover:bg-gray-100 transition duration-200 focus:outline-none flex items-center justify-center ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -159,10 +160,12 @@ export default function ProductCard({
                 <div className="flex flex-col justify-start w-3/4">
                     <h3 className="font-semibold text-xl mb-2 whitespace-nowrap overflow-hidden text-ellipsis w-full" title={translatedName}>{translatedName}</h3>
                     <p className="text-gray-700 text-lg mb-3">{product.price}</p>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">
-                        {translatedDescription?.length > 0 ? translatedDescription : ''}
-                        {translatedDescription && translatedDescription.length > 0 ? '...' : ''}
-                    </p>
+                    {translatedDescription &&
+                        translatedDescription !== '{"es":"","ca":""}' && (
+                            <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">
+                                {translatedDescription}...
+                            </p>
+                        )}
                     {/* Action Icons Below Text - List View */}
                     <div className="flex items-center justify-start space-x-3 mt-2">
                         <HoverButton onClick={handleAddToCart}>

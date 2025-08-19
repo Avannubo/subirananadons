@@ -1,7 +1,49 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2, FiEye } from 'react-icons/fi';
 
 export default function ClientsTable({ clients, onEditClient, onDeleteClient, onViewClient }) {
+    const [orderCounts, setOrderCounts] = useState({});
+
+    // Fetch order counts for all clients
+    useEffect(() => {
+        const fetchOrderCounts = async () => {
+            try {
+                const counts = {};
+                await Promise.all(
+                    clients.map(async (client) => {
+                        const userId = client._id || client.id;
+                        const res = await fetch('/api/orders/count', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                userId: userId,
+                                email: client.email,
+                                client: {
+                                    id: userId,
+                                    email: client.email
+                                }
+                            })
+                        });
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            counts[userId] = data.count || 0;
+                        }
+                    })
+                );
+                setOrderCounts(counts);
+            } catch (error) {
+                console.error('Error fetching order counts:', error);
+            }
+        };
+
+        if (clients.length > 0) {
+            fetchOrderCounts();
+        }
+    }, [clients]);
     // console.log('ClientsTable rendered with clients:', clients);
     // Locale detection (default to 'ca')
     let locale = 'ca';
@@ -65,8 +107,10 @@ export default function ClientsTable({ clients, onEditClient, onDeleteClient, on
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{client.name}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{client.lastName}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{client.email}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {client.sales || '--'}
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm font-medium text-gray-500">
+                                        {orderCounts[client._id || client.id] || 0}
+                                    </div>
                                 </td>
                                 {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${client.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
