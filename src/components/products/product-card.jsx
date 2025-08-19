@@ -30,7 +30,7 @@ export default function ProductCard({
     // Get translated name/description
     const translatedName = getTranslatedField(product, 'name', locale);
     const translatedDescription = getTranslatedField(product, 'description', locale);
-    console.log(translatedDescription);
+    // console.log(translatedDescription);
     const HoverButton = ({ children, onClick, disabled }) => (
         <button
             className={`bg-white rounded-full p-2 shadow text-gray-700 hover:bg-gray-100 transition duration-200 focus:outline-none flex items-center justify-center ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -51,7 +51,7 @@ export default function ProductCard({
             // toast.success(`${getTranslatedField(product, 'name', locale) || product.name} añadido al carrito`);
         } catch (error) {
             toast.error('Error al añadir al carrito');
-            console.error('Error adding to cart:', error);
+            // console.error('Error adding to cart:', error);
         }
     };
     // Generate the product URL based on product id only

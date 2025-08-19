@@ -71,6 +71,22 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         if (isOpen) {
             fetchCategories();
             fetchBrands();
+
+            // Initial synchronization of textarea heights
+            setTimeout(() => {
+                const caTextarea = document.getElementById('description-ca');
+                const esTextarea = document.getElementById('description-es');
+                if (caTextarea && esTextarea) {
+                    // Reset heights to auto to get proper scrollHeight
+                    caTextarea.style.height = 'auto';
+                    esTextarea.style.height = 'auto';
+                    // Get the maximum height between both textareas
+                    const height = Math.max(caTextarea.scrollHeight, esTextarea.scrollHeight, 144);
+                    // Set both textareas to the maximum height
+                    caTextarea.style.height = `${height}px`;
+                    esTextarea.style.height = `${height}px`;
+                }
+            }, 100);
         }
     }, [isOpen]);
     // Fetch categories for the dropdown
@@ -261,6 +277,33 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     [id === 'description-ca' ? 'ca' : 'es']: value
                 }
             }));
+
+            // After state update, sync textarea heights
+            setTimeout(() => {
+                const caTextarea = document.getElementById('description-ca');
+                const esTextarea = document.getElementById('description-es');
+                if (caTextarea && esTextarea) {
+                    const maxHeight = Math.max(caTextarea.scrollHeight, esTextarea.scrollHeight);
+                    caTextarea.style.height = `${maxHeight}px`;
+                    esTextarea.style.height = `${maxHeight}px`;
+                }
+            }, 0);
+
+            // Synchronize textarea heights after a short delay to ensure state is updated
+            setTimeout(() => {
+                const caTextarea = document.getElementById('description-ca');
+                const esTextarea = document.getElementById('description-es');
+                if (caTextarea && esTextarea) {
+                    // Reset heights to auto to get proper scrollHeight
+                    caTextarea.style.height = 'auto';
+                    esTextarea.style.height = 'auto';
+                    // Get the maximum height between both textareas
+                    const height = Math.max(caTextarea.scrollHeight, esTextarea.scrollHeight, 144); // minimum height of 144px (6 rows)
+                    // Set both textareas to the maximum height
+                    caTextarea.style.height = `${height}px`;
+                    esTextarea.style.height = `${height}px`;
+                }
+            }, 0);
         } else if (name === 'available' || name === 'minStock') {
             setFormData(prev => ({
                 ...prev,
@@ -682,138 +725,149 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                             <FiX className="h-5 w-5" />
                         </button>
                     </div>
-                    <form onSubmit={handleSubmit} className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                            {/* Left Column */}
-                            <div className="space-y-4 md:col-span-2">
-                                <h3 className="text-md font-medium">Informació bàsica</h3>
-                                <div className="flex gap-4">
-                                    <div className="flex-1">
-                                        <label htmlFor="name-ca" className="block text-sm font-medium text-gray-700">
-                                            Nom (CA) *
+                    <form onSubmit={handleSubmit} className="">
+                        <div className="overflow-y-auto max-h-[80vh] p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                {/* Left Column */}
+                                <div className="space-y-4 md:col-span-2">
+                                    <h3 className="text-md font-medium">Informació bàsica</h3>
+                                    <div className="flex gap-4">
+                                        <div className="flex-1">
+                                            <label htmlFor="name-ca" className="block text-sm font-medium text-gray-700">
+                                                Nom (CA) *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="name-ca"
+                                                name="name"
+                                                value={formData.name.ca}
+                                                onChange={handleChange}
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                            />
+                                            {errors.name && (
+                                                <p className=" text-sm text-red-600">{errors.name}</p>
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <label htmlFor="name-es" className="block text-sm font-medium text-gray-700">
+                                                Nom (ES) *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="name-es"
+                                                name="name"
+                                                value={formData.name.es}
+                                                onChange={handleChange}
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-4 mt-2">
+                                        <div className="flex-1">
+                                            <label htmlFor="description-ca" className="block text-sm font-medium text-gray-700">
+                                                Descripció (CA)
+                                            </label>
+                                            <textarea
+                                                id="description-ca"
+                                                name="description"
+                                                rows={6}
+                                                value={formData.description.ca}
+                                                onChange={(e) => {
+                                                    handleChange(e);
+                                                    const target = e.target;
+                                                    target.style.height = 'auto';
+                                                    target.style.height = `${target.scrollHeight}px`;
+                                                }}
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
+                                                style={{ whiteSpace: 'pre-line', minHeight: '144px', resize: 'none', overflow: 'hidden' }}
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <label htmlFor="description-es" className="block text-sm font-medium text-gray-700">
+                                                Descripció (ES)
+                                            </label>
+                                            <textarea
+                                                id="description-es"
+                                                name="description"
+                                                rows={6}
+                                                value={formData.description.es}
+                                                onChange={(e) => {
+                                                    handleChange(e);
+                                                    const target = e.target;
+                                                    target.style.height = 'auto';
+                                                    target.style.height = `${target.scrollHeight}px`;
+                                                }}
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
+                                                style={{ whiteSpace: 'pre-line', minHeight: '144px', resize: 'none', overflow: 'hidden' }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="reference" className="block text-sm font-medium text-gray-700">
+                                            Referència *
                                         </label>
                                         <input
                                             type="text"
-                                            id="name-ca"
-                                            name="name"
-                                            value={formData.name.ca}
+                                            id="reference"
+                                            name="reference"
+                                            value={formData.reference}
                                             onChange={handleChange}
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                            className={`mt-1 block w-full px-3 py-2 border ${errors.reference ? 'border-red-300' : 'border-gray-300'
+                                                } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
                                         />
-                                        {errors.name && (
-                                            <p className=" text-sm text-red-600">{errors.name}</p>
+                                        {errors.reference && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.reference}</p>
                                         )}
                                     </div>
-                                    <div className="flex-1">
-                                        <label htmlFor="name-es" className="block text-sm font-medium text-gray-700">
-                                            Nom (ES) *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="name-es"
-                                            name="name"
-                                            value={formData.name.es}
-                                            onChange={handleChange}
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex gap-4 mt-2">
-                                    <div className="flex-1">
-                                        <label htmlFor="description-ca" className="block text-sm font-medium text-gray-700">
-                                            Descripció (CA)
-                                        </label>
-                                        <textarea
-                                            id="description-ca"
-                                            name="description"
-                                            rows={6}
-                                            value={formData.description.ca}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
-                                            style={{ whiteSpace: 'pre-line' }}
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label htmlFor="description-es" className="block text-sm font-medium text-gray-700">
-                                            Descripció (ES)
-                                        </label>
-                                        <textarea
-                                            id="description-es"
-                                            name="description"
-                                            rows={6}
-                                            value={formData.description.es}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
-                                            style={{ whiteSpace: 'pre-line' }}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label htmlFor="reference" className="block text-sm font-medium text-gray-700">
-                                        Referència *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="reference"
-                                        name="reference"
-                                        value={formData.reference}
-                                        onChange={handleChange}
-                                        className={`mt-1 block w-full px-3 py-2 border ${errors.reference ? 'border-red-300' : 'border-gray-300'
-                                            } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                    />
-                                    {errors.reference && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.reference}</p>
-                                    )}
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                                            Categoria :
-                                            {isEditing && (
-                                                <span className='font-bold'>{
-                                                    product.category && typeof product.category === 'object'
-                                                        ? (
-                                                            // If category has a name object (populated)
-                                                            product.category.name && typeof product.category.name === 'object'
-                                                                ? (product.category.name.ca || product.category.name.es || product.category.name.name || 'N/D')
-                                                                // If category is a translation object itself (like { ca, es })
-                                                                : (product.category.ca || product.category.es || product.category.name || 'N/D')
-                                                        )
-                                                        : (product.category || 'N/D')
-                                                }</span>)}
-                                        </label>
-                                        <div className="relative">
-                                            <div
-                                                className={`mt-1 block w-full px-3 py-2 border ${errors.category ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none cursor-pointer flex justify-between items-center`}
-                                                onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                                            >
-                                                <span className="truncate">{
-                                                    formData.categoryDisplayName || 'Selecciona categoria'
-                                                }</span>
-                                                <FiChevronRight className={`transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
-                                            </div>
-                                            {showCategoryDropdown && (
-                                                <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md overflow-auto border border-gray-300">
-                                                    {loadingCategories ? (
-                                                        <div className="flex justify-center p-4">
-                                                            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                                                            <span className="ml-2">Carregant categories...</span>
-                                                        </div>
-                                                    ) : hierarchicalCategories.length === 0 ? (
-                                                        <div className="p-4 text-gray-500">No hi ha categories disponibles</div>
-                                                    ) : (
-                                                        <>
-                                                            <div className='p-2 border-b border-gray-200 sticky top-0 bg-white z-10'>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Cerca categoria..."
-                                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                                                    value={categorySearchTerm}
-                                                                    onChange={e => setCategorySearchTerm(e.target.value)}
-                                                                />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                                                Categoria:
+                                                {isEditing && (
+                                                    <span className='font-bold'> {
+                                                        product.category && typeof product.category === 'object'
+                                                            ? (
+                                                                // If category has a name object (populated)
+                                                                product.category.name && typeof product.category.name === 'object'
+                                                                    ? (product.category.name.ca || product.category.name.es || product.category.name.name || 'N/D')
+                                                                    // If category is a translation object itself (like { ca, es })
+                                                                    : (product.category.ca || product.category.es || product.category.name || 'N/D')
+                                                            )
+                                                            : (product.category || 'N/D')
+                                                    }</span>)}
+                                            </label>
+                                            <div className="relative">
+                                                <div
+                                                    className={`mt-1 block w-full px-3 py-2 border ${errors.category ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none cursor-pointer flex justify-between items-center`}
+                                                    onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                                                >
+                                                    <span className="truncate">{
+                                                        formData.categoryDisplayName || 'Selecciona categoria'
+                                                    }</span>
+                                                    <FiChevronRight className={`transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
+                                                </div>
+                                                {showCategoryDropdown && (
+                                                    <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md overflow-auto border border-gray-300">
+                                                        {loadingCategories ? (
+                                                            <div className="flex justify-center p-4">
+                                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                                <span className="ml-2">Carregant categories...</span>
                                                             </div>
-                                                            <div className=" category-dropdown">
-                                                                <style jsx global>{`
+                                                        ) : hierarchicalCategories.length === 0 ? (
+                                                            <div className="p-4 text-gray-500">No hi ha categories disponibles</div>
+                                                        ) : (
+                                                            <>
+                                                                <div className='p-2 border-b border-gray-200 sticky top-0 bg-white z-10'>
+                                                                    <input
+                                                                        type="text"
+                                                                        placeholder="Cerca categoria..."
+                                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                                        value={categorySearchTerm}
+                                                                        onChange={e => setCategorySearchTerm(e.target.value)}
+                                                                    />
+                                                                </div>
+                                                                <div className=" category-dropdown">
+                                                                    <style jsx global>{`
                                                                     .category-dropdown .category-item {
                                                                         margin: 0;
                                                                         padding: 0;
@@ -823,414 +877,414 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                             padding: 0;
                                                                     }
                                                                 `}</style>
-                                                                {filteredCategories.length === 0 ? (
-                                                                    <div className="p-4 text-center text-gray-500">
-                                                                        {categorySearchTerm
-                                                                            ? `No s'han trobat categories amb "${categorySearchTerm}"`
-                                                                            : "No hi ha categories disponibles"}
-                                                                    </div>
-                                                                ) : (
-                                                                    filteredCategories.map((category, index) =>
-                                                                        renderCategoryOption(
-                                                                            category,
-                                                                            0,
-                                                                            index === filteredCategories.length - 1
+                                                                    {filteredCategories.length === 0 ? (
+                                                                        <div className="p-4 text-center text-gray-500">
+                                                                            {categorySearchTerm
+                                                                                ? `No s'han trobat categories amb "${categorySearchTerm}"`
+                                                                                : "No hi ha categories disponibles"}
+                                                                        </div>
+                                                                    ) : (
+                                                                        filteredCategories.map((category, index) =>
+                                                                            renderCategoryOption(
+                                                                                category,
+                                                                                0,
+                                                                                index === filteredCategories.length - 1
+                                                                            )
                                                                         )
-                                                                    )
-                                                                )}
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                        {errors.category && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.category}</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
-                                            Marca :
-                                            {isEditing && (<span className='font-bold'> {product.brand || 'N/D'}</span>)}
-                                        </label>
-                                        <div className="relative">
-                                            <div
-                                                className={`mt-1 block w-full px-3 py-2 border ${errors.brand ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none cursor-pointer flex justify-between items-center`}
-                                                onClick={() => setShowBrandDropdown(!showBrandDropdown)}
-                                            >
-                                                {formData.brand ? (
-                                                    <div className="flex items-center space-x-3 truncate">
-                                                        {(() => {
-                                                            const selectedBrand = brands.find(b => b._id === formData.brand);
-                                                            if (selectedBrand?.logo) {
-                                                                return (
-                                                                    <div className="w-6 h-6 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
-                                                                        <Image
-                                                                            src={selectedBrand.logo}
-                                                                            alt={selectedBrand.name}
-                                                                            width={100}
-                                                                            height={100}
-                                                                            className="object-contain w-full h-full"
-                                                                        />
-                                                                    </div>
-                                                                );
-                                                            }
-                                                            return (
-                                                                <div className="w-6 h-6 flex-shrink-0 rounded bg-gray-100 flex items-center justify-center">
-                                                                    <FiPackage size={14} className="text-gray-400" />
+                                                                    )}
                                                                 </div>
-                                                            );
-                                                        })()}
-                                                        <span className="truncate text-gray-700 font-medium">{
-                                                            (() => {
-                                                                const selectedBrand = brands.find(b => b._id === formData.brand);
-                                                                return selectedBrand ? selectedBrand.name : ' Selecciona nova marca';
-                                                            })()
-                                                        }</span>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center space-x-2">
-                                                        <FiPackage size={16} className="text-gray-400" />
-                                                        <span className="truncate text-gray-500">Selecciona marca</span>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 )}
-                                                <FiChevronRight className={`transition-transform ${showBrandDropdown ? 'rotate-90' : ''}`} />
                                             </div>
-                                            {showBrandDropdown && (
-                                                <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-80 rounded-md overflow-hidden border border-gray-300 flex flex-col">
-                                                    {/* Search input */}
-                                                    <div className="p-2 border-b border-gray-200 sticky top-0 bg-white z-10">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Cerca marca..."
-                                                            value={brandSearchTerm}
-                                                            onChange={handleBrandSearch}
-                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        />
-                                                    </div>
-                                                    {/* Results container */}
-                                                    <div className="overflow-auto max-h-60">
-                                                        {loadingBrands ? (
-                                                            <div className="flex justify-center p-4">
-                                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
-                                                                <span className="ml-2">Carregant marques...</span>
-                                                            </div>
-                                                        ) : filteredBrands.length === 0 ? (
-                                                            <div className="p-4 text-center text-gray-500">
-                                                                {brandSearchTerm ?
-                                                                    `No s'han trobat marques amb "${brandSearchTerm}"` :
-                                                                    "No hi ha marques disponibles"}
-                                                            </div>
-                                                        ) : (
-                                                            <div className="p-2  brand-dropdown">
-                                                                <style jsx global>{`
+                                            {errors.category && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.category}</p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
+                                                Marca:
+                                                {isEditing && (<span className='font-bold'> {product.brand || 'N/D'}</span>)}
+                                            </label>
+                                            <div className="relative">
+                                                <div
+                                                    className={`mt-1 block w-full px-3 py-2 border ${errors.brand ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none cursor-pointer flex justify-between items-center`}
+                                                    onClick={() => setShowBrandDropdown(!showBrandDropdown)}
+                                                >
+                                                    {formData.brand ? (
+                                                        <div className="flex items-center space-x-3 truncate">
+                                                            {(() => {
+                                                                const selectedBrand = brands.find(b => b._id === formData.brand);
+                                                                if (selectedBrand?.logo) {
+                                                                    return (
+                                                                        <div className="w-6 h-6 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
+                                                                            <Image
+                                                                                src={selectedBrand.logo}
+                                                                                alt={selectedBrand.name}
+                                                                                width={100}
+                                                                                height={100}
+                                                                                className="object-contain w-full h-full"
+                                                                            />
+                                                                        </div>
+                                                                    );
+                                                                }
+                                                                return (
+                                                                    <div className="w-6 h-6 flex-shrink-0 rounded bg-gray-100 flex items-center justify-center">
+                                                                        <FiPackage size={14} className="text-gray-400" />
+                                                                    </div>
+                                                                );
+                                                            })()}
+                                                            <span className="truncate text-gray-700 font-medium">{
+                                                                (() => {
+                                                                    const selectedBrand = brands.find(b => b._id === formData.brand);
+                                                                    return selectedBrand ? selectedBrand.name : ' Selecciona nova marca';
+                                                                })()
+                                                            }</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center space-x-2">
+                                                            <FiPackage size={16} className="text-gray-400" />
+                                                            <span className="truncate text-gray-500">Selecciona marca</span>
+                                                        </div>
+                                                    )}
+                                                    <FiChevronRight className={`transition-transform ${showBrandDropdown ? 'rotate-90' : ''}`} />
+                                                </div>
+                                                {showBrandDropdown && (
+                                                    <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-80 rounded-md overflow-hidden border border-gray-300 flex flex-col">
+                                                        {/* Search input */}
+                                                        <div className="p-2 border-b border-gray-200 sticky top-0 bg-white z-10">
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Cerca marca..."
+                                                                value={brandSearchTerm}
+                                                                onChange={handleBrandSearch}
+                                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            />
+                                                        </div>
+                                                        {/* Results container */}
+                                                        <div className="overflow-auto max-h-60">
+                                                            {loadingBrands ? (
+                                                                <div className="flex justify-center p-4">
+                                                                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                                    <span className="ml-2">Carregant marques...</span>
+                                                                </div>
+                                                            ) : filteredBrands.length === 0 ? (
+                                                                <div className="p-4 text-center text-gray-500">
+                                                                    {brandSearchTerm ?
+                                                                        `No s'han trobat marques amb "${brandSearchTerm}"` :
+                                                                        "No hi ha marques disponibles"}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="p-2  brand-dropdown">
+                                                                    <style jsx global>{`
                                                                         .brand-dropdown .brand-item {
                                                                             margin: 0;
                                                                             padding: 0;
                                                                         }
                                                                     `}</style>
-                                                                {filteredBrands.map((brand, index) =>
-                                                                    <div
-                                                                        key={brand._id}
-                                                                        className="brand-item px-3 py-2   cursor-pointer flex items-center  space-x-3 my-2"
-                                                                        onClick={() => handleBrandSelect(brand)}
-                                                                    >
-                                                                        {brand.logo ? (
-                                                                            <div className="w-10 h-10 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
-                                                                                <Image
-                                                                                    src={brand.logo}
-                                                                                    alt={brand.name}
-                                                                                    width={100}
-                                                                                    height={100}
-                                                                                    className="object-contain w-full h-full"
-                                                                                />
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="w-10 h-10 flex-shrink-0 rounded bg-gray-100 flex items-center justify-center my-1">
-                                                                                <FiPackage className="text-gray-400" size={16} />
-                                                                            </div>
-                                                                        )}
-                                                                        <div>
-                                                                            <span className="text-sm font-medium text-gray-700">{brand.name}</span>
-                                                                            {brand.description && (
-                                                                                <p className="text-xs text-gray-500 truncate max-w-[200px]">{brand.description}</p>
+                                                                    {filteredBrands.map((brand, index) =>
+                                                                        <div
+                                                                            key={brand._id}
+                                                                            className="brand-item px-3 py-2   cursor-pointer flex items-center  space-x-3 my-2"
+                                                                            onClick={() => handleBrandSelect(brand)}
+                                                                        >
+                                                                            {brand.logo ? (
+                                                                                <div className="w-10 h-10 flex-shrink-0 relative rounded overflow-hidden bg-white border border-gray-200">
+                                                                                    <Image
+                                                                                        src={brand.logo}
+                                                                                        alt={brand.name}
+                                                                                        width={100}
+                                                                                        height={100}
+                                                                                        className="object-contain w-full h-full"
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="w-10 h-10 flex-shrink-0 rounded bg-gray-100 flex items-center justify-center my-1">
+                                                                                    <FiPackage className="text-gray-400" size={16} />
+                                                                                </div>
                                                                             )}
+                                                                            <div>
+                                                                                <span className="text-sm font-medium text-gray-700">{brand.name}</span>
+                                                                                {brand.description && (
+                                                                                    <p className="text-xs text-gray-500 truncate max-w-[200px]">{brand.description}</p>
+                                                                                )}
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                )}
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {errors.brand && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.brand}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label htmlFor="price_excl_tax" className="block text-sm font-medium text-gray-700">
+                                                Preu sense impostos (€)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="price_excl_tax"
+                                                name="price_excl_tax"
+                                                value={(() => {
+                                                    const iva = parseFloat(ivaValue || '21');
+                                                    const incl = parseFloat(formData.price_incl_tax || '');
+                                                    if (!incl || isNaN(incl) || !iva || isNaN(iva)) return '';
+                                                    return (incl / (1 + iva / 100)).toFixed(2);
+                                                })()}
+                                                readOnly
+                                                disabled
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 focus:outline-none"
+                                                placeholder={ivaLoading ? 'Carregant...' : 'Calculat automàticament'}
+                                            />
+                                            <p className="mt-1 text-xs text-gray-500">IVA actual: {ivaLoading ? 'Carregant...' : ivaValue ? ivaValue + '%' : 'No definit'}</p>
+                                        </div>
+                                        <div>
+                                            <label htmlFor="price_incl_tax" className="block text-sm font-medium text-gray-700">
+                                                Preu amb impostos (€) *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="price_incl_tax"
+                                                name="price_incl_tax"
+                                                value={formData.price_incl_tax}
+                                                onChange={handleChange}
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.price_incl_tax ? 'border-red-300' : 'border-gray-300'
+                                                    } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                            />
+                                            {errors.price_incl_tax && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.price_incl_tax}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <h3 className="text-md font-medium mt-6">Inventari</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label htmlFor="available" className="block text-sm font-medium text-gray-700">
+                                                Estoc
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="available"
+                                                name="available"
+                                                value={formData.stock.available}
+                                                onChange={handleChange}
+                                                min="0"
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.available ? 'border-red-300' : 'border-gray-300'
+                                                    } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                            />
+                                            {errors.available && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.available}</p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <label htmlFor="minStock" className="block text-sm font-medium text-gray-700">
+                                                Estoc mínim
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="minStock"
+                                                name="minStock"
+                                                value={formData.stock.minStock}
+                                                onChange={handleChange}
+                                                min="0"
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.minStock ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                            />
+                                            {errors.minStock && (
+                                                <p className="mt-1 text-sm text-red-600">{errors.minStock}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                                                Estat
+                                            </label>
+                                            <select
+                                                id="status"
+                                                name="status"
+                                                value={formData.status}
+                                                onChange={handleChange}
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                            >
+                                                <option value="active">Actiu</option>
+                                                <option value="inactive">Inactiu</option>
+                                                <option value="discontinued">Descatalogat</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex items-center h-full pt-6">
+                                            <input
+                                                type="checkbox"
+                                                id="featured"
+                                                name="featured"
+                                                checked={formData.featured}
+                                                onChange={handleChange}
+                                                className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
+                                            />
+                                            <label htmlFor="featured" className="ml-2 block text-sm font-medium text-gray-700">
+                                                Destacat
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Right Column - Multiple Image Upload */}
+                                <div className="space-y-6">
+                                    <h3 className="text-md font-medium">Imatges del producte</h3>
+                                    {/* Current Images */}
+                                    {/* productImages.length > 0 && ( */}
+                                    <div className="mb-6">
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Imatges actuals</h4>
+                                        <p className="text-xs text-gray-500 mb-2">
+                                            La primera imatge serà la principal, la segona serà la de hover (opcional).
+                                        </p>
+                                        <div className="flex overflow-x-auto p-1 space-x-4">
+                                            {productImages.map((img, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200`}
+                                                >
+                                                    <div className="relative " >
+                                                        {/* onClick={() => handleSelectImage(index)} */}
+                                                        <img
+                                                            src={img || '/assets/images/product-placeholder.jpg'}
+                                                            alt={`Imatge de producte ${index + 1}`}
+                                                            width={100}
+                                                            height={100}
+                                                            className="h-[100px] w-[100px] object-cover"
+                                                        />
+                                                        {index === 0 && (
+                                                            <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">
+                                                                Principal
+                                                            </div>
+                                                        )}
+                                                        {index === 1 && (
+                                                            <div className="absolute top-0 left-0 rounded-br-md bg-[#00B0C8] text-white text-xs px-2 py-1">
+                                                                Secundària
                                                             </div>
                                                         )}
                                                     </div>
+                                                    <div className="flex justify-between bg-gray-50 p-1 gap-1">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleMoveImageUp(index)}
+                                                            disabled={index === 0}
+                                                            className={`text-gray-500 p-1 cursor-pointer rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                            title="Mou a l'esquerra"
+                                                        >
+                                                            <FiChevronRight className="transform rotate-180" size={16} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveImage(index)}
+                                                            className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
+                                                            title="Elimina imatge"
+                                                        >
+                                                            <FiTrash2 size={16} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleMoveImageDown(index)}
+                                                            disabled={index === productImages.length - 1}
+                                                            className={`text-gray-500 p-1 rounded cursor-pointer hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                                            title="Mou a la dreta"
+                                                        >
+                                                            <FiChevronRight size={16} />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            )}
+                                            ))}
                                         </div>
-                                        {errors.brand && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.brand}</p>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label htmlFor="price_excl_tax" className="block text-sm font-medium text-gray-700">
-                                            Preu sense impostos (€)
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="price_excl_tax"
-                                            name="price_excl_tax"
-                                            value={(() => {
-                                                const iva = parseFloat(ivaValue || '21');
-                                                const incl = parseFloat(formData.price_incl_tax || '');
-                                                if (!incl || isNaN(incl) || !iva || isNaN(iva)) return '';
-                                                return (incl / (1 + iva / 100)).toFixed(2);
-                                            })()}
-                                            readOnly
-                                            disabled
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 focus:outline-none"
-                                            placeholder={ivaLoading ? 'Carregant...' : 'Calculat automàticament'}
-                                        />
-                                        <p className="mt-1 text-xs text-gray-500">IVA actual: {ivaLoading ? 'Carregant...' : ivaValue ? ivaValue + '%' : 'No definit'}</p>
-                                    </div>
-                                    <div>
-                                        <label htmlFor="price_incl_tax" className="block text-sm font-medium text-gray-700">
-                                            Preu amb impostos (€) *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="price_incl_tax"
-                                            name="price_incl_tax"
-                                            value={formData.price_incl_tax}
-                                            onChange={handleChange}
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.price_incl_tax ? 'border-red-300' : 'border-gray-300'
-                                                } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                        />
-                                        {errors.price_incl_tax && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.price_incl_tax}</p>
-                                        )}
-                                    </div>
-                                </div>
-                                <h3 className="text-md font-medium mt-6">Inventari</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label htmlFor="available" className="block text-sm font-medium text-gray-700">
-                                            Estoc
-                                        </label>
-                                        <input
-                                            type="number"
-                                            id="available"
-                                            name="available"
-                                            value={formData.stock.available}
-                                            onChange={handleChange}
-                                            min="0"
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.available ? 'border-red-300' : 'border-gray-300'
-                                                } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                        />
-                                        {errors.available && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.available}</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label htmlFor="minStock" className="block text-sm font-medium text-gray-700">
-                                            Estoc mínim
-                                        </label>
-                                        <input
-                                            type="number"
-                                            id="minStock"
-                                            name="minStock"
-                                            value={formData.stock.minStock}
-                                            onChange={handleChange}
-                                            min="0"
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.minStock ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
-                                        />
-                                        {errors.minStock && (
-                                            <p className="mt-1 text-sm text-red-600">{errors.minStock}</p>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                                            Estat
-                                        </label>
-                                        <select
-                                            id="status"
-                                            name="status"
-                                            value={formData.status}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                        >
-                                            <option value="active">Actiu</option>
-                                            <option value="inactive">Inactiu</option>
-                                            <option value="discontinued">Descatalogat</option>
-                                        </select>
-                                    </div>
-                                    <div className="flex items-center h-full pt-6">
-                                        <input
-                                            type="checkbox"
-                                            id="featured"
-                                            name="featured"
-                                            checked={formData.featured}
-                                            onChange={handleChange}
-                                            className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
-                                        />
-                                        <label htmlFor="featured" className="ml-2 block text-sm font-medium text-gray-700">
-                                            Destacat
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Right Column - Multiple Image Upload */}
-                            <div className="space-y-6">
-                                <h3 className="text-md font-medium">Imatges del producte</h3>
-                                {/* Current Images */}
-                                {/* productImages.length > 0 && ( */}
-                                <div className="mb-6">
-                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Imatges actuals</h4>
-                                    <p className="text-xs text-gray-500 mb-2">
-                                        La primera imatge serà la principal, la segona serà la de hover (opcional).
-                                    </p>
-                                    <div className="flex overflow-x-auto p-1 space-x-4">
-                                        {productImages.map((img, index) => (
-                                            <div
-                                                key={index}
-                                                className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200`}
-                                            >
-                                                <div className="relative " >
-                                                    {/* onClick={() => handleSelectImage(index)} */}
-                                                    <img
-                                                        src={img || '/assets/images/product-placeholder.jpg'}
-                                                        alt={`Imatge de producte ${index + 1}`}
-                                                        width={100}
-                                                        height={100}
-                                                        className="h-[100px] w-[100px] object-cover"
-                                                    />
-                                                    {index === 0 && (
-                                                        <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">
-                                                            Principal
-                                                        </div>
-                                                    )}
-                                                    {index === 1 && (
-                                                        <div className="absolute top-0 left-0 rounded-br-md bg-[#00B0C8] text-white text-xs px-2 py-1">
-                                                            Secundària
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex justify-between bg-gray-50 p-1 gap-1">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleMoveImageUp(index)}
-                                                        disabled={index === 0}
-                                                        className={`text-gray-500 p-1 cursor-pointer rounded hover:bg-gray-200 ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                        title="Mou a l'esquerra"
-                                                    >
-                                                        <FiChevronRight className="transform rotate-180" size={16} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveImage(index)}
-                                                        className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
-                                                        title="Elimina imatge"
-                                                    >
-                                                        <FiTrash2 size={16} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleMoveImageDown(index)}
-                                                        disabled={index === productImages.length - 1}
-                                                        className={`text-gray-500 p-1 rounded cursor-pointer hover:bg-gray-200 ${index === productImages.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                        title="Mou a la dreta"
-                                                    >
-                                                        <FiChevronRight size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            if (selectedImages && selectedImages.length > 0) {
-                                                // Only add images not already in productImages
-                                                const newImages = selectedImages.filter(img => !productImages.includes(img));
-                                                if (newImages.length > 0) {
-                                                    setProductImages(prev => [...prev, ...newImages]);
-                                                    setSelectedImages([]);
-                                                    setSelectedFiles([]);
-                                                    toast.success('Imatges afegides a la galeria');
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (selectedImages && selectedImages.length > 0) {
+                                                    // Only add images not already in productImages
+                                                    const newImages = selectedImages.filter(img => !productImages.includes(img));
+                                                    if (newImages.length > 0) {
+                                                        setProductImages(prev => [...prev, ...newImages]);
+                                                        setSelectedImages([]);
+                                                        setSelectedFiles([]);
+                                                        toast.success('Imatges afegides a la galeria');
+                                                    } else {
+                                                        toast.warning('Totes les imatges ja són a la galeria');
+                                                    }
                                                 } else {
-                                                    toast.warning('Totes les imatges ja són a la galeria');
+                                                    handleAddImage();
                                                 }
-                                            } else {
-                                                handleAddImage();
-                                            }
-                                        }}
-                                        disabled={isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)}
-                                        className={`w-full my-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)
-                                            ? 'bg-gray-400 cursor-not-allowed'
-                                            : 'bg-green-600 hover:bg-green-700'
-                                            }`}
-                                    >
-                                        <FiChevronsUp size={16} />
-                                        <span>Afegeix a la galeria</span>
-                                    </button>
-                                    {/* Use preview images array as preview below uploaded images */}
-                                    {selectedImages && selectedImages.length > 0 ? (
-                                        <div className="mt-2">
-                                            <h4 className="text-sm font-medium text-gray-700 mb-2">Previsualització d'imatges seleccionades</h4>
-                                            <div className="flex overflow-x-auto p-1 space-x-4">
-                                                {selectedImages.map((img, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200"
-                                                    >
-                                                        <div className="relative">
-                                                            <Image
-                                                                src={img || '/assets/images/product-placeholder.jpg'}
-                                                                alt={`Imatge seleccionada ${index + 1}`}
-                                                                width={500}
-                                                                height={500}
-                                                                className="h-28 w-28 object-cover"
-                                                            />
-                                                            {/* Distintiu per imatges noves o seleccionades */}
-                                                            <div className="absolute -top-0.5 left-0">
-                                                                {img.startsWith('data:') ? (
-                                                                    <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
-                                                                ) : (
-                                                                    <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Existent</span>
-                                                                )}
+                                            }}
+                                            disabled={isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)}
+                                            className={`w-full my-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-green-600 hover:bg-green-700'
+                                                }`}
+                                        >
+                                            <FiChevronsUp size={16} />
+                                            <span>Afegeix a la galeria</span>
+                                        </button>
+                                        {/* Use preview images array as preview below uploaded images */}
+                                        {selectedImages && selectedImages.length > 0 ? (
+                                            <div className="mt-2">
+                                                <h4 className="text-sm font-medium text-gray-700 mb-2">Previsualització d'imatges seleccionades</h4>
+                                                <div className="flex overflow-x-auto p-1 space-x-4">
+                                                    {selectedImages.map((img, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200"
+                                                        >
+                                                            <div className="relative">
+                                                                <Image
+                                                                    src={img || '/assets/images/product-placeholder.jpg'}
+                                                                    alt={`Imatge seleccionada ${index + 1}`}
+                                                                    width={500}
+                                                                    height={500}
+                                                                    className="h-28 w-28 object-cover"
+                                                                />
+                                                                {/* Distintiu per imatges noves o seleccionades */}
+                                                                <div className="absolute -top-0.5 left-0">
+                                                                    {img.startsWith('data:') ? (
+                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
+                                                                    ) : (
+                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Existent</span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex justify-between bg-gray-50 p-1 gap-1">
+                                                                <div className="w-6"></div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+                                                                        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+                                                                    }}
+                                                                    className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
+                                                                    title="Elimina imatge seleccionada"
+                                                                >
+                                                                    <FiTrash2 size={16} />
+                                                                </button>
+                                                                <div className="w-6"></div>
                                                             </div>
                                                         </div>
-                                                        <div className="flex justify-between bg-gray-50 p-1 gap-1">
-                                                            <div className="w-6"></div>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-                                                                    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-                                                                }}
-                                                                className="text-red-500 p-1 cursor-pointer rounded hover:bg-gray-200"
-                                                                title="Elimina imatge seleccionada"
-                                                            >
-                                                                <FiTrash2 size={16} />
-                                                            </button>
-                                                            <div className="w-6"></div>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="mt-2 text-center text-gray-500">
-                                            <p>Cap imatge seleccionada</p>
-                                        </div>
-                                    )}
-                                </div>
-                                {/* )} */}
-                                {/* Image Upload */}
-                                <div className="flex flex-col items-center space-y-4">
-                                    {/* <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
+                                        ) : (
+                                            <div className="mt-2 text-center text-gray-500">
+                                                <p>Cap imatge seleccionada</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {/* )} */}
+                                    {/* Image Upload */}
+                                    <div className="flex flex-col items-center space-y-4">
+                                        {/* <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
                                         {isUploading && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
                                                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
@@ -1256,87 +1310,89 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             </div>
                                         )}
                                     </div> */}
-                                    <div className="w-full grid grid-row-2 gap-2">
+                                        <div className="w-full grid grid-row-2 gap-2">
 
-                                        <div className='flex flex-row gap-2'>
-                                            <label
-                                                htmlFor="productImage"
-                                                className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading
-                                                    ? 'bg-gray-400 cursor-not-allowed'
-                                                    : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
-                                                    }`}
-                                            >
-                                                {isUploading ? 'Pujant...' : 'Selecciona imatges'}
-                                            </label>
-                                            <input
-                                                type="file"
-                                                id="productImage"
-                                                accept="image/*"
-                                                onChange={handleImageChange}
-                                                disabled={isUploading}
-                                                className="hidden"
-                                                multiple
-                                            />   <button
-                                                type="button"
-                                                onClick={() => setShowImageSelector(true)}
-                                                disabled={isUploading}
-                                                className={`w-full col-span-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
-                                            >
-                                                Selecciona existent
-                                            </button>
+                                            <div className='flex flex-row gap-2'>
+                                                <label
+                                                    htmlFor="productImage"
+                                                    className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading
+                                                        ? 'bg-gray-400 cursor-not-allowed'
+                                                        : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
+                                                        }`}
+                                                >
+                                                    {isUploading ? 'Pujant...' : 'Selecciona imatges'}
+                                                </label>
+                                                <input
+                                                    type="file"
+                                                    id="productImage"
+                                                    accept="image/*"
+                                                    onChange={handleImageChange}
+                                                    disabled={isUploading}
+                                                    className="hidden"
+                                                    multiple
+                                                />   <button
+                                                    type="button"
+                                                    onClick={() => setShowImageSelector(true)}
+                                                    disabled={isUploading}
+                                                    className={`w-full col-span-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                                                >
+                                                    Selecciona existent
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    {showImageSelector && (
-                                        <ImageSelector
-                                            onSelect={(url) => {
-                                                // Add selected image URL to preview list (selectedImages), do not upload
-                                                setSelectedImages(prev => [...prev, url]);
-                                                setFormData(f => ({ ...f, image: '' }));
-                                                setImagePreview(url);
-                                                setShowImageSelector(false);
-                                            }}
-                                            onClose={() => setShowImageSelector(false)}
-                                        />
-                                    )}
-                                    {/* <p className="mt-1 text-xs text-gray-500 text-center">
+                                        {showImageSelector && (
+                                            <ImageSelector
+                                                onSelect={(url) => {
+                                                    // Add selected image URL to preview list (selectedImages), do not upload
+                                                    setSelectedImages(prev => [...prev, url]);
+                                                    setFormData(f => ({ ...f, image: '' }));
+                                                    setImagePreview(url);
+                                                    setShowImageSelector(false);
+                                                }}
+                                                onClose={() => setShowImageSelector(false)}
+                                            />
+                                        )}
+                                        {/* <p className="mt-1 text-xs text-gray-500 text-center">
                                         Formats: JPG, PNG. Màx: 5MB
                                     </p> */}
-                                    {/* Manual URL input */}
-                                    <div className="w-full mt-4">
-                                        <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-                                            URL d'imatge (opcional)
-                                        </label>
-                                        <div className="flex mt-1">
-                                            <input
-                                                type="text"
-                                                id="image"
-                                                name="image"
-                                                value={formData.image}
-                                                onChange={handleChange}
-                                                className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                                placeholder="https://exemple.com/imatge.jpg"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    if (formData.image) {
-                                                        setSelectedImages(prev => [...prev, formData.image]);
-                                                        setFormData(f => ({ ...f, image: '' }));
-                                                    }
-                                                }}
-                                                className="text-nowrap bg-[#00B0C8] cursor-pointer text-white px-3 py-2 border border-l-0 border-[#00B0C8] rounded-r-md hover:bg-[#008A9B]"
-                                            >
-                                                Vista prèvia
-                                            </button>
+                                        {/* Manual URL input */}
+                                        <div className="w-full mt-4">
+                                            <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+                                                URL d'imatge (opcional)
+                                            </label>
+                                            <div className="flex mt-1">
+                                                <input
+                                                    type="text"
+                                                    id="image"
+                                                    name="image"
+                                                    value={formData.image}
+                                                    onChange={handleChange}
+                                                    className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    placeholder="https://exemple.com/imatge.jpg"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (formData.image) {
+                                                            setSelectedImages(prev => [...prev, formData.image]);
+                                                            setFormData(f => ({ ...f, image: '' }));
+                                                        }
+                                                    }}
+                                                    className="text-nowrap bg-[#00B0C8] cursor-pointer text-white px-3 py-2 border border-l-0 border-[#00B0C8] rounded-r-md hover:bg-[#008A9B]"
+                                                >
+                                                    Vista prèvia
+                                                </button>
+                                            </div>
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                O enganxa la URL directament aquí
+                                            </p>
                                         </div>
-                                        <p className="mt-1 text-xs text-gray-500">
-                                            O enganxa la URL directament aquí
-                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="mt-8 flex justify-end space-x-3">
+
+                        <div className="border-t border-gray-300 flex justify-end space-x-3 bg-gray-100 p-6">
                             <button
                                 type="button"
                                 onClick={onClose}
