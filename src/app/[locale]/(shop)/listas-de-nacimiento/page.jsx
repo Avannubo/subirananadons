@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ShopLayout from "@/components/Layouts/shop-layout";
-import Image from "next/image";
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -111,10 +110,10 @@ export default function BirthListsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5, duration: 0.5 }}
                     >
-                        <div className="flex flex-col items-start justify-start space-y-4">
+                        <div className="flex flex-col items-center justify-center space-y-4">
                             <div>
-                                <h2 className="text-2xl font-bold mb-2">{t('expectingTitle')}</h2>
-                                <p className="text-white/90">{t('expectingDesc')}</p>
+                                <h2 className="text-2xl text-center font-bold mb-2">{t('expectingTitle')}</h2>
+                                <p className="text-white/90 text-center">{t('expectingDesc')}</p>
                             </div>
                             <button
                                 onClick={() => {
@@ -136,10 +135,10 @@ export default function BirthListsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5, duration: 0.5 }}
                     >
-                        <div className="flex flex-col items-start justify-start space-y-4">
+                        <div className="flex flex-col items-center justify-center space-y-4">
                             <div>
-                                <h2 className="text-2xl font-bold mb-2">{t('recommendTitle')}</h2>
-                                <p className="text-white/90">{t('recommendDesc')}</p>
+                                <h2 className="text-2xl text-center font-bold mb-2">{t('recommendTitle')}</h2>
+                                <p className="text-white/90 text-center">{t('recommendDesc')}</p>
                             </div>
                             <Link
                                 href="/recomendations"
@@ -185,7 +184,7 @@ export default function BirthListsPage() {
                                     </svg>
                                 </div>
                                 <h3 className="text-lg font-semibold mb-2">{t('howWorksStep3Title', { default: 'Comparte tu lista / Comparteix la teva llista' })}</h3>
-                                <p className="text-gray-600">{t('howWorksStep3Desc', { default: 'Envía el enlace generado para que tus amigos y familiares compren tus regalos / Enviía l’enllaç generat per a que els teus amics i familiars comprin els teus regals' })}</p>
+                                <p className="text-gray-600">{t('howWorksStep3Desc', { default: 'Envía el enlace generado para que tus amigos y familiares compren tus regalos / Enviía l\'enllaç generat per a que els teus amics i familiars comprin els teus regals' })}</p>
                             </div>
                             <div className="flex-1 min-w-[220px] shadow-md  p-6 rounded-lg  text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">

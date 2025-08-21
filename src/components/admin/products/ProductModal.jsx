@@ -71,22 +71,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         if (isOpen) {
             fetchCategories();
             fetchBrands();
-
-            // Initial synchronization of textarea heights
-            setTimeout(() => {
-                const caTextarea = document.getElementById('description-ca');
-                const esTextarea = document.getElementById('description-es');
-                if (caTextarea && esTextarea) {
-                    // Reset heights to auto to get proper scrollHeight
-                    caTextarea.style.height = 'auto';
-                    esTextarea.style.height = 'auto';
-                    // Get the maximum height between both textareas
-                    const height = Math.max(caTextarea.scrollHeight, esTextarea.scrollHeight, 144);
-                    // Set both textareas to the maximum height
-                    caTextarea.style.height = `${height}px`;
-                    esTextarea.style.height = `${height}px`;
-                }
-            }, 100);
         }
     }, [isOpen]);
     // Fetch categories for the dropdown
@@ -277,18 +261,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     [id === 'description-ca' ? 'ca' : 'es']: value
                 }
             }));
-
-            // After state update, sync textarea heights
-            setTimeout(() => {
-                const caTextarea = document.getElementById('description-ca');
-                const esTextarea = document.getElementById('description-es');
-                if (caTextarea && esTextarea) {
-                    const maxHeight = Math.max(caTextarea.scrollHeight, esTextarea.scrollHeight);
-                    caTextarea.style.height = `${maxHeight}px`;
-                    esTextarea.style.height = `${maxHeight}px`;
-                }
-            }, 0);
-
             // Synchronize textarea heights after a short delay to ensure state is updated
             setTimeout(() => {
                 const caTextarea = document.getElementById('description-ca');
@@ -330,7 +302,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         }));
         setShowCategoryDropdown(false);
     };
-
     // --- Brand Selection Handler ---
     const handleBrandSelect = (brandObj) => {
         setFormData(prev => ({
@@ -541,9 +512,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             // Ensure category and brand are ObjectId (not name or empty string)
             let categoryId = formData.category;
             let brandId = formData.brand;
-
             console.log(categoryId, brandId);
-
             const isObjectId = (val) => typeof val === 'string' && /^[a-fA-F0-9]{24}$/.test(val);
             // Treat empty string as null for category/brand
             if (categoryId === "") categoryId = null;
@@ -772,14 +741,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="description"
                                                 rows={6}
                                                 value={formData.description.ca}
-                                                onChange={(e) => {
-                                                    handleChange(e);
-                                                    const target = e.target;
-                                                    target.style.height = 'auto';
-                                                    target.style.height = `${target.scrollHeight}px`;
-                                                }}
+                                                onChange={handleChange}
                                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
-                                                style={{ whiteSpace: 'pre-line', minHeight: '144px', resize: 'none', overflow: 'hidden' }}
+                                                style={{ whiteSpace: 'pre-line' }}
                                             />
                                         </div>
                                         <div className="flex-1">
@@ -791,14 +755,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="description"
                                                 rows={6}
                                                 value={formData.description.es}
-                                                onChange={(e) => {
-                                                    handleChange(e);
-                                                    const target = e.target;
-                                                    target.style.height = 'auto';
-                                                    target.style.height = `${target.scrollHeight}px`;
-                                                }}
+                                                onChange={handleChange}
                                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
-                                                style={{ whiteSpace: 'pre-line', minHeight: '144px', resize: 'none', overflow: 'hidden' }}
+                                                style={{ whiteSpace: 'pre-line' }}
                                             />
                                         </div>
                                     </div>
@@ -1201,7 +1160,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 </div>
                                             ))}
                                         </div>
-
                                         <button
                                             type="button"
                                             onClick={() => {
@@ -1277,7 +1235,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             </div>
                                         ) : (
                                             <div className="mt-2 text-center text-gray-500">
-                                                <p>Cap imatge seleccionada</p>
+                                                {/* <p>Cap imatge seleccionada</p> */}
                                             </div>
                                         )}
                                     </div>
@@ -1311,7 +1269,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         )}
                                     </div> */}
                                         <div className="w-full grid grid-row-2 gap-2">
-
                                             <div className='flex flex-row gap-2'>
                                                 <label
                                                     htmlFor="productImage"
@@ -1391,8 +1348,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 </div>
                             </div>
                         </div>
-
-                        <div className="border-t border-gray-300 flex justify-end space-x-3 bg-gray-100 p-6">
+                        <div className="border-t border-gray-300 flex justify-end space-x-3 bg-gray-100 py-4 px-6">
                             <button
                                 type="button"
                                 onClick={onClose}

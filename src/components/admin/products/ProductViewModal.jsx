@@ -104,7 +104,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
             <div className="fixed inset-0 flex items-center justify-center p-4">
-                <Dialog.Panel className="w-full max-w-3xl bg-white rounded-lg shadow-xl overflow-hidden">
+                <Dialog.Panel className="w-full max-w-7xl bg-white rounded-lg shadow-xl overflow-hidden">
                     {/* Header with product name */}
                     <div className="flex justify-between items-center p-4 border-b border-gray-300 bg-gray-50">
                         <Dialog.Title className="text-lg font-medium text-gray-800 flex items-center">
@@ -132,14 +132,14 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Left column - Product Image */}
                             <div className="md:col-span-1 flex flex-col items-start">
-                                <div className="bg-gray-50 p-1 rounded-lg border border-gray-200 w-full">
+                                <div className="bg-white p-1 rounded-lg border border-gray-200 w-full">
                                     <div className="relative h-56 w-full">
                                         <img
                                             src={selectedImage || '/assets/images/product-placeholder.jpg'}
                                             alt={product.name || 'Product image'}
                                             fill
                                             style={{ objectFit: 'contain' }}
-                                            className="rounded-md"
+                                            className="rounded-md h-56 w-full object-contain"
                                         />
                                     </div>
                                 </div>
