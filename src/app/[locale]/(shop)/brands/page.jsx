@@ -322,7 +322,7 @@ export default function BrandsPage() {
                         className="w-full lg:w-1/6 mb-2 md:mb-0 pt-6"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4, duration: 0.5 }}
+                        transition={{ delay: 0.1, duration: 0.2 }}
                     >
                         <div className="sticky top-24 bg-white">
                             <div className="hidden lg:block max-h-[calc(100vh-650px)] lg:max-h-[65vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">

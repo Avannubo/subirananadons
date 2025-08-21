@@ -8,6 +8,58 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null);
 
+    // Get locale from URL or default to 'ca'
+    let locale = 'ca';
+    if (typeof window !== 'undefined') {
+        const pathLocale = window.location.pathname.split('/')[1];
+        if (['ca', 'es'].includes(pathLocale)) locale = pathLocale;
+    }
+
+    const translations = {
+        ca: {
+            processingPayment: "Pagament en procés...",
+            pleaseWait: "Si us plau, espera mentre processem el teu pagament.",
+            paymentSuccess: "Pagament realitzat!",
+            paymentCompleted: "El teu pagament s'ha completat amb èxit!",
+            orderSummaryEmail: "El resum de la comanda arribarà al teu correu electrònic.",
+            home: "Inici",
+            shop: "Botiga",
+            contact: "Contacte",
+            paymentError: "Error en el pagament",
+            paymentProblem: "Hi ha hagut un problema en processar el teu pagament. Torna-ho a intentar.",
+            close: "Tancar",
+            orderSummary: "Resum de la Comanda",
+            product: "Producte",
+            quantity: "Quantitat",
+            price: "Preu",
+            total: "Total",
+            totalOrderPrice: "Preu total de la comanda:",
+            confirmPayment: "Confirmar Pagament",
+            cancel: "Cancel·lar"
+        },
+        es: {
+            processingPayment: "Pago en proceso...",
+            pleaseWait: "Por favor, espera mientras procesamos tu pago.",
+            paymentSuccess: "¡Pago realizado!",
+            paymentCompleted: "¡Tu pago ha sido completado con éxito!",
+            orderSummaryEmail: "El resumen del pedido llegará a tu correo electrónico.",
+            home: "Inicio",
+            shop: "Tienda",
+            contact: "Contacto",
+            paymentError: "Error en el pago",
+            paymentProblem: "Hubo un problema al procesar tu pago. Inténtalo de nuevo.",
+            close: "Cerrar",
+            orderSummary: "Resumen del Pedido",
+            product: "Producto",
+            quantity: "Cantidad",
+            price: "Precio",
+            total: "Total",
+            totalOrderPrice: "Precio total del pedido:",
+            confirmPayment: "Confirmar Pago",
+            cancel: "Cancelar"
+        }
+    };
+
     useEffect(() => {
         if (orderData && Array.isArray(orderData.cartProducts)) {
             setCartItems(orderData.cartProducts);
@@ -57,7 +109,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             "DS_MERCHANT_TERMINAL": "2",
             "DS_MERCHANT_TRANSACTIONTYPE": "0",
             "DS_MERCHANT_URLOK": `${window.location.origin}/cart/order/success`,
-            "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed` 
+            "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed`
         };
 
         console.log('Payment Data:', data);
@@ -109,50 +161,50 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             <div className="z-[1000] max-w-4xl w-full mx-auto bg-white rounded-2xl shadow-2xl border border-gray-100 px-0 md:px-0">
                 {isProcessingPayment ? (
                     <div className="p-8 rounded-2xl shadow-xl text-center bg-white">
-                        <h2 className="text-2xl font-bold text-[#0090a8]">Pago en proceso...</h2>
-                        <p className="text-base mt-2 text-gray-700">Por favor, espera mientras procesamos tu pago.</p>
+                        <h2 className="text-2xl font-bold text-[#0090a8]">{translations[locale].processingPayment}</h2>
+                        <p className="text-base mt-2 text-gray-700">{translations[locale].pleaseWait}</p>
                         <div className="mt-6 flex justify-center">
                             <span className="inline-block w-8 h-8 border-4 border-[#0090a8] border-t-transparent rounded-full animate-spin"></span>
                         </div>
                     </div>
                 ) : paymentStatus === 'OK' ? (
                     <div className="p-8 rounded-2xl shadow-xl text-center bg-white">
-                        <h2 className="text-2xl font-bold text-green-600">¡Pago realizado!</h2>
-                        <p className="text-base mt-2 text-gray-700">¡Tu pago ha sido completado con éxito!</p>
-                        <h2 className="text-xl mt-4 font-semibold text-[#0090a8]">El resumen del pedido llegará a tu correo electrónico.</h2>
+                        <h2 className="text-2xl font-bold text-green-600">{translations[locale].paymentSuccess}</h2>
+                        <p className="text-base mt-2 text-gray-700">{translations[locale].paymentCompleted}</p>
+                        <h2 className="text-xl mt-4 font-semibold text-[#0090a8]">{translations[locale].orderSummaryEmail}</h2>
                         <div className='flex flex-row justify-center gap-3 mt-6'>
                             <Link href="/" className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
-                                Inicio
+                                {translations[locale].home}
                             </Link>
                             <Link href="/products" className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
-                                Tienda
+                                {translations[locale].shop}
                             </Link>
                             <Link href="/about/contacto" className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
-                                Contacto
+                                {translations[locale].contact}
                             </Link>
                         </div>
                     </div>
                 ) : paymentStatus === 'KO' ? (
                     <div className="p-8 rounded-2xl shadow-xl text-center bg-white">
-                        <h2 className="text-2xl font-bold text-red-500">Error en el pago</h2>
-                        <p className="text-base mt-2 text-gray-700">Hubo un problema al procesar tu pago. Inténtalo de nuevo.</p>
+                        <h2 className="text-2xl font-bold text-red-500">{translations[locale].paymentError}</h2>
+                        <p className="text-base mt-2 text-gray-700">{translations[locale].paymentProblem}</p>
                         <div className="flex flex-row justify-center gap-3 mt-6">
                             <button onClick={handleCloseModal} className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
-                                Cerrar
+                                {translations[locale].close}
                             </button>
                         </div>
                     </div>
                 ) : (
                     <div className="px-6 md:px-12 py-8 rounded-2xl shadow-xl bg-white">
-                        <h2 className="text-2xl font-bold text-[#0090a8] mb-4">Resumen del Pedido</h2>
+                        <h2 className="text-2xl font-bold text-[#0090a8] mb-4">{translations[locale].orderSummary}</h2>
                         <div className="overflow-x-auto rounded-lg border border-gray-100">
                             <table className="w-full table-auto border-collapse text-sm">
                                 <thead>
                                     <tr className="bg-gray-50 text-gray-700">
-                                        <th className="px-4 py-2 font-semibold">Producto</th>
-                                        <th className="px-4 py-2 font-semibold">Cantidad</th>
-                                        <th className="px-4 py-2 font-semibold">Precio</th>
-                                        <th className="px-4 py-2 font-semibold">Total</th>
+                                        <th className="px-4 py-2 font-semibold">{translations[locale].product}</th>
+                                        <th className="px-4 py-2 font-semibold">{translations[locale].quantity}</th>
+                                        <th className="px-4 py-2 font-semibold">{translations[locale].price}</th>
+                                        <th className="px-4 py-2 font-semibold">{translations[locale].total}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -176,17 +228,17 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                             </table>
                         </div>
                         <p className="mt-6 text-right text-lg font-bold text-gray-900">
-                            Precio total del pedido: {cartItems.reduce((sum, p) => {
+                            {translations[locale].totalOrderPrice} {cartItems.reduce((sum, p) => {
                                 const price = typeof p.priceValue === 'number' ? p.priceValue : (typeof p.price === 'number' ? p.price : parseFloat(String(p.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
                                 return sum + (price * (p.quantity || 1));
                             }, 0).toFixed(2)} €
                         </p>
                         <div className="flex flex-row justify-center gap-3 mt-8">
-                            <button onClick={handlePaymentProcess} className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-150 h-[42px]">
-                                Confirmar Pago
+                                        <button onClick={handlePaymentProcess} className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-6 py-2 rounded-lg font-normal transition-colors duration-150 h-[42px]">
+                                {translations[locale].confirmPayment}
                             </button>
-                            <button onClick={onClose} className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-150 h-[42px]">
-                                Cancelar
+                            <button onClick={onClose} className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-normal transition-colors duration-150 h-[42px]">
+                                {translations[locale].cancel}
                             </button>
                         </div>
                     </div>
