@@ -89,18 +89,39 @@ export default function BrandsPage() {
                 const data = await response.json();
                 let fetchedProducts = data.products || [];
                 // Format products to match the expected structure
-                fetchedProducts = fetchedProducts.map(product => ({
-                    id: product._id,
-                    name: product.name,
-                    category: product.category,
-                    price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
-                    priceValue: product.price_incl_tax,
-                    salesCount: product.salesCount || 0,
-                    imageUrl: product.image,
-                    imageUrlHover: product.imageHover || product.image,
-                    brand: product.brand,
-                    description: product.description || ''
-                }));
+                fetchedProducts = fetchedProducts.map(product => {
+                    const hasDiscount = product.discount?.active &&
+                        product.discount.value > 0 &&
+                        (!product.discount.startDate || new Date(product.discount.startDate) <= new Date()) &&
+                        (!product.discount.endDate || new Date(product.discount.endDate) >= new Date());
+
+                    const discountedPrice = hasDiscount ? (
+                        product.discount.type === 'percentage'
+                            ? product.price_incl_tax * (1 - product.discount.value / 100)
+                            : product.price_incl_tax - product.discount.value
+                    ) : null;
+
+                    return {
+                        id: product._id,
+                        name: product.name,
+                        category: product.category,
+                        price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
+                        priceValue: product.price_incl_tax,
+                        salesCount: product.salesCount || 0,
+                        imageUrl: product.image,
+                        imageUrlHover: product.imageHover || product.image,
+                        brand: product.brand,
+                        description: product.description || '',
+                        discount: hasDiscount ? {
+                            active: true,
+                            type: product.discount.type,
+                            value: product.discount.value,
+                            startDate: product.discount.startDate,
+                            endDate: product.discount.endDate,
+                            finalPrice: discountedPrice
+                        } : null
+                    };
+                });
                 setProducts(fetchedProducts);
                 // Update pagination information
                 if (data.pagination) {

@@ -1175,7 +1175,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                                 />
                                             </div>
-                                            <div>
+                                            {/* <div>
                                                 <label htmlFor="discount-min-amount" className="block text-sm font-medium text-gray-700">
                                                     Import mínim de compra (€)
                                                 </label>
@@ -1203,7 +1203,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     min="1"
                                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
                                                 />
-                                            </div>
+                                            </div> */}
                                             {formData.discount?.type && formData.discount?.value && formData.price_incl_tax && (
                                                 <div className="md:col-span-2">
                                                     <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">

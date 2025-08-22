@@ -309,7 +309,7 @@ export default function OffersTab() {
                             <option key={b.id} value={b.id}>{b.name}</option>
                         ))}
                     </select>
-                    <input name="discount" type="number" value={form.discount ?? ''} onChange={handleChange} placeholder="% Descompte" className="border border-gray-300 p-2 rounded w-full bg-gray-50" min="0" max="100" />
+                    {/* <input name="discount" type="number" value={form.discount ?? ''} onChange={handleChange} placeholder="% Descompte" className="border border-gray-300 p-2 rounded w-full bg-gray-50" min="0" max="100" /> */}
                 </div>
                 <div className="flex gap-2">
                     <button type="submit" className="bg-[#00B0C8] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm" disabled={isUploading || (offers.length >= maxOffers && !editingId)}>{editingId ? 'Actualitza' : 'Afegeix'} Oferta</button>

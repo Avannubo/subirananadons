@@ -375,7 +375,7 @@ export default function BrandsTable() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logotip</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enllaç</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descompte</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estat</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accions</th>
                                 </tr>
@@ -393,7 +393,7 @@ export default function BrandsTable() {
                                             <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+                                            <div className="h-5 bg-gray-200 rounded w-24 animate-pulse"></div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
@@ -417,7 +417,7 @@ export default function BrandsTable() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logotip</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enllaç</th> */}
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descompte</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estat</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accions</th>
                             </tr>
@@ -443,11 +443,24 @@ export default function BrandsTable() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-w-xs truncate" title={brand.name}>
                                             {brand.name}
                                         </td>
-                                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <a className="text-[#00B0C8] hover:text-[#008A9B]" href={brand.website} target="_blank" rel="noopener noreferrer">
-                                                {brand.website}
-                                            </a>
-                                        </td> */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {brand.discount && brand.discount.active ? (
+                                                <span className="flex items-center">
+                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800`}>
+                                                        {brand.discount.type === 'percentage'
+                                                            ? `${brand.discount.value}%`
+                                                            : `${brand.discount.value}€`}
+                                                    </span>
+                                                    {brand.discount.startDate && brand.discount.endDate && (
+                                                        <span className="ml-2 text-xs text-gray-500" title={`Del ${new Date(brand.discount.startDate).toLocaleDateString()} al ${new Date(brand.discount.endDate).toLocaleDateString()}`}>
+                                                            {new Date(brand.discount.endDate) > new Date() ? 'Actiu' : 'Caducat'}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 italic text-sm">Sense descompte</span>
+                                            )}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${brand.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'}`}>
                                                 {brand.enabled ? 'Activa' : 'Inactiva'}

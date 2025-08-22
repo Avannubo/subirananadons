@@ -542,7 +542,7 @@ export default function CartPage() {
                                                     {/* <p className="text-gray-500 text-sm">{item.brand.name} - {typeof item.category === 'object' ? item.category.name.es || item.category.name.ca : item.category.name}</p> */}
                                                     {item.discount && item.discount.active ? (
                                                         <div className="flex items-center gap-2">
-                                                            <p className="text-gray-400 line-through text-sm">{item.price}€</p>
+                                                            <p className="text-gray-400 line-through text-sm">{item.price}</p>
                                                             <p className="text-red-600 font-medium">{getItemPrice(item).toFixed(2)}€</p>
                                                             {item.discount.type === 'percentage' && (
                                                                 <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded">

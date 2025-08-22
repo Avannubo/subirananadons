@@ -2,14 +2,14 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import ShopLayout from "@/components/Layouts/shop-layout"; 
+import ShopLayout from "@/components/Layouts/shop-layout";
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductSlider from '@/components/landing/ProductSlider';
 import FullscreenImagePreview from '@/components/products/FullscreenImagePreview';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { toast } from 'react-hot-toast';
 import { useRouter } from "next/navigation";
-import { useSession } from 'next-auth/react'; 
+import { useSession } from 'next-auth/react';
 import { fetchProductById, fetchProducts, formatProduct } from '@/services/ProductService';
 import BirthListSelectModal from '@/components/products/BirthListSelectModal.jsx';
 // Helper to get display name from category (handles translation and legacy)
@@ -201,7 +201,15 @@ export default function Page() {
     const handleAddToCart = async () => {
         if (!product) return;
         try {
-            await addToCart(product, quantity);
+            // Create a product object with the correct price structure
+            const productToAdd = {
+                ...product,
+                price: `${product.price_incl_tax?.toFixed(2).replace('.', ',')} €`,  // Formatted price string
+                priceValue: product.price_incl_tax,  // Numerical value for calculations
+                finalPrice: product.discount?.active ? product.discount.finalPrice : product.price_incl_tax
+            };
+
+            await addToCart(productToAdd, quantity);
             // toast.success(`${quantity} ${product.name} ${t(addedToCart)} `);//añadido al carrito
         } catch (error) {
             toast.error('Error al añadir al carrito');
@@ -409,11 +417,45 @@ export default function Page() {
                     {/* Product Info */}
                     <div className="space-y-6">
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{typeof product.name === 'object' ? product.name[locale] : product.name}</h1>
-                        <p className="text-xl sm:text-2xl font-semibold text-gray-900">
-                            {typeof product.price_incl_tax === 'number'
-                                ? product.price_incl_tax.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
-                                : product.price_incl_tax}
-                        </p>
+
+                        {/* Price and Discount Section */}
+                        <div className="flex flex-col gap-2">
+                            {product.discount?.active ? (
+                                <>
+                                    <div className="flex items-center gap-4">
+                                        <p className="text-2xl sm:text-3xl font-bold text-red-600">
+                                            {typeof product.discount.finalPrice === 'number'
+                                                ? product.discount.finalPrice.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+                                                : product.discount.finalPrice + ' €'}
+                                        </p>
+                                        <p className="text-lg sm:text-xl text-gray-400 line-through">
+                                            {typeof product.price_incl_tax === 'number'
+                                                ? product.price_incl_tax.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+                                                : product.price_incl_tax}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                            {product.discount.type === 'percentage'
+                                                ? `-${product.discount.value}%`
+                                                : `-${product.discount.value}€`}
+                                        </span>
+                                        {product.discount.endDate && (
+                                            <span className="text-sm text-gray-500">
+                                                {t('validUntil')} {new Date(product.discount.endDate).toLocaleDateString(locale)}
+                                            </span>
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <p className="text-xl sm:text-2xl font-semibold text-gray-900">
+                                    {typeof product.price_incl_tax === 'number'
+                                        ? product.price_incl_tax.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+                                        : product.price_incl_tax}
+                                </p>
+                            )}
+                        </div>
+
                         <div className="space-y-4">
                             {/* Only show the first two plain lines of the description, remove the rest */}
                             {(() => {

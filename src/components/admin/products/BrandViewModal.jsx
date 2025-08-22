@@ -71,12 +71,89 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                         </a>
                                     </div>
                                 )}
+
                                 <div className="mt-3 text-start">
+                                    <span className='text-sm text-gray-500'>
+                                    Estat: 
+                                    </span> <span>  </span>
                                     <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${brand.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'
                                         }`}>
                                         {brand.enabled ? 'Actiu' : 'Inactiu'}
                                     </span>
                                 </div>
+
+                                
+                                {/* Discount Section */}
+                                {brand.discount && (
+                                    <div className="border-t border-gray-200 pt-3 mt-3">
+                                        <h4 className="text-sm text-gray-500 mb-2">Informació del descompte</h4>
+                                        {brand.discount.active ? (
+                                            <div className="space-y-2">
+                                                <div>
+                                                    <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                        {brand.discount.type === 'percentage'
+                                                            ? `${brand.discount.value}%`
+                                                            : `${brand.discount.value}€`}
+                                                    </span>
+                                                    {/* <span className="ml-2 text-sm text-gray-500">
+                                                        {new Date(brand.discount.endDate) > new Date() ? 'Actiu' : 'Caducat'}
+                                                    </span> */}
+                                                </div>
+                                                {
+                                                    brand.discount.startDate && brand.discount.endDate && (
+                                                        <div className="grid grid-cols-2 gap-2 text-sm">
+                                                            <div>
+                                                                <span className="text-gray-500">Data d'inici:</span>
+                                                                <p>{brand.discount.startDate
+                                                                    ? new Date(brand.discount.startDate).toLocaleDateString('ca-ES', {
+                                                                        year: 'numeric',
+                                                                        month: 'long',
+                                                                        day: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit'
+                                                                    })
+                                                                    : 'No especificada'}
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-500">Data de fi:</span>
+                                                                <p>{brand.discount.endDate
+                                                                    ? new Date(brand.discount.endDate).toLocaleDateString('ca-ES', {
+                                                                        year: 'numeric',
+                                                                        month: 'long',
+                                                                        day: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit'
+                                                                    })
+                                                                    : 'No especificada'}
+                                                                </p>
+                                                            </div>
+
+                                                            {brand.discount.minPurchaseAmount && (
+                                                                <div>
+                                                                    <span className="text-gray-500">Import mínim:</span>
+                                                                    <p>{brand.discount.minPurchaseAmount}€</p>
+                                                                </div>
+                                                            )}
+
+                                                            {brand.discount.minQuantity && (
+                                                                <div>
+                                                                    <span className="text-gray-500">Quantitat mínima:</span>
+                                                                    <p>{brand.discount.minQuantity} unitats</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                }
+
+                                            </div>
+                                        ) : (
+                                            <p className="text-gray-500 italic">Descompte no actiu</p>
+                                        )}
+                                    </div>
+                                )}
+
+                               
                                 {/* <div>
                                     <h4 className="text-sm text-gray-500">Productes</h4>
                                     <p>{brand.products || 0}</p>

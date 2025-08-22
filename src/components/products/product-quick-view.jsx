@@ -139,7 +139,25 @@ export default function ProductQuickView({ product, onClose }) {
                         <div className="w-full md:w-1/2 p-4 sm:p-6 flex flex-col justify-between">
                             <div>
                                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">{translatedName}</h2>
-                                <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{product.price}</p>
+                                {product.discount?.active ? (
+                                    <div className="mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <p className="text-2xl sm:text-3xl font-bold text-red-600">
+                                                {`${product.discount.finalPrice.toFixed(2).replace('.', ',')} €`}
+                                            </p>
+                                            <p className="text-lg sm:text-xl text-gray-400 line-through">
+                                                {product.price}
+                                            </p>
+                                        </div>
+                                        <p className="text-sm text-red-600 font-medium mt-1">
+                                            {product.discount.type === 'percentage'
+                                                ? `${product.discount.value}% de descuento`
+                                                : `${product.discount.value}€ de descuento`}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{product.price}</p>
+                                )}
                                 <p className="text-xs sm:text-sm text-gray-500 mb-4">Impuestos incluidos</p>
                                 <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">
                                     {translatedDescription?.length > 0 ? translatedDescription : ''}

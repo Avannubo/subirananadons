@@ -104,7 +104,7 @@ export default function ProductCard({
             style={{
                 boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
                 borderRadius: '10px',
-                padding: '10px',
+                // padding: '10px',
             }}
             className="m-2 flex flex-col items-center text-center h-full group hover:text-[#00B0C8]"
             onMouseEnter={() => setIsHovered(true)}
@@ -112,23 +112,24 @@ export default function ProductCard({
         >
             <Link href={productUrl} className="w-full flex flex-col items-center">
                 <div className="relative w-full h-64 mb-4">
+                    {product.discount?.active && (
+                        <div className="absolute top-0 right-4 bg-red-600 text-white rounded-bl-lg rounded-br-lg  w-12 h-8 flex items-center justify-center transform ">
+                            <span className="text-sm font-bold -rotate-12">
+                                {product.discount.type === 'percentage'
+                                    ? `-${product.discount.value}%`
+                                    : `-${product.discount.value}€`}
+                            </span>
+                        </div>
+                    )}
                     <img
                         src={currentImageUrl}
                         alt={product.name.ca || product.name.es || product.name}
                         className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
                     />
                     {/* Discount Badge */}
-                    {product.discount?.active && (
-                        <div className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-12 h-12 flex items-center justify-center transform rotate-12">
-                            <span className="text-sm font-bold -rotate-12">
-                                {product.discount.type === 'percentage'
-                                    ? `-${product.discount.value}%`
-                                    : `-${Math.round((product.discount.value / product.price_incl_tax) * 100)}%`}
-                            </span>
-                        </div>
-                    )}
+
                     {/* Hover Overlay Buttons - Grid View */}
-                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 px-3 py-2 transition-all duration-300 z-10">
+                    <div className="absolute -bottom-2 p- left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 px-3 py-2 transition-all duration-300 z-10">
                         <HoverButton onClick={handleAddToCart}>
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         </HoverButton>
@@ -152,12 +153,12 @@ export default function ProductCard({
                         </HoverButton>
                     </div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2 w-full whitespace-nowrap overflow-hidden text-ellipsis h-7 min-h-[28px]" title={translatedName}>{translatedName}</h3>
+                <h3 className="font-semibold px-4 text-lg  mb-2 w-full whitespace-nowrap overflow-hidden text-ellipsis h-7 min-h-[28px]" title={translatedName}>{translatedName}</h3>
                 <div className="flex flex-col items-center">
                     {product.discount?.active ? (
                         <>
                             <p className="text-gray-400 line-through text-sm">{product.price}</p>
-                            <p className="text-red-600 font-semibold">
+                            <p className="text-red-600 font-semibold text-lg">
                                 {`${product.discount.finalPrice.toFixed(2).replace('.', ',')} €`}
                             </p>
                         </>
@@ -192,7 +193,7 @@ export default function ProductCard({
                             <span className="text-sm font-bold -rotate-12">
                                 {product.discount.type === 'percentage'
                                     ? `-${product.discount.value}%`
-                                    : `-${Math.round((product.discount.value / product.price_incl_tax) * 100)}%`}
+                                    : `-${product.discount.value}€`}
                             </span>
                         </div>
                     )}
