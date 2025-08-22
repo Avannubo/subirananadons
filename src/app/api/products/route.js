@@ -181,6 +181,20 @@ export async function POST(request) {
             },
             status: body.status || 'active',
             featured: body.featured || false,
+            // Add discount handling
+            discount: body.discount ? {
+                active: body.discount.active || false,
+                type: body.discount.type || 'percentage',
+                value: parseFloat(body.discount.value) || 0,
+                startDate: body.discount.startDate ? new Date(body.discount.startDate) : null,
+                endDate: body.discount.endDate ? new Date(body.discount.endDate) : null,
+                minPurchaseAmount: parseFloat(body.discount.minPurchaseAmount) || 0,
+                minQuantity: parseInt(body.discount.minQuantity) || 1
+            } : {
+                active: false,
+                type: 'percentage',
+                value: 0
+            },
             stockHistory: [{
                 date: new Date(),
                 type: 'initial',

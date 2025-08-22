@@ -20,6 +20,8 @@ export default function ProductCard({
     setShowAuthModal,  // Function to show/hide auth modal
     setAuthModalData   // Function to set auth modal data (title, message, callback)
 }) {
+    console.log(product);
+
     const [isHovered, setIsHovered] = useState(false);
     const [showBirthListModal, setShowBirthListModal] = useState(false);
     const { addToCart } = useCart();
@@ -27,10 +29,17 @@ export default function ProductCard({
     const router = useRouter();
     const locale = useLocale();
     const currentImageUrl = isHovered && product.imageUrlHover ? product.imageUrlHover : product.imageUrl;
+
     // Get translated name/description
     const translatedName = getTranslatedField(product, 'name', locale);
     const translatedDescription = getTranslatedField(product, 'description', locale);
-    // console.log(translatedDescription);
+
+    // Calculate discount percentage
+    const getDiscountPercentage = () => {
+        if (!product.discount?.active) return null;
+        if (product.discount.type === 'percentage') return product.discount.value;
+        return Math.round(((product.priceValue - product.discount.finalPrice) / product.priceValue) * 100);
+    };
     const HoverButton = ({ children, onClick, disabled }) => (
         <button
             className={`bg-white rounded-full p-2 shadow text-gray-700 hover:bg-gray-100 transition duration-200 focus:outline-none flex items-center justify-center ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -108,6 +117,16 @@ export default function ProductCard({
                         alt={product.name.ca || product.name.es || product.name}
                         className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
                     />
+                    {/* Discount Badge */}
+                    {product.discount?.active && (
+                        <div className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-12 h-12 flex items-center justify-center transform rotate-12">
+                            <span className="text-sm font-bold -rotate-12">
+                                {product.discount.type === 'percentage'
+                                    ? `-${product.discount.value}%`
+                                    : `-${Math.round((product.discount.value / product.price_incl_tax) * 100)}%`}
+                            </span>
+                        </div>
+                    )}
                     {/* Hover Overlay Buttons - Grid View */}
                     <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 px-3 py-2 transition-all duration-300 z-10">
                         <HoverButton onClick={handleAddToCart}>
@@ -134,7 +153,18 @@ export default function ProductCard({
                     </div>
                 </div>
                 <h3 className="font-semibold text-lg mb-2 w-full whitespace-nowrap overflow-hidden text-ellipsis h-7 min-h-[28px]" title={translatedName}>{translatedName}</h3>
-                <p className="text-gray-700 hover:text-gray-900">{product.price}</p>
+                <div className="flex flex-col items-center">
+                    {product.discount?.active ? (
+                        <>
+                            <p className="text-gray-400 line-through text-sm">{product.price}</p>
+                            <p className="text-red-600 font-semibold">
+                                {`${product.discount.finalPrice.toFixed(2).replace('.', ',')} €`}
+                            </p>
+                        </>
+                    ) : (
+                        <p className="text-gray-700 hover:text-gray-900">{product.price}</p>
+                    )}
+                </div>
             </Link>
         </motion.div>
     ) : (
@@ -156,10 +186,31 @@ export default function ProductCard({
                         alt={translatedName}
                         className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
                     />
+                    {/* Discount Badge */}
+                    {product.discount?.active && (
+                        <div className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-12 h-12 flex items-center justify-center transform rotate-12">
+                            <span className="text-sm font-bold -rotate-12">
+                                {product.discount.type === 'percentage'
+                                    ? `-${product.discount.value}%`
+                                    : `-${Math.round((product.discount.value / product.price_incl_tax) * 100)}%`}
+                            </span>
+                        </div>
+                    )}
                 </div>
                 <div className="flex flex-col justify-start w-3/4">
                     <h3 className="font-semibold text-xl mb-2 whitespace-nowrap overflow-hidden text-ellipsis w-full" title={translatedName}>{translatedName}</h3>
-                    <p className="text-gray-700 text-lg mb-3">{product.price}</p>
+                    <div className="mb-3">
+                        {product.discount?.active ? (
+                            <div className="flex items-center gap-2">
+                                <p className="text-gray-400 line-through text-base">{product.price}</p>
+                                <p className="text-red-600 font-semibold text-lg">
+                                    {`${product.discount.finalPrice.toFixed(2).replace('.', ',')} €`}
+                                </p>
+                            </div>
+                        ) : (
+                            <p className="text-gray-700 text-lg">{product.price}</p>
+                        )}
+                    </div>
                     {translatedDescription &&
                         translatedDescription !== '{"es":"","ca":""}' && (
                             <p className="text-xs sm:text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">

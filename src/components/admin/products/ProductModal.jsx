@@ -59,7 +59,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [loadingBrands, setLoadingBrands] = useState(false);
     const [showBrandDropdown, setShowBrandDropdown] = useState(false);
     const [brandSearchTerm, setBrandSearchTerm] = useState('');
+    const [calculatedFinalPric, setCalculatedFinalPrice] = useState(0);
     const [productImages, setProductImages] = useState([]);
+
     // selectedImages: array of preview URLs for selected files
     const [selectedImages, setSelectedImages] = useState([]);
     // selectedFiles: array of File objects for selected files
@@ -194,6 +196,26 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             } else if (typeof product.description === 'string') {
                 description = { es: product.description, ca: '' };
             }
+
+            // Handle discount data
+            const discount = product.discount ? {
+                active: product.discount.active || false,
+                type: product.discount.type || 'percentage',
+                value: product.discount.value || '',
+                startDate: product.discount.startDate ? new Date(product.discount.startDate).toISOString().slice(0, 16) : '',
+                endDate: product.discount.endDate ? new Date(product.discount.endDate).toISOString().slice(0, 16) : '',
+                minPurchaseAmount: product.discount.minPurchaseAmount || '',
+                minQuantity: product.discount.minQuantity || ''
+            } : {
+                active: false,
+                type: 'percentage',
+                value: '',
+                startDate: '',
+                endDate: '',
+                minPurchaseAmount: '',
+                minQuantity: ''
+            };
+
             setFormData({
                 name,
                 reference: product.reference || '',
@@ -214,6 +236,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 },
                 status: product.status || 'active',
                 featured: product.featured || false,
+                discount: discount
             });
         } else {
             // Reset for new product
@@ -238,19 +261,71 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 },
                 status: 'active',
                 featured: false,
+                discount: {
+                    active: false,
+                    type: 'percentage',
+                    value: '',
+                    startDate: '',
+                    endDate: '',
+                    minPurchaseAmount: '',
+                    minQuantity: ''
+                }
             });
         }
     }, [isEditing, product]);
     // --- Form Input Change Handler ---
     const handleChange = (e) => {
-        const { name, value, type, checked, id } = e.target;
-        // Handle translation fields for name and description
-        if (name === 'name') {
+        const { name, value, type, checked } = e.target;
+
+        if (name.startsWith('discount.')) {
+            const discountField = name.split('.')[1];
+            const newDiscount = {
+                ...formData.discount,
+                [discountField]: type === 'checkbox' ? checked : value
+            };
+
+            // If changing the type or value, recalculate the final price
+            if (discountField === 'type' || discountField === 'value' || discountField === 'active') {
+                const basePrice = parseFloat(formData.price_incl_tax);
+                if (basePrice) {
+                    const finalPrice = calculateFinalPrice(basePrice, {
+                        ...newDiscount,
+                        value: discountField === 'value' ? value : newDiscount.value
+                    });
+                    setCalculatedFinalPrice(finalPrice);
+                }
+            }
+
+            setFormData(prev => ({
+                ...prev,
+                discount: newDiscount
+            }));
+
+            // Clear any previous discount-related errors
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors.discountType;
+                delete newErrors.discountValue;
+                delete newErrors.discountDates;
+                return newErrors;
+            });
+        } else if (name === 'price_incl_tax') {
+            // When price changes, recalculate final price if discount is active
+            const newPrice = parseFloat(value);
+            if (formData.discount.active && newPrice) {
+                const finalPrice = calculateFinalPrice(newPrice, formData.discount);
+                setCalculatedFinalPrice(finalPrice);
+            }
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        } else if (name === 'name') {
             setFormData(prev => ({
                 ...prev,
                 name: {
                     ...prev.name,
-                    [id === 'name-ca' ? 'ca' : 'es']: value
+                    [e.target.id === 'name-ca' ? 'ca' : 'es']: value
                 }
             }));
         } else if (name === 'description') {
@@ -258,7 +333,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 ...prev,
                 description: {
                     ...prev.description,
-                    [id === 'description-ca' ? 'ca' : 'es']: value
+                    [e.target.id === 'description-ca' ? 'ca' : 'es']: value
                 }
             }));
             // Synchronize textarea heights after a short delay to ensure state is updated
@@ -281,7 +356,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 ...prev,
                 stock: {
                     ...prev.stock,
-                    [name]: value
+                    [name]: type === 'number' ? Number(value) : value
                 }
             }));
         } else {
@@ -1023,6 +1098,131 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             )}
                                         </div>
                                     </div>
+
+                                    <h3 className="text-md font-medium mt-6">Descompte</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="flex items-center h-full">
+                                            <input
+                                                type="checkbox"
+                                                id="discount-active"
+                                                name="discount.active"
+                                                checked={formData.discount?.active || false}
+                                                onChange={handleChange}
+                                                className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
+                                            />
+                                            <label htmlFor="discount-active" className="ml-2 block text-sm font-medium text-gray-700">
+                                                Activar descompte
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {formData.discount?.active && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                            <div>
+                                                <label htmlFor="discount-type" className="block text-sm font-medium text-gray-700">
+                                                    Tipus de descompte
+                                                </label>
+                                                <select
+                                                    id="discount-type"
+                                                    name="discount.type"
+                                                    value={formData.discount?.type || 'percentage'}
+                                                    onChange={handleChange}
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                >
+                                                    <option value="percentage">Percentatge (%)</option>
+                                                    <option value="fixed">Import fix (€)</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label htmlFor="discount-value" className="block text-sm font-medium text-gray-700">
+                                                    {formData.discount?.type === 'fixed' ? 'Import del descompte (€)' : 'Percentatge de descompte (%)'}
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    id="discount-value"
+                                                    name="discount.value"
+                                                    value={formData.discount?.value || ''}
+                                                    onChange={handleChange}
+                                                    min="0"
+                                                    max={formData.discount?.type === 'percentage' ? "100" : undefined}
+                                                    step={formData.discount?.type === 'percentage' ? "1" : "0.01"}
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="discount-start-date" className="block text-sm font-medium text-gray-700">
+                                                    Data d'inici
+                                                </label>
+                                                <input
+                                                    type="datetime-local"
+                                                    id="discount-start-date"
+                                                    name="discount.startDate"
+                                                    value={formData.discount?.startDate ? new Date(formData.discount.startDate).toISOString().slice(0, 16) : ''}
+                                                    onChange={handleChange}
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="discount-end-date" className="block text-sm font-medium text-gray-700">
+                                                    Data de fi
+                                                </label>
+                                                <input
+                                                    type="datetime-local"
+                                                    id="discount-end-date"
+                                                    name="discount.endDate"
+                                                    value={formData.discount?.endDate ? new Date(formData.discount.endDate).toISOString().slice(0, 16) : ''}
+                                                    onChange={handleChange}
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="discount-min-amount" className="block text-sm font-medium text-gray-700">
+                                                    Import mínim de compra (€)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    id="discount-min-amount"
+                                                    name="discount.minPurchaseAmount"
+                                                    value={formData.discount?.minPurchaseAmount || ''}
+                                                    onChange={handleChange}
+                                                    min="0"
+                                                    step="0.01"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">
+                                                    Quantitat mínima
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    id="discount-min-quantity"
+                                                    name="discount.minQuantity"
+                                                    value={formData.discount?.minQuantity || ''}
+                                                    onChange={handleChange}
+                                                    min="1"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                />
+                                            </div>
+                                            {formData.discount?.type && formData.discount?.value && formData.price_incl_tax && (
+                                                <div className="md:col-span-2">
+                                                    <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">
+                                                        Preu final amb descompte:
+                                                    </label>
+                                                    <div className="mt-2 p-4 bg-gray-50 rounded-md border border-gray-200">
+                                                        <p className="text-lg font-medium text-gray-700">
+                                                            {
+                                                                formData.discount.type === 'percentage'
+                                                                    ? (formData.price_incl_tax * (1 - formData.discount.value / 100)).toFixed(2)
+                                                                    : Math.max(0, formData.price_incl_tax - formData.discount.value).toFixed(2)
+                                                            } €
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <h3 className="text-md font-medium mt-6">Inventari</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
@@ -1370,3 +1570,44 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         </Dialog>
     );
 }
+
+// Add these utility functions right after your state declarations
+const calculateFinalPrice = (basePrice, discount) => {
+    if (!discount?.active || !basePrice || !discount?.value) {
+        return basePrice;
+    }
+
+    if (discount.type === 'percentage') {
+        return basePrice * (1 - discount.value / 100);
+    } else {
+        return Math.max(0, basePrice - discount.value);
+    }
+};
+
+const validateDiscountFields = (discount) => {
+    const errors = {};
+
+    if (discount.active) {
+        if (!discount.type) {
+            errors.discountType = "El tipus de descompte és obligatori";
+        }
+
+        if (!discount.value) {
+            errors.discountValue = "El valor del descompte és obligatori";
+        } else if (discount.type === 'percentage' && (discount.value < 0 || discount.value > 100)) {
+            errors.discountValue = "El percentatge ha d'estar entre 0 i 100";
+        } else if (discount.type === 'fixed' && discount.value < 0) {
+            errors.discountValue = "El descompte no pot ser negatiu";
+        }
+
+        if (discount.startDate && discount.endDate) {
+            const start = new Date(discount.startDate);
+            const end = new Date(discount.endDate);
+            if (start > end) {
+                errors.discountDates = "La data de fi ha de ser posterior a la data d'inici";
+            }
+        }
+    }
+
+    return errors;
+};

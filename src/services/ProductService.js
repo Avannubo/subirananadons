@@ -154,7 +154,27 @@ export function formatProduct(product) {
         imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
         description: ensureString(getTranslatedField(product, 'description', locale)) || ensureString(product.description),
         reference: product.reference,
-        brand: ensureString(getTranslatedField(product, 'brand', locale)) || ensureString(product.brand)
+        brand: ensureString(getTranslatedField(product, 'brand', locale)) || ensureString(product.brand),
+        // Add discount information
+        discount: product.discount ? {
+            active: product.discount.active || false,
+            type: product.discount.type || 'percentage',
+            value: parseFloat(product.discount.value) || 0,
+            startDate: product.discount.startDate ? new Date(product.discount.startDate) : null,
+            endDate: product.discount.endDate ? new Date(product.discount.endDate) : null,
+            minPurchaseAmount: parseFloat(product.discount.minPurchaseAmount) || 0,
+            minQuantity: parseInt(product.discount.minQuantity) || 1,
+            // Calculate final price with discount
+            finalPrice: (() => {
+                if (!product.discount?.active || !product.price_incl_tax) return null;
+                const price = parseFloat(product.price_incl_tax);
+                if (product.discount.type === 'percentage') {
+                    return price * (1 - (parseFloat(product.discount.value) || 0) / 100);
+                } else {
+                    return Math.max(0, price - (parseFloat(product.discount.value) || 0));
+                }
+            })()
+        } : null
     };
 }
 

@@ -23,14 +23,36 @@ export function CartProvider({ children }) {
     });
 
     // Helper functions
+    const getItemPrice = useCallback((item) => {
+        // Get base price
+        const basePrice = typeof item.priceValue === 'number' ? item.priceValue :
+            typeof item.price === 'number' ? item.price :
+                parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
+
+        // Check if there's an active discount
+        if (item.discount && item.discount.active) {
+            const now = new Date();
+            const startDate = item.discount.startDate ? new Date(item.discount.startDate) : null;
+            const endDate = item.discount.endDate ? new Date(item.discount.endDate) : null;
+
+            // Verify if discount is currently valid
+            if ((!startDate || now >= startDate) && (!endDate || now <= endDate)) {
+                if (item.discount.type === 'percentage') {
+                    return basePrice * (1 - (item.discount.value / 100));
+                } else if (item.discount.type === 'fixed') {
+                    return Math.max(0, basePrice - item.discount.value);
+                }
+            }
+        }
+        return basePrice;
+    }, []);
+
     const calculateTotal = useCallback((items) => {
         return items.reduce((sum, item) => {
-            const price = typeof item.priceValue === 'number' ? item.priceValue :
-                typeof item.price === 'number' ? item.price :
-                    parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
+            const price = getItemPrice(item);
             return sum + (price * item.quantity);
         }, 0);
-    }, []);
+    }, [getItemPrice]);
 
     const calculateCount = useCallback((items) => {
         return items.reduce((count, item) => count + item.quantity, 0);
@@ -126,6 +148,22 @@ export function CartProvider({ children }) {
                 listInfo: product.type === 'gift' ? {
                     ...product.listInfo,
                     updatedAt: new Date().toISOString(),
+                } : null,
+                // Add discount information if present
+                discount: product.discount && product.discount.active ? {
+                    ...product.discount,
+                    // Ensure dates are properly formatted
+                    startDate: product.discount.startDate ? new Date(product.discount.startDate).toISOString() : null,
+                    endDate: product.discount.endDate ? new Date(product.discount.endDate).toISOString() : null,
+                    // Make sure we have all required discount fields
+                    type: product.discount.type || 'percentage',
+                    value: product.discount.value || 0,
+                    active: true,
+                    // Calculate final price if not provided
+                    finalPrice: product.discount.finalPrice || getItemPrice({
+                        ...product,
+                        priceValue: product.priceValue || product.price
+                    })
                 } : null,
                 updatedAt: Date.now()
             };            // Check if the product already exists in cart

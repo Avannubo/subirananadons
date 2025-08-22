@@ -553,8 +553,21 @@ export default function ProductsTable(props) {
                                         {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {product.price_excl_tax.toFixed(2)} €
                                         </td> */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {product.price_incl_tax.toFixed(2)} €
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {product.discount?.active ? (
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm text-gray-400 line-through">
+                                                        {product.price_incl_tax.toFixed(2)}€
+                                                    </span>
+                                                    <span className="text-sm font-medium text-red-600">
+                                                        {product.discount.finalPrice?.toFixed(2)} € { product.discount.type === 'percentage' ? `(-${product.discount.value}%)` : '' }
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-sm text-gray-500">
+                                                    {product.price_incl_tax.toFixed(2)} €
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${product.status === 'active' ? 'bg-green-100 text-green-800' :

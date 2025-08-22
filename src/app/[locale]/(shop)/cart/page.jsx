@@ -1,14 +1,14 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react';
-import ShopLayout from "@/components/Layouts/shop-layout"; 
+import ShopLayout from "@/components/Layouts/shop-layout";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 import { ShoppingCart } from 'lucide-react';
-import dynamic from 'next/dynamic'; 
-import { useTranslations } from 'next-intl'; 
+import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 const ModalTPV = dynamic(() => import('@/components/cart/ModalTPV'), { ssr: false });
 export default function CartPage() {
     const t = useTranslations('CartPage');
@@ -134,23 +134,41 @@ export default function CartPage() {
     };
     const calculateSubtotal = () => {
         return cartItems.reduce((sum, item) => {
-            // Get the numerical price value, handling different formats
-            const price = typeof item.priceValue === 'number'
-                ? item.priceValue
-                : (typeof item.price === 'number'
-                    ? item.price
-                    : parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
+            // Get the numerical price value with discount if applicable
+            const price = getItemPrice(item);
             return sum + (price * (item.quantity || 1));
         }, 0);
     };
+    // Get the price for an item, considering any active discounts
+    const getItemPrice = (item) => {
+        let basePrice = typeof item.priceValue === 'number'
+            ? item.priceValue
+            : (typeof item.price === 'number'
+                ? item.price
+                : parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
+
+        // Check if there's an active discount
+        if (item.discount && item.discount.active) {
+            const now = new Date();
+            const startDate = item.discount.startDate ? new Date(item.discount.startDate) : null;
+            const endDate = item.discount.endDate ? new Date(item.discount.endDate) : null;
+
+            // Verify if discount is currently valid
+            if ((!startDate || now >= startDate) && (!endDate || now <= endDate)) {
+                if (item.discount.type === 'percentage') {
+                    return basePrice * (1 - (item.discount.value / 100));
+                } else if (item.discount.type === 'fixed') {
+                    return Math.max(0, basePrice - item.discount.value);
+                }
+            }
+        }
+        return basePrice;
+    };
+
     // Subtotal for only regular (personal) items
     const calculateRegularSubtotal = () => {
         return regularItems.reduce((sum, item) => {
-            const price = typeof item.priceValue === 'number'
-                ? item.priceValue
-                : (typeof item.price === 'number'
-                    ? item.price
-                    : parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
+            const price = getItemPrice(item);
             return sum + (price * (item.quantity || 1));
         }, 0);
     };
@@ -160,7 +178,12 @@ export default function CartPage() {
         return regularSubtotal >= 60 ? 0 : (regularItems.length === 0 ? 0 : 5.99);
     };
     const calculateTax = () => {
-        return calculateSubtotal() * 0.21;
+        // Calculate tax based on the discounted subtotal
+        const subtotalWithDiscounts = cartItems.reduce((sum, item) => {
+            const price = getItemPrice(item);
+            return sum + (price * (item.quantity || 1));
+        }, 0);
+        return subtotalWithDiscounts * 0.21;
     };
     const calculateTotal = () => {
         return calculateSubtotal() + calculateShipping();// + calculateTax();
@@ -236,7 +259,16 @@ export default function CartPage() {
                 subtotal: calculateSubtotal(),
                 shipping: calculateShipping(),
                 tax: calculateTax(),
-                total: calculateTotal()
+                total: calculateTotal(),
+                discounts: cartItems.reduce((total, item) => {
+                    if (item.discount && item.discount.active) {
+                        const originalPrice = typeof item.priceValue === 'number' ? item.priceValue :
+                            parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
+                        const discountedPrice = getItemPrice(item);
+                        return total + ((originalPrice - discountedPrice) * (item.quantity || 1));
+                    }
+                    return total;
+                }, 0)
             }
         };
         // Save orderData as 'orderpending' in localStorage
@@ -506,9 +538,21 @@ export default function CartPage() {
                                                     )}
                                                 </div>
                                                 <div className="flex-grow">
-                                                    <h3 className="font-medium">{typeof item.name === 'object' ?  item.name.es || item.name.ca : item.name}</h3>
+                                                    <h3 className="font-medium">{typeof item.name === 'object' ? item.name.es || item.name.ca : item.name}</h3>
                                                     {/* <p className="text-gray-500 text-sm">{item.brand.name} - {typeof item.category === 'object' ? item.category.name.es || item.category.name.ca : item.category.name}</p> */}
-                                                    <p className="text-[#00B0C8] font-medium">{item.price}</p>
+                                                    {item.discount && item.discount.active ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-gray-400 line-through text-sm">{item.price}€</p>
+                                                            <p className="text-red-600 font-medium">{getItemPrice(item).toFixed(2)}€</p>
+                                                            {item.discount.type === 'percentage' && (
+                                                                <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded">
+                                                                    -{item.discount.value}%
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-[#00B0C8] font-medium">{item.price}</p>
+                                                    )}
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
                                                             Lista de regalo: {item.listOwner}
@@ -573,7 +617,19 @@ export default function CartPage() {
                                                 <div className="flex-1">
                                                     <h3 className="font-medium">{typeof item.name === 'object' ? item.name[t('locale')] || item.name['es'] || item.name['ca'] : item.name}</h3>
                                                     <p className="text-gray-500 text-sm">{item.brand} - {typeof item.category === 'object' ? item.category[t('locale')] || item.category['es'] || item.category['ca'] : item.category}</p>
-                                                    <p className="text-[#00B0C8] font-medium">{item.price}€</p>
+                                                    {item.discount && item.discount.active ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-gray-400 line-through text-sm">{item.price}€</p>
+                                                            <p className="text-red-600 font-medium">{getItemPrice(item).toFixed(2)}€</p>
+                                                            {item.discount.type === 'percentage' && (
+                                                                <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded">
+                                                                    -{item.discount.value}%
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-[#00B0C8] font-medium">{item.price}€</p>
+                                                    )}
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
                                                             Lista de regalo: {item.listOwner}

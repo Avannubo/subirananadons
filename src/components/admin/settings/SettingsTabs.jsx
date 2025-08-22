@@ -7,8 +7,7 @@ import SliderTab from "@/components/admin/settings/tabs/SliderTab";
 import BannerTab from "@/components/admin/settings/tabs/BannerTab";
 import RecomendationTab from "@/components/admin/settings/tabs/RecomendationTab";
 import TextosLegalesTab from "@/components/admin/settings/tabs/TextosLegalesTab";
-import ParametersTab from "@/components/admin/settings/tabs/ParametersTab";
-import EquipoTab from "@/components/admin/settings/tabs/EquipoTab";
+import ParametersTab from "@/components/admin/settings/tabs/ParametersTab"; 
 import TabNavigation from "@/components/admin/shared/TabNavigation";
 export default function SettingsTabs() {
     const [activeTab, setActiveTab] = useState('transportistas');

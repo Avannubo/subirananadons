@@ -277,6 +277,73 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                                 {product.price_incl_tax ? formatPrice(product.price_incl_tax) : 'N/D'}
                                             </p>
                                         </div>
+                                        {product.discount?.active && (
+                                            <>
+                                                <div className="bg-gray-50 p-2 rounded-lg border border-gray-200 md:col-span-2">
+                                                    <span className="text-sm font-medium text-gray-500">Descompte:</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-base font-medium text-green-600">
+                                                            {product.discount.type === 'percentage'
+                                                                ? `${product.discount.value}% de descompte`
+                                                                : `${formatPrice(product.discount.value)} de descompte`}
+                                                        </span>
+                                                        {product.discount.active && (
+                                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                Actiu
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="mt-2">
+                                                        <span className="text-sm font-medium text-gray-500">Preu final amb descompte:</span>
+                                                        <p className="text-base font-medium text-green-600">
+                                                            {product.discount.type === 'percentage'
+                                                                ? formatPrice(product.price_incl_tax * (1 - product.discount.value / 100))
+                                                                : formatPrice(Math.max(0, product.price_incl_tax - product.discount.value))}
+                                                        </p>
+                                                    </div>
+                                                    {(product.discount.startDate || product.discount.endDate) && (
+                                                        <div className="mt-2 flex gap-4">
+                                                            {product.discount.startDate && (
+                                                                <div>
+                                                                    <span className="text-sm font-medium text-gray-500">Data d'inici:</span>
+                                                                    <p className="text-sm text-gray-700">
+                                                                        {new Date(product.discount.startDate).toLocaleString('ca')}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                            {product.discount.endDate && (
+                                                                <div>
+                                                                    <span className="text-sm font-medium text-gray-500">Data de fi:</span>
+                                                                    <p className="text-sm text-gray-700">
+                                                                        {new Date(product.discount.endDate).toLocaleString('ca')}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {(product.discount.minPurchaseAmount > 0 || product.discount.minQuantity > 1) && (
+                                                        <div className="mt-2 flex gap-4">
+                                                            {product.discount.minPurchaseAmount > 0 && (
+                                                                <div>
+                                                                    <span className="text-sm font-medium text-gray-500">Import mínim:</span>
+                                                                    <p className="text-sm text-gray-700">
+                                                                        {formatPrice(product.discount.minPurchaseAmount)}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                            {product.discount.minQuantity > 1 && (
+                                                                <div>
+                                                                    <span className="text-sm font-medium text-gray-500">Quantitat mínima:</span>
+                                                                    <p className="text-sm text-gray-700">
+                                                                        {product.discount.minQuantity} unitats
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </section>
                                 {/* Inventory Information */}
