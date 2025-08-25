@@ -75,6 +75,7 @@ export default function BirthListPage({ params }) {
                             name,
                             price: `${(item.productSnapshot?.price || prod.price_incl_tax).toFixed(2).replace('.', ',')} €`,
                             priceValue: item.productSnapshot?.price || prod.price_incl_tax,
+                            discount: prod.discount,
                             image: item.productSnapshot?.image || prod.image || '/assets/images/Screenshot_4.png',
                             category: item.productSnapshot?.category || prod.category,
                             brand: item.productSnapshot?.brand || prod.brand,
@@ -250,7 +251,7 @@ export default function BirthListPage({ params }) {
             const productForCart = {
                 id: product.productId,
                 name: product.name,
-                price: product.priceValue,
+                price: product.discount?.active ? product.discount.finalPrice : product.priceValue,
                 image: product.image,
                 brand: product.brand || '',
                 category: product.category || '',
@@ -432,7 +433,25 @@ export default function BirthListPage({ params }) {
                                                 ? (product.name[locale] || product.name.es || product.name.ca || product.name.name || 'N/D')
                                                 : product.name}
                                         </h3>
-                                        <p className="text-gray-600 text-sm mb-2">{product.price}</p>
+                                        <div className="flex flex-col items-start mb-2">
+                                            {product.discount?.active ? (
+                                                <>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm text-gray-400 line-through">
+                                                            {product.priceValue.toFixed(2)}€
+                                                        </span>
+                                                        <span className="px-1.5 py-0.5 text-xs font-medium text-red-700 bg-red-100 rounded-sm">
+                                                            -{product.discount.value}%
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-[#00B0C8]">
+                                                        {product.discount.finalPrice?.toFixed(2)}€
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <span className="text-sm text-gray-600">{product.price}</span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div>
                                         {product.status === 'available' ? (

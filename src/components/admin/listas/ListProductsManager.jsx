@@ -235,7 +235,26 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                                                    {item.product.price_incl_tax?.toFixed(2).replace('.', ',')} €
+                                                    {item.product.discount?.active ? (
+                                                        <>
+                                                            {item.product.discount?.active ? (
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-sm text-gray-400 line-through">
+                                                                        {item.product.price_incl_tax.toFixed(2)}€
+                                                                    </span>
+                                                                    <span className="text-sm font-medium text-red-600">
+                                                                        {item.product.discount.finalPrice?.toFixed(2)} € {item.product.discount.type === 'percentage' ? `(-${item.product.discount.value}%)` : ''}
+                                                                    </span>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-sm text-gray-500">
+                                                                    {item.product.price_incl_tax.toFixed(2)} €
+                                                                </span>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                            <p className="text-gray-700 hover:text-gray-900">{item.product.discount.finalPrice?.toFixed(2)} €</p>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                                     <button

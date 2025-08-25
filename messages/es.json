@@ -157,6 +157,7 @@
     "noProducts": "No hay productos en tu pedido",
     "giftOrder": "Regalos de Compra",
     "notesPlaceholder": "Por favor, deja una nota para la tienda (opcional)",
+    "giftnotesPlaceholder": "Deje una nota para el propietario de la lista de regalos (opcional)",
     "giftItemsPlaceholder": "Añade una nota para el propietario de la lista (opcional)",
     "giftItems": "Artículos de regalo",
     "giftItemsOnly": "Este pedido incluye solo artículos de regalo. Estos deben ser recogidos en tienda por el propietario de la lista.",

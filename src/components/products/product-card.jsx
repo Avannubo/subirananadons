@@ -16,9 +16,7 @@ import BirthListSelectModal from './BirthListSelectModal.jsx';
 export default function ProductCard({
     product,
     viewMode = "grid",
-    onQuickViewClick,
-    setShowAuthModal,  // Function to show/hide auth modal
-    setAuthModalData   // Function to set auth modal data (title, message, callback)
+    onQuickViewClick
 }) {
     console.log(product);
 

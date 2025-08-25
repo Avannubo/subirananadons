@@ -407,6 +407,29 @@ export default function ListViewModal({
                             )}
                         </div>
                         <div className='grid grid-cols-3 gap-2 mt-1'>
+                            {/* <p className=''>{item.product?.discount?.finalPrice}€</p> */}
+                            <div className="flex flex-col items-start">
+                                {item.product.discount?.active ? (
+                                    <>
+                                        {item.product.discount?.active ? (
+                                            <div className="flex flex-col">
+                                                <span className="text-sm text-gray-400 line-through">
+                                                    {item.product.price_incl_tax.toFixed(2)}€
+                                                </span>
+                                                <span className="text-sm font-medium text-red-600">
+                                                    {item.product.discount.finalPrice?.toFixed(2)} € {item.product.discount.type === 'percentage' ? `(-${item.product.discount.value}%)` : ''}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-sm text-gray-500">
+                                                {item.product.price_incl_tax.toFixed(2)} €
+                                            </span>
+                                        )}
+                                    </>
+                                ) : (
+                                        <p className="text-gray-700 hover:text-gray-900">{item.product.price}</p>
+                                )}
+                            </div>
                             <p className="text-xs text-gray-500">Ref: {item.product.reference || '-'}</p>
                             {/* <p className="text-xs text-gray-500 mt-1">{item.product.brand}</p> */}
                             {user.role === 'admin' && (

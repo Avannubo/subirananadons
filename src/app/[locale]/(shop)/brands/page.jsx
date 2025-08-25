@@ -90,18 +90,21 @@ export default function BrandsPage() {
                 let fetchedProducts = data.products || [];
                 // Format products to match the expected structure
                 fetchedProducts = fetchedProducts.map(product => {
+                    console.log(fetchedProducts);
+
+                    const now = new Date();
                     const hasDiscount = product.discount?.active &&
                         product.discount.value > 0 &&
-                        (!product.discount.startDate || new Date(product.discount.startDate) <= new Date()) &&
-                        (!product.discount.endDate || new Date(product.discount.endDate) >= new Date());
+                        (!product.discount.startDate || new Date(product.discount.startDate) <= now) &&
+                        (!product.discount.endDate || new Date(product.discount.endDate) >= now);
 
                     const discountedPrice = hasDiscount ? (
-                        product.discount.type === 'percentage'
-                            ? product.price_incl_tax * (1 - product.discount.value / 100)
-                            : product.price_incl_tax - product.discount.value
-                    ) : null;
-
-                    return {
+                        product.discount.finalPrice || (
+                            product.discount.type === 'percentage'
+                                ? product.price_incl_tax * (1 - product.discount.value / 100)
+                                : product.price_incl_tax - product.discount.value
+                        )
+                    ) : null; return {
                         id: product._id,
                         name: product.name,
                         category: product.category,
@@ -112,13 +115,24 @@ export default function BrandsPage() {
                         imageUrlHover: product.imageHover || product.image,
                         brand: product.brand,
                         description: product.description || '',
-                        discount: hasDiscount ? {
-                            active: true,
-                            type: product.discount.type,
-                            value: product.discount.value,
-                            startDate: product.discount.startDate,
-                            endDate: product.discount.endDate,
-                            finalPrice: discountedPrice
+                        discount: product.discount ? {
+                            active: product.discount.active || false,
+                            type: product.discount.type || 'percentage',
+                            value: parseFloat(product.discount.value) || 0,
+                            startDate: product.discount.startDate ? new Date(product.discount.startDate) : null,
+                            endDate: product.discount.endDate ? new Date(product.discount.endDate) : null,
+                            minPurchaseAmount: parseFloat(product.discount.minPurchaseAmount) || 0,
+                            minQuantity: parseInt(product.discount.minQuantity) || 1,
+                            // Calculate final price with discount
+                            finalPrice: (() => {
+                                if (!product.discount?.active || !product.price_incl_tax) return null;
+                                const price = parseFloat(product.price_incl_tax);
+                                if (product.discount.type === 'percentage') {
+                                    return price * (1 - (parseFloat(product.discount.value) || 0) / 100);
+                                } else {
+                                    return Math.max(0, price - (parseFloat(product.discount.value) || 0));
+                                }
+                            })()
                         } : null
                     };
                 });
