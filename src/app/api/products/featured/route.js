@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
+import { formatProduct } from '@/services/ProductService';
 
 export async function GET(request) {
     try {
@@ -11,25 +12,17 @@ export async function GET(request) {
 
         await dbConnect();
 
-        // Find featured and active products
+        // Find featured and active products, populate brand and category for translations
         const featuredProducts = await Product.find({
             featured: true,
             status: 'active'
-        }).limit(limit);
+        })
+            .populate('brand')
+            .populate('category')
+            .limit(limit);
 
-        // Format products for frontend consumption
-        const formattedProducts = featuredProducts.map(product => ({
-            id: product._id.toString(),
-            name: product.name,
-            category: product.category,
-            price: `${product.price_incl_tax.toFixed(2).replace('.', ',')} €`,
-            priceValue: product.price_incl_tax,
-            imageUrl: product.image || '/assets/images/Screenshot_4.png',
-            imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
-            description: product.description || '',
-            reference: product.reference || '',
-            brand: product.brand || ''
-        }));
+        // Format products for frontend consumption using the shared formatProduct function
+        const formattedProducts = featuredProducts.map(product => formatProduct(product));
 
         return NextResponse.json({
             success: true,

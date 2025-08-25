@@ -6,7 +6,6 @@ import { FiStar, FiXCircle, FiCheck, FiAlertCircle } from 'react-icons/fi';
 import ImageHoverPreview from '@/components/shared/ImageHoverPreview';
 import { toast } from 'react-hot-toast';
 import Pagination from '@/components/admin/shared/Pagination';
-
 export default function FeaturedProductsPage() {
     const [allProducts, setAllProducts] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -17,17 +16,14 @@ export default function FeaturedProductsPage() {
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [totalItems, setTotalItems] = useState(0);
     const [totalFeaturedCount, setTotalFeaturedCount] = useState(0);
-
     // Fetch all featured products count on mount
     useEffect(() => {
         fetchFeaturedCount();
     }, []);
-
     // Fetch products whenever page, items per page, or filter changes
     useEffect(() => {
         fetchProducts();
     }, [currentPage, itemsPerPage, filter]);
-
     // Fetch total featured products count
     const fetchFeaturedCount = async () => {
         try {
@@ -43,7 +39,6 @@ export default function FeaturedProductsPage() {
             toast.error('Error fetching featured count');
         }
     };
-
     // Fetch all products from API    
     const fetchProducts = async () => {
         try {
@@ -114,7 +109,6 @@ export default function FeaturedProductsPage() {
             setLoading(false);
         }
     };
-
     // Toggle featured status of a product
     const toggleFeatured = async (productId) => {
         try {
@@ -126,7 +120,6 @@ export default function FeaturedProductsPage() {
                 },
                 body: JSON.stringify({ productId }),
             });
-
             if (!response.ok) {
                 let errorMsg = 'Error en actualitzar l\'estat';
                 try {
@@ -135,9 +128,7 @@ export default function FeaturedProductsPage() {
                 } catch { }
                 throw new Error(errorMsg);
             }
-
             const data = await response.json();
-
             setAllProducts(prevProducts =>
                 prevProducts.map(product =>
                     product._id === productId
@@ -145,7 +136,6 @@ export default function FeaturedProductsPage() {
                         : product
                 )
             );
-
             fetchFeaturedCount();
             toast.success((data && data.message) || 'Estat actualitzat correctament', { id: toastId });
         } catch (error) {
@@ -153,24 +143,20 @@ export default function FeaturedProductsPage() {
             toast.error(`Error: ${error.message}`);
         }
     };
-
     // Effect to fetch products when search term changes
     useEffect(() => {
         if (searchTerm.length === 0 || searchTerm.length >= 2) {
             fetchProducts();
         }
     }, [searchTerm]);
-
     // Handle items per page change
     const handleItemsPerPageChange = (newItemsPerPage) => {
         setItemsPerPage(newItemsPerPage);
         setCurrentPage(1);
     };
-
     // Pagination logic (client-side)
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const paginatedProducts = allProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
     return (
         <AuthCheck>
             <AdminLayout>
@@ -244,6 +230,9 @@ export default function FeaturedProductsPage() {
                                                     Preu
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Descompte
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                     Estat
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -280,9 +269,37 @@ export default function FeaturedProductsPage() {
                                                         <div className="text-sm text-gray-500">{product.reference || '-'}</div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-900">
+                                                        <div className={`text-sm ${product.discount?.active ? 'line-through text-gray-500' : 'text-gray-900'}`}>
                                                             {product.price_incl_tax?.toFixed(2).replace('.', ',')} €
                                                         </div>
+                                                        {product.discount?.active && product.discount.finalPrice && (
+                                                            <div className="text-sm text-red-600 font-medium">
+                                                                {product.discount.finalPrice.toFixed(2).replace('.', ',')} €
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {product.discount?.active ? (
+                                                            <div>
+                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                    {product.discount.type === 'percentage'
+                                                                        ? `${product.discount.value}%`
+                                                                        : `${product.discount.value.toFixed(2).replace('.', ',')}€`}
+                                                                </span>
+                                                                {(product.discount.startDate || product.discount.endDate) && (
+                                                                    <div className="text-xs text-gray-500 mt-1">
+                                                                        {product.discount.startDate && (
+                                                                            <div>Des de: {new Date(product.discount.startDate).toLocaleDateString()}</div>
+                                                                        )}
+                                                                        {product.discount.endDate && (
+                                                                            <div>Fins: {new Date(product.discount.endDate).toLocaleDateString()}</div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-sm text-gray-500">-</span>
+                                                        )}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${product.status === 'active' ? 'bg-green-100 text-green-800' :

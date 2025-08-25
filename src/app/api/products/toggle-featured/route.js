@@ -5,7 +5,7 @@ import Product from '@/models/Product';
 export async function POST(request) {
     try {
         const { productId } = await request.json();
-        console.log('[toggle-featured] Received productId:', productId);
+        // console.log('[toggle-featured] Received productId:', productId);
 
         if (!productId) {
             return NextResponse.json(
