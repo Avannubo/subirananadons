@@ -656,12 +656,12 @@ export default function CartPage() {
                                                             )}
                                                             {item.discount.type === 'fixed' && (
                                                                 <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded">
-                                                                    -{item.discount.value}€
+                                                                    -{item.discount.value} €
                                                                 </span>
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        <p className="text-[#00B0C8] font-medium">{parsePrice(item.price).toFixed(2)}€</p>
+                                                        <p className="text-[#00B0C8] font-medium">{parsePrice(item.price).toFixed(2)} €</p>
                                                     )}
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">

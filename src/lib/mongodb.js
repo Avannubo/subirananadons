@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 
 // Connection URL
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://193.176.230.24:27017/test';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://193.176.230.34:27017/test';
 const MONGODB_DB = process.env.MONGODB_DB || 'test';
 
 // Connection options

@@ -16,7 +16,8 @@
     "sortNameAsc": "Nombre A-Z",
     "sortNewest": "Más nuevos",
     "noResults": "No se encontraron productos que coincidan con tu búsqueda.",
-    "showingText": "Mostrando {count} de {total} productos"
+    "showingText": "Mostrando {count} de {total} productos",
+    "noProductsFound": "No se han encontrado productos para esta búsqueda."
   },
   "Menu": {
     "products": "Productos",

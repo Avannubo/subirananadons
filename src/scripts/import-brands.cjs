@@ -13,7 +13,7 @@ dotenv.config();
 
 // Configuration
 const CSV_FILE_PATH = path.join(process.cwd(), 'brands_2025-04-25_091938.csv');
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://193.176.230.24:27017/test';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://193.176.230.34:27017/test';
 const DB_NAME = process.env.MONGODB_DB || 'test'; // Replace with your database name
 const COLLECTION_NAME = 'brands';
 
