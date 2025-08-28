@@ -35,6 +35,7 @@ export async function POST(request) {
         const orderData = {
             orderNumber: generateOrderNumber(),
             items: items.map(item => {
+                console.log
                 const productId = typeof item.id === 'string' && /^[0-9a-fA-F]{24}$/.test(item.id)
                     ? item.id
                     : item.id.toString(); return {

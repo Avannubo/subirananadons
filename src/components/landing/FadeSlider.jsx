@@ -1,6 +1,5 @@
 // components/FadeSlider.jsx
 'use client';
-
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -9,11 +8,9 @@ import 'swiper/css';
 import 'swiper/css/effect-fade';
 import 'swiper/css/pagination';
 import Link from 'next/link';
-
 export default function FadeSlider() {
     const [slides, setSlides] = useState([]);
     const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         fetch('/api/slider')
             .then(res => res.json())
@@ -28,9 +25,8 @@ export default function FadeSlider() {
     if (typeof window !== 'undefined') {
         locale = (window.location.pathname.split('/')[1] || 'ca');
     }
-
     return (
-        <div className="w-full h-[45vw] min-h-[450px] max-h-[600px] md:h-[100vh] md:min-h-[350px] md:max-h-full relative">
+        <div className="w-full h-[80vh] min-h-[450px]  md:h-[100vh] md:min-h-[350px] md:max-h-full relative">
             <Swiper
                 modules={[EffectFade, Autoplay, Pagination]}
                 effect="fade"
@@ -68,7 +64,7 @@ export default function FadeSlider() {
                                 className="flex items-center uppercase  text-white rounded-md transition-colors text-lg font-bold md:text-4xl mx-auto relative group"
                             >
                                 <span
-                                    className="relative z-10 font-bold text-shadow-lg"
+                                    className="relative z-10 font-bold text-shadow-lg p-4 sm:p-0 text-center sm:text-left"
                                 >
                                     {(slide.btnText && slide.btnText[locale]) || 'Learn More'}
                                 </span>

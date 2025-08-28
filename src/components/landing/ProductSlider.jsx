@@ -77,7 +77,7 @@ export default function ProductSlider({
                         onBeforeInit={(swiper) => {
                             swiperRef.current = swiper;
                         }}
-                        spaceBetween={8}
+                        spaceBetween={16}
                         pagination={{
                             clickable: true,
                             el: '.custom-pagination',
@@ -90,9 +90,22 @@ export default function ProductSlider({
                         }}
                         modules={[Pagination, Navigation]}
                         breakpoints={{
-                            0: { slidesPerView: slidesPerView.mobile || 1 },
-                            640: { slidesPerView: slidesPerView.tablet || 3 },
-                            1024: { slidesPerView: slidesPerView.desktop || 4 },
+                            0: {
+                                slidesPerView: 1,
+                                spaceBetween: 8
+                            },
+                            540: {
+                                slidesPerView: 2,
+                                spaceBetween: 12
+                            },
+                            768: {
+                                slidesPerView: 3,
+                                spaceBetween: 16
+                            },
+                            1024: {
+                                slidesPerView: 4,
+                                spaceBetween: 24
+                            }
                         }}
                         loop={products.length >= (slidesPerView.desktop || 4)}
                         grabCursor={true}

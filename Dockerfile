@@ -3,6 +3,22 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Install Chromium and its dependencies
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    nodejs \
+    yarn
+
+# Set environment variables for Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 # Copy package files (only those that exist)
 COPY package.json ./
 COPY package-lock.json ./
@@ -20,6 +36,20 @@ RUN npm run build
 # Production image
 FROM node:18-alpine AS runner
 WORKDIR /app
+
+# Install Chromium and its dependencies in the production image
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Set environment variables for Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Copy built files and production dependencies
 COPY --from=builder /app/.next .next

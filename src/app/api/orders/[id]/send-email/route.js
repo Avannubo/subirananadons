@@ -77,7 +77,7 @@ export async function POST(request, { params }) {
                 
                 return {
                     product: {
-                        name: productData.name || 'Producto no disponible',
+                        name: productData.name.es || 'Producto no disponible',
                         description: productData.description || '',
                         image: productData.image || '',
                         brand: productData.brand || '',

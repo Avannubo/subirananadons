@@ -6,8 +6,7 @@ import ShopLayout from "@/components/Layouts/shop-layout";
 import ProductCard from "@/components/products/product-card";
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductQuickView from "@/components/products/product-quick-view";
-import { fetchProducts, formatProduct } from '@/services/ProductService';
-// import { fetchCategories } from '@/services/CategoryService';
+import { fetchProducts, formatProduct } from '@/services/ProductService'; 
 import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
 // Utility to get display name from category (handles translation and legacy)
