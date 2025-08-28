@@ -730,7 +730,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                                 required
                                             />
                                             <label htmlFor="acceptTerms" className="ml-3 text-sm text-gray-700 select-none">
-                                                {t.acceptTerms} <a href="/terminos-y-condiciones" target="_blank" rel="noopener noreferrer" className="underline text-[#00B0C8] hover:text-[#008da0]">{t.termsLink}</a> {locale === 'ca' ? 'i la' : 'y la'} <a href="/politica-de-privacidad" target="_blank" rel="noopener noreferrer" className="underline text-[#00B0C8] hover:text-[#008da0]">{t.privacyLink}</a> {locale === 'ca' ? 'd’aquest lloc web.' : 'de este sitio web.'}
+                                                {t.acceptTerms} <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline text-[#00B0C8] hover:text-[#008da0]">{t.termsLink}</a> {locale === 'ca' ? 'i la' : 'y la'} <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline text-[#00B0C8] hover:text-[#008da0]">{t.privacyLink}</a> {locale === 'ca' ? 'd’aquest lloc web.' : 'de este sitio web.'}
                                             </label>
                                         </div>
                                     </div>

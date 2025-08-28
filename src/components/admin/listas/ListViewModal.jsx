@@ -427,7 +427,7 @@ export default function ListViewModal({
                                         )}
                                     </>
                                 ) : (
-                                        <p className="text-gray-700 hover:text-gray-900">{item.product.price}</p>
+                                        <p className="text-sm  text-gray-900">{item.product.discount.finalPrice} €</p>
                                 )}
                             </div>
                             <p className="text-xs text-gray-500">Ref: {item.product.reference || '-'}</p>

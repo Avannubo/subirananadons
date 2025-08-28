@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'; 
+import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
     service: 'outlook',
     port: 587,
@@ -119,8 +119,12 @@ class EmailService {
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>ID de la lista:</strong> <a>${list._id}</a></p> 
-                    <p>Puedes compartir el enlace de tu lista con familiares y amigos para que puedan ver los productos que has seleccionado.</p>
+                    <p><strong>Enlace a tu lista:</strong> <a href="https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
+                    <p><strong>ID a tu lista:</strong> <a href="https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
+                    <p>Puedes compartir el enlace de tu lista con familiares y amigos usando esta dirección:<br/>
+                    <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}</span></p>
+                    <p>También puedes buscar tu lista usando este ID en el buscador de listas de nacimiento.</p>
+                    <p>Gestiona tu lista desde tu perfil de tienda.</p>
                     <p>Gracias por confiar en Subirana Nadons.</p>
                 `
             };
@@ -130,15 +134,19 @@ class EmailService {
                 to: "info@subirananadons.com",
                 subject: `Nueva lista de nacimiento creada - ${list.title}`,
                 html: `
-                    <h1>Nueva lista de nacimiento creada</h1>
-                    <p>Se ha creado una nueva lista de nacimiento en la tienda.</p>
+                    <h1>¡Tu lista de nacimiento ha sido creada con éxito!</h1>
+                    <p>Tu lista de nacimiento ha sido creada y está lista para ser compartida.</p>
                     <h2>Detalles de la lista:</h2>
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Creada por:</strong> ${(user.Creator || '')} (${list.email || ''})</p>
-                    <p><strong>Estado:</strong> ${list.isPublic ? 'Pública' : 'Privada'}</p>
-                    <p><strong>URL de la lista:</strong> <a>/lists/${list._id}</a></p>
+                    <p><strong>Enlace a tu lista:</strong> <a href="https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
+                    <p><strong>ID a tu lista:</strong> <a href="https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
+                    <p>Puedes compartir el enlace de tu lista con familiares y amigos usando esta dirección:<br/>
+                    <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}</span></p>
+                    <p>También puedes buscar tu lista usando este ID en el buscador de listas de nacimiento.</p>
+                    <p>Gestiona tu lista desde tu perfil de tienda.</p>
+                    <p>Gracias por confiar en Subirana Nadons.</p>
                 `
             };
             // Send both emails

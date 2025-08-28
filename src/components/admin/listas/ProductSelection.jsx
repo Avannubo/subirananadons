@@ -10,6 +10,9 @@ const translations = {
         removeSuccess: 'Producte eliminat de la llista',
         prev: 'Anterior',
         next: 'Següent',
+        discounted: 'Amb descompte',
+        originalPrice: 'Preu original',
+        finalPrice: 'Preu final'
     },
     es: {
         selected: 'Productos seleccionados',
@@ -19,6 +22,9 @@ const translations = {
         removeSuccess: 'Producto eliminado de la lista',
         prev: 'Anterior',
         next: 'Siguiente',
+        discounted: 'Con descuento',
+        originalPrice: 'Precio original',
+        finalPrice: 'Precio final'
     }
 };
 
@@ -151,7 +157,22 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                 />
                                             )}
                                         </div>
-                                        <span className="text-sm font-medium truncate max-w-[400px]">{getProductName(item.product)}</span>
+                                        <div className='flex flex-col'>
+                                            <span className="text-sm font-medium truncate max-w-[400px] block">{getProductName(item.product)}</span>
+                                            <div className="flex items-center gap-2">
+                                                {item.product.discount?.active ? (
+                                                    <>
+                                                        <span className="text-gray-400 line-through text-sm" title={t.originalPrice}>{item.product.price_incl_tax?.toFixed(2)}€</span>
+                                                        <span className="text-red-500 bg-red-50 rounded-md text-xs font-medium px-1" title={t.discounted}>
+                                                            {item.product.discount.type === 'percentage' ? `-${item.product.discount.value}%` : `-${item.product.discount.value}€`}
+                                                        </span>
+                                                        <span className="text-[#00B0C8] font-bold text-base" title={t.finalPrice}>{item.product.discount.finalPrice?.toFixed(2)}€</span>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-[#00B0C8] font-bold text-base">{item.product.price_incl_tax?.toFixed(2)}€</span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="flex items-center space-x-3">
                                         <button
@@ -238,7 +259,23 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                     </div>
                                     <div className="p-4 pt-2 pb-3 bg-white">
                                         <h3 className="font-medium text-gray-900 text-center w-[200px] truncate">{getProductName(product)}</h3>
-                                        <p className="text-[#00B0C8] font-bold text-center text-md mt-2">{product.price_incl_tax?.toFixed(2).replace('.', ',')} €</p>
+                                        <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+                                            {product.discount?.active ? (
+                                                <div className='flex flex-col items-center'>
+                                                    <div className='space-x-2 flex items-center'>
+                                                        <span className="text-gray-400 line-through text-base">{product.price_incl_tax?.toFixed(2)}€</span>
+                                                        <span className="text-red-500 rounded-md bg-red-50 text-sm font-medium px-1">
+                                                            {product.discount.type === 'percentage' ? `-${product.discount.value}%` : `-${product.discount.value}€`}
+                                                        </span>
+
+                                                    </div>
+
+                                                    <span className="text-[#00B0C8] font-bold text-lg">{product.discount.finalPrice?.toFixed(2)}€</span>
+                                                </div>
+                                            ) : (
+                                                <p className="text-[#00B0C8] font-bold text-lg">{product.price_incl_tax?.toFixed(2)}€</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

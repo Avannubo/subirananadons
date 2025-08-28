@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
+import { join } from 'path';
+import { writeFile, mkdir } from 'fs/promises';
 
 export async function GET(request, { params }) {
     try {
@@ -81,21 +83,21 @@ export async function GET(request, { params }) {
                         </thead>
                         <tbody>
                         ${list.items.map(item => {
-                            // Map the state number to status text
-                            let status;
-                            switch (item.state) {
-                                case 1:
-                                    status = 'Reservado';
-                                    break;
-                                case 2:
-                                    status = 'Comprado';
-                                    break;
-                                default:
-                                    status = 'Pendiente';
-                            } 
+            // Map the state number to status text
+            let status;
+            switch (item.state) {
+                case 1:
+                    status = 'Reservado';
+                    break;
+                case 2:
+                    status = 'Comprado';
+                    break;
+                default:
+                    status = 'Pendiente';
+            }
             return `
                                 <tr>
-                                    <td>${item.product ? item.product.name : 'Producto no disponible'}</td> 
+                                    <td>${item.product ? item.product.name.es : 'Producto no disponible'}</td> 
                                     <td>${item.quantity}</td>
                                     <td>${status}</td>
                                 </tr>
@@ -110,9 +112,38 @@ export async function GET(request, { params }) {
             </html>
         `;
 
-        // Launch Puppeteer and generate PDF
+        // Create directory for storing PDFs if it doesn't exist
+        const uploadsDir = join(process.cwd(), 'public', 'uploads', 'lists');
+        await mkdir(uploadsDir, { recursive: true });
+
+        // Generate unique filename
+        const fileName = `list-${list._id}.pdf`;
+        const filePath = join(uploadsDir, fileName);
+        const publicUrl = `/uploads/lists/${fileName}`;
+
+        // Check if PDF already exists
+        try {
+            const { readFile } = await import('fs/promises');
+            const existingPdf = await readFile(filePath);
+            return new NextResponse(existingPdf, {
+                status: 200,
+                headers: {
+                    'Content-Type': 'application/pdf',
+                    'Content-Disposition': `attachment; filename="Lista_${list.title}.pdf"`
+                }
+            });
+        } catch (error) {
+            // File doesn't exist, continue to generate new PDF
+        }
+
+        // Launch Puppeteer with Docker-compatible configuration
         const browser = await puppeteer.launch({
-            headless: 'new'
+            headless: 'new',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage'
+            ]
         });
         const page = await browser.newPage();
         await page.setContent(html);
@@ -130,12 +161,15 @@ export async function GET(request, { params }) {
 
         await browser.close();
 
+        // Save PDF to file
+        await writeFile(filePath, pdf);
+
         // Return PDF response
         return new NextResponse(pdf, {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="Lista_de_Regalos_${list.reference}.pdf"`
+                'Content-Disposition': `attachment; filename="Lista_${list.title}.pdf"`
             }
         });
 
