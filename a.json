@@ -1,0 +1,423 @@
+{
+    "success": true,
+    "orders": [
+        {
+            "_id": "68b174ae70fec2aa9868af01",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-60206525-3650",
+            "items": [
+                {
+                    "product": "680b3416720673b5c5fe8d94",
+                    "quantity": 2,
+                    "price": 849.9,
+                    "type": "regular",
+                    "_id": "68b174ae70fec2aa9868af02"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "arjun.singh@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 1444.83,
+            "subtotal": 1444.83,
+            "tax": 303.41429999999997,
+            "shippingCost": 0,
+            "discounts": {
+                "total": 0
+            },
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [
+                "68b174b670fec2aa9868af14"
+            ],
+            "createdAt": "2025-08-29T09:36:46.533Z",
+            "updatedAt": "2025-08-29T09:36:54.950Z",
+            "__v": 0
+        },
+        {
+            "_id": "68b16b6b70fec2aa9868acda",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-57835225-6336",
+            "items": [
+                {
+                    "product": "680b3416720673b5c5fe8d94",
+                    "quantity": 1,
+                    "price": 849.9,
+                    "type": "regular",
+                    "_id": "68b16b6b70fec2aa9868acdb"
+                },
+                {
+                    "product": "680b3414720673b5c5fe8d86",
+                    "quantity": 1,
+                    "price": 649.9,
+                    "type": "regular",
+                    "_id": "68b16b6b70fec2aa9868acdc"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "arjun.singh@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 1274.83,
+            "subtotal": 1274.83,
+            "tax": 267.7143,
+            "shippingCost": 0,
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [
+                "68b16b7370fec2aa9868acee"
+            ],
+            "createdAt": "2025-08-29T08:57:15.233Z",
+            "updatedAt": "2025-08-29T08:57:23.417Z",
+            "__v": 0
+        },
+        {
+            "_id": "68b169b570fec2aa9868ac17",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-57397546-0261",
+            "items": [
+                {
+                    "product": "680b3418720673b5c5fe8dac",
+                    "quantity": 2,
+                    "price": 1299,
+                    "type": "regular",
+                    "_id": "68b169b570fec2aa9868ac18"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "arjun.singh@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 1948.5,
+            "subtotal": 1948.5,
+            "tax": 409.185,
+            "shippingCost": 0,
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [
+                "68b169bb70fec2aa9868ac2c"
+            ],
+            "createdAt": "2025-08-29T08:49:57.553Z",
+            "updatedAt": "2025-08-29T08:50:03.868Z",
+            "__v": 0
+        },
+        {
+            "_id": "68b1526e70fec2aa9868aa4b",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-51438229-1954",
+            "items": [
+                {
+                    "product": "680b3418720673b5c5fe8dac",
+                    "quantity": 2,
+                    "price": 1299,
+                    "type": "regular",
+                    "_id": "68b1526e70fec2aa9868aa4c"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "arjun.singh@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 1948.5,
+            "subtotal": 1948.5,
+            "tax": 409.185,
+            "shippingCost": 0,
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [
+                "68b1527970fec2aa9868aa63"
+            ],
+            "createdAt": "2025-08-29T07:10:38.238Z",
+            "updatedAt": "2025-08-29T07:10:49.318Z",
+            "__v": 0
+        },
+        {
+            "_id": "68b03ae2d781d4ec69dbe1d9",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-79874520-1367",
+            "items": [
+                {
+                    "product": "680b3418720673b5c5fe8daa",
+                    "quantity": 2,
+                    "price": 1299,
+                    "type": "regular",
+                    "_id": "68b03ae2d781d4ec69dbe1da"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "arjun.singh@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 1948.5,
+            "subtotal": 1948.5,
+            "tax": 409.185,
+            "shippingCost": 0,
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [],
+            "createdAt": "2025-08-28T11:17:54.524Z",
+            "updatedAt": "2025-08-28T11:17:54.524Z",
+            "__v": 0
+        },
+        {
+            "_id": "68b020cc4b38795fd1ca4178",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-73196125-1350",
+            "items": [
+                {
+                    "product": "680b3418720673b5c5fe8dac",
+                    "quantity": 1,
+                    "price": 1299,
+                    "type": "regular",
+                    "_id": "68b020cc4b38795fd1ca4179"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "arjun.singh@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 974.25,
+            "subtotal": 974.25,
+            "tax": 204.5925,
+            "shippingCost": 0,
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [
+                "68b020d84b38795fd1ca418d"
+            ],
+            "createdAt": "2025-08-28T09:26:36.131Z",
+            "updatedAt": "2025-08-28T09:26:48.844Z",
+            "__v": 0
+        },
+        {
+            "_id": "68b015b14b38795fd1ca3f12",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-70353505-2123",
+            "items": [
+                {
+                    "product": "680b3418720673b5c5fe8daa",
+                    "quantity": 1,
+                    "price": 1299,
+                    "type": "regular",
+                    "_id": "68b015b14b38795fd1ca3f13"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "arjun.singh@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 974.25,
+            "subtotal": 974.25,
+            "tax": 204.5925,
+            "shippingCost": 0,
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [
+                "68b015bd4b38795fd1ca3f34"
+            ],
+            "createdAt": "2025-08-28T08:39:13.512Z",
+            "updatedAt": "2025-08-28T08:39:25.590Z",
+            "__v": 0
+        },
+        {
+            "_id": "68b008464b38795fd1ca3d55",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-66918941-6534",
+            "items": [
+                {
+                    "product": "680b3418720673b5c5fe8daa",
+                    "quantity": 1,
+                    "price": 1299,
+                    "type": "regular",
+                    "_id": "68b008464b38795fd1ca3d56"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "arjun.singh@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 974.25,
+            "subtotal": 974.25,
+            "tax": 204.59,
+            "shippingCost": 0,
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [
+                "68b0084f4b38795fd1ca3d6a"
+            ],
+            "createdAt": "2025-08-28T07:41:58.948Z",
+            "updatedAt": "2025-08-28T07:42:07.803Z",
+            "__v": 0
+        },
+        {
+            "_id": "68b003174b38795fd1ca3c8e",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-65591481-6536",
+            "items": [
+                {
+                    "product": "680b3418720673b5c5fe8dae",
+                    "quantity": 1,
+                    "price": 1487,
+                    "type": "regular",
+                    "_id": "68b003174b38795fd1ca3c8f"
+                },
+                {
+                    "product": "680b3418720673b5c5fe8dac",
+                    "quantity": 1,
+                    "price": 1299,
+                    "type": "regular",
+                    "_id": "68b003174b38795fd1ca3c90"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "arjun.singh@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 2451.25,
+            "subtotal": 2451.25,
+            "tax": 514.7624999999999,
+            "shippingCost": 0,
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [
+                "68b0031a4b38795fd1ca3ca6"
+            ],
+            "createdAt": "2025-08-28T07:19:51.494Z",
+            "updatedAt": "2025-08-28T07:19:54.864Z",
+            "__v": 0
+        },
+        {
+            "_id": "68b002d74b38795fd1ca3c15",
+            "user": {
+                "_id": "683edc32e0d409ba221b11a7",
+                "name": "User Admin",
+                "email": "admin@avannubo.com"
+            },
+            "orderNumber": "ORD-65527527-6493",
+            "items": [
+                {
+                    "product": "680b3418720673b5c5fe8daa",
+                    "quantity": 1,
+                    "price": 1299,
+                    "type": "regular",
+                    "_id": "68b002d74b38795fd1ca3c16"
+                },
+                {
+                    "product": "680b3418720673b5c5fe8dac",
+                    "quantity": 1,
+                    "price": 1299,
+                    "type": "regular",
+                    "_id": "68b002d74b38795fd1ca3c17"
+                }
+            ],
+            "shippingAddress": {
+                "name": "User",
+                "lastName": "Admin",
+                "email": "admin@avannubo.com",
+                "phone": "54324325",
+                "country": "España"
+            },
+            "deliveryMethod": "pickup",
+            "status": "acceptado",
+            "totalAmount": 1948.5,
+            "subtotal": 1948.5,
+            "tax": 409.185,
+            "shippingCost": 0,
+            "paymentMethod": "pending",
+            "notes": "",
+            "invoices": [
+                "68b002dd4b38795fd1ca3c34"
+            ],
+            "createdAt": "2025-08-28T07:18:47.534Z",
+            "updatedAt": "2025-08-28T07:18:53.808Z",
+            "__v": 0
+        }
+    ],
+    "pagination": {
+        "currentPage": 1,
+        "totalPages": 9,
+        "totalItems": 82,
+        "limit": 10
+    }
+}

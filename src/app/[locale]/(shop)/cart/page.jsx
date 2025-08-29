@@ -252,16 +252,30 @@ export default function CartPage() {
             phone: formData.phone
         };
         const orderData = {
-            items: cartItems.map(item => ({
-                ...item,
-                buyerInfo: item.type === 'gift' ? {
-                    ...buyerInfo,
-                    ...(item.listInfo || {}),
-                    note: formData.giftNote
-                } : undefined,
-                quantity: item.type === 'gift' ? 1 : item.quantity,
-                notes: formData.notes
-            })),
+            items: cartItems.map(item => {
+                const originalPrice = typeof item.priceValue === 'number' ? item.priceValue :
+                    parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
+                const discountedPrice = item.discount?.finalPrice || item.price || 0;
+                const hasDiscount = item.discount && item.discount.active;
+
+                return {
+                    ...item,
+                    buyerInfo: item.type === 'gift' ? {
+                        ...buyerInfo,
+                        ...(item.listInfo || {}),
+                        note: formData.giftNote
+                    } : undefined,
+                    quantity: item.type === 'gift' ? 1 : item.quantity,
+                    notes: formData.notes,
+                    priceDetails: {
+                        originalPrice: hasDiscount ? originalPrice : discountedPrice,
+                        finalPrice: discountedPrice,
+                        discountAmount: hasDiscount ? originalPrice - discountedPrice : 0,
+                        discountPercentage: hasDiscount ?
+                            Math.round(((originalPrice - discountedPrice) / originalPrice) * 100) : 0
+                    }
+                };
+            }),
             shippingDetails: {
                 ...formData,
                 // Only include address if there are regular items and delivery is selected
@@ -282,15 +296,32 @@ export default function CartPage() {
                 shipping: calculateShipping(),
                 tax: calculateTax(),
                 total: calculateTotal(),
-                discounts: cartItems.reduce((total, item) => {
-                    if (item.discount && item.discount.active) {
-                        const originalPrice = typeof item.priceValue === 'number' ? item.priceValue :
-                            parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
-                        const discountedPrice = item.discount?.finalPrice || item.price || 0;
-                        return total + ((originalPrice - discountedPrice) * (item.quantity || 1));
-                    }
-                    return total;
-                }, 0)
+                discounts: {
+                    total: cartItems.reduce((total, item) => {
+                        if (item.discount && item.discount.active) {
+                            const originalPrice = typeof item.priceValue === 'number' ? item.priceValue :
+                                parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
+                            const discountedPrice = item.discount?.finalPrice || item.price || 0;
+                            return total + ((originalPrice - discountedPrice) * (item.quantity || 1));
+                        }
+                        return total;
+                    }, 0),
+                    items: cartItems.reduce((acc, item) => {
+                        if (item.discount && item.discount.active) {
+                            const originalPrice = typeof item.priceValue === 'number' ? item.priceValue :
+                                parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
+                            const discountedPrice = item.discount?.finalPrice || item.price || 0;
+                            acc[item.id] = {
+                                originalPrice,
+                                discountedPrice,
+                                quantity: item.quantity || 1,
+                                totalDiscount: (originalPrice - discountedPrice) * (item.quantity || 1),
+                                percentage: Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
+                            };
+                        }
+                        return acc;
+                    }, {})
+                }
             }
         };
         // Save orderData as 'orderpending' in localStorage

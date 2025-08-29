@@ -32,26 +32,50 @@ export async function POST(request) {
         }
 
         // Prepare order data
+        // Calculate tax if not provided
+        if (totals.tax === null) {
+            totals.tax = parseFloat((totals.subtotal * 0.21).toFixed(2));
+        }
+
         const orderData = {
             orderNumber: generateOrderNumber(),
             items: items.map(item => {
-                console.log
                 const productId = typeof item.id === 'string' && /^[0-9a-fA-F]{24}$/.test(item.id)
                     ? item.id
-                    : item.id.toString(); return {
-                        product: productId,
-                        quantity: item.quantity,
-                        price: item.priceValue || parseFloat(item.price.replace(',', '.')),
-                        type: item.type || 'regular',
-                        giftInfo: item.type === 'gift' ? item.listInfo : undefined,
-                        buyerInfo: item.type === 'gift' ? {
-                            name: shippingDetails.name,
-                            email: shippingDetails.email,
-                            phone: shippingDetails.phone,
-                            note: shippingDetails.giftNote || '',
-                            userId: session?.user?.id
-                        } : undefined
-                    };
+                    : item.id.toString();
+
+                // Ensure proper number formatting
+                const price = typeof item.priceValue === 'number'
+                    ? item.priceValue
+                    : parseFloat(String(item.price).replace(/[^\d.,]/g, '').replace(',', '.'));
+
+                // Handle discount information
+                const hasDiscount = item.discount?.active && item.priceDetails;
+
+                return {
+                    product: productId,
+                    quantity: item.quantity,
+                    price: price,
+                    type: item.type || 'regular',
+                    priceDetails: hasDiscount ? {
+                        originalPrice: item.priceDetails.originalPrice,
+                        finalPrice: item.priceDetails.finalPrice,
+                        discountAmount: item.priceDetails.discountAmount,
+                        discountPercentage: item.priceDetails.discountPercentage
+                    } : undefined,
+                    giftInfo: item.type === 'gift' ? item.listInfo : undefined,
+                    buyerInfo: item.type === 'gift' ? {
+                        name: shippingDetails.name,
+                        email: shippingDetails.email,
+                        phone: shippingDetails.phone,
+                        note: shippingDetails.giftNote || '',
+                        userId: session?.user?.id
+                    } : undefined,
+                    image: item.image,
+                    name: item.name,
+                    brand: item.brand,
+                    category: item.category
+                };
             }),
             shippingAddress: {
                 name: shippingDetails.name,
@@ -66,10 +90,25 @@ export async function POST(request) {
             },
             deliveryMethod: deliveryMethod,
             // status: 'procesando', // Set initial status to procesando (Acceptado)
-            totalAmount: totals.total,
-            subtotal: totals.subtotal,
-            tax: totals.tax,
-            shippingCost: totals.shipping,
+            totalAmount: parseFloat(totals.total.toFixed(2)),
+            subtotal: parseFloat(totals.subtotal.toFixed(2)),
+            tax: parseFloat(totals.tax.toFixed(2)),
+            shippingCost: parseFloat((totals.shipping || 0).toFixed(2)),
+            discounts: totals.discounts ? {
+                total: parseFloat(totals.discounts.total.toFixed(2)),
+                items: Object.fromEntries(
+                    Object.entries(totals.discounts.items).map(([key, value]) => [
+                        key,
+                        {
+                            originalPrice: parseFloat(value.originalPrice.toFixed(2)),
+                            discountedPrice: parseFloat(value.discountedPrice.toFixed(2)),
+                            quantity: value.quantity,
+                            totalDiscount: parseFloat(value.totalDiscount.toFixed(2)),
+                            percentage: value.percentage
+                        }
+                    ])
+                )
+            } : undefined,
             notes: shippingDetails.notes || '',
             giftNote: shippingDetails.giftNote || ''
         };

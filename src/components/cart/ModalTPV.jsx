@@ -233,7 +233,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                                 </thead>
                                 <tbody>
                                     {cartItems.map((product) => (
-                                        <tr key={product.id} className="border-b last:border-b-0">
+                                        <tr key={product.id} className="border-b border-b-gray-100 last:border-b-0">
                                             <td className="px-4 py-2 flex items-center gap-3">
                                                 {product.image && (
                                                     <img src={product.image} alt={product.name} className="w-32 h-32 object-cover rounded-lg border border-gray-200 bg-gray-50" />

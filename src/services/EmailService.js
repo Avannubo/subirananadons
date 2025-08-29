@@ -11,15 +11,38 @@ const transporter = nodemailer.createTransport({
 class EmailService {
     static async sendOrderConfirmation(order) {
         try {
-            console.log('Sending order confirmation email:', order);
-            const items_list = order.items.map(item =>
-                `<tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;"><span style="display: inline-block; padding: 2px 8px; border-radius: 12px; background-color: ${item.giftInfo === 'gift' ? '#FFE4E1' : '#E8F5E9'}; color: ${item.giftInfo === 'gift' ? '#FF69B4' : '#2E7D32'}">${item.giftInfo === 'gift' ? 'Regalo' : 'Personal'}</span></td>
+            console.log('Sending order confirmation email:', JSON.stringify(order));
+            const items_list = order.items.map(item => {
+                const hasDiscount = item.priceDetails?.discountAmount > 0;
+                const finalPrice = hasDiscount ? item.priceDetails.finalPrice : item.price;
+
+                return `<tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                        <div style="display: flex; align-items: center;">
+                            <img src="${item.product.images?.[0] || ''}" alt="${item.product.name}" style="width: 60px; height: 60px; object-fit: cover; margin-right: 10px;"/>
+                            <div>
+                                <div style="font-weight: 500;">${item.product.name}</div>
+                                <div style="color: #666; font-size: 0.9em;">${item.product.brand || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
+                        <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; background-color: ${item.type === 'gift' ? '#FFE4E1' : '#E8F5E9'}; color: ${item.type === 'gift' ? '#FF69B4' : '#2E7D32'}">${item.type === 'gift' ? 'Regalo' : 'Personal'}</span>
+                    </td>
                     <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)}€</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${(item.quantity * item.price).toFixed(2)}€</td>
-                </tr>`
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
+                        ${hasDiscount ? `
+                            <div style="text-decoration: line-through; color: #999;">${item.priceDetails.originalPrice.toFixed(2)}€</div>
+                            <div style="font-weight: 600; color: #e41e31;">
+                                ${item.priceDetails.finalPrice.toFixed(2)}€
+                                <span style="font-size: 0.8em;">-${item.priceDetails.discountPercentage}%</span>
+                            </div>
+                        ` : `
+                            <div>${item.price.toFixed(2)}€</div>
+                        `}
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${(item.quantity * finalPrice).toFixed(2)}€</td>
+                </tr>`}
             ).join('');
             const mailOptions = {
                 from: "info@subirananadons.com",
@@ -46,7 +69,17 @@ class EmailService {
                         <tbody>
                             ${items_list}
                         </tbody>                        
-                        <tfoot>    
+                        <tfoot>
+                            <tr style="background-color: #f8f9fa;">
+                                <td colspan="3" style="padding: 10px; text-align: right;"><strong>Subtotal:</strong></td>
+                                <td colspan="2" style="padding: 10px; text-align: right;">${order.subtotal.toFixed(2)}€</td>
+                            </tr>
+                            ${order.discounts?.total > 0 ? `
+                            <tr style="background-color: #f8f9fa;">
+                                <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total descuentos:</strong></td>
+                                <td colspan="2" style="padding: 10px; text-align: right; color: #e41e31;">-${order.discounts.total.toFixed(2)}€</td>
+                            </tr>
+                            ` : ''}
                             <tr style="background-color: #f8f9fa;">
                                 <td colspan="3" style="padding: 10px; text-align: right;"><strong>IVA (21%):</strong></td>
                                 <td colspan="2" style="padding: 10px; text-align: right;">${order.tax.toFixed(2)}€</td>
@@ -55,9 +88,12 @@ class EmailService {
                                 <td colspan="3" style="padding: 10px; text-align: right;"><strong>Gastos de envío:</strong></td>
                                 <td colspan="2" style="padding: 10px; text-align: right;">${order.shippingCost.toFixed(2)}€</td>
                             </tr>
+                            <tr style="background-color: #f8f9fa;">
+                                <td colspan="5" style="border-top: 2px solid #dee2e6;"></td>
+                            </tr>
                             <tr style="background-color: #f8f9fa; font-weight: bold;">
                                 <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-                                <td colspan="2" style="padding: 10px; text-align: right;">${order.totalAmount.toFixed(2)}€</td>
+                                <td colspan="2" style="padding: 10px; text-align: right; font-size: 1.2em;">${order.totalAmount.toFixed(2)}€</td>
                             </tr>
                         </tfoot>
                     </table>

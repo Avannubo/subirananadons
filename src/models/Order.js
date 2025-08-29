@@ -31,6 +31,24 @@ const orderSchema = new mongoose.Schema({
             enum: ['regular', 'gift'],
             default: 'regular'
         },
+        priceDetails: {
+            originalPrice: {
+                type: Number,
+                required: false
+            },
+            finalPrice: {
+                type: Number,
+                required: false
+            },
+            discountAmount: {
+                type: Number,
+                required: false
+            },
+            discountPercentage: {
+                type: Number,
+                required: false
+            }
+        },
         giftInfo: {
             listId: mongoose.Schema.Types.ObjectId,
             itemId: mongoose.Schema.Types.ObjectId,
@@ -87,6 +105,24 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: true,
         default: 0
+    },
+    discounts: {
+        total: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        items: {
+            type: Map,
+            of: {
+                originalPrice: Number,
+                discountedPrice: Number,
+                quantity: Number,
+                totalDiscount: Number,
+                percentage: Number
+            },
+            required: false
+        }
     },
     paymentMethod: {
         type: String,
