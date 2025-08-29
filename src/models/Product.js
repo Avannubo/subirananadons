@@ -48,12 +48,10 @@ const productSchema = new mongoose.Schema({
     stock: {
         available: {
             type: Number,
-            default: 0,
             min: 0
         },
         minStock: {
             type: Number,
-            default: 5,
             min: 0
         }
     },

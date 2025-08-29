@@ -7,8 +7,6 @@ services:
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb:27017/test
-      # - MONGODB_URI=mongodb+srv://arjunsingh:2LKnqF4ZpQVxZvvh@cluster0.zzuehnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-      # mongorestore --uri mongodb+srv://arjunsingh:2LKnqF4ZpQVxZvvh@cluster0.zzuehnx.mongodb.net
       - NEXT_PUBLIC_EMAILJS_USER_ID=IjDoDTaq-TBRUaGn1
       - NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_3l0ku6a
       - MONGODB_DB=test
@@ -17,6 +15,13 @@ services:
       - CLOUDINARY_API_KEY=544412284116647
       - NEXTAUTH_SECRET=e991fff4025f411ec955c2d62674427bcfcb49e01bc5a2b488985ddc864ba25e
       - NEXTAUTH_URL=https://subirana.avannubo.net
+      - DOMAIN=https://subirana.avannubo.net/
       - JWT_SECRET=65a7a69f249b740949483caf84c583f7da58312e8c6ae80f93a0fcefd2458038171c8626e513cd55cc67944621cd8526ededf5389d4fb639d5bac4b8eac081dc
     volumes:
-      - ./public:/app/public   # <── Mount local public folder into container
+      - ./public:/app/public
+    networks: 
+      - subirana
+
+networks:
+  subirana:
+    external: true

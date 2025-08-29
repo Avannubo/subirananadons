@@ -102,14 +102,15 @@ export default function ProductCard({
             style={{
                 boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
                 borderRadius: '10px',
+                margin: '10px',
                 // padding: '10px',
             }}
-            className="m-2 flex flex-col items-center text-center h-full group hover:text-[#00B0C8]"
+            className="flex flex-col items-center text-center h-full group hover:text-[#00B0C8] bg-white rounded-lg overflow-hidden"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <Link href={productUrl} className="w-full flex flex-col items-center">
-                <div className="relative w-full h-64 mb-4">
+            <Link href={productUrl} className="w-full flex flex-col items-center h-full">
+                <div className="relative w-full h-[300px]">
                     {product.discount?.active && (
                         <div className="absolute top-0 right-4 bg-red-600 text-white rounded-bl-lg rounded-br-lg  w-12 h-8 flex items-center justify-center transform ">
                             <span className="text-sm font-bold -rotate-12">
@@ -151,18 +152,21 @@ export default function ProductCard({
                         </HoverButton>
                     </div>
                 </div>
-                <h3 className="font-semibold px-4 text-lg  mb-2 w-full whitespace-nowrap overflow-hidden text-ellipsis h-7 min-h-[28px]" title={translatedName}>{translatedName}</h3>
-                <div className="flex flex-col items-center">
-                    {product.discount?.active ? (
-                        <>
-                            <p className="text-gray-400 line-through text-sm">{product.price}</p>
-                            <p className="text-red-600 font-semibold text-lg">
-                                {`${product.discount.finalPrice.toFixed(2).replace('.', ',')} €`}
-                            </p>
-                        </>
-                    ) : (
-                        <p className="text-gray-700 hover:text-gray-900">{product.price}</p>
-                    )}
+                <div className="flex-1 w-full flex flex-col justify-between p-4">
+                    <h3 className="font-semibold text-lg w-full overflow-hidden text-ellipsis line-clamp-2 min-h-[56px]" title={translatedName}>{translatedName}</h3>
+                    <div className="flex flex-wrap items-center justify-center gap-2 mt-auto">
+                        {product.discount?.active ? (
+                            <>
+                                <span className="text-gray-400 line-through text-base">{product.price}</span>
+                                {/* <span className="text-red-500 text-sm font-medium px-1">
+                                    {product.discount.type === 'percentage' ? `-${product.discount.value}%` : `-${product.discount.value}€`}
+                                </span> */}
+                                <span className="text-[#00B0C8] font-bold text-lg">{product.discount.finalPrice.toFixed(2)}€</span>
+                            </>
+                        ) : (
+                            <p className="text-[#00B0C8] font-bold text-lg">{product.price}</p>
+                        )}
+                    </div>
                 </div>
             </Link>
         </motion.div>
@@ -174,11 +178,11 @@ export default function ProductCard({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-row items-start text-left p-4 px-8 w-full overflow-hidden group"
+            className="flex flex-row items-start text-left p-4 px-8 w-full overflow-hidden group h-full"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <Link href={productUrl} className="flex flex-row w-full">
+            <Link href={productUrl} className="flex flex-row w-full ">
                 <div className="relative w-1/4 h-60 mr-4 flex-shrink-0">
                     <img
                         src={currentImageUrl}
@@ -200,7 +204,7 @@ export default function ProductCard({
                     <h3 className="font-semibold text-xl mb-2 whitespace-nowrap overflow-hidden text-ellipsis w-full" title={translatedName}>{translatedName}</h3>
                     <div className="mb-3">
                         {product.discount?.active ? (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-row space-x-4 justify-between gap-2 text-center ">
                                 <p className="text-gray-400 line-through text-base">{product.price}</p>
                                 <p className="text-red-600 font-semibold text-lg">
                                     {`${product.discount.finalPrice.toFixed(2).replace('.', ',')} €`}

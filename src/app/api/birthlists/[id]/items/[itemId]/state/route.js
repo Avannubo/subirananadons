@@ -58,7 +58,7 @@ export async function PUT(request, { params }) {
 
         // Validate user data if state > 0
         if (state > 0) {
-            if (!userData || !userData.name || !userData.email) {
+            if (!userData || !userData.name) {
                 return NextResponse.json(
                     { success: false, message: 'Les dades de l\'usuari (nom i correu electrònic) són necessàries per a reserves i compres' },
                     { status: 400 }

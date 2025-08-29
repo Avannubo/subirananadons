@@ -119,10 +119,10 @@ class EmailService {
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Enlace a tu lista:</strong> <a href="https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
-                    <p><strong>ID a tu lista:</strong> <a href="https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
+                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
+                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
                     <p>Puedes compartir el enlace de tu lista con familiares y amigos usando esta dirección:<br/>
-                    <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}</span></p>
+                    <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">${process.env.DOMAIN}/listas-de-nacimiento/${list._id}</span></p>
                     <p>También puedes buscar tu lista usando este ID en el buscador de listas de nacimiento.</p>
                     <p>Gestiona tu lista desde tu perfil de tienda.</p>
                     <p>Gracias por confiar en Subirana Nadons.</p>
@@ -140,10 +140,10 @@ class EmailService {
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Enlace a tu lista:</strong> <a href="https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
-                    <p><strong>ID a tu lista:</strong> <a href="https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
+                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
+                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
                     <p>Puedes compartir el enlace de tu lista con familiares y amigos usando esta dirección:<br/>
-                    <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">https://subirana.avannubo.net/es/listas-de-nacimiento/${list._id}</span></p>
+                    <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">${process.env.DOMAIN}/es/listas-de-nacimiento/${list._id}</span></p>
                     <p>También puedes buscar tu lista usando este ID en el buscador de listas de nacimiento.</p>
                     <p>Gestiona tu lista desde tu perfil de tienda.</p>
                     <p>Gracias por confiar en Subirana Nadons.</p>

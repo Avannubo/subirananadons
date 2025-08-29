@@ -76,7 +76,7 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
     }
 
     return (
-        <div className="w-full py-8">
+        <div className="w-full py-8 p-12">
             <div className="container mx-auto px-2">
                 <ProductSlider
                     title={locale === 'ca' ? 'Productes Destacats' : 'Productos Destacados'}

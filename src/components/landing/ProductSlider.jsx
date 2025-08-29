@@ -78,6 +78,8 @@ export default function ProductSlider({
                             swiperRef.current = swiper;
                         }}
                         spaceBetween={16}
+                        style={{ height: 'auto' }}
+                        autoHeight={true}
                         pagination={{
                             clickable: true,
                             el: '.custom-pagination',
@@ -118,14 +120,17 @@ export default function ProductSlider({
                         className="relative"
                     >
                         {products.map((product) => (
-                            <SwiperSlide key={product.id} className="h-full">
-                                <ProductCard
-                                    key={product.id}
-                                    product={product}
-                                    viewMode={viewMode}
-                                    onQuickViewClick={handleOpenQuickView}
-                                    onOpenBirthListModal={handleOpenBirthListSelectModal}
-                                />
+                            <SwiperSlide key={product.id} className="!h-auto flex">
+                                <div className="h-full flex-1 flex flex-col">
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                        viewMode={viewMode}
+                                        onQuickViewClick={handleOpenQuickView}
+                                        onOpenBirthListModal={handleOpenBirthListSelectModal}
+                                        className="h-full flex-1"
+                                    />
+                                </div>
                             </SwiperSlide>
                         ))}
                         <div className="swiper-button-prev !hidden"></div>

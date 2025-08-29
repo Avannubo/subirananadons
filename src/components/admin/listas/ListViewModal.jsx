@@ -55,7 +55,7 @@ const translations = {
         save: 'Tancar',
         buyerData: 'Dades del comprador',
         name: 'Nom *',
-        email: 'Email *',
+        email: 'Email',
         phone: 'Telèfon',
         message: 'Missatge',
         guardar: 'Desar',
@@ -108,7 +108,7 @@ const translations = {
         save: 'Guardar',
         buyerData: 'Datos del comprador',
         name: 'Nombre *',
-        email: 'Email *',
+        email: 'Email',
         phone: 'Teléfono',
         message: 'Mensaje',
         guardar: 'Guardar',
@@ -229,8 +229,8 @@ export default function ListViewModal({
                 return toast.error('El producto ya está en este estado');
             }
             // Check required fields for reserve/buy actions
-            if ((direction === 'reserve' || direction === 'buy') && (!userData.name || !userData.email)) {
-                toast.error('Por favor complete los campos obligatorios (nombre y email)');
+            if ((direction === 'reserve' || direction === 'buy') && (!userData.name)) {
+                toast.error('Nom és obligatori');
                 return;
             }
             setLoading(true);
@@ -851,7 +851,7 @@ export default function ListViewModal({
                                     value={userData.email}
                                     onChange={handleUserDataChange}
                                     className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm p-2 border"
-                                    required
+                                    // required
                                 />
                             </div>
                             <div>

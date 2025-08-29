@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = "mongodb://193.176.230.34:27017/test";
+// const MONGODB = process.env.MONGODB_URI || "mongodb://193.176.230.34:27017/test";
 //"mongodb+srv://arjunsingh:2LKnqF4ZpQVxZvvh@cluster0.zzuehnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-if (!MONGODB_URI) {
+if (!process.env.MONGODB_URI) {
     throw new Error('Please define the MONGODB_URI environment variable inside .env');
 }
 
@@ -31,10 +31,10 @@ async function dbConnect() {
             socketTimeoutMS: 45000,
         };
 
-        console.log('Connecting to MongoDB at:', MONGODB_URI);
-        cached.promise = mongoose.connect(MONGODB_URI, opts)
+        console.log('Connecting to MongoDB at:', process.env.MONGODB_URI);
+        cached.promise = mongoose.connect(process.env.MONGODB_URI, opts)
             .then((mongoose) => {
-                console.log('MongoDB connected successfully to:', MONGODB_URI);
+                console.log('MongoDB connected successfully to:', process.env.MONGODB_URI);
                 return mongoose;
             })
             .catch((error) => {

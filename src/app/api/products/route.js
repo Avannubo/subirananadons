@@ -175,10 +175,10 @@ export async function POST(request) {
             image: body.image || 'https://res.cloudinary.com/dmv3sqzfp/image/upload/v1750843703/user_profiles/user_683edc32e0d409ba221b11a7_1750843701800.png',
             imageHover: body.imageHover || '',
             additionalImages: body.additionalImages || [],
-            stock: {
-                available: parseInt(body.stock?.available || 0),
-                minStock: parseInt(body.stock?.minStock || 5)
-            },
+            stock: body.stock ? {
+                available: parseInt(body.stock.available),
+                minStock: parseInt(body.stock.minStock)
+            } : undefined,
             status: body.status || 'active',
             featured: body.featured || false,
             // Add discount handling
@@ -195,14 +195,14 @@ export async function POST(request) {
                 type: 'percentage',
                 value: 0
             },
-            stockHistory: [{
+            stockHistory: body.stock ? [{
                 date: new Date(),
                 type: 'initial',
-                available: parseInt(body.stock?.available || 0),
-                minStock: parseInt(body.stock?.minStock || 5),
+                available: parseInt(body.stock.available),
+                minStock: parseInt(body.stock.minStock),
                 userId: session.user.id,
                 userName: session.user.name || 'Admin user'
-            }]
+            }] : undefined
         });
         return NextResponse.json(product, { status: 201 });
     } catch (error) {

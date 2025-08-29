@@ -18,7 +18,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         if (!formData.price_incl_tax || isNaN(parseFloat(formData.price_incl_tax))) newErrors.price_incl_tax = 'Preu amb impostos obligatori';
         if (!formData.category) newErrors.category = 'Categoria obligatòria';
         if (!formData.brand) newErrors.brand = 'Marca obligatòria';
-        if (!formData.stock || isNaN(parseInt(formData.stock.available))) newErrors.available = 'Estoc obligatori';
+        // if (!formData.stock || isNaN(parseInt(formData.stock.available))) newErrors.available = 'Estoc obligatori';
         if (!formData.stock || isNaN(parseInt(formData.stock.minStock))) newErrors.minStock = 'Estoc mínim obligatori';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;

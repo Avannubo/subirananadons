@@ -228,7 +228,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
 
                                         </div>
                                     </div>
-                                    {product.description && (
+                                    {product.description.es || product.description.ca && (
                                         <section>
                                             <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                                 <h3 className="text-sm font-medium text-gray-500">Descripció:</h3>
