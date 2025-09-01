@@ -17,12 +17,11 @@ class EmailService {
                 const finalPrice = hasDiscount ? item.priceDetails.finalPrice : item.price;
 
                 return `<tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; max-width: 400px;">
                         <div style="display: flex; align-items: center;">
-                            <img src="${item.product.images?.[0] || ''}" alt="${item.product.name}" style="width: 60px; height: 60px; object-fit: cover; margin-right: 10px;"/>
-                            <div>
-                                <div style="font-weight: 500;">${item.product.name}</div>
-                                <div style="color: #666; font-size: 0.9em;">${item.product.brand || ''}</div>
+                            <img src="${item.product.images?.[0] || ''}" alt="${item.product.name}" style="width: 60px; height: 60px; object-fit: cover; margin-right: 10px; flex-shrink: 0;"/>
+                            <div style="min-width: 0; flex: 1;">
+                                <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.product.name}">${item.product.name}</div>
                             </div>
                         </div>
                     </td>
@@ -57,9 +56,17 @@ class EmailService {
                     <p><strong>Número de pedido:</strong> ${order.orderNumber}</p>
                     <p><strong>Fecha:</strong> ${new Date(order.createdAt).toLocaleDateString('es-ES')}</p>
                     <p><strong>Método de entrega:</strong> ${order.deliveryMethod === 'delivery' ? 'Envío a domicilio' : 'Recogida en tienda'}</p>
-                    <table style="width:100%; border-collapse: collapse; margin: 20px 0;">                        <thead>
+                    <table style="width:100%; border-collapse: collapse; margin: 20px 0; table-layout: fixed;">
+                        <colgroup>
+                            <col style="width: 400px;">
+                            <col style="width: 100px;">
+                            <col style="width: 100px;">
+                            <col style="width: 150px;">
+                            <col style="width: 150px;">
+                        </colgroup>
+                        <thead>
                             <tr style="background-color: #f8f9fa;">
-                                <th style="padding: 10px; text-align: left;">Producto</th>
+                                <th style="padding: 10px; text-align: left; overflow: hidden; text-overflow: ellipsis;">Producto</th>
                                 <th style="padding: 10px; text-align: center;">Tipo</th>
                                 <th style="padding: 10px; text-align: center;">Cantidad</th>
                                 <th style="padding: 10px; text-align: right;">Precio por unidad</th>

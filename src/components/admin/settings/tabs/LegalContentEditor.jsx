@@ -7,6 +7,7 @@ const LEGAL_KEYS = [
     // { key: "cookies_policy", label: "POLÍTICA DE COOKIES" },
     // { key: "legal_notice", label: "AVISO LEGAL" },
     { key: "terms_conditions", label: "Términos y Condiciones" },
+    { key: "list_conditions", label: "Condiciones de uso de las listas" },
 ];
 
 export default function LegalContentEditor() {

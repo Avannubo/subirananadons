@@ -50,90 +50,130 @@ export async function GET(request, { params }) {
             <style>
                 @page { size: A4; margin: 0; }
                 body { 
-                font-family: Arial, sans-serif;
-                margin: 40px;
-                color: #333;
+                    font-family: Arial, sans-serif;
+                    margin: 40px;
+                    color: #333;
+                    font-size: 14px;
                 }
                 .header { 
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 40px;
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 40px;
+                    align-items: flex-start;
                 }
                 .logo { 
-                font-size: 24px;
-                font-weight: bold;
-                color: #00B0C8;
-                white-space: nowrap;
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #00B0C8;
+                    white-space: nowrap;
                 }
                 .invoice-details {
-                text-align: right;
-                white-space: nowrap;
+                    text-align: right;
+                    white-space: nowrap;
+                }
+                .invoice-details h2 {
+                    margin: 0 0 10px 0;
                 }
                 .invoice-box {
-                background: #fff;
-                padding: 30px;
+                    background: #fff;
+                    padding: 30px;
+                    max-width: 1000px;
+                    margin: 0 auto;
                 }
                 .info {
-                margin-bottom: 30px;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
+                    margin-bottom: 30px;
                 }
-                .info h3,
+                .info h3 {
+                    margin: 0 0 10px 0;
+                    color: #333;
+                }
                 .info div {
-                white-space: nowrap;
+                    line-height: 1.5;
                 }
                 table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 20px 0;
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
                 }
                 th, td {
-                padding: 12px;
-                text-align: left;
-                border-bottom: 1px solid #eee;
-                white-space: nowrap;
-                }                th {
-                background: #00B0C8;
-                color: white;
+                    padding: 12px;
+                    border-bottom: 1px solid #eee;
                 }
-                .gift-item {
-                    background-color: #FFF5F7;
+                th {
+                    background: #00B0C8;
+                    color: white;
+                    font-weight: normal;
+                    text-align: left;
+                    white-space: nowrap;
                 }
+                th:first-child {
+                    width: 45%;
+                }
+                th:nth-child(2) { width: 15%; }
+                th:nth-child(3) { width: 10%; text-align: center; }
+                th:nth-child(4) { width: 10%; text-align: right; }
+                th:nth-child(5) { width: 10%; text-align: right; }
+                th:nth-child(6) { width: 10%; text-align: right; }
+                
+                td {
+                    vertical-align: top;
+                }
+                td:first-child {
+                    max-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                td:nth-child(2) { text-align: left; }
+                td:nth-child(3) { text-align: center; }
+                td:nth-child(4) { text-align: right; }
+                td:nth-child(5) { text-align: right; }
+                td:nth-child(6) { text-align: right; }
+                
                 .item-type {
-                    font-weight: 600;
-                    text-align: center;
-                }                
-                    .gift-type {
-                    color: #DB2777;
+                    font-weight: normal;
+                    text-align: left;
                 }
                 .personal-type {
                     color: #00B0C8;
                 }
-                .gift-info {
-                    color: #DB2777;
-                    font-size: 0.8em;
-                    font-style: italic;
+                .gift-type {
+                    color: #FF0080;
+                }
+                .discount {
+                    color: #FF0080;
                 }
                 .totals {
-                margin-left: auto;
-                width: 300px;
+                    width: auto;
+                    min-width: 300px;
+                    margin: 20px 0 20px auto;
                 }
                 .totals td {
-                padding: 8px;
-                white-space: nowrap;
+                    padding: 8px 12px;
+                    border: none;
+                    text-align: right;
+                    white-space: normal;
+                }
+                .totals td:first-child {
+                    text-align: right;
+                    padding-right: 40px;
                 }
                 .total-row td {
-                font-weight: bold;
-                font-size: 1.1em;
-                border-top: 2px solid #00B0C8;
+                    padding-top: 12px;
+                    font-weight: bold;
+                    border-top: 2px solid #00B0C8;
+                }
+                .discount-row td {
+                    color: #FF0080;
+                }
+                .totals tr:not(.total-row):not(.discount-row) td:first-child {
+                    color: #666;
                 }
                 .footer {
-                margin-top: 40px;
-                text-align: center;
-                color: #666;
-                font-size: 0.9em;
-                white-space: nowrap;
+                    margin-top: 40px;
+                    text-align: center;
+                    color: #666;
+                    font-size: 0.9em;
                 }
             </style>
             </head>
@@ -170,39 +210,56 @@ export async function GET(request, { params }) {
                     <th>Tipo</th>
                     <th>Cantidad</th>
                     <th>Precio</th>
+                    <th>Descuento</th>
                     <th>Total</th>
                     </tr>
-                </thead>                        <tbody>
-                    ${order.items.map(item => `                    <tr class="${item.type === 'gift' ? 'gift-item' : ''}">
-                        <td>
-                        ${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producto') : 'Producto'}
-                        ${item.giftInfo ? `<br><small class="gift-info">(Lista: ${item.giftInfo.babyName})</small>` : ''}
+                </thead>
+                <tbody>
+                    ${order.items.map(item => {
+            const discount = item.priceDetails?.discountAmount || 0;
+            const discountPercent = item.priceDetails?.discountPercentage || 0;
+            const originalPrice = item.priceDetails?.originalPrice || item.price;
+            const finalPrice = item.priceDetails?.finalPrice || item.price;
+            return `
+                        <tr>
+                        <td title="${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producto') : 'Producto'}">
+                            ${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producto') : 'Producto'}
                         </td>
                         <td class="item-type ${item.type === 'gift' ? 'gift-type' : 'personal-type'}">
                             ${item.type === 'gift' ? 'Regalo' : 'Personal'}
                         </td>
                         <td>${item.quantity}</td>
-                        <td>${item.price.toFixed(2)}€</td>
-                        <td>${(item.price * item.quantity).toFixed(2)}€</td>
-                    </tr>
-                    `).join('')}
+                        <td>${originalPrice.toFixed(2)}€</td>
+                        <td class="discount">
+                            ${discount > 0 ? `${discountPercent}% (-${discount.toFixed(2)}€)` : '-'}
+                        </td>
+                        <td>${finalPrice.toFixed(2)}€</td>
+                        </tr>
+                        `;
+        }).join('')}
                 </tbody>
                 </table>
                 <table class="totals">
                 <tr>
-                    <td>Subtotal</td>
+                    <td style="min-width: 150px;">Subtotal</td>
                     <td>${order.subtotal.toFixed(2)} €</td>
                 </tr>
                 <tr>
-                    <td>IVA (21%)</td>
+                    <td style="min-width: 150px;">IVA (21%)</td>
                     <td>${order.tax.toFixed(2)} €</td>
                 </tr>
                 <tr>
-                    <td>Gastos de envío</td>
+                    <td style="min-width: 150px;">Gastos de envío</td>
                     <td>${order.shippingCost.toFixed(2)} €</td>
                 </tr>
+                ${order.discounts && order.discounts.total > 0 ? `
+                <tr class="discount-row">
+                    <td style="min-width: 150px;">Descuento</td>
+                    <td>-${order.discounts.total.toFixed(2)} €</td>
+                </tr>
+                ` : ''}
                 <tr class="total-row">
-                    <td>Total</td>
+                    <td style="min-width: 150px;">Total</td>
                     <td>${order.totalAmount.toFixed(2)} €</td>
                 </tr>
                 </table>

@@ -60,27 +60,22 @@ export async function POST(request, { params }) {
                 },
                 { status: 400 }
             );
-        }
-
-        console.log('Original order:', JSON.stringify(order, null, 2));
-        
+        } 
+        console.log('Original order:', JSON.stringify(order, null, 2)); 
         // Transform the order data
         const transformedOrder = {
             ...order,
             items: order.items.map(item => {
-                console.log(item);
-                
-                const productData = item.product || {};
-                // Use the price from the order item, not from the product
+                console.log(item); 
+                const productData = item.product || {}; 
                 const price = Number(item.price || 0);
-                const quantity = Number(item.quantity || 1);
-                
+                const quantity = Number(item.quantity || 1); 
                 return {
                     product: {
                         name: productData.name.es || 'Producto no disponible',
                         description: productData.description || '',
                         image: productData.image || '',
-                        brand: productData.brand || '',
+                        brand: productData.brand.name || '',
                         category: productData.category || '',
                         slug: productData.slug || ''
                     },

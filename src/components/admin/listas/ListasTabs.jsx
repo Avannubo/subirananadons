@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import ListasTable from '@/components/admin/listas/ListasTable';
@@ -47,7 +46,7 @@ const translations = {
             'La gestió de reserves i compres de productes depèn de la participació dels teus convidats.',
             'Has de respectar les normes d’ús i la privacitat de les dades segons la legislació vigent.'
         ],
-        termsNote: 'Si us plau, llegeix atentament aquestes condicions abans de continuar.',
+        termsNote: 'Si us plau, llegeix atentament aquestes condicions abans de continuar. Qualsevol problema en crear la llista, si us plau posa\'t en contacte amb nosaltres.',
         acceptTerms: 'Confirmo que he llegit i accepto les condicions d’ús de les llistes, els',
         termsLink: 'Termes i Condicions',
         privacyLink: 'Política de Privacitat',
@@ -96,7 +95,7 @@ const translations = {
             'La gestión de reservas y compras de productos depende de la participación de tus invitados.',
             'Debes respetar las normas de uso y la privacidad de los datos según la legislación vigente.'
         ],
-        termsNote: 'Por favor, lee atentamente estas condiciones antes de continuar.',
+        termsNote: 'Por favor, lee atentamente estas condiciones antes de continuar. Cualquier problema al crear la lista, por favor ponte en contacto con nosotros.',
         acceptTerms: 'Confirmo que he leído y acepto las condiciones de uso de las listas, los',
         termsLink: 'Términos y Condiciones',
         privacyLink: 'Política de Privacidad',
@@ -118,10 +117,14 @@ function getLocale() {
     return 'es';
 }
 
+import useShopParameter from '@/lib/useShopParameter';
+
 export default function ListasTabs({ userRole = 'user' }) {
     const locale = getLocale();
     const t = translations[locale];
     const [activeTab, setActiveTab] = useState(t.tabs[0]);
+    const { value: listConditions, loading: loadingConditions } = useShopParameter('list_conditions');
+    console.log("List Conditions:", listConditions, "Loading:", loadingConditions);
     const [filters, setFilters] = useState({
         searchId: '',
         searchReference: '',
@@ -172,7 +175,7 @@ export default function ListasTabs({ userRole = 'user' }) {
             }
         } catch (error) {
             console.error('Error fetching birth lists:', error);
-            toast.error('Error al cargar las listas');
+            toast.error('Error al cargar les llistes');
         } finally {
             setIsLoading(false);
         }
@@ -714,10 +717,31 @@ export default function ListasTabs({ userRole = 'user' }) {
                                     <div className="bg-white p-4 rounded shadow border border-gray-100">
                                         <div className="mb-2">
                                             <strong className="block text-gray-800 mb-1">{t.termsTitle}</strong>
-                                            <ul className="list-disc pl-5 text-sm text-gray-700 mb-2">
-                                                {t.terms.map((item, idx) => <li key={idx}>{item}</li>)}
-                                            </ul>
-                                            <span className="text-xs text-gray-500">{t.termsNote}</span>
+                                            {loadingConditions ? (
+                                                <div className="animate-pulse bg-gray-200 h-20 rounded"></div>
+                                            ) : (
+                                                <>
+                                                        <div className="text-sm text-gray-700 mb-2 pl-2">
+                                                            {(() => {
+                                                                const content = typeof listConditions === 'object'
+                                                                    ? listConditions[locale]?.value || listConditions.es?.value || listConditions.ca?.value || ''
+                                                                    : listConditions?.es?.value || '';
+
+                                                                // Split by regex into items (removing empty)
+                                                                const items = content.split(/\d+\.\s/).filter(Boolean);
+
+                                                                return (
+                                                                    <ol className="list-decimal pl-4 space-y-2">
+                                                                        {items.map((item, index) => (
+                                                                            <li key={index} className="ml-2">{item.trim()}</li>
+                                                                        ))}
+                                                                    </ol>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                    <span className="text-xs text-gray-500">{t.termsNote}</span>
+                                                </>
+                                            )}
                                         </div>
                                         <div className="flex items-start mt-2">
                                             <input
@@ -758,4 +782,4 @@ export default function ListasTabs({ userRole = 'user' }) {
             )}
         </>
     );
-} 
+}
