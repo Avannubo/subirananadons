@@ -85,7 +85,7 @@ export default function ResetPassword() {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#36A9E1]"></div>
             </div>
         );
     }
@@ -117,7 +117,7 @@ export default function ResetPassword() {
                                 name="password"
                                 type="password"
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                 minLength={6}
@@ -132,7 +132,7 @@ export default function ResetPassword() {
                                 name="confirmPassword"
                                 type="password"
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                 value={formData.confirmPassword}
                                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                                 minLength={6}
@@ -143,7 +143,7 @@ export default function ResetPassword() {
                     <div>
                         <button
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#00B0C8] hover:bg-[#00a2b8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#36A9E1] hover:bg-[#00a2b8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1]"
                         >
                             Actualizar contraseña
                         </button>

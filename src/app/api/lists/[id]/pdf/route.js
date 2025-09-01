@@ -56,7 +56,7 @@ export async function GET(request, { params }) {
                         .header {
                             margin-bottom: 30px;
                             text-align: center;
-                            color: #00B0C8;
+                            color: #36A9E1;
                         }
                         .product-cell {
                             display: flex;
@@ -132,8 +132,8 @@ export async function GET(request, { params }) {
                         </thead>
                         <tbody>
                             ${list.items.map(item => {
-                            if (!item || !item.product) return ''; 
-                            return `
+            if (!item || !item.product) return '';
+            return `
                                     <tr>
                                         <td>
                                             <div class="product-cell">

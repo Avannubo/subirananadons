@@ -290,7 +290,7 @@ export default function SearchPage() {
                             placeholder={t('searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full focus:bg-white p-2 bg-[#FFFFFF80] rounded-xl border border-gray-200 focus:border-[#00B0C8] focus:outline-none text-base sm:text-lg shadow-sm"
+                            className="w-full focus:bg-white p-2 bg-[#FFFFFF80] rounded-xl border border-gray-200 focus:border-[#36A9E1] focus:outline-none text-base sm:text-lg shadow-sm"
                         />
                         <button className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer">
                             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +301,7 @@ export default function SearchPage() {
                     {/* Filter Button for mobile */}
                     <div className="md:hidden flex justify-end">
                         <button
-                            className="px-4 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition cursor-pointer"
+                            className="px-4 py-2 bg-[#36A9E1] text-white rounded-lg font-semibold shadow hover:bg-[#3f93ba] transition cursor-pointer"
                             onClick={() => setIsFilterModalOpen(true)}
                         >
                             {t('filterButton')}
@@ -323,7 +323,7 @@ export default function SearchPage() {
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#36A9E1] focus:ring-[#36A9E1] focus:outline-none"
                                 >
                                     <option value="">{t('allCategoriesOption')}</option>
                                     {categories
@@ -363,7 +363,7 @@ export default function SearchPage() {
                                 <select
                                     value={selectedBrand}
                                     onChange={(e) => setSelectedBrand(e.target.value)}
-                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#36A9E1] focus:ring-[#36A9E1] focus:outline-none"
                                 >
                                     <option value="">{t('allBrandsOption')}</option>
                                     {brands.map((brand) => (
@@ -379,7 +379,7 @@ export default function SearchPage() {
                                 <select
                                     value={stockStatus}
                                     onChange={(e) => setStockStatus(e.target.value)}
-                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#36A9E1] focus:ring-[#36A9E1] focus:outline-none"
                                 >
                                     <option value="all">Todos los productos</option>
                                     <option value="in-stock">En stock</option>
@@ -421,7 +421,7 @@ export default function SearchPage() {
                                                 <div
                                                     key={key}
                                                     {...restProps}
-                                                    className="h-5 w-5 rounded-full bg-white border-2 border-[#00B0C8] focus:outline-none"
+                                                    className="h-5 w-5 rounded-full bg-white border-2 border-[#36A9E1] focus:outline-none"
                                                 />
                                             );
                                         }}
@@ -452,7 +452,7 @@ export default function SearchPage() {
                                         <select
                                             value={selectedCategory}
                                             onChange={(e) => setSelectedCategory(e.target.value)}
-                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#36A9E1] focus:ring-[#36A9E1] focus:outline-none"
                                         >
                                             <option value="">Todas las categorías</option>
                                             {categories.map((category, index) => (
@@ -479,7 +479,7 @@ export default function SearchPage() {
                                         <select
                                             value={selectedBrand}
                                             onChange={(e) => setSelectedBrand(e.target.value)}
-                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#36A9E1] focus:ring-[#36A9E1] focus:outline-none"
                                         >
                                             <option value="">Todas las marcas</option>
                                             {brands.map((brand) => (
@@ -523,7 +523,7 @@ export default function SearchPage() {
                                                         <div
                                                             key={key}
                                                             {...restProps}
-                                                            className="h-5 w-5 rounded-full bg-white border-2 border-[#00B0C8] focus:outline-none"
+                                                            className="h-5 w-5 rounded-full bg-white border-2 border-[#36A9E1] focus:outline-none"
                                                         />
                                                     );
                                                 }}
@@ -535,7 +535,7 @@ export default function SearchPage() {
                                         </div>
                                     </div>
                                     <button
-                                        className="w-full mt-2 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition cursor-pointer"
+                                        className="w-full mt-2 py-2 bg-[#36A9E1] text-white rounded-lg font-semibold shadow hover:bg-[#3f93ba] transition cursor-pointer"
                                         onClick={() => setIsFilterModalOpen(false)}
                                     >
                                         Aplicar Filtros
@@ -595,7 +595,7 @@ export default function SearchPage() {
                         {isLoading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[...Array(6)].map((_, index) => (
-                                    <div key={index} className="animate-pulse"> 
+                                    <div key={index} className="animate-pulse">
                                         <div className="bg-gray-200 h-48 rounded-lg mb-2"></div>
                                         <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                                         <div className="h-4 bg-gray-200 rounded w-1/2"></div>

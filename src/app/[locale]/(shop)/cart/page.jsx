@@ -362,7 +362,7 @@ export default function CartPage() {
                                             {/* {!user && (
                                                 <button
                                                     onClick={() => setIsAuthModalOpen(true)}
-                                                    className="text-[#00B0C8] text-sm hover:underline"
+                                                    className="text-[#36A9E1] text-sm hover:underline"
                                                 >
                                                     {t('login')}
                                                 </button>
@@ -395,7 +395,7 @@ export default function CartPage() {
                                         <h2 className="text-xl font-bold mb-6">{deliveryMethod === 'pickup' ? t('contactData') : t('shippingData')}</h2>
                                         {userLoading ? (
                                             <div className="flex items-center justify-center py-4">
-                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00B0C8]"></div>
+                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#36A9E1]"></div>
                                                 <span className="ml-2 text-gray-600">{t('loadingUserData')}</span>
                                             </div>
                                         ) : (
@@ -430,7 +430,7 @@ export default function CartPage() {
                                                             name="name"
                                                             value={formData.name}
                                                             onChange={handleInputChange}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                             required
                                                         />
                                                     </div>
@@ -443,7 +443,7 @@ export default function CartPage() {
                                                             name="lastName"
                                                             value={formData.lastName}
                                                             onChange={handleInputChange}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                             required
                                                         />
                                                     </div>
@@ -456,7 +456,7 @@ export default function CartPage() {
                                                             name="email"
                                                             value={formData.email}
                                                             onChange={handleInputChange}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                             required
                                                         />
                                                     </div>
@@ -469,7 +469,7 @@ export default function CartPage() {
                                                             name="phone"
                                                             value={formData.phone}
                                                             onChange={handleInputChange}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                             required
                                                         />
                                                     </div>
@@ -484,7 +484,7 @@ export default function CartPage() {
                                                                     name="address"
                                                                     value={formData.address}
                                                                     onChange={handleInputChange}
-                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                                     required={deliveryMethod === 'delivery'}
                                                                 />
                                                             </div>
@@ -497,7 +497,7 @@ export default function CartPage() {
                                                                     name="city"
                                                                     value={formData.city}
                                                                     onChange={handleInputChange}
-                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                                     required={deliveryMethod === 'delivery'}
                                                                 />
                                                             </div>
@@ -510,7 +510,7 @@ export default function CartPage() {
                                                                     name="postalCode"
                                                                     value={formData.postalCode}
                                                                     onChange={handleInputChange}
-                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                                     required={deliveryMethod === 'delivery'}
                                                                 />
                                                             </div>
@@ -523,7 +523,7 @@ export default function CartPage() {
                                                                     name="province"
                                                                     value={formData.province}
                                                                     onChange={handleInputChange}
-                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                                     required={deliveryMethod === 'delivery'}
                                                                 />
                                                             </div>
@@ -539,7 +539,7 @@ export default function CartPage() {
                                                             onChange={handleInputChange}
                                                             placeholder={t('notesPlaceholder')}
                                                             rows={3}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] text-sm"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] text-sm"
                                                         />
                                                     </div>
                                                     {hasGiftItems && (
@@ -609,7 +609,7 @@ export default function CartPage() {
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        <p className="text-[#00B0C8] font-medium">{parsePrice(item.price).toFixed(2)}€</p>
+                                                        <p className="text-[#36A9E1] font-medium">{parsePrice(item.price).toFixed(2)}€</p>
                                                     )}
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
@@ -692,7 +692,7 @@ export default function CartPage() {
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        <p className="text-[#00B0C8] font-medium">{parsePrice(item.price).toFixed(2)} €</p>
+                                                        <p className="text-[#36A9E1] font-medium">{parsePrice(item.price).toFixed(2)} €</p>
                                                     )}
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
@@ -742,7 +742,7 @@ export default function CartPage() {
                                             </p>
                                             <div className="w-full bg-gray-200 rounded-full h-2.5">
                                                 <div
-                                                    className="bg-[#00B0C8] h-2.5 rounded-full transition-all duration-500 ease-in-out"
+                                                    className="bg-[#36A9E1] h-2.5 rounded-full transition-all duration-500 ease-in-out"
                                                     style={{ width: `${Math.min(100, (calculateRegularSubtotal() / 60) * 100)}%` }}
                                                 ></div>
                                             </div>
@@ -753,18 +753,18 @@ export default function CartPage() {
                                             className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${hasOnlyGiftItems
                                                 ? 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-60'
                                                 : deliveryMethod === 'delivery'
-                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5 cursor-pointer'
-                                                    : 'border-gray-200 hover:border-[#00B0C8] cursor-pointer'
+                                                    ? 'border-[#36A9E1] bg-[#36A9E1]/5 cursor-pointer'
+                                                    : 'border-gray-200 hover:border-[#36A9E1] cursor-pointer'
                                                 }`}
                                             onClick={() => !hasOnlyGiftItems && handleDeliveryMethodChange('delivery')}
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${hasOnlyGiftItems
                                                     ? 'border-gray-400'
-                                                    : deliveryMethod === 'delivery' ? 'border-[#00B0C8]' : 'border-gray-400'
+                                                    : deliveryMethod === 'delivery' ? 'border-[#36A9E1]' : 'border-gray-400'
                                                     }`}>
                                                     {deliveryMethod === 'delivery' && !hasOnlyGiftItems && (
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#36A9E1]" />
                                                     )}
                                                 </div>
                                                 <div>
@@ -778,22 +778,22 @@ export default function CartPage() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <span className="text-[#00B0C8] font-medium">
+                                            <span className="text-[#36A9E1] font-medium">
                                                 {calculateRegularSubtotal() >= 60 || regularItems.length === 0 ? t('free') : t('shippingPrice')}
                                             </span>
                                         </div>
                                         <div
                                             className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${deliveryMethod === 'pickup'
-                                                ? 'border-[#00B0C8] bg-[#00B0C8]/5'
-                                                : 'border-gray-200 hover:border-[#00B0C8]'
+                                                ? 'border-[#36A9E1] bg-[#36A9E1]/5'
+                                                : 'border-gray-200 hover:border-[#36A9E1]'
                                                 }`}
                                             onClick={() => handleDeliveryMethodChange('pickup')}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${deliveryMethod === 'pickup' ? 'border-[#00B0C8]' : 'border-gray-400'
+                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${deliveryMethod === 'pickup' ? 'border-[#36A9E1]' : 'border-gray-400'
                                                     }`}>
                                                     {deliveryMethod === 'pickup' && (
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#36A9E1]" />
                                                     )}
                                                 </div>
                                                 <div>
@@ -809,7 +809,7 @@ export default function CartPage() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <span className="text-[#00B0C8] font-medium">{t('free')}</span>
+                                            <span className="text-[#36A9E1] font-medium">{t('free')}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -850,7 +850,7 @@ export default function CartPage() {
                                                 }}
                                                 type="button"
                                                 disabled={isSubmitting}
-                                                className={`w-full ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#0090a8] cursor-pointer'} text-white py-3 px-6 rounded-md transition-colors duration-300`}
+                                                className={`w-full ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#36A9E1] hover:bg-[#3f93ba] cursor-pointer'} text-white py-3 px-6 rounded-md transition-colors duration-300`}
                                             >
                                                 {isSubmitting ? t('processing') : t('checkout')}
                                             </button>
@@ -876,7 +876,7 @@ export default function CartPage() {
                         <p className="text-gray-500 mb-8">{t('emptyDescription')}</p>
                         <Link
                             href="/products"
-                            className="inline-block bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#0090a8] transition-colors duration-300"
+                            className="inline-block bg-[#36A9E1] text-white py-3 px-6 rounded-md hover:bg-[#3f93ba] transition-colors duration-300"
                         >
                             {t('continueShopping')}
                         </Link>

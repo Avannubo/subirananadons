@@ -85,7 +85,7 @@ export default function Pagination({
                             onClick={() => typeof page === 'number' ? goToPage(page) : null}
                             disabled={page === '...'}
                             className={`px-4 py-2 cursor-pointer rounded-md ${page === currentPage
-                                ? 'bg-[#00B0C8] text-white'
+                                ? 'bg-[#36A9E1] text-white'
                                 : page === '...'
                                     ? 'text-gray-500'
                                     : 'text-gray-700 hover:bg-gray-100'

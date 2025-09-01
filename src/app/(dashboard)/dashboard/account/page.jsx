@@ -220,7 +220,7 @@ export default function Page() {
                                         htmlFor="profileImage"
                                         className={`px-4 py-2 text-white rounded-md text-center ${isUpdating
                                             ? 'bg-gray-400 cursor-not-allowed'
-                                            : 'bg-[#00B0C8] hover:bg-[#00B0C890] cursor-pointer'
+                                            : 'bg-[#36A9E1] hover:bg-[#00B0C890] cursor-pointer'
                                             }`}
                                     >
                                         {isUpdating ? 'Uploading...' : 'Change image'}
@@ -303,7 +303,7 @@ export default function Page() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPasswordChange(!showPasswordChange)}
-                                        className="absolute right-2 top-2 text-[#00B0C8] text-sm font-medium"
+                                        className="absolute right-2 top-2 text-[#36A9E1] text-sm font-medium"
                                     >
                                         Canvia
                                     </button>
@@ -355,7 +355,7 @@ export default function Page() {
                                             type="checkbox"
                                             checked={userData.partnerOffers}
                                             onChange={handleInputChange}
-                                            className="focus:ring-[#00B0C860] h-4 w-4 text-[#00B0C8] border-gray-300 rounded"
+                                            className="focus:ring-[#00B0C860] h-4 w-4 text-[#36A9E1] border-gray-300 rounded"
                                         />
                                     </div>
                                     <label htmlFor="partnerOffers" className="ml-2 block text-sm text-gray-700">
@@ -376,7 +376,7 @@ export default function Page() {
                                             type="checkbox"
                                             checked={userData.newsletter}
                                             onChange={handleInputChange}
-                                            className="focus:ring-[rgba(0,177,200,0.66)] h-4 w-4 text-[#00B0C8] border-gray-300 rounded"
+                                            className="focus:ring-[rgba(0,177,200,0.66)] h-4 w-4 text-[#36A9E1] border-gray-300 rounded"
                                         />
                                     </div>
                                     <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-700">
@@ -392,7 +392,7 @@ export default function Page() {
                                 <button
                                     type="submit"
                                     disabled={loading || isUpdating}
-                                    className={`px-4 py-2 bg-[#00B0C8] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C860] ${(loading || isUpdating) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#00B0C890]'
+                                    className={`px-4 py-2 bg-[#36A9E1] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C860] ${(loading || isUpdating) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#00B0C890]'
                                         }`}
                                 >
                                     {loading ? 'Guardant...' : isUpdating ? 'Actualitzant...' : 'Desa els canvis'}

@@ -306,7 +306,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                             />
                         </div>
 
@@ -320,7 +320,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                     id="slug"
                                     value={slug}
                                     onChange={(e) => setSlug(e.target.value)}
-                                    className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                    className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                 />
                                 <button
                                     type="button"
@@ -340,7 +340,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                             <div className="flex flex-col items-center gap-2">
                                 <div
                                     className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer h-40 flex flex-col items-center justify-center ${isDragging
-                                        ? 'border-[#00B0C8] bg-blue-50'
+                                        ? 'border-[#36A9E1] bg-blue-50'
                                         : 'border-gray-300 hover:border-gray-400'
                                         }`}
                                     onClick={handleImageClick}
@@ -386,7 +386,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 <button
                                     type="button"
                                     onClick={() => setShowImageSelector(true)}
-                                    className="w-full px-4 py-2 text-white text-sm rounded-md bg-[#00B0C8] hover:bg-[#008A9B]"
+                                    className="w-full px-4 py-2 text-white text-sm rounded-md bg-[#36A9E1] hover:bg-[#008A9B]"
                                 >
                                     Selecciona existent
                                 </button>
@@ -414,7 +414,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 rows="3"
                                 value={formData.description}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                             ></textarea>
                         </div>
                         */}
@@ -429,7 +429,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 name="website"
                                 value={formData.website}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                             />
                         </div>
 
@@ -448,7 +448,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                             ...prev,
                                             discount: { ...prev.discount, active: e.target.checked }
                                         }))}
-                                        className="h-4 w-4 rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
+                                        className="h-4 w-4 rounded border-gray-300 text-[#36A9E1] focus:ring-[#36A9E1]"
                                     />
                                     <label htmlFor="discount-active" className="ml-2 block text-sm font-medium text-gray-700">
                                         Activar descompte
@@ -467,7 +467,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                     ...prev,
                                                     discount: { ...prev.discount, type: e.target.value }
                                                 }))}
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             >
                                                 <option value="percentage">Percentatge (%)</option>
                                                 <option value="fixed">Import fix (€)</option>
@@ -489,7 +489,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                     min="0"
                                                     max={formData.discount.type === 'percentage' ? "100" : ""}
                                                     step={formData.discount.type === 'percentage' ? "1" : "0.01"}
-                                                    className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 />
                                                 <span className="absolute right-3 top-2 text-gray-500">
                                                     {formData.discount.type === 'percentage' ? '%' : '€'}
@@ -508,7 +508,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                     ...prev,
                                                     discount: { ...prev.discount, startDate: e.target.value }
                                                 }))}
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             />
                                         </div>
 
@@ -523,7 +523,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                     ...prev,
                                                     discount: { ...prev.discount, endDate: e.target.value }
                                                 }))}
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             />
                                         </div>
 
@@ -540,7 +540,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                 }))}
                                                 min="0"
                                                 step="0.01"
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             />
                                         </div>
 
@@ -557,7 +557,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                 }))}
                                                 min="0"
                                                 step="1"
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             />
                                         </div> */}
                                     </div>
@@ -572,7 +572,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 name="enabled"
                                 checked={formData.enabled}
                                 onChange={handleChange}
-                                className="h-4 w-4 rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
+                                className="h-4 w-4 rounded border-gray-300 text-[#36A9E1] focus:ring-[#36A9E1]"
                             />
                             <label htmlFor="enabled" className="ml-2 block text-sm font-medium text-gray-700">
                                 Marca activa
@@ -590,7 +590,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 border border-transparent rounded text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008A9B]"
+                            className="px-4 py-2 border border-transparent rounded text-sm font-medium text-white bg-[#36A9E1] hover:bg-[#008A9B]"
                         >
                             {isEditing ? 'Actualitza' : 'Crea'}
                         </button>

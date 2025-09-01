@@ -277,7 +277,7 @@ export default function CategoriesTree() {
                     </span>
                     <div className="flex items-center space-x-1 invisible group-hover:visible transition-all absolute right-2">
                         <button
-                            className="p-1 text-[#00abc2] hover:text-[#00B0C8] rounded cursor-pointer"
+                            className="p-1 text-[#00abc2] hover:text-[#36A9E1] rounded cursor-pointer"
                             onClick={(e) => handleAddCategory(category, e)}
                             title="Afegir subcategoria"
                         >
@@ -337,7 +337,7 @@ export default function CategoriesTree() {
                     </div>
                     <button
                         onClick={() => handleAddCategory(null)}
-                        className="flex items-center text-sm px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] cursor-pointer"
+                        className="flex items-center text-sm px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#008A9B] cursor-pointer"
                     >
                         <FiPlus className="mr-1" /> Afegir categoria
                     </button>
@@ -347,7 +347,7 @@ export default function CategoriesTree() {
             <div ref={treeContainerRef} className="p-4 max-h-[550px] overflow-y-auto">
                 {loading ? (
                     <div className="flex justify-center my-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#36A9E1]"></div>
                     </div>
                 ) : categories.length === 0 ? (
                     <div className="text-center text-gray-500 my-4">

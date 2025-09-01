@@ -6,7 +6,7 @@ import ShopLayout from "@/components/Layouts/shop-layout";
 import ProductCard from "@/components/products/product-card";
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductQuickView from "@/components/products/product-quick-view";
-import { fetchProducts, formatProduct } from '@/services/ProductService'; 
+import { fetchProducts, formatProduct } from '@/services/ProductService';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
 // Utility to get display name from category (handles translation and legacy)
@@ -28,7 +28,7 @@ function getCategoryDisplayName(cat, locale = 'es') {
     }
     if (typeof cat === 'string') return cat;
     return '';
-} 
+}
 export default function Page() {
     // Birth list modal state
     const [showBirthListModal, setShowBirthListModal] = useState(false);
@@ -499,7 +499,7 @@ export default function Page() {
                 </div>
             )}
             <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-2 rounded-t-2xl sm:mt-0 ">
-                <nav aria-label="Breadcrumb" className="hidden lg:flex mb-4 pb-2 pl-2 overflow-x-auto border-b border-[#00B0C8]">
+                <nav aria-label="Breadcrumb" className="hidden lg:flex mb-4 pb-2 pl-2 overflow-x-auto border-b border-[#36A9E1]">
                     <ol className="flex items-center space-x-1 text-sm sm:text-md text-gray-500 flex-wrap min-w-[200px]">
                         {categoryPath.map((cat, index) => (
                             <li key={cat.slug || index} className="flex items-center">
@@ -523,7 +523,7 @@ export default function Page() {
                     <div className="block lg:hidden w-full mb-4 ">
                         <select
                             id="mobile-category-select"
-                            className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition"
+                            className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition"
                             value={categoryPath[categoryPath.length - 1]?._id || 'root'}
                             onChange={handleMobileCategoryChange}
                         >
@@ -577,7 +577,7 @@ export default function Page() {
                                                     }}
                                                     className={`w-full cursor-pointer text-left px-2 py-1.5 rounded transition-colors duration-150 
                                                         ${siblingCategory._id === currentCategoryLabel._id
-                                                            ? 'text-[#00B0C8] font-semibold bg-gray-100'
+                                                            ? 'text-[#36A9E1] font-semibold bg-gray-100'
                                                             : 'text-gray-600 hover:bg-gray-100 hover:font-semibold'
                                                         }`}
                                                 >
@@ -673,7 +673,7 @@ export default function Page() {
                         {/* Loading state */}
                         {loading && (
                             <div className="flex justify-center items-center h-64">
-                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#36A9E1]"></div>
                             </div>
                         )}
                         {/* Error state */}
@@ -729,7 +729,7 @@ export default function Page() {
                                             onClick={() => typeof page === 'number' ? goToPage(page) : null}
                                             disabled={page === '...'}
                                             className={`px-4 py-2 rounded-md cursor-pointer ${page === currentPage
-                                                ? 'bg-[#00B0C8] text-white'
+                                                ? 'bg-[#36A9E1] text-white'
                                                 : page === '...'
                                                     ? 'text-gray-500'
                                                     : 'text-gray-700 hover:bg-gray-100'

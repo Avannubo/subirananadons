@@ -256,7 +256,7 @@ export default function OffersTab() {
                     </div>
                     <div className="w-full grid grid-cols-2 gap-2">
                         <div>
-                            <label htmlFor="offerImage" className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'}`}>{isUploading ? 'Pujant...' : 'Selecciona Imatge'}</label>
+                            <label htmlFor="offerImage" className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#36A9E1] hover:bg-[#008A9B] cursor-pointer'}`}>{isUploading ? 'Pujant...' : 'Selecciona Imatge'}</label>
                             <input type="file" id="offerImage" accept="image/*" onChange={handleImageChange} disabled={isUploading} className="hidden" />
                         </div>
                         <button type="button" onClick={() => { if (form.imageUrl) { setImagePreview(form.imageUrl); } }} disabled={isUploading || !form.imageUrl} className={`w-full px-4 py-2 text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || !form.imageUrl ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>
@@ -267,7 +267,7 @@ export default function OffersTab() {
                             type="button"
                             onClick={() => setShowImageSelector(true)}
                             disabled={isUploading}
-                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#36A9E1] hover:bg-[#008A9B]'}`}
                         >
                             Selecciona existent
                         </button>
@@ -286,7 +286,7 @@ export default function OffersTab() {
                     <div className="w-full">
                         <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">URL de la imatge (opcional)</label>
                         <div className="flex mt-1">
-                            <input type="text" id="imageUrl" name="imageUrl" value={form.imageUrl} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]" placeholder="https://example.com/image.jpg" />
+                            <input type="text" id="imageUrl" name="imageUrl" value={form.imageUrl} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]" placeholder="https://example.com/image.jpg" />
                             <button type="button" onClick={() => { if (form.imageUrl) { setImagePreview(form.imageUrl); } }} className="text-nowrap bg-gray-200 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-300">Vista previa</button>
                         </div>
                         <p className="mt-1 text-xs text-gray-500">O enganxa la URL directament aquí</p>
@@ -312,7 +312,7 @@ export default function OffersTab() {
                     {/* <input name="discount" type="number" value={form.discount ?? ''} onChange={handleChange} placeholder="% Descompte" className="border border-gray-300 p-2 rounded w-full bg-gray-50" min="0" max="100" /> */}
                 </div>
                 <div className="flex gap-2">
-                    <button type="submit" className="bg-[#00B0C8] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm" disabled={isUploading || (offers.length >= maxOffers && !editingId)}>{editingId ? 'Actualitza' : 'Afegeix'} Oferta</button>
+                    <button type="submit" className="bg-[#36A9E1] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm" disabled={isUploading || (offers.length >= maxOffers && !editingId)}>{editingId ? 'Actualitza' : 'Afegeix'} Oferta</button>
                     {editingId && (
                         <button type="button" onClick={() => { setEditingId(null); setForm({ imageUrl: '', title: '', description: '', brand: '', brandLogo: '', discount: '' }); setImagePreview(''); }} className="px-4 py-2 text-gray-700 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200">Cancel·la</button>
                     )}

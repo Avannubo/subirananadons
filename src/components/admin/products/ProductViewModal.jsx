@@ -108,17 +108,17 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                     {/* Header with product name */}
                     <div className="flex justify-between items-center p-4 border-b border-gray-300 bg-gray-50">
                         <Dialog.Title className="text-lg font-medium text-gray-800 flex items-center">
-                            <FiPackage className="mr-2 text-[#00B0C8]" />
+                            <FiPackage className="mr-2 text-[#36A9E1]" />
                             {getTranslated(product.name)}
                         </Dialog.Title>
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setLang('es')}
-                                className={`px-2 py-1 rounded text-xs font-medium border ${lang === 'es' ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300'}`}
+                                className={`px-2 py-1 rounded text-xs font-medium border ${lang === 'es' ? 'bg-[#36A9E1] text-white border-[#36A9E1]' : 'bg-white text-gray-700 border-gray-300'}`}
                             >ES</button>
                             <button
                                 onClick={() => setLang('ca')}
-                                className={`px-2 py-1 rounded text-xs font-medium border ${lang === 'ca' ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300'}`}
+                                className={`px-2 py-1 rounded text-xs font-medium border ${lang === 'ca' ? 'bg-[#36A9E1] text-white border-[#36A9E1]' : 'bg-white text-gray-700 border-gray-300'}`}
                             >CA</button>
                             <button
                                 onClick={onClose}
@@ -147,7 +147,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                 {galleryImages.length > 1 && (
                                     <div className="w-full mt-3">
                                         <h4 className="text-xs font-medium text-gray-500 uppercase mb-2 flex items-center">
-                                            <FiImage className="mr-1 text-[#00B0C8]" /> Galeria ({galleryImages.length} imatges)
+                                            <FiImage className="mr-1 text-[#36A9E1]" /> Galeria ({galleryImages.length} imatges)
                                         </h4>
                                         <div className="flex space-x-2 overflow-x-auto pb-2">
                                             {galleryImages.map((img, index) => (
@@ -155,7 +155,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                                     key={index}
                                                     onClick={() => setSelectedImage(img)}
                                                     className={`flex-shrink-0 w-14 h-14 relative rounded border ${selectedImage === img
-                                                        ? 'border-[#00B0C8] ring-2 ring-[#00B0C8]/30'
+                                                        ? 'border-[#36A9E1] ring-2 ring-[#36A9E1]/30'
                                                         : 'border-gray-200 hover:border-gray-300'}`}
                                                     style={{ minWidth: '3.5rem', minHeight: '3.5rem', maxWidth: '3.5rem', maxHeight: '3.5rem', overflow: 'hidden' }}
                                                 >
@@ -168,7 +168,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                                         style={{ maxWidth: '100%', maxHeight: '100%', minWidth: 0, minHeight: 0, display: 'block' }}
                                                     />
                                                     {index === 0 && (
-                                                        <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-[8px] px-1">
+                                                        <div className="absolute top-0 left-0 bg-[#36A9E1] text-white text-[8px] px-1">
                                                             Principal
                                                         </div>
                                                     )}
@@ -204,7 +204,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                 {/* Basic Information */}
                                 <section className="border-b border-gray-200 pb-4 space-y-2">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiTag className="mr-2 text-[#00B0C8]" /> Informació bàsica
+                                        <FiTag className="mr-2 text-[#36A9E1]" /> Informació bàsica
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="space-y-2">
@@ -260,7 +260,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                 {/* Pricing Information */}
                                 <section className="border-b border-gray-200 pb-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiDollarSign className="mr-2 text-[#00B0C8]" /> Preus
+                                        <FiDollarSign className="mr-2 text-[#36A9E1]" /> Preus
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
@@ -349,7 +349,7 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                 {/* Inventory Information */}
                                 <section className="  border-gray-200 pb-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiBox className="mr-2 text-[#00B0C8]" /> Inventari
+                                        <FiBox className="mr-2 text-[#36A9E1]" /> Inventari
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">

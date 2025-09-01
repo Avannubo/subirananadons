@@ -1,6 +1,6 @@
 'use client';
 
-export default function LoadingSpinner({ size = 'md', color = '[#00B0C8]' }) {
+export default function LoadingSpinner({ size = 'md', color = '[#36A9E1]' }) {
     const sizeClasses = {
         sm: 'h-6 w-6',
         md: 'h-10 w-10',

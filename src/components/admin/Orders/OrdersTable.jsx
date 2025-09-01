@@ -126,7 +126,7 @@ export default function OrdersTable({
             console.error('Error viewing PDF:', error);
             toast.error('Error al visualizar el PDF');
         }
-    }; 
+    };
     // Filter the orders based on search criteria
     const filteredOrders = orders.filter((order) => {
         return (
@@ -373,7 +373,7 @@ export default function OrdersTable({
                                             <FaRegFilePdf size={20} />
                                         </button>
                                         <button
-                                            className="text-[#00B0C8] hover:text-[#008A9B] mr-4 text-center cursor-pointer"
+                                            className="text-[#36A9E1] hover:text-[#008A9B] mr-4 text-center cursor-pointer"
                                             title={t.viewDetails}
                                             onClick={() => handleViewOrder(order)}
                                         >

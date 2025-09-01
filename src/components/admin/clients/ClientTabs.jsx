@@ -5,7 +5,7 @@ import ClientsTable from '@/components/admin/clients/ClientTable';
 import ClientModal from '@/components/admin/clients/ClientModal';
 import ClientViewModal from '@/components/admin/clients/ClientViewModal';
 import ConfirmDeleteModal from '@/components/admin/clients/ConfirmDeleteModal';
-import { toast } from 'react-hot-toast'; 
+import { toast } from 'react-hot-toast';
 import Pagination from '@/components/admin/shared/Pagination';
 export default function ClientsTabs() {
     // Locale detection (default to 'ca')
@@ -68,7 +68,7 @@ export default function ClientsTabs() {
             refreshSuccess: 'Datos actualizados correctamente',
             yes: 'Sí',
             no: 'No',
-            headers: ['Nombre', 'Apellidos', 'Email','Fecha de registro'],
+            headers: ['Nombre', 'Apellidos', 'Email', 'Fecha de registro'],
         }
     };
     const t = translations[locale];
@@ -283,7 +283,7 @@ export default function ClientsTabs() {
                 // client.id,
                 client.name,
                 client.lastName,
-                client.email, 
+                client.email,
                 client.registrationDate
             ].join(','))
         ].join('\n');
@@ -328,7 +328,7 @@ export default function ClientsTabs() {
                             <FiDownload className="mr-1" /> {t.export}
                         </button>
                         <button
-                            className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors cursor-pointer"
+                            className="flex items-center px-3 py-2 bg-[#36A9E1] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors cursor-pointer"
                             onClick={handleAddNewClient}
                             title={t.addTitle}
                         >
@@ -386,7 +386,7 @@ export default function ClientsTabs() {
                     </div>
                     <div className="flex sm:flex-row flex-col justify-start gap-2">
                         <button
-                            className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890] cursor-pointer"
+                            className="flex items-center justify-center px-4 py-2 bg-[#36A9E1] text-white rounded hover:bg-[#00B0C890] cursor-pointer"
                             onClick={applyFilters}
                             title={t.filterTitle}
                         >
@@ -405,7 +405,7 @@ export default function ClientsTabs() {
                 {/* Client data table */}
                 {isLoading ? (
                     <div className="py-20 text-center">
-                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
+                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#36A9E1]"></div>
                         <p className="mt-3 text-gray-600">{t.loading}</p>
                     </div>
                 ) : (

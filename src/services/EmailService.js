@@ -162,8 +162,8 @@ class EmailService {
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
-                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
+                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #36A9E1; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
+                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #36A9E1; text-decoration: underline;">${list._id}</a></p>
                     <p>Puedes compartir el enlace de tu lista con familiares y amigos usando esta dirección:<br/>
                     <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">${process.env.DOMAIN}/listas-de-nacimiento/${list._id}</span></p>
                     <p>También puedes buscar tu lista usando este ID en el buscador de listas de nacimiento.</p>
@@ -183,8 +183,8 @@ class EmailService {
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
-                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
+                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #36A9E1; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
+                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #36A9E1; text-decoration: underline;">${list._id}</a></p>
                     <p>Puedes compartir el enlace de tu lista con familiares y amigos usando esta dirección:<br/>
                     <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">${process.env.DOMAIN}/es/listas-de-nacimiento/${list._id}</span></p>
                     <p>También puedes buscar tu lista usando este ID en el buscador de listas de nacimiento.</p>
@@ -209,7 +209,7 @@ class EmailService {
                 to: "info@subirananadons.com",
                 subject: formData.subject || "Consulta general desde el formulario de contacto",
                 html: `
-                    <h1 style="color:#00B0C8;">Nuevo mensaje de contacto</h1>
+                    <h1 style="color:#36A9E1;">Nuevo mensaje de contacto</h1>
                     <p><strong>Nombre:</strong> ${formData.name}</p>
                     <p><strong>Email:</strong> ${formData.email}</p>
                     <p><strong>Teléfono:</strong> ${formData.phone || 'No proporcionado'}</p>
@@ -267,7 +267,7 @@ class EmailService {
                 html: `
                     <h1>Restablecer contraseña</h1>
                     <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para crear una nueva contraseña:</p>
-                    <p><a href="${resetUrl}" style="padding: 10px 20px; background-color: #00B0C8; color: white; text-decoration: none; border-radius: 5px;">Restablecer contraseña</a></p>
+                    <p><a href="${resetUrl}" style="padding: 10px 20px; background-color: #36A9E1; color: white; text-decoration: none; border-radius: 5px;">Restablecer contraseña</a></p>
                     <p><strong>IMPORTANTE:</strong> Este es un enlace de un solo uso y expirará en 1 hora.</p>
                     <p>Si no solicitaste restablecer tu contraseña, puedes ignorar este mensaje.</p>
                     <br>

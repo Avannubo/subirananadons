@@ -57,7 +57,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
             const result = await fetchBirthListItems(listId);
             if (result.success) {
                 // console.log('Birth list items loaded:', result.data);
-                
+
                 setItems(result.data || []);
             } else {
                 toast.error(t.errorLoad);
@@ -159,7 +159,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                         e.stopPropagation();
                         setShowAddProducts(!showAddProducts);
                     }}
-                    className="flex items-center px-3 py-1 text-sm bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0]"
+                    className="flex items-center px-3 py-1 text-sm bg-[#36A9E1] text-white rounded-md hover:bg-[#008da0]"
                 >
                     {showAddProducts ? (
                         locale === 'ca' ? 'Tornar a la llista' : 'Volver a la lista'
@@ -172,7 +172,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
             </div>
             {loading && !showAddProducts && (
                 <div className="flex justify-center items-center py-10">
-                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]" />
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]" />
                 </div>
             )}
             {showAddProducts && (
@@ -195,7 +195,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                             <table className="flex-1 min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                            <th scope="col" className="px-6 py-3 text-start min-w-[300px] w-[300px] truncate text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-6 py-3 text-start min-w-[300px] w-[300px] truncate text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             {t.product}
                                         </th>
                                         <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -253,7 +253,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                             )}
                                                         </>
                                                     ) : (
-                                                            <p className="text-gray-700 hover:text-gray-900">{item.product.discount.finalPrice?.toFixed(2)} €</p>
+                                                        <p className="text-gray-700 hover:text-gray-900">{item.product.discount.finalPrice?.toFixed(2)} €</p>
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">

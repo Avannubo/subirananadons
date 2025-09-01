@@ -318,7 +318,7 @@ export default function BrandsTable() {
                 <div className="flex space-x-2">
                     <button
                         onClick={handleAddBrand}
-                        className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] flex items-center cursor-pointer"
+                        className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#008A9B] flex items-center cursor-pointer"
                     >
                         <FiPlus className="mr-1" />
                         Afegir marca
@@ -353,7 +353,7 @@ export default function BrandsTable() {
                                 type="checkbox"
                                 checked={showEnabledOnly}
                                 onChange={() => setShowEnabledOnly(!showEnabledOnly)}
-                                className="rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
+                                className="rounded border-gray-300 text-[#36A9E1] focus:ring-[#36A9E1]"
                             />
                             <span>Mostrar només actives</span>
                         </label>
@@ -469,7 +469,7 @@ export default function BrandsTable() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
                                                 <button
-                                                    className="text-[#00B0C8] hover:text-[#008A9B] cursor-pointer"
+                                                    className="text-[#36A9E1] hover:text-[#008A9B] cursor-pointer"
                                                     onClick={() => handleViewBrand(brand)}
                                                     title="Veure detalls"
                                                 >

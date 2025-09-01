@@ -163,14 +163,14 @@ export default function BannerTab() {
                         </div>
                         <div className="flex flex-col w-full gap-2">
                             <div className="flex flex-row gap-2 w-full">
-                                <label htmlFor="portimg-upload" className={`w-full px-4 py-2 text-center text-white rounded-md cursor-pointer ${isUploading ? 'bg-gray-400' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}>
+                                <label htmlFor="portimg-upload" className={`w-full px-4 py-2 text-center text-white rounded-md cursor-pointer ${isUploading ? 'bg-gray-400' : 'bg-[#36A9E1] hover:bg-[#008A9B]'}`}>
                                     {isUploading ? t('uploading') : t('selectImage')}
                                 </label>
                                 <input id="portimg-upload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" disabled={isUploading} />
                                 <button
                                     onClick={() => setShowImageSelector(true)}
                                     disabled={isUploading}
-                                    className={`w-full px-4 py-2 whitespace-nowrap rounded-md text-white ${isUploading ? 'bg-gray-400' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                                    className={`w-full px-4 py-2 whitespace-nowrap rounded-md text-white ${isUploading ? 'bg-gray-400' : 'bg-[#36A9E1] hover:bg-[#008A9B]'}`}
                                 >
                                     {t('selectExisting')}
                                 </button>
@@ -178,7 +178,7 @@ export default function BannerTab() {
                             <button
                                 onClick={handleUpload}
                                 disabled={(!image && !selectedImageUrl) || isUploading}
-                                className={`w-full px-4 py-2 rounded-md text-white ${(!image && !selectedImageUrl) || isUploading ? 'bg-gray-400' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                                className={`w-full px-4 py-2 rounded-md text-white ${(!image && !selectedImageUrl) || isUploading ? 'bg-gray-400' : 'bg-[#36A9E1] hover:bg-[#008A9B]'}`}
                             >
                                 {isUploading ? t('saving') : t('saveImage')}
                             </button>
@@ -219,12 +219,12 @@ export default function BannerTab() {
                                 <h3 className="font-semibold mb-2 text-gray-700">{t('uploadedImages')}</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {uploadedImages.map(img => (
-                                        <div key={img._id} className={`border border-gray-200 rounded-lg overflow-hidden bg-white shadow flex flex-col items-center ${img.active ? 'ring-2 ring-[#00B0C8]' : ''}`}>
+                                        <div key={img._id} className={`border border-gray-200 rounded-lg overflow-hidden bg-white shadow flex flex-col items-center ${img.active ? 'ring-2 ring-[#36A9E1]' : ''}`}>
                                             <img src={img.imageUrl} alt="uploaded" className="object-cover w-full h-32 mb-2" />
                                             <div className='flex flex-row items-center '>
                                                 <button
                                                     onClick={() => setActivePortada(img._id)}
-                                                    className={`px-3 m-2 py-1 rounded text-xs ${img.active ? 'bg-[#00B0C8] text-white' : 'bg-gray-200 text-gray-700 hover:bg-[#00B0C8] hover:text-white'}`}
+                                                    className={`px-3 m-2 py-1 rounded text-xs ${img.active ? 'bg-[#36A9E1] text-white' : 'bg-gray-200 text-gray-700 hover:bg-[#36A9E1] hover:text-white'}`}
                                                     disabled={img.active}
                                                 >
                                                     {img.active ? t('bannerActive') : t('setAsBanner')}

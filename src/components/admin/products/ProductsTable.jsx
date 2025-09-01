@@ -400,7 +400,7 @@ export default function ProductsTable(props) {
                 <div className="flex space-x-2">
                     <button
                         onClick={handleAddProduct}
-                        className="px-3 py-1 bg-[#00B0C8] cursor-pointer text-white rounded hover:bg-[#008A9B] flex items-center"
+                        className="px-3 py-1 bg-[#36A9E1] cursor-pointer text-white rounded hover:bg-[#008A9B] flex items-center"
                     >
                         <FiPlus className="mr-1" />
                         Afegir producte
@@ -560,7 +560,7 @@ export default function ProductsTable(props) {
                                                         {product.price_incl_tax.toFixed(2)}€
                                                     </span>
                                                     <span className="text-sm font-medium text-red-600">
-                                                        {product.discount.finalPrice?.toFixed(2)} € { product.discount.type === 'percentage' ? `(-${product.discount.value}%)` : '' }
+                                                        {product.discount.finalPrice?.toFixed(2)} € {product.discount.type === 'percentage' ? `(-${product.discount.value}%)` : ''}
                                                     </span>
                                                 </div>
                                             ) : (
@@ -582,7 +582,7 @@ export default function ProductsTable(props) {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
                                                 <button
-                                                    className="text-[#00B0C8] hover:text-[#008A9B] cursor-pointer"
+                                                    className="text-[#36A9E1] hover:text-[#008A9B] cursor-pointer"
                                                     onClick={() => handleViewProduct(product)}
                                                     title="Ver detalles"
                                                 >

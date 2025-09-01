@@ -110,7 +110,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                     {/* Header with client name */}
                     <div className="flex justify-between items-center p-4 border-b border-gray-300 bg-gray-50">
                         <Dialog.Title className="text-lg font-medium text-gray-800 flex items-center">
-                            <FiUser className="mr-2 text-[#00B0C8]" />
+                            <FiUser className="mr-2 text-[#36A9E1]" />
                             {client.name} {client.lastName}
                         </Dialog.Title>
                         <button
@@ -160,7 +160,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                 {/* Contact Information */}
                                 <section className="border-b border-gray-200 pb-4 space-y-2">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiMail className="mr-2 text-[#00B0C8]" /> {t.contact}
+                                        <FiMail className="mr-2 text-[#36A9E1]" /> {t.contact}
                                     </h3>
                                     <div className="space-y-2">
                                         <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
@@ -175,7 +175,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                 </section>
                                 <section>
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiShoppingBag className="mr-2 text-[#00B0C8]" /> {t.purchaseHistory}
+                                        <FiShoppingBag className="mr-2 text-[#36A9E1]" /> {t.purchaseHistory}
                                     </h3>
                                     <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                         <span className="text-sm font-medium text-gray-500">{t.totalOrders}:</span>

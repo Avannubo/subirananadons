@@ -232,7 +232,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                         value={formData.name.ca}
                                         onChange={handleChange}
                                         onBlur={generateSlug}
-                                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -246,7 +246,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                         value={formData.name.es}
                                         onChange={handleChange}
                                         onBlur={generateSlug}
-                                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                     />
                                 </div>
                             </div>
@@ -263,7 +263,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                     name="parent"
                                     value={formData.parent || ''}
                                     onChange={handleChange}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                     disabled={loadingCategories}
                                 >
                                     <option value="">Ninguna (Categoría Principal)</option>
@@ -290,7 +290,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                         name="slug"
                                         value={formData.slug}
                                         onChange={handleChange}
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                     />
                                     <button
                                         type="button"
@@ -316,7 +316,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                     rows={3}
                                     value={formData.description}
                                     onChange={handleChange}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                 />
                             </div> */}
 
@@ -328,7 +328,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                     name="isActive"
                                     checked={formData.isActive}
                                     onChange={handleChange}
-                                    className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
+                                    className="h-4 w-4 text-[#36A9E1] border-gray-300 rounded focus:ring-[#36A9E1]"
                                 />
                                 <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
                                     Categoría activa
@@ -347,7 +347,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-4 py-2 bg-[#00B0C8] text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] disabled:opacity-50"
+                                className="px-4 py-2 bg-[#36A9E1] text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1] disabled:opacity-50"
                             >
                                 {loading ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
                             </button>

@@ -4,7 +4,7 @@ export default function ActionButton({ onClick, text, icon, isLoading, variant =
     const baseClasses = "flex items-center px-5 py-3 rounded-md transition-colors shadow-md font-medium";
 
     const variantClasses = {
-        primary: "bg-[#00B0C8] text-white hover:bg-[#008da0]",
+        primary: "bg-[#36A9E1] text-white hover:bg-[#008da0]",
         secondary: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50",
         danger: "bg-red-600 text-white hover:bg-red-700",
         success: "bg-green-600 text-white hover:bg-green-700"

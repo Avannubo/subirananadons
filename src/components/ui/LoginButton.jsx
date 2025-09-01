@@ -7,7 +7,7 @@ export default function LoginButton() {
     return (
         <button
             type="button"
-            className="mt-8 px-6 py-3 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition-colors"
+            className="mt-8 px-6 py-3 bg-[#36A9E1] text-white rounded-lg font-semibold shadow hover:bg-[#3f93ba] transition-colors"
             onClick={() => {
                 const btn = document.getElementById('login-button');
                 if (btn) btn.click();

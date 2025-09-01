@@ -120,7 +120,7 @@ export default function ClientsTable({ clients, onEditClient, onDeleteClient, on
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
                                     <button
                                         onClick={() => onViewClient(client)}
-                                        className="text-[#00B0C8] hover:text-[#008A9B] cursor-pointer"
+                                        className="text-[#36A9E1] hover:text-[#008A9B] cursor-pointer"
                                         title={t.view}
                                     >
                                         <FiEye size={20} />

@@ -94,7 +94,7 @@ export default function ListStatusModal({
                 <div className="p-6">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center">
-                            <span className="text-[#00B0C8] mr-2">
+                            <span className="text-[#36A9E1] mr-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -138,7 +138,7 @@ export default function ListStatusModal({
                                     name="privacyToggle"
                                     checked={isPublic}
                                     onChange={handlePrivacyChange}
-                                    className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 rounded"
+                                    className="h-4 w-4 text-[#36A9E1] focus:ring-[#36A9E1] border-gray-300 rounded"
                                 />
                                 <label htmlFor="privacyToggle" className="ml-2 block text-sm text-gray-700">
                                     {t.publicToggle}
@@ -203,7 +203,7 @@ export default function ListStatusModal({
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#36A9E1] hover:bg-[#008da0] focus:outline-none ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
                                 >
                                     {loading ? t.saving : t.save}
                                 </button>

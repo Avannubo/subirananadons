@@ -372,7 +372,7 @@ export default function ListViewModal({
                                                     setDirection('reserve');
                                                     setShowDataModal(true);
                                                 }}
-                                                className="px-3 py-1 text-sm rounded-md bg-blue-50 text-[#00B0C8] hover:bg-blue-100 border border-blue-200 transition-colors duration-200"
+                                                className="px-3 py-1 text-sm rounded-md bg-blue-50 text-[#36A9E1] hover:bg-blue-100 border border-blue-200 transition-colors duration-200"
                                                 title={t.reservar || 'Reservar producto'}
                                             >
                                                 {t.reservar || 'Reservar'}
@@ -427,7 +427,7 @@ export default function ListViewModal({
                                         )}
                                     </>
                                 ) : (
-                                        <p className="text-sm  text-gray-900">{item.product.discount.finalPrice} €</p>
+                                    <p className="text-sm  text-gray-900">{item.product.discount.finalPrice} €</p>
                                 )}
                             </div>
                             <p className="text-xs text-gray-500">Ref: {item.product.reference || '-'}</p>
@@ -439,7 +439,7 @@ export default function ListViewModal({
                                         className={`font-medium ${item.state === 0
                                             ? "text-yellow-500"
                                             : item.state === 1
-                                                ? "text-[#00B0C8]"
+                                                ? "text-[#36A9E1]"
                                                 : item.state === 2
                                                     ? "text-green-600"
                                                     : "text-gray-500"
@@ -494,7 +494,7 @@ export default function ListViewModal({
                         {/* Header */}
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center">
-                                <span className="text-[#00B0C8] mr-2">
+                                <span className="text-[#36A9E1] mr-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                     </svg>
@@ -513,7 +513,7 @@ export default function ListViewModal({
                         {/* Main information cards */}
                         <div>
                             <div className="flex items-center mb-4 ">
-                                <span className="text-[#00B0C8] mr-2">
+                                <span className="text-[#36A9E1] mr-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
                                     </svg>
@@ -580,7 +580,7 @@ export default function ListViewModal({
                                         </div>
                                         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                             <div className="flex items-center mb-2">
-                                                <span className="text-[#00B0C8] mr-2">
+                                                <span className="text-[#36A9E1] mr-2">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
@@ -590,7 +590,7 @@ export default function ListViewModal({
                                             <div>
                                                 <span
                                                     className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${selectedList.status === 'Activa' ? 'bg-green-100 text-green-800' :
-                                                        selectedList.status === 'Completada' ? 'bg-blue-100 text-[#00B0C8]' :
+                                                        selectedList.status === 'Completada' ? 'bg-blue-100 text-[#36A9E1]' :
                                                             'bg-red-100 text-red-800'
                                                         }`}
                                                 >
@@ -614,7 +614,7 @@ export default function ListViewModal({
                             {/* Pending Items - Always shown, but for owner also show reserved with tag */}
                             <div className="flex flex-col">
                                 <div className="flex items-center mb-4">
-                                    <span className="text-[#00B0C8] mr-2">
+                                    <span className="text-[#36A9E1] mr-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                         </svg>
@@ -624,7 +624,7 @@ export default function ListViewModal({
                                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[55vh] flex-1">
                                     {itemsLoading ? (
                                         <div className="flex justify-center items-center py-10">
-                                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                         </div>
                                     ) : (() => {
                                         // For the owner, show reserved products in pending with a tag
@@ -675,7 +675,7 @@ export default function ListViewModal({
                             {/* Bought Items - Always shown */}
                             <div className="flex flex-col">
                                 <div className="flex items-center mb-4">
-                                    <span className="text-[#00B0C8] mr-2">
+                                    <span className="text-[#36A9E1] mr-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                         </svg>
@@ -685,7 +685,7 @@ export default function ListViewModal({
                                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[55vh] flex-1">
                                     {itemsLoading ? (
                                         <div className="flex justify-center items-center py-10">
-                                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                         </div>
                                     ) : getBoughtItems().length === 0 ? (
                                         <div className="text-center py-10">
@@ -703,7 +703,7 @@ export default function ListViewModal({
                                 /* Admin view - Reserved Items */
                                 <div className="flex flex-col">
                                     <div className="flex items-center mb-4">
-                                        <span className="text-[#00B0C8] mr-2">
+                                        <span className="text-[#36A9E1] mr-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                             </svg>
@@ -713,7 +713,7 @@ export default function ListViewModal({
                                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[55vh] flex-1">
                                         {itemsLoading ? (
                                             <div className="flex justify-center items-center py-10">
-                                                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                             </div>
                                         ) : getReservedItems().length === 0 ? (
                                             <div className="text-center py-10">
@@ -730,7 +730,7 @@ export default function ListViewModal({
                                 /* Owner view - Progress */
                                 <div>
                                     <div className="flex items-center mb-4">
-                                        <span className="text-[#00B0C8] mr-2">
+                                        <span className="text-[#36A9E1] mr-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                                             </svg>
@@ -745,8 +745,8 @@ export default function ListViewModal({
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2.5">
                                                 <div
-                                                    className={`h-2.5 rounded-full ${calculateProgress() >= 100 ? 'bg-[#00B0C8]' :
-                                                        calculateProgress() >= 75 ? 'bg-[#00B0C8]' :
+                                                    className={`h-2.5 rounded-full ${calculateProgress() >= 100 ? 'bg-[#36A9E1]' :
+                                                        calculateProgress() >= 75 ? 'bg-[#36A9E1]' :
                                                             calculateProgress() >= 50 ? 'bg-yellow-500' :
                                                                 'bg-green-500'
                                                         }`}
@@ -756,7 +756,7 @@ export default function ListViewModal({
                                         </div>
                                         <div className="grid grid-row-2 gap-4 text-center">
                                             <div className="bg-gray-50 p-4 rounded-lg">
-                                                <div className="text-4xl font-bold text-[#00B0C8]">{selectedList.products}</div>
+                                                <div className="text-4xl font-bold text-[#36A9E1]">{selectedList.products}</div>
                                                 <div className="text-xs text-gray-500 mt-1">{t.totalProducts}</div>
                                             </div>
                                             <div className="bg-gray-50 p-4 rounded-lg">
@@ -770,7 +770,7 @@ export default function ListViewModal({
                                                     setShowModal(false);
                                                     openEditModal(selectedList);
                                                 }}
-                                                className="w-full px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#008da0] text-sm font-medium mb-2"
+                                                className="w-full px-4 py-2 bg-[#36A9E1] text-white rounded hover:bg-[#008da0] text-sm font-medium mb-2"
                                             >
                                                 Gestionar Productos
                                             </button>
@@ -779,7 +779,7 @@ export default function ListViewModal({
                                                     setShowModal(false);
                                                     openStatusModal(selectedList);
                                                 }}
-                                                className="w-full px-4 py-2 border border-[#00B0C8] text-[#00B0C8] rounded hover:bg-[#00B0C810] text-sm font-medium"
+                                                className="w-full px-4 py-2 border border-[#36A9E1] text-[#36A9E1] rounded hover:bg-[#00B0C810] text-sm font-medium"
                                             >
                                                 Cambiar Estado
                                             </button>
@@ -793,7 +793,7 @@ export default function ListViewModal({
                             <div className="flex justify-end">
                                 <button
                                     onClick={handleSaveList}
-                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#00B0C8] border border-transparent rounded-md hover:bg-[#00B0C8]/80 focus:outline-none"
+                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#36A9E1] border border-transparent rounded-md hover:bg-[#36A9E1]/80 focus:outline-none"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 3.75H6.912a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859M12 3v8.25m0 0l-3-3m3 3l3-3" />
@@ -836,7 +836,7 @@ export default function ListViewModal({
                                     name="name"
                                     value={userData.name}
                                     onChange={handleUserDataChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm p-2 border"
+                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#36A9E1] focus:ring-[#36A9E1] sm:text-sm p-2 border"
                                     required
                                 />
                             </div>
@@ -850,8 +850,8 @@ export default function ListViewModal({
                                     name="email"
                                     value={userData.email}
                                     onChange={handleUserDataChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm p-2 border"
-                                    // required
+                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#36A9E1] focus:ring-[#36A9E1] sm:text-sm p-2 border"
+                                // required
                                 />
                             </div>
                             <div>
@@ -864,7 +864,7 @@ export default function ListViewModal({
                                     name="phone"
                                     value={userData.phone}
                                     onChange={handleUserDataChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm p-2 border"
+                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#36A9E1] focus:ring-[#36A9E1] sm:text-sm p-2 border"
                                 />
                             </div>
                             <div>
@@ -877,19 +877,19 @@ export default function ListViewModal({
                                     value={userData.message}
                                     onChange={handleUserDataChange}
                                     rows={3}
-                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm p-2 border"
+                                    className="mt-1 block w-full rounded-md border-gray-300 focus:border-[#36A9E1] focus:ring-[#36A9E1] sm:text-sm p-2 border"
                                 ></textarea>
                             </div>
                         </div>
                         <div className="mt-6 flex justify-end space-x-3">
                             <button
                                 onClick={() => setShowDataModal(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"> 
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1]">
                                 {t.cancel}
                             </button>
                             <button
                                 onClick={confirmStateChange}
-                                className="px-4 py-2 text-sm font-medium text-white bg-[#00B0C8] border border-transparent rounded-md hover:bg-[#00B0C8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"> 
+                                className="px-4 py-2 text-sm font-medium text-white bg-[#36A9E1] border border-transparent rounded-md hover:bg-[#36A9E1] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1]">
                                 {t.save}
                             </button>
                         </div>

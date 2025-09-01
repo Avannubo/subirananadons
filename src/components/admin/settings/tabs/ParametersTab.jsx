@@ -294,7 +294,7 @@ export default function ParametersTab() {
                             {param.unit && <span>{param.unit}</span>}
                             <button
                                 onClick={() => saveEdit(param.key, param.description)}
-                                className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8]"
+                                className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#3f93ba]"
                                 disabled={loading}
                             >
                                 {locale === 'ca' ? 'Desar' : 'Guardar'}
@@ -329,7 +329,7 @@ export default function ParametersTab() {
             <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
                 <h2 className="text-lg font-bold mb-4 flex items-center justify-between">{locale === 'ca' ? 'Xarxes Socials' : 'Redes Sociales'}
                     <button
-                        className="ml-4 px-3 py-1 bg-[#00B0C8]/10 text-[#00B0C8] rounded hover:bg-[#00B0C8]/20 border border-[#00B0C8] text-sm transition"
+                        className="ml-4 px-3 py-1 bg-[#36A9E1]/10 text-[#36A9E1] rounded hover:bg-[#36A9E1]/20 border border-[#36A9E1] text-sm transition"
                         onClick={() => setAddingSocial(v => !v)}
                     >
                         {addingSocial ? (locale === 'ca' ? 'Cancel·lar' : 'Cancelar') : (locale === 'ca' ? 'Afegir nova' : 'Añadir nueva')}
@@ -368,7 +368,7 @@ export default function ParametersTab() {
                             })()}
                         </div>
                         <button
-                            className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8] text-sm transition"
+                            className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#3f93ba] text-sm transition"
                             onClick={handleAddSocial}
                         >
                             {locale === 'ca' ? 'Afegir' : 'Añadir'}
@@ -396,7 +396,7 @@ export default function ParametersTab() {
                                         />
                                         <button
                                             onClick={() => saveEdit(param.key, param.name)}
-                                            className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8] transition"
+                                            className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#3f93ba] transition"
                                             disabled={loading}
                                         >
                                             {locale === 'ca' ? 'Desar' : 'Guardar'}
@@ -459,7 +459,7 @@ export default function ParametersTab() {
                                 />
                                 <button
                                     onClick={() => saveEdit(param.key, param.description)}
-                                    className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8]"
+                                    className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#3f93ba]"
                                     disabled={loading}
                                 >
                                     {locale === 'ca' ? 'Desar' : 'Guardar'}
@@ -501,7 +501,7 @@ export default function ParametersTab() {
                 );
             })()}
 
-            
+
         </div>
     );
 }

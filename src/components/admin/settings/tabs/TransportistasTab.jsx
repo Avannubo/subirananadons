@@ -225,7 +225,7 @@ export default function TransportistasTab() {
                     <h2 className="text-xl font-semibold">{locale === 'ca' ? 'Transportistes' : 'Transportistas'}</h2>
                     <button
                         onClick={handleNewCarrier}
-                        className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#00b1c8ad]"
+                        className="bg-[#36A9E1] text-white px-4 py-2 rounded hover:bg-[#00b1c8ad]"
                     >
                         {locale === 'ca' ? 'Nou Transportista' : 'Nuevo Transportista'}
                     </button>
@@ -266,7 +266,7 @@ export default function TransportistasTab() {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <button
                                         onClick={() => handleEditClick(t)}
-                                        className="text-[#00B0C8] hover:text-[#00b1c8ad] mr-3"
+                                        className="text-[#36A9E1] hover:text-[#00b1c8ad] mr-3"
                                     >
                                         {locale === 'ca' ? 'Editar' : 'Editar'}
                                     </button>
@@ -308,7 +308,7 @@ export default function TransportistasTab() {
                                 <div className="flex flex-col items-center gap-2">
                                     <div
                                         className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer h-40 flex flex-col items-center justify-center ${isDragging
-                                            ? 'border-[#00B0C8] bg-blue-50'
+                                            ? 'border-[#36A9E1] bg-blue-50'
                                             : 'border-gray-300 hover:border-gray-400'
                                             }`}
                                         onClick={handleImageClick}
@@ -355,7 +355,7 @@ export default function TransportistasTab() {
                                     <button
                                         type="button"
                                         onClick={() => setShowImageSelector(true)}
-                                        className="w-full px-4 py-2 text-white text-sm rounded-md bg-[#00B0C8] hover:bg-[#008A9B]"
+                                        className="w-full px-4 py-2 text-white text-sm rounded-md bg-[#36A9E1] hover:bg-[#008A9B]"
                                     >
                                         Selecciona existent
                                     </button>
@@ -434,7 +434,7 @@ export default function TransportistasTab() {
                             </button>
                             <button
                                 onClick={() => handleSaveCarrier(editingCarrier)}
-                                className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#00b1c8ad]"
+                                className="bg-[#36A9E1] text-white px-4 py-2 rounded hover:bg-[#00b1c8ad]"
                             >
                                 {locale === 'ca' ? 'Desar' : 'Guardar'}
                             </button>

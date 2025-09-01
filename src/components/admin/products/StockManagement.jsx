@@ -55,7 +55,7 @@ export default function StockManagement() {
 
             setProducts(data.products || []);
             console.log('Fetched products:', data.products);
-            
+
             setPagination({
                 currentPage: data.pagination?.currentPage || page,
                 totalPages: data.pagination?.totalPages || 1,
@@ -299,7 +299,7 @@ export default function StockManagement() {
                                 type="checkbox"
                                 checked={showLowStock}
                                 onChange={() => setShowLowStock(!showLowStock)}
-                                className="rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
+                                className="rounded border-gray-300 text-[#36A9E1] focus:ring-[#36A9E1]"
                             />
                             <span>Mostrar només productes amb estoc baix</span>
                         </label>
@@ -311,7 +311,7 @@ export default function StockManagement() {
             <div className="overflow-x-auto">
                 {loading ? (
                     <div className="flex justify-center items-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#36A9E1]"></div>
                         <span className="ml-2">Carregant productes...</span>
                     </div>
                 ) : products.length === 0 ? (
@@ -395,7 +395,7 @@ export default function StockManagement() {
                                             <div className="flex space-x-2">
                                                 <button
                                                     onClick={() => saveStockChanges(product._id)}
-                                                    className="text-[#00B0C8] hover:text-[#00B0C870] cursor-pointer"
+                                                    className="text-[#36A9E1] hover:text-[#00B0C870] cursor-pointer"
                                                 >
                                                     Desa
                                                 </button>

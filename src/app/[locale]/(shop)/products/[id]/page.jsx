@@ -308,7 +308,7 @@ export default function Page() {
                     <div className="text-center py-16">
                         <h2 className="text-2xl text-red-500 mb-4">{t('errorTitle')}</h2>
                         <p className="text-gray-600">{error || t('errorNotFound')}</p>
-                        <a href="/products" className="mt-6 inline-block bg-[#00B0C8] text-white py-2 px-6 rounded-md hover:bg-[#009bb1]">
+                        <a href="/products" className="mt-6 inline-block bg-[#36A9E1] text-white py-2 px-6 rounded-md hover:bg-[#009bb1]">
                             {t('backToShop')}
                         </a>
                     </div>
@@ -320,7 +320,7 @@ export default function Page() {
         <ShopLayout>
             <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 mt-20">
                 {/* Breadcrumb */}
-                <nav className="mb-6   sm:mb-8 overflow-x-auto mt-10 border-b border-[#00B0C8]">
+                <nav className="mb-6   sm:mb-8 overflow-x-auto mt-10 border-b border-[#36A9E1]">
                     <ol className="hidden pl-2 md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
                         <li><a href="/products" className="hover:text-gray-700">{t('breadcrumbProducts')}</a></li>
                         {/* Render full category path if possible */}
@@ -392,7 +392,7 @@ export default function Page() {
                                                 <div
                                                     key={index}
                                                     className={`relative border border-gray-200 rounded-md overflow-hidden \
-                                                        ${selectedImage === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}\
+                                                        ${selectedImage === index ? 'ring-2 ring-[#36A9E1]' : 'ring-1 ring-gray-200'}\
                                                         w-[90px] xs:w-[120px] sm:w-[140px] md:w-[180px] flex-shrink-0`}
                                                 >
                                                     <div
@@ -510,7 +510,7 @@ export default function Page() {
                             {/* Add to Cart Button */}
                             <button
                                 onClick={handleAddToCart}
-                                className="cursor-pointer w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200 mt-2"
+                                className="cursor-pointer w-full bg-[#36A9E1] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200 mt-2"
                             >
                                 {t('addToCart')}
                             </button>
@@ -542,7 +542,7 @@ export default function Page() {
                                     key={tab}
                                     // onClick={() => setActiveTab(idx === 0 ? 'DETALLES DEL PRODUCTO' : 'DETALLES DEL PRODUCTO')}
                                     className={`pb-4 px-1 select-none text-xs sm:text-sm font-medium ${activeTab === (idx === 0 ? 'DETALLES DEL PRODUCTO' : 'DETALLES DEL PRODUCTO')
-                                        ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
+                                        ? 'border-b-2 border-[#36A9E1] text-[#36A9E1]'
                                         : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
                                 >

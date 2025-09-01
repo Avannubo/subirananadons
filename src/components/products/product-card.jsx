@@ -105,7 +105,7 @@ export default function ProductCard({
                 margin: '10px',
                 // padding: '10px',
             }}
-            className="flex flex-col items-center text-center h-full group hover:text-[#00B0C8] bg-white rounded-lg overflow-hidden"
+            className="flex flex-col items-center text-center h-full group hover:text-[#36A9E1] bg-white rounded-lg overflow-hidden"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -161,10 +161,10 @@ export default function ProductCard({
                                 {/* <span className="text-red-500 text-sm font-medium px-1">
                                     {product.discount.type === 'percentage' ? `-${product.discount.value}%` : `-${product.discount.value}€`}
                                 </span> */}
-                                <span className="text-[#00B0C8] font-bold text-lg">{product.discount.finalPrice.toFixed(2)}€</span>
+                                <span className="text-[#36A9E1] font-bold text-lg">{product.discount.finalPrice.toFixed(2)}€</span>
                             </>
                         ) : (
-                            <p className="text-[#00B0C8] font-bold text-lg">{product.price}</p>
+                            <p className="text-[#36A9E1] font-bold text-lg">{product.price}</p>
                         )}
                     </div>
                 </div>

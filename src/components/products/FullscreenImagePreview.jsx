@@ -82,7 +82,7 @@ export default function FullscreenImagePreview({ images, initialIndex, onClose }
             {images.length > 1 && (
                 <>
                     <button
-                        className="absolute left-2 top-1/2 transform -translate-y-1/2 text-[#00B0C8] p-2"
+                        className="absolute left-2 top-1/2 transform -translate-y-1/2 text-[#36A9E1] p-2"
                         onClick={(e) => {
                             e.stopPropagation();
                             previousImage();
@@ -93,7 +93,7 @@ export default function FullscreenImagePreview({ images, initialIndex, onClose }
                         </svg>
                     </button>
                     <button
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#00B0C8] p-2"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#36A9E1] p-2"
                         onClick={(e) => {
                             e.stopPropagation();
                             nextImage();

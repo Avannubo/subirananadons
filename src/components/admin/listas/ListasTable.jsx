@@ -481,7 +481,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                     </td>
                                     <td className="px-6 py-4 text-sm">
                                         <div className="flex items-center justify-center space-x-3">
-                                            <button className="text-[#00B0C8] hover:text-[#008da0]" onClick={() => openViewModal(list)} title={t.viewDetails}><FiEye size={22} /></button>
+                                            <button className="text-[#36A9E1] hover:text-[#008da0]" onClick={() => openViewModal(list)} title={t.viewDetails}><FiEye size={22} /></button>
                                             <button className="text-indigo-600 hover:text-indigo-900" onClick={() => { const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`; navigator.clipboard.writeText(url).then(() => toast.success(t.linkCopied)).catch(() => toast.error(t.linkCopyError)); }} title={t.copyLink}><FiLink size={22} /></button>
                                         </div>
                                     </td>

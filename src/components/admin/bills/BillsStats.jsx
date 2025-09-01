@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 export default function BillsStats() {
     const [stats, setStats] = useState([
         {
-            icon: <FiUser className="text-[#00B0C8] text-xl" />,
+            icon: <FiUser className="text-[#36A9E1] text-xl" />,
             title: "Facturas emitidas",
             value: "...",
             description: "Este mes",
@@ -43,7 +43,7 @@ export default function BillsStats() {
                 if (data.success) {
                     setStats([
                         {
-                            icon: <FiUser className="text-[#00B0C8] text-xl" />,
+                            icon: <FiUser className="text-[#36A9E1] text-xl" />,
                             title: "Facturas emitidas",
                             value: data.data.totalBills.toString(),
                             description: "Este mes",

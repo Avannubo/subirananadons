@@ -20,14 +20,14 @@ export default function ProductsStats() {
 
     const statsItems = [
         {
-            icon: <FiShoppingBag className="text-[#00B0C8] text-xl" />,
+            icon: <FiShoppingBag className="text-[#36A9E1] text-xl" />,
             title: "Productos",
             value: loading ? "Cargando..." : `${stats.totalProducts}`,
             description: "Productos en catálogo",
             bgColor: "bg-blue-100"
         },
         {
-            icon: <FiPackage  className="text-green-600 text-xl" />,
+            icon: <FiPackage className="text-green-600 text-xl" />,
             title: "Categorías",
             value: loading ? "Cargando..." : stats.totalCategories.toString(),
             description: "Total de categorías",

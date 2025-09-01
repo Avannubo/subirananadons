@@ -21,7 +21,7 @@ export default function ClientsStats() {
     // Format stats for display
     const displayStats = [
         {
-            icon: <FiUser className="text-[#00B0C8] text-xl" />,
+            icon: <FiUser className="text-[#36A9E1] text-xl" />,
             title: "Clientes",
             value: loading ? "Cargando..." : `${stats.totalClients} Clientes`,
             description: `${stats.activeClients} activos, ${stats.inactiveClients} inactivos`,

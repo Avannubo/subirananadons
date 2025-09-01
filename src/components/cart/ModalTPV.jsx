@@ -185,25 +185,25 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             <div className="z-[1000] max-w-4xl w-full mx-auto bg-white rounded-2xl shadow-2xl border border-gray-100 px-0 md:px-0">
                 {isProcessingPayment ? (
                     <div className="p-8 rounded-2xl shadow-xl text-center bg-white">
-                        <h2 className="text-2xl font-bold text-[#0090a8]">{translations[locale].processingPayment}</h2>
+                        <h2 className="text-2xl font-bold text-[#3f93ba]">{translations[locale].processingPayment}</h2>
                         <p className="text-base mt-2 text-gray-700">{translations[locale].pleaseWait}</p>
                         <div className="mt-6 flex justify-center">
-                            <span className="inline-block w-8 h-8 border-4 border-[#0090a8] border-t-transparent rounded-full animate-spin"></span>
+                            <span className="inline-block w-8 h-8 border-4 border-[#3f93ba] border-t-transparent rounded-full animate-spin"></span>
                         </div>
                     </div>
                 ) : paymentStatus === 'OK' ? (
                     <div className="p-8 rounded-2xl shadow-xl text-center bg-white">
                         <h2 className="text-2xl font-bold text-green-600">{translations[locale].paymentSuccess}</h2>
                         <p className="text-base mt-2 text-gray-700">{translations[locale].paymentCompleted}</p>
-                        <h2 className="text-xl mt-4 font-semibold text-[#0090a8]">{translations[locale].orderSummaryEmail}</h2>
+                        <h2 className="text-xl mt-4 font-semibold text-[#3f93ba]">{translations[locale].orderSummaryEmail}</h2>
                         <div className='flex flex-row justify-center gap-3 mt-6'>
-                            <Link href="/" className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
+                            <Link href="/" className="bg-[#3f93ba] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
                                 {translations[locale].home}
                             </Link>
-                            <Link href="/products" className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
+                            <Link href="/products" className="bg-[#3f93ba] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
                                 {translations[locale].shop}
                             </Link>
-                            <Link href="/about/contacto" className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
+                            <Link href="/about/contacto" className="bg-[#3f93ba] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
                                 {translations[locale].contact}
                             </Link>
                         </div>
@@ -220,7 +220,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                     </div>
                 ) : (
                     <div className="px-6 md:px-12 py-8 rounded-2xl shadow-xl bg-white">
-                        <h2 className="text-2xl font-bold text-[#0090a8] mb-4">{translations[locale].orderSummary}</h2>
+                        <h2 className="text-2xl font-bold text-[#3f93ba] mb-4">{translations[locale].orderSummary}</h2>
                         <div className="overflow-x-auto rounded-lg border border-gray-100">
                             <table className="w-full table-auto border-collapse text-sm">
                                 <thead>
@@ -290,7 +290,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                             </p>
                         </div>
                         <div className="flex flex-row justify-center gap-3 mt-8">
-                                        <button onClick={handlePaymentProcess} className="bg-[#00B0C8] hover:bg-[#008fa8d5] text-white px-6 py-2 rounded-lg font-normal transition-colors duration-150 h-[42px]">
+                            <button onClick={handlePaymentProcess} className="bg-[#36A9E1] hover:bg-[#008fa8d5] text-white px-6 py-2 rounded-lg font-normal transition-colors duration-150 h-[42px]">
                                 {translations[locale].confirmPayment}
                             </button>
                             <button onClick={onClose} className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-normal transition-colors duration-150 h-[42px]">

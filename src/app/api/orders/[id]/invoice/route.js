@@ -64,7 +64,7 @@ export async function GET(request, { params }) {
                 .logo { 
                     font-size: 24px;
                     font-weight: bold;
-                    color: #00B0C8;
+                    color: #36A9E1;
                     white-space: nowrap;
                 }
                 .invoice-details {
@@ -100,7 +100,7 @@ export async function GET(request, { params }) {
                     border-bottom: 1px solid #eee;
                 }
                 th {
-                    background: #00B0C8;
+                    background: #36A9E1;
                     color: white;
                     font-weight: normal;
                     text-align: left;
@@ -135,7 +135,7 @@ export async function GET(request, { params }) {
                     text-align: left;
                 }
                 .personal-type {
-                    color: #00B0C8;
+                    color: #36A9E1;
                 }
                 .gift-type {
                     color: #FF0080;
@@ -161,7 +161,7 @@ export async function GET(request, { params }) {
                 .total-row td {
                     padding-top: 12px;
                     font-weight: bold;
-                    border-top: 2px solid #00B0C8;
+                    border-top: 2px solid #36A9E1;
                 }
                 .discount-row td {
                     color: #FF0080;

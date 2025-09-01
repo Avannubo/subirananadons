@@ -255,7 +255,7 @@ export default function ProductosTab() {
                         </select>
                     </div>
                     <button
-                        className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#0090a8]"
+                        className="bg-[#36A9E1] text-white px-4 py-2 rounded hover:bg-[#3f93ba]"
                         onClick={handleAddRecommendation}
                         type="button"
                         disabled={!form.name.ca || !form.name.es || !form.category}
@@ -274,7 +274,7 @@ export default function ProductosTab() {
                                     return (
                                         <li key={realIdx} className="flex items-center gap-2">
                                             <span>
-                                                <span className="font-medium cursor-pointer text-[#00B0C8] hover:underline" onClick={() => handleEditRecommendation(realIdx)}>
+                                                <span className="font-medium cursor-pointer text-[#36A9E1] hover:underline" onClick={() => handleEditRecommendation(realIdx)}>
                                                     {r.name?.ca || ''}
                                                     {r.name?.es ? ` / ${r.name.es}` : ''}
                                                 </span>
@@ -297,7 +297,7 @@ export default function ProductosTab() {
                                     return (
                                         <li key={realIdx} className="flex items-center gap-2">
                                             <span>
-                                                <span className="font-medium cursor-pointer text-[#00B0C8] hover:underline" onClick={() => handleEditRecommendation(realIdx)}>
+                                                <span className="font-medium cursor-pointer text-[#36A9E1] hover:underline" onClick={() => handleEditRecommendation(realIdx)}>
                                                     {r.name?.ca || ''}
                                                     {r.name?.es ? ` / ${r.name.es}` : ''}
                                                 </span>
@@ -328,7 +328,7 @@ export default function ProductosTab() {
                 )}
                 <button
                     type="submit"
-                    className="bg-[#00B0C8] text-white px-4 py-2 rounded hover:bg-[#0090a8] mt-2 md:mt-0"
+                    className="bg-[#36A9E1] text-white px-4 py-2 rounded hover:bg-[#3f93ba] mt-2 md:mt-0"
                     disabled={loading || !form.groupTitle || recommendations.length === 0}
                 >
                     {editGroupIdx !== null
@@ -375,7 +375,7 @@ export default function ProductosTab() {
                                         {container.title?.ca || ''}
                                         {container.title?.es ? ` / ${container.title.es}` : ''}
                                         <button
-                                            className="text-xs text-[#00B0C8] border border-[#00B0C820] rounded px-2 py-1 hover:bg-[#00B0C810]"
+                                            className="text-xs text-[#36A9E1] border border-[#00B0C820] rounded px-2 py-1 hover:bg-[#00B0C810]"
                                             onClick={() => handleEditGroup(idx)}
                                         >
                                             {locale === 'es' ? 'Editar' : locale === 'en' ? 'Edit' : 'Editar'}

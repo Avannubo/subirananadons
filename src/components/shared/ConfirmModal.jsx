@@ -49,7 +49,7 @@ export default function ConfirmModal({
                         <button
                             type="button"
                             onClick={onConfirm}
-                            className="inline-flex justify-center rounded-md border border-transparent bg-[#00B0C8] px-4 py-2 text-sm font-medium text-white hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:ring-offset-2"
+                            className="inline-flex justify-center rounded-md border border-transparent bg-[#36A9E1] px-4 py-2 text-sm font-medium text-white hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:ring-offset-2"
                         >
                             {confirmText}
                         </button>

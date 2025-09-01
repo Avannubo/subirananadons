@@ -124,7 +124,7 @@ export default function ProductQuickView({ product, onClose }) {
                                 {thumbnailImages.map((thumb, index) => (
                                     <div
                                         key={index}
-                                        className={`relative w-12 h-12 sm:w-16 sm:h-16 border rounded overflow-hidden cursor-pointer ${selectedImage === thumb ? 'border-[#00B0C8] border-2' : 'border-gray-200'}`}
+                                        className={`relative w-12 h-12 sm:w-16 sm:h-16 border rounded overflow-hidden cursor-pointer ${selectedImage === thumb ? 'border-[#36A9E1] border-2' : 'border-gray-200'}`}
                                         onClick={() => handleThumbnailClick(thumb)}
                                     >
                                         <img
@@ -201,7 +201,7 @@ export default function ProductQuickView({ product, onClose }) {
                                         Més informació
                                     </button>
                                     <button
-                                        className="cursor-pointer w-1/2 bg-[#00B0C8] text-white py-3 rounded font-medium hover:bg-[#0090a8] transition duration-200"
+                                        className="cursor-pointer w-1/2 bg-[#36A9E1] text-white py-3 rounded font-medium hover:bg-[#3f93ba] transition duration-200"
                                         onClick={handleAddToCart}
                                     >
                                         Afegir al carret

@@ -175,7 +175,7 @@ export default function BirthListPage({ params }) {
                         </svg>
                         <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('errorLoadListTitle')}</h3>
                         <p className="text-gray-500 mb-6">{t('errorLoadListDesc', { error })}</p>
-                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
+                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#36A9E1] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>
                     </div>
@@ -197,7 +197,7 @@ export default function BirthListPage({ params }) {
                         <p className="text-gray-500 mb-6">
                             {!list ? t('listNotFoundDesc') : t('listInactiveDesc')}
                         </p>
-                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
+                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#36A9E1] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>
                     </div>
@@ -217,7 +217,7 @@ export default function BirthListPage({ params }) {
                         </svg>
                         <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('listCompletedTitle')}</h3>
                         <p className="text-gray-500 mb-6">{t('listCompletedDesc')}</p>
-                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
+                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#36A9E1] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>
                     </div>
@@ -337,7 +337,7 @@ export default function BirthListPage({ params }) {
                         </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
-                                    className="bg-[#00B0C8] h-2 rounded-full transition-all duration-500"
+                                    className="bg-[#36A9E1] h-2 rounded-full transition-all duration-500"
                                     style={{ width: `${list.progress}%` }}
                                     title={t('giftsPurchasedTitle', { percent: list.progress })}
                                 />
@@ -346,7 +346,7 @@ export default function BirthListPage({ params }) {
                         <div className="flex space-x-4 relative">
                             <button
                                 onClick={handleShareClick}
-                                className="cursor-pointer px-4 py-2 bg-[#00B0C8] text-white rounded-full hover:bg-[#0090a8] transition-colors flex items-center gap-2"
+                                className="cursor-pointer px-4 py-2 bg-[#36A9E1] text-white rounded-full hover:bg-[#3f93ba] transition-colors flex items-center gap-2"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
@@ -378,7 +378,7 @@ export default function BirthListPage({ params }) {
                                         key={category._id ? category._id : label + idx}
                                         onClick={() => setSelectedCategory(category)}
                                         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isSelected
-                                            ? 'bg-[#00B0C8] text-white shadow-sm'
+                                            ? 'bg-[#36A9E1] text-white shadow-sm'
                                             : 'bg-transparent text-gray-600 hover:bg-gray-200'
                                             }`}
                                     >
@@ -444,7 +444,7 @@ export default function BirthListPage({ params }) {
                                                             -{product.discount.value}%
                                                         </span>
                                                     </div>
-                                                    <span className="text-sm font-semibold text-[#00B0C8]">
+                                                    <span className="text-sm font-semibold text-[#36A9E1]">
                                                         {product.discount.finalPrice?.toFixed(2)}€
                                                     </span>
                                                 </>
@@ -457,7 +457,7 @@ export default function BirthListPage({ params }) {
                                         {product.status === 'available' ? (
                                             <button
                                                 onClick={() => handleReserveClick(product)}
-                                                className="cursor-pointer w-full bg-[#00B0C8] text-white py-1.5 text-sm rounded-md hover:bg-[#0090a8] transition-colors"
+                                                className="cursor-pointer w-full bg-[#36A9E1] text-white py-1.5 text-sm rounded-md hover:bg-[#3f93ba] transition-colors"
                                             >
                                                 {t('addToCartBtn')}
                                             </button>

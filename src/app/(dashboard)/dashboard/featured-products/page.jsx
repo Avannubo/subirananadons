@@ -178,7 +178,7 @@ export default function FeaturedProductsPage() {
                                     <input
                                         type="text"
                                         placeholder="Cerca per nom, marca, categoria o referència"
-                                        className="border border-gray-300 rounded-md w-full px-4 py-2 focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                        className="border border-gray-300 rounded-md w-full px-4 py-2 focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
@@ -196,7 +196,7 @@ export default function FeaturedProductsPage() {
                     </div>
                     {loading ? (
                         <div className="bg-white rounded-lg shadow p-8 flex justify-center items-center">
-                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00B0C8]"></div>
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#36A9E1]"></div>
                         </div>
                     ) : (
                         <div className="bg-white rounded-lg shadow overflow-hidden">

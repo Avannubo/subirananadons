@@ -168,8 +168,8 @@ export default function CartSuccessPage() {
         <ShopLayout>
             <div className="min-h-[60vh] flex flex-col items-center justify-center">
                 <div className="flex flex-col items-center justify-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#00B0C8] border-t-transparent mb-4"></div>
-                    <div className="text-lg text-[#00B0C8] font-semibold">{t('loading')}</div>
+                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#36A9E1] border-t-transparent mb-4"></div>
+                    <div className="text-lg text-[#36A9E1] font-semibold">{t('loading')}</div>
                 </div>
             </div>
         </ShopLayout>
@@ -192,7 +192,7 @@ export default function CartSuccessPage() {
                     <p>{t('notFound')}</p>
                 )}
                 <div className="flex gap-4 mt-6">
-                    <Link href="/products" className="bg-[#00B0C8] text-white px-6 py-2 rounded-md cursor-pointer">{t('continueShopping')}</Link>
+                    <Link href="/products" className="bg-[#36A9E1] text-white px-6 py-2 rounded-md cursor-pointer">{t('continueShopping')}</Link>
                     <Link href="/" className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md cursor-pointer">{t('home')}</Link>
                 </div>
             </div>

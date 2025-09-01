@@ -105,7 +105,7 @@ export default function LegalContentEditor() {
                     </div>
                     <div className="flex gap-2">
                         <button
-                            className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8]"
+                            className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#3f93ba]"
                             onClick={() => handleSave(key)}
                             disabled={loading || (edit[key]?.ca === initial[key]?.ca && edit[key]?.es === initial[key]?.es)}
                         >

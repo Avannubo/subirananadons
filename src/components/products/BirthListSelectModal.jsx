@@ -94,7 +94,7 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
 
                             {loading && !selectedList ? (
                                 <div className="flex justify-center items-center py-10">
-                                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                 </div>
                             ) : (
                                 <ul className="divide-y divide-gray-200 max-h-[200px] overflow-y-auto">
@@ -130,7 +130,7 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
                                                         )}
                                                     </div>
                                                     {selectedList === list._id && (
-                                                        <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                        <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                                     )}
                                                 </div>
                                             </li>

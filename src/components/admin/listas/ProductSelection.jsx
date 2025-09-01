@@ -166,10 +166,10 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                         <span className="text-red-500 bg-red-50 rounded-md text-xs font-medium px-1" title={t.discounted}>
                                                             {item.product.discount.type === 'percentage' ? `-${item.product.discount.value}%` : `-${item.product.discount.value}€`}
                                                         </span>
-                                                        <span className="text-[#00B0C8] font-bold text-base" title={t.finalPrice}>{item.product.discount.finalPrice?.toFixed(2)}€</span>
+                                                        <span className="text-[#36A9E1] font-bold text-base" title={t.finalPrice}>{item.product.discount.finalPrice?.toFixed(2)}€</span>
                                                     </>
                                                 ) : (
-                                                    <span className="text-[#00B0C8] font-bold text-base">{item.product.price_incl_tax?.toFixed(2)}€</span>
+                                                    <span className="text-[#36A9E1] font-bold text-base">{item.product.price_incl_tax?.toFixed(2)}€</span>
                                                 )}
                                             </div>
                                         </div>
@@ -222,7 +222,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             {/* Loading State */}
             {loading && (
                 <div className="flex justify-center items-center py-10">
-                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]"></div>
                 </div>
             )}
             {/* Products Grid */}
@@ -270,10 +270,10 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
 
                                                     </div>
 
-                                                    <span className="text-[#00B0C8] font-bold text-lg">{product.discount.finalPrice?.toFixed(2)}€</span>
+                                                    <span className="text-[#36A9E1] font-bold text-lg">{product.discount.finalPrice?.toFixed(2)}€</span>
                                                 </div>
                                             ) : (
-                                                <p className="text-[#00B0C8] font-bold text-lg">{product.price_incl_tax?.toFixed(2)}€</p>
+                                                <p className="text-[#36A9E1] font-bold text-lg">{product.price_incl_tax?.toFixed(2)}€</p>
                                             )}
                                         </div>
                                     </div>
@@ -315,7 +315,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                 setCurrentPage(pageNum);
                                             }}
                                             className={`px-3 py-1 rounded-md ${currentPage === pageNum
-                                                ? 'bg-[#00B0C8] text-white'
+                                                ? 'bg-[#36A9E1] text-white'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >

@@ -90,7 +90,7 @@ export default function BirthListsPage() {
                         />
                         <button
                             type="submit"
-                            className="ml-2 text-gray-500 hover:text-[#00B0C8] focus:outline-none"
+                            className="ml-2 text-gray-500 hover:text-[#36A9E1] focus:outline-none"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -105,7 +105,7 @@ export default function BirthListsPage() {
             <div className="container mx-auto p-4">
                 <div className="flex flex-col md:flex-row gap-6 mb-12">
                     <motion.div
-                        className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-6 md:mb-12 text-white"
+                        className="flex-1 bg-gradient-to-r from-[#36A9E1] to-[#3f93ba] rounded-lg p-8 mb-6 md:mb-12 text-white"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5, duration: 0.5 }}
@@ -123,14 +123,14 @@ export default function BirthListsPage() {
                                         router.push('/dashboard/listas');
                                     }
                                 }}
-                                className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
+                                className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#36A9E1] rounded-full font-medium hover:bg-gray-100 transition-colors"
                             >
                                 {t('createListBtn')}
                             </button>
                         </div>
                     </motion.div>
                     <motion.div
-                        className="flex-1 bg-gradient-to-r from-[#00B0C8] to-[#0090a8] rounded-lg p-8 mb-6 md:mb-12 text-white"
+                        className="flex-1 bg-gradient-to-r from-[#36A9E1] to-[#3f93ba] rounded-lg p-8 mb-6 md:mb-12 text-white"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5, duration: 0.5 }}
@@ -142,7 +142,7 @@ export default function BirthListsPage() {
                             </div>
                             <Link
                                 href="/recomendations"
-                                className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#00B0C8] rounded-full font-medium hover:bg-gray-100 transition-colors"
+                                className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#36A9E1] rounded-full font-medium hover:bg-gray-100 transition-colors"
                             >
                                 {t('recommendBtn')}
                             </Link>
@@ -161,7 +161,7 @@ export default function BirthListsPage() {
                         <div className="flex flex-col p-4 md:flex-row md:space-x-4 space-y-8 md:space-y-0 overflow-x-auto">
                             <div className="flex-1 min-w-[220px] shadow-md p-6 rounded-lg text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-8 h-8 text-[#36A9E1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
                                 </div>
@@ -170,7 +170,7 @@ export default function BirthListsPage() {
                             </div>
                             <div className="flex-1 min-w-[220px] shadow-md p-6 rounded-lg  text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">
-                                    <svg className="w-8 h-8  text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-8 h-8  text-[#36A9E1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
                                 </div>
@@ -179,7 +179,7 @@ export default function BirthListsPage() {
                             </div>
                             <div className="flex-1 min-w-[220px] shadow-md p-6 rounded-lg  text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">
-                                    <svg className="w-8 h-8  text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-8 h-8  text-[#36A9E1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
                                 </div>
@@ -188,7 +188,7 @@ export default function BirthListsPage() {
                             </div>
                             <div className="flex-1 min-w-[220px] shadow-md  p-6 rounded-lg  text-center">
                                 <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4">
-                                    <svg className="w-8 h-8  text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-8 h-8  text-[#36A9E1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m8-8v13m-8 0V8m-8 8v13" />
                                     </svg>
                                 </div>

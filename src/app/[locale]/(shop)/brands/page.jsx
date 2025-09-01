@@ -351,7 +351,7 @@ export default function BrandsPage() {
             )}
             {/* <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">{t('sidebarTitle')}</h2> */}
             <div className="container mx-auto px-2 sm:px-4 py-4 ">
-                <div className="flex flex-col lg:flex-row gap-2 border-t border-[#00B0C8] pb-2">
+                <div className="flex flex-col lg:flex-row gap-2 border-t border-[#36A9E1] pb-2">
                     {/* Brands Sidebar */}
                     <motion.div
                         className="w-full lg:w-1/6 mb-2 md:mb-0 pt-6"
@@ -375,7 +375,7 @@ export default function BrandsPage() {
                                                 onClick={() => handleBrandSelect('all')}
                                                 data-brand="all"
                                                 className={`w-full text-left px-4 py-2 transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-3 ${selectedBrandId === 'all'
-                                                    ? 'bg-gray-50 font-medium text-[#00B0C8]'
+                                                    ? 'bg-gray-50 font-medium text-[#36A9E1]'
                                                     : ''
                                                     } cursor-pointer`}
                                             >
@@ -384,7 +384,7 @@ export default function BrandsPage() {
                                                         <span className="text-gray-500 text-xs">ALL</span>
                                                     </div>
                                                 </div>
-                                                <span className="hover:text-[#00B0C8] transition-colors active:font-bold">{t('allBrandsOption')}</span>
+                                                <span className="hover:text-[#36A9E1] transition-colors active:font-bold">{t('allBrandsOption')}</span>
                                             </button>
                                         </motion.li>
                                     ) : (
@@ -410,7 +410,7 @@ export default function BrandsPage() {
                                                     onClick={() => handleBrandSelect(brand._id)}
                                                     data-brand={brand._id}
                                                     className={`w-full text-left px-4 py-2 transition-colors hover:bg-gray-50 flex items-center gap-3 ${selectedBrandId === brand._id
-                                                        ? 'bg-gray-50 font-medium text-[#00B0C8]'
+                                                        ? 'bg-gray-50 font-medium text-[#36A9E1]'
                                                         : ''
                                                         } cursor-pointer`}
                                                 >
@@ -429,7 +429,7 @@ export default function BrandsPage() {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <span className="hover:text-[#00B0C8] transition-colors active:font-bold">{brand.name}</span>
+                                                    <span className="hover:text-[#36A9E1] transition-colors active:font-bold">{brand.name}</span>
                                                 </button>
                                             </motion.li>
                                         ))
@@ -439,7 +439,7 @@ export default function BrandsPage() {
                             {/* Brand selection dropdown for mobile and tablet (up to lg) */}
                             <div className="block lg:hidden w-full">
                                 <select
-                                    className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition"
+                                    className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition"
                                     value={selectedBrandId || 'all'}
                                     onChange={e => handleBrandSelect(e.target.value)}
                                     disabled={brandsLoading}
@@ -596,7 +596,7 @@ export default function BrandsPage() {
                                                 key={`page-${page}`}
                                                 onClick={() => goToPage(page)}
                                                 className={`min-w-[40px] px-4 py-2 ${currentPage === page
-                                                    ? 'bg-[#00B0C8] text-white font-medium'
+                                                    ? 'bg-[#36A9E1] text-white font-medium'
                                                     : 'text-gray-700 hover:bg-gray-50'} cursor-pointer`}
                                             >
                                                 {page}

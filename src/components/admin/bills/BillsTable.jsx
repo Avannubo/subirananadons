@@ -188,7 +188,7 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
                         />
                     </div>
                     <div className="flex items-end space-x-2">
-                        <button className="flex items-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C880]">
+                        <button className="flex items-center px-4 py-2 bg-[#36A9E1] text-white rounded hover:bg-[#00B0C880]">
                             <FiFilter className="mr-2" />
                             Buscar
                         </button>
@@ -221,7 +221,7 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
                             <tr>
                                 <td colSpan="9" className="px-6 py-4 text-center">
                                     <div className="flex items-center justify-center">
-                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00B0C8]"></div>
+                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#36A9E1]"></div>
                                         <span className="ml-2">Cargando facturas...</span>
                                     </div>
                                 </td>
@@ -246,7 +246,7 @@ export default function BillsTable({ bills = [], filters, setFilters, loading = 
                                         <div className="flex space-x-2">
                                             <button
                                                 onClick={() => viewPdf(bill.pdfUrl)}
-                                                className="text-[#00B0C8] hover:text-[#008A9B] flex items-center"
+                                                className="text-[#36A9E1] hover:text-[#008A9B] flex items-center"
                                                 title="Ver PDF"
                                             >
                                                 <FiEye size={20} />

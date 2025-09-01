@@ -286,7 +286,7 @@ export default function ListEditModal({
                     {/* Header */}
                     <div className="flex justify-between items-center p-4 px-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                         <DialogTitle className="text-xl font-semibold text-gray-800 flex items-center">
-                            <FiEdit2 className="mr-3 text-[#00B0C8]" />
+                            <FiEdit2 className="mr-3 text-[#36A9E1]" />
                             {t.title}
                         </DialogTitle>
                         <button
@@ -317,7 +317,7 @@ export default function ListEditModal({
                                                 name="title"
                                                 value={editForm.title}
                                                 onChange={handleEditChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition-colors"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition-colors"
                                                 placeholder={t.listTitlePlaceholder}
                                                 required
                                             />
@@ -334,7 +334,7 @@ export default function ListEditModal({
                                                 name="babyName"
                                                 value={editForm.babyName}
                                                 onChange={handleEditChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition-colors"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition-colors"
                                                 placeholder={t.babyNamePlaceholder}
                                                 required
                                             />
@@ -351,7 +351,7 @@ export default function ListEditModal({
                                                 name="dueDate"
                                                 value={editForm.dueDate}
                                                 onChange={handleEditChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition-colors"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition-colors"
                                                 required
                                             />
                                         </div>
@@ -367,7 +367,7 @@ export default function ListEditModal({
                                             name="description"
                                             value={editForm.description}
                                             onChange={handleEditChange}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition-colors resize-y"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition-colors resize-y"
                                             placeholder={t.descriptionPlaceholder}
                                             rows={1}
                                         />
@@ -379,7 +379,7 @@ export default function ListEditModal({
                             <div className="border-t border-gray-200 pt-2">
                                 <div className="mb-6">
                                     <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                        <FiImage className="mr-2 text-[#00B0C8]" />
+                                        <FiImage className="mr-2 text-[#36A9E1]" />
                                         {t.productManagement}
                                     </h3>
                                 </div>
@@ -414,7 +414,7 @@ export default function ListEditModal({
                                                         await handleAddProductsToList();
                                                         setTimeout(() => setAddBtnLoading(false), 2000);
                                                     }}
-                                                    className={`px-3 py-1 bg-[#00B0C8] text-white text-sm rounded-md hover:bg-[#008da0] transition-colors flex items-center justify-center ${addBtnLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                                    className={`px-3 py-1 bg-[#36A9E1] text-white text-sm rounded-md hover:bg-[#008da0] transition-colors flex items-center justify-center ${addBtnLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                                                     disabled={addBtnLoading}
                                                 >
                                                     {addBtnLoading ? (
@@ -473,7 +473,7 @@ export default function ListEditModal({
                                 disabled={loading}
                                 ref={saveButtonRef}
                                 onClick={handleUpdateList}
-                                className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] transition-colors ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                                className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#36A9E1] hover:bg-[#008da0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1] transition-colors ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
                             >
                                 {loading ? t.saving : t.save}
                             </button>

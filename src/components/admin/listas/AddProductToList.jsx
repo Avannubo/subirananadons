@@ -187,7 +187,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                         <span className="text-gray-400 line-through">
                                                             {item.product.price_incl_tax?.toFixed(2)}€
                                                         </span>
-                                                        <span className="text-[#00B0C8] font-medium">
+                                                        <span className="text-[#36A9E1] font-medium">
                                                             {item.product.discount.finalPrice?.toFixed(2)}€
                                                         </span>
                                                         <span className="px-1.5 py-0.5 text-xs font-medium text-red-700 bg-red-100 rounded-sm">
@@ -195,7 +195,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                         </span>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-[#00B0C8] font-medium">
+                                                    <span className="text-[#36A9E1] font-medium">
                                                         {item.product.price_incl_tax?.toFixed(2)}€
                                                     </span>
                                                 )}
@@ -251,7 +251,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             {/* Loading State */}
             {loading && (
                 <div className="flex justify-center items-center py-10">
-                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]" />
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]" />
                 </div>
             )}
             {/* Products Grid */}
@@ -299,12 +299,12 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                             -{product.discount.value}%
                                                         </span>
                                                     </div>
-                                                    <span className="text-base font-semibold text-[#00B0C8] mt-0.5">
+                                                    <span className="text-base font-semibold text-[#36A9E1] mt-0.5">
                                                         {product.discount.finalPrice?.toFixed(2)}€
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <span className="text-base font-semibold text-[#00B0C8]">
+                                                <span className="text-base font-semibold text-[#36A9E1]">
                                                     {product.price_incl_tax?.toFixed(2)}€
                                                 </span>
                                             )}
@@ -348,7 +348,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                 setCurrentPage(pageNum);
                                             }}
                                             className={`px-3 py-1 rounded-md ${currentPage === pageNum
-                                                ? 'bg-[#00B0C8] text-white'
+                                                ? 'bg-[#36A9E1] text-white'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >

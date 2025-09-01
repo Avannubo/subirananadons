@@ -724,7 +724,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         <span className="text-gray-400 font-mono mr-1">{currentPrefix}</span>
                     )}
                     <div className="flex items-center">
-                        <FiFolder className={`mr-1 ${level === 0 ? 'text-[#00B0C8]' : 'text-gray-400'}`} size={14} />
+                        <FiFolder className={`mr-1 ${level === 0 ? 'text-[#36A9E1]' : 'text-gray-400'}`} size={14} />
                         <span className={`${level === 0 ? 'font-medium' : ''} text-sm`}>{getCategoryDisplayName(category)}</span>
                     </div>
                 </div>
@@ -786,7 +786,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="name"
                                                 value={formData.name.ca}
                                                 onChange={handleChange}
-                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                             {errors.name && (
                                                 <p className=" text-sm text-red-600">{errors.name}</p>
@@ -802,7 +802,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="name"
                                                 value={formData.name.es}
                                                 onChange={handleChange}
-                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                         </div>
                                     </div>
@@ -817,7 +817,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 rows={6}
                                                 value={formData.description.ca}
                                                 onChange={handleChange}
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1] whitespace-pre-line"
                                                 style={{ whiteSpace: 'pre-line' }}
                                             />
                                         </div>
@@ -831,7 +831,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 rows={6}
                                                 value={formData.description.es}
                                                 onChange={handleChange}
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1] whitespace-pre-line"
                                                 style={{ whiteSpace: 'pre-line' }}
                                             />
                                         </div>
@@ -847,7 +847,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             value={formData.reference}
                                             onChange={handleChange}
                                             className={`mt-1 block w-full px-3 py-2 border ${errors.reference ? 'border-red-300' : 'border-gray-300'
-                                                } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                } rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                         />
                                         {errors.reference && (
                                             <p className="mt-1 text-sm text-red-600">{errors.reference}</p>
@@ -884,7 +884,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md overflow-auto border border-gray-300">
                                                         {loadingCategories ? (
                                                             <div className="flex justify-center p-4">
-                                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                                                 <span className="ml-2">Carregant categories...</span>
                                                             </div>
                                                         ) : hierarchicalCategories.length === 0 ? (
@@ -895,7 +895,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                     <input
                                                                         type="text"
                                                                         placeholder="Cerca categoria..."
-                                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                                         value={categorySearchTerm}
                                                                         onChange={e => setCategorySearchTerm(e.target.value)}
                                                                     />
@@ -993,7 +993,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                 placeholder="Cerca marca..."
                                                                 value={brandSearchTerm}
                                                                 onChange={handleBrandSearch}
-                                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             />
                                                         </div>
@@ -1001,7 +1001,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         <div className="overflow-auto max-h-60">
                                                             {loadingBrands ? (
                                                                 <div className="flex justify-center p-4">
-                                                                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                                                     <span className="ml-2">Carregant marques...</span>
                                                                 </div>
                                                             ) : filteredBrands.length === 0 ? (
@@ -1091,7 +1091,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 value={formData.price_incl_tax}
                                                 onChange={handleChange}
                                                 className={`mt-1 block w-full px-3 py-2 border ${errors.price_incl_tax ? 'border-red-300' : 'border-gray-300'
-                                                    } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                    } rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                             {errors.price_incl_tax && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.price_incl_tax}</p>
@@ -1108,7 +1108,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="discount.active"
                                                 checked={formData.discount?.active || false}
                                                 onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
+                                                className="h-4 w-4 text-[#36A9E1] border-gray-300 rounded focus:ring-[#36A9E1]"
                                             />
                                             <label htmlFor="discount-active" className="ml-2 block text-sm font-medium text-gray-700">
                                                 Activar descompte
@@ -1127,7 +1127,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     name="discount.type"
                                                     value={formData.discount?.type || 'percentage'}
                                                     onChange={handleChange}
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 >
                                                     <option value="percentage">Percentatge (%)</option>
                                                     <option value="fixed">Import fix (€)</option>
@@ -1146,7 +1146,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     min="0"
                                                     max={formData.discount?.type === 'percentage' ? "100" : undefined}
                                                     step={formData.discount?.type === 'percentage' ? "1" : "0.01"}
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 />
                                             </div>
                                             <div>
@@ -1159,7 +1159,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     name="discount.startDate"
                                                     value={formData.discount?.startDate ? new Date(formData.discount.startDate).toISOString().slice(0, 16) : ''}
                                                     onChange={handleChange}
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 />
                                             </div>
                                             <div>
@@ -1172,7 +1172,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     name="discount.endDate"
                                                     value={formData.discount?.endDate ? new Date(formData.discount.endDate).toISOString().slice(0, 16) : ''}
                                                     onChange={handleChange}
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 />
                                             </div>
                                             {/* <div>
@@ -1187,7 +1187,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     onChange={handleChange}
                                                     min="0"
                                                     step="0.01"
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 />
                                             </div>
                                             <div>
@@ -1201,7 +1201,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     value={formData.discount?.minQuantity || ''}
                                                     onChange={handleChange}
                                                     min="1"
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 />
                                             </div> */}
                                             {formData.discount?.type && formData.discount?.value && formData.price_incl_tax && (
@@ -1237,7 +1237,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 onChange={handleChange}
                                                 min="0"
                                                 className={`mt-1 block w-full px-3 py-2 border ${errors.available ? 'border-red-300' : 'border-gray-300'
-                                                    } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                    } rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                             {errors.available && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.available}</p>
@@ -1254,7 +1254,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 value={formData.stock.minStock}
                                                 onChange={handleChange}
                                                 min="0"
-                                                className={`mt-1 block w-full px-3 py-2 border ${errors.minStock ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.minStock ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                             {errors.minStock && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.minStock}</p>
@@ -1271,7 +1271,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="status"
                                                 value={formData.status}
                                                 onChange={handleChange}
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             >
                                                 <option value="active">Actiu</option>
                                                 <option value="inactive">Inactiu</option>
@@ -1285,7 +1285,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="featured"
                                                 checked={formData.featured}
                                                 onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
+                                                className="h-4 w-4 text-[#36A9E1] border-gray-300 rounded focus:ring-[#36A9E1]"
                                             />
                                             <label htmlFor="featured" className="ml-2 block text-sm font-medium text-gray-700">
                                                 Destacat
@@ -1319,12 +1319,12 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             className="h-[100px] w-[100px] object-cover"
                                                         />
                                                         {index === 0 && (
-                                                            <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">
+                                                            <div className="absolute top-0 left-0 bg-[#36A9E1] text-white text-xs px-2 py-1 rounded-br-md">
                                                                 Principal
                                                             </div>
                                                         )}
                                                         {index === 1 && (
-                                                            <div className="absolute top-0 left-0 rounded-br-md bg-[#00B0C8] text-white text-xs px-2 py-1">
+                                                            <div className="absolute top-0 left-0 rounded-br-md bg-[#36A9E1] text-white text-xs px-2 py-1">
                                                                 Secundària
                                                             </div>
                                                         )}
@@ -1408,9 +1408,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                 {/* Distintiu per imatges noves o seleccionades */}
                                                                 <div className="absolute -top-0.5 left-0">
                                                                     {img.startsWith('data:') ? (
-                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
+                                                                        <span className="bg-[#36A9E1] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
                                                                     ) : (
-                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Existent</span>
+                                                                        <span className="bg-[#36A9E1] text-white text-xs px-2 py-1 rounded-br-md">Existent</span>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -1474,7 +1474,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     htmlFor="productImage"
                                                     className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading
                                                         ? 'bg-gray-400 cursor-not-allowed'
-                                                        : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
+                                                        : 'bg-[#36A9E1] hover:bg-[#008A9B] cursor-pointer'
                                                         }`}
                                                 >
                                                     {isUploading ? 'Pujant...' : 'Selecciona imatges'}
@@ -1491,7 +1491,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     type="button"
                                                     onClick={() => setShowImageSelector(true)}
                                                     disabled={isUploading}
-                                                    className={`w-full col-span-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                                                    className={`w-full col-span-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#36A9E1] hover:bg-[#008A9B]'}`}
                                                 >
                                                     Selecciona existent
                                                 </button>
@@ -1524,7 +1524,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     name="image"
                                                     value={formData.image}
                                                     onChange={handleChange}
-                                                    className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                     placeholder="https://exemple.com/imatge.jpg"
                                                 />
                                                 <button
@@ -1535,7 +1535,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             setFormData(f => ({ ...f, image: '' }));
                                                         }
                                                     }}
-                                                    className="text-nowrap bg-[#00B0C8] cursor-pointer text-white px-3 py-2 border border-l-0 border-[#00B0C8] rounded-r-md hover:bg-[#008A9B]"
+                                                    className="text-nowrap bg-[#36A9E1] cursor-pointer text-white px-3 py-2 border border-l-0 border-[#36A9E1] rounded-r-md hover:bg-[#008A9B]"
                                                 >
                                                     Vista prèvia
                                                 </button>
@@ -1559,7 +1559,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                             <button
                                 type="submit"
                                 disabled={loading || isUploading}
-                                className="px-4 py-2 bg-[#00B0C8] cursor-pointer text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] disabled:opacity-50"
+                                className="px-4 py-2 bg-[#36A9E1] cursor-pointer text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1] disabled:opacity-50"
                             >
                                 {loading ? 'Desant...' : isEditing ? 'Actualitza' : 'Crea'}
                             </button>

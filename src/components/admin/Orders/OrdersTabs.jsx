@@ -152,7 +152,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             text-align: left;
                         }
                         th { 
-                            background-color: #00B0C8; 
+                            background-color: #36A9E1; 
                             color: white; 
                             font-weight: bold;
                         }
@@ -160,7 +160,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             background-color: #f9f9f9;
                         }
                         h1 { 
-                            color: #00B0C8; 
+                            color: #36A9E1; 
                             font-family: Arial, sans-serif;
                         }
                     </style>
@@ -245,7 +245,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             <p>${t.exportDate}: ${new Date().toLocaleDateString()}</p>
                             ${generateTableHtml()}
                             <div style="text-align: center; margin-top: 30px;">
-                                <button onclick="window.print(); window.close();" style="padding: 10px 20px; background-color: #00B0C8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                <button onclick="window.print(); window.close();" style="padding: 10px 20px; background-color: #36A9E1; color: white; border: none; border-radius: 4px; cursor: pointer;">
                                     ${t.printPDF}
                                 </button>
                             </div>
@@ -350,7 +350,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                         </button> */}
                     {/* {userRole === 'admin' && (
                             <button
-                                className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
+                                className="flex items-center px-3 py-2 bg-[#36A9E1] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
                                 onClick={() =>  }
                                 title="Añadir nuevo pedido"
                             >
@@ -372,7 +372,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div> */}
-                    {/* <div className="relative">
+            {/* <div className="relative">
                         <FiSearch className="absolute left-3 top-3 text-gray-400" />
                         <input
                             type="text"
@@ -394,7 +394,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                         />
                     </div> */}
-                    {/* <div className="relative">
+            {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -411,7 +411,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
             {/* Order data table */}
             {loading ? (
                 <div className="py-20 text-center">
-                    <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
+                    <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#36A9E1]"></div>
                     <p className="mt-3 text-gray-600">{t.loading}</p>
                 </div>
             ) : (

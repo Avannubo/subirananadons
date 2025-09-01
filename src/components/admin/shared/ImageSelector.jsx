@@ -78,7 +78,7 @@ export default function ImageSelector({ onSelect, onClose }) {
                         <input
                             type="text"
                             placeholder="Cerca imatges..."
-                            className="w-full pl-10 pr-4 py-2 border-gray-300 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B0C8] transition-colors"
+                            className="w-full pl-10 pr-4 py-2 border-gray-300 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#36A9E1] transition-colors"
                             autoFocus
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
