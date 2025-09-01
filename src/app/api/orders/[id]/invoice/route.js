@@ -248,16 +248,17 @@ export async function GET(request, { params }) {
                     <td style="min-width: 150px;">IVA (21%)</td>
                     <td>${order.tax.toFixed(2)} €</td>
                 </tr>
-                <tr>
-                    <td style="min-width: 150px;">Gastos de envío</td>
-                    <td>${order.shippingCost.toFixed(2)} €</td>
-                </tr>
+                
                 ${order.discounts && order.discounts.total > 0 ? `
                 <tr class="discount-row">
                     <td style="min-width: 150px;">Descuento</td>
                     <td>-${order.discounts.total.toFixed(2)} €</td>
                 </tr>
                 ` : ''}
+                <tr>
+                    <td style="min-width: 150px;">Gastos de envío</td>
+                    <td>${order.shippingCost.toFixed(2)} €</td>
+                </tr>
                 <tr class="total-row">
                     <td style="min-width: 150px;">Total</td>
                     <td>${order.totalAmount.toFixed(2)} €</td>
@@ -270,7 +271,8 @@ export async function GET(request, { params }) {
             </div>
             </body>
             </html>
-        `;        // Create invoices directory if it doesn't exist
+        `;
+        // Create invoices directory if it doesn't exist
         const uploadsDir = join(process.cwd(), 'public', 'uploads', 'invoices');
         await mkdir(uploadsDir, { recursive: true });
         // Generate unique filename
@@ -279,7 +281,9 @@ export async function GET(request, { params }) {
         const publicUrl = `/uploads/invoices/${fileName}`;
         // Launch Puppeteer and generate PDF
         const browser = await puppeteer.launch({
-            headless: 'new'
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+            executablePath: process.env.CHROME_BIN || undefined
         });
         const page = await browser.newPage();
         await page.setContent(html);
@@ -306,7 +310,8 @@ export async function GET(request, { params }) {
             sequence = lastSequence + 1;
         }
         // Format: YYYY-XXXXXX (e.g., 2025-000001)
-        const invoiceNumber = `${currentYear}-${sequence.toString().padStart(6, '0')}`;        // Create invoice record in database with additional data for dashboard
+        const invoiceNumber = `${currentYear}-${sequence.toString().padStart(6, '0')}`;
+        // Create invoice record in database with additional data for dashboard
         const invoice = await Invoice.create({
             order: order._id,
             invoiceNumber: invoiceNumber,

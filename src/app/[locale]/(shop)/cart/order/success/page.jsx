@@ -5,13 +5,11 @@ import { OrderService } from '@/services/OrderService';
 import { toast } from 'react-hot-toast';
 import ShopLayout from '@/components/Layouts/shop-layout';
 import { useTranslations } from 'next-intl';
-
 export default function CartSuccessPage() {
     const t = useTranslations('CartOrderSuccessPage');
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [invoiceBlob, setInvoiceBlob] = useState(null);
-
     // Create order from localStorage 'orderpending' (for payment return or recovery)
     const createOrderFromPending = async () => {
         if (typeof window === 'undefined') return;
@@ -22,7 +20,6 @@ export default function CartSuccessPage() {
         try {
             const orderPending = JSON.parse(pending);
             const data = await OrderService.createOrder(orderPending);
-
             // add the click on the btns here adter 2000ms
             setTimeout(() => {
                 if (typeof window !== 'undefined') {
@@ -33,7 +30,6 @@ export default function CartSuccessPage() {
             }, 2000);
             // onClick={handleDownloadInvoice}
             // onClick={handleSendEmail}
-
             window.localStorage.removeItem('orderpending');
             window.localStorage.removeItem('cart');
             return data;
@@ -42,7 +38,6 @@ export default function CartSuccessPage() {
             return null;
         }
     };
-
     useEffect(() => {
         createOrderFromPending()
             .then(async (data) => {
@@ -102,7 +97,6 @@ export default function CartSuccessPage() {
                 setLoading(false);
             });
     }, []);
-
     // Generate and save invoice PDF blob when order is loaded (for button re-download)
     useEffect(() => {
         if (!order) return;
@@ -124,7 +118,6 @@ export default function CartSuccessPage() {
         };
         generateInvoice();
     }, [order]);
-
     // Download the invoice PDF
     const handleDownloadInvoice = () => {
         if (!invoiceBlob || !order) return;
@@ -140,7 +133,6 @@ export default function CartSuccessPage() {
         window.URL.revokeObjectURL(url);
         toast.success('Ticket descargada correctamente');
     }
-
     // Handle sending email with receipt using API route
     const handleSendEmail = async () => {
         if (!order?._id && !order?.id) return;
@@ -161,7 +153,6 @@ export default function CartSuccessPage() {
             toast.error('Error al enviar el email');
         }
     };
-
     // Listen for simulated events and call the handlers
     useEffect(() => {
         const downloadListener = () => handleDownloadInvoice();
@@ -173,7 +164,6 @@ export default function CartSuccessPage() {
             window.removeEventListener('send-email', emailListener);
         };
     }, [invoiceBlob, order]);
-
     if (loading) return (
         <ShopLayout>
             <div className="min-h-[60vh] flex flex-col items-center justify-center">
@@ -184,7 +174,6 @@ export default function CartSuccessPage() {
             </div>
         </ShopLayout>
     );
-
     return (
         <ShopLayout>
             <div className="min-h-[60vh] flex flex-col items-center justify-center py-16">
