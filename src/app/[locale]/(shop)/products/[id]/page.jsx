@@ -201,12 +201,25 @@ export default function Page() {
     const handleAddToCart = async () => {
         if (!product) return;
         try {
+            const isDiscountActive = () => {
+                if (!product.discount?.active) return false;
+                
+                const now = new Date();
+                const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
+                const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
+                
+                if (!startDate && !endDate) return true;
+                if (startDate && !endDate) return now >= startDate;
+                if (!startDate && endDate) return now <= endDate;
+                return now >= startDate && now <= endDate;
+            };
+
             // Create a product object with the correct price structure
             const productToAdd = {
                 ...product,
                 price: `${product.price_incl_tax?.toFixed(2).replace('.', ',')} €`,  // Formatted price string
                 priceValue: product.price_incl_tax,  // Numerical value for calculations
-                finalPrice: product.discount?.active ? product.discount.finalPrice : product.price_incl_tax
+                finalPrice: (product.discount?.active && isDiscountActive()) ? product.discount.finalPrice : product.price_incl_tax
             };
 
             await addToCart(productToAdd, quantity);
@@ -420,7 +433,23 @@ export default function Page() {
 
                         {/* Price and Discount Section */}
                         <div className="flex flex-col gap-2">
-                            {product.discount?.active ? (
+                            {product.discount?.active && (() => {
+                                const now = new Date();
+                                const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
+                                const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
+                                
+                                // If no dates are set, discount is always active
+                                if (!startDate && !endDate) return true;
+                                
+                                // If only start date is set, check if current date is after start
+                                if (startDate && !endDate) return now >= startDate;
+                                
+                                // If only end date is set, check if current date is before end
+                                if (!startDate && endDate) return now <= endDate;
+                                
+                                // If both dates are set, check if current date is within range
+                                return now >= startDate && now <= endDate;
+                            })() ? (
                                 <>
                                     <div className="flex items-center gap-4">
                                         <p className="text-2xl sm:text-3xl font-bold text-red-600">

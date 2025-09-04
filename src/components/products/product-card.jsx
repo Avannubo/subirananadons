@@ -32,9 +32,30 @@ export default function ProductCard({
     const translatedName = getTranslatedField(product, 'name', locale);
     const translatedDescription = getTranslatedField(product, 'description', locale);
 
+    // Check if discount is currently active based on date range
+    const isDiscountActive = () => {
+        if (!product.discount?.active) return false;
+
+        const now = new Date();
+        const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
+        const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
+
+        // If no dates are set, discount is always active
+        if (!startDate && !endDate) return true;
+
+        // If only start date is set, check if current date is after start
+        if (startDate && !endDate) return now >= startDate;
+
+        // If only end date is set, check if current date is before end
+        if (!startDate && endDate) return now <= endDate;
+
+        // If both dates are set, check if current date is within range
+        return now >= startDate && now <= endDate;
+    };
+
     // Calculate discount percentage
     const getDiscountPercentage = () => {
-        if (!product.discount?.active) return null;
+        if (!isDiscountActive()) return null;
         if (product.discount.type === 'percentage') return product.discount.value;
         return Math.round(((product.priceValue - product.discount.finalPrice) / product.priceValue) * 100);
     };
@@ -111,7 +132,7 @@ export default function ProductCard({
         >
             <Link href={productUrl} className="w-full flex flex-col items-center h-full">
                 <div className="relative w-full h-[300px]">
-                    {product.discount?.active && (
+                    {isDiscountActive() && (
                         <div className="absolute top-0 right-4 bg-red-600 text-white rounded-bl-lg rounded-br-lg  w-12 h-8 flex items-center justify-center transform ">
                             <span className="text-sm font-bold -rotate-12">
                                 {product.discount.type === 'percentage'
@@ -155,7 +176,7 @@ export default function ProductCard({
                 <div className="flex-1 w-full flex flex-col justify-between p-4">
                     <h3 className="font-semibold text-lg w-full overflow-hidden text-ellipsis line-clamp-2 min-h-[56px]" title={translatedName}>{translatedName}</h3>
                     <div className="flex flex-wrap items-center justify-center gap-2 mt-auto">
-                        {product.discount?.active ? (
+                        {isDiscountActive() ? (
                             <>
                                 <span className="text-gray-400 line-through text-base">{product.price}</span>
                                 {/* <span className="text-red-500 text-sm font-medium px-1">
@@ -190,7 +211,7 @@ export default function ProductCard({
                         className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
                     />
                     {/* Discount Badge */}
-                    {product.discount?.active && (
+                    {isDiscountActive() && (
                         <div className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-12 h-12 flex items-center justify-center transform rotate-12">
                             <span className="text-sm font-bold -rotate-12">
                                 {product.discount.type === 'percentage'
@@ -203,8 +224,8 @@ export default function ProductCard({
                 <div className="flex flex-col justify-start w-3/4">
                     <h3 className="font-semibold text-xl mb-2 whitespace-nowrap overflow-hidden text-ellipsis w-full" title={translatedName}>{translatedName}</h3>
                     <div className="mb-3">
-                        {product.discount?.active ? (
-                            <div className="flex flex-row space-x-4 justify-between gap-2 text-center ">
+                        {isDiscountActive() ? (
+                            <div className="flex flex-row space-x-4 justify-start gap-2 text-center ">
                                 <p className="text-gray-400 line-through text-base">{product.price}</p>
                                 <p className="text-red-600 font-semibold text-lg">
                                     {`${product.discount.finalPrice.toFixed(2).replace('.', ',')} €`}
