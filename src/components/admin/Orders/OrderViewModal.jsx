@@ -291,7 +291,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                             <div className="p-6">
                                 {/* Order Summary Card */}
                                 <div className="rounded-lg mb-6">
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
                                             <div className="bg-blue-100 bg-opacity-10 p-2 rounded-full mr-3">
                                                 <FiCalendar className="text-[#36A9E1]" />
@@ -299,6 +299,15 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                             <div>
                                                 <p className="text-xs text-gray-500">{t.date}</p>
                                                 <p className="font-medium text-sm">{formatDate(order.createdAt)}</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                            <div className="bg-blue-100 p-2 rounded-full mr-3">
+                                                <FiTruck className="text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-500">{t.shipping}</p>
+                                                <p className="font-medium text-sm">{order.shippingCost === 0 ? 'Gratis' : formatPrice(order.shippingCost)}</p>
                                             </div>
                                         </div>
                                         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
@@ -333,9 +342,9 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                     </div>
                                 </div>
                                 {/* Main content with 2 columns layout */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="flex gap-6">
                                     {/* Left Column - Customer Info and Shipping */}
-                                    <div className="space-y-6">
+                                    <div className="space-y-6 w-[40%]">
                                         <div className="flex flex-row justify-between gap-4" >
                                             {/* Customer Information */}
                                             <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -419,7 +428,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         </div>
                                     </div>
                                     {/* Right Column - Products and Order Summary */}
-                                    <div className="space-y-6">
+                                    <div className="space-y-6 w-[60%]">
                                         {/* Products */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                                             <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
@@ -440,7 +449,13 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                     {t.type}
                                                                 </th>
                                                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                    {t.price}
+                                                                    Original
+                                                                </th>
+                                                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                    Descuento
+                                                                </th>
+                                                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                    Final
                                                                 </th>
                                                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                     {t.subtotal}
@@ -488,10 +503,16 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                             {item.type === 'gift' ? t.gift : t.personal}
                                                                         </td>
                                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                                                                            {formatPrice(item.price)}
+                                                                            {formatPrice(item.priceDetails?.originalPrice || item.price)}
+                                                                        </td>
+                                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-pink-600">
+                                                                            {item.priceDetails?.discountPercentage ? `-${item.priceDetails.discountPercentage}%` : '-'}
+                                                                        </td>
+                                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                                                            {formatPrice(item.priceDetails?.finalPrice || item.price)}
                                                                         </td>
                                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-                                                                            {formatPrice(item.price * item.quantity)}
+                                                                            {formatPrice((item.priceDetails?.finalPrice || item.price) * item.quantity)}
                                                                         </td>
                                                                     </tr>
                                                                 );
@@ -507,18 +528,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <FiCreditCard className="mr-2 text-[#36A9E1]" /> {t.orderSummary}
                                             </h4>
                                             <div className="flex p-4 flex-row space-x-4 justify-between">
-
-                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center">
-                                                        <div className="mr-4 bg-blue-100 p-3 rounded-full">
-                                                            <FiTruck className="text-blue-600" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm font-medium">{t.shipping}</p>
-                                                            <p className="text-gray-600">{formatPrice(order.shippingCost) || t.pending}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                                 <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                                                     <div className="flex items-center">
                                                         <div className="mr-4 bg-purple-100 p-3 rounded-full">
@@ -530,6 +539,20 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                                    <div className="flex items-center">
+                                                        <div className="mr-4 bg-pink-100 p-3 rounded-full">
+                                                            <FiDollarSign className="text-pink-600" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-medium">Descuento Total</p>
+                                                            <p className="text-pink-600 font-medium">
+                                                                {order.discounts?.total ? `-${formatPrice(order.discounts.total)}` : '-'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                                 <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                                                     <div className="flex items-center">
                                                         <div className="mr-4 bg-green-100 p-3 rounded-full">

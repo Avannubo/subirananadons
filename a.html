@@ -1,0 +1,190 @@
+<div class="tabs-container"> 
+  <div class="tab">
+    <h3 class="tab-button" onclick="toggleTabContent(this, 'tab1')">
+      CRO & UX/UI <span class="tab-icon">+</span>
+    </h3>
+    <div class="tab-content" id="tab1">
+      <p class="p-content">
+        En el mundo digital actual, optimizar las conversiones de un sitio web o plataforma es esencial para maximizar el retorno de inversión (ROI) y lograr un crecimiento sostenible.<br>En el mundo digital actual, optimizar las conversiones de un sitio web o plataforma es esencial.
+      </p> 
+    </div>
+  </div>
+  <div class="tab">
+    <h3 class="tab-button" onclick="toggleTabContent(this, 'tab2')">
+      PAID MEDIA <span class="tab-icon">+</span>
+    </h3>
+    <div class="tab-content" id="tab2">
+      <p class="p-content">
+        El marketing por correo electrónico sigue siendo una herramienta poderosa para conectarse con los clientes.
+      </p>
+    </div>
+  </div>
+  <div class="tab">
+    <h3 class="tab-button" onclick="toggleTabContent(this, 'tab3')">
+      SEO & SEO LOCAL <span class="tab-icon">+</span>
+    </h3>
+    <div class="tab-content" id="tab3">
+      <p class="p-content">
+        La analítica de datos es clave para tomar decisiones basadas en evidencia y obtener resultados óptimos.
+      </p>
+    </div>
+  </div>
+  <div class="tab">
+    <h3 class="tab-button" onclick="toggleTabContent(this, 'tab4')">
+      MAIL MARKETING <span class="tab-icon">+</span>
+    </h3>
+    <div class="tab-content" id="tab4">
+      <p class="p-content">
+        La analítica de datos es clave para tomar decisiones basadas en evidencia y obtener resultados óptimos.
+      </p>
+    </div>
+  </div>
+  <div class="tab">
+    <h3 class="tab-button" onclick="toggleTabContent(this, 'tab5')">
+      SEO & SEO LOCAL <span class="tab-icon">+</span>
+    </h3>
+    <div class="tab-content" id="tab5">
+      <p class="p-content">
+        La analítica de datos es clave para tomar decisiones basadas en evidencia y obtener resultados óptimos.
+      </p> 
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTabContent(tabButton12, tabId12) {
+  const content12 = document.getElementById(tabId12);
+  const icon12 = tabButton12.querySelector(".tab-icon");
+  
+  // Cerrar todas las pestañas antes de abrir la seleccionada
+  document.querySelectorAll(".tab-content").forEach((tab12) => {
+    if (tab12.id !== tabId12) {
+      tab12.classList.remove("open");
+      tab12.style.maxHeight = "0";
+        }
+    });
+  
+  document.querySelectorAll(".tab-icon").forEach((iconEl12) => {
+    if (iconEl12 !== icon12) {
+      iconEl12.classList.remove("rotated");
+        }
+    });
+  
+  // Alternar la pestaña seleccionada
+  if (content12.classList.contains("open")) {
+    content12.classList.remove("open");
+    content12.style.maxHeight = "0";
+    icon12.classList.remove("rotated");
+    } else {
+    content12.classList.add("open");
+    content12.style.maxHeight = content12.scrollHeight + "px";
+    icon12.classList.add("rotated");
+    }
+}
+
+const darkModeButton12 = document.querySelector(".js-dark-mode-trigger-60987c8");
+const getCurrentMode12 = () => document.body.classList.contains("dark-mode") ? "dark": "light";
+
+// Alternar modo oscuro
+function toggleDarkMode12() {
+  const currentMode12 = getCurrentMode12();
+  
+  if (currentMode12 === "light") {
+    document.body.classList.remove("dark-mode");
+    } else {
+    document.body.classList.add("dark-mode");
+    }
+}
+// Escuchar el botón para cambiar el modo oscuro
+if (darkModeButton12) {
+  darkModeButton12.addEventListener("click", toggleDarkMode12);
+}
+</script>
+
+
+<style>  
+  .tabs-container {
+    max-width: 800px;
+    margin: 20px auto;
+}
+ 
+  .tab-button {
+    font-size: 20px;
+    width: 100%;
+    background: grey;
+    color: #FFFFFF;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+ 
+  .tab-content {
+    background: #f9f9f9;
+    color: #FFFFFF;
+    border-radius: 8px;
+    padding: 0 20px;
+    margin-top: -22px;
+    margin-bottom: 20px;
+    max-height: 0;
+    overflow: hidden;
+    display: block;
+    box-shadow: 0px 4px 6px rgba(0,
+    0,
+    0,
+    0.1);
+    transition: max-height 0.6s ease, padding 0.3s ease;
+}
+ 
+  .tab-content.open {
+    max-height: 200px;
+    padding: 15px 20px;
+} 
+  
+ 
+  body:not(.dark-mode) .tab-button,
+  body:not(.dark-mode) .tab-content {
+    background: linear-gradient(to left, #17426F  , #38375B  )!important;
+    color: #FFFFFF;
+}
+ 
+  .dark-mode .tab-button,
+  .dark-mode .tab-content {
+       background: linear-gradient(to left, #262626, #919191)!important;
+    color: #FFFFFF;
+}
+ 
+  .tab-icon {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+}
+ 
+  .rotated {
+    transform: rotate(45deg);
+}
+ 
+  .p-content {
+    margin: 0;
+}
+
+  .dark-mode-toggle {
+    background: #3a778c;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+  .dark-mode-toggle:hover {
+    background: #2c5d70;
+}
+</style>

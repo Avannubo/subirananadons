@@ -47,7 +47,8 @@
     "notAvailable": "N/D",
     "seeLabel": "Ver etiqueta",
     "uncategorized": "Sin categoría",
-    "addedToCart": "añadido al carrito"
+    "addedToCart": "añadido al carrito",
+    "validUntil": "Válido hasta"
   },
   "CookiesPage": {
     "title": "Política de Cookies",

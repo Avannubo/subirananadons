@@ -69,7 +69,8 @@
     "notAvailable": "N/D",
     "seeLabel": "Veure etiqueta",
     "uncategorized": "Sense categoria",
-    "addedToCart": "afegit al carret"
+    "addedToCart": "afegit al carret",
+    "validUntil": "Vàlid fins a"
   },
   "CookiesPage": {
     "title": "Política de Cookies",

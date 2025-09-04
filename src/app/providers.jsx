@@ -7,6 +7,13 @@ import { StatsProvider } from '@/contexts/StatsContext'
 import { ClientStatsProvider } from '@/contexts/ClientStatsContext'
 import { ListStatsProvider } from '@/contexts/ListStatsContext'
 import { Toaster } from 'react-hot-toast'
+import dynamic from 'next/dynamic'
+
+// Dynamically import DiscountTaskManager with no SSR
+const DiscountTaskManager = dynamic(
+    () => import('@/components/admin/discounts/DiscountTaskManager'),
+    { ssr: false }
+)
 
 // Wrapper component that has access to session
 function ListStatsWithAuth({ children }) {
@@ -26,11 +33,12 @@ export function Providers({ children }) {
             <UserProvider>
                 <CartProvider>
                     {/* <StatsProvider> */}
-                        {/* <ClientStatsProvider> */}
-                            <ListStatsWithAuth>
-                                {children}
-                            </ListStatsWithAuth>
-                        {/* </ClientStatsProvider> */}
+                    {/* <ClientStatsProvider> */}
+                    <ListStatsWithAuth>
+                        {children}
+                        <DiscountTaskManager />
+                    </ListStatsWithAuth>
+                    {/* </ClientStatsProvider> */}
                     {/* </StatsProvider> */}
                 </CartProvider>
             </UserProvider>

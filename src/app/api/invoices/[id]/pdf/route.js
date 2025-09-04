@@ -1,33 +1,15 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
-import Invoice from '@/models/Invoice';
 import puppeteer from 'puppeteer';
 import { join } from 'path';
-import { writeFile, mkdir } from 'fs/promises';
+import { mkdir } from 'fs/promises';
 export async function GET(request, { params }) {
     try {
         await dbConnect();
         const { id } = params;
-        // First check if an invoice already exists for this order
-        const existingInvoice = await Invoice.findOne({ order: id });
-        if (existingInvoice) {
-            // If invoice exists, read and return the existing PDF
-            const filePath = join(process.cwd(), 'public', existingInvoice.pdfUrl);
-            try {
-                const { readFile } = await import('fs/promises');
-                const pdf = await readFile(filePath);
-                return new NextResponse(pdf, {
-                    status: 200,
-                    headers: {
-                        'Content-Type': 'application/pdf',
-                        'Content-Disposition': `attachment; filename="Ticket-${existingInvoice.invoiceNumber}.pdf"`
-                    }
-                });
-            } catch (error) {
-                console.error('Error reading existing PDF:', error);
-                // If we can't read the existing PDF, continue to generate a new one
-            }
+        if (!id) {
+            return NextResponse.json({ message: 'Order ID is required' }, { status: 400 });
         }
         const order = await Order.findById(id)
             .populate({
@@ -217,11 +199,11 @@ export async function GET(request, { params }) {
                 </thead>
                 <tbody>
                     ${order.items.map(item => {
-                    const discount = item.priceDetails?.discountAmount || 0;
-                    const discountPercent = item.priceDetails?.discountPercentage || 0;
-                    const originalPrice = item.priceDetails?.originalPrice || item.price;
-                    const finalPrice = item.priceDetails?.finalPrice || item.price;
-                    return `
+            const discount = item.priceDetails?.discountAmount || 0;
+            const discountPercent = item.priceDetails?.discountPercentage || 0;
+            const originalPrice = item.priceDetails?.originalPrice || item.price;
+            const finalPrice = item.priceDetails?.finalPrice || item.price;
+            return `
                         <tr>
                         <td title="${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producto') : 'Producto'}">
                             ${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producto') : 'Producto'}
@@ -237,7 +219,7 @@ export async function GET(request, { params }) {
                         <td>${finalPrice.toFixed(2)}€</td>
                         </tr>
                         `;
-                    }).join('')}
+        }).join('')}
                 </tbody>
                 </table>
                 <table class="totals">
@@ -299,75 +281,25 @@ export async function GET(request, { params }) {
             }
         });
         await browser.close();
-        // Save PDF to file
-        await writeFile(filePath, pdf);        // Generate invoice number
-        const currentYear = new Date().getFullYear();
-        const lastInvoice = await Invoice.findOne({
-            invoiceNumber: new RegExp(`^${currentYear}-`, 'i')
-        }).sort({ invoiceNumber: -1 });
-        let sequence = 1;
-        if (lastInvoice) {
-            const lastSequence = parseInt(lastInvoice.invoiceNumber.split('-')[1]);
-            sequence = lastSequence + 1;
-        }
-        // Format: YYYY-XXXXXX (e.g., 2025-000001)
-        const invoiceNumber = `${currentYear}-${sequence.toString().padStart(6, '0')}`;
-        // Create invoice record in database with additional data for dashboard
-        const invoice = await Invoice.create({
-            order: order._id,
-            invoiceNumber: invoiceNumber,
-            pdfUrl: publicUrl,
-            totalAmount: order.totalAmount,
-            issuedDate: new Date(),
-            status: 'generated',
-            orderDetails: {
-                customerName: `${order.shippingAddress.name} ${order.shippingAddress.lastName}`,
-                customerEmail: order.shippingAddress.email,
-                orderNumber: order.orderNumber,
-                orderDate: order.createdAt,
-                deliveryMethod: order.deliveryMethod,
-                subtotal: order.subtotal,
-                tax: order.tax,
-                shippingCost: order.shippingCost,
-                totalAmount: order.totalAmount
-            }
-        });
-        // Update order with invoice reference
-        await Order.findByIdAndUpdate(order._id, {
-            $push: { invoices: invoice._id }
-        });
-        // Return PDF response
+
         return new NextResponse(pdf, {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="Ticket-${invoice.invoiceNumber}.pdf"`
+                'Content-Disposition': `attachment; filename="Ticket-${order.orderNumber}.pdf"`
             }
         });
     } catch (error) {
         console.error('Error generating invoice:', error);
-        return NextResponse.json({
-            success: false,
-            message: 'Error generating invoice',
-            error: error.message
-        }, { status: 500 });
-    }
-}
-export async function DELETE(request, { params }) {
-    try {
-        await dbConnect();
-        const { id } = params;
-        const deletedInvoice = await Invoice.findByIdAndDelete(id);
-        if (!deletedInvoice) {
-            return new NextResponse('Invoice not found', { status: 404 });
+        // Log detailed error information
+        if (error.stack) {
+            console.error('Stack trace:', error.stack);
         }
-        return new NextResponse(null, { status: 200 });
-    } catch (error) {
-        console.error('Error deleting invoice:', error);
         return NextResponse.json({
             success: false,
-            message: 'Error deleting invoice',
-            error: error.message
+            message: 'Error generating invoice: ' + error.message,
+            error: error.stack || error.message
         }, { status: 500 });
     }
 }
+

@@ -308,7 +308,7 @@ export default function Page() {
                     <div className="text-center py-16">
                         <h2 className="text-2xl text-red-500 mb-4">{t('errorTitle')}</h2>
                         <p className="text-gray-600">{error || t('errorNotFound')}</p>
-                        <a href="/products" className="mt-6 inline-block bg-[#36A9E1] text-white py-2 px-6 rounded-md hover:bg-[#009bb1]">
+                        <a href="/products" className="mt-6 inline-block bg-[#36A9E1] text-white py-2 px-6 rounded-md hover:bg-[#3f93ba]">
                             {t('backToShop')}
                         </a>
                     </div>
@@ -510,7 +510,7 @@ export default function Page() {
                             {/* Add to Cart Button */}
                             <button
                                 onClick={handleAddToCart}
-                                className="cursor-pointer w-full bg-[#36A9E1] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200 mt-2"
+                                className="cursor-pointer w-full bg-[#36A9E1] text-white py-3 px-6 rounded-md hover:bg-[#3f93ba] transition-colors duration-200 mt-2"
                             >
                                 {t('addToCart')}
                             </button>

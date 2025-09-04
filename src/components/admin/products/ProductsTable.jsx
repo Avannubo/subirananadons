@@ -562,6 +562,13 @@ export default function ProductsTable(props) {
                                                     <span className="text-sm font-medium text-red-600">
                                                         {product.discount.finalPrice?.toFixed(2)} € {product.discount.type === 'percentage' ? `(-${product.discount.value}%)` : ''}
                                                     </span>
+                                                    {product.discount.startDate && product.discount.endDate && (
+                                                        <span className="text-xs text-gray-500 mt-1">
+                                                            {new Date(product.discount.startDate).toLocaleDateString()} {new Date(product.discount.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            {' - '}
+                                                            {new Date(product.discount.endDate).toLocaleDateString()} {new Date(product.discount.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <span className="text-sm text-gray-500">

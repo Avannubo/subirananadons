@@ -102,11 +102,16 @@ export async function PATCH(request, { params }) {
 
         // Validate status if it's being updated
         const allowedStatuses = ['acceptado', 'procesando', 'enviado', 'completo', 'cancelado'];
-        if (data.status !== undefined && !allowedStatuses.includes(data.status)) {
-            return NextResponse.json({
-                success: false,
-                message: 'Invalid order status. Allowed values are: ' + allowedStatuses.join(', ')
-            }, { status: 400 });
+        if (data.status !== undefined) {
+            // Convert status to lowercase for validation and storage
+            data.status = data.status.toLowerCase();
+            if (!allowedStatuses.includes(data.status)) {
+                console.log('Invalid status value:', data.status);
+                return NextResponse.json({
+                    success: false,
+                    message: 'Invalid order status. Allowed values are: ' + allowedStatuses.join(', ')
+                }, { status: 400 });
+            }
         }
 
         // Validate the update data

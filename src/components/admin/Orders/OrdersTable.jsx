@@ -1,7 +1,6 @@
 // State for bulk status selector
 'use client';
-import { FiEye, FiTrash2, FiEdit } from 'react-icons/fi';
-import { FaRegFilePdf } from 'react-icons/fa';
+import { FiEye, FiTrash2, FiEdit, FiDownload } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import Pagination from '@/components/admin/shared/Pagination';
@@ -115,16 +114,32 @@ export default function OrdersTable({
         console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
         console.log('Orders data:', orders);
     }, [orders, userRole]);
-    const viewPdf = async (pdfUrl) => {
-        if (!pdfUrl || pdfUrl === '#') {
-            toast.error('PDF no disponible');
-            return;
-        }
+    const handleDownloadPDF = async (order) => {
         try {
-            window.open(pdfUrl, '_blank');
+            const toastId = toast.loading('Generando PDF...');
+            const response = await fetch(`/api/invoices/${order.id}/pdf`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/pdf'
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al generar el PDF');
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Factura_${order.reference}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success('Factura descargada correctamente', { id: toastId });
         } catch (error) {
-            console.error('Error viewing PDF:', error);
-            toast.error('Error al visualizar el PDF');
+            console.error('Error downloading PDF:', error);
+            toast.error('Error al descargar el PDF');
         }
     };
     // Filter the orders based on search criteria
@@ -364,20 +379,20 @@ export default function OrdersTable({
                                         })()}
                                     </td>
                                     <td className="px-6 py-4">{order.date}</td>
-                                    <td className="px-6 py-4 text-sm flex flex-row items-center space-x-4 justify-center">
+                                    <td className="px-6 py-4 text-sm flex flex-row items-center space-x-4 justify-start">
                                         <button
-                                            onClick={() => viewPdf("/uploads/invoices/invoice-" + order.reference + ".pdf")}
+                                            onClick={() => handleDownloadPDF(order)}
                                             className="text-green-600 hover:text-green-800 flex items-center cursor-pointer"
                                             title={t.viewPDF}
                                         >
-                                            <FaRegFilePdf size={20} />
+                                            <FiDownload size={22} />
                                         </button>
                                         <button
                                             className="text-[#36A9E1] hover:text-[#008A9B] mr-4 text-center cursor-pointer"
                                             title={t.viewDetails}
                                             onClick={() => handleViewOrder(order)}
                                         >
-                                            <FiEye size={20} />
+                                            <FiEye size={22} />
                                         </button>
                                         {userRole === 'admin' && (
                                             <>
@@ -386,14 +401,14 @@ export default function OrdersTable({
                                                     title={t.editOrder}
                                                     onClick={() => handleEditOrder(order)}
                                                 >
-                                                    <FiEdit size={20} />
+                                                    <FiEdit size={22} />
                                                 </button>
                                                 <button
                                                     className="text-red-600 hover:text-red-900 text-center cursor-pointer"
                                                     title={t.deleteOrder}
                                                     onClick={() => handleDeleteOrder(order)}
                                                 >
-                                                    <FiTrash2 size={20} />
+                                                    <FiTrash2 size={22} />
                                                 </button>
                                             </>
                                         )}

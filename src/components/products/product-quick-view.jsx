@@ -195,7 +195,7 @@ export default function ProductQuickView({ product, onClose }) {
                                 {/* Comprar and Ver detalles side by side */}
                                 <div className="flex flex-row gap-2 mb-1">
                                     <button
-                                        className="cursor-pointer w-1/2 bg-black text-white py-3 rounded font-medium hover:bg-gray-700 transition duration-200"
+                                        className="cursor-pointer w-1/2 bg-transparent border-1 border-gray-300 hover:bg-gray-50 py-3 rounded font-medium  text-gray-800 transition duration-200"
                                         onClick={() => router.push(`/products/${product.id}`)}
                                     >
                                         Més informació
