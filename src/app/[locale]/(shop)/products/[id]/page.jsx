@@ -203,11 +203,11 @@ export default function Page() {
         try {
             const isDiscountActive = () => {
                 if (!product.discount?.active) return false;
-                
+
                 const now = new Date();
                 const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
                 const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
-                
+
                 if (!startDate && !endDate) return true;
                 if (startDate && !endDate) return now >= startDate;
                 if (!startDate && endDate) return now <= endDate;
@@ -437,16 +437,16 @@ export default function Page() {
                                 const now = new Date();
                                 const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
                                 const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
-                                
+
                                 // If no dates are set, discount is always active
                                 if (!startDate && !endDate) return true;
-                                
+
                                 // If only start date is set, check if current date is after start
                                 if (startDate && !endDate) return now >= startDate;
-                                
+
                                 // If only end date is set, check if current date is before end
                                 if (!startDate && endDate) return now <= endDate;
-                                
+
                                 // If both dates are set, check if current date is within range
                                 return now >= startDate && now <= endDate;
                             })() ? (

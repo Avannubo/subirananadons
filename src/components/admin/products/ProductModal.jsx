@@ -19,7 +19,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         if (!formData.category) newErrors.category = 'Categoria obligatòria';
         if (!formData.brand) newErrors.brand = 'Marca obligatòria';
         if (!formData.stock || isNaN(parseInt(formData.stock.minStock))) newErrors.minStock = 'Estoc mínim obligatori';
-
         // Validate discount dates if discount is active and dates are provided
         if (formData.discount?.active) {
             // Only validate start date if it's provided
@@ -30,7 +29,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     newErrors.discountStartDate = 'La data d\'inici no pot ser anterior a ara';
                 }
             }
-
             // Only validate date range if both dates are provided
             if (formData.discount.startDate && formData.discount.endDate) {
                 const startDate = new Date(formData.discount.startDate);
@@ -38,7 +36,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 if (startDate >= endDate) {
                     newErrors.discountDates = 'La data i hora de fi han de ser posteriors a la data i hora d\'inici';
                 }
-
                 // Calculate duration if both dates are set
                 if (formData.discount.startDate && formData.discount.endDate) {
                     const startDate = new Date(formData.discount.startDate);
@@ -99,7 +96,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [brandSearchTerm, setBrandSearchTerm] = useState('');
     const [calculatedFinalPric, setCalculatedFinalPrice] = useState(0);
     const [productImages, setProductImages] = useState([]);
-
     // selectedImages: array of preview URLs for selected files
     const [selectedImages, setSelectedImages] = useState([]);
     // selectedFiles: array of File objects for selected files
@@ -204,7 +200,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     useEffect(() => {
         // Only check expiration for discounts that have both start and end dates
         if (!formData.discount?.active || !formData.discount?.startDate || !formData.discount?.endDate) return;
-
         // Check if already expired
         // if (isDiscountExpired(formData.discount)) {
         //     setFormData(prev => ({
@@ -228,12 +223,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         //     });
         //     return;
         // }
-
         // Set up timer to check expiration
         const endDate = new Date(formData.discount.endDate);
         const now = new Date();
         const timeUntilExpiry = endDate.getTime() - now.getTime();
-
         if (timeUntilExpiry > 0) {
             const timer = setTimeout(() => {
                 setFormData(prev => ({
@@ -252,11 +245,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     }
                 });
             }, timeUntilExpiry);
-
             return () => clearTimeout(timer);
         }
     }, [formData.discount?.endDate, formData.discount?.active]);
-
     useEffect(() => {
         if (isEditing && product) {
             // Format all images into a single array for the UI
@@ -291,16 +282,15 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             } else if (typeof product.description === 'string') {
                 description = { es: product.description, ca: '' };
             }
-
             // Handle discount data
             const discount = product.discount ? {
                 ...product.discount,
                 active: product.discount.active ?? false,
                 type: product.discount.type ?? 'percentage',
                 value: product.discount.value ?? '',
-                // Preserve exact dates from the product discount
-                startDate: product.discount.startDate ?? '',
-                endDate: product.discount.endDate ?? '',
+                // Format dates to local datetime-local input format
+                startDate: product.discount.startDate ? new Date(product.discount.startDate).toISOString().slice(0, 16) : '',
+                endDate: product.discount.endDate ? new Date(product.discount.endDate).toISOString().slice(0, 16) : '',
                 minPurchaseAmount: product.discount.minPurchaseAmount ?? '',
                 minQuantity: product.discount.minQuantity ?? '',
                 finalPrice: product.discount.finalPrice ?? null
@@ -314,7 +304,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 minQuantity: '',
                 finalPrice: null
             };
-
             setFormData({
                 name,
                 reference: product.reference || '',
@@ -375,7 +364,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     // --- Form Input Change Handler ---
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-
         if (name === 'status' && value !== 'active') {
             // If product is deactivated or discontinued, reset the discount
             setFormData(prev => ({
@@ -394,11 +382,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             }));
             return;
         }
-
         if (name.startsWith('discount.')) {
             const discountField = name.split('.')[1];
             let newDiscount;
-
             if (discountField === 'active') {
                 if (!checked) {
                     // When deactivating discount, reset all discount fields
@@ -422,16 +408,11 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     };
                 }
             } else if (discountField === 'startDate' || discountField === 'endDate') {
-                // For date fields, ensure proper local timezone handling
-                let dateString = value;
+                // For date fields, store in ISO format but adjust for local timezone
+                let dateString = '';
                 if (value) {
-                    // Create date in local timezone
                     const dateValue = new Date(value);
-                    // Adjust for timezone offset
-                    const timezoneOffset = dateValue.getTimezoneOffset();
-                    dateValue.setMinutes(dateValue.getMinutes() - timezoneOffset);
-                    // Format to YYYY-MM-DDTHH:mm
-                    dateString = dateValue.toISOString().slice(0, 16);
+                    dateString = dateValue.toISOString();
                 }
                 newDiscount = {
                     ...(formData.discount || {}),
@@ -443,7 +424,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     [discountField]: type === 'checkbox' ? checked : value
                 };
             }
-
             // If changing the type or value, recalculate the final price
             if (discountField === 'type' || discountField === 'value' || discountField === 'active') {
                 const basePrice = parseFloat(formData.price_incl_tax);
@@ -455,39 +435,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     setCalculatedFinalPrice(finalPrice);
                 }
             }
-
             setFormData(prev => ({
                 ...prev,
                 discount: newDiscount
             }));
-
-            // Clear any previous discount-related errors
-            setErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors.discountType;
-                delete newErrors.discountValue;
-                delete newErrors.discountDates;
-                return newErrors;
-            });
-        } else if (name === 'price_incl_tax') {
-
-            // If changing the type or value, recalculate the final price
-            if (discountField === 'type' || discountField === 'value' || discountField === 'active') {
-                const basePrice = parseFloat(formData.price_incl_tax);
-                if (basePrice) {
-                    const finalPrice = calculateFinalPrice(basePrice, {
-                        ...newDiscount,
-                        value: discountField === 'value' ? value : newDiscount.value
-                    });
-                    setCalculatedFinalPrice(finalPrice);
-                }
-            }
-
-            setFormData(prev => ({
-                ...prev,
-                discount: newDiscount
-            }));
-
             // Clear any previous discount-related errors
             setErrors(prev => {
                 const newErrors = { ...prev };
@@ -499,14 +450,15 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         } else if (name === 'price_incl_tax') {
             // When price changes, recalculate final price if discount is active
             const newPrice = parseFloat(value);
-            if (formData.discount.active && newPrice) {
-                const finalPrice = calculateFinalPrice(newPrice, formData.discount);
-                setCalculatedFinalPrice(finalPrice);
-            }
             setFormData(prev => ({
                 ...prev,
                 [name]: value
             }));
+
+            if (formData.discount?.active && newPrice) {
+                const finalPrice = calculateFinalPrice(newPrice, formData.discount);
+                setCalculatedFinalPrice(finalPrice);
+            }
         } else if (name === 'name') {
             setFormData(prev => ({
                 ...prev,
@@ -760,7 +712,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) return;
-
         // Check if discount is expired before saving
         if (formData.discount?.active && isDiscountExpired(formData.discount)) {
             const confirmSave = window.confirm('El descompte ha expirat. Voleu desar el producte amb el descompte desactivat?');
@@ -776,7 +727,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 return;
             }
         }
-
         setLoading(true);
         try {
             // Prepare images for submission
@@ -1302,7 +1252,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             )}
                                         </div>
                                     </div>
-
                                     <h3 className="text-md font-medium mt-6">Descompte</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="flex items-center h-full">
@@ -1326,7 +1275,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             </div>
                                         )}
                                     </div>
-
                                     {formData.discount?.active && (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                             <div>
@@ -1368,7 +1316,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     type="datetime-local"
                                                     id="discount-start-date"
                                                     name="discount.startDate"
-                                                    value={formData.discount?.startDate || ''}
+                                                    value={formData.discount?.startDate ? new Date(formData.discount.startDate).toISOString().slice(0, 16) : ''}
                                                     onChange={handleChange}
                                                     step="60"
                                                     className={`mt-1 block w-full px-3 py-2 border ${errors.discountStartDate ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
@@ -1385,7 +1333,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     type="datetime-local"
                                                     id="discount-end-date"
                                                     name="discount.endDate"
-                                                    value={formData.discount?.endDate || ''}
+                                                    value={formData.discount?.endDate ? new Date(formData.discount.endDate).toISOString().slice(0, 16) : ''}
                                                     onChange={handleChange}
                                                     step="60"
                                                     className={`mt-1 block w-full px-3 py-2 border ${errors.discountEndDate ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
@@ -1444,7 +1392,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             )}
                                         </div>
                                     )}
-
                                     <h3 className="text-md font-medium mt-6">Inventari</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
@@ -1792,7 +1739,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         </Dialog>
     );
 }
-
 // Add these utility functions right after your state declarations
 const isDiscountExpired = (discount) => {
     if (!discount?.active || !discount?.startDate || !discount?.endDate) return false;
@@ -1802,32 +1748,26 @@ const isDiscountExpired = (discount) => {
     // Check if the current time is after the end date
     return now > endDate && startDate < endDate;
 };
-
 const calculateFinalPrice = (basePrice, discount) => {
     // Check if discount has expired
     if (isDiscountExpired(discount)) {
         return basePrice;
     }
-
     if (!discount?.active || !basePrice || !discount?.value) {
         return basePrice;
     }
-
     if (discount.type === 'percentage') {
         return basePrice * (1 - discount.value / 100);
     } else {
         return Math.max(0, basePrice - discount.value);
     }
 };
-
 const validateDiscountFields = (discount) => {
     const errors = {};
-
     if (discount.active) {
         if (!discount.type) {
             errors.discountType = "El tipus de descompte és obligatori";
         }
-
         if (!discount.value) {
             errors.discountValue = "El valor del descompte és obligatori";
         } else if (discount.type === 'percentage' && (discount.value < 0 || discount.value > 100)) {
@@ -1835,7 +1775,6 @@ const validateDiscountFields = (discount) => {
         } else if (discount.type === 'fixed' && discount.value < 0) {
             errors.discountValue = "El descompte no pot ser negatiu";
         }
-
         if (discount.startDate && discount.endDate) {
             const start = new Date(discount.startDate);
             const end = new Date(discount.endDate);
@@ -1844,6 +1783,5 @@ const validateDiscountFields = (discount) => {
             }
         }
     }
-
     return errors;
 };

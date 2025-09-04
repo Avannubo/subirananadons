@@ -19,12 +19,7 @@ export default function SettingsTabs() {
         { id: 'banner', label: locale === 'ca' ? 'Banner' : 'Banner' },
         { id: 'recomendation', label: locale === 'ca' ? 'Recomanacions' : 'Recomendaciones' },
         { id: 'politicas', label: locale === 'ca' ? 'Textos Legals' : 'Textos Legales' },
-        { id: 'parameters', label: locale === 'ca' ? 'Paràmetres' : 'Parametros' },
-        // { id: 'rendimiento', label: locale === 'ca' ? 'Rendiment' : 'Rendimiento' },
-        // { id: 'administracion', label: locale === 'ca' ? 'Administració' : 'Administración' },
-        // { id: 'email', label: locale === 'ca' ? 'Adreça electrònica' : 'Dirección de correo electrónico' },
-        // { id: 'importar', label: locale === 'ca' ? 'Importar' : 'Importar' },
-        // { id: 'equipo', label: locale === 'ca' ? 'Equip' : 'Equipo' }
+        { id: 'parameters', label: locale === 'ca' ? 'Paràmetres' : 'Parametros' }
     ];
     // Format tabs for the TabNavigation component
     const tabNavItems = tabs.map(tab => tab.label);
@@ -55,8 +50,6 @@ export default function SettingsTabs() {
                 {activeTab === 'recomendation' && <RecomendationTab />}
                 {activeTab === 'politicas' && <TextosLegalesTab />}
                 {activeTab === 'parameters' && <ParametersTab />}
-                {/*{activeTab === 'equipo' && <EquipoTab />}
-                */}
             </div>
         </div>
     );
