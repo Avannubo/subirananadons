@@ -554,159 +554,87 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
     // --- Add Image to Product Gallery ---
     const handleAddImage = async () => {
-        if (!selectedImage && !formData.image) {
-            toast.error('Por favor seleccione una imagen o proporcione una URL');
-            return;
-        }
+        // if ((!selectedFiles || selectedFiles.length === 0) && !formData.image) {
+        //     toast.error('Por favor seleccione una imagen o proporcione una URL');
+        //     return;
+        // }
+
         // If URL provided, add it directly
-        if (formData.image && !selectedImage) {
-            // Check if this URL already exists in the product images
+        if (formData.image && (!selectedFiles || selectedFiles.length === 0)) {
             if (productImages.includes(formData.image)) {
-                // toast.error('Esta imagen ya ha sido añadida');
+                toast.error('La imagen ya existe en la galería');
                 return;
             }
-            const newImages = [...productImages, formData.image];
-            setProductImages(newImages);
-            // Clear inputs for next image
-            setSelectedImage(null);
+            setProductImages(prev => [...prev, formData.image]);
+            setFormData(prev => ({ ...prev, image: '' }));
             setImagePreview('');
-            setFormData(prev => ({
-                ...prev,
-                image: ''
-            }));
             toast.success('Imagen añadida correctamente');
             return;
         }
+
         // Handle multiple files upload
-        if (selectedImage && selectedImage.length) {
+        if (selectedFiles && selectedFiles.length > 0) {
             setIsUploading(true);
-            const toastId = toast.loading(`Subiendo ${selectedImage.length} imágenes...`);
+            const toastId = toast.loading(`Subiendo ${selectedFiles.length} imágenes...`);
             try {
-                const uploadPromises = [];
-                const filesArray = Array.from(selectedImage);
-                // Process each file for upload
-                for (const file of filesArray) {
-                    uploadPromises.push(
-                        new Promise(async (resolve) => {
-                            try {
-                                // Convert image to base64
-                                const base64Image = await new Promise((resolveBase64) => {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => resolveBase64(reader.result);
-                                    reader.readAsDataURL(file);
-                                });
-                                // Upload to server
-                                const response = await fetch('/api/cloudinary/upload', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ image: base64Image })
-                                });
-                                if (!response.ok) {
-                                    const errorData = await response.json();
-                                    throw new Error(errorData.error || `Error al subir la imagen ${file.name}`);
-                                }
-                                const data = await response.json();
-                                resolve(data.url);
-                            } catch (error) {
-                                console.error('Error uploading image:', error);
-                                resolve(null); // Return null for failed uploads
-                            }
-                        })
-                    );
-                }
-                // Wait for all uploads to complete
-                const uploadedUrls = await Promise.all(uploadPromises);
-                const validUrls = uploadedUrls.filter(url => url !== null);
-                if (validUrls.length > 0) {
-                    // Filter out any URLs that already exist in the product images
-                    const newUrls = validUrls.filter(url => !productImages.includes(url));
-                    if (newUrls.length === 0) {
-                        toast.warning('Todas las imágenes ya han sido añadidas', { id: toastId });
-                    } else {
-                        setProductImages(prev => [...prev, ...newUrls]);
-                        toast.success(`${newUrls.length} de ${filesArray.length} imágenes añadidas`, { id: toastId });
-                    }
-                } else {
-                    toast.error('Error al subir las imágenes', { id: toastId });
-                }
-                // Clear inputs for next upload
-                setSelectedImage(null);
-                setImagePreview('');
-            } catch (error) {
-                console.error('Error uploading images:', error);
-                toast.error('Error al subir las imágenes', { id: toastId });
-            } finally {
-                setIsUploading(false);
-            }
-            return;
-        }
-        // Handle single file upload (legacy path)
-        // Add selected images to productImages (upload to server)
-        const handleAddImage = async () => {
-            if ((!selectedFiles || selectedFiles.length === 0) && !formData.image) {
-                toast.error('Por favor seleccione una imagen o proporcione una URL');
-                return;
-            }
-            // If URL provided, add it directly
-            if (formData.image && (!selectedFiles || selectedFiles.length === 0)) {
-                if (productImages.includes(formData.image)) {
-                    toast.error('La imagen ya existe en la galería');
-                    return;
-                }
-                setProductImages(prev => [...prev, formData.image]);
-                setFormData(prev => ({ ...prev, image: '' }));
-                setImagePreview('');
-                toast.success('Imagen añadida correctamente');
-                return;
-            }
-            // Handle multiple files upload
-            if (selectedFiles && selectedFiles.length > 0) {
-                setIsUploading(true);
-                const toastId = toast.loading(`Subiendo ${selectedFiles.length} imágenes...`);
-                try {
-                    // Upload each file and collect URLs
-                    const uploadedUrls = [];
-                    for (let i = 0; i < selectedFiles.length; i++) {
-                        const file = selectedFiles[i];
+                const uploadPromises = selectedFiles.map(async (file) => {
+                    try {
+                        // Convert image to base64
                         const base64Image = await new Promise((resolve) => {
                             const reader = new FileReader();
                             reader.onloadend = () => resolve(reader.result);
                             reader.readAsDataURL(file);
                         });
+
+                        // Upload to server
                         const response = await fetch('/api/cloudinary/upload', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ image: base64Image })
                         });
+
                         if (!response.ok) {
                             const errorData = await response.json();
-                            toast.error(errorData.error || 'Error al subir la imagen', { id: toastId });
-                            continue;
+                            throw new Error(errorData.error || `Error al subir la imagen ${file.name}`);
                         }
+
                         const data = await response.json();
-                        uploadedUrls.push(data.url);
+                        return data.url;
+                    } catch (error) {
+                        console.error('Error uploading image:', error);
+                        toast.error(`Error al subir la imagen ${file.name}`);
+                        return null;
                     }
-                    setProductImages(prev => [...prev, ...uploadedUrls]);
-                    toast.success('Imágenes añadidas correctamente', { id: toastId });
-                } catch (error) {
+                });
+
+                const uploadedUrls = await Promise.all(uploadPromises);
+                const validUrls = uploadedUrls.filter(url => url !== null);
+
+                if (validUrls.length > 0) {
+                    // Filter out any URLs that already exist in the product images
+                    const newUrls = validUrls.filter(url => !productImages.includes(url));
+                    if (newUrls.length > 0) {
+                        setProductImages(prev => [...prev, ...newUrls]);
+                        toast.success(`${newUrls.length} de ${selectedFiles.length} imágenes añadidas`, {
+                            id: toastId
+                        });
+                    } else {
+                        toast.warning('Todas las imágenes ya han sido añadidas', { id: toastId });
+                    }
+                } else {
                     toast.error('Error al subir las imágenes', { id: toastId });
-                } finally {
-                    setIsUploading(false);
-                    setSelectedFiles([]);
-                    setSelectedImages([]);
-                    setSelectedImage(null);
-                    setImagePreview('');
                 }
-                return;
+            } catch (error) {
+                console.error('Error uploading images:', error);
+                toast.error('Error al subir las imágenes', { id: toastId });
+            } finally {
+                setIsUploading(false);
+                setSelectedFiles([]);
+                setSelectedImages([]);
+                setSelectedImage(null);
+                setImagePreview('');
             }
-        };
-        if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
-            newErrors.minStock = 'Ha de ser un número enter';
         }
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
     };
     // --- Form Submission Handler ---
     const handleSubmit = async (e) => {
@@ -1531,22 +1459,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                if (selectedImages && selectedImages.length > 0) {
-                                                    // Only add images not already in productImages
-                                                    const newImages = selectedImages.filter(img => !productImages.includes(img));
-                                                    if (newImages.length > 0) {
-                                                        setProductImages(prev => [...prev, ...newImages]);
-                                                        setSelectedImages([]);
-                                                        setSelectedFiles([]);
-                                                        toast.success('Imatges afegides a la galeria');
-                                                    } else {
-                                                        toast.warning('Totes les imatges ja són a la galeria');
-                                                    }
-                                                } else {
-                                                    handleAddImage();
-                                                }
-                                            }}
+                                            onClick={handleAddImage}
                                             disabled={isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)}
                                             className={`w-full my-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)
                                                 ? 'bg-gray-400 cursor-not-allowed'
@@ -1669,10 +1582,13 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         {showImageSelector && (
                                             <ImageSelector
                                                 onSelect={(url) => {
-                                                    // Add selected image URL to preview list (selectedImages), do not upload
-                                                    setSelectedImages(prev => [...prev, url]);
-                                                    setFormData(f => ({ ...f, image: '' }));
-                                                    setImagePreview(url);
+                                                    // Add the selected image directly to productImages
+                                                    if (!productImages.includes(url)) {
+                                                        setProductImages(prev => [...prev, url]);
+                                                        toast.success('Imatge afegida a la galeria');
+                                                    } else {
+                                                        toast.warning('Aquesta imatge ja existeix a la galeria');
+                                                    }
                                                     setShowImageSelector(false);
                                                 }}
                                                 onClose={() => setShowImageSelector(false)}
