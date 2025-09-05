@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FiUpload, FiPlus } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import ImageSelector from "@/components/admin/shared/ImageSelector"; // Adjust the import based on your file structure
-
 export default function OffersTab() {
     const [offers, setOffers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,7 +21,6 @@ export default function OffersTab() {
     const [brands, setBrands] = useState([]);
     const [showImageSelector, setShowImageSelector] = useState(false);
     const maxOffers = 4;
-
     useEffect(() => {
         async function fetchOffers() {
             try {
@@ -30,7 +28,6 @@ export default function OffersTab() {
                 const data = await res.json();
                 setOffers(data);
                 console.log(data);
-
             } catch (err) {
                 toast.error('Error al cargar las ofertas');
             } finally {
@@ -51,7 +48,6 @@ export default function OffersTab() {
                 }
             });
     }, []);
-
     const handleChange = e => {
         const { name, value } = e.target;
         if (name === 'brand') {
@@ -77,7 +73,6 @@ export default function OffersTab() {
             setForm(f => ({ ...f, [name]: value }));
         }
     };
-
     const handleImageChange = (e) => {
         const files = e.target.files;
         if (files && files.length > 0) {
@@ -89,7 +84,6 @@ export default function OffersTab() {
             fileReader.readAsDataURL(files[0]);
         }
     };
-
     const uploadImage = async () => {
         if (!selectedImage) return null;
         setIsUploading(true);
@@ -117,7 +111,6 @@ export default function OffersTab() {
             setIsUploading(false);
         }
     };
-
     const handleSubmit = async e => {
         e.preventDefault();
         setError('');
@@ -135,7 +128,6 @@ export default function OffersTab() {
                 }
                 imageUrl = uploadedUrl;
             }
-
             // Find the selected brand from the brands list
             const selectedBrand = brands.find(b => b.id === form.brand || b.name === form.brand);
             if (!selectedBrand) {
@@ -153,29 +145,24 @@ export default function OffersTab() {
                 brand: selectedBrand.id, // Send ObjectId
                 brandLogo
             };
-
             // Add _id if editing
             if (editingId) {
                 offerData._id = editingId;
             }
-
             const res = await fetch('/api/offers', {
                 method: editingId ? 'PUT' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(offerData)
             });
-
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data.error || 'Error saving offer');
             }
-
             if (editingId) {
                 setOffers(offers.map(o => o._id === editingId ? data : o));
             } else {
                 setOffers([...offers, data]);
             }
-
             // Reset form
             setForm({
                 imageUrl: '',
@@ -194,7 +181,6 @@ export default function OffersTab() {
             toast.error(err.message);
         }
     };
-
     const handleEdit = offer => {
         // Determine the brand id for the select input
         let brandId = '';
@@ -214,7 +200,6 @@ export default function OffersTab() {
         setImagePreview(offer.imageUrl || '');
         setEditingId(offer._id);
     };
-
     const handleDelete = async id => {
         if (!window.confirm('¿Eliminar esta oferta?')) return;
         const res = await fetch('/api/offers', {
@@ -231,12 +216,10 @@ export default function OffersTab() {
         }
         toast.success('Oferta eliminada correctamente');
     };
-
     return (
         <div className="p-6 bg-white rounded-xl">
             <h2 className="font-bold mb-6 text-lg text-gray-800">Ofertes Destacades</h2>
             {error && <div className="text-red-500 mb-2">{error}</div>}
-
             <form onSubmit={handleSubmit} className="mb-8 space-y-6">
                 <div className="flex flex-col items-center space-y-4">
                     <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
@@ -300,7 +283,6 @@ export default function OffersTab() {
                     <input name="description.ca" value={form.description.ca} onChange={handleChange} placeholder="Descripció (CA)" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
                     <input name="description.es" value={form.description.es} onChange={handleChange} placeholder="Descripción (ES)" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
                 </div>
-
                 {/* Brand selector and discount */}
                 <div className="flex flex-col md:flex-row gap-2">
                     <select name="brand" value={form.brand} onChange={handleChange} className="border border-gray-300 p-2 rounded w-full bg-gray-50">
@@ -330,7 +312,7 @@ export default function OffersTab() {
                                 <th className="py-3 px-2 font-semibold text-left">Títol</th>
                                 <th className="py-3 px-2 font-semibold text-left">Descripció</th>
                                 <th className="py-3 px-2 font-semibold text-left">Marca</th>
-                                <th className="py-3 px-2 font-semibold text-left">Descompte %</th>
+                                {/* <th className="py-3 px-2 font-semibold text-left">Descompte %</th> */}
                                 <th className="py-3 px-2 font-semibold text-left">Accions</th>
                             </tr>
                         </thead>
@@ -349,11 +331,11 @@ export default function OffersTab() {
                                     <td className="py-2 px-2">
                                         <div className="h-4 w-20 bg-gray-200 rounded mx-auto" />
                                     </td>
-                                    <td className="py-2 px-2">
+                                    {/* <td className="py-2 px-2">
                                         <div className="h-4 w-10 bg-gray-200 rounded mx-auto" />
-                                    </td>
+                                    </td> */}
                                     <td className="py-2 px-2">
-                                        <div className="flex gap-2 justify-center">
+                                        <div className="flex gap-2 justify-start">
                                             <div className="h-8 w-12 bg-gray-200 rounded-full" />
                                             <div className="h-8 w-12 bg-gray-200 rounded-full" />
                                         </div>
@@ -372,7 +354,7 @@ export default function OffersTab() {
                                 <th className="py-3 px-2 font-semibold text-left">Título</th>
                                 <th className="py-3 px-2 font-semibold text-left">Descripción</th>
                                 <th className="py-3 px-2 font-semibold text-left">Marca</th>
-                                <th className="py-3 px-2 font-semibold text-left">Desc. %</th>
+                                {/* <th className="py-3 px-2 font-semibold text-left">Desc. %</th> */}
                                 <th className="py-3 px-2 font-semibold text-left">Acciones</th>
                             </tr>
                         </thead>
@@ -408,7 +390,7 @@ export default function OffersTab() {
                                                 : (brands.find(b => b.id === offer.brand)?.name || offer.brand)}
                                         </a>
                                     </td>
-                                    <td className="py-2 px-2">{offer.discount ? `${offer.discount}%` : ''}</td>
+                                    {/* <td className="py-2 px-2">{offer.discount ? `${offer.discount}%` : ''}</td> */}
                                     <td className="py-2 px-2 flex gap-2">
                                         <button onClick={() => handleEdit(offer)} className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 border border-blue-100 text-xs">Edita</button>
                                         <button onClick={() => handleDelete(offer._id)} className="bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100 border border-red-100 text-xs">Elimina</button>
