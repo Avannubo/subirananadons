@@ -42,9 +42,9 @@ export async function GET(request) {
 
         return NextResponse.json({ success: true, data: birthLists });
     } catch (error) {
-        console.error('Error fetching birth lists:', error);
+        console.error('Error en obtenir les llistes de naixement:', error);
         return NextResponse.json(
-            { success: false, message: 'Error fetching birth lists', error: error.message },
+            { success: false, message: 'Error en obtenir les llistes de naixement', error: error.message },
             { status: 500 }
         );
     }
@@ -79,7 +79,7 @@ export async function POST(request) {
         const user = await User.findById(userIdToUse);
         if (!user) {
             return NextResponse.json(
-                { success: false, message: 'User not found' },
+                { success: false, message: 'Usuari no trobat' },
                 { status: 404 }
             );
         }
@@ -87,7 +87,7 @@ export async function POST(request) {
         // Validate required fields
         if (!data.title || !data.babyName || !data.dueDate) {
             return NextResponse.json(
-                { success: false, message: 'Required fields missing: title, babyName, dueDate' },
+                { success: false, message: 'Falten camps obligatoris: títol, nom del nadó, data prevista' },
                 { status: 400 }
             );
         }
@@ -122,13 +122,13 @@ export async function POST(request) {
             status: data.status || 'Activa'
         };
         // Create the birth list in the database
-         const birthList = await BirthList.create(birthListData);
+        const birthList = await BirthList.create(birthListData);
 
         // Send confirmation emails
         try {
             await EmailService.sendListCreationConfirmation(birthList, user);
         } catch (emailError) {
-            console.error('Error sending creation confirmation email:', emailError);
+            console.error('Error en enviar el correu de confirmació de creació:', emailError);
             // We don't want to fail the list creation if email sending fails
         }
 
@@ -136,16 +136,16 @@ export async function POST(request) {
         return NextResponse.json(
             {
                 success: true,
-                message: 'Birth list created successfully',
+                message: 'Llista de naixement creada correctament',
                 _id: birthList._id,
                 ...birthList.toObject()
             },
             { status: 201 }
         );
     } catch (error) {
-        console.error('Error creating birth list:', error);
+        console.error('Error en crear la llista de naixement:', error);
         return NextResponse.json(
-            { success: false, message: 'Error creating birth list', error: error.message },
+            { success: false, message: 'Error en crear la llista de naixement', error: error.message },
             { status: 500 }
         );
     }

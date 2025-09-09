@@ -12,7 +12,7 @@ export async function POST(request) {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return NextResponse.json(
-                { error: 'User already exists' },
+                { error: 'El usuario ya existe' },
                 { status: 400 }
             );
         }
@@ -42,7 +42,7 @@ export async function POST(request) {
         });
     } catch (error) {
         return NextResponse.json(
-            { error: error.message || 'Registration failed' },
+            { error: error.message || 'Error en el registro' },
             { status: 400 }
         );
     }

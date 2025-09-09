@@ -5,16 +5,13 @@ import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
 import User from '@/models/User';
 import mongoose from 'mongoose';
-
 // Helper function to check if a MongoDB ObjectId is valid
 const isValidObjectId = (id) => {
     return mongoose.Types.ObjectId.isValid(id);
 };
-
 export async function POST(request, { params }) {
     try {
         const { id } = params;
-
         // Validate birth list ID
         if (!isValidObjectId(id)) {
             return NextResponse.json(
@@ -22,7 +19,6 @@ export async function POST(request, { params }) {
                 { status: 400 }
             );
         }
-
         // Parse request body
         const {
             itemId,
@@ -32,7 +28,6 @@ export async function POST(request, { params }) {
             buyerPhone,
             paymentMethod = 'store' // 'store', 'online'
         } = await request.json();
-
         // Validate required fields
         if (!itemId || !isValidObjectId(itemId)) {
             return NextResponse.json(
@@ -40,41 +35,32 @@ export async function POST(request, { params }) {
                 { status: 400 }
             );
         }
-
         if (!buyerName || !buyerEmail) {
             return NextResponse.json(
                 { success: false, message: 'Buyer name and email are required' },
                 { status: 400 }
             );
         }
-
         await dbConnect();
-
         // Find the birth list with the specified item
         const birthList = await BirthList.findById(id).populate('user', 'email name');
-
         if (!birthList) {
             return NextResponse.json(
                 { success: false, message: 'Birth list not found' },
                 { status: 404 }
             );
         }
-
         // Find the specific item in the birth list
         const itemIndex = birthList.items.findIndex(item => item._id.toString() === itemId);
-
         if (itemIndex === -1) {
             return NextResponse.json(
                 { success: false, message: 'Item not found in birth list' },
                 { status: 404 }
             );
         }
-
         const item = birthList.items[itemIndex];
-
         // Check if the requested quantity is available
         const availableQuantity = item.quantity - item.reserved;
-
         if (availableQuantity < quantity) {
             return NextResponse.json(
                 {
@@ -85,11 +71,9 @@ export async function POST(request, { params }) {
                 { status: 400 }
             );
         }
-
         // Get current user session if available (optional for guests)
         const session = await getServerSession(authOptions);
         const userId = session?.user?.id || null;
-
         // Record the purchase
         const purchase = {
             buyerName,
@@ -101,22 +85,17 @@ export async function POST(request, { params }) {
             status: 'pending', // pending, completed, cancelled
             purchaseDate: new Date()
         };
-
         // Update the item's reserved count and add the purchase info
         birthList.items[itemIndex].reserved += quantity;
-
         if (!birthList.items[itemIndex].purchases) {
             birthList.items[itemIndex].purchases = [];
         }
-
         birthList.items[itemIndex].purchases.push(purchase);
-
         // Add contributor to list if they're not already there
         if (userId) {
             const contributorExists = birthList.contributors.some(
                 contributor => contributor.user && contributor.user.toString() === userId
             );
-
             if (!contributorExists) {
                 birthList.contributors.push({
                     user: userId,
@@ -124,11 +103,9 @@ export async function POST(request, { params }) {
                 });
             }
         }
-
         // Check if the list is now complete
         const isListComplete = birthList.items.every(item => item.reserved >= item.quantity); if (isListComplete && birthList.status === 'Activa') {
             birthList.status = 'Completada';
-
             // Send list completion notification
             try {
                 await EmailService.sendListCompletedNotification(birthList, birthList.user);
@@ -137,10 +114,8 @@ export async function POST(request, { params }) {
                 // Continue with the purchase even if email fails
             }
         }
-
         // Save the updated birth list
         await birthList.save();
-
         return NextResponse.json({
             success: true,
             message: 'Gift purchase recorded successfully',

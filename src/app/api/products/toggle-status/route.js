@@ -11,7 +11,7 @@ export async function POST(request) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: 'Product ID is required'
+                    message: 'El ID del producto es requerido'
                 },
                 { status: 400 }
             );
@@ -27,7 +27,7 @@ export async function POST(request) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: `Product not found with ID: ${productId}`
+                    message: `Producto no encontrado con ID: ${productId}`
                 },
                 { status: 404 }
             );

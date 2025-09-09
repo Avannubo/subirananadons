@@ -25,7 +25,7 @@ export async function GET(request, { params }) {
                     }
                 });
             } catch (error) {
-                console.error('Error reading existing PDF:', error);
+                console.error('Error al leer el PDF existente:', error);
                 // If we can't read the existing PDF, continue to generate a new one
             }
         }
@@ -38,7 +38,7 @@ export async function GET(request, { params }) {
             .lean();
         console.log('Order:', order);
         if (!order) {
-            return new NextResponse('Order not found', { status: 404 });
+            return new NextResponse('Pedido no encontrado', { status: 404 });
         }
         // HTML template for the invoice
         const html = `
@@ -217,11 +217,11 @@ export async function GET(request, { params }) {
                 </thead>
                 <tbody>
                     ${order.items.map(item => {
-                    const discount = item.priceDetails?.discountAmount || 0;
-                    const discountPercent = item.priceDetails?.discountPercentage || 0;
-                    const originalPrice = item.priceDetails?.originalPrice || item.price;
-                    const finalPrice = item.priceDetails?.finalPrice || item.price;
-                    return `
+            const discount = item.priceDetails?.discountAmount || 0;
+            const discountPercent = item.priceDetails?.discountPercentage || 0;
+            const originalPrice = item.priceDetails?.originalPrice || item.price;
+            const finalPrice = item.priceDetails?.finalPrice || item.price;
+            return `
                         <tr>
                         <td title="${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producto') : 'Producto'}">
                             ${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producto') : 'Producto'}
@@ -237,7 +237,7 @@ export async function GET(request, { params }) {
                         <td>${finalPrice.toFixed(2)}€</td>
                         </tr>
                         `;
-                    }).join('')}
+        }).join('')}
                 </tbody>
                 </table>
                 <table class="totals">
@@ -345,10 +345,10 @@ export async function GET(request, { params }) {
             }
         });
     } catch (error) {
-        console.error('Error generating invoice:', error);
+        console.error('Error al generar la factura:', error);
         return NextResponse.json({
             success: false,
-            message: 'Error generating invoice',
+            message: 'Error al generar la factura',
             error: error.message
         }, { status: 500 });
     }
@@ -359,14 +359,14 @@ export async function DELETE(request, { params }) {
         const { id } = params;
         const deletedInvoice = await Invoice.findByIdAndDelete(id);
         if (!deletedInvoice) {
-            return new NextResponse('Invoice not found', { status: 404 });
+            return new NextResponse('Factura no encontrada', { status: 404 });
         }
         return new NextResponse(null, { status: 200 });
     } catch (error) {
-        console.error('Error deleting invoice:', error);
+        console.error('Error al eliminar la factura:', error);
         return NextResponse.json({
             success: false,
-            message: 'Error deleting invoice',
+            message: 'Error al eliminar la factura',
             error: error.message
         }, { status: 500 });
     }

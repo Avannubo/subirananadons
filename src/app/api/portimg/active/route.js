@@ -12,6 +12,6 @@ export async function GET(req) {
         }
         return Response.json({ imageUrl: activeImg.imageUrl }, { status: 200 });
     } catch (error) {
-        return Response.json({ error: 'Failed to fetch active banner image.' }, { status: 500 });
+        return Response.json({ error: 'Error al obtener la imagen del banner activo.' }, { status: 500 });
     }
 }

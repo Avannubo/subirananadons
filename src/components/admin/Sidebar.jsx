@@ -1,21 +1,19 @@
 'use client';
+import React from 'react';
 import Link from 'next/link';
 import {
     ShoppingBag,
     ClipboardList,
     Users,
-    CreditCard,
     GiftIcon,
     Settings,
     CircleUserRound,
     TagIcon,
     Star,
-    ChartArea,
     LogOut
 } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { useSession, signOut } from 'next-auth/react';
-import useShopSocials from "@/lib/useShopSocials";
 const getNavigationItems = (userRole, locale) => [
     {
         href: "/dashboard/account",
@@ -55,12 +53,6 @@ const getNavigationItems = (userRole, locale) => [
         label: locale === 'ca' ? "Clients" : "Clientes",
         roles: ['admin']
     },
-    // {
-    //     href: "/dashboard/facturas",
-    //     icon: CreditCard,
-    //     label: locale === 'ca' ? "Factures" : "Facturas",
-    //     roles: ['admin']
-    // },
     {
         href: "/dashboard/listas",
         icon: GiftIcon,
@@ -80,14 +72,29 @@ const getNavigationItems = (userRole, locale) => [
 export default function Sidebar() {
     const { data: session } = useSession();
     const userRole = session?.user?.role || 'user';
-    const locale = useLocale();
-    const navigationItems = getNavigationItems(userRole, locale);
+    const defaultLocale = useLocale();
+
+    // Detect browser language and set initial locale
+    const [currentLocale, setCurrentLocale] = React.useState(defaultLocale);
+
+    React.useEffect(() => {
+        let detectedLocale = 'ca';
+        if (typeof window !== 'undefined' && window.navigator) {
+            const lang = window.navigator.language || window.navigator.userLanguage;
+            if (lang && lang.toLowerCase().startsWith('es')) {
+                detectedLocale = 'es';
+            }
+        }
+        setCurrentLocale(detectedLocale);
+    }, []);
+
+    const navigationItems = getNavigationItems(userRole, currentLocale);
     return (
         <div className="w-64 h-[80vh] bg-white top-[100px] sticky">
             <div className="px-4 py-2 min-h-[88vh] flex flex-col justify-between">
                 <nav className="space-y-1">
                     <div className='flex items-center justify-center font-bold text-2xl border-b pb-2 border-gray-200'>
-                        <span className="font-medium">{locale === 'ca' ? 'Hola' : 'Hola'}! {session?.user.name}</span>
+                        <span className="font-medium">{currentLocale === 'ca' ? 'Hola' : 'Hola'}! {session?.user.name}</span>
                     </div>
                     {navigationItems.map((item, index) => {
                         if (!item.roles.includes(userRole)) {
@@ -113,7 +120,7 @@ export default function Sidebar() {
                         className="w-full flex items-center justify-center gap-2 py-2 mb-4 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-[#36A9E1] hover:text-white rounded-lg transition-colors"
                     >
                         <LogOut size={20} />
-                        {locale === 'ca' ? 'Tancar sessió' : 'Cerrar sesión'}
+                        {currentLocale === 'ca' ? 'Tancar sessió' : 'Cerrar sesión'}
                     </button>
                     {/* <div className="flex space-x-5 justify-center my-4">
                         {useShopSocials().socials.map((social) => {

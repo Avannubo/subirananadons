@@ -10,7 +10,7 @@ export async function POST(request) {
 
         if (!email) {
             return NextResponse.json(
-                { message: 'Email is required' },
+                { message: 'El correu electrònic és obligatori' },
                 { status: 400 }
             );
         }
@@ -23,7 +23,7 @@ export async function POST(request) {
         // Even if we don't find the user, we send a success response for security
         if (!user) {
             return NextResponse.json(
-                { message: 'If the email exists, you will receive recovery instructions' },
+                { message: 'Si el correu existeix, rebràs instruccions de recuperació' },
                 { status: 200 }
             );
         }
@@ -43,9 +43,9 @@ export async function POST(request) {
             { status: 200 }
         );
     } catch (error) {
-        console.error('Password reset error:', error);
+        console.error('Error de restabliment de contrasenya:', error);
         return NextResponse.json(
-            { message: 'An error occurred while processing your request' },
+            { message: 'Hi ha hagut un error en processar la teva sol·licitud' },
             { status: 500 }
         );
     }

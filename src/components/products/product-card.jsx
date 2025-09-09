@@ -144,9 +144,8 @@ export default function ProductCard({
                     <img
                         src={currentImageUrl}
                         alt={product.name.ca || product.name.es || product.name}
-                        className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
-                    />
-                    {/* Discount Badge */}
+                        className="transition-opacity duration-300 p-4 ease-in-out rounded-lg object-contain w-full h-full"
+                    /> 
 
                     {/* Hover Overlay Buttons - Grid View */}
                     <div className="absolute -bottom-2 p- left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 px-3 py-2 transition-all duration-300 z-10">

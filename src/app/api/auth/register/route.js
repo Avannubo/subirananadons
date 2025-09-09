@@ -11,7 +11,7 @@ export async function POST(request) {
         // Validate input
         if (!name || !email || !password) {
             return NextResponse.json(
-                { message: 'Please provide all required fields' },
+                { message: 'Si us plau, omple tots els camps obligatoris' },
                 { status: 400 }
             );
         }
@@ -20,7 +20,7 @@ export async function POST(request) {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return NextResponse.json(
-                { message: 'User with this email already exists' },
+                { message: 'Ja existeix un usuari amb aquest correu electrònic' },
                 { status: 400 }
             );
         }
@@ -42,13 +42,13 @@ export async function POST(request) {
         };
 
         return NextResponse.json(
-            { message: 'User registered successfully', user: userResponse },
+            { message: 'Usuari registrat correctament', user: userResponse },
             { status: 201 }
         );
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('Error de registre:', error);
         return NextResponse.json(
-            { message: error.message || 'Error registering user' },
+            { message: error.message || 'Error en registrar l\'usuari' },
             { status: 500 }
         );
     }

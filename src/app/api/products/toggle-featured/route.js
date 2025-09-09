@@ -11,7 +11,7 @@ export async function POST(request) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: 'Product ID is required'
+                    message: 'El ID del producto es requerido'
                 },
                 { status: 400 }
             );
@@ -27,7 +27,7 @@ export async function POST(request) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: `Product not found with ID: ${productId}`
+                    message: `Producto no encontrado con ID: ${productId}`
                 },
                 { status: 404 }
             );
@@ -44,7 +44,7 @@ export async function POST(request) {
 
         return NextResponse.json({
             success: true,
-            message: `Product ${updatedProduct.featured ? 'marked as featured' : 'unmarked as featured'}`,
+            message: `Producto ${updatedProduct.featured ? 'marcado como destacado' : 'desmarcado como destacado'}`,
             product: {
                 id: updatedProduct._id,
                 name: updatedProduct.name,
@@ -56,7 +56,7 @@ export async function POST(request) {
         return NextResponse.json(
             {
                 success: false,
-                message: 'Error toggling featured status',
+                message: 'Error al cambiar el estado destacado',
                 error: error.message
             },
             { status: 500 }

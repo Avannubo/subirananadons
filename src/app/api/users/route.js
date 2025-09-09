@@ -64,7 +64,7 @@ export async function POST(request) {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return NextResponse.json(
-                { error: 'Email already in use' },
+                { error: 'El correo electrónico ya está en uso' },
                 { status: 400 }
             );
         }

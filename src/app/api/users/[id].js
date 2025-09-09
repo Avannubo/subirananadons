@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
 
         if (!user) {
             return NextResponse.json(
-                { error: 'User not found' },
+                { error: 'Usuario no encontrado' },
                 { status: 404 }
             );
         }
@@ -48,7 +48,7 @@ export async function PUT(request, { params }) {
 
         if (!user) {
             return NextResponse.json(
-                { error: 'User not found' },
+                { error: 'Usuario no encontrado' },
                 { status: 404 }
             );
         }
@@ -71,7 +71,7 @@ export async function DELETE(request, { params }) {
 
         if (!user) {
             return NextResponse.json(
-                { error: 'User not found' },
+                { error: 'Usuario no encontrado' },
                 { status: 404 }
             );
         }
@@ -89,7 +89,7 @@ export async function DELETE(request, { params }) {
 
         return NextResponse.json({
             success: true,
-            message: 'User and all related data deleted successfully'
+            message: 'Usuario y todos los datos relacionados eliminados correctamente'
         });
     } catch (error) {
         return NextResponse.json(

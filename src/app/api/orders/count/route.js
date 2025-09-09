@@ -11,7 +11,7 @@ export async function GET(request) {
         console.log('[order-count] Received userId:', userId);
 
         if (!userId) {
-            return NextResponse.json({ message: 'Missing userId parameter' }, { status: 400 });
+            return NextResponse.json({ message: 'Falta el parámetro userId' }, { status: 400 });
         }
 
         // Create query to match either string or ObjectId format of userId
@@ -43,7 +43,7 @@ export async function POST(request) {
         const { userId, client, email } = body;
 
         if (!userId && !email) {
-            return NextResponse.json({ message: 'Missing both userId and email in request body' }, { status: 400 });
+            return NextResponse.json({ message: 'Faltan tanto userId como email en el cuerpo de la solicitud' }, { status: 400 });
         }
 
         // Convert userId to ObjectId if it's a valid format

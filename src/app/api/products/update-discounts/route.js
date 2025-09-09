@@ -51,7 +51,7 @@ export async function POST() {
     } catch (error) {
         console.error('Error updating discounts:', error);
         return NextResponse.json(
-            { error: 'Failed to update discounts' },
+            { error: 'Error al actualizar los descuentos' },
             { status: 500 }
         );
     }

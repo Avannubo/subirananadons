@@ -29,9 +29,9 @@ export async function PUT(request) {
         // Find user
         const user = await User.findById(session.user.id);
         if (!user) {
-            console.error('User not found:', session.user.id);
+            console.error('Usuari no trobat:', session.user.id);
             return NextResponse.json(
-                { message: 'User not found' },
+                { message: 'Usuari no trobat' },
                 { status: 404 }
             );
         }
@@ -41,7 +41,7 @@ export async function PUT(request) {
             const existingUser = await User.findOne({ email });
             if (existingUser && existingUser._id.toString() !== user._id.toString()) {
                 return NextResponse.json(
-                    { message: 'Email already in use' },
+                    { message: 'Aquest correu electrònic ja està en ús' },
                     { status: 400 }
                 );
             }
@@ -68,7 +68,7 @@ export async function PUT(request) {
         // Return success response
         return NextResponse.json(
             {
-                message: 'Profile updated successfully',
+                message: 'Perfil actualitzat correctament',
                 user: {
                     id: user._id,
                     name: user.name,
@@ -83,9 +83,9 @@ export async function PUT(request) {
         );
 
     } catch (error) {
-        console.error('Error updating profile:', error);
+        console.error('Error en actualitzar el perfil:', error);
         return NextResponse.json(
-            { message: 'Error updating profile', error: error.message },
+            { message: 'Error en actualitzar el perfil', error: error.message },
             { status: 500 }
         );
     }
@@ -132,9 +132,9 @@ export async function GET(request) {
         );
 
     } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Error en obtenir el perfil:', error);
         return NextResponse.json(
-            { message: 'Error fetching profile', error: error.message },
+            { message: 'Error en obtenir el perfil', error: error.message },
             { status: 500 }
         );
     }

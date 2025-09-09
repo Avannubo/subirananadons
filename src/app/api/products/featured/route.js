@@ -33,7 +33,7 @@ export async function GET(request) {
         return NextResponse.json(
             {
                 success: false,
-                message: 'Error fetching featured products',
+                message: 'Error al obtener los productos destacados',
                 error: error.message
             },
             { status: 500 }

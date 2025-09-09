@@ -564,9 +564,9 @@ export default function ProductsTable(props) {
                                                     </span>
                                                     {product.discount.startDate && product.discount.endDate && (
                                                         <span className="text-xs text-gray-500 mt-1">
-                                                            {new Date(product.discount.startDate).toLocaleDateString()} {new Date(product.discount.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            {new Date(product.discount.startDate).toLocaleDateString()} {new Date(product.discount.startDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
                                                             {' - '}
-                                                            {new Date(product.discount.endDate).toLocaleDateString()} {new Date(product.discount.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            {new Date(product.discount.endDate).toLocaleDateString()} {new Date(product.discount.endDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                                         </span>
                                                     )}
                                                 </div>

@@ -15,7 +15,7 @@ export async function POST(request) {
         if (!productId || !quantity) {
             return NextResponse.json({
                 success: false,
-                message: 'Product ID and quantity are required'
+                message: 'L\'ID del producte i la quantitat són obligatoris'
             }, { status: 400 });
         }
         try {
@@ -41,7 +41,7 @@ export async function POST(request) {
                 console.log(`Product not found: ${productId}`);
                 return NextResponse.json({
                     success: false,
-                    message: `Product not found with ID: ${productId}`
+                    message: `Producte no trobat amb l'ID: ${productId}`
                 }, { status: 404 });
             }
             console.log(`Found product: ${product.name} (ID: ${product._id})`);
@@ -50,7 +50,7 @@ export async function POST(request) {
             try {
                 session = await getServerSession(authOptions);
             } catch (authError) {
-                console.error('Authentication error:', authError);
+                console.error('Error d\'autenticació:', authError);
                 // Continue without session
             }
             const userId = session?.user?.id;
@@ -72,7 +72,7 @@ export async function POST(request) {
                 };
                 return NextResponse.json({
                     success: true,
-                    message: 'Product info retrieved for guest cart',
+                    message: 'Informació del producte obtinguda per al carret de convidat',
                     cart: {
                         items: [cartItem]
                     },
@@ -87,7 +87,7 @@ export async function POST(request) {
                     cart = existingCart.toObject();
                 }
             } catch (cartError) {
-                console.error('Error finding user cart:', cartError);
+                console.error('Error en trobar el carret de l\'usuari:', cartError);
                 // Continue with empty cart
             }
             // Check if product already exists in cart            // For gift items, always add as new. For regular items, check for duplicates
@@ -123,10 +123,10 @@ export async function POST(request) {
                     cart._id = newCart._id;
                 }
             } catch (saveError) {
-                console.error('Error saving cart to database:', saveError);
+                console.error('Error en desar el carret a la base de dades:', saveError);
                 return NextResponse.json({
                     success: false,
-                    message: 'Error saving cart to database',
+                    message: 'Error en desar el carret a la base de dades',
                     error: saveError.message
                 }, { status: 500 });
             }
@@ -145,26 +145,26 @@ export async function POST(request) {
             });
             return NextResponse.json({
                 success: true,
-                message: 'Product added to cart',
+                message: 'Producte afegit al carret',
                 cart: {
                     items: formattedItems,
                     _id: cart._id
                 }
             });
         } catch (dbError) {
-            console.error('Database error:', dbError);
+            console.error('Error de base de dades:', dbError);
             return NextResponse.json({
                 success: false,
-                message: 'Database error',
+                message: 'Error de base de dades',
                 error: dbError.message,
                 stack: dbError.stack
             }, { status: 500 });
         }
     } catch (error) {
-        console.error('Error adding to cart:', error);
+        console.error('Error en afegir al carret:', error);
         return NextResponse.json({
             success: false,
-            message: 'Error adding product to cart',
+            message: 'Error en afegir el producte al carret',
             error: error.message,
             stack: error.stack
         }, { status: 500 });

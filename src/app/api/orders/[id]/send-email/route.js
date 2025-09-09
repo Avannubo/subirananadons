@@ -11,7 +11,7 @@ export async function POST(request, { params }) {
         const { id } = await Promise.resolve(params);
         if (!id) {
             return NextResponse.json(
-                { message: 'Order ID is required' },
+                { message: 'Se requiere ID del pedido' },
                 { status: 400 }
             );
         }
@@ -27,7 +27,7 @@ export async function POST(request, { params }) {
 
         if (!order) {
             return NextResponse.json(
-                { message: 'Order not found' },
+                { message: 'Pedido no encontrado' },
                 { status: 404 }
             );
         }
@@ -35,12 +35,12 @@ export async function POST(request, { params }) {
         // Validate essential order data
         const requiredFields = ['orderNumber', 'items', 'shippingAddress', 'totalAmount'];
         const missingFields = requiredFields.filter(field => !order[field]);
-        
+
         if (missingFields.length > 0) {
             return NextResponse.json(
-                { 
-                    message: 'Incomplete order data', 
-                    details: `Missing required fields: ${missingFields.join(', ')}`
+                {
+                    message: 'Datos del pedido incompletos',
+                    details: `Faltan campos obligatorios: ${missingFields.join(', ')}`
                 },
                 { status: 400 }
             );
@@ -54,22 +54,22 @@ export async function POST(request, { params }) {
 
         if (missingAddressFields.length > 0) {
             return NextResponse.json(
-                { 
-                    message: 'Incomplete shipping address', 
-                    details: `Missing required address fields: ${missingAddressFields.join(', ')}`
+                {
+                    message: 'Dirección de envío incompleta',
+                    details: `Faltan campos obligatorios en la dirección: ${missingAddressFields.join(', ')}`
                 },
                 { status: 400 }
             );
-        } 
-        console.log('Original order:', JSON.stringify(order, null, 2)); 
+        }
+        console.log('Original order:', JSON.stringify(order, null, 2));
         // Transform the order data
         const transformedOrder = {
             ...order,
             items: order.items.map(item => {
-                console.log(item); 
-                const productData = item.product || {}; 
+                console.log(item);
+                const productData = item.product || {};
                 const price = Number(item.price || 0);
-                const quantity = Number(item.quantity || 1); 
+                const quantity = Number(item.quantity || 1);
                 return {
                     product: {
                         name: productData.name.es || 'Producto no disponible',
@@ -116,13 +116,13 @@ export async function POST(request, { params }) {
         await EmailService.sendOrderConfirmation(transformedOrder);
 
         return NextResponse.json({
-            message: 'Order confirmation email sent successfully',
+            message: 'Correo de confirmación de pedido enviado correctamente',
             orderId: order._id
         });
     } catch (error) {
-        console.error('Error sending order confirmation email:', error);
+        console.error('Error al enviar el correo de confirmación del pedido:', error);
         return NextResponse.json(
-            { message: 'Error sending confirmation email', error: error.message },
+            { message: 'Error al enviar el correo de confirmación', error: error.message },
             { status: 500 }
         );
     }

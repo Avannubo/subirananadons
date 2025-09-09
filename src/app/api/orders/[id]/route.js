@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
             console.error('Order Detail API - No user ID in session');
             return NextResponse.json({
                 success: false,
-                message: 'Unauthorized'
+                message: 'No autorizado'
             }, { status: 401 });
         }
 
@@ -29,7 +29,7 @@ export async function GET(request, { params }) {
             console.error('Order Detail API - Invalid order ID:', id);
             return NextResponse.json({
                 success: false,
-                message: 'Invalid order ID'
+                message: 'ID de pedido no válido'
             }, { status: 400 });
         }
 
@@ -69,7 +69,7 @@ export async function GET(request, { params }) {
         console.error('Order Detail API - Error:', error);
         return NextResponse.json({
             success: false,
-            message: error.message || 'Failed to fetch order details'
+            message: error.message || 'Error al obtener los detalles del pedido'
         }, { status: 500 });
     }
 }
@@ -87,7 +87,7 @@ export async function PATCH(request, { params }) {
         if (!isAdmin) {
             return NextResponse.json({
                 success: false,
-                message: 'Only administrators can update orders'
+                message: 'Solo los administradores pueden actualizar pedidos'
             }, { status: 403 });
         }
         await dbConnect();
@@ -148,14 +148,14 @@ export async function PATCH(request, { params }) {
 
         return NextResponse.json({
             success: true,
-            message: 'Order updated successfully',
+            message: 'Pedido actualizado correctamente',
             order: updatedOrder
         });
     } catch (error) {
         console.error('Error updating order:', error);
         return NextResponse.json({
             success: false,
-            message: 'Failed to update order',
+            message: 'Error al actualizar el pedido',
             error: error.message
         }, { status: 500 });
     }
@@ -174,7 +174,7 @@ export async function DELETE(request, { params }) {
         if (!isAdmin) {
             return NextResponse.json({
                 success: false,
-                message: 'Only administrators can delete orders'
+                message: 'Solo los administradores pueden eliminar pedidos'
             }, { status: 403 });
         }
         await dbConnect();
@@ -196,13 +196,13 @@ export async function DELETE(request, { params }) {
         }
         return NextResponse.json({
             success: true,
-            message: 'Order deleted successfully'
+            message: 'Pedido eliminado correctamente'
         });
     } catch (error) {
         console.error('Error deleting order:', error);
         return NextResponse.json({
             success: false,
-            message: 'Failed to delete order',
+            message: 'Error al eliminar el pedido',
             error: error.message
         }, { status: 500 });
     }

@@ -16,7 +16,7 @@ export async function POST(request) {
         const session = await getServerSession(authOptions);
         if (!session?.user?.id) {
             return NextResponse.json(
-                { error: 'Unauthorized' },
+                { error: 'No autoritzat' },
                 { status: 401 }
             );
         }
@@ -26,13 +26,13 @@ export async function POST(request) {
 
         if (!image) {
             return NextResponse.json(
-                { error: 'No image data provided' },
+                { error: 'No s\'ha proporcionat cap imatge' },
                 { status: 400 }
             );
         }
 
         // Log that we're starting the upload
-        console.log('Starting Cloudinary upload from server...');
+        console.log('Iniciant la pujada a Cloudinary des del servidor...');
 
         // Upload the image to Cloudinary
         const result = await new Promise((resolve, reject) => {
@@ -46,10 +46,10 @@ export async function POST(request) {
                 },
                 (error, result) => {
                     if (error) {
-                        console.error('Cloudinary upload error:', error);
+                        console.error('Error en pujar a Cloudinary:', error);
                         reject(error);
                     } else {
-                        console.log('Cloudinary upload success:', result.secure_url);
+                        console.log('Pujada a Cloudinary completada amb èxit:', result.secure_url);
                         resolve(result);
                     }
                 }
@@ -62,9 +62,9 @@ export async function POST(request) {
             publicId: result.public_id
         });
     } catch (error) {
-        console.error('Server upload error:', error);
+        console.error('Error de pujada al servidor:', error);
         return NextResponse.json(
-            { error: error.message || 'Error uploading image' },
+            { error: error.message || 'Error en pujar la imatge' },
             { status: 500 }
         );
     }

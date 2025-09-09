@@ -1,7 +1,7 @@
 export async function DELETE(req) {
     await dbConnect();
     const { key } = await req.json();
-    if (!key) return NextResponse.json({ error: 'Key required' }, { status: 400 });
+    if (!key) return NextResponse.json({ error: 'Clave requerida' }, { status: 400 });
     await ShopParameter.deleteOne({ key });
     return NextResponse.json({ success: true });
 }

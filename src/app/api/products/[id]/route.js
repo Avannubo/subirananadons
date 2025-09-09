@@ -14,7 +14,7 @@ export async function GET(request, { params }) {
 
         // Validate MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
+            return NextResponse.json({ error: 'ID de producto no válido' }, { status: 400 });
         }
 
         await dbConnect();
@@ -24,13 +24,13 @@ export async function GET(request, { params }) {
             .populate('brand');
 
         if (!product) {
-            return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 });
         }
 
         return NextResponse.json(product);
     } catch (error) {
         console.error('Error fetching product:', error);
-        return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
+        return NextResponse.json({ error: 'Error al obtener el producto' }, { status: 500 });
     }
 }
 
@@ -147,10 +147,10 @@ export async function PUT(request, { params }) {
 
         // Handle duplicate reference error
         if (error.code === 11000) {
-            return NextResponse.json({ error: 'Product reference already exists' }, { status: 400 });
+            return NextResponse.json({ error: 'La referencia del producto ya existe' }, { status: 400 });
         }
 
-        return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
+        return NextResponse.json({ error: 'Error al actualizar el producto' }, { status: 500 });
     }
 }
 
@@ -185,9 +185,9 @@ export async function DELETE(request, { params }) {
 
         await Product.findByIdAndDelete(id);
 
-        return NextResponse.json({ message: 'Product deleted successfully' });
+        return NextResponse.json({ message: 'Producto eliminado correctamente' });
     } catch (error) {
         console.error('Error deleting product:', error);
-        return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
+        return NextResponse.json({ error: 'Error al eliminar el producto' }, { status: 500 });
     }
 }

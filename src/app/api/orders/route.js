@@ -27,7 +27,7 @@ export async function POST(request) {
         if (!items || !items.length || !shippingDetails) {
             return NextResponse.json({
                 success: false,
-                message: 'Missing required order information'
+                message: 'Falta información requerida del pedido'
             }, { status: 400 });
         }
 
@@ -180,7 +180,7 @@ export async function POST(request) {
         // Return success response
         return NextResponse.json({
             success: true,
-            message: 'Order created successfully',
+            message: 'Pedido creado correctamente',
             order: {
                 id: order._id,
                 orderNumber: order.orderNumber
@@ -190,7 +190,7 @@ export async function POST(request) {
         console.error('Error creating order:', error);
         return NextResponse.json({
             success: false,
-            message: 'An error occurred while processing your order',
+            message: 'Ha ocurrido un error al procesar su pedido',
             error: error.message
         }, { status: 500 });
     }
@@ -206,7 +206,7 @@ export async function GET(request) {
             console.error('No user ID in session - unauthorized');
             return NextResponse.json({
                 success: false,
-                message: 'Unauthorized'
+                message: 'No autorizado'
             }, { status: 401 });
         }
 
@@ -246,7 +246,7 @@ export async function GET(request) {
         console.error('Error fetching orders:', error);
         return NextResponse.json({
             success: false,
-            message: 'Failed to fetch orders',
+            message: 'Error al obtener los pedidos',
             error: error.message
         }, { status: 500 });
     }

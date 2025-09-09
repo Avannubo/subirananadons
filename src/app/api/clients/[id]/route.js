@@ -63,7 +63,7 @@ export async function GET(request, { params }) {
             client: userToClient(user)
         });
     } catch (error) {
-        console.error('Error fetching client:', error);
+        console.error('Error en obtenir el client:', error);
         return NextResponse.json(
             { success: false, message: error.message },
             { status: 500 }
@@ -119,7 +119,7 @@ export async function PUT(request, { params }) {
             const existingUser = await User.findOne({ email });
             if (existingUser && existingUser._id.toString() !== id) {
                 return NextResponse.json(
-                    { success: false, message: 'Email already in use' },
+                    { success: false, message: 'Aquest correu electrònic ja està en ús' },
                     { status: 400 }
                 );
             }
@@ -157,11 +157,11 @@ export async function PUT(request, { params }) {
         // Return success response with updated client data
         return NextResponse.json({
             success: true,
-            message: 'Client updated successfully',
+            message: 'Client actualitzat correctament',
             client: userToClient(user)
         });
     } catch (error) {
-        console.error('Error updating client:', error);
+        console.error('Error en actualitzar el client:', error);
         return NextResponse.json(
             { success: false, message: error.message },
             { status: 500 }
@@ -215,10 +215,10 @@ export async function DELETE(request, { params }) {
         // Return success response
         return NextResponse.json({
             success: true,
-            message: 'Client deleted successfully'
+            message: 'Client eliminat correctament'
         });
     } catch (error) {
-        console.error('Error deleting client:', error);
+        console.error('Error en eliminar el client:', error);
         return NextResponse.json(
             { success: false, message: error.message },
             { status: 500 }

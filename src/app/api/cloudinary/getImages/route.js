@@ -17,9 +17,9 @@ export async function GET() {
 
         return NextResponse.json(result);
     } catch (error) {
-        console.error('Error fetching Cloudinary images:', error);
+        console.error('Error en obtenir les imatges de Cloudinary:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to fetch images' },
+            { error: error.message || 'Error en obtenir les imatges' },
             { status: 500 }
         );
     }

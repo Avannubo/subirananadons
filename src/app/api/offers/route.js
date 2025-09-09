@@ -53,7 +53,7 @@ export async function PUT(request) {
         const body = await request.json();
         const { _id } = body;
         if (!_id) {
-            return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+            return NextResponse.json({ error: 'Se requiere ID' }, { status: 400 });
         }
         // Support both old and new translation structure
         const updateData = {
@@ -74,7 +74,7 @@ export async function PUT(request) {
         };
         const offer = await Offer.findByIdAndUpdate(_id, updateData, { new: true });
         if (!offer) {
-            return NextResponse.json({ error: 'Offer not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Oferta no encontrada' }, { status: 404 });
         }
         return NextResponse.json(offer);
     } catch (err) {
@@ -88,11 +88,11 @@ export async function DELETE(request) {
         const body = await request.json();
         const { _id } = body;
         if (!_id) {
-            return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+            return NextResponse.json({ error: 'Se requiere ID' }, { status: 400 });
         }
         const result = await Offer.findByIdAndDelete(_id);
         if (!result) {
-            return NextResponse.json({ error: 'Offer not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Oferta no encontrada' }, { status: 404 });
         }
         return new Response(null, { status: 204 });
     } catch (err) {

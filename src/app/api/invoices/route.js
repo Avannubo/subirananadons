@@ -8,7 +8,7 @@ export async function GET(request) {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user?.id) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
         }
 
         await dbConnect();
@@ -59,7 +59,7 @@ export async function GET(request) {
             code: error.code
         });
         return NextResponse.json({
-            error: 'Internal Server Error',
+            error: 'Error interno del servidor',
             details: error.message
         }, { status: 500 });
     }

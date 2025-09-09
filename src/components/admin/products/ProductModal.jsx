@@ -1231,7 +1231,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     value={formData.discount?.value || ''}
                                                     onChange={handleChange}
                                                     min="0"
-                                                    max={formData.discount?.type === 'percentage' ? "100" : undefined}
+                                                    max={formData.discount?.type === 'percentage' ? "99" : undefined}
                                                     step={formData.discount?.type === 'percentage' ? "1" : "0.01"}
                                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 />
@@ -1273,36 +1273,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     <p className="mt-1 text-sm text-red-600">{errors.discountDates}</p>
                                                 )}
                                             </div>
-                                            {/* <div>
-                                                <label htmlFor="discount-min-amount" className="block text-sm font-medium text-gray-700">
-                                                    Import mínim de compra (€)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    id="discount-min-amount"
-                                                    name="discount.minPurchaseAmount"
-                                                    value={formData.discount?.minPurchaseAmount || ''}
-                                                    onChange={handleChange}
-                                                    min="0"
-                                                    step="0.01"
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">
-                                                    Quantitat mínima
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    id="discount-min-quantity"
-                                                    name="discount.minQuantity"
-                                                    value={formData.discount?.minQuantity || ''}
-                                                    onChange={handleChange}
-                                                    min="1"
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
-                                                />
-                                            </div> */}
-                                            {formData.discount?.type && formData.discount?.value && formData.price_incl_tax && (
+
+                                            {/* {formData.discount?.type && formData.discount?.value && formData.price_incl_tax && ( */}
                                                 <div className="md:col-span-2">
                                                     <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">
                                                         Preu final amb descompte:
@@ -1317,7 +1289,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         </p>
                                                     </div>
                                                 </div>
-                                            )}
+                                            {/* )} */}
                                         </div>
                                     )}
                                     <h3 className="text-md font-medium mt-6">Inventari</h3>
