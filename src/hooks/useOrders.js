@@ -17,7 +17,7 @@ export function useOrders(userRole) {
     const fetchOrders = async (page = 1, limit = 5) => {
         setLoading(true);
         try {
-            console.log(`Fetching orders for role: ${userRole}, page: ${page}, limit: ${limit}`);
+            //console.log(`Fetching orders for role: ${userRole}, page: ${page}, limit: ${limit}`);
             const response = await fetch(`/api/orders?page=${page}&limit=${limit}`);
             if (!response.ok) {
                 const errorData = await response.json();
@@ -25,7 +25,7 @@ export function useOrders(userRole) {
                 throw new Error(errorData.message || 'Failed to fetch orders');
             }
             const data = await response.json();
-            console.log('Orders API response:', data);
+            //console.log('Orders API response:', data);
             if (data.success) {
                 // Map orders to match our UI format
                 const formattedOrders = data.orders.map(order => ({
@@ -54,7 +54,7 @@ export function useOrders(userRole) {
                     return dateB - dateA;
                 });
 
-                console.log(`Formatted ${formattedOrders.length} orders for display`);
+                //console.log(`Formatted ${formattedOrders.length} orders for display`);
                 setOrders(formattedOrders);
                 setPagination(data.pagination);
             } else {

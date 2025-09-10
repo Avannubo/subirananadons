@@ -1,149 +1,141 @@
-<!-- Importación de la fuente -->
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<div class="tabs-container">
-    <div class="tab">
-        <h3 class="tab-button" onclick="toggleTabContent(this, 'tab1')">
-            CRO & UX/UI <span class="tab-icon">+</span>
-        </h3>
-        <div class="tab-content" id="tab1">
-            <p class="p-content">
-                En el mundo digital actual, optimizar las conversiones de un sitio web o plataforma es esencial para
-                maximizar el retorno de inversión (ROI) y lograr un crecimiento sostenible.<br>En el mundo digital
-                actual, optimizar las conversiones de un sitio web o plataforma es esencial.
-            </p>
-        </div>
-    </div>
-    <div class="tab">
-        <h3 class="tab-button" onclick="toggleTabContent(this, 'tab2')">
-            PAID MEDIA <span class="tab-icon">+</span>
-        </h3>
-        <div class="tab-content" id="tab2">
-            <p class="p-content">
-                El marketing por correo electrónico sigue siendo una herramienta poderosa para conectarse con los
-                clientes.
-            </p>
-        </div>
-    </div>
-    <div class="tab">
-        <h3 class="tab-button" onclick="toggleTabContent(this, 'tab3')">
-            SEO & SEO LOCAL <span class="tab-icon">+</span>
-        </h3>
-        <div class="tab-content" id="tab3">
-            <p class="p-content">
-                La analítica de datos es clave para tomar decisiones basadas en evidencia y obtener resultados óptimos.
-            </p>
-        </div>
-    </div>
-    <div class="tab">
-        <h3 class="tab-button" onclick="toggleTabContent(this, 'tab4')">
-            MAIL MARKETING <span class="tab-icon">+</span>
-        </h3>
-        <div class="tab-content" id="tab4">
-            <p class="p-content">
-                La analítica de datos es clave para tomar decisiones basadas en evidencia y obtener resultados óptimos.
-            </p>
-        </div>
-    </div>
-    <div class="tab">
-        <h3 class="tab-button" onclick="toggleTabContent(this, 'tab5')">
-            SEO & SEO LOCAL <span class="tab-icon">+</span>
-        </h3>
-        <div class="tab-content" id="tab5">
-            <p class="p-content">
-                La analítica de datos es clave para tomar decisiones basadas en evidencia y obtener resultados óptimos.
-            </p>
-        </div>
-    </div>
-</div>
 <script>
-    function toggleTabContent(tabButton12, tabId12) {
-        const content12 = document.getElementById(tabId12);
-        const icon12 = tabButton12.querySelector(".tab-icon");
-        document.querySelectorAll(".tab-content").forEach((tab12) => {
-            if (tab12.id !== tabId12) {
-                tab12.classList.remove("open");
-                tab12.style.maxHeight = "0";
-            }
-        });
-        document.querySelectorAll(".tab-icon").forEach((iconEl12) => {
-            if (iconEl12 !== icon12) {
-                iconEl12.classList.remove("rotated");
-            }
-        });
-        if (content12.classList.contains("open")) {
-            content12.classList.remove("open");
-            content12.style.maxHeight = "0";
-            icon12.classList.remove("rotated");
-        } else {
-            content12.classList.add("open");
-            content12.style.maxHeight = content12.scrollHeight + "px";
-            icon12.classList.add("rotated");
+    document.addEventListener("DOMContentLoaded", function () {
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const astScrollTop = document.getElementById("ast-scroll-top");
+        const darkModeButton = document.querySelector(".js-dark-mode-trigger-60987c8");
+        function getThemeFromStorage() {
+            return localStorage.getItem("theme-preference") === "dark";
         }
-    }
+        function updateIcons() {
+            const isDark = localStorage.getItem("theme-preference") === "dark";
+            // Mostrar la luna cuando es dark, el sol cuando es light
+            document.querySelector(".light-icon").style.display = isDark ? "none" : "block";
+            document.querySelector(".dark-icon").style.display = isDark ? "block" : "none";
+            astScrollTop.style.backgroundColor = isDark ? "#17426F" : "#2e2e2e";
+        }
+        // Al cargar la página, forzar el estado según localStorage
+        setTimeout(() => {
+            const isDark = getThemeFromStorage();
+            if (isDark) {
+                document.body.classList.add("dark-mode");
+                darkModeToggle.classList.add("active");
+            } else {
+                document.body.classList.remove("dark-mode");
+                darkModeToggle.classList.remove("active");
+            }
+            updateIcons();
+        }, 50);
+        setTimeout(() => { darkModeToggle.click(); darkModeToggle.click(); }, 10);
+        // Toggle manual
+        darkModeToggle.addEventListener("click", function () {
+            const isDark = !getThemeFromStorage(); // invertimos manualmente
+            localStorage.setItem("theme-preference", isDark ? "dark" : "light");
+            document.body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.classList.toggle("active", isDark);
+            updateIcons();
+            if (darkModeButton) darkModeButton.click();
+            const style = document.createElement("style");
+            if (isDark) {
+                style.innerHTML = `
+        .swiper-pagination-bullet { background-color: #C5C6C9 !important; }
+        .swiper-pagination-bullet-active { background-color: #17426F !important; }
+        .post-content { color: white !important; }
+		.page-numbers-dark {
+			    display: inline-block!important;
+			    padding: 10px 20px!important;
+			    border-radius: 50px!important;
+			    font-weight: 600!important;
+			    text-decoration: none!important;
+			    background: linear-gradient(180deg, #17426F 0%, #1E293B 100%)!important;
+			    color: #FFFFFF !important;
+			    transition: all 0.3s ease!important;
+			}
+			.page-numbers-dark:hover {
+			    background: linear-gradient(180deg, #1D4C7F 0%, #25344A 100%)!important;
+			    transform: translateY(-2px)!important;
+			}
+      `;
+            } else {
+                style.innerHTML = `
+        .swiper-pagination-bullet { background-color: #D2CCC8 !important; }
+        .swiper-pagination-bullet-active { background-color: #1E293B !important; }
+        .post-content { color: #2E2E2E !important; }
+		.page-numbers {
+		    display: inline-block!important;
+		    padding: 10px 20px!important;
+		    border-radius: 50px!important;
+		    font-weight: 600!important;
+		    text-decoration: none!important;
+		    background: linear-gradient(180deg, #7E7E7E 0%, #272727 100%)!important;
+		    color: #FFFFFF !important;
+		    transition: all 0.3s ease!important;
+		}
+		.page-numbers:hover {
+		    background: linear-gradient(180deg, #6A6A6A 0%, #3E3E3E 100%)!important;
+		    transform: translateY(-2px)!important;
+		}
+    `;
+            }
+            document.head.appendChild(style);
+        });
+    });
 </script>
+
 <style>
-    body,
-    .tab-button,
-    .tab-content,
-    .p-content {
-        font-family: 'Space Grotesk', sans-serif;
+    .dark-icon {
+        display: none;
     }
-    .tabs-container {
-        max-width: 800px;
-        margin: 20px auto;
-    }
-    .tab-button {
-        font-size: 20px;
-        width: 100%;
-        background: grey;
-        color: #FFFFFF;
-        padding: 15px 20px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        text-align: left;
+
+    .toggle-container {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
-        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+        justify-content: space-between;
+        background: #fff;
+        padding: 12px;
+        border-radius: 25px;
+        width: 70px;
+        cursor: pointer;
+        position: relative;
     }
-    .tab-content {
-        background: #f9f9f9;
-        color: #FFFFFF;
-        border-radius: 8px;
-        padding: 0 20px;
-        margin-top: -22px;
-        margin-bottom: 20px;
-        max-height: 0;
-        overflow: hidden;
-        display: block;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        transition: max-height 0.6s ease, padding 0.3s ease;
+
+    .toggle-container svg {
+        width: 24px;
+        height: 24px;
+        z-index: 2;
     }
-    .tab-content.open {
-        max-height: 200px;
-        padding: 15px 20px;
+
+    .toggle-circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: #e4d4c7;
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        left: 0px;
+        transition: transform 0.3s ease, background 0.3s ease;
+        z-index: 1;
     }
-    body:not(.dark-mode) .tab-button,
-    body:not(.dark-mode) .tab-content {
-        background: linear-gradient(to left, #262626, #919191) !important;
-        color: #FFFFFF;
+
+    .toggle-container.active .toggle-circle {
+        transform: translateX(35px);
+        background: #17426f;
     }
-    .dark-mode .tab-button,
-    .dark-mode .tab-content {
-         background: linear-gradient(to left, #17426F, #38375B) !important;
-        color: #FFFFFF;
-        
+
+    .svg-ico {
+        width: 18px !important;
     }
-    .tab-icon {
-        font-size: 1.5rem;
-        transition: transform 0.3s ease;
-    }
-    .rotated {
-        transform: rotate(45deg);
-    }
-    .p-content {
-        margin: 0;
+
+    .toggle-container,
+    .toggle-circle,
+    .toggle-container svg {
+        user-select: none;
+        -webkit-user-select: none;
+        /* For Safari */
+        -moz-user-select: none;
+        /* For Firefox */
+        -ms-user-select: none;
+        /* For older Edge */
     }
 </style>

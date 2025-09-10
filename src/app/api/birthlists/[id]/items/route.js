@@ -36,7 +36,7 @@ export async function GET(request, { params }) {
         // Find the birth list
         const birthList = await BirthList.findById(id)
             .populate('items.product')
-        console.log(birthList);
+        //console.log(birthList);
 
         if (!birthList) {
             return NextResponse.json(

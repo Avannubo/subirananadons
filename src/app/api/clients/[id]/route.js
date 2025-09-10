@@ -95,7 +95,7 @@ export async function PUT(request, { params }) {
         }        // Get request body
         const data = await request.json();
         const { name, lastName, email, active, newsletter, partnerOffers, password } = data;
-        console.log('Updating client with data:', { ...data, password: password ? '[REDACTED]' : undefined });
+        //console.log('Updating client with data:', { ...data, password: password ? '[REDACTED]' : undefined });
 
         // Find the user with password field
         const user = await User.findById(id).select('+password');

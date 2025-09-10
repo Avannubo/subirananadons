@@ -1,8 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslations, useLocale } from 'next-intl';
-
 export default function ProductosTab() {
     const locale = useLocale();
     const [groups, setGroups] = useState([]);
@@ -12,12 +10,10 @@ export default function ProductosTab() {
     const [recommendations, setRecommendations] = useState([]);
     const [editIdx, setEditIdx] = useState(null);
     const [loading, setLoading] = useState(false);
-
     useEffect(() => {
         fetchCategories();
         fetchGroups();
     }, []);
-
     async function fetchCategories() {
         try {
             const catResponse = await fetch('/api/categories?includeChildren=true');
@@ -28,7 +24,6 @@ export default function ProductosTab() {
             setCategories([]);
         }
     }
-
     async function fetchGroups() {
         setLoading(true);
         try {
@@ -41,7 +36,6 @@ export default function ProductosTab() {
             setLoading(false);
         }
     }
-
     function handleEditGroup(idx) {
         const group = groups[idx];
         setEditGroupIdx(idx);
@@ -79,8 +73,6 @@ export default function ProductosTab() {
             })
         );
     }
-
-
     function handleAddRecommendation(e) {
         e.preventDefault();
         if (!form.category) {
@@ -115,13 +107,11 @@ export default function ProductosTab() {
         }
         setForm(f => ({ ...f, name: { ca: '', es: '' }, category: '' }));
     }
-
     function handleEditRecommendation(idx) {
         const rec = recommendations[idx];
         setForm(f => ({ ...f, name: { ...rec.name }, category: rec.category }));
         setEditIdx(idx);
     }
-
     function handleRemoveRecommendation(idx) {
         setRecommendations(prev => prev.filter((_, i) => i !== idx));
         // If editing the one being removed, reset edit
@@ -130,7 +120,6 @@ export default function ProductosTab() {
             setForm(f => ({ ...f, name: { ca: '', es: '' }, category: '' }));
         }
     }
-
     async function handleSaveGroup(e) {
         e.preventDefault();
         setLoading(true);
@@ -172,7 +161,6 @@ export default function ProductosTab() {
             setLoading(false);
         }
     }
-
     // Delete group handler
     async function handleDeleteGroup(idx) {
         if (!window.confirm(locale === 'es' ? '¿Seguro que quieres eliminar este grupo?' : locale === 'en' ? 'Are you sure you want to delete this group?' : 'Segur que vols eliminar aquest grup?')) return;
@@ -195,7 +183,6 @@ export default function ProductosTab() {
             setTimeout(() => setSuccess(''), 1500);
         }
     }
-
     return (
         <div className="p-4 bg-gray-50 rounded-lg">
             <h2 className="text-xl font-bold mb-4">{locale === 'es' ? 'Grupos de Recomendaciones' : locale === 'en' ? 'Recommendation Groups' : 'Grups de Recomanacions'}</h2>
@@ -203,7 +190,6 @@ export default function ProductosTab() {
                 <div className='flex-1 flex felx-col mb-2 space-x-4'>
                     <div className='flex-1'>
                         <label className="block text-sm font-medium">{locale === 'es' ? 'Título del Grupo (CA)' : locale === 'en' ? 'Group Title (CA)' : 'Títol del Grup (CA)'}</label>
-
                         <input
                             className="border border-gray-300 rounded px-2 py-1 w-full mb-1"
                             value={form.groupTitle.ca}
@@ -220,7 +206,6 @@ export default function ProductosTab() {
                             required
                         />
                     </div>
-
                 </div>
                 <div className='flex flex-row gap-2 space-x-2 items-end'>
                     <div className='flex-1'>
@@ -231,9 +216,7 @@ export default function ProductosTab() {
                             onChange={e => setForm(f => ({ ...f, name: { ...f.name, ca: e.target.value } }))}
                         />
                     </div>
-
                     <div className='flex-1'>
-
                         <label className="block text-sm font-medium">{locale === 'es' ? 'Nombre de Recomendación (ES)' : locale === 'en' ? 'Recommendation Name (ES)' : 'Nom de Recomanació (ES)'}</label>
                         <input
                             className="border border-gray-300 rounded px-2 py-1 w-full"
@@ -350,7 +333,6 @@ export default function ProductosTab() {
                     </button>
                 )}
             </form>
-
             <div>
                 <h3 className="text-lg font-semibold mb-2">{locale === 'es' ? 'Grupos guardados' : locale === 'en' ? 'Saved Groups' : 'Grups desats'}</h3>
                 {loading ? (
@@ -387,7 +369,6 @@ export default function ProductosTab() {
                                             {locale === 'es' ? 'Eliminar' : locale === 'en' ? 'Delete' : 'Eliminar'}
                                         </button>
                                     </div>
-
                                     {container.groups && container.groups.length > 0 && (
                                         <ul className="space-y-2 mt-2">
                                             {container.groups.map((g, gidx) => {

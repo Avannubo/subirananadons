@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-
 const categorySchema = new mongoose.Schema({
     name: {
         es: { type: String, required: true, maxlength: 100, trim: true },
@@ -33,7 +32,6 @@ const categorySchema = new mongoose.Schema({
         default: 0
     }
 }, { timestamps: true });
-
 // Generate slug before saving
 categorySchema.pre('save', function (next) {
     if (!this.slug && this.name) {
@@ -44,35 +42,26 @@ categorySchema.pre('save', function (next) {
     }
     next();
 });
-
 // Virtual for getting child categories
 categorySchema.virtual('children', {
     ref: 'Category',
     localField: '_id',
     foreignField: 'parent'
 });
-
 // Method to get all subcategories
 categorySchema.methods.getAllSubcategories = async function () {
     const Category = mongoose.model('Category');
-
     const findChildren = async (categoryId, allCategories = []) => {
         const children = await Category.find({ parent: categoryId });
-
         if (children.length === 0) {
             return allCategories;
         }
-
         allCategories.push(...children);
-
         for (const child of children) {
             await findChildren(child._id, allCategories);
         }
-
         return allCategories;
     };
-
     return findChildren(this._id);
 };
-
 export default mongoose.models.Category || mongoose.model('Category', categorySchema); 

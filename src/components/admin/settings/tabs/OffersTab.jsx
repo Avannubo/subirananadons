@@ -27,7 +27,7 @@ export default function OffersTab() {
                 const res = await fetch('/api/offers');
                 const data = await res.json();
                 setOffers(data);
-                console.log(data);
+                //console.log(data);
             } catch (err) {
                 toast.error('Error al cargar las ofertas');
             } finally {

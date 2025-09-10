@@ -21,7 +21,6 @@ export default function TransportistasTab() {
     const [isDragging, setIsDragging] = useState(false);
     const [showImageSelector, setShowImageSelector] = useState(false);
     const fileInputRef = useRef(null);
-
     // Handlers for image upload/drag
     const handleImageClick = () => {
         if (fileInputRef.current) fileInputRef.current.click();
@@ -98,12 +97,10 @@ export default function TransportistasTab() {
                 minimoEnvioGratis: carrierData.minimoEnvioGratis || 0,
                 minimoPesoGratis: carrierData.minimoPesoGratis || 0
             };
-
             const url = carrierData._id
                 ? `/api/carriers/${carrierData._id}`
                 : '/api/carriers';
             const method = carrierData._id ? 'PUT' : 'POST';
-
             const response = await fetch(url, {
                 method,
                 headers: {
@@ -111,13 +108,10 @@ export default function TransportistasTab() {
                 },
                 body: JSON.stringify(dataToSend),
             });
-
             const responseData = await response.json();
-
             if (!response.ok) {
                 throw new Error(responseData.message || 'Error saving carrier');
             }
-
             setShowEditModal(false);
             setEditingCarrier(null);
             fetchData();
@@ -282,7 +276,6 @@ export default function TransportistasTab() {
                     </tbody>
                 </table>
             </div>
-
             {/* Edit Modal */}
             {showEditModal && (
                 <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4 z-50">

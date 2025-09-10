@@ -56,7 +56,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
             setLoading(true);
             const result = await fetchBirthListItems(listId);
             if (result.success) {
-                // console.log('Birth list items loaded:', result.data);
+                // //console.log('Birth list items loaded:', result.data);
 
                 setItems(result.data || []);
             } else {

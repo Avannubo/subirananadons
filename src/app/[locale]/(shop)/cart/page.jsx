@@ -13,7 +13,7 @@ const ModalTPV = dynamic(() => import('@/components/cart/ModalTPV'), { ssr: fals
 export default function CartPage() {
     const t = useTranslations('CartPage');
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
-    console.log('Cart items:', cartItems);
+    //console.log('Cart items:', cartItems);
     const { user, loading: userLoading } = useUser();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
@@ -122,7 +122,7 @@ export default function CartPage() {
     useEffect(() => {
         // This will trigger a re-render with the correct shipping cost
         const shipping = calculateShipping();
-        // console.log(`Delivery method: ${deliveryMethod}, Subtotal: ${calculateSubtotal()}, Shipping: ${shipping}`);
+        // //console.log(`Delivery method: ${deliveryMethod}, Subtotal: ${calculateSubtotal()}, Shipping: ${shipping}`);
     }, [cartItems, deliveryMethod]);
     const handleDeliveryMethodChange = (method) => {
         // Only allow changing to 'delivery' if there are regular items
@@ -136,36 +136,29 @@ export default function CartPage() {
     const parsePrice = (price) => {
         // If it's already a number, return it
         if (typeof price === 'number') return price;
-
         // If it's undefined or null, return 0
         if (!price) return 0;
-
         // Remove currency symbol and convert to standard format
         const cleanPrice = String(price)
             .replace(/[^\d.,]/g, '')  // Remove all non-digit characters except . and ,
             .replace(/,(\d{2})$/, '.$1')  // Replace comma before last 2 digits with dot
             .replace(/,/g, '');  // Remove any remaining commas
-
         // Parse the clean price string to float
         return parseFloat(cleanPrice) || 0;
     };
-
     // Helper function to calculate the final price for an item
     const calculateItemPrice = (item) => {
         // First check if there's a valid discount with a final price
         if (item.discount?.active && item.discount.finalPrice !== undefined) {
             return parseFloat(item.discount.finalPrice);
         }
-
         // Parse the base price
         const basePrice = parsePrice(item.price);
-
         // Check for active discounts
         if (item.discount?.active) {
             const now = new Date();
             const startDate = item.discount.startDate ? new Date(item.discount.startDate) : null;
             const endDate = item.discount.endDate ? new Date(item.discount.endDate) : null;
-
             // Only apply discount if within valid date range
             if ((!startDate || now >= startDate) && (!endDate || now <= endDate)) {
                 if (item.discount.type === 'fixed') {
@@ -180,14 +173,12 @@ export default function CartPage() {
         }
         return basePrice;
     };
-
     const calculateSubtotal = () => {
         return cartItems.reduce((sum, item) => {
             const price = calculateItemPrice(item);
             return sum + (price * (item.quantity || 1));
         }, 0);
     };
-
     const calculateRegularSubtotal = () => {
         return regularItems.reduce((sum, item) => {
             const price = calculateItemPrice(item);
@@ -211,22 +202,22 @@ export default function CartPage() {
         return calculateSubtotal() + calculateShipping();// + calculateTax();
     };
     // Save user's address for future orders
-    const saveUserAddressPreferences = async () => {
-        if (!user?.id) return;
-        try {
-            console.log('Saving user address preferences:', {
-                name: formData.name,
-                lastName: formData.lastName,
-                phone: formData.phone,
-                address: formData.address,
-                city: formData.city,
-                postalCode: formData.postalCode,
-                province: formData.province,
-            });
-        } catch (error) {
-            console.error('Error saving address preferences:', error);
-        }
-    };
+    // const saveUserAddressPreferences = async () => {
+    //     if (!user?.id) return;
+    //     try {
+    //         console.log('Saving user address preferences:', {
+    //             name: formData.name,
+    //             lastName: formData.lastName,
+    //             phone: formData.phone,
+    //             address: formData.address,
+    //             city: formData.city,
+    //             postalCode: formData.postalCode,
+    //             province: formData.province,
+    //         });
+    //     } catch (error) {
+    //         console.error('Error saving address preferences:', error);
+    //     }
+    // };
     // Handle order submission
     const handleSubmitOrder = async () => {
         setOrderError(null);
@@ -257,7 +248,6 @@ export default function CartPage() {
                     parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
                 const discountedPrice = item.discount?.finalPrice || item.price || 0;
                 const hasDiscount = item.discount && item.discount.active;
-
                 return {
                     ...item,
                     buyerInfo: item.type === 'gift' ? {
@@ -358,15 +348,6 @@ export default function CartPage() {
                                     {/* User Type Selection - Only for guests */}
                                     <div className='bg-white rounded-lg shadow-sm p-6'>
                                         <div className="flex items-start justify-between">
-                                            {/* <h2 className="text-xl font-bold mb-6">{t('userData')}</h2> */}
-                                            {/* {!user && (
-                                                <button
-                                                    onClick={() => setIsAuthModalOpen(true)}
-                                                    className="text-[#36A9E1] text-sm hover:underline"
-                                                >
-                                                    {t('login')}
-                                                </button>
-                                            )} */}
                                         </div>
                                         {!user ? (
                                             <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
@@ -675,7 +656,6 @@ export default function CartPage() {
                                                 <div className="flex-1">
                                                     <h3 className="font-medium">{typeof item.name === 'object' ? item.name[t('locale')] || item.name['es'] || item.name['ca'] : item.name}</h3>
                                                     {/* <p className="text-gray-500 text-sm">{item.brand} - {typeof item.category === 'object' ? item.category[t('locale')] || item.category['es'] || item.category['ca'] : item.category}</p> */}
-
                                                     {item.discount && item.discount.active ? (
                                                         <div className="flex items-center gap-2">
                                                             <p className="text-gray-400 line-through text-sm">{parsePrice(item.price).toFixed(2)}€</p>

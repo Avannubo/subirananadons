@@ -15,7 +15,7 @@ export default function ProductQuickView({ product, onClose }) {
 
     // Get current locale from next-intl
     const locale = useLocale();
-    console.log(product.description);
+    //console.log(product.description);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(product?.imageUrl); // State for main image
     const { data: session } = useSession();

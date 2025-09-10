@@ -11,7 +11,6 @@ import {
     Mail,
     Globe,
 } from "lucide-react";
-
 const iconMap = {
     Facebook,
     Twitter,
@@ -24,11 +23,9 @@ const iconMap = {
     Mail,
     Globe,
 };
-
 export default function useShopSocials() {
     const [socials, setSocials] = useState([]);
     const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         async function fetchSocials() {
             try {
@@ -62,6 +59,5 @@ export default function useShopSocials() {
         }
         fetchSocials();
     }, []);
-
     return { socials, loading };
 }

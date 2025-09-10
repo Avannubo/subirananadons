@@ -5,7 +5,7 @@ import Product from '@/models/Product';
 export async function POST(request) {
     try {
         const { productId } = await request.json();
-        // console.log('[toggle-featured] Received productId:', productId);
+        // //console.log('[toggle-featured] Received productId:', productId);
 
         if (!productId) {
             return NextResponse.json(
@@ -21,7 +21,7 @@ export async function POST(request) {
 
         // Find the product by ID to get current featured value
         const product = await Product.findById(productId);
-        console.log('[toggle-featured] Product found:', product ? product._id : null, 'Current featured:', product ? product.featured : null);
+        //console.log('[toggle-featured] Product found:', product ? product._id : null, 'Current featured:', product ? product.featured : null);
 
         if (!product) {
             return NextResponse.json(
@@ -40,7 +40,7 @@ export async function POST(request) {
             { $set: { featured: newFeatured } },
             { new: true, runValidators: false }
         );
-        console.log('[toggle-featured] Updated product from DB:', updatedProduct ? updatedProduct.featured : null);
+        //console.log('[toggle-featured] Updated product from DB:', updatedProduct ? updatedProduct.featured : null);
 
         return NextResponse.json({
             success: true,

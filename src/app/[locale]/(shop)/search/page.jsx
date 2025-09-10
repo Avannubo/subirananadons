@@ -59,7 +59,7 @@ export default function SearchPage() {
                 const flattenCategories = (categories) => {
                     let flat = [];
                     categories.forEach(cat => {
-                        // console.log('Flattening category:', cat);
+                        // //console.log('Flattening category:', cat);
                         flat.push({
                             id: cat._id,
                             name: cat.name,
@@ -240,7 +240,7 @@ export default function SearchPage() {
     }, [searchTerm, selectedCategory, selectedBrand, stockStatus, priceRange, sortBy]);
     const handleAddToCart = (e, product) => {
         e.preventDefault();
-        console.log('Add to cart:', product);
+        //console.log('Add to cart:', product);
     };
     // Fetch banner image from API
     const [bannerImage, setBannerImage] = useState(null);

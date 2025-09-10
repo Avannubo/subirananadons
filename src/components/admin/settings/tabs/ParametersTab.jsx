@@ -15,14 +15,12 @@ import {
     Trash2
 } from 'lucide-react';
 import { useLocale } from 'next-intl';
-
 // Helper for fetching and saving parameters
 async function fetchParameters() {
     const res = await fetch("/api/shop-parameters");
     if (!res.ok) throw new Error("Failed to fetch parameters");
     return await res.json();
 }
-
 async function saveParameter(key, value, description = "") {
     const res = await fetch("/api/shop-parameters", {
         method: "POST",
@@ -32,17 +30,14 @@ async function saveParameter(key, value, description = "") {
     if (!res.ok) throw new Error("Failed to save parameter");
     return await res.json();
 }
-
 export default function ParametersTab() {
     const locale = useLocale();
-
     // Generalized parameter state
     const [parameters, setParameters] = useState({});
     const [edit, setEdit] = useState({}); // { key: value }
     const [editing, setEditing] = useState({}); // { key: boolean }
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
     // Load parameters and socials on mount
     useEffect(() => {
         fetchParameters()
@@ -77,7 +72,6 @@ export default function ParametersTab() {
             })
             .catch(() => setError(locale === 'ca' ? "No s'han pogut carregar els paràmetres" : "No se pudieron cargar los parámetros"));
     }, []);
-
     // Helper for starting edit
     const startEdit = (key) => {
         setEdit((prev) => ({ ...prev, [key]: parameters[key] }));
@@ -111,7 +105,6 @@ export default function ParametersTab() {
             setLoading(false);
         }
     };
-
     // Define parameters to show (add more here)
     const parameterDefs = [
         {
@@ -181,14 +174,11 @@ export default function ParametersTab() {
             unit: "",
         },
     ];
-
     // Socials parameter state
     const [socials, setSocials] = useState([]);
-
     // For adding new social
     const [newSocial, setNewSocial] = useState({ name: '', link: '', icon: 'Instagram' });
     const [addingSocial, setAddingSocial] = useState(false);
-
     // Icon options
     const iconOptions = [
         { name: 'Facebook', Icon: Facebook },
@@ -202,7 +192,6 @@ export default function ParametersTab() {
         { name: 'Mail', Icon: Mail },
         { name: 'Globe', Icon: Globe },
     ];
-
     // Add new social
     const handleAddSocial = async () => {
         const name = newSocial.name.trim();
@@ -226,7 +215,6 @@ export default function ParametersTab() {
             setLoading(false);
         }
     };
-
     // Remove social (from UI and DB)
     const handleRemoveSocial = async (key) => {
         setLoading(true);
@@ -251,7 +239,6 @@ export default function ParametersTab() {
             setLoading(false);
         }
     };
-
     return (
         <div className="space-y-8 mx-auto ">
             {error && <div className="text-red-500">{error}</div>}
@@ -433,7 +420,6 @@ export default function ParametersTab() {
                     })}
                 </div>
             </div>
-
             {/* Google Maps Parameter at the end */}
             {(() => {
                 const param = parameterDefs.find(p => p.key === "googleMapsSrc");
@@ -500,8 +486,6 @@ export default function ParametersTab() {
                     </div>
                 );
             })()}
-
-
         </div>
     );
 }

@@ -389,8 +389,8 @@ export default function ProductsTable(props) {
     // Removed duplicate sortOrder useEffect
     // For debugging
     // useEffect(() => {
-    //     console.log("Current pagination state:", pagination);
-    //     console.log("Products count:", products.length);
+    //     //console.log("Current pagination state:", pagination);
+    //     //console.log("Products count:", products.length);
     // }, [pagination, products]);
     return (
         <div className="bg-white rounded-lg shadow">
@@ -564,9 +564,9 @@ export default function ProductsTable(props) {
                                                     </span>
                                                     {product.discount.startDate && product.discount.endDate && (
                                                         <span className="text-xs text-gray-500 mt-1">
-                                                            {new Date(product.discount.startDate).toLocaleDateString()} {new Date(product.discount.startDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
+                                                            {new Date(product.discount.startDate).toLocaleDateString()} {new Date(product.discount.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             {' - '}
-                                                            {new Date(product.discount.endDate).toLocaleDateString()} {new Date(product.discount.endDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                            {new Date(product.discount.endDate).toLocaleDateString()} {new Date(product.discount.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                         </span>
                                                     )}
                                                 </div>

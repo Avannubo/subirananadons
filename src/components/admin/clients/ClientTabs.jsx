@@ -127,13 +127,13 @@ export default function ClientsTabs() {
             // if (activeTab === 'Newsletter') queryParams.append('newsletter', 'true');
             // if (activeTab === 'Ofertas') queryParams.append('partnerOffers', 'true');
             const url = `/api/clients?${queryParams.toString()}`;
-            console.log('Fetching clients with URL:', url);
+            //console.log('Fetching clients with URL:', url);
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Error fetching clients');
             }
             const data = await response.json();
-            console.log('API response:', data);
+            //console.log('API response:', data);
             if (data.success) {
                 setClients(data.clients || []);
                 setPagination(data.pagination || {

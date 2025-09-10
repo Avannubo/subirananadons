@@ -2,7 +2,6 @@
 import { Dialog, DialogTitle } from '@headlessui/react';
 import { FiAlertTriangle, FiX } from 'react-icons/fi';
 import { useClientStats } from '@/contexts/ClientStatsContext';
-
 export default function ConfirmDeleteModal({ isOpen, onClose, onConfirm, client, isDeleting }) {
 // Locale detection (default to 'ca')
 let locale = 'ca';
@@ -31,16 +30,13 @@ const translations = {
 };
 const t = translations[locale];
 // const { notifyChange } = useClientStats();
-
 const handleConfirm = async () => {
     await onConfirm();
     // await notifyChange();
 };
-
 return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-
         <div className="fixed inset-0 flex items-center justify-center p-4">
             <Dialog.Panel className="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
                 <div className="flex justify-between items-center p-4 border-b border-gray-200">
@@ -54,20 +50,17 @@ return (
                         <FiX className="h-5 w-5" />
                     </button>
                 </div>
-
                 <div className="p-6">
                     <div className="flex items-center justify-center mb-4">
                         <div className="bg-red-100 rounded-full p-3">
                             <FiAlertTriangle className="h-6 w-6 text-red-600" />
                         </div>
                     </div>
-
                     <p className="text-center text-gray-700 mb-6">
                         {t.confirm} <span className="font-bold">{client?.name} {client?.lastName}</span>?
                         <br />
                         <span className="text-sm text-red-500">{t.irreversible}</span>
                     </p>
-
                     <div className="flex justify-center space-x-3">
                         <button
                             type="button"

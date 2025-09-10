@@ -65,7 +65,7 @@ export async function POST(request) {
 
         // Parse request body
         const data = await request.json();
-        console.log('Creating birth list with data:', data);
+        //console.log('Creating birth list with data:', data);
 
         // Determine the user for the list (admin can set userId or user, others use their own)
         let userIdToUse = session.user.id;
@@ -105,7 +105,7 @@ export async function POST(request) {
         } else if (user.name) {
             userName = user.name;
         }
-        console.log('Creating birth list for user:', userIdToUse, 'with email:', userEmail, 'and name:', userName);
+        //console.log('Creating birth list for user:', userIdToUse, 'with email:', userEmail, 'and name:', userName);
         const birthListData = {
             user: userIdToUse,
             // userEmail,

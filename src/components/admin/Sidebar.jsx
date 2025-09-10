@@ -68,15 +68,12 @@ const getNavigationItems = (userRole, locale) => [
         roles: ['admin']
     }
 ];
-
 export default function Sidebar() {
     const { data: session } = useSession();
     const userRole = session?.user?.role || 'user';
     const defaultLocale = useLocale();
-
     // Detect browser language and set initial locale
     const [currentLocale, setCurrentLocale] = React.useState(defaultLocale);
-
     React.useEffect(() => {
         let detectedLocale = 'ca';
         if (typeof window !== 'undefined' && window.navigator) {
@@ -87,7 +84,6 @@ export default function Sidebar() {
         }
         setCurrentLocale(detectedLocale);
     }, []);
-
     const navigationItems = getNavigationItems(userRole, currentLocale);
     return (
         <div className="w-64 h-[80vh] bg-white top-[100px] sticky">

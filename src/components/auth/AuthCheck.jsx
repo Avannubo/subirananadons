@@ -9,21 +9,21 @@ export default function AuthCheck({ children }) {
     const router = useRouter();
 
     useEffect(() => {
-        console.log('AuthCheck - Session Status:', status);
-        console.log('AuthCheck - Session Data:', session);
+        //console.log('AuthCheck - Session Status:', status);
+        //console.log('AuthCheck - Session Data:', session);
 
         if (status === 'loading') {
-            console.log('AuthCheck - Loading session...');
+            //console.log('AuthCheck - Loading session...');
             return;
         }
 
         if (status === 'unauthenticated') {
-            console.log('AuthCheck - No session found, redirecting to home');
+            //console.log('AuthCheck - No session found, redirecting to home');
             router.replace('/');
             return;
         }
 
-        console.log('AuthCheck - Session valid, user authenticated');
+        //console.log('AuthCheck - Session valid, user authenticated');
     }, [status, session, router]);
 
     if (status === 'loading') {

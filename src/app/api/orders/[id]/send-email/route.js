@@ -61,12 +61,12 @@ export async function POST(request, { params }) {
                 { status: 400 }
             );
         }
-        console.log('Original order:', JSON.stringify(order, null, 2));
+        //console.log('Original order:', JSON.stringify(order, null, 2));
         // Transform the order data
         const transformedOrder = {
             ...order,
             items: order.items.map(item => {
-                console.log(item);
+                //console.log(item);
                 const productData = item.product || {};
                 const price = Number(item.price || 0);
                 const quantity = Number(item.quantity || 1);
@@ -110,7 +110,7 @@ export async function POST(request, { params }) {
             notes: order.notes || ''
         };
 
-        console.log('Transformed order:', JSON.stringify(transformedOrder, null, 2));
+        //console.log('Transformed order:', JSON.stringify(transformedOrder, null, 2));
 
         // Send confirmation email with transformed data
         await EmailService.sendOrderConfirmation(transformedOrder);

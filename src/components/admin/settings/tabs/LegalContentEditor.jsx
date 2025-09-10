@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import useShopParameter from "@/lib/useShopParameter";
-
 const LEGAL_KEYS = [
     { key: "privacy_policy", label: "POLÍTICA DE PRIVACIDAD" },
     // { key: "cookies_policy", label: "POLÍTICA DE COOKIES" },
@@ -9,14 +8,12 @@ const LEGAL_KEYS = [
     { key: "terms_conditions", label: "Términos y Condiciones" },
     { key: "list_conditions", label: "Condiciones de uso de las listas" },
 ];
-
 export default function LegalContentEditor() {
     const [edit, setEdit] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [initial, setInitial] = useState({});
-
     useEffect(() => {
         async function fetchAll() {
             setLoading(true);
@@ -42,7 +39,6 @@ export default function LegalContentEditor() {
         }
         fetchAll();
     }, []);
-
     const handleChange = (key, lang, value) => {
         setEdit((prev) => ({
             ...prev,
@@ -52,7 +48,6 @@ export default function LegalContentEditor() {
             }
         }));
     };
-
     const handleSave = async (key) => {
         setLoading(true);
         setError("");
@@ -80,7 +75,6 @@ export default function LegalContentEditor() {
             setTimeout(() => setSuccess(""), 1500);
         }
     };
-
     return (
         <div className="space-y-8">
             {error && <div className="text-red-500">{error}</div>}

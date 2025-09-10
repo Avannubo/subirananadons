@@ -111,8 +111,8 @@ export default function OrdersTable({
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
     useEffect(() => {
-        console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
-        console.log('Orders data:', orders);
+        //console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
+        //console.log('Orders data:', orders);
     }, [orders, userRole]);
     const handleDownloadPDF = async (order) => {
         try {
@@ -435,7 +435,7 @@ export default function OrdersTable({
                         itemsPerPage={pagination.limit}
                         onPageChange={onPageChange}
                         onItemsPerPageChange={onLimitChange || ((newLimit) => {
-                            console.log('Items per page changed to', newLimit);
+                            //console.log('Items per page changed to', newLimit);
                         })}
                         showingText={locale === 'ca' ? 'Mostrant {} de {} comandes' : 'Mostrando {} de {} pedidos'}
                     />

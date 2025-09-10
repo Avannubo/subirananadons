@@ -24,7 +24,7 @@ export async function PUT(request) {
         const data = await request.json();
         const { name, email, birthDate, image, newsletter, partnerOffers, password } = data;
 
-        console.log('Update user request:', { userId: session.user.id, name, email, hasImage: !!image });
+        //console.log('Update user request:', { userId: session.user.id, name, email, hasImage: !!image });
 
         // Find user
         const user = await User.findById(session.user.id);
@@ -63,7 +63,7 @@ export async function PUT(request) {
 
         // Save updated user
         await user.save();
-        console.log('User updated successfully:', user._id);
+        //console.log('User updated successfully:', user._id);
 
         // Return success response
         return NextResponse.json(

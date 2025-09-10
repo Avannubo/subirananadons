@@ -364,12 +364,9 @@ export default function BrandsPage() {
                                 <ul className="space-y-1">
                                     {/* All Products option - always show this */}
                                     {!brandsLoading ? (
-                                        <motion.li
+                                        <li
                                             key="all-products"
                                             className='hover:font-bold text-zinc-700 transition-all duration-300'
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.05, duration: 0.5 }}
                                         >
                                             <button
                                                 onClick={() => handleBrandSelect('all')}
@@ -386,7 +383,7 @@ export default function BrandsPage() {
                                                 </div>
                                                 <span className="hover:text-[#36A9E1] transition-colors active:font-bold">{t('allBrandsOption')}</span>
                                             </button>
-                                        </motion.li>
+                                        </li>
                                     ) : (
                                         <BrandSkeleton key="all-skeleton" />
                                     )}
@@ -399,12 +396,9 @@ export default function BrandsPage() {
                                     ) : (
                                         // Show actual brands when loaded
                                         brands.map((brand, index) => (
-                                            <motion.li
+                                            <li
                                                 key={brand._id}
                                                 className='hover:font-bold text-zinc-700 transition-all duration-300'
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.1 * index, duration: 0.5 }}
                                             >
                                                 <button
                                                     onClick={() => handleBrandSelect(brand._id)}
@@ -431,7 +425,7 @@ export default function BrandsPage() {
                                                     </div>
                                                     <span className="hover:text-[#36A9E1] transition-colors active:font-bold">{brand.name}</span>
                                                 </button>
-                                            </motion.li>
+                                            </li>
                                         ))
                                     )}
                                 </ul>

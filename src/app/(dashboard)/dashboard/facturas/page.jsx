@@ -2,7 +2,6 @@ import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import BillTabs from '@/components/admin/bills/BillsTabs';
 import BillsStats from '@/components/admin/bills/BillsStats';
-
 export default async function FacturacionPage() {
     return (
         <AuthCheck>

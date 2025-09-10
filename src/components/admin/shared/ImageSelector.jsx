@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { FiSearch, FiImage, FiCheck, FiX, FiTrash2 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
-
 export default function ImageSelector({ onSelect, onClose }) {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
-
     useEffect(() => {
         async function fetchImages() {
             try {
@@ -28,18 +26,15 @@ export default function ImageSelector({ onSelect, onClose }) {
         }
         fetchImages();
     }, []);
-
     const filteredImages = images.filter(img =>
         img.public_id.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
     const handleSelect = () => {
         if (selectedImage) {
             onSelect(selectedImage.secure_url);
             onClose();
         }
     };
-
     // Delete image handler
     const handleDelete = async (img) => {
         if (!window.confirm('Segur que vols eliminar aquesta imatge?')) return;
@@ -61,7 +56,6 @@ export default function ImageSelector({ onSelect, onClose }) {
             toast.error('Error eliminant la imatge');
         }
     };
-
     return (
         <div className="fixed inset-0 h-screen bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4 z-50 border-gray-300">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col">
@@ -71,7 +65,6 @@ export default function ImageSelector({ onSelect, onClose }) {
                         <FiX size={24} />
                     </button>
                 </div>
-
                 <div className="p-4 border-b border-gray-300">
                     <div className="relative">
                         <FiSearch className="absolute left-3 top-3 text-gray-400" />
@@ -85,7 +78,6 @@ export default function ImageSelector({ onSelect, onClose }) {
                         />
                     </div>
                 </div>
-
                 {loading ? (
                     <div className="flex-1 flex items-center justify-center">
                         {/* Skeleton grid for loading */}
@@ -138,7 +130,6 @@ export default function ImageSelector({ onSelect, onClose }) {
                         )}
                     </div>
                 )}
-
                 <div className="flex justify-end p-4 border-t border-gray-300 ">
                     <button
                         onClick={onClose}

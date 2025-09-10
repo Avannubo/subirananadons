@@ -56,24 +56,20 @@ export default function Page() {
     const [bannerUrl, setBannerUrl] = useState(null);
     const currentCategoryLabel = categoryPath[categoryPath.length - 1];
     const t = useTranslations('ProductsPage');
-
     // Utility function to filter inactive categories and their children
     const filterActiveCategories = (categories) => {
         return categories.filter(category => {
             // If category is explicitly marked as inactive, filter it out
             if (category.isActive === false) return false;
-
             // If category has children, recursively filter them
             if (category.children && category.children.length > 0) {
                 category.children = filterActiveCategories(category.children);
                 // If all children were filtered out and category has no other data, filter out the category
                 return category.children.length > 0 || category.name;
             }
-
             return true;
         });
     };
-
     function findCategoryPathById(categories, id, locale = 'es', path = []) {
         for (const cat of categories) {
             const newPath = [...path, { _id: cat._id, label: getCategoryDisplayName(cat, locale) }];
@@ -127,7 +123,7 @@ export default function Page() {
             setCategoryPath([{ _id: 'root', label: 'Productes' }]);
         }
     }, [categoriesLoading, categories, searchParams, locale]);
-    // console.log('CATEGORIES', categories)
+    // //console.log('CATEGORIES', categories)
     // Fetch active banner image on mount
     useEffect(() => {
         async function fetchBanner() {
@@ -181,7 +177,6 @@ export default function Page() {
                 const res = await fetch('/api/categories?flat=true&status=active');
                 if (!res.ok) throw new Error('Error loading categories');
                 const cats = await res.json();
-
                 // Filter out inactive categories and their children
                 const filterInactiveCategories = (categories) => {
                     return categories.filter(cat => {
@@ -190,7 +185,6 @@ export default function Page() {
                         return true;
                     });
                 };
-
                 const filteredCats = filterInactiveCategories(cats);
                 setCategoriesFlat(filteredCats);
                 setCategories(organizeCategories(filteredCats));
@@ -206,49 +200,6 @@ export default function Page() {
         }
         loadCategories();
     }, []);
-    // // Helper function to find a category in the category tree
-    // function findCategoryInTree(rootNode, categoryToFind) {
-    //     // First try direct lookup
-    //     const result = findCategoryAndPath(rootNode, categoryToFind);
-    //     if (result) return result;
-    //     // If not found directly, try case-insensitive search or exact matches
-    //     function searchRecursively(node, target, currentPath = []) {
-    //         const targetLower = target.toLowerCase();
-    //         const pathWithCurrent = [...currentPath, node.label];
-    //         // Check if current node matches (case insensitive)
-    //         if (node.label.toLowerCase() === targetLower) {
-    //             return { node, path: pathWithCurrent };
-    //         }
-    //         // Check submenu
-    //         if (node.submenu) {
-    //             for (const child of node.submenu) {
-    //                 const result = searchRecursively(child, target, pathWithCurrent);
-    //                 if (result) return result;
-    //             }
-    //         }
-    //         return null;
-    //     }
-    //     return searchRecursively(rootNode, categoryToFind);
-    // }
-    // // Helper function to find a category by partial match (case insensitive)
-    // function findCategoryByPartialMatch(rootNode, partialName) {
-    //     function searchNodeRecursively(node, search, currentPath = []) {
-    //         const nodePath = [...currentPath, node.label];
-    //         // Check if current node contains the search term
-    //         if (node.label.toLowerCase().includes(search)) {
-    //             return { node, path: nodePath };
-    //         }
-    //         // Search in submenu
-    //         if (node.submenu) {
-    //             for (const subNode of node.submenu) {
-    //                 const result = searchNodeRecursively(subNode, search, nodePath);
-    //                 if (result) return result;
-    //             }
-    //         }
-    //         return null;
-    //     }
-    //     return searchNodeRecursively(rootNode, partialName);
-    // }
     // // Fetch products from the database
     useEffect(() => {
         // Only load products after categories, categoryPath, and currentCategoryNode are ready
@@ -439,7 +390,6 @@ export default function Page() {
     function flattenCategoriesForMobile(categories, locale = 'es') {
         let flat = [];
         for (const cat of categories) {
-
             const catLabel = getCategoryDisplayName(cat, locale);
             flat.push({
                 label: catLabel,
@@ -608,41 +558,8 @@ export default function Page() {
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                                     </button>
-                                </div>
-                                {/* <div className="flex items-center">
-                                    <label htmlFor="sort-by" className="mr-1 text-gray-600 text-xs whitespace-nowrap">{t('sortLabelMobile')}</label>
-                                    <select
-                                        id="sort-by"
-                                        className="border border-gray-300 rounded p-1 text-xs text-gray-600 cursor-pointer"
-                                        value={sortOrder}
-                                        onChange={handleSortChange}
-                                    >
-                                        <option value="sales-desc">{t('sortSalesDesc')}</option>
-                                        <option value="price-asc">{t('sortPriceAsc')}</option>
-                                        <option value="price-desc">{t('sortPriceDesc')}</option>
-                                        <option value="name-asc">{t('sortNameAsc')}</option>
-                                        <option value="name-desc">{t('sortNameDesc')}</option>
-                                    </select>
-                                </div> */}
-                            </div>
-                            {/* Desktop controls */}
-                            {/* <div className="hidden sm:flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto gap-2 sm:gap-0">
-                                <div className="flex items-center space-x-2">
-                                    <label htmlFor="sort-by" className="mr-2 text-gray-600 whitespace-nowrap">{t('sortLabelDesktop')}</label>
-                                    <select
-                                        id="sort-by"
-                                        className="border border-gray-300 w-full text-start rounded p-2 text-gray-600 cursor-pointer"
-                                        value={sortOrder}
-                                        onChange={handleSortChange}
-                                    >
-                                        <option value="sales-desc">{t('sortSalesDesc')}</option>
-                                        <option value="price-asc">{t('sortPriceAsc')}</option>
-                                        <option value="price-desc">{t('sortPriceDesc')}</option>
-                                        <option value="name-asc">{t('sortNameAsc')}</option>
-                                        <option value="name-desc">{t('sortNameDesc')}</option>
-                                    </select>
-                                </div>
-                            </div> */}
+                                </div> 
+                            </div> 
                             <div className="hidden sm:flex items-center justify-between space-x-4 w-full sm:w-auto mt-2 sm:mt-0">
                                 <div className="flex items-center space-x-2">
                                     {/* Grid/List view toggle icons */}

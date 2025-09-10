@@ -106,7 +106,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
 
     // Initial fetch of all orders when component mounts
     useEffect(() => {
-        console.log(`OrdersTabs mounted with userRole: ${userRole}`);
+        //console.log(`OrdersTabs mounted with userRole: ${userRole}`);
         fetchOrders(pagination.currentPage, pagination.limit);
     }, [userRole]);
     // Fetch orders when filters change

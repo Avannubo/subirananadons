@@ -70,7 +70,7 @@ export default function Page() {
                 reader.onloadend = () => resolve(reader.result);
                 reader.readAsDataURL(selectedImage);
             });
-            console.log('Image converted to base64, uploading to server...');
+            //console.log('Image converted to base64, uploading to server...');
             // Upload using our server API endpoint (which handles Cloudinary authentication)
             const response = await fetch('/api/cloudinary/upload', {
                 method: 'POST',
@@ -93,7 +93,7 @@ export default function Page() {
                 // When server-side upload fails, fall back to using the base64 image directly
                 // but only in development to avoid database bloat in production
                 if (process.env.NODE_ENV === 'development') {
-                    console.log('Using base64 image as fallback in development');
+                    //console.log('Using base64 image as fallback in development');
                     toast.success('S\'està utilitzant la imatge local', { id: toastId });
                     setIsUpdating(false);
                     return base64Image;
@@ -105,7 +105,7 @@ export default function Page() {
             }
             // If the request was successful, parse the response
             const data = await response.json();
-            console.log('Server upload successful, Cloudinary URL:', data.url);
+            //console.log('Server upload successful, Cloudinary URL:', data.url);
             toast.success('Imatge pujada correctament!', { id: toastId });
             // Set the image preview directly from the Cloudinary URL to update UI immediately
             setImagePreview(data.url);
@@ -119,7 +119,7 @@ export default function Page() {
             toast.error('No s\'ha pogut pujar la imatge', { id: toastId });
             // In development, use the base64 image as fallback
             if (process.env.NODE_ENV === 'development') {
-                console.log('Using base64 image as fallback due to error');
+                //console.log('Using base64 image as fallback due to error');
                 setIsUpdating(false);
                 return imagePreview;
             }
@@ -238,7 +238,6 @@ export default function Page() {
                                     </p>
                                 </div>
                             // </div>
-                            
                             // Nombre */}
                             <div>
                                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -329,64 +328,6 @@ export default function Page() {
                                     </p>
                                 </div>
                             )}
-                            {/* Birth Date */}
-                            {/* <div>
-                                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Data de naixement
-                                </label>
-                                <input
-                                    type="text"
-                                    id="birthDate"
-                                    name="birthDate"
-                                    value={userData.birthDate}
-                                    onChange={handleInputChange}
-                                    placeholder="Exemple: 31/05/1970"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                />
-                                <p className="mt-1 text-xs text-gray-500">Opcional</p>
-                            </div> */}
-                            {/* Privacy Section */}
-                            {/* <div className="pt-4 border-t border-gray-200">
-                                <div className="flex items-start mb-4">
-                                    <div className="flex items-center h-5">
-                                        <input
-                                            id="partnerOffers"
-                                            name="partnerOffers"
-                                            type="checkbox"
-                                            checked={userData.partnerOffers}
-                                            onChange={handleInputChange}
-                                            className="focus:ring-[#00B0C860] h-4 w-4 text-[#36A9E1] border-gray-300 rounded"
-                                        />
-                                    </div>
-                                    <label htmlFor="partnerOffers" className="ml-2 block text-sm text-gray-700">
-                                        Recibir ofertas de nuestros socios
-                                    </label>
-                                </div>
-                                <div className="bg-gray-50 p-4 rounded-md mb-4">
-                                    <p className="text-sm text-gray-600">
-                                        The personal data you provide is used to answer queries, process orders or allow access to specific information.
-                                        You have the right to modify and delete all the personal information found in the "My Account" page.
-                                    </p>
-                                </div>
-                                <div className="flex items-start">
-                                    <div className="flex items-center h-5">
-                                        <input
-                                            id="newsletter"
-                                            name="newsletter"
-                                            type="checkbox"
-                                            checked={userData.newsletter}
-                                            onChange={handleInputChange}
-                                            className="focus:ring-[rgba(0,177,200,0.66)] h-4 w-4 text-[#36A9E1] border-gray-300 rounded"
-                                        />
-                                    </div>
-                                    <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-700">
-                                        Suscribirse a nuestro boletín de noticias
-                                        <span className="block text-xs text-gray-500 mt-1">
-                                            Puede darse de baja en cualquier momento. Para ello, consulte nuestra información de contacto en el aviso legal.
-                                        </span>
-                                    </label>
-                                </div>
-                            </div> */}
                             {/* Submit Button */}
                             <div className="pt-4">
                                 <button

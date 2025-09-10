@@ -136,7 +136,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed`
         };
 
-        console.log('Payment Data:', data);
+        //console.log('Payment Data:', data);
 
         // Encode parameters and calculate signature
         let encodedParameters = stringBase64Encode(JSON.stringify(data));
@@ -155,8 +155,8 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             }
         }
 
-        console.log('Encoded Parameters:', encodedParameters);
-        console.log('DS Signature:', dsSignature);
+        //console.log('Encoded Parameters:', encodedParameters);
+        //console.log('DS Signature:', dsSignature);
     };
 
     const handlePaymentProcess = async () => {

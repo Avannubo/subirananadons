@@ -85,16 +85,16 @@ export default function AuthModal({ title }) {
             const formData = new FormData(e.currentTarget);
             const email = formData.get('email');
             const password = formData.get('password');
-            console.log('Attempting login with email:', email);
+            //console.log('Attempting login with email:', email);
             const result = await signIn('credentials', {
                 redirect: false,
                 email,
                 password,
             });
-            console.log('Login result:', result);
+            //console.log('Login result:', result);
             if (result?.error) {
                 let errorMessage = t('loginError') + ' ';
-                console.log('Login error:', result.error);
+                //console.log('Login error:', result.error);
                 if (result.error === 'Account not active') {
                     errorMessage = t('loginAccountNotActive') || 'Tu cuenta no está activa. Contacta con el propietario de la tienda.';
                 } else {
@@ -113,7 +113,7 @@ export default function AuthModal({ title }) {
                 return;
             }
             toast.success(t('loginSuccess'));
-            console.log('Login successful, redirecting to dashboard...');
+            //console.log('Login successful, redirecting to dashboard...');
             setTimeout(() => {
                 closeModal();
                 router.push('/dashboard');
@@ -204,7 +204,7 @@ export default function AuthModal({ title }) {
     }, []);
     return (
         <div className="">
-            
+
             {title ? (
                 <button
                     onClick={openLogin}
@@ -217,7 +217,7 @@ export default function AuthModal({ title }) {
                 <button
                     onClick={openLogin}
                     id='login-button'
-                        className="p-2  transition-colors flex items-center justify-center cursor-pointer text-gray-700 hover:text-[#3f93ba]"
+                    className="p-2  transition-colors flex items-center justify-center cursor-pointer text-gray-700 hover:text-[#3f93ba]"
                     aria-label="Abrir modal de autenticación"
                 >
                     <UserRound size={24} />

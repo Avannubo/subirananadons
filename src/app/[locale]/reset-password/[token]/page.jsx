@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-
 export default function ResetPassword({ params }) {
     const router = useRouter();
     const [isValidToken, setIsValidToken] = useState(false);
@@ -11,7 +10,6 @@ export default function ResetPassword({ params }) {
         password: '',
         confirmPassword: ''
     });
-
     useEffect(() => {
         const verifyToken = async () => {
             const { token } = params;
@@ -20,19 +18,16 @@ export default function ResetPassword({ params }) {
                 router.push('/');
                 return;
             }
-
             try {
                 const response = await fetch('/api/auth/verify-reset-token', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token })
                 });
-
                 const data = await response.json();
                 if (!response.ok) {
                     throw new Error(data.message);
                 }
-
                 setIsValidToken(true);
             } catch (error) {
                 toast.error('Este enlace ya ha expirado o ya ha sido utilizado. Por favor, solicita un nuevo enlace de recuperación.');
@@ -41,23 +36,18 @@ export default function ResetPassword({ params }) {
                 setIsLoading(false);
             }
         };
-
         verifyToken();
     }, [params, router]);
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (formData.password !== formData.confirmPassword) {
             toast.error('Las contraseñas no coinciden');
             return;
         }
-
         if (formData.password.length < 6) {
             toast.error('La contraseña debe tener al menos 6 caracteres');
             return;
         }
-
         try {
             const response = await fetch('/api/auth/reset-password', {
                 method: 'POST',
@@ -67,19 +57,16 @@ export default function ResetPassword({ params }) {
                     password: formData.password
                 })
             });
-
             const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.message);
             }
-
             toast.success('Contraseña actualizada correctamente');
             setTimeout(() => router.push('/'), 2000);
         } catch (error) {
             toast.error(error.message || 'Error al actualizar la contraseña');
         }
     };
-
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -87,11 +74,9 @@ export default function ResetPassword({ params }) {
             </div>
         );
     }
-
     if (!isValidToken) {
         return null; // The useEffect will handle the redirection
     }
-
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
@@ -137,7 +122,6 @@ export default function ResetPassword({ params }) {
                             />
                         </div>
                     </div>
-
                     <div>
                         <button
                             type="submit"

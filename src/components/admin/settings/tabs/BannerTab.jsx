@@ -252,7 +252,6 @@ export default function BannerTab() {
                                                     {t('removeBanner')}
                                                 </button>
                                             </div>
-
                                             <div className='space-x-2'>
                                                 <a href={img.imageUrl} target="_blank" rel="noopener noreferrer" className="text-[#007d8d] break-all px-3 py-1 rounded text-xs bg-[#007d8d30] hover:bg-[#007d8d40] ">{t('view')}</a>
                                                 <button
@@ -261,7 +260,6 @@ export default function BannerTab() {
                                                 >
                                                     {t('delete')}
                                                 </button>
-
                                             </div>
                                         </div>
                                     ))}

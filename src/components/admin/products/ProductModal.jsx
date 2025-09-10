@@ -60,7 +60,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
     // --- Shop Parameter (IVA) ---
     const { value: ivaValue, loading: ivaLoading } = useShopParameter('iva');
-    // console.log(product);
+    // //console.log(product);
     const [formData, setFormData] = useState({
         name: { es: '', ca: '' },
         reference: '',
@@ -669,7 +669,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             // Ensure category and brand are ObjectId (not name or empty string)
             let categoryId = formData.category;
             let brandId = formData.brand;
-            console.log(categoryId, brandId);
+            //console.log(categoryId, brandId);
             const isObjectId = (val) => typeof val === 'string' && /^[a-fA-F0-9]{24}$/.test(val);
             // Treat empty string as null for category/brand
             if (categoryId === "") categoryId = null;
@@ -1275,20 +1275,20 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             </div>
 
                                             {/* {formData.discount?.type && formData.discount?.value && formData.price_incl_tax && ( */}
-                                                <div className="md:col-span-2">
-                                                    <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">
-                                                        Preu final amb descompte:
-                                                    </label>
-                                                    <div className="mt-2 p-4 bg-gray-50 rounded-md border border-gray-200">
-                                                        <p className="text-lg font-medium text-gray-700">
-                                                            {
-                                                                formData.discount.type === 'percentage'
-                                                                    ? (formData.price_incl_tax * (1 - formData.discount.value / 100)).toFixed(2)
-                                                                    : Math.max(0, formData.price_incl_tax - formData.discount.value).toFixed(2)
-                                                            } €
-                                                        </p>
-                                                    </div>
+                                            <div className="md:col-span-2">
+                                                <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">
+                                                    Preu final amb descompte:
+                                                </label>
+                                                <div className="mt-2 p-4 bg-gray-50 rounded-md border border-gray-200">
+                                                    <p className="text-lg font-medium text-gray-700">
+                                                        {
+                                                            formData.discount.type === 'percentage'
+                                                                ? (formData.price_incl_tax * (1 - formData.discount.value / 100)).toFixed(2)
+                                                                : Math.max(0, formData.price_incl_tax - formData.discount.value).toFixed(2)
+                                                        } €
+                                                    </p>
                                                 </div>
+                                            </div>
                                             {/* )} */}
                                         </div>
                                     )}

@@ -44,7 +44,7 @@ export default function ClientsTable({ clients, onEditClient, onDeleteClient, on
             fetchOrderCounts();
         }
     }, [clients]);
-    // console.log('ClientsTable rendered with clients:', clients);
+    // //console.log('ClientsTable rendered with clients:', clients);
     // Locale detection (default to 'ca')
     let locale = 'ca';
     if (typeof window !== 'undefined' && window.navigator) {

@@ -1,5 +1,4 @@
 'use client';
-
 export default function StatsCardGrid({ children, lastUpdated, refreshStats, refreshing }) {
     return (
         <div className="space-y-4 mb-6">

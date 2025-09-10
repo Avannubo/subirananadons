@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-
 const productSchema = new mongoose.Schema({
     name: {
         es: { type: String, required: [true, 'Por favor, proporciona un nombre de producto'] },
@@ -88,7 +87,6 @@ const productSchema = new mongoose.Schema({
             type: Number,
             default: function () {
                 if (!this.discount.active) return this.price_incl_tax;
-
                 if (this.discount.type === 'percentage') {
                     return this.price_incl_tax * (1 - this.discount.value / 100);
                 } else {
@@ -107,5 +105,4 @@ const productSchema = new mongoose.Schema({
         default: false
     }
 }, { timestamps: true });
-
 export default mongoose.models.Product || mongoose.model('Product', productSchema); 

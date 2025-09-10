@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-
 const sessionSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -27,12 +26,9 @@ const sessionSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
-
 // Index for faster queries and automatic expiration
 sessionSchema.index({ expires: 1 }, { expireAfterSeconds: 0 });
 sessionSchema.index({ userId: 1 });
 sessionSchema.index({ accessToken: 1 });
-
 const Session = mongoose.models.Session || mongoose.model('Session', sessionSchema);
-
 export default Session; 

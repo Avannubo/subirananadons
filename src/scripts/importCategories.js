@@ -1,10 +1,8 @@
 // Import Categories Script
 // This script extracts the category structure from the product page
 // and imports it into the database using the Categories API
-
 // Import required modules
 const { MongoClient } = require('mongodb');
-
 // Product menu tree structure from the shop page
 const productMenuTree = [
     {
@@ -119,7 +117,6 @@ const productMenuTree = [
         ]
     }
 ];
-
 // Helper function to create a slug from a category name
 const createSlug = (name) => {
     return name
@@ -127,31 +124,25 @@ const createSlug = (name) => {
         .replace(/[^\w ]+/g, '')
         .replace(/ +/g, '-');
 };
-
 // Function to connect to the database directly
 async function connectToDatabase() {
     const uri = "mongodb+srv://arjunsingh:2LKnqF4ZpQVxZvvh@cluster0.zzuehnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
     if (!uri) {
         throw new Error('Please define the MONGODB_URI environment variable');
     }
-
     const client = new MongoClient(uri);
     await client.connect();
     return client.db('test');
 }
-
 // Function to import categories recursively
 async function importCategories() {
     const db = await connectToDatabase();
     const categoriesCollection = db.collection('categories');
-
     // Clear existing categories (optional - be careful with this in production)
     // Comment this out if you want to preserve existing categories
     // await categoriesCollection.deleteMany({});
-
     // Keep track of inserted categories to avoid duplicates
     const insertedCategories = new Map();
-
     // Process the category tree recursively
     async function processCategory(category, parentId = null, level = 1, order = 0) {
         // Create category object
@@ -165,10 +156,8 @@ async function importCategories() {
             createdAt: new Date(),
             updatedAt: new Date()
         };
-
         // Check if category already exists (by slug)
         const existingCategory = await categoriesCollection.findOne({ slug: categoryData.slug });
-
         // Insert or update the category
         let categoryId;
         if (existingCategory) {
@@ -183,51 +172,42 @@ async function importCategories() {
                 }
             );
             categoryId = existingCategory._id;
-            console.log(`Updated category: ${category.label}`);
+            //console.log(`Updated category: ${category.label}`);
         } else {
             // Insert new category
             const result = await categoriesCollection.insertOne(categoryData);
             categoryId = result.insertedId;
-            console.log(`Inserted category: ${category.label}`);
+            //console.log(`Inserted category: ${category.label}`);
         }
-
         // Store the category ID
         insertedCategories.set(categoryData.slug, categoryId);
-
         // Process subcategories if they exist
         if (category.submenu && category.submenu.length > 0) {
             for (let i = 0; i < category.submenu.length; i++) {
                 await processCategory(category.submenu[i], categoryId, level + 1, i);
             }
         }
-
         return categoryId;
     }
-
     // Start processing each top-level category separately
     for (let i = 0; i < productMenuTree.length; i++) {
         await processCategory(productMenuTree[i], null, 1, i);
     }
-
-    console.log('Category import completed successfully!');
+    //console.log('Category import completed successfully!');
     return insertedCategories.size;
 }
-
 // Function to update product categories to match the new category structure
 async function updateProductCategories() {
     const db = await connectToDatabase();
     const productsCollection = db.collection('products');
     const categoriesCollection = db.collection('categories');
-
     // Get all products
     const products = await productsCollection.find({}).toArray();
     let updatedCount = 0;
-
     for (const product of products) {
         // Find the category by name
         const categoryName = product.category;
         const category = await categoriesCollection.findOne({ name: categoryName });
-
         if (category) {
             // Update the product with the category ID
             await productsCollection.updateOne(
@@ -235,34 +215,29 @@ async function updateProductCategories() {
                 { $set: { categoryId: category._id } }
             );
             updatedCount++;
-            console.log(`Updated product: ${product.name} with category ID: ${category._id}`);
+            //console.log(`Updated product: ${product.name} with category ID: ${category._id}`);
         } else {
-            console.log(`Warning: No matching category found for product: ${product.name} (Category: ${categoryName})`);
+            //console.log(`Warning: No matching category found for product: ${product.name} (Category: ${categoryName})`);
         }
     }
-
-    console.log(`Updated ${updatedCount} products with category IDs`);
+    //console.log(`Updated ${updatedCount} products with category IDs`);
     return updatedCount;
 }
-
 // Main function to run the import process
 async function main() {
     try {
-        console.log('Starting category import process...');
+        //console.log('Starting category import process...');
         const categoriesCount = await importCategories();
-        console.log(`Imported/updated ${categoriesCount} categories.`);
-
+        //console.log(`Imported/updated ${categoriesCount} categories.`);
         // Optionally update product categories
         // const updatedProducts = await updateProductCategories();
-        // console.log(`Updated ${updatedProducts} products with category IDs.`);
-
-        console.log('Import process completed successfully.');
+        // //console.log(`Updated ${updatedProducts} products with category IDs.`);
+        //console.log('Import process completed successfully.');
     } catch (error) {
         console.error('Import process failed:', error);
     } finally {
         process.exit(0);
     }
 }
-
 // Run the script
 main(); 

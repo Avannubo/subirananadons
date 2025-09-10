@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { use } from 'react';
-import ShopLayout from "@/components/Layouts/shop-layout";
-import Image from "next/image";
+import ShopLayout from "@/components/Layouts/shop-layout"; 
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -205,7 +204,6 @@ export default function BirthListPage({ params }) {
             </ShopLayout>
         );
     }
-
     // Show a different message for completed lists
     if (list.status === 'Completada') {
         return (
@@ -269,9 +267,9 @@ export default function BirthListPage({ params }) {
                 }
             };
             const success = await addToCart(productForCart, 1); if (success) {
-                console.log('Regalo añadido al carrito');
+                //console.log('Regalo añadido al carrito');
             } else {
-                console.log('No se pudo añadir el regalo al carrito');
+                //console.log('No se pudo añadir el regalo al carrito');
             }
         } catch (error) {
             console.error('Error adding gift to cart:', error);
@@ -356,49 +354,6 @@ export default function BirthListPage({ params }) {
                         </div>
                     </div>
                 </div>
-                {/* <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-                    <div className="w-full md:w-auto mb-4 md:mb-0 overflow-x-auto">
-                        <div className="inline-flex border border-gray-200 rounded-lg p-1 min-w-max bg-gray-50">
-                            {availableCategories.map((category, idx) => {
-                                let label = '';
-                                if (category === 'Todos') {
-                                    label = 'Todos';
-                                } else if (category && category.name) {
-                                    label = getTranslatedName(category.name);
-                                } else if (typeof category === 'string') {
-                                    label = category;
-                                } else {
-                                    label = 'N/D';
-                                }
-                                const isSelected = (selectedCategory && category && typeof selectedCategory === 'object' && typeof category === 'object')
-                                    ? selectedCategory._id === category._id
-                                    : selectedCategory === category;
-                                return (
-                                    <button
-                                        key={category._id ? category._id : label + idx}
-                                        onClick={() => setSelectedCategory(category)}
-                                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isSelected
-                                            ? 'bg-[#36A9E1] text-white shadow-sm'
-                                            : 'bg-transparent text-gray-600 hover:bg-gray-200'
-                                            }`}
-                                    >
-                                        {label}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div> */}
-                {/* <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-md"
-                    >
-                        <option value="default">{t('sortDefault')}</option>
-                        <option value="price-asc">{t('sortPriceAsc')}</option>
-                        <option value="price-desc">{t('sortPriceDesc')}</option>
-                        <option value="name">{t('sortName')}</option>
-                    </select> */}
                 {/* Products Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {filteredProducts.length > 0 ? (

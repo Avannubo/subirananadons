@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FiUpload, FiPlus } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import ImageSelector from '@/components/admin/shared/ImageSelector';
-
 export default function ConfiguracionTab() {
     const [sliders, setSliders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -168,7 +167,6 @@ export default function ConfiguracionTab() {
         setImagePreview(slider.imageUrl || '');
         setEditingId(slider._id);
     };
-
     // Move slider up or down
     const moveSlider = (id, direction) => {
         setSliders(prev => {

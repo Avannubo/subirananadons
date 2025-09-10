@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
 
 export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }) {
-    console.log(brand);
+    //console.log(brand);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -32,8 +32,8 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
     // Initialize form with brand data when editing
     useEffect(() => {
         if (isEditing && brand) {
-            console.log('Brand data:', brand);
-            console.log('Brand discount:', brand.discount);
+            //console.log('Brand data:', brand);
+            //console.log('Brand discount:', brand.discount);
 
             const discountData = brand.discount ? {
                 active: brand.discount.active,  // Ensure boolean
@@ -53,7 +53,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                 minQuantity: ''
             };
 
-            console.log('Processed discount data:', discountData);
+            //console.log('Processed discount data:', discountData);
 
             setFormData({
                 name: brand.name || '',

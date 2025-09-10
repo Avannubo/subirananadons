@@ -1,5 +1,4 @@
 'use client'; // Required for Chart.js since it uses client-side APIs
-
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -11,7 +10,6 @@ import {
     Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -21,7 +19,6 @@ ChartJS.register(
     Tooltip,
     Legend
 );
-
 export default function LineChart({ data, options }) {
     const defaultOptions = {
         responsive: true,
@@ -36,6 +33,5 @@ export default function LineChart({ data, options }) {
         },
         ...options,
     };
-
     return <Line data={data} options={defaultOptions} />;
 }

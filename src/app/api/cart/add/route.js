@@ -10,7 +10,7 @@ export async function POST(request) {
         await dbConnect();
         // Parse the request body
         const body = await request.json();
-        console.log('Add to cart request:', JSON.stringify(body, null, 2));
+        //console.log('Add to cart request:', JSON.stringify(body, null, 2));
         const { productId, quantity, isGift, giftInfo } = body;
         if (!productId || !quantity) {
             return NextResponse.json({
@@ -23,13 +23,13 @@ export async function POST(request) {
             let product;
             // Check if productId is a valid ObjectId
             const isValidObjectId = mongoose.Types.ObjectId.isValid(productId);
-            console.log(`Searching for product with ID: ${productId}, valid MongoDB ID: ${isValidObjectId}`);
+            //console.log(`Searching for product with ID: ${productId}, valid MongoDB ID: ${isValidObjectId}`);
             if (isValidObjectId) {
                 product = await Product.findById(productId);
             }
             // If not found by ID, try searching by other fields
             if (!product) {
-                console.log('Product not found by ID, trying to find by other fields...');
+                //console.log('Product not found by ID, trying to find by other fields...');
                 product = await Product.findOne({
                     $or: [
                         { _id: productId },
@@ -38,13 +38,13 @@ export async function POST(request) {
                 });
             }
             if (!product) {
-                console.log(`Product not found: ${productId}`);
+                //console.log(`Product not found: ${productId}`);
                 return NextResponse.json({
                     success: false,
                     message: `Producte no trobat amb l'ID: ${productId}`
                 }, { status: 404 });
             }
-            console.log(`Found product: ${product.name} (ID: ${product._id})`);
+            //console.log(`Found product: ${product.name} (ID: ${product._id})`);
             // Get the session for authenticated users
             let session;
             try {
@@ -58,7 +58,7 @@ export async function POST(request) {
             const price = product.price_incl_tax || product.price || 0;
             // Create cart response for guest users if no session
             if (!userId) {
-                console.log('Guest user adding to cart - returning product info only');
+                //console.log('Guest user adding to cart - returning product info only');
                 const cartItem = {
                     product: product._id.toString(),
                     quantity: Number(quantity),

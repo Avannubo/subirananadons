@@ -11,7 +11,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
             try {
                 // Get all possible ID forms from the client object
                 const userId = client._id || client.id;
-                console.log('[ClientViewModal] Fetching orders for userId:', userId, 'Client:', client);
+                //console.log('[ClientViewModal] Fetching orders for userId:', userId, 'Client:', client);
                 if (!userId) {
                     console.error('[ClientViewModal] No valid user ID found:', client);
                     return;
@@ -37,7 +37,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                 }
 
                 const data = await res.json();
-                console.log('[ClientViewModal] Order count response:', data);
+                //console.log('[ClientViewModal] Order count response:', data);
                 setOrderCount(data.count || 0);
             } catch (err) {
                 console.error('[ClientViewModal] Error fetching order count:', err);

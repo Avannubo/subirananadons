@@ -1,6 +1,5 @@
 const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
-
 /**
  * Connect to MongoDB database
  * @returns {Promise<{client: MongoClient, db: Db}>} Database connection
@@ -9,7 +8,7 @@ async function connectToDatabase() {
     try {
         const client = new MongoClient(process.env.MONGODB_URI);
         await client.connect();
-        console.log('Connected to MongoDB');
+        //console.log('Connected to MongoDB');
         const db = client.db();
         return { client, db };
     } catch (error) {
@@ -17,7 +16,6 @@ async function connectToDatabase() {
         throw error;
     }
 }
-
 /**
  * Get all categories from the database with their slugs and IDs
  * @param {Db} db - MongoDB database instance
@@ -26,14 +24,11 @@ async function connectToDatabase() {
 async function getCategoryMap(db) {
     const categories = await db.collection('categories').find({}).toArray();
     const categoryMap = new Map();
-
     categories.forEach(category => {
         categoryMap.set(category.slug, category._id.toString());
     });
-
     return categoryMap;
 }
-
 /**
  * Update product category references from strings to ObjectIds
  * @param {Db} db - MongoDB database instance
@@ -43,11 +38,9 @@ async function getCategoryMap(db) {
 async function updateProductCategories(db, categoryMap) {
     const products = await db.collection('products').find({}).toArray();
     let updatedCount = 0;
-
     for (const product of products) {
         let updated = false;
         const updatedCategories = [];
-
         // Handle case where categories might be strings (slugs) or already ObjectIds
         if (product.categories && Array.isArray(product.categories)) {
             product.categories.forEach(category => {
@@ -64,7 +57,6 @@ async function updateProductCategories(db, categoryMap) {
                 }
             });
         }
-
         // If the product has a main category as string, convert it to ObjectId
         let mainCategory = product.mainCategory;
         if (mainCategory && typeof mainCategory === 'string') {
@@ -74,7 +66,6 @@ async function updateProductCategories(db, categoryMap) {
                 updated = true;
             }
         }
-
         if (updated) {
             await db.collection('products').updateOne(
                 { _id: product._id },
@@ -86,13 +77,11 @@ async function updateProductCategories(db, categoryMap) {
                 }
             );
             updatedCount++;
-            console.log(`Updated product: ${product.name || product.title || product._id}`);
+            //console.log(`Updated product: ${product.name || product.title || product._id}`);
         }
     }
-
     return updatedCount;
 }
-
 /**
  * Main function to update product categories
  */
@@ -101,23 +90,19 @@ async function main() {
     try {
         const { client: dbClient, db } = await connectToDatabase();
         client = dbClient;
-
         // Get category mapping (slug to ID)
         const categoryMap = await getCategoryMap(db);
-        console.log(`Found ${categoryMap.size} categories in the database`);
-
+        //console.log(`Found ${categoryMap.size} categories in the database`);
         // Update product categories
         const updatedProducts = await updateProductCategories(db, categoryMap);
-        console.log(`Updated ${updatedProducts} products with category IDs`);
-
+        //console.log(`Updated ${updatedProducts} products with category IDs`);
     } catch (error) {
         console.error('Error updating product categories:', error);
     } finally {
         if (client) {
             await client.close();
-            console.log('MongoDB connection closed');
+            //console.log('MongoDB connection closed');
         }
     }
 }
-
 main().catch(console.error); 

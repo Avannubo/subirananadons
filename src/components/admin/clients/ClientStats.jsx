@@ -3,21 +3,17 @@ import { FiUser, FiCalendar, FiShoppingBag, FiMail } from 'react-icons/fi';
 import { useClientStats } from '@/contexts/ClientStatsContext';
 import StatsCard from '@/components/admin/shared/StatsCard';
 import StatsCardGrid from '@/components/admin/shared/StatsCardGrid';
-
 export default function ClientsStats() {
     const { stats, loading, refreshing, lastUpdated, refreshStats } = useClientStats();
-
     // Format the last updated time
     const formatLastUpdated = () => {
         if (!lastUpdated) return '';
-
         return new Intl.DateTimeFormat('es', {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit'
         }).format(lastUpdated);
     };
-
     // Format stats for display
     const displayStats = [
         {
@@ -49,7 +45,6 @@ export default function ClientsStats() {
             bgColor: "bg-purple-100"
         }
     ];
-
     return (
         <StatsCardGrid
             lastUpdated={formatLastUpdated()}

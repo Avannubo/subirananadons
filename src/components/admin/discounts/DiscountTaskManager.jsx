@@ -1,16 +1,12 @@
 'use client';
-
 import { useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { usePathname } from 'next/navigation';
 import { DiscountService } from '@/services/DiscountService';
-
 const CHECK_INTERVAL = 60000; // Check every minute
-
 export default function DiscountTaskManager() {
     const intervalRef = useRef(null);
     const pathname = usePathname();
-
     const checkAndUpdateDiscounts = async () => {
         try {
             const result = await DiscountService.updateProductDiscounts();
@@ -22,14 +18,11 @@ export default function DiscountTaskManager() {
             // Don't show error toast to avoid spamming users
         }
     };
-
     useEffect(() => {
         // Initial check
         checkAndUpdateDiscounts();
-
         // Set up periodic checks
         intervalRef.current = setInterval(checkAndUpdateDiscounts, CHECK_INTERVAL);
-
         // Cleanup
         return () => {
             if (intervalRef.current) {
@@ -37,7 +30,6 @@ export default function DiscountTaskManager() {
             }
         };
     }, []);
-
     // This component doesn't render anything
     return null;
 }

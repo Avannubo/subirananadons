@@ -11,8 +11,8 @@ import Invoice from '@/models/Invoice';
 export async function GET(request, { params }) {
     try {
         const session = await getServerSession(authOptions);
-        console.log('Order Detail API - Session:', session);
-        console.log('Order Detail API - Request Params:', params);
+        //console.log('Order Detail API - Session:', session);
+        //console.log('Order Detail API - Request Params:', params);
 
         if (!session?.user?.id) {
             console.error('Order Detail API - No user ID in session');
@@ -106,7 +106,7 @@ export async function PATCH(request, { params }) {
             // Convert status to lowercase for validation and storage
             data.status = data.status.toLowerCase();
             if (!allowedStatuses.includes(data.status)) {
-                console.log('Invalid status value:', data.status);
+                //console.log('Invalid status value:', data.status);
                 return NextResponse.json({
                     success: false,
                     message: 'Invalid order status. Allowed values are: ' + allowedStatuses.join(', ')

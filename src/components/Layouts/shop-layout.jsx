@@ -7,8 +7,8 @@ export default function ShopLayout({ children }) {
             <div className="flex flex-col justify-center items-center w-full h-full bg-white">
                 <div className="flex flex-col justify-center items-center w-full ">
                     {children}
-                </div> 
-            </div> 
+                </div>
+            </div>
             <Footer />
         </>
     );

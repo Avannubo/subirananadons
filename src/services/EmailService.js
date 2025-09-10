@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 class EmailService {
     static async sendOrderConfirmation(order) {
         try {
-            console.log('Sending order confirmation email:', JSON.stringify(order));
+            //console.log('Sending order confirmation email:', JSON.stringify(order));
             const items_list = order.items.map(item => {
                 const hasDiscount = item.priceDetails?.discountAmount > 0;
                 const finalPrice = hasDiscount ? item.priceDetails.finalPrice : item.price;

@@ -34,7 +34,7 @@ export default function RecommendationsPage() {
                 if (!res.ok) throw new Error('Failed to fetch recommendations');
                 const data = await res.json();
                 setGroups(data.containers || []);
-                console.log("Fetched recommendation groups:", data.containers);
+                //console.log("Fetched recommendation groups:", data.containers);
             } catch (err) {
                 setGroups([]);
             } finally {

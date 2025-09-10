@@ -191,7 +191,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                         }
 
                         const data = await response.json();
-                        console.log('Product API response:', data);
+                        //console.log('Product API response:', data);
 
                         if (data.product) {
                             productsMap[item.product] = data.product;
@@ -206,7 +206,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                 }
             }
 
-            console.log('Final products map:', productsMap);
+            //console.log('Final products map:', productsMap);
             setProducts(productsMap);
         } catch (error) {
             console.error("Error fetching product details:", error);

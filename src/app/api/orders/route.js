@@ -200,7 +200,7 @@ export async function POST(request) {
 export async function GET(request) {
     try {
         const session = await getServerSession(authOptions);
-        console.log('Session in Orders API:', session);
+        //console.log('Session in Orders API:', session);
 
         if (!session?.user?.id) {
             console.error('No user ID in session - unauthorized');
@@ -220,7 +220,7 @@ export async function GET(request) {
         // Admin can see all orders, regular users can only see their own
         const isAdmin = session.user.role === 'admin';
         const query = isAdmin ? {} : { user: session.user.id };
-        console.log(`User role: ${session.user.role}, query filter:`, query);
+        //console.log(`User role: ${session.user.role}, query filter:`, query);
 
         const orders = await Order.find(query)
             .sort({ createdAt: -1 })
@@ -229,7 +229,7 @@ export async function GET(request) {
             .populate('user', 'name email')
             .lean();
 
-        console.log(`Found ${orders.length} orders for user ${session.user.id}`);
+        //console.log(`Found ${orders.length} orders for user ${session.user.id}`);
         const total = await Order.countDocuments(query);
 
         return NextResponse.json({

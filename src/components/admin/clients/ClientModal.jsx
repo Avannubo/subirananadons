@@ -103,7 +103,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
     const [loading, setLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     // Initialize form data when client is provided
-
     useEffect(() => {
         if (client) {
             setFormData({
@@ -138,9 +137,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
         // Reset errors when form is reset
         setErrors({});
     }, [client]);
-
-
-
     // Handle form input changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -152,7 +148,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
     // Form validation
     const validateForm = () => {
         const newErrors = {};
-
         if (!formData.name) {
             newErrors.name = t.nameRequired;
         }
@@ -164,7 +159,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = t.emailInvalid;
         }
-
         // Only validate password if either password field is filled
         if (formData.password || formData.confirmPassword) {
             if (formData.password.length < 6) {
@@ -174,7 +168,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                 newErrors.confirmPassword = t.passwordMismatch;
             }
         }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -190,7 +183,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                 ...(formData.password ? { password: formData.password } : {})
             };
             delete dataToSend.confirmPassword; // Remove confirmPassword as it's not needed by the API
-
             await onSave(dataToSend);
             toast.success(client ? t.successEdit : t.successAdd);
             // Notify the stats context that changes have been made
@@ -203,7 +195,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             setLoading(false);
         }
     };
-
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -305,7 +296,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                         />
                                         {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                                     </div>                                </section>
-
                                 {/* Password Change Section */}
                                 <section className="space-y-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
@@ -344,7 +334,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                         </div>
                                     </div>
                                 </section>
-
                                 {/* Preferences */}
                                 {/* <section className="space-y-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">

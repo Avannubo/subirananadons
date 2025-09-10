@@ -7,11 +7,9 @@ export class DiscountService {
                     'Content-Type': 'application/json',
                 },
             });
-
             if (!response.ok) {
                 throw new Error('Failed to update discounts');
             }
-
             const result = await response.json();
             return result;
         } catch (error) {
@@ -19,16 +17,13 @@ export class DiscountService {
             throw error;
         }
     }
-
     static isDiscountActive(discount) {
         if (!discount || !discount.startDate || !discount.endDate) {
             return false;
         }
-
         const now = new Date();
         const startDate = new Date(discount.startDate);
         const endDate = new Date(discount.endDate);
-
         return now >= startDate && now <= endDate;
     }
 }

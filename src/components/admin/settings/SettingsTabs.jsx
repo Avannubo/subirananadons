@@ -40,7 +40,6 @@ export default function SettingsTabs() {
                     setActiveTab={handleTabChange}
                 />
             </div>
-
             {/* Tab Content */}
             <div className="p-6">
                 {activeTab === 'transportistas' && <TransportistasTab />}

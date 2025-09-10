@@ -36,7 +36,7 @@ export async function GET(request, { params }) {
                 select: 'name reference'
             })
             .lean();
-        console.log('Order:', order);
+        //console.log('Order:', order);
         if (!order) {
             return new NextResponse('Pedido no encontrado', { status: 404 });
         }

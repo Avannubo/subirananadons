@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-
 export default function Pagination({
     currentPage = 1,
     totalPages = 1,
@@ -26,28 +25,23 @@ export default function Pagination({
         }
         return pages;
     };
-
     const visiblePages = getVisiblePages();
-
     // Format showing text with current values
     const formattedShowingText = showingText
         .replace('{}', Math.min(currentPage * itemsPerPage, totalItems))
         .replace('{}', totalItems);
-
     // Helper function to handle the items per page change
     const handleItemsPerPageChange = (value) => {
         // Check if onItemsPerPageChange is provided
         if (typeof onItemsPerPageChange === 'function') {
             // Convert to number to ensure consistency
             const numValue = Number(value);
-
             // Call the handler with the numeric value
             onItemsPerPageChange(numValue);
         } else {
             console.warn('onItemsPerPageChange is not a function or not provided');
         }
     };
-
     // Navigation helpers for new style
     const goToPreviousPage = () => {
         if (currentPage > 1) onPageChange(currentPage - 1);
@@ -58,7 +52,6 @@ export default function Pagination({
     const goToPage = (page) => {
         if (page !== '...' && page !== currentPage) onPageChange(page);
     };
-
     return (
         <div className="flex flex-col items-center justify-center gap-3 mt-4 mb-2 px-4">
             <div className="text-sm text-gray-600 mb-2">{formattedShowingText}</div>

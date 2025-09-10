@@ -108,10 +108,10 @@ export default function CategoriesTree() {
                 throw new Error('Failed to fetch categories');
             }
             const data = await response.json();
-            console.log('Fetched categories (raw):', data);
+            //console.log('Fetched categories (raw):', data);
             // Organize into proper hierarchy
             const organizedCategories = organizeCategories(data);
-            console.log('Organized categories:', organizedCategories);
+            //console.log('Organized categories:', organizedCategories);
             setCategories(organizedCategories);
             // Don't automatically overwrite expanded state here to preserve 
             // user's previous choices from localStorage

@@ -88,7 +88,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                     status: 'active',
                     search: debouncedSearch && debouncedSearch.trim() !== '' ? debouncedSearch : undefined
                 });
-                console.log(result);
+                //console.log(result);
 
                 setProducts(result.products || []);
                 setTotalPages(result.pagination?.totalPages || 1);

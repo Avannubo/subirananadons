@@ -1,5 +1,4 @@
 'use client';
-
 export default function SearchBar({ placeholder, value, onChange, name, className = '' }) {
     return (
         <div className={`relative ${className}`}>

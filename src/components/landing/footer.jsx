@@ -6,8 +6,6 @@ import { InstagramIcon, YoutubeIcon, LinkedinIcon, Phone, Mail, ExternalLink } f
 import { useTranslations } from 'next-intl';
 import useShopSocials from '../../lib/useShopSocials';
 import useShopParameter from '../../lib/useShopParameter';
-
-
 export default function Footer() {
     const t = useTranslations('Footer');
     const { socials } = useShopSocials();
@@ -59,9 +57,7 @@ export default function Footer() {
                                     </Link>
                                 )}
                             </div>
-
                             <p className="text-xs md:text-sm mt-4 text-center md:text-left">{t('copyright')}</p>
-
                             <div className="w-full flex justify-center md:justify-start">
                                 <Link
                                     href="https://avannubo.com/"

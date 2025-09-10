@@ -3,16 +3,14 @@ import Link from "next/link";
 import { useEffect } from "react";
 import ShopLayout from "@/components/Layouts/shop-layout";
 import { useTranslations } from 'next-intl';
-
 export default function CartFailedPage() {
     const t = useTranslations('CartOrderFailedPage');
-
     useEffect(() => {
         // Clean up the orderpending from localStorage
         if (typeof window !== 'undefined') {
             try {
                 localStorage.removeItem('orderpending');
-                console.log('Cleaned up orderpending from localStorage');
+                //console.log('Cleaned up orderpending from localStorage');
             } catch (error) {
                 console.error('Error cleaning up localStorage:', error);
             }

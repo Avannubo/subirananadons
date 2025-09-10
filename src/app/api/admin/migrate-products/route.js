@@ -21,11 +21,11 @@ export async function GET(request) {
 
         // Connect to MongoDB
         await dbConnect();
-        console.log('Connected to MongoDB');
+        //console.log('Connected to MongoDB');
 
         // Get all products
         const products = await Product.find({});
-        console.log(`Found ${products.length} products to migrate`);
+        //console.log(`Found ${products.length} products to migrate`);
 
         let migratedCount = 0;
         let errorCount = 0;
@@ -50,7 +50,7 @@ export async function GET(request) {
                             changes.push(`Set available to 0 (default)`);
                         }
                     }
-                    
+
                     // Make sure minStock exists and has a value
                     if (product.stock.minStock === undefined) {
                         // Convert from reserved to minStock if needed
@@ -62,13 +62,13 @@ export async function GET(request) {
                             changes.push(`Set minStock to 5 (default)`);
                         }
                     }
-                    
+
                     // Remove physical field
                     if (product.stock.physical !== undefined) {
                         delete product.stock.physical;
                         changes.push(`Removed physical field`);
                     }
-                    
+
                     // Remove reserved field
                     if (product.stock.reserved !== undefined) {
                         delete product.stock.reserved;

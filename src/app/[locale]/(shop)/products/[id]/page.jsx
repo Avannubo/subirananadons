@@ -203,17 +203,14 @@ export default function Page() {
         try {
             const isDiscountActive = () => {
                 if (!product.discount?.active) return false;
-
                 const now = new Date();
                 const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
                 const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
-
                 if (!startDate && !endDate) return true;
                 if (startDate && !endDate) return now >= startDate;
                 if (!startDate && endDate) return now <= endDate;
                 return now >= startDate && now <= endDate;
             };
-
             // Create a product object with the correct price structure
             const productToAdd = {
                 ...product,
@@ -221,7 +218,6 @@ export default function Page() {
                 priceValue: product.price_incl_tax,  // Numerical value for calculations
                 finalPrice: (product.discount?.active && isDiscountActive()) ? product.discount.finalPrice : product.price_incl_tax
             };
-
             await addToCart(productToAdd, quantity);
             // toast.success(`${quantity} ${product.name} ${t(addedToCart)} `);//añadido al carrito
         } catch (error) {
@@ -369,7 +365,6 @@ export default function Page() {
                                 </svg>
                             </div>
                         </motion.div>
-
                         {/* Fullscreen Preview Modal */}
                         <AnimatePresence>
                             {showFullscreen && (
@@ -430,23 +425,18 @@ export default function Page() {
                     {/* Product Info */}
                     <div className="space-y-6">
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{typeof product.name === 'object' ? product.name[locale] : product.name}</h1>
-
                         {/* Price and Discount Section */}
                         <div className="flex flex-col gap-2">
                             {product.discount?.active && (() => {
                                 const now = new Date();
                                 const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
                                 const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
-
                                 // If no dates are set, discount is always active
                                 if (!startDate && !endDate) return true;
-
                                 // If only start date is set, check if current date is after start
                                 if (startDate && !endDate) return now >= startDate;
-
                                 // If only end date is set, check if current date is before end
                                 if (!startDate && endDate) return now <= endDate;
-
                                 // If both dates are set, check if current date is within range
                                 return now >= startDate && now <= endDate;
                             })() ? (
@@ -484,7 +474,6 @@ export default function Page() {
                                 </p>
                             )}
                         </div>
-
                         <div className="space-y-4">
                             {/* Only show the first two plain lines of the description, remove the rest */}
                             {(() => {
@@ -500,23 +489,6 @@ export default function Page() {
                                     <p key={idx} className="text-gray-600 break-words">{line}</p>
                                 ));
                             })()}
-                            {/* <div className="py-4">
-                                <h3 className="font-bold text-gray-900 mb-2">{t('detailsTitle')}</h3>
-                                <ul className="list-disc list-inside space-y-1 text-gray-600">
-                                    {product.details.dimensions && (
-                                        <li>{t('dimensions')}: {product.details.dimensions}</li>
-                                    )}
-                                    {product.details.washingInstructions && (
-                                        <li>{t('washingInstructions')}: {product.details.washingInstructions}</li>
-                                    )}
-                                    {product.details.reference && (
-                                        <li>{t('reference')}: {product.details.reference}</li>
-                                    )} 
-                                    {product.details.brand && (
-                                        <li>{t('brand')}: {product.details.brand}</li>
-                                    )}
-                                </ul>
-                            </div>*/}
                             {/* Quantity Selector */}
                             <div className="flex flex-wrap items-center space-x-2 ">
                                 <span className="text-gray-700">{t('quantity')}:</span>
@@ -608,24 +580,6 @@ export default function Page() {
                                 </>;
                             })()}
                         </div>
-                        {/* {activeTab === 'DETALLES DEL PRODUCTO' && (
-                            <div className="prose max-w-none">
-                                <ul className="list-disc list-inside space-y-2 text-gray-600">
-                                {product.details.dimensions && (
-                                        <li>{t('dimensions')}: {product.details.dimensions}</li>
-                                    )}
-                                    {product.details.washingInstructions && (
-                                        <li>{t('washingInstructions')}: {product.details.washingInstructions}</li>
-                                    )}
-                                    {product.details.reference && (
-                                        <li>{t('reference')}: {product.details.reference}</li>
-                                    )} 
-                                    {product.details.brand && (
-                                        <li>{t('brand')}: {product.details.brand}</li>
-                                    )} 
-                                </ul>
-                            </div>
-                        )} */}
                     </div>
                 </div>
                 {/* Related Products */}

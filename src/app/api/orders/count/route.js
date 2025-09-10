@@ -8,7 +8,7 @@ export async function GET(request) {
         await dbConnect();
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('userId');
-        console.log('[order-count] Received userId:', userId);
+        //console.log('[order-count] Received userId:', userId);
 
         if (!userId) {
             return NextResponse.json({ message: 'Falta el parámetro userId' }, { status: 400 });
@@ -20,10 +20,10 @@ export async function GET(request) {
             status: { $ne: 'cancelled' } // Exclude cancelled orders
         };
 
-        console.log('[order-count] Query:', JSON.stringify(query));
+        //console.log('[order-count] Query:', JSON.stringify(query));
 
         const count = await Order.countDocuments(query);
-        console.log('[order-count] Found orders:', count);
+        //console.log('[order-count] Found orders:', count);
 
         return NextResponse.json({ count });
     } catch (error) {
@@ -56,7 +56,7 @@ export async function POST(request) {
 
         // First, let's find a sample order to debug
         const sampleOrder = await Order.findOne().lean();
-        console.log('[order-count] Sample order structure:', JSON.stringify(sampleOrder, null, 2));
+        //console.log('[order-count] Sample order structure:', JSON.stringify(sampleOrder, null, 2));
 
         // Create a more comprehensive query using $or to check multiple possible fields
         const query = {
@@ -69,13 +69,13 @@ export async function POST(request) {
             status: { $nin: ['cancelado', 'cancelled'] }     // Check both status variations
         };
 
-        console.log('[order-count] UserId:', userId);
-        console.log('[order-count] Query:', JSON.stringify(query, null, 2));
+        //console.log('[order-count] UserId:', userId);
+        //console.log('[order-count] Query:', JSON.stringify(query, null, 2));
 
         // Find orders first to debug
         const orders = await Order.find(query).lean();
-        console.log('[order-count] Found orders:', orders.length);
-        console.log('[order-count] Order IDs:', orders.map(o => o._id));
+        //console.log('[order-count] Found orders:', orders.length);
+        //console.log('[order-count] Order IDs:', orders.map(o => o._id));
 
         const count = orders.length;
         return NextResponse.json({ count });

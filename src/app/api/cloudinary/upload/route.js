@@ -32,7 +32,7 @@ export async function POST(request) {
         }
 
         // Log that we're starting the upload
-        console.log('Iniciant la pujada a Cloudinary des del servidor...');
+        //console.log('Iniciant la pujada a Cloudinary des del servidor...');
 
         // Upload the image to Cloudinary
         const result = await new Promise((resolve, reject) => {
@@ -49,7 +49,7 @@ export async function POST(request) {
                         console.error('Error en pujar a Cloudinary:', error);
                         reject(error);
                     } else {
-                        console.log('Pujada a Cloudinary completada amb èxit:', result.secure_url);
+                        //console.log('Pujada a Cloudinary completada amb èxit:', result.secure_url);
                         resolve(result);
                     }
                 }

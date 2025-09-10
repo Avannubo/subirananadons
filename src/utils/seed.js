@@ -3,18 +3,15 @@ const bcrypt = require('bcryptjs');
 async function seedDatabase() {
     const uri = 'mongodb+srv://arjunsingh:2LKnqF4ZpQVxZvvh@cluster0.zzuehnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'; // Update with your MongoDB connection string
     const client = new MongoClient(uri);
-
     try {
         await client.connect();
         const db = client.db('Subirana'); // Replace with your database name
-
         // 1. Clear existing collections
         const collections = await db.listCollections().toArray();
         for (const collection of collections) {
             await db.collection(collection.name).deleteMany({});
         }
-        console.log('🔥 Database cleared');
-
+        //console.log('🔥 Database cleared');
         // 2. Seed Users (5 rows)
         const hashedPassword = await bcrypt.hash('password123', 10);
         const users = await db.collection('users').insertMany([
@@ -72,11 +69,9 @@ async function seedDatabase() {
                 updatedAt: new Date()
             }
         ]);
-        console.log(`👥 Created ${users.insertedCount} users`);
-
+        //console.log(`👥 Created ${users.insertedCount} users`);
         // Get user IDs for relationships
         const userDocs = await db.collection('users').find().toArray();
-
         // 3. Seed Products (5 rows)
         const products = await db.collection('products').insertMany([
             {
@@ -125,11 +120,9 @@ async function seedDatabase() {
                 updatedAt: new Date()
             }
         ]);
-        console.log(`📦 Created ${products.insertedCount} products`);
-
+        //console.log(`📦 Created ${products.insertedCount} products`);
         // Get product IDs for relationships
         const productDocs = await db.collection('products').find().toArray();
-
         // 4. Seed Payment Methods (5 rows)
         const paymentMethods = await db.collection('paymentmethods').insertMany([
             {
@@ -190,8 +183,7 @@ async function seedDatabase() {
                 updatedAt: new Date()
             }
         ]);
-        console.log(`💳 Created ${paymentMethods.insertedCount} payment methods`);
-
+        //console.log(`💳 Created ${paymentMethods.insertedCount} payment methods`);
         // 5. Seed Addresses (5 rows)
         const addresses = await db.collection('addresses').insertMany([
             {
@@ -255,8 +247,7 @@ async function seedDatabase() {
                 updatedAt: new Date()
             }
         ]);
-        console.log(`🏠 Created ${addresses.insertedCount} addresses`);
-
+        //console.log(`🏠 Created ${addresses.insertedCount} addresses`);
         // 6. Seed Orders (5 rows)
         const orders = await db.collection('orders').insertMany([
             {
@@ -284,8 +275,7 @@ async function seedDatabase() {
             },
             // ... 4 more orders
         ]);
-        console.log(`📦 Created ${orders.insertedCount} orders`);
-
+        //console.log(`📦 Created ${orders.insertedCount} orders`);
         // 7. Seed Birth Lists (5 rows)
         const birthLists = await db.collection('birthlists').insertMany([
             {
@@ -318,19 +308,12 @@ async function seedDatabase() {
                 ],
                 createdAt: new Date(),
                 updatedAt: new Date()
-            },
-            // ... 4 more birth lists
-        ]);
-        console.log(`🎁 Created ${birthLists.insertedCount} birth lists`);
-
-        console.log('✅ Database seeded successfully!');
-        console.log('🔑 Admin credentials: arjun.singh@avannubo.com / password123');
-        console.log('👤 User credentials: marc.mari@avannubo.com / password123');
+            }, 
+        ]); 
     } catch (error) {
         console.error('❌ Error seeding database:', error);
     } finally {
         await client.close();
     }
 }
-
 seedDatabase();

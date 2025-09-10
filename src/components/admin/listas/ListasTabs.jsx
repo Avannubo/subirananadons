@@ -124,7 +124,7 @@ export default function ListasTabs({ userRole = 'user' }) {
     const t = translations[locale];
     const [activeTab, setActiveTab] = useState(t.tabs[0]);
     const { value: listConditions, loading: loadingConditions } = useShopParameter('list_conditions');
-    console.log("List Conditions:", listConditions, "Loading:", loadingConditions);
+    //console.log("List Conditions:", listConditions, "Loading:", loadingConditions);
     const [filters, setFilters] = useState({
         searchId: '',
         searchReference: '',
@@ -208,7 +208,7 @@ export default function ListasTabs({ userRole = 'user' }) {
         const extractedEmail = emailMatch ? emailMatch[1] : '';
 
         const selectedUser = users.find(u => u.email === extractedEmail);
-        console.log("Selected User:", selectedUser);
+        //console.log("Selected User:", selectedUser);
         setSelectedUser(selectedUser);
         setFormData(prev => ({
             ...prev,
@@ -320,7 +320,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                 theme: 'default', // Default theme
                 status: 'Activa' // Active status
             };
-            // console.log('Creating birth list with data:', JSON.stringify(birthListData, null, 2));
+            // //console.log('Creating birth list with data:', JSON.stringify(birthListData, null, 2));
             const result = await createBirthList(birthListData);
             if (result.success) {
                 await loadBirthLists();

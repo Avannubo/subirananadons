@@ -84,7 +84,7 @@ export function UserProvider({ children }) {
                 ...data.user
             }));
 
-            console.log('User data refreshed from server');
+            //console.log('User data refreshed from server');
         } catch (error) {
             console.error('Error refreshing user data:', error);
         } finally {

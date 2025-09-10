@@ -5,7 +5,7 @@ import { useUser } from '@/contexts/UserContext';
 import { useState, useCallback, useEffect } from 'react';
 // Helper to get product name in correct locale with fallback
 function getProductName(product, locale = 'es') {
-    console.log('getProductName called with:', product, locale);
+    //console.log('getProductName called with:', product, locale);
     if (!product) return 'ND';
     if (locale === 'ca' && product.name.ca && typeof product.name.ca === 'string' && product.name.ca.trim()) return product.name.ca;
     if (locale === 'es' && product.name.es && typeof product.name.es === 'string' && product.name.es.trim()) return product.name.es;

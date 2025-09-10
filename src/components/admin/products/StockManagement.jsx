@@ -54,7 +54,7 @@ export default function StockManagement() {
             const data = await response.json();
 
             setProducts(data.products || []);
-            console.log('Fetched products:', data.products);
+            //console.log('Fetched products:', data.products);
 
             setPagination({
                 currentPage: data.pagination?.currentPage || page,

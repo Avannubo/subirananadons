@@ -15,7 +15,7 @@ export default function CartSuccessPage() {
         if (typeof window === 'undefined') return;
         const pending = window.localStorage.getItem('orderpending');
         // setOrder(pending || null);
-        console.log('Pending order:', pending);
+        //console.log('Pending order:', pending);
         if (!pending) return;
         try {
             const orderPending = JSON.parse(pending);

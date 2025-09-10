@@ -159,7 +159,7 @@ export async function POST(request) {
         }
         await dbConnect();
         const body = await request.json();
-        console.log('Creating product with body:', body);
+        //console.log('Creating product with body:', body);
         // Validate required fields
         if (!body.name || body.price_incl_tax === undefined) {
             return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
