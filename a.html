@@ -1,141 +1,111 @@
+<div class="cont">
+    <div class="text-box">
+        <h3 id="head1">AS IS</h3>
+        <h4 id="text1" class="p-text">Convierte más en digital y multiplica tus ventas optimizando cada paso de tu
+            funnel
+            de tu empresa</h4>
+    </div>
+    <div class="text-box">
+        <h3 id="head2">TO BE</h3>
+        <h4 id="text2" class="p-text">Escala tu negocio con growth estratégico, duplicando conversiones y logrando
+            crecimiento escalable</h4>
+    </div>
+    <div class="text-box">
+        <h3 id="head3">TO DO</h3>
+        <h4 id="text3" class="p-text">Implementa acciones medibles en CRO, Paid Media, SEO y automatización para
+            acelerar
+            tu negocio</h4>
+    </div>
+</div>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const darkModeToggle = document.getElementById("darkModeToggle");
-        const astScrollTop = document.getElementById("ast-scroll-top");
-        const darkModeButton = document.querySelector(".js-dark-mode-trigger-60987c8");
-        function getThemeFromStorage() {
-            return localStorage.getItem("theme-preference") === "dark";
-        }
-        function updateIcons() {
-            const isDark = localStorage.getItem("theme-preference") === "dark";
-            // Mostrar la luna cuando es dark, el sol cuando es light
-            document.querySelector(".light-icon").style.display = isDark ? "none" : "block";
-            document.querySelector(".dark-icon").style.display = isDark ? "block" : "none";
-            astScrollTop.style.backgroundColor = isDark ? "#17426F" : "#2e2e2e";
-        }
-        // Al cargar la página, forzar el estado según localStorage
-        setTimeout(() => {
-            const isDark = getThemeFromStorage();
-            if (isDark) {
-                document.body.classList.add("dark-mode");
-                darkModeToggle.classList.add("active");
+    document.addEventListener("DOMContentLoaded", () => {
+        const headers1 = ["#head1", "#head2", "#head3"];
+        const texts1 = ["#text1", "#text2", "#text3"];
+        const darkModeButton1 = document.querySelector(".js-dark-mode-trigger-60987c8");
+
+        // 1. Leer siempre el modo desde localStorage
+        const getCurrentMode1 = () => {
+            return localStorage.getItem("theme-preference") === "dark" ? "dark" : "light";
+        };
+
+        // 2. Función que aplica colores en base al index activo y modo
+        const setActive1 = (index, mode) => {
+            const colors = mode === "light"
+                ? { active: "#222222", inactive: "#B0B0B0" }   // Light → textos oscuros
+                : { active: "#FFFFFF", inactive: "#787878" };  // Dark → textos claros
+
+            headers1.forEach((id, i) => {
+                document.querySelector(id).style.color = i === index ? colors.active : colors.inactive;
+                document.querySelector(texts1[i]).style.color = i === index ? colors.active : colors.inactive;
+            });
+        };
+
+        // 3. Actualizar colores en base al scroll + modo guardado
+        const updateColors1 = () => {
+            const scrollPosition1 = window.scrollY;
+            let activeIndex1 = 0;
+
+            if (scrollPosition1 >= 1600 && scrollPosition1 < 2300) {
+                activeIndex1 = 1;
+            } else if (scrollPosition1 >= 2300 && scrollPosition1 < 3500) {
+                activeIndex1 = 2;
             } else {
-                document.body.classList.remove("dark-mode");
-                darkModeToggle.classList.remove("active");
+                activeIndex1 = 0;
             }
-            updateIcons();
-        }, 50);
-        setTimeout(() => { darkModeToggle.click(); darkModeToggle.click(); }, 10);
-        // Toggle manual
-        darkModeToggle.addEventListener("click", function () {
-            const isDark = !getThemeFromStorage(); // invertimos manualmente
-            localStorage.setItem("theme-preference", isDark ? "dark" : "light");
-            document.body.classList.toggle("dark-mode", isDark);
-            darkModeToggle.classList.toggle("active", isDark);
-            updateIcons();
-            if (darkModeButton) darkModeButton.click();
-            const style = document.createElement("style");
-            if (isDark) {
-                style.innerHTML = `
-        .swiper-pagination-bullet { background-color: #C5C6C9 !important; }
-        .swiper-pagination-bullet-active { background-color: #17426F !important; }
-        .post-content { color: white !important; }
-		.page-numbers-dark {
-			    display: inline-block!important;
-			    padding: 10px 20px!important;
-			    border-radius: 50px!important;
-			    font-weight: 600!important;
-			    text-decoration: none!important;
-			    background: linear-gradient(180deg, #17426F 0%, #1E293B 100%)!important;
-			    color: #FFFFFF !important;
-			    transition: all 0.3s ease!important;
-			}
-			.page-numbers-dark:hover {
-			    background: linear-gradient(180deg, #1D4C7F 0%, #25344A 100%)!important;
-			    transform: translateY(-2px)!important;
-			}
-      `;
-            } else {
-                style.innerHTML = `
-        .swiper-pagination-bullet { background-color: #D2CCC8 !important; }
-        .swiper-pagination-bullet-active { background-color: #1E293B !important; }
-        .post-content { color: #2E2E2E !important; }
-		.page-numbers {
-		    display: inline-block!important;
-		    padding: 10px 20px!important;
-		    border-radius: 50px!important;
-		    font-weight: 600!important;
-		    text-decoration: none!important;
-		    background: linear-gradient(180deg, #7E7E7E 0%, #272727 100%)!important;
-		    color: #FFFFFF !important;
-		    transition: all 0.3s ease!important;
-		}
-		.page-numbers:hover {
-		    background: linear-gradient(180deg, #6A6A6A 0%, #3E3E3E 100%)!important;
-		    transform: translateY(-2px)!important;
-		}
-    `;
-            }
-            document.head.appendChild(style);
-        });
+
+            setActive1(activeIndex1, getCurrentMode1());
+        };
+
+        // 4. Llamar al iniciar
+        updateColors1();
+
+        // 5. Recalcular al hacer scroll
+        window.addEventListener("scroll", updateColors1);
+
+        // 6. Recalcular también al pulsar el botón de dark mode
+        if (darkModeButton1) {
+            darkModeButton1.addEventListener("click", () => {
+                // Esperar un poco a que el toggle actualice el localStorage
+                setTimeout(updateColors1, 100);
+            });
+        }
     });
 </script>
 
+
 <style>
-    .dark-icon {
-        display: none;
-    }
-
-    .toggle-container {
+    .cont {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: #fff;
-        padding: 12px;
-        border-radius: 25px;
-        width: 70px;
-        cursor: pointer;
-        position: relative;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+        font-family: "Space Grotesk", sans-serif;
+        ;
     }
 
-    .toggle-container svg {
-        width: 24px;
-        height: 24px;
-        z-index: 2;
+    .p-text {
+        font-size: 18px;
+        margin-bottom: 0px !important;
+        font-family: "Space Grotesk", sans-serif;
+        ;
     }
 
-    .toggle-circle {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        background: #e4d4c7;
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        left: 0px;
-        transition: transform 0.3s ease, background 0.3s ease;
-        z-index: 1;
+    .text-box {
+        padding: 20px;
+        padding-bottom: 5px !important;
+        font-family: "Space Grotesk", sans-serif;
+        ;
     }
 
-    .toggle-container.active .toggle-circle {
-        transform: translateX(35px);
-        background: #17426f;
+    #head1,
+    #text1 {
+        color: #222222;
     }
 
-    .svg-ico {
-        width: 18px !important;
-    }
-
-    .toggle-container,
-    .toggle-circle,
-    .toggle-container svg {
-        user-select: none;
-        -webkit-user-select: none;
-        /* For Safari */
-        -moz-user-select: none;
-        /* For Firefox */
-        -ms-user-select: none;
-        /* For older Edge */
+    #head2,
+    #text2,
+    #head3,
+    #text3 {
+        color: #B0B0B0;
     }
 </style>

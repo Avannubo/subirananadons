@@ -3,21 +3,17 @@ import { FiShoppingBag, FiPackage, FiTag, FiAlertCircle } from 'react-icons/fi';
 import { useStats } from '@/contexts/StatsContext';
 import StatsCard from '@/components/admin/shared/StatsCard';
 import StatsCardGrid from '@/components/admin/shared/StatsCardGrid';
-
 export default function ProductsStats() {
     const { stats, loading, refreshing, lastUpdated, refreshStats } = useStats();
-
     // Format the last updated time
     const formatLastUpdated = () => {
         if (!lastUpdated) return '';
-
         return new Intl.DateTimeFormat('es', {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit'
         }).format(lastUpdated);
     };
-
     const statsItems = [
         {
             icon: <FiShoppingBag className="text-[#36A9E1] text-xl" />,
@@ -48,7 +44,6 @@ export default function ProductsStats() {
             bgColor: "bg-red-100"
         }
     ];
-
     return (
         <StatsCardGrid
             lastUpdated={formatLastUpdated()}

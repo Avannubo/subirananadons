@@ -200,29 +200,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     useEffect(() => {
         // Only check expiration for discounts that have both start and end dates
         if (!formData.discount?.active || !formData.discount?.startDate || !formData.discount?.endDate) return;
-        // Check if already expired
-        // if (isDiscountExpired(formData.discount)) {
-        //     setFormData(prev => ({
-        //         ...prev,
-        //         discount: {
-        //             ...prev.discount,
-        //             active: false,
-        //             // Only clear dates if they exist
-        //             ...(prev.discount.startDate ? { startDate: '' } : {}),
-        //             ...(prev.discount.endDate ? { endDate: '' } : {}),
-        //             value: '',
-        //         }
-        //     }));
-        //     toast('El descompte ha expirat i s\'ha desactivat automàticament', {
-        //         icon: '⚠️',
-        //         style: {
-        //             borderRadius: '10px',
-        //             background: '#FFF3CD',
-        //             color: '#856404',
-        //         }
-        //     });
-        //     return;
-        // }
         // Set up timer to check expiration
         const endDate = new Date(formData.discount.endDate);
         const now = new Date();
@@ -454,7 +431,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 ...prev,
                 [name]: value
             }));
-
             if (formData.discount?.active && newPrice) {
                 const finalPrice = calculateFinalPrice(newPrice, formData.discount);
                 setCalculatedFinalPrice(finalPrice);
@@ -554,11 +530,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
     // --- Add Image to Product Gallery ---
     const handleAddImage = async () => {
-        // if ((!selectedFiles || selectedFiles.length === 0) && !formData.image) {
-        //     toast.error('Por favor seleccione una imagen o proporcione una URL');
-        //     return;
-        // }
-
         // If URL provided, add it directly
         if (formData.image && (!selectedFiles || selectedFiles.length === 0)) {
             if (productImages.includes(formData.image)) {
@@ -571,7 +542,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             toast.success('Imagen añadida correctamente');
             return;
         }
-
         // Handle multiple files upload
         if (selectedFiles && selectedFiles.length > 0) {
             setIsUploading(true);
@@ -585,19 +555,16 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                             reader.onloadend = () => resolve(reader.result);
                             reader.readAsDataURL(file);
                         });
-
                         // Upload to server
                         const response = await fetch('/api/cloudinary/upload', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ image: base64Image })
                         });
-
                         if (!response.ok) {
                             const errorData = await response.json();
                             throw new Error(errorData.error || `Error al subir la imagen ${file.name}`);
                         }
-
                         const data = await response.json();
                         return data.url;
                     } catch (error) {
@@ -606,10 +573,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         return null;
                     }
                 });
-
                 const uploadedUrls = await Promise.all(uploadPromises);
                 const validUrls = uploadedUrls.filter(url => url !== null);
-
                 if (validUrls.length > 0) {
                     // Filter out any URLs that already exist in the product images
                     const newUrls = validUrls.filter(url => !productImages.includes(url));
@@ -719,12 +684,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 }
                 throw apiError;
             }
-            // Notify stats context about the change
-            // if (stats.notifyChange) {
-            //     setTimeout(() => {
-            //         stats.notifyChange();
-            //     }, 500);
-            // }
         } catch (error) {
             console.error('Error saving product:', error);
             // Only show toast if not already shown by API error block
@@ -992,7 +951,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                             margin: 0;
                                                                             padding: 0;
                                                                     }
-                                                                `}</style>
+                                                                `}
+                                                                    </style>
                                                                     {filteredCategories.length === 0 ? (
                                                                         <div className="p-4 text-center text-gray-500">
                                                                             {categorySearchTerm
@@ -1273,8 +1233,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     <p className="mt-1 text-sm text-red-600">{errors.discountDates}</p>
                                                 )}
                                             </div>
-
-                                            {/* {formData.discount?.type && formData.discount?.value && formData.price_incl_tax && ( */}
                                             <div className="md:col-span-2">
                                                 <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">
                                                     Preu final amb descompte:
@@ -1289,7 +1247,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     </p>
                                                 </div>
                                             </div>
-                                            {/* )} */}
                                         </div>
                                     )}
                                     <h3 className="text-md font-medium mt-6">Inventari</h3>
@@ -1366,7 +1323,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <div className="space-y-6">
                                     <h3 className="text-md font-medium">Imatges del producte</h3>
                                     {/* Current Images */}
-                                    {/* productImages.length > 0 && ( */}
                                     <div className="mb-6">
                                         <h4 className="text-sm font-medium text-gray-700 mb-2">Imatges actuals</h4>
                                         <p className="text-xs text-gray-500 mb-2">
@@ -1379,7 +1335,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200`}
                                                 >
                                                     <div className="relative " >
-                                                        {/* onClick={() => handleSelectImage(index)} */}
                                                         <img
                                                             src={img || '/assets/images/product-placeholder.jpg'}
                                                             alt={`Imatge de producte ${index + 1}`}
@@ -1493,35 +1448,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             </div>
                                         )}
                                     </div>
-                                    {/* )} */}
                                     {/* Image Upload */}
                                     <div className="flex flex-col items-center space-y-4">
-                                        {/* <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
-                                        {isUploading && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
-                                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-                                            </div>
-                                        )}
-                                        {imagePreview ? (
-                                            <Image
-                                                src={imagePreview || '/assets/images/product-placeholder.jpg'}
-                                                alt="Vista previa"
-                                                width={1000}
-                                                height={1000}
-                                                className="w-full h-full object-contain rounded-lg"
-                                            />
-                                        ) : ( 
-                                            <div className="flex flex-col items-center justify-center h-full">
-                                                <FiUpload className="w-10 h-10 text-gray-400" />
-                                                <p className="mt-2 text-sm text-gray-500">No hi ha imatge leccionada</p>
-                                                <p className="mt-1 text-xs text-gray-400">
-                                                    {productImages.length === 0
-                                                        ? "Afegeix almenys una imatge principal"
-                                                        : "Afegeix més imatges (opcional)"}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div> */}
                                         <div className="w-full grid grid-row-2 gap-2">
                                             <div className='flex flex-row gap-2'>
                                                 <label
@@ -1566,9 +1494,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 onClose={() => setShowImageSelector(false)}
                                             />
                                         )}
-                                        {/* <p className="mt-1 text-xs text-gray-500 text-center">
-                                        Formats: JPG, PNG. Màx: 5MB
-                                    </p> */}
                                         {/* Manual URL input */}
                                         <div className="w-full mt-4">
                                             <label htmlFor="image" className="block text-sm font-medium text-gray-700">
@@ -1649,27 +1574,4 @@ const calculateFinalPrice = (basePrice, discount) => {
     } else {
         return Math.max(0, basePrice - discount.value);
     }
-};
-const validateDiscountFields = (discount) => {
-    const errors = {};
-    if (discount.active) {
-        if (!discount.type) {
-            errors.discountType = "El tipus de descompte és obligatori";
-        }
-        if (!discount.value) {
-            errors.discountValue = "El valor del descompte és obligatori";
-        } else if (discount.type === 'percentage' && (discount.value < 0 || discount.value > 100)) {
-            errors.discountValue = "El percentatge ha d'estar entre 0 i 100";
-        } else if (discount.type === 'fixed' && discount.value < 0) {
-            errors.discountValue = "El descompte no pot ser negatiu";
-        }
-        if (discount.startDate && discount.endDate) {
-            const start = new Date(discount.startDate);
-            const end = new Date(discount.endDate);
-            if (start > end) {
-                errors.discountDates = "La data de fi ha de ser posterior a la data d'inici";
-            }
-        }
-    }
-    return errors;
 };

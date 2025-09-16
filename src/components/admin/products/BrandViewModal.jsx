@@ -32,7 +32,6 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                     <span className="text-gray-400 text-sm">No hi ha logotip</span>
                                 </div>
                             )}
-
                         </div>
                         {/* Details Section */}
                         <div className="md:w-1/2">
@@ -71,7 +70,6 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                         </a>
                                     </div>
                                 )}
-
                                 <div className="mt-3 text-start">
                                     <span className='text-sm text-gray-500'>
                                     Estat: 
@@ -81,8 +79,6 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                         {brand.enabled ? 'Actiu' : 'Inactiu'}
                                     </span>
                                 </div>
-
-                                
                                 {/* Discount Section */}
                                 {brand.discount && (
                                     <div className="border-t border-gray-200 pt-3 mt-3">
@@ -95,9 +91,6 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                                             ? `${brand.discount.value}%`
                                                             : `${brand.discount.value}€`}
                                                     </span>
-                                                    {/* <span className="ml-2 text-sm text-gray-500">
-                                                        {new Date(brand.discount.endDate) > new Date() ? 'Actiu' : 'Caducat'}
-                                                    </span> */}
                                                 </div>
                                                 {
                                                     brand.discount.startDate && brand.discount.endDate && (
@@ -128,14 +121,12 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                                                     : 'No especificada'}
                                                                 </p>
                                                             </div>
-
                                                             {brand.discount.minPurchaseAmount && (
                                                                 <div>
                                                                     <span className="text-gray-500">Import mínim:</span>
                                                                     <p>{brand.discount.minPurchaseAmount}€</p>
                                                                 </div>
                                                             )}
-
                                                             {brand.discount.minQuantity && (
                                                                 <div>
                                                                     <span className="text-gray-500">Quantitat mínima:</span>
@@ -145,19 +136,12 @@ export default function BrandViewModal({ isOpen, onClose, brand }) {
                                                         </div>
                                                     )
                                                 }
-
                                             </div>
                                         ) : (
                                             <p className="text-gray-500 italic">Descompte no actiu</p>
                                         )}
                                     </div>
                                 )}
-
-                               
-                                {/* <div>
-                                    <h4 className="text-sm text-gray-500">Productes</h4>
-                                    <p>{brand.products || 0}</p>
-                                </div> */}
                             </div>
                         </div>
                     </div>

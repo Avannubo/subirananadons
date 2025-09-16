@@ -20,7 +20,7 @@ export default function TermsPage() {
         fetchBanner();
     }, []);
     function formatNumberedHeadings(text) {
-        if (!text) return ''; 
+        if (!text) return '';
         return text
             // Third-level subsection headings (e.g. 1.1.1 Title)
             .replace(/^(\d+\.\d+\.\d+[^\d][^\n]*)/gm, '<span style="display:block;font-size:0.95em;font-weight:500;margin-top:0.8em;">$1</span>')

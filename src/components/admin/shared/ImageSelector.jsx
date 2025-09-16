@@ -121,9 +121,6 @@ export default function ImageSelector({ onSelect, onClose }) {
                                                 </div>
                                             )}
                                         </div>
-                                        {/* <div className="absolute bottom-0 left-0 right-0 bg-[#00b1c8be] bg-opacity-50 text-white p-2 text-xs truncate">
-                                            {img.public_id.split('/').pop()}
-                                        </div> */}
                                     </div>
                                 ))}
                             </div>

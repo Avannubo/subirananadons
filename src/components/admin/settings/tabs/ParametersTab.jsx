@@ -132,7 +132,8 @@ export default function ParametersTab() {
             sanitize: (value) => {
                 // Remove country code, non-digits, and keep first 9 digits
                 const digits = (value || "").replace(/\D/g, "");
-                return digits.slice(-9); // Take last 9 digits (in case user pastes with country code)
+                // Take last 9 digits (in case user pastes with country code)
+                return digits.slice(-9);
             }
         },
         {
@@ -192,7 +193,6 @@ export default function ParametersTab() {
         { name: 'Mail', Icon: Mail },
         { name: 'Globe', Icon: Globe },
     ];
-    // Add new social
     const handleAddSocial = async () => {
         const name = newSocial.name.trim();
         const link = newSocial.link.trim();

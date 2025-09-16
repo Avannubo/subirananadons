@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import useShopParameter from '@/lib/useShopParameter';
-import ShopLayout from '@/components/Layouts/shop-layout';  
+import ShopLayout from '@/components/Layouts/shop-layout';
 import { useLocale } from 'next-intl';
 export default function PrivacyPage() {
     const { value: privacyText, loading } = useShopParameter('privacy_policy');

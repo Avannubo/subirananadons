@@ -9,11 +9,6 @@ import OrdersTabs from '@/components/admin/orders/OrdersTabs';
 export default function PedidosPage() {
     const { data: session, status } = useSession();
     const userRole = session?.user?.role || 'user';
-    useEffect(() => {
-        //console.log('Pedidos Page - Session Status:', status);
-        //console.log('Pedidos Page - User Role:', userRole);
-        //console.log('Pedidos Page - Session Data:', session);
-    }, [session, status, userRole]);
     // Get browser language (default to 'ca' if not found)
     let locale = 'ca';
     if (typeof window !== 'undefined' && window.navigator) {
@@ -106,11 +101,6 @@ export default function PedidosPage() {
         }
     };
     const heading = userRole === 'admin' ? translations[locale].admin : translations[locale].user;
-    useEffect(() => {
-        //console.log('Pedidos Page - Session Status:', status);
-        //console.log('Pedidos Page - User Role:', userRole);
-        //console.log('Pedidos Page - Session Data:', session);
-    }, [session, status, userRole]);
     return (
         <AuthCheck>
             <AdminLayout>

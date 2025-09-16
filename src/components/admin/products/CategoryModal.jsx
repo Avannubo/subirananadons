@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle } from '@headlessui/react';
 import { FiX } from 'react-icons/fi';
-
 // Utility to get display name from category (handles both string and object)
 function getCategoryDisplayName(cat) {
     if (!cat) return '';
@@ -11,44 +10,36 @@ function getCategoryDisplayName(cat) {
     }
     return cat.name || '';
 }
-
 export default function CategoryModal({ isOpen, onClose, onSave, category, parent, isEditing = false }) {
     const [formData, setFormData] = useState({
         name: { ca: '', es: '' },
         slug: '',
-        // description: { ca: '', es: '' },
         parent: null,
         isActive: true
     });
-
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [allCategories, setAllCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
-
     // Load available categories for parent selection
     useEffect(() => {
         if (isOpen) {
             fetchAllCategories();
         }
     }, [isOpen]);
-
     // Fetch all categories for the parent dropdown
     const fetchAllCategories = async () => {
         try {
             setLoadingCategories(true);
             const response = await fetch('/api/categories?flat=true');
-
             if (!response.ok) {
                 throw new Error('Failed to fetch categories');
             }
-
             const data = await response.json();
             // Filter out the current category if editing to prevent circular references
             const filteredCategories = isEditing && category?._id
                 ? data.filter(cat => cat._id !== category._id)
                 : data;
-
             setAllCategories(filteredCategories);
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -56,7 +47,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
             setLoadingCategories(false);
         }
     };
-
     // Load category data when editing
     useEffect(() => {
         if (isEditing && category) {
@@ -74,10 +64,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                 _id: category._id,
                 name: migratedName,
                 slug: category.slug || '',
-                // description: {
-                //     ca: (category.description && category.description.ca) || '',
-                //     es: (category.description && category.description.es) || ''
-                // },
                 parent: category.parent || null,
                 isActive: category.isActive !== false
             });
@@ -96,7 +82,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
             setFormData(prev => ({
                 ...prev,
                 name: { ca: '', es: '' },
-                // description: { ca: '', es: '' },
                 parent: migratedParent._id,
                 slug: '',
                 isActive: true
@@ -105,13 +90,11 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
             setFormData({
                 name: { ca: '', es: '' },
                 slug: '',
-                // description: { ca: '', es: '' },
                 parent: null,
                 isActive: true
             });
         }
     }, [isEditing, category, parent]);
-
     // Handle form input changes
     const handleChange = (e) => {
         const { name, value, type, checked, id } = e.target;
@@ -124,15 +107,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                     [id === 'name-ca' ? 'ca' : 'es']: value
                 }
             }));
-            // Uncomment if you add description translation fields
-            // } else if (name === 'description') {
-            //     setFormData(prev => ({
-            //         ...prev,
-            //         description: {
-            //             ...prev.description,
-            //             [id === 'description-ca' ? 'ca' : 'es']: value
-            //         }
-            //     }));
         } else if (name === 'parent') {
             setFormData(prev => ({
                 ...prev,
@@ -145,7 +119,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
             }));
         }
     };
-
     // Generate slug from name
     // Generate slug from name (prefer Catalan, fallback to Spanish)
     const generateSlug = () => {
@@ -158,7 +131,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
             setFormData(prev => ({ ...prev, slug }));
         }
     };
-
     // Form validation
     const validateForm = () => {
         const newErrors = {};
@@ -168,7 +140,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -191,17 +162,14 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
             setLoading(false);
         }
     };
-
     const modalTitle = isEditing
         ? `Editar Categoría: ${getCategoryDisplayName(category)}`
         : parent && typeof parent === 'object'
             ? `Añadir Subcategoría a: ${getCategoryDisplayName(parent)}`
             : 'Añadir Nueva Categoría';
-
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-
             <div className="fixed inset-0 flex items-center justify-center p-4">
                 <Dialog.Panel className="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
                     <div className="flex justify-between items-center p-4 ">
@@ -215,11 +183,9 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                             <FiX className="h-5 w-5" />
                         </button>
                     </div>
-
                     <form onSubmit={handleSubmit} className="px-4 pb-4" >
                         <div className="space-y-4">
                             {/* Name */}
-
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <label htmlFor="name-ca" className="block text-sm font-medium text-gray-700">
@@ -277,49 +243,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                     Selecciona la categoría padre o déjalo vacío para crear una categoría principal.
                                 </p>
                             </div>
-
-                            {/* Slug */}
-                            {/* <div>
-                                <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
-                                    Slug
-                                </label>
-                                <div className="flex mt-1">
-                                    <input
-                                        type="text"
-                                        id="slug"
-                                        name="slug"
-                                        value={formData.slug}
-                                        onChange={handleChange}
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={generateSlug}
-                                        className="ml-2 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 hover:bg-gray-200"
-                                    >
-                                        Generar
-                                    </button>
-                                </div>
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Se usa en URLs. Se generará automáticamente si se deja en blanco.
-                                </p>
-                            </div> */}
-
-                            {/* Description */}
-                            {/* <div>
-                                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                                    Descripción
-                                </label>
-                                <textarea
-                                    id="description"
-                                    name="description"
-                                    rows={3}
-                                    value={formData.description}
-                                    onChange={handleChange}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
-                                />
-                            </div> */}
-
                             {/* Active Status */}
                             <div className="flex items-center">
                                 <input
@@ -335,7 +258,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category, paren
                                 </label>
                             </div>
                         </div>
-
                         <div className="mt-6 flex justify-end space-x-3">
                             <button
                                 type="button"

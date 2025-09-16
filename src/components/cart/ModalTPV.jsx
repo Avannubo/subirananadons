@@ -2,19 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CryptoJS from 'crypto-js';
-
 export default function ModalTPV({ isOpen, onClose, orderData }) {
     const [cartItems, setCartItems] = useState(orderData?.cartProducts || []);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null);
-
     // Get locale from URL or default to 'ca'
     let locale = 'ca';
     if (typeof window !== 'undefined') {
         const pathLocale = window.location.pathname.split('/')[1];
         if (['ca', 'es'].includes(pathLocale)) locale = pathLocale;
     }
-
     const translations = {
         ca: {
             processingPayment: "Pagament en procés...",
@@ -61,25 +58,21 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             cancel: "Cancelar"
         }
     };
-
     useEffect(() => {
         if (orderData && Array.isArray(orderData.cartProducts)) {
             setCartItems(orderData.cartProducts);
         }
     }, [orderData]);
-
     const getItemPrice = (item) => {
         // Get base price
         let basePrice = typeof item.priceValue === 'number' ? item.priceValue :
             (typeof item.price === 'number' ? item.price :
                 parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
-
         // Check if there's an active discount
         if (item.discount && item.discount.active) {
             const now = new Date();
             const startDate = item.discount.startDate ? new Date(item.discount.startDate) : null;
             const endDate = item.discount.endDate ? new Date(item.discount.endDate) : null;
-
             // Verify if discount is currently valid
             if ((!startDate || now >= startDate) && (!endDate || now <= endDate)) {
                 if (item.discount.type === 'percentage') {
@@ -91,23 +84,19 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
         }
         return basePrice;
     };
-
     const calculateTotal = () => {
         return cartItems.reduce((sum, item) => {
             const price = getItemPrice(item);
             return sum + (price * (item.quantity || 1));
         }, 0);
     };
-
     const stringBase64Encode = (input) => {
         let utf8Input = CryptoJS.enc.Utf8.parse(input);
         return CryptoJS.enc.Base64.stringify(utf8Input);
     };
-
     const base64Decode = (input) => {
         return CryptoJS.enc.Base64.parse(input);
     };
-
     const des_encrypt = (message, key) => {
         let ivArray = [0, 0, 0, 0, 0, 0, 0, 0];
         let IV = ivArray.map(item => String.fromCharCode(item)).join("");
@@ -118,12 +107,10 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
         });
         return encode_str.toString();
     };
-
     const calcularFirma = () => {
         const total = calculateTotal();
         let cleanPrecioTotal = (total * 100).toString(); // Convert to cents and string
         let merchantOrder = orderData?.orderId || String(Date.now()).substring(0, 12).padStart(4, '0');
-
         // Create data object for the payment request
         let data = {
             "DS_MERCHANT_AMOUNT": cleanPrecioTotal,
@@ -135,17 +122,12 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             "DS_MERCHANT_URLOK": `${window.location.origin}/cart/order/success`,
             "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed`
         };
-
-        //console.log('Payment Data:', data);
-
         // Encode parameters and calculate signature
         let encodedParameters = stringBase64Encode(JSON.stringify(data));
         let encodedSignature = "sq7HjrUOBfKmC576ILgskD5srU870gJ7";
         let encodedSignatureDES = des_encrypt(merchantOrder, base64Decode(encodedSignature));
         let encodedDsSignature = CryptoJS.HmacSHA256(encodedParameters, base64Decode(encodedSignatureDES));
         let dsSignature = CryptoJS.enc.Base64.stringify(encodedDsSignature);
-
-
         // Populate form fields safely
         if (typeof document !== 'undefined') {
             const form = document.forms["pago"];
@@ -154,11 +136,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                 if (form.Ds_Signature) form.Ds_Signature.value = dsSignature;
             }
         }
-
-        //console.log('Encoded Parameters:', encodedParameters);
-        //console.log('DS Signature:', dsSignature);
     };
-
     const handlePaymentProcess = async () => {
         setIsProcessingPayment(true);
         try {
@@ -173,13 +151,11 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             setIsProcessingPayment(false);
         }
     };
-
     const handleCloseModal = () => {
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState(null, '', cleanUrl);
         window.location.reload();
     };
-
     return isOpen || paymentStatus ? (
         <div className="fixed inset-0 flex flex-wrap justify-center items-center w-full h-full z-[999] bg-[rgba(0,0,0,0.45)] overflow-auto font-[sans-serif]">
             <div className="z-[1000] max-w-4xl w-full mx-auto bg-white rounded-2xl shadow-2xl border border-gray-100 px-0 md:px-0">

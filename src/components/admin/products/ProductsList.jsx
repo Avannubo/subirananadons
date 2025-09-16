@@ -6,7 +6,6 @@ import ProductViewModal from './ProductViewModal';
 import DeleteConfirmationModal from '../DeleteConfirmationModal';
 import { fetchProducts, deleteProduct, toggleProductStatus } from '@/services/ProductService';
 import { toast } from 'react-hot-toast';
-
 export default function ProductsList() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -17,19 +16,16 @@ export default function ProductsList() {
     const [currentProduct, setCurrentProduct] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
-
     // Load products on component mount
     useEffect(() => {
         loadProducts();
     }, []);
-
     // Filter products when search term or products list changes
     useEffect(() => {
         if (searchTerm.trim() === '') {
             setFilteredProducts(products);
             return;
         }
-
         const searchTermLower = searchTerm.toLowerCase();
         const filtered = products.filter(product =>
             product.name.toLowerCase().includes(searchTermLower) ||
@@ -37,10 +33,8 @@ export default function ProductsList() {
             (product.category && product.category.toLowerCase().includes(searchTermLower)) ||
             (product.brand && product.brand.toLowerCase().includes(searchTermLower))
         );
-
         setFilteredProducts(filtered);
     }, [searchTerm, products]);
-
     const loadProducts = async () => {
         setLoading(true);
         try {
@@ -56,27 +50,22 @@ export default function ProductsList() {
             setLoading(false);
         }
     };
-
     const handleView = (product) => {
         setCurrentProduct(product);
         setIsViewModalOpen(true);
     };
-
     const handleEdit = (product) => {
         setCurrentProduct(product);
         setIsEditModalOpen(true);
     };
-
     const handleDelete = (product) => {
         setCurrentProduct(product);
         setIsDeleteModalOpen(true);
     };
-
     const handleToggleStatus = async (product) => {
         try {
             const updatedProduct = await toggleProductStatus(product.id || product._id);
             toast.success(`Producto ${updatedProduct.status === 'active' ? 'activado' : 'desactivado'} con éxito`);
-
             // Update the product in the list without changing order
             updateProductInList(updatedProduct);
         } catch (error) {
@@ -84,7 +73,6 @@ export default function ProductsList() {
             toast.error('Error al cambiar el estado del producto');
         }
     };
-
     const confirmDelete = async () => {
         try {
             await deleteProduct(currentProduct.id);
@@ -96,7 +84,6 @@ export default function ProductsList() {
             toast.error('Error al eliminar el producto');
         }
     };
-
     // Update a single product in the list without changing order
     const updateProductInList = (updatedProduct) => {
         setProducts(currentProducts => {
@@ -109,12 +96,10 @@ export default function ProductsList() {
             return updatedProducts;
         });
     };
-
     // Format price with 2 decimal places and € symbol
     const formatPrice = (price) => {
         return price ? `${parseFloat(price).toFixed(2)} €` : 'N/A';
     };
-
     // Determine status color and text
     const getStatusDisplay = (status) => {
         switch (status) {
@@ -126,7 +111,6 @@ export default function ProductsList() {
                 return { color: 'bg-red-100 text-red-800', text: 'Descontinuado' };
         }
     };
-
     return (
         <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="p-4 sm:p-6 border-b border-gray-200">
@@ -151,7 +135,6 @@ export default function ProductsList() {
                     </div>
                 </div>
             </div>
-
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -193,7 +176,6 @@ export default function ProductsList() {
                             filteredProducts.map((product) => {
                                 const { color, text } = getStatusDisplay(product.status);
                                 const availableStock = product.stock?.available || 0;
-
                                 return (
                                     <tr key={product.id}>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -269,7 +251,6 @@ export default function ProductsList() {
                     </tbody>
                 </table>
             </div>
-
             {/* Add Product Modal */}
             <ProductModal
                 isOpen={isAddModalOpen}
@@ -287,7 +268,6 @@ export default function ProductsList() {
                     }
                 }}
             />
-
             {/* Edit Product Modal */}
             <ProductModal
                 isOpen={isEditModalOpen}
@@ -302,13 +282,10 @@ export default function ProductsList() {
                             },
                             body: JSON.stringify(productData),
                         });
-
                         if (!response.ok) {
                             throw new Error(`Failed to update product: ${response.status}`);
                         }
-
                         const updatedProduct = await response.json();
-
                         // Preserve the createdAt and updatedAt from the current product
                         // to maintain the same order in the list
                         const preservedProduct = {
@@ -316,11 +293,9 @@ export default function ProductsList() {
                             createdAt: currentProduct.createdAt,
                             updatedAt: currentProduct.updatedAt
                         };
-
                         // Update the product in the list without changing order
                         updateProductInList(preservedProduct);
                         setIsEditModalOpen(false);
-
                         toast.success('Producto actualizado correctamente');
                         return updatedProduct;
                     } catch (error) {
@@ -332,14 +307,12 @@ export default function ProductsList() {
                 product={currentProduct}
                 isEditing={true}
             />
-
             {/* View Product Modal */}
             <ProductViewModal
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
                 product={currentProduct}
             />
-
             {/* Delete Confirmation Modal */}
             <DeleteConfirmationModal
                 isOpen={isDeleteModalOpen}

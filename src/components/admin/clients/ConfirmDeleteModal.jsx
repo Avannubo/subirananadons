@@ -29,10 +29,8 @@ const translations = {
     }
 };
 const t = translations[locale];
-// const { notifyChange } = useClientStats();
 const handleConfirm = async () => {
     await onConfirm();
-    // await notifyChange();
 };
 return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">

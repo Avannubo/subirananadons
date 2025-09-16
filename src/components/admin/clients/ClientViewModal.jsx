@@ -6,17 +6,14 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
     const [orderCount, setOrderCount] = useState(0);
     useEffect(() => {
         if (!client) return;
-
         const fetchOrderCount = async () => {
             try {
                 // Get all possible ID forms from the client object
-                const userId = client._id || client.id;
-                //console.log('[ClientViewModal] Fetching orders for userId:', userId, 'Client:', client);
+                const userId = client._id || client.id; 
                 if (!userId) {
                     console.error('[ClientViewModal] No valid user ID found:', client);
                     return;
                 }
-
                 const res = await fetch(`/api/orders/count`, {
                     method: 'POST',
                     headers: {
@@ -31,11 +28,9 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                         }
                     })
                 });
-
                 if (!res.ok) {
                     throw new Error(`Failed to fetch order count: ${res.status} ${res.statusText}`);
                 }
-
                 const data = await res.json();
                 //console.log('[ClientViewModal] Order count response:', data);
                 setOrderCount(data.count || 0);
@@ -44,7 +39,6 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                 setOrderCount(0);
             }
         };
-
         fetchOrderCount();
     }, [client]);
     if (!client) return null;
@@ -144,11 +138,6 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                         <h3 className="text-xl font-semibold text-gray-800">
                                             {client.name} {client.lastName}
                                         </h3>
-                                        {/* <p className="text-sm text-gray-500 mt-1">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${client.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                {client.active ? t.active : t.inactive}
-                                            </span>
-                                        </p> */}
                                         <p className="text-sm text-gray-600 mt-2">
                                             {t.clientSince} {formatDate(client.registrationDate)}
                                         </p>

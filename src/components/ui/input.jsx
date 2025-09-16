@@ -1,7 +1,5 @@
 'use client';
-
 import React, { forwardRef } from 'react';
-
 const Input = forwardRef(({ className = '', ...props }, ref) => {
     return (
         <input
@@ -11,7 +9,5 @@ const Input = forwardRef(({ className = '', ...props }, ref) => {
         />
     );
 });
-
 Input.displayName = 'Input';
-
 export { Input };

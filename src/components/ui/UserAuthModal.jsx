@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { LogOut, UserRound } from 'lucide-react';
-import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 export default function AuthModal({ title }) {
     const t = useTranslations('UserAuthModal');
@@ -90,11 +89,9 @@ export default function AuthModal({ title }) {
                 redirect: false,
                 email,
                 password,
-            });
-            //console.log('Login result:', result);
+            }); 
             if (result?.error) {
-                let errorMessage = t('loginError') + ' ';
-                //console.log('Login error:', result.error);
+                let errorMessage = t('loginError') + ' '; 
                 if (result.error === 'Account not active') {
                     errorMessage = t('loginAccountNotActive') || 'Tu cuenta no está activa. Contacta con el propietario de la tienda.';
                 } else {
@@ -112,8 +109,7 @@ export default function AuthModal({ title }) {
                 toast.error(errorMessage);
                 return;
             }
-            toast.success(t('loginSuccess'));
-            //console.log('Login successful, redirecting to dashboard...');
+            toast.success(t('loginSuccess')); 
             setTimeout(() => {
                 closeModal();
                 router.push('/dashboard');
@@ -204,7 +200,6 @@ export default function AuthModal({ title }) {
     }, []);
     return (
         <div className="">
-
             {title ? (
                 <button
                     onClick={openLogin}
@@ -223,7 +218,6 @@ export default function AuthModal({ title }) {
                     <UserRound size={24} />
                 </button>
             )}
-
             {isOpen && (
                 <div className="fixed w-screen h-screen inset-0 flex items-center justify-center z-[9999] pointer-events-none">
                     {/* Backdrop - covers entire screen */}
@@ -281,17 +275,6 @@ export default function AuthModal({ title }) {
                                         />
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        {/*  <div className="flex items-center">
-                                            <input
-                                                id="remember-me"
-                                                name="remember-me"
-                                                type="checkbox"
-                                                className="h-4 w-4 text-[#36A9E1] focus:ring-[#36A9E1] border-gray-300 rounded transition-all"
-                                            />
-                                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                                                Recuérdame
-                                            </label>
-                                        </div> */}
                                         <button
                                             type="button"
                                             onClick={() => toggleView('recover')}
@@ -418,7 +401,7 @@ export default function AuthModal({ title }) {
                                             required
                                         />
                                         <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                                            {t('acceptTerms')} <a href="#" className="text-[#36A9E1] hover:text-[#00a2b8] transition-colors">{t('termsLink')}</a>
+                                            {t('acceptTerms')} <a href="/terms" className="text-[#36A9E1] hover:text-[#00a2b8] transition-colors">{t('termsLink')}</a>
                                         </label>
                                     </div>
                                     <button

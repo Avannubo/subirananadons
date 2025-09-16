@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 export default function FullscreenImagePreview({ images, initialIndex, onClose }) {
     const [currentIndex, setCurrentIndex] = useState(initialIndex);
     const [touchStart, setTouchStart] = useState(null);

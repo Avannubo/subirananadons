@@ -202,16 +202,6 @@ export default function Menu() {
                                         </div>
                                     )}
                                 </div>
-                                {/* <div className="flex space-x-2 justify-center my-2 md:my-4">
-                                    {socials.map((social) => {
-                                        const Icon = social.Icon;
-                                        return (
-                                            <Link key={social.key} target="_blank" href={social.link} aria-label={social.name} className="flex justify-center items-center text-gray-700 hover:text-[#36A9E1] cursor-pointer" rel="noopener noreferrer">
-                                                <Icon className="w-6 h-6" />
-                                            </Link>
-                                        );
-                                    })}
-                                </div> */}
                                 <Link href={`tel:${shopPhone || '938751567'}`} className="block text-gray-700 text-sm hover:text-[#36A9E1] cursor-pointer text-center">
                                     Tel: {shopPhone || '938 751 567'}
                                 </Link>

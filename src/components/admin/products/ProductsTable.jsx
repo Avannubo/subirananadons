@@ -7,9 +7,6 @@ import ProductViewModal from './ProductViewModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import Pagination from '@/components/admin/shared/Pagination';
 export default function ProductsTable(props) {
-    // Pagination handlers
-
-    // Remove allProducts and filters, not needed for API-driven filtering
     // Next Intl: detect browser locale
     let locale = 'ca'; // default
     if (typeof window !== 'undefined' && window.navigator?.language) {
@@ -118,28 +115,23 @@ export default function ProductsTable(props) {
             setLoading(false);
         }
     };
-
     // Reset to first page when search/filter/sort changes
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, sortOrder]);
-
     useEffect(() => {
         fetchProducts();
     }, [searchTerm, currentPage, itemsPerPage, sortOrder]);
-
     // Handle search input change
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
         setCurrentPage(1);
     };
-
     // Handle sort order change
     const handleSortOrderChange = (e) => {
         setSortOrder(e.target.value);
         setCurrentPage(1);
     };
-
     // Update the sortOrder useEffect to trigger a refresh
     useEffect(() => {
         fetchProducts();
@@ -149,9 +141,6 @@ export default function ProductsTable(props) {
     useEffect(() => {
         fetchProducts();
     }, [props.categoryFilter]);
-    // Removed handleFilterChange, not needed
-    // Removed filter-related useEffect
-    // Filter products client-side (accepts custom filters for instant search, left-side/startsWith for name)
     // For category, always use CA if available, then ES, then fallback to string
     // Show category name if cat is an ObjectId string by looking up in categories prop
     const getCategoryString = (cat) => {
@@ -212,8 +201,6 @@ export default function ProductsTable(props) {
         }
         return '';
     };
-    // Removed filterProductsClientSide
-    // Removed clearFilters
     // Handle product view
     const handleViewProduct = (product) => {
         // If product.category or product.brand is an ObjectId, try to populate from props
@@ -385,13 +372,7 @@ export default function ProductsTable(props) {
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
         };
-    }, []);
-    // Removed duplicate sortOrder useEffect
-    // For debugging
-    // useEffect(() => {
-    //     //console.log("Current pagination state:", pagination);
-    //     //console.log("Products count:", products.length);
-    // }, [pagination, products]);
+    }, []); 
     return (
         <div className="bg-white rounded-lg shadow">
             {/* Table Header with Actions */}
@@ -454,9 +435,6 @@ export default function ProductsTable(props) {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {[1, 2, 3, 4, 5].map((item) => (
                                     <tr key={item}>
-                                        {/* <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
-                                        </td> */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
                                         </td>
@@ -491,27 +469,18 @@ export default function ProductsTable(props) {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    ID
-                                </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Imatge
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Nom
                                 </th>
-                                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Referència
-                                </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Categoria
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Marca
                                 </th>
-                                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Preu (imp. excl.)
-                                </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Preu
                                 </th>
@@ -527,9 +496,6 @@ export default function ProductsTable(props) {
                             {products.length > 0 ? (
                                 products.map((product, index) => (
                                     <tr key={product._id}>
-                                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {index + 1}
-                                        </td> */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="relative">
                                                 <img
@@ -550,9 +516,6 @@ export default function ProductsTable(props) {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={getBrandString(product.brand)}>
                                             {getBrandString(product.brand)}
                                         </td>
-                                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {product.price_excl_tax.toFixed(2)} €
-                                        </td> */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {product.discount?.active ? (
                                                 <div className="flex flex-col">

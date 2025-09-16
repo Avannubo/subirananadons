@@ -4,7 +4,6 @@ import { FiChevronRight, FiChevronDown, FiPlus, FiEdit, FiTrash2, FiFolder, FiFo
 import { toast } from 'react-hot-toast';
 import CategoryModal from './CategoryModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
-
 // Utility to get display name from category (handles both string and object)
 function getCategoryDisplayName(cat) {
     if (!cat) return '';
@@ -108,10 +107,8 @@ export default function CategoriesTree() {
                 throw new Error('Failed to fetch categories');
             }
             const data = await response.json();
-            //console.log('Fetched categories (raw):', data);
             // Organize into proper hierarchy
             const organizedCategories = organizeCategories(data);
-            //console.log('Organized categories:', organizedCategories);
             setCategories(organizedCategories);
             // Don't automatically overwrite expanded state here to preserve 
             // user's previous choices from localStorage
@@ -160,7 +157,6 @@ export default function CategoriesTree() {
     };
     const saveCategory = async (categoryData) => {
         try {
-            // Defensiu: sempre envia el nom com {es, ca}
             let migratedName = categoryData.name;
             if (typeof migratedName === 'string') {
                 migratedName = { es: migratedName, ca: '' };
@@ -228,7 +224,8 @@ export default function CategoriesTree() {
             if (parentId) {
                 setLastModifiedCategoryId(parentId);
             }
-            fetchCategories(); // Refresca les categories
+            // Refresca les categories
+            fetchCategories();
         } catch (error) {
             console.error('Error deleting category:', error);
             toast.error(error.message || 'Error eliminant la categoria');

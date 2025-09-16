@@ -1,7 +1,6 @@
 'use client';
 import FadeSlider from '@/components/ui/FadeSlider';
 import SwiperSlider from '@/components/ui/SwiperSlider';
-import Image from 'next/image';
 const SliderExample = () => {
     // Example slides data
     const slides = [

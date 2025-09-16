@@ -1,17 +1,13 @@
 'use client';
-
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 import PropTypes from 'prop-types';
-
 // Export the context so it can be used by TypeScript for type checking
 export const CartContext = createContext();
-
 CartProvider.propTypes = {
     children: PropTypes.node.isRequired,
 };
-
 export function CartProvider({ children }) {
     const t = useTranslations('CartToasts');
     const [cart, setCart] = useState({
@@ -21,20 +17,17 @@ export function CartProvider({ children }) {
         loading: true,
         generalNote: ''
     });
-
     // Helper functions
     const getItemPrice = useCallback((item) => {
         // Get base price
         const basePrice = typeof item.priceValue === 'number' ? item.priceValue :
             typeof item.price === 'number' ? item.price :
                 parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
-
         // Check if there's an active discount
         if (item.discount && item.discount.active) {
             const now = new Date();
             const startDate = item.discount.startDate ? new Date(item.discount.startDate) : null;
             const endDate = item.discount.endDate ? new Date(item.discount.endDate) : null;
-
             // Verify if discount is currently valid
             if ((!startDate || now >= startDate) && (!endDate || now <= endDate)) {
                 if (item.discount.type === 'percentage') {
@@ -46,28 +39,25 @@ export function CartProvider({ children }) {
         }
         return basePrice;
     }, []);
-
     const calculateTotal = useCallback((items) => {
         return items.reduce((sum, item) => {
             const price = getItemPrice(item);
             return sum + (price * item.quantity);
         }, 0);
     }, [getItemPrice]);
-
     const calculateCount = useCallback((items) => {
         return items.reduce((count, item) => count + item.quantity, 0);
     }, []);
-
     // Helper function to clear all cart data from localStorage
     const clearLocalCartData = useCallback(() => {
         localStorage.removeItem('cart');
         localStorage.removeItem('cartTimestamp');
     }, []);
-
     // Fetch cart data from localStorage
     const fetchCart = useCallback(async (showToast = false) => {
         try {
-            setCart(prev => ({ ...prev, loading: true }));            // Get cart from localStorage
+            setCart(prev => ({ ...prev, loading: true }));
+            // Get cart from localStorage
             const localCart = localStorage.getItem('cart');
             let cartItems = []; let generalNote = '';
             if (localCart) {
@@ -89,7 +79,6 @@ export function CartProvider({ children }) {
                     clearLocalCartData();
                 }
             }
-
             setCart({
                 items: cartItems,
                 total: calculateTotal(cartItems),
@@ -97,11 +86,9 @@ export function CartProvider({ children }) {
                 loading: false,
                 generalNote
             });
-
             if (showToast) {
                 toast.success(t('updated'));
             }
-
             return true;
         } catch (error) {
             console.error('Error fetching cart:', error);
@@ -112,29 +99,23 @@ export function CartProvider({ children }) {
             return false;
         }
     }, [calculateTotal, calculateCount, clearLocalCartData]);
-
     // Initialize cart
     useEffect(() => {
         fetchCart();
     }, [fetchCart]);
-
     // Add to cart
     const addToCart = useCallback(async (product, quantity = 1) => {
         try {
             if (cart.loading) return false;
-
             const { items } = cart;
-
             // Ensure product has all required fields
             if (!product.id && !product._id) {
                 throw new Error('Product ID is required');
             }
-
             // Validate gift type products have listInfo
             if (product.type === 'gift' && !product.listInfo) {
                 throw new Error('List information is required for gift items');
             }
-
             const productData = {
                 id: product.id || product._id,
                 name: product.name,
@@ -170,7 +151,6 @@ export function CartProvider({ children }) {
             const existingItemIndex = items.findIndex(item =>
                 item.id === productData.id && item.type === productData.type
             );
-
             // For gift products, prevent adding if it already exists
             if (productData.type === 'gift' && existingItemIndex > -1) {
                 toast.error(t('giftAlreadyInCart'));
@@ -178,7 +158,6 @@ export function CartProvider({ children }) {
             }            // Get current cart from localStorage to ensure we have the latest data
             const currentCart = localStorage.getItem('cart');
             let currentItems = [];
-
             try {
                 if (currentCart) {
                     const parsed = JSON.parse(currentCart);
@@ -189,12 +168,10 @@ export function CartProvider({ children }) {
             } catch (error) {
                 console.error('Error parsing current cart:', error);
             }
-
             // Find existing item in the current cart items
             const existingItemInCurrent = currentItems.findIndex(item =>
                 item.id === productData.id && item.type === productData.type
             );
-
             let updatedItems;
             if (existingItemInCurrent > -1 && productData.type === 'regular') {
                 // Update existing regular item quantity
@@ -210,14 +187,12 @@ export function CartProvider({ children }) {
                     updatedItems.push(productData);
                 }
             }
-
             // Update local storage with timestamp           
             localStorage.setItem('cart', JSON.stringify({
                 items: updatedItems,
                 timestamp: Date.now(),
                 generalNote: cart.generalNote
             }));
-
             // Update state
             setCart(prev => ({
                 ...prev,
@@ -225,7 +200,6 @@ export function CartProvider({ children }) {
                 total: calculateTotal(updatedItems),
                 count: calculateCount(updatedItems),
             }));
-
             toast.success(t('added'));
             return true;
         } catch (error) {
@@ -234,7 +208,6 @@ export function CartProvider({ children }) {
             return false;
         }
     }, [cart, calculateTotal, calculateCount]);
-
     // Remove from cart    
     const removeFromCart = useCallback(async (productId, itemIndex) => {
         try {
@@ -257,13 +230,11 @@ export function CartProvider({ children }) {
                 toast.success(t('emptied'));
                 return true;
             }
-
             // Update local storage with timestamp in the same object
             localStorage.setItem('cart', JSON.stringify({
                 items: updatedItems,
                 timestamp: Date.now()
             }));
-
             // Update state
             setCart(prev => ({
                 ...prev,
@@ -280,25 +251,20 @@ export function CartProvider({ children }) {
             return false;
         }
     }, [cart, calculateTotal, calculateCount]);
-
     // Update quantity
-
     const updateQuantity = useCallback(async (productId, quantity) => {
         try {
             if (cart.loading) return false;
-
             const updatedItems = cart.items.map(item =>
                 item.id === productId
                     ? { ...item, quantity: Math.max(1, parseInt(quantity)) }
                     : item
             );
-
             // Update local storage
             localStorage.setItem('cart', JSON.stringify({
                 items: updatedItems,
                 timestamp: Date.now()
             }));
-
             // Update state
             setCart(prev => ({
                 ...prev,
@@ -315,10 +281,8 @@ export function CartProvider({ children }) {
     const clearCart = useCallback(async () => {
         try {
             if (cart.loading) return false;
-
             // Clear all cart data from localStorage
             clearLocalCartData();
-
             // Reset state completely
             setCart({
                 items: [],
@@ -327,7 +291,6 @@ export function CartProvider({ children }) {
                 loading: false,
                 generalNote: ''
             });
-
             toast.success(t('emptied'));
             return true;
         } catch (error) {
@@ -336,12 +299,10 @@ export function CartProvider({ children }) {
             return false;
         }
     }, [cart.loading, clearLocalCartData]);
-
     // Update gift note
     const updateItemNote = useCallback(async (itemId, note) => {
         try {
             if (cart.loading) return false;
-
             const updatedItems = cart.items.map(item =>
                 item.id === itemId
                     ? {
@@ -353,13 +314,11 @@ export function CartProvider({ children }) {
                     }
                     : item
             );
-
             // Update local storage
             localStorage.setItem('cart', JSON.stringify({
                 items: updatedItems,
                 timestamp: Date.now()
             }));
-
             // Update state
             setCart(prev => ({
                 ...prev,
@@ -371,25 +330,21 @@ export function CartProvider({ children }) {
             return false;
         }
     }, [cart]);
-
     // Update general note for all cart items
     const updateGeneralNote = useCallback(async (note) => {
         try {
             if (cart.loading) return false;
-
             // Update cart state with new note
             const updatedCart = {
                 ...cart,
                 generalNote: note
             };
-
             // Update local storage with all cart data
             localStorage.setItem('cart', JSON.stringify({
                 items: cart.items,
                 timestamp: Date.now(),
                 generalNote: note
             }));
-
             // Update state
             setCart(updatedCart);
             toast.success(t('generalNoteUpdated'));
@@ -400,7 +355,6 @@ export function CartProvider({ children }) {
             return false;
         }
     }, [cart]);
-
     // Helper function to save cart to localStorage
     const saveCartToStorage = useCallback((items, note = cart.generalNote) => {
         localStorage.setItem('cart', JSON.stringify({
@@ -409,7 +363,6 @@ export function CartProvider({ children }) {
             generalNote: note
         }));
     }, [cart.generalNote]);
-
     const value = {
         items: cart.items,
         total: cart.total,
@@ -424,14 +377,12 @@ export function CartProvider({ children }) {
         updateGeneralNote,
         refreshCart: fetchCart
     };
-
     return (
         <CartContext.Provider value={value}>
             {children}
         </CartContext.Provider>
     );
 }
-
 // Custom hook to use the cart context
 export function useCart() {
     const context = useContext(CartContext);

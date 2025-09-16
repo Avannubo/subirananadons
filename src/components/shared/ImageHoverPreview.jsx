@@ -11,7 +11,8 @@ export default function ImageHoverPreview({ src, alt, className }) {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
         // Preview dimensions
-        const previewWidth = 200;  // Adjust these values as needed
+        // Adjust these values as needed
+        const previewWidth = 200;
         const previewHeight = 200;
         // Calculate final position ensuring preview stays within viewport
         const finalX = Math.min(x, windowWidth - previewWidth - 20);
@@ -33,7 +34,8 @@ export default function ImageHoverPreview({ src, alt, className }) {
                     style={{
                         left: `${position.x + 30}px`,
                         top: `${position.y - 50}px`,
-                        width: '200px',  // Adjust size as needed
+                        // Adjust size as needed
+                        width: '200px',
                         height: 'auto'
                     }}
                 >

@@ -112,22 +112,12 @@ export default function Sidebar() {
                 <div className="mt-auto pt-6 border-t border-gray-200">
                     <button
                         type="button"
-                        onClick={() => signOut()}//{ callbackUrl: '/' }
+                        onClick={() => signOut({ callbackUrl: '/' })}
                         className="w-full flex items-center justify-center gap-2 py-2 mb-4 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-[#36A9E1] hover:text-white rounded-lg transition-colors"
                     >
                         <LogOut size={20} />
                         {currentLocale === 'ca' ? 'Tancar sessió' : 'Cerrar sesión'}
                     </button>
-                    {/* <div className="flex space-x-5 justify-center my-4">
-                        {useShopSocials().socials.map((social) => {
-                            const Icon = social.Icon;
-                            return (
-                                <Link key={social.key} href={social.link} aria-label={social.name} className="text-[#333] hover:text-[#36A9E1] transition-colors" target="_blank" rel="noopener noreferrer">
-                                    <Icon size={28} />
-                                </Link>
-                            );
-                        })}
-                    </div> */}
                     <p className="text-sm text-center text-gray-500 mt-2">© 2025 Subirana</p>
                 </div>
             </div>

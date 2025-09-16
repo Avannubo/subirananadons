@@ -1,7 +1,6 @@
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import ProductTabs from '@/components/admin/products/ProductTabs'; 
-
 export default async function ProductosPage() {
     return (
         <AuthCheck>

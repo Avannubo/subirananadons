@@ -312,7 +312,6 @@ export default function OffersTab() {
                                 <th className="py-3 px-2 font-semibold text-left">Títol</th>
                                 <th className="py-3 px-2 font-semibold text-left">Descripció</th>
                                 <th className="py-3 px-2 font-semibold text-left">Marca</th>
-                                {/* <th className="py-3 px-2 font-semibold text-left">Descompte %</th> */}
                                 <th className="py-3 px-2 font-semibold text-left">Accions</th>
                             </tr>
                         </thead>
@@ -331,9 +330,6 @@ export default function OffersTab() {
                                     <td className="py-2 px-2">
                                         <div className="h-4 w-20 bg-gray-200 rounded mx-auto" />
                                     </td>
-                                    {/* <td className="py-2 px-2">
-                                        <div className="h-4 w-10 bg-gray-200 rounded mx-auto" />
-                                    </td> */}
                                     <td className="py-2 px-2">
                                         <div className="flex gap-2 justify-start">
                                             <div className="h-8 w-12 bg-gray-200 rounded-full" />
@@ -354,7 +350,6 @@ export default function OffersTab() {
                                 <th className="py-3 px-2 font-semibold text-left">Título</th>
                                 <th className="py-3 px-2 font-semibold text-left">Descripción</th>
                                 <th className="py-3 px-2 font-semibold text-left">Marca</th>
-                                {/* <th className="py-3 px-2 font-semibold text-left">Desc. %</th> */}
                                 <th className="py-3 px-2 font-semibold text-left">Acciones</th>
                             </tr>
                         </thead>
@@ -390,7 +385,6 @@ export default function OffersTab() {
                                                 : (brands.find(b => b.id === offer.brand)?.name || offer.brand)}
                                         </a>
                                     </td>
-                                    {/* <td className="py-2 px-2">{offer.discount ? `${offer.discount}%` : ''}</td> */}
                                     <td className="py-2 px-2 flex gap-2">
                                         <button onClick={() => handleEdit(offer)} className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 border border-blue-100 text-xs">Edita</button>
                                         <button onClick={() => handleDelete(offer._id)} className="bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100 border border-red-100 text-xs">Elimina</button>

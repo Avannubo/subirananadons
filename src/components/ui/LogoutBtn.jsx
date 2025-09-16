@@ -6,7 +6,6 @@ export default function LogoutBtn() {
         // Optionally, redirect to the login page
         window.location.href = "/";
     };
-
     return (
         <p 
             onClick={handleLogout} 

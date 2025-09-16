@@ -47,11 +47,11 @@ export async function GET() {
             })
         ]);
         //console.log({
-        totalBills,
-            paidBills,
-            pendingBills,
-            notificationsSent
-    });
+    //     totalBills,
+    //         paidBills,
+    //         pendingBills,
+    //         notificationsSent
+    // });
 
     return NextResponse.json({
         success: true,

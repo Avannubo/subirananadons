@@ -2,10 +2,8 @@
 import { FiFilter, FiSearch, FiUpload, FiDownload, FiEdit, FiAlertCircle } from 'react-icons/fi';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import { useStats } from '@/contexts/StatsContext';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import Pagination from '@/components/admin/shared/Pagination';
-
 export default function StockManagement() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,8 +23,6 @@ export default function StockManagement() {
         message: '',
         onConfirm: () => { }
     });
-    // const { notifyChange } = useStats();
-
     // Fetch products from the API
     const fetchProducts = useCallback(async (page = 1, limit = pagination.limit) => {
         try {
@@ -34,28 +30,20 @@ export default function StockManagement() {
             const queryParams = new URLSearchParams();
             queryParams.append('page', page);
             queryParams.append('limit', limit);
-
             // Add stock filter if enabled
             if (showLowStock) {
                 queryParams.append('lowStock', 'true');
             }
-
             // Add search term if present
             if (searchTerm) {
                 queryParams.append('search', searchTerm);
             }
-
             const response = await fetch(`/api/products?${queryParams.toString()}`);
-
             if (!response.ok) {
                 throw new Error('Failed to fetch products');
             }
-
             const data = await response.json();
-
             setProducts(data.products || []);
-            //console.log('Fetched products:', data.products);
-
             setPagination({
                 currentPage: data.pagination?.currentPage || page,
                 totalPages: data.pagination?.totalPages || 1,
@@ -70,12 +58,10 @@ export default function StockManagement() {
             setLoading(false);
         }
     }, [searchTerm, showLowStock, pagination.limit]);
-
     // Initial load and refresh when filters change
     useEffect(() => {
         fetchProducts(1);
     }, [fetchProducts, searchTerm, showLowStock]);
-
     // Handle page change
     const handlePageChange = (page) => {
         fetchProducts(page);
@@ -85,7 +71,6 @@ export default function StockManagement() {
         setPagination(prev => ({ ...prev, limit }));
         fetchProducts(1, limit);
     };
-
     // Handle quantity change in edit mode
     const handleQuantityChange = (id, field, value) => {
         setQuantities(prev => ({
@@ -96,14 +81,12 @@ export default function StockManagement() {
             }
         }));
     };
-
     // Save stock changes
     const saveStockChanges = async (productId) => {
         if (!quantities[productId]) {
             setEditingId(null);
             return;
         }
-
         try {
             // Find the current product in our products array
             const product = products.find(p => p._id === productId);
@@ -112,7 +95,6 @@ export default function StockManagement() {
                 setEditingId(null);
                 return;
             }
-
             // Show confirmation modal
             setConfirmModal({
                 isOpen: true,
@@ -121,11 +103,9 @@ export default function StockManagement() {
                 onConfirm: async () => {
                     try {
                         const toastId = toast.loading('Actualitzant estoc...');
-
                         // Get the new values from quantities
                         const newAvailable = quantities[productId].available;
                         const newMinStock = quantities[productId].minStock ?? product.stock?.minStock ?? 5;
-
                         const response = await fetch(`/api/products/${productId}/stock`, {
                             method: 'PUT',
                             headers: {
@@ -138,12 +118,10 @@ export default function StockManagement() {
                                 }
                             }),
                         });
-
                         if (!response.ok) {
                             const error = await response.json();
                             throw new Error(error.message || 'Error en actualitzar l\'estoc');
                         }
-
                         // Update product in the local state
                         const updatedProduct = await response.json();
                         setProducts(prevProducts =>
@@ -151,21 +129,12 @@ export default function StockManagement() {
                                 p._id === productId ? updatedProduct : p
                             )
                         );
-
                         // Clear the quantities for this product
                         setQuantities(prev => {
                             const newQuantities = { ...prev };
                             delete newQuantities[productId];
                             return newQuantities;
-                        });
-
-                        // Notify stats context about the change
-                        // if (notifyChange) {
-                        //     setTimeout(() => {
-                        //         notifyChange();
-                        //     }, 500);
-                        // }
-
+                        }); 
                         toast.success('Estoc actualitzat correctament', { id: toastId });
                     } catch (error) {
                         console.error('Error updating stock:', error);
@@ -182,15 +151,12 @@ export default function StockManagement() {
             setEditingId(null);
         }
     };
-
-
     // Get NextIntl locale from Next.js
     let locale = 'ca';
     if (typeof window !== 'undefined') {
         locale = (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca').split('-')[0];
         if (locale !== 'ca' && locale !== 'es') locale = 'ca';
     }
-
     // Get translated product name
     const getTranslatedProductName = (product) => {
         if (!product) return 'N/D';
@@ -199,7 +165,6 @@ export default function StockManagement() {
         }
         return product.name || 'N/D';
     };
-
     // Get translated category name
     const getTranslatedCategoryName = (product) => {
         if (!product || !product.category) return 'N/D';
@@ -219,7 +184,6 @@ export default function StockManagement() {
         }
         return 'N/D';
     };
-
     // Get current available stock
     const getAvailableStock = (product) => {
         if (editingId === product._id) {
@@ -227,13 +191,11 @@ export default function StockManagement() {
         }
         return product.stock?.available ?? 0;
     };
-
     // Determine if product is low on stock
     const isLowStock = (product) => {
         const available = getAvailableStock(product);
         return available < (product.stock?.minStock ?? 5);
     };
-
     // Handle export of stock data
     const handleExportStock = () => {
         // Create CSV content
@@ -249,37 +211,23 @@ export default function StockManagement() {
                 product.status
             ].join(','))
         ].join('\n');
-
         // Create download link
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-
         link.setAttribute('href', url);
         link.setAttribute('download', `stock-report-${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
-
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
-
     return (
         <div className="bg-white rounded-lg shadow">
             {/* Header with title and actions */}
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 className="text-lg font-semibold">Gestió d'estoc</h2>
-                {/* <div className="flex space-x-2">
-                    <button
-                        className="flex items-center px-3 py-1 border border-gray-300 rounded hover:bg-gray-50"
-                        onClick={handleExportStock}
-                    >
-                        <FiDownload className="mr-2" />
-                        Exportar
-                    </button>
-                </div> */}
             </div>
-
             {/* Search and filters */}
             <div className="p-4 border-b border-gray-200">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -306,7 +254,6 @@ export default function StockManagement() {
                     </div>
                 </div>
             </div>
-
             {/* Stock table */}
             <div className="overflow-x-auto">
                 {loading ? (
@@ -422,7 +369,6 @@ export default function StockManagement() {
                     </table>
                 )}
             </div>
-
             {/* Pagination */}
             {products.length > 0 && (
                 <div className="px-4 py-3 border-t border-gray-200">
@@ -437,7 +383,6 @@ export default function StockManagement() {
                     />
                 </div>
             )}
-
             {/* Confirmation Modal */}
             <ConfirmModal
                 isOpen={confirmModal.isOpen}

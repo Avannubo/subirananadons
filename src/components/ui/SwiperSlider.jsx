@@ -1,15 +1,12 @@
 'use client';
-
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
-
 const SwiperSlider = ({
     slides,
     autoPlayInterval = 5000,
@@ -46,7 +43,6 @@ const SwiperSlider = ({
                         {slide}
                     </SwiperSlide>
                 ))}
-
                 {showArrows && (
                     <>
                         <button
@@ -64,7 +60,6 @@ const SwiperSlider = ({
                     </>
                 )}
             </Swiper>
-
             <style jsx global>{`
                 .swiper-pagination-bullet {
                     width: 12px;
@@ -73,11 +68,9 @@ const SwiperSlider = ({
                     opacity: 1;
                     transition: all 0.2s;
                 }
-                
                 .swiper-pagination-bullet-active {
                     transform: scale(1.1);
                 }
-
                 .swiper-button-prev::after,
                 .swiper-button-next::after {
                     display: none;
@@ -86,5 +79,4 @@ const SwiperSlider = ({
         </div>
     );
 };
-
 export default SwiperSlider; 

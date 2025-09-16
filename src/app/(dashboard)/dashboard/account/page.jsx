@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { toast } from 'react-hot-toast';
-import Image from 'next/image';
+import { toast } from 'react-hot-toast'; 
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import { useUser } from '@/contexts/UserContext';
@@ -70,7 +69,6 @@ export default function Page() {
                 reader.onloadend = () => resolve(reader.result);
                 reader.readAsDataURL(selectedImage);
             });
-            //console.log('Image converted to base64, uploading to server...');
             // Upload using our server API endpoint (which handles Cloudinary authentication)
             const response = await fetch('/api/cloudinary/upload', {
                 method: 'POST',
@@ -199,46 +197,7 @@ export default function Page() {
                     <div className="bg-white rounded-lg p-6">
                         <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Informació personal</h2>
                         <form className="space-y-6" onSubmit={handleSubmit}>
-                            {/* Profile Image */}
-                            {/* <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 mb-6">
-                                <div className="w-32 h-32 relative rounded-full overflow-hidden border-2 border-gray-200">
-                                    {isUpdating && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
-                                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-                                        </div>
-                                    )}
-                                    <img
-                                        src={imagePreview || userData.image || '/assets/images/joie.png'}
-                                        alt="Profile"
-                                        width={128}
-                                        height={128}
-                                        className="object-cover w-full h-full"
-                                    />
-                                </div>  
-                                <div className="flex flex-col justify-center">
-                                    <label
-                                        htmlFor="profileImage"
-                                        className={`px-4 py-2 text-white rounded-md text-center ${isUpdating
-                                            ? 'bg-gray-400 cursor-not-allowed'
-                                            : 'bg-[#36A9E1] hover:bg-[#00B0C890] cursor-pointer'
-                                            }`}
-                                    >
-                                        {isUpdating ? 'Uploading...' : 'Change image'}
-                                    </label>
-                                    <input
-                                        type="file"
-                                        id="profileImage"
-                                        accept="image/*"
-                                        onChange={handleImageChange}
-                                        disabled={isUpdating}
-                                        className="hidden"
-                                    />
-                                    <p className="mt-2 text-xs text-gray-500">
-                                        Formatos recomendados: JPG, PNG. Máximo 5MB.
-                                    </p>
-                                </div>
-                            // </div>
-                            // Nombre */}
+                            {/* Nombre */}
                             <div>
                                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
                                     Nom
@@ -330,7 +289,7 @@ export default function Page() {
                             )}
                             {/* Submit Button */}
                             <div className="pt-4">
-                                <button
+                                <button 
                                     type="submit"
                                     disabled={loading || isUpdating}
                                     className={`px-4 py-2 bg-[#36A9E1] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C860] ${(loading || isUpdating) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#00B0C890]'

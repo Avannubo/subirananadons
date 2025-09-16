@@ -1,50 +1,38 @@
 'use client';
 import { Dialog } from '@headlessui/react';
 import { FiX, FiPackage, FiDollarSign, FiTag, FiBox, FiImage } from 'react-icons/fi';
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import useShopParameter from '@/lib/useShopParameter';
-
-
 export default function ProductViewModal({ isOpen, onClose, product, categories = [], brands = [] }) {
     // Get IVA value from shop parameters
     const { value: ivaValue, loading: ivaLoading } = useShopParameter('iva');
-
     // Language state for translation switcher
     const [lang, setLang] = useState('ca');
     // Do not reset lang on product change, only set default on first mount
-
     if (!product) return null;
-
     // Get all product images for the gallery
     const [galleryImages, setGalleryImages] = useState([]);
     const [selectedImage, setSelectedImage] = useState('/assets/images/product-placeholder.jpg');
-
     // Update images when product changes
     useEffect(() => {
         if (product) {
             const images = [];
-
             // Add main image
             if (product.image) {
                 images.push(product.image);
             }
-
             // Add hover image if it exists and is different
             if (product.imageHover && product.imageHover !== product.image) {
                 images.push(product.imageHover);
             }
-
             // Add additional images if they exist
             if (product.additionalImages && Array.isArray(product.additionalImages) && product.additionalImages.length > 0) {
                 images.push(...product.additionalImages);
             }
-
             // If no images, add placeholder
             if (images.length === 0) {
                 images.push('/assets/images/product-placeholder.jpg');
             }
-
             setGalleryImages(images);
             // Make sure we never set an empty string
             if (images.length > 0 && images[0]) {
@@ -54,14 +42,11 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
             }
         }
     }, [product]);
-
-
     // Format price with 2 decimal places and € symbol
     const formatPrice = (price) => {
         if (price === '' || price === undefined || price === null || isNaN(price)) return 'N/D';
         return `${parseFloat(price).toFixed(2)} €`;
     };
-
     // Auto-calculate price without IVA from price_incl_tax and IVA value
     const autoPriceExclTax = (() => {
         const iva = parseFloat(ivaValue || '21');
@@ -69,12 +54,8 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
         if (!incl || isNaN(incl) || !iva || isNaN(iva)) return '';
         return (incl / (1 + iva / 100)).toFixed(2);
     })();
-
     // Calculate available stock
     const availableStock = product.stock?.available || 0;
-
-
-
     // Helper to get display name from populated object or string
     const getDisplayName = (field) => {
         if (!field) return '';
@@ -87,11 +68,8 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
         }
         return '';
     };
-
-
     const categoryDisplay = getDisplayName(product.category);
     const brandDisplay = getDisplayName(product.brand);
-
     // Get translated name/description (only these two fields are translated)
     const getTranslated = (field) => {
         if (!field) return '';
@@ -99,7 +77,6 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
         if (typeof field === 'object') return field[lang] || field.es || field.ca || '';
         return '';
     };
-
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -215,7 +192,6 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                                 <span className="text-sm font-medium text-gray-500">Referència:</span>
                                                 <p className="text-sm text-gray-700">{product.reference || 'N/D'}</p>
                                             </div>
-
                                         </div>
                                         <div className="space-y-2"> <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
                                             <span className="text-sm font-medium text-gray-500">Categoria:</span>
@@ -225,7 +201,6 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                                 <span className="text-sm font-medium text-gray-500">Marca:</span>
                                                 <p className="text-sm text-gray-700">{brandDisplay || 'N/D'}</p>
                                             </div>
-
                                         </div>
                                     </div>
                                     {product.description && (
@@ -366,7 +341,6 @@ export default function ProductViewModal({ isOpen, onClose, product, categories 
                                         </div>
                                     </div>
                                 </section>
-
                             </div>
                         </div>
                     </div>

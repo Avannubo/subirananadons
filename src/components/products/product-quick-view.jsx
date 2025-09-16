@@ -11,8 +11,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 export default function ProductQuickView({ product, onClose }) {
     const { addToCart } = useCart();
-
-
     // Get current locale from next-intl
     const locale = useLocale();
     //console.log(product.description);
@@ -26,7 +24,6 @@ export default function ProductQuickView({ product, onClose }) {
             setSelectedImage(product.imageUrl);
         }
     }, [product]);
-
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -62,9 +59,6 @@ export default function ProductQuickView({ product, onClose }) {
         new Set([
             product.imageUrl,
             product.imageUrlHover,
-            // Add more actual image URLs from product data if available
-            // product.image3,
-            // product.image4,
         ].filter(Boolean))
     ).slice(0, 4); // Filter out falsy values, remove duplicates, and limit
     const handleThumbnailClick = (imageUrl) => {
@@ -183,15 +177,6 @@ export default function ProductQuickView({ product, onClose }) {
                                         </button>
                                     </div>
                                 </div>
-                                {/* Lista button */}
-                                {/* <div className='mb-3'>
-                                    <button
-                                        onClick={handleAddToWishlist}
-                                        className="w-full bg-gray-400 text-white uppercase p-2 py-3 rounded font-semibold transition duration-200 hover:bg-gray-500 mb-2"
-                                    >
-                                        Añadir a mi lista
-                                    </button>
-                                </div> */}
                                 {/* Comprar and Ver detalles side by side */}
                                 <div className="flex flex-row gap-2 mb-1">
                                     <button

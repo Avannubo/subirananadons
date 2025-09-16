@@ -1,7 +1,6 @@
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import SettingsTabs from '@/components/admin/settings/SettingsTabs';
-
 export default async function ConfiguracionPage() {
     return (
         <AuthCheck>
