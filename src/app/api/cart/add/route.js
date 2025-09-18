@@ -28,8 +28,7 @@ export async function POST(request) {
                 product = await Product.findById(productId);
             }
             // If not found by ID, try searching by other fields
-            if (!product) {
-                //console.log('Product not found by ID, trying to find by other fields...');
+            if (!product) { 
                 product = await Product.findOne({
                     $or: [
                         { _id: productId },
@@ -43,8 +42,7 @@ export async function POST(request) {
                     success: false,
                     message: `Producte no trobat amb l'ID: ${productId}`
                 }, { status: 404 });
-            }
-            //console.log(`Found product: ${product.name} (ID: ${product._id})`);
+            } 
             // Get the session for authenticated users
             let session;
             try {
@@ -94,7 +92,6 @@ export async function POST(request) {
             const existingItemIndex = !isGift ? cart.items.findIndex(
                 item => item.product?.toString() === product._id.toString() && !item.isGift
             ) : -1;
-
             if (existingItemIndex > -1) {
                 // Update existing non-gift item quantity
                 cart.items[existingItemIndex].quantity += Number(quantity);

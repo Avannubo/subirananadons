@@ -1,5 +1,4 @@
 'use client'
-
 import { SessionProvider, useSession } from 'next-auth/react'
 import { CartProvider } from '@/contexts/CartContext.jsx'
 import { UserProvider } from '@/contexts/UserContext'
@@ -8,25 +7,21 @@ import { ClientStatsProvider } from '@/contexts/ClientStatsContext'
 import { ListStatsProvider } from '@/contexts/ListStatsContext'
 import { Toaster } from 'react-hot-toast'
 import dynamic from 'next/dynamic'
-
 // Dynamically import DiscountTaskManager with no SSR
 const DiscountTaskManager = dynamic(
     () => import('@/components/admin/discounts/DiscountTaskManager'),
     { ssr: false }
 )
-
 // Wrapper component that has access to session
 function ListStatsWithAuth({ children }) {
     const { data: session } = useSession();
     const userRole = session?.user?.role || 'user';
-
     return (
         <ListStatsProvider userRole={userRole}>
             {children}
         </ListStatsProvider>
     );
 }
-
 export function Providers({ children }) {
     return (
         <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={true}>
@@ -45,4 +40,4 @@ export function Providers({ children }) {
             <Toaster position="bottom-right" />
         </SessionProvider>
     )
-} 
+}

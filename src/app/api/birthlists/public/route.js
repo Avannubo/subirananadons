@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
-
 export async function GET(request) {
     try {
         await dbConnect();
-
         const { searchParams } = new URL(request.url);
         const preventSort = searchParams.get('preventSort') === 'true';
-
         // Only fetch birth lists that are public and active
         const query = {
             isPublic: true,
@@ -17,15 +14,12 @@ export async function GET(request) {
         let birthListsQuery = BirthList.find(query)
             .populate('user', 'name')
             .populate('items.product', 'name reference');  // Populate product data for each item
-
         // Apply sorting only if preventSort is false
         if (!preventSort) {
             birthListsQuery = birthListsQuery.sort({ createdAt: -1 });
         }
-
         // Execute the query
         const birthLists = await birthListsQuery.lean();
-
         return NextResponse.json({
             success: true,
             data: birthLists

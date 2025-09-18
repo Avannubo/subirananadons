@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
-
 export async function POST(request) {
     try {
         await dbConnect();
-
         const { name, email, password } = await request.json();
-
         // Validate input
         if (!name || !email || !password) {
             return NextResponse.json(
@@ -15,7 +12,6 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -24,7 +20,6 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-
         // Create new user, set emailVerified to now (auto-verify)
         const user = await User.create({
             name,
@@ -33,14 +28,12 @@ export async function POST(request) {
             emailVerified: new Date(),
             IsActive: true, // Set user as active by default
         });
-
         // Remove password from response
         const userResponse = {
             id: user._id,
             name: user.name,
             email: user.email,
         };
-
         return NextResponse.json(
             { message: 'Usuari registrat correctament', user: userResponse },
             { status: 201 }

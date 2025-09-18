@@ -6,7 +6,6 @@ import ClientModal from '@/components/admin/clients/ClientModal';
 import ClientViewModal from '@/components/admin/clients/ClientViewModal';
 import ConfirmDeleteModal from '@/components/admin/clients/ConfirmDeleteModal';
 import { toast } from 'react-hot-toast';
-import Pagination from '@/components/admin/shared/Pagination';
 export default function ClientsTabs() {
     // Locale detection (default to 'ca')
     let locale = 'ca';
@@ -91,17 +90,12 @@ export default function ClientsTabs() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [clients, setClients] = useState([]);
-    const [pagination, setPagination] = useState({
-        currentPage: 1,
-        totalPages: 1,
-        totalItems: 0,
-        limit: 5
-    });
+
     // const tabs = ['Todos', 'Activos', 'Inactivos', 'Newsletter', 'Ofertas'];
     // Load clients when component mounts
     useEffect(() => {
         fetchClients();
-    }, [activeTab, pagination.currentPage]);
+    }, [activeTab]);
     // Calculate status counts
     const statusCounts = {
         [t.tabs[0]]: clients.length,
@@ -113,9 +107,7 @@ export default function ClientsTabs() {
         try {
             setIsLoading(true);
             const queryParams = new URLSearchParams();
-            // Add pagination parameters
-            queryParams.append('page', pagination.currentPage);
-            queryParams.append('limit', pagination.limit);
+
             // Add search filters
             if (filters.searchId) queryParams.append('searchId', filters.searchId);
             if (filters.searchName) queryParams.append('searchName', filters.searchName);
@@ -136,12 +128,6 @@ export default function ClientsTabs() {
             //console.log('API response:', data);
             if (data.success) {
                 setClients(data.clients || []);
-                setPagination(data.pagination || {
-                    currentPage: 1,
-                    totalPages: 1,
-                    totalItems: data.clients?.length || 0,
-                    limit: 5
-                });
             } else {
                 throw new Error(data.message || 'Failed to fetch clients');
             }
@@ -164,7 +150,6 @@ export default function ClientsTabs() {
     };
     // Apply filters
     const applyFilters = () => {
-        setPagination(prev => ({ ...prev, currentPage: 1 })); // Reset to first page
         fetchClients();
     };
     // Clear all filters
@@ -178,8 +163,7 @@ export default function ClientsTabs() {
             registrationDateFrom: '',
             registrationDateTo: ''
         });
-        // Reset page and fetch
-        setPagination(prev => ({ ...prev, currentPage: 1 }));
+
         fetchClients();
     };
     // Refresh data
@@ -309,7 +293,7 @@ export default function ClientsTabs() {
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">
-                        <h2 className="text-lg font-medium">{t.adminTitle} ({pagination.totalItems})</h2>
+                        <h2 className="text-lg font-medium">{t.adminTitle} ({clients.length})</h2>
                         <button
                             className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer"
                             onClick={refreshData}
@@ -416,27 +400,7 @@ export default function ClientsTabs() {
                             onDeleteClient={handleDeleteClient}
                             onViewClient={handleViewClient}
                         />
-                        {/* Pagination */}
-                        {!isLoading && pagination.totalPages > 0 && (
-                            <div className="p-4 border-t border-gray-200">
-                                <Pagination
-                                    currentPage={pagination.currentPage}
-                                    totalPages={pagination.totalPages}
-                                    totalItems={pagination.totalItems}
-                                    itemsPerPage={pagination.limit}
-                                    onPageChange={handlePageChange}
-                                    onItemsPerPageChange={(newLimit) => {
-                                        setPagination(prev => ({
-                                            ...prev,
-                                            limit: newLimit,
-                                            currentPage: 1
-                                        }));
-                                        fetchClients();
-                                    }}
-                                    showingText={t.showingText}
-                                />
-                            </div>
-                        )}
+
                     </>
                 )}
             </div>

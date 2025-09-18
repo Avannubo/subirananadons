@@ -2,23 +2,19 @@ import { NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
-
 export async function GET(request, { params }) {
     try {
         await dbConnect();
         const { id } = params;
-
         // Get the birth list data
         const list = await BirthList.findById(id)
             .populate('items.product');
-
         if (!list) {
             return NextResponse.json({
                 success: false,
                 message: 'Lista no encontrada'
             }, { status: 404 });
         }
-
         // Generate HTML content
         const html = `
             <!DOCTYPE html>
@@ -109,7 +105,6 @@ export async function GET(request, { params }) {
                 </body>
             </html>
         `;
-
         // Launch Puppeteer and generate PDF
         const browser = await puppeteer.launch({
             headless: 'new',
@@ -118,7 +113,6 @@ export async function GET(request, { params }) {
         });
         const page = await browser.newPage();
         await page.setContent(html);
-
         const pdf = await page.pdf({
             format: 'A4',
             printBackground: true,
@@ -129,9 +123,7 @@ export async function GET(request, { params }) {
                 right: '20px'
             }
         });
-
         await browser.close();
-
         // Return PDF response
         return new NextResponse(pdf, {
             status: 200,
@@ -140,7 +132,6 @@ export async function GET(request, { params }) {
                 'Content-Disposition': `attachment; filename="Lista_de_Regalos_${list.reference}.pdf"`
             }
         });
-
     } catch (error) {
         console.error('Error generating PDF:', error);
         return NextResponse.json({

@@ -2,7 +2,6 @@
 // Returns the active banner image (portada) from the DB
 import dbConnect from '@/lib/dbConnect';
 import PortImg from '@/models/PortImg';
-
 export async function GET(req) {
     await dbConnect();
     try {

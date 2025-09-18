@@ -96,7 +96,6 @@ export async function GET(request, { params }) {
                 th:nth-child(4) { width: 10%; text-align: right; }
                 th:nth-child(5) { width: 10%; text-align: right; }
                 th:nth-child(6) { width: 10%; text-align: right; }
-                
                 td {
                     vertical-align: top;
                 }
@@ -111,7 +110,6 @@ export async function GET(request, { params }) {
                 td:nth-child(4) { text-align: right; }
                 td:nth-child(5) { text-align: right; }
                 td:nth-child(6) { text-align: right; }
-                
                 .item-type {
                     font-weight: normal;
                     text-align: left;
@@ -231,7 +229,6 @@ export async function GET(request, { params }) {
                     <td style="min-width: 150px;">IVA (21%)</td>
                     <td>${order.tax.toFixed(2)} €</td>
                 </tr>
-                
                 ${order.discounts && order.discounts.total > 0 ? `
                 <tr class="discount-row">
                     <td style="min-width: 150px;">Descuento</td>
@@ -281,7 +278,6 @@ export async function GET(request, { params }) {
             }
         });
         await browser.close();
-
         return new NextResponse(pdf, {
             status: 200,
             headers: {
@@ -302,4 +298,3 @@ export async function GET(request, { params }) {
         }, { status: 500 });
     }
 }
-

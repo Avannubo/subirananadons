@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
-
 export async function GET() {
     try {
         //console.log('Connecting to database...');
         await dbConnect();
         //console.log('Database connected.');
-
         const today = new Date();
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
         const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
         // Get counts for the current month
         const [totalBills, paidBills, pendingBills, notificationsSent] = await Promise.all([
             Order.countDocuments({
@@ -52,7 +49,6 @@ export async function GET() {
     //         pendingBills,
     //         notificationsSent
     // });
-
     return NextResponse.json({
         success: true,
         data: {

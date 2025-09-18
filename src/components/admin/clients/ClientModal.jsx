@@ -334,27 +334,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                         </div>
                                     </div>
                                 </section>
-                                {/* Preferences */}
-                                {/* <section className="space-y-4">
-                                    <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
-                                        <FiBell className="mr-2 text-[#36A9E1]" /> {t.preferences}
-                                    </h3>
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                        <div className="flex items-center mb-3">
-                                            <input
-                                                id="active"
-                                                name="active"
-                                                type="checkbox"
-                                                checked={formData.active}
-                                                onChange={handleChange}
-                                                className="h-4 w-4 text-[#36A9E1] focus:ring-[#36A9E1] border-gray-300 border-1  rounded"
-                                            />
-                                            <label htmlFor="active" className="ml-2 block text-sm text-gray-700">
-                                                {t.accountActive}
-                                            </label>
-                                        </div> 
-                                    </div>
-                                </section> */}
                             </div>
                         </div>
                         <div className="mt-8 flex justify-end space-x-3 border-t border-gray-200 pt-4">

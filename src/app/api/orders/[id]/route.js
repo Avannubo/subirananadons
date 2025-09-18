@@ -6,14 +6,12 @@ import mongoose from 'mongoose';
 import Order from '@/models/Order';
 import Invoice from '@/models/Invoice';
 // Ensure Invoice model is imported before using it in population
-
 // Get a single order by ID
 export async function GET(request, { params }) {
     try {
         const session = await getServerSession(authOptions);
         //console.log('Order Detail API - Session:', session);
         //console.log('Order Detail API - Request Params:', params);
-
         if (!session?.user?.id) {
             console.error('Order Detail API - No user ID in session');
             return NextResponse.json({
@@ -21,10 +19,8 @@ export async function GET(request, { params }) {
                 message: 'No autorizado'
             }, { status: 401 });
         }
-
         await dbConnect();
         const { id } = params;
-
         if (!mongoose.Types.ObjectId.isValid(id)) {
             console.error('Order Detail API - Invalid order ID:', id);
             return NextResponse.json({
@@ -32,22 +28,18 @@ export async function GET(request, { params }) {
                 message: 'ID de pedido no válido'
             }, { status: 400 });
         }
-
         // First try to find the order without population to ensure it exists
         const order = await Order.findById(id);
-
         if (!order) {
             return NextResponse.json({
                 success: false,
                 message: 'Order not found'
             }, { status: 404 });
         }
-
         // Then populate the references if needed
         const populatedOrder = await Order.findById(id)
             .populate('user', 'name email')
             .lean(); // Use lean() for better performance
-
         // Handle invoices separately to avoid schema registration issues
         if (populatedOrder.invoices && populatedOrder.invoices.length > 0) {
             try {
@@ -60,7 +52,6 @@ export async function GET(request, { params }) {
                 populatedOrder.invoices = []; // Fallback to empty array if invoice fetch fails
             }
         }
-
         return NextResponse.json({
             success: true,
             order: populatedOrder
@@ -99,7 +90,6 @@ export async function PATCH(request, { params }) {
                 message: 'Invalid order ID'
             }, { status: 400 });
         }
-
         // Validate status if it's being updated
         const allowedStatuses = ['acceptado', 'procesando', 'enviado', 'completo', 'cancelado'];
         if (data.status !== undefined) {
@@ -113,7 +103,6 @@ export async function PATCH(request, { params }) {
                 }, { status: 400 });
             }
         }
-
         // Validate the update data
         const allowedFields = ['status', 'trackingNumber', 'notes', 'paymentDetails'];
         const updateData = {};
@@ -122,7 +111,6 @@ export async function PATCH(request, { params }) {
                 updateData[field] = data[field];
             }
         }
-
         // If no valid fields to update
         if (Object.keys(updateData).length === 0) {
             return NextResponse.json({
@@ -130,14 +118,12 @@ export async function PATCH(request, { params }) {
                 message: 'No valid fields to update'
             }, { status: 400 });
         }
-
         // Find and update the order
         const updatedOrder = await Order.findByIdAndUpdate(
             id,
             updateData,
             { new: true, runValidators: true }
         );
-
         // Check if order exists
         if (!updatedOrder) {
             return NextResponse.json({
@@ -145,7 +131,6 @@ export async function PATCH(request, { params }) {
                 message: 'Order not found'
             }, { status: 404 });
         }
-
         return NextResponse.json({
             success: true,
             message: 'Pedido actualizado correctamente',

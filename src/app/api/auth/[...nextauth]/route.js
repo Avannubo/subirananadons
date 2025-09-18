@@ -5,10 +5,8 @@ import User from '@/models/User';
 import dbConnect from '@/lib/dbConnect';
 import { headers } from 'next/headers';
 import { trackUserSession } from '@/lib/auth/sessionTracker';
-
 // Fallback secret for development - in production always use environment variable
 const SECRET = process.env.NEXTAUTH_SECRET || "e991fff4025f411ec955c2d62674427bcfcb49e01bc5a2b488985ddc864ba25e";
-
 export const authOptions = {
     providers: [
         CredentialsProvider({
@@ -21,19 +19,15 @@ export const authOptions = {
                 if (!credentials?.email || !credentials?.password) {
                     throw new Error('Please enter an email and password');
                 }
-
                 await dbConnect();
-
                 const user = await User.findOne({ email: credentials.email }).select('+password');
                 if (!user) {
                     throw new Error('No user found with this email');
                 }
-
                 const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
                 if (!isPasswordValid) {
                     throw new Error('Invalid password');
                 }
-
                 return {
                     id: user._id.toString(),
                     email: user.email,
@@ -55,7 +49,6 @@ export const authOptions = {
             if (token) {
                 session.user.id = token.id;
                 session.user.role = token.role;
-
                 // Get request headers - Fix by awaiting the headers() function
                 try {
                     // Use await with headers() since it's an async API in Next.js 13+
@@ -64,7 +57,6 @@ export const authOptions = {
                     const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0] ||
                         headersList.get('x-real-ip') ||
                         'unknown';
-
                     // Track the session
                     try {
                         await trackUserSession(
@@ -93,6 +85,5 @@ export const authOptions = {
     },
     secret: SECRET
 };
-
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

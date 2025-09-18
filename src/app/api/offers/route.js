@@ -1,7 +1,6 @@
 import dbConnect from '@/lib/dbConnect';
 import Offer from '@/models/Offer';
 import { NextResponse } from 'next/server';
-
 export async function GET() {
     await dbConnect();
     try {
@@ -11,7 +10,6 @@ export async function GET() {
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }
-
 export async function POST(request) {
     await dbConnect();
     try {
@@ -46,7 +44,6 @@ export async function POST(request) {
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }
-
 export async function PUT(request) {
     await dbConnect();
     try {
@@ -81,7 +78,6 @@ export async function PUT(request) {
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }
-
 export async function DELETE(request) {
     await dbConnect();
     try {

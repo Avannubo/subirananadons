@@ -1,5 +1,4 @@
 import EmailService from "@/services/EmailService";
-
 export async function POST(request) {
     try {
         const body = await request.json();

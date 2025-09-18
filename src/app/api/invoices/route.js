@@ -3,16 +3,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/dbConnect';
 import Invoice from '@/models/Invoice';
-
 export async function GET(request) {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
         }
-
         await dbConnect();
-
         // Get query parameters
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
@@ -27,7 +24,6 @@ export async function GET(request) {
             if (from) query.issuedDate.$gte = new Date(from);
             if (to) query.issuedDate.$lte = new Date(to);
         }
-
         // Fetch invoices with populated order details
         const invoices = await Invoice.find(query)
             .populate('order')
@@ -49,7 +45,6 @@ export async function GET(request) {
                 return null;
             }
         }).filter(Boolean);
-
         return NextResponse.json(formattedInvoices);
     } catch (error) {
         console.error('Error fetching invoices:', error);

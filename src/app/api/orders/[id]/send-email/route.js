@@ -2,11 +2,9 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import EmailService from '@/services/EmailService';
-
 export async function POST(request, { params }) {
     try {
         await dbConnect();
-
         // Get and validate params
         const { id } = await Promise.resolve(params);
         if (!id) {
@@ -15,7 +13,6 @@ export async function POST(request, { params }) {
                 { status: 400 }
             );
         }
-
         // Find order and populate product information
         const order = await Order.findById(id)
             .populate({
@@ -24,18 +21,15 @@ export async function POST(request, { params }) {
                 select: 'name price slug image description brand category'
             })
             .lean();
-
         if (!order) {
             return NextResponse.json(
                 { message: 'Pedido no encontrado' },
                 { status: 404 }
             );
         }
-
         // Validate essential order data
         const requiredFields = ['orderNumber', 'items', 'shippingAddress', 'totalAmount'];
         const missingFields = requiredFields.filter(field => !order[field]);
-
         if (missingFields.length > 0) {
             return NextResponse.json(
                 {
@@ -45,13 +39,11 @@ export async function POST(request, { params }) {
                 { status: 400 }
             );
         }
-
         // Validate shipping address
         const requiredAddressFields = ['email', 'name'];
         const missingAddressFields = requiredAddressFields.filter(
             field => !order.shippingAddress[field]
         );
-
         if (missingAddressFields.length > 0) {
             return NextResponse.json(
                 {
@@ -109,12 +101,9 @@ export async function POST(request, { params }) {
             paymentMethod: order.paymentMethod || 'pending',
             notes: order.notes || ''
         };
-
         //console.log('Transformed order:', JSON.stringify(transformedOrder, null, 2));
-
         // Send confirmation email with transformed data
         await EmailService.sendOrderConfirmation(transformedOrder);
-
         return NextResponse.json({
             message: 'Correo de confirmación de pedido enviado correctamente',
             orderId: order._id

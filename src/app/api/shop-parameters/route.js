@@ -8,13 +8,11 @@ export async function DELETE(req) {
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import ShopParameter from "@/models/ShopParameter";
-
 export async function GET(req) {
     await dbConnect();
     const params = await ShopParameter.find({});
     return NextResponse.json(params);
 }
-
 export async function POST(req) {
     await dbConnect();
     const { key, value, description } = await req.json();

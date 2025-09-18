@@ -4,8 +4,6 @@ import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
 import { NextIntlClientProvider } from 'next-intl';
 import messages from '../../messages/ca.json'; // Default to Catalan
-
-
 export const metadata = {
   title: 'Subirana Nadons',
   description: 'Tienda de productos para bebés',

@@ -3,11 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
-
 // Helper function to convert user document to client format
 function userToClient(user) {
     if (!user) return null;
-
     return {
         id: user._id.toString(),
         name: user.name.split(' ')[0] || '',
@@ -20,7 +18,6 @@ function userToClient(user) {
         sales: 0 // This would come from orders in a real app
     };
 }
-
 // Get a single client by ID
 export async function GET(request, { params }) {
     try {
@@ -32,23 +29,18 @@ export async function GET(request, { params }) {
                 { status: 403 }
             );
         }
-
         // Connect to database
         await dbConnect();
-
         // Get client ID from params
         const { id } = params;
-
         // Find the user
         const user = await User.findById(id).select('-password -resetPasswordToken -resetPasswordExpires -__v');
-
         if (!user) {
             return NextResponse.json(
                 { success: false, message: 'Client not found' },
                 { status: 404 }
             );
         }
-
         // Check if the user is a client (role = 'user')
         if (user.role !== 'user') {
             return NextResponse.json(
@@ -56,7 +48,6 @@ export async function GET(request, { params }) {
                 { status: 400 }
             );
         }
-
         // Return the client data
         return NextResponse.json({
             success: true,
@@ -70,7 +61,6 @@ export async function GET(request, { params }) {
         );
     }
 }
-
 // Update a client by ID
 export async function PUT(request, { params }) {
     try {
@@ -83,7 +73,6 @@ export async function PUT(request, { params }) {
             );
         }        // Connect to database
         await dbConnect();
-
         // Get and validate params
         const resolvedParams = await Promise.resolve(params);
         const id = resolvedParams.id;
@@ -96,7 +85,6 @@ export async function PUT(request, { params }) {
         const data = await request.json();
         const { name, lastName, email, active, newsletter, partnerOffers, password } = data;
         //console.log('Updating client with data:', { ...data, password: password ? '[REDACTED]' : undefined });
-
         // Find the user with password field
         const user = await User.findById(id).select('+password');
         if (!user) {
@@ -105,7 +93,6 @@ export async function PUT(request, { params }) {
                 { status: 404 }
             );
         }
-
         // Check if the user is a client (role = 'user')
         if (user.role !== 'user') {
             return NextResponse.json(
@@ -113,7 +100,6 @@ export async function PUT(request, { params }) {
                 { status: 400 }
             );
         }
-
         // Check if email is changed and already exists for another user
         if (email && email !== user.email) {
             const existingUser = await User.findOne({ email });
@@ -124,36 +110,29 @@ export async function PUT(request, { params }) {
                 );
             }
         }
-
         // Update user data
         if (name || lastName) {
             user.name = `${name || user.name.split(' ')[0]} ${lastName || user.name.split(' ').slice(1).join(' ')}`;
         }
-
         if (email) {
             user.email = email;
         }
-
         // Update status fields
         if (active !== undefined) {
             user.emailVerified = active ? new Date() : null;
         }
-
         if (newsletter !== undefined) {
             user.newsletter = newsletter;
         } if (partnerOffers !== undefined) {
             user.partnerOffers = partnerOffers;
         }
-
         // Update password if provided
         if (password) {
             user.password = password;
             user.markModified('password'); // Ensure mongoose knows the password was modified
         }
-
         // Save the updated user
         await user.save();
-
         // Return success response with updated client data
         return NextResponse.json({
             success: true,
@@ -168,7 +147,6 @@ export async function PUT(request, { params }) {
         );
     }
 }
-
 // Delete a client by ID
 export async function DELETE(request, { params }) {
     try {
@@ -181,7 +159,6 @@ export async function DELETE(request, { params }) {
             );
         }        // Connect to database
         await dbConnect();
-
         // Get and validate params
         const resolvedParams = await Promise.resolve(params);
         const id = resolvedParams.id;
@@ -191,7 +168,6 @@ export async function DELETE(request, { params }) {
                 { status: 400 }
             );
         }
-
         // Find the user
         const user = await User.findById(id);
         if (!user) {
@@ -200,7 +176,6 @@ export async function DELETE(request, { params }) {
                 { status: 404 }
             );
         }
-
         // Check if the user is a client (role = 'user')
         if (user.role !== 'user') {
             return NextResponse.json(
@@ -208,10 +183,8 @@ export async function DELETE(request, { params }) {
                 { status: 400 }
             );
         }
-
         // Delete the user
         await User.findByIdAndDelete(id);
-
         // Return success response
         return NextResponse.json({
             success: true,

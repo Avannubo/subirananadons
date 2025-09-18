@@ -23,7 +23,6 @@ export async function DELETE(request, { params }) {
         // Start a session for transaction
         const mongoSession = await mongoose.startSession();
         mongoSession.startTransaction();
-
         try {
             // Delete the PDF file if it exists
             if (invoice.pdfUrl) {
@@ -38,7 +37,6 @@ export async function DELETE(request, { params }) {
                     }
                 }
             }
-
             // Remove invoice reference from the order
             if (invoice.order) {
                 const Order = mongoose.models.Order;
@@ -48,10 +46,8 @@ export async function DELETE(request, { params }) {
                     { session: mongoSession }
                 );
             }
-
             // Delete the invoice from database
             await Invoice.findByIdAndDelete(id).session(mongoSession);
-
             // Commit the transaction
             await mongoSession.commitTransaction();
             return NextResponse.json({
@@ -68,7 +64,6 @@ export async function DELETE(request, { params }) {
         }
     } catch (error) {
         console.error('Error al eliminar la factura:', error);
-
         // If we started a transaction, make sure it's aborted
         // If we started a transaction, make sure it's aborted
         if (typeof mongoSession !== 'undefined' && mongoSession.inTransaction()) {

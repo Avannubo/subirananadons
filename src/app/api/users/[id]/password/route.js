@@ -13,7 +13,6 @@ export async function PUT(request, context) {
                 { status: 401 }
             );
         }
-
         // Get and validate params
         const params = await Promise.resolve(context.params);
         const id = params.id;
@@ -23,7 +22,6 @@ export async function PUT(request, context) {
                 { status: 400 }
             );
         }
-
         const { password } = await request.json();
         await dbConnect();
         // Hash the new password
