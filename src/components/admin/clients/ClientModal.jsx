@@ -47,6 +47,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             saving: 'Desant...',
             successAdd: 'Client afegit correctament',
             successEdit: 'Client actualitzat correctament',
+            successCreate: 'Client creat correctament',
             error: 'Error en desar el client',
             passwordSection: 'Canviar Contrasenya',
         },
@@ -83,6 +84,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             saving: 'Guardando...',
             successAdd: 'Cliente añadido correctamente',
             successEdit: 'Cliente actualizado correctamente',
+            successCreate: 'Cliente creado correctamente',
             error: 'Error al guardar el cliente',
             passwordSection: 'Cambiar Contraseña',
         }
@@ -174,20 +176,75 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validateForm()) return;
         setLoading(true);
-        try {            // Save all client data including password in a single request
-            const dataToSend = {
-                ...formData,
-                // Only include password if it's provided and not empty
-                ...(formData.password ? { password: formData.password } : {})
-            };
-            delete dataToSend.confirmPassword; // Remove confirmPassword as it's not needed by the API
-            await onSave(dataToSend);
-            toast.success(client ? t.successEdit : t.successAdd);
-            // Notify the stats context that changes have been made
-            // await notifyChange();
-            onClose();
+        try {
+            if (client) {
+                // If editing existing client
+                if (!validateForm()) {
+                    setLoading(false);
+                    return;
+                }
+                const dataToSend = {
+                    ...formData,
+                    ...(formData.password ? { password: formData.password } : {})
+                };
+                delete dataToSend.confirmPassword;
+                await onSave(dataToSend);
+                toast.success(t.successEdit);
+                onClose();
+            } else {
+                // Validation for new client creation
+                if (!formData.name || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword) {
+                    toast.error(t.nameRequired);
+                    setLoading(false);
+                    return;
+                }
+
+                if (formData.password !== formData.confirmPassword) {
+                    toast.error(t.passwordMismatch);
+                    setLoading(false);
+                    return;
+                }
+
+                if (formData.password.length < 6) {
+                    toast.error(t.passwordShort);
+                    setLoading(false);
+                    return;
+                }
+
+                // Use register endpoint for creating new client
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: `${formData.name} ${formData.lastName}`.trim(),
+                        email: formData.email,
+                        password: formData.password,
+                        IsActive: true
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (data.message.includes('Ja existeix un usuari')) {
+                        toast.error(t.emailInvalid);
+                    } else {
+                        toast.error(data.message || t.error);
+                    }
+                    setLoading(false);
+                    return;
+                }
+
+                // Show success message
+                toast.success(t.successCreate);
+
+                // Successfully created user, just close the modal and refresh the list
+                await onSave(null); // Pass null to indicate successful creation                toast.success(t.successAdd);
+                onClose();
+            }
         } catch (error) {
             console.error('Error saving client:', error);
             toast.error(t.error);

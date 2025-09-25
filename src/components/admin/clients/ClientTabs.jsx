@@ -195,33 +195,32 @@ export default function ClientsTabs() {
     // Save client (new or edit)
     const handleSaveClient = async (formData) => {
         try {
-            let response;
+            // If formData is null, it means a new user was created through register endpoint
+            if (formData === null) {
+                // Just refresh the client list
+                await fetchClients();
+                return null;
+            }
+
             if (selectedClient) {
                 // Edit existing client
-                response = await fetch(`/api/clients/${selectedClient.id}`, {
+                const response = await fetch(`/api/clients/${selectedClient.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formData),
                 });
-            } else {
-                // Add new client
-                response = await fetch('/api/clients', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData),
-                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Operation failed');
+                }
+
+                // Refresh the client list
+                await fetchClients();
+                return data.client;
             }
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || 'Operation failed');
-            }
-            // Refresh the client list
-            fetchClients();
-            return data.client;
         } catch (error) {
             console.error('Error saving client:', error);
             throw error;

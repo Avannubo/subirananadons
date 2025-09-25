@@ -59,6 +59,7 @@ const translations = {
         phone: 'Telèfon',
         message: 'Missatge',
         guardar: 'Desar',
+        cancelarCompra: 'Cancelar Compra',
         purchased: 'Productes Rebuts',
         productos: 'productes',
         progresoTotal: 'Progrés total',
@@ -112,6 +113,7 @@ const translations = {
         phone: 'Teléfono',
         message: 'Mensaje',
         guardar: 'Guardar',
+        cancelarCompra: 'Cancelar Compra',
         purchased: 'Productos Recibidos',
         productos: 'productos',
         progresoTotal: 'Progreso total',
@@ -235,7 +237,7 @@ export default function ListViewModal({
             let newState;
             switch (direction) {
                 case 'left':
-                    newState = currentItem.state - 1;
+                    newState = 0; // Always move to pending state when canceling
                     break;
                 case 'reserve':
                     newState = 1;
@@ -251,13 +253,16 @@ export default function ListViewModal({
                 return toast.error('El producto ya está en este estado');
             }
             // Check required fields for reserve/buy actions
-            if ((direction === 'reserve' || direction === 'buy') && (!userData.name)) {
-                toast.error('Nom és obligatori');
-                return;
-            }
+            // if ((direction === 'reserve' || direction === 'buy') && (!userData.name)) {
+            //     toast.error('Nom és obligatori');
+            //     return;
+            // }
             setLoading(true);
+            // When canceling (moving left), we want to clear the userData
+            const dataToSend = direction === 'left' ? null : userData;
+
             // Update the item's state
-            const result = await updateBirthListItemState(listId, currentItem._id, newState, userData);
+            const result = await updateBirthListItemState(listId, currentItem._id, newState, dataToSend);
             if (result.success) {
                 // Update the item in the local state
                 const updatedItems = items.map(item =>
@@ -280,12 +285,35 @@ export default function ListViewModal({
             setLoading(false);
         }
     };
-    const moveItem = (item, dir) => {
+    const moveItem = async (item, dir) => {
         setCurrentItem(item);
         setDirection(dir);
-        // If moving left (undoing reservation/purchase), directly update the state
+        // If moving left (undoing reservation/purchase), handle it in a single API call
         if (dir === 'left') {
-            confirmStateChange();
+            try {
+                setLoading(true);
+                const listId = selectedList.rawData?._id || selectedList._id;
+                if (!listId) {
+                    toast.error('Error: ID de lista no encontrado');
+                    return;
+                }
+
+                // Move directly to pending state with null user data in a single API call
+                const result = await updateBirthListItemState(listId, item._id, 0, null);
+                if (result.success) {
+                    // Update the item in the local state
+                    const updatedItems = items.map(i =>
+                        i._id === item._id ? result.data : i
+                    );
+                    setItems(updatedItems);
+                    toast.success('Producto cancelado correctamente');
+                }
+            } catch (error) {
+                console.error('Error updating item:', error);
+                toast.error(error.message || 'Error al cancelar el producto');
+            } finally {
+                setLoading(false);
+            }
         } else {
             // If moving to reserved or bought state, show data modal
             setShowDataModal(true);
@@ -377,13 +405,13 @@ export default function ListViewModal({
                             <h4 className="text-sm font-medium text-gray-900">{productName}</h4>
                             {user.role === 'admin' && (
                                 <div className="flex items-center space-x-2">
-                                    {item.state === 1 && (
+                                    {(item.state === 1 || item.state === 2) && (
                                         <button
                                             onClick={() => moveItem(item, 'left')}
                                             className="px-3 py-1 text-sm rounded-md text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors duration-200"
-                                            title={t.cancelarReserva || 'Cancelar reserva'}
+                                            title={item.state === 2 ? (t.cancelarCompra || 'Cancelar compra (Devolución)') : (t.cancelarReserva || 'Cancelar reserva')}
                                         >
-                                            {t.cancelarReserva || 'Cancelar'}
+                                            {item.state === 2 ? (t.cancelarCompra || 'Devolución') : (t.cancelarReserva || 'Cancelar')}
                                         </button>
                                     )}
                                     {item.state === 0 && (

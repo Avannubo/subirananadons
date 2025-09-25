@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
+import bcrypt from 'bcryptjs';
 // Get all clients (users with role 'user')
 export async function GET(request) {
     try {
@@ -98,11 +99,18 @@ export async function POST(request) {
         await dbConnect();
         // Get request body
         const data = await request.json();
-        const { name, lastName, email, active, newsletter, partnerOffers } = data;
+        const { name, lastName, email, password, active, newsletter, partnerOffers } = data;
         // Validate required fields
         if (!name || !lastName || !email) {
             return NextResponse.json(
                 { success: false, message: 'Name, last name and email are required' },
+                { status: 400 }
+            );
+        }
+        // Validate password when creating new user
+        if (!password) {
+            return NextResponse.json(
+                { success: false, message: 'Password is required for new users' },
                 { status: 400 }
             );
         }
@@ -114,13 +122,14 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-        // Create temporary password (in a real app, you'd send an email to the user to set their password)
-        const tempPassword = Math.random().toString(36).slice(-8);
+        // Hash the provided password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
         // Create new user
         const newUser = new User({
             name: `${name} ${lastName}`,
             email,
-            password: tempPassword,
+            password: hashedPassword,
             role: 'user',
             emailVerified: active ? new Date() : null,
             newsletter: newsletter || false,
