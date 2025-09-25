@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { usePathname } from 'next/navigation';
 import { DiscountService } from '@/services/DiscountService';
 const CHECK_INTERVAL = 60000; // Check every minute
-export default function DiscountTaskManager() {
+export default function DiscountTaskManager() { 
     const intervalRef = useRef(null);
     const pathname = usePathname();
     const checkAndUpdateDiscounts = async () => {

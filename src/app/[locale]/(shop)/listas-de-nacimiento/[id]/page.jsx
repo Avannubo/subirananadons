@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { use } from 'react';
-import ShopLayout from "@/components/Layouts/shop-layout"; 
+import ShopLayout from "@/components/Layouts/shop-layout";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -20,7 +20,8 @@ export default function BirthListPage({ params }) {
     const router = useRouter();
     const { addToCart } = useCart();
     // Remove or simplify unused states related to the modal
-    const [selectedProduct, setSelectedProduct] = useState(null);    // Calculate progress percentage based on item states (2=purchased, 1=reserved, 0=available)
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [hoveredId, setHoveredId] = useState(null);    // Calculate progress percentage based on item states (2=purchased, 1=reserved, 0=available)
     const calculateProgress = (items) => {
         if (!items || items.length === 0) return 0;
         const purchasedCount = items.filter(item => item.state === 2).length;
@@ -76,6 +77,7 @@ export default function BirthListPage({ params }) {
                             priceValue: item.productSnapshot?.price || prod.price_incl_tax,
                             discount: prod.discount,
                             image: item.productSnapshot?.image || prod.image || '/assets/images/Screenshot_4.png',
+                            imageHover: item.productSnapshot?.imageHover || prod.imageHover || '',
                             category: item.productSnapshot?.category || prod.category,
                             brand: item.productSnapshot?.brand || prod.brand,
                             reference: item.productSnapshot?.reference || prod.reference,
@@ -360,17 +362,36 @@ export default function BirthListPage({ params }) {
                         filteredProducts.map((product) => (
                             <motion.div
                                 key={product.id}
-                                className="bg-white rounded-lg overflow-hidden shadow-sm flex flex-col h-full"
+                                className="bg-white rounded-lg overflow-hidden shadow-sm flex flex-col h-full group"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 whileHover={{ y: -3 }}
+                                onMouseEnter={() => setHoveredId(product.id)}
+                                onMouseLeave={() => setHoveredId(null)}
                             >
-                                <div className="relative w-full" style={{ aspectRatio: '1/0.8' }}>
-                                    <img
-                                        src={product.image}
-                                        alt={product.name}
-                                        className="object-contain"
-                                    />
+                                <div className="relative w-full overflow-hidden" style={{ aspectRatio: '1/0.8' }}>
+                                    {product.imageHover ? (
+                                        <>
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="object-cover h-[200px] w-full bg-white transition-opacity duration-300"
+                                                style={{ opacity: hoveredId === product.id ? 0 : 1 }}
+                                            />
+                                            <img
+                                                src={product.imageHover}
+                                                alt={`${product.name} - hover`}
+                                                className="object-cover h-[200px] w-full bg-white absolute inset-0 transition-opacity duration-300"
+                                                style={{ opacity: hoveredId === product.id ? 1 : 0 }}
+                                            />
+                                        </>
+                                    ) : (
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="object-cover h-[200px] w-full bg-white"
+                                        />
+                                    )}
                                     {product.status !== 'available' && (
                                         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
                                             <div className=" px-4 py-2 rounded-lg">

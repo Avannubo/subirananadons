@@ -299,7 +299,11 @@ export default function ListEditModal({
 
                     {/* Content - Scrollable */}
                     <div className="flex-1 overflow-y-auto">
-                        <form onSubmit={handleUpdateList} className="p-6">
+                        <form onSubmit={(e) => e.preventDefault()} className="p-6" onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                            }
+                        }}>
 
                             {/* Basic Information Section */}
                             <div className="mb-4">
@@ -317,6 +321,11 @@ export default function ListEditModal({
                                                 name="title"
                                                 value={editForm.title}
                                                 onChange={handleEditChange}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition-colors"
                                                 placeholder={t.listTitlePlaceholder}
                                                 required
@@ -334,6 +343,11 @@ export default function ListEditModal({
                                                 name="babyName"
                                                 value={editForm.babyName}
                                                 onChange={handleEditChange}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition-colors"
                                                 placeholder={t.babyNamePlaceholder}
                                                 required
@@ -418,7 +432,7 @@ export default function ListEditModal({
                                                     disabled={addBtnLoading}
                                                 >
                                                     {addBtnLoading ? (
-                                                        <svg className="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <svg className="animate-spin h-4 w-4 mr-2 select-none text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                                                         </svg>

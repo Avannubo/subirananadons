@@ -42,8 +42,10 @@ const translations = {
         imageUploadSuccess: 'Imatge pujada correctament',
         imageUploadError: 'Error en pujar la imatge. Es desarà la llista sense la nova imatge.',
         requiredFields: 'Si us plau, completa tots els camps obligatoris',
+        babyname: 'Nom del nadó',
     },
     es: {
+        babyname: 'Nombre del bebé',
         id: 'ID',
         reference: 'Referencia',
         name: 'Nombre',
@@ -137,7 +139,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             });
         return (
             list.id.toString().includes(filters.searchId || '') &&
-            list.reference.toLowerCase().includes((filters.searchReference || '').toLowerCase()) &&
+            list.babyName.toLowerCase().includes((filters.searchBabyName || '').toLowerCase()) &&
             list.name.toLowerCase().includes((filters.searchName || '').toLowerCase()) &&
             list.creator.toLowerCase().includes((filters.searchCreator || '').toLowerCase()) &&
             hasMatchingProduct
@@ -447,12 +449,12 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                     <thead className="bg-gray-50 text-gray-700 uppercasªe text-xs">
                         <tr>
                             <th className="px-6 py-3 text-left">{t.id}</th>
-                            <th className="px-6 py-3 text-left">{t.reference}</th>
+                            <th className="px-6 py-3 text-left">{t.babyname}</th>
                             <th className="px-6 py-3 text-left">{t.name}</th>
                             {userRole === 'admin' && <th className="px-6 py-3 text-left">{t.creator}</th>}
-                            <th className="px-6 py-3 text-left">{t.creationDate}</th>
+                            {/* <th className="px-6 py-3 text-left">{t.creationDate}</th> */}
                             <th className="px-6 py-3 text-left">{t.dueDate}</th>
-                            <th className="px-6 py-3 text-left">{t.privacy}</th>
+                            {/* <th className="px-6 py-3 text-left">{t.privacy}</th> */}
                             <th className="px-6 py-3 text-left">{t.status}</th>
                             <th className="px-6 py-3 text-left">{t.viewShare}</th>
                             <th className="px-6 py-3 text-left">{t.documents}</th>
@@ -464,16 +466,16 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                             (filteredLists.map((list, index) => (
                                 <tr key={index} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 w-[50px]">{index + 1}</td>
-                                    <td className="px-6 py-4 w-[100px] truncate">{list.reference}</td>
-                                    <td className="px-6 py-4 max-w-[150px] truncate" title={list.name}>{list.name}</td>
-                                    {userRole === 'admin' && <td className="px-6 py-4 w-[120px] truncate" title={list.creator}>{list.creator}</td>}
-                                    <td className="px-6 py-4 w-[120px]">{list.creationDate}</td>
+                                    <td className="px-6 py-4 max-w-[200px] truncate">{list.babyName}</td>
+                                    <td className="px-6 py-4 max-w-[220px] truncate" title={list.name}>{list.name}</td>
+                                    {userRole === 'admin' && <td className="px-6 py-4 max-w-[150px] truncate" title={list.creator}>{list.creator}</td>}
+                                    {/* <td className="px-6 py-4 w-[120px]">{list.creationDate}</td> */}
                                     <td className="px-6 py-4 w-[120px]">{list.dueDate}</td>
-                                    <td className="px-6 py-4">
+                                    {/* <td className="px-6 py-4">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.isPublic ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'}`}>
                                             {list.isPublic ? t.public : t.private}
                                         </span>
-                                    </td>
+                                    </td> */}
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.status === t.active ? 'bg-green-100 text-green-800' : list.status === t.completed ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
                                             {list.status}

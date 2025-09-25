@@ -143,6 +143,9 @@ export default function ListViewModal({
     openStatusModal,
     onStatusChange
 }) {
+    const [pendingSearch, setPendingSearch] = useState('');
+    const [boughtSearch, setBoughtSearch] = useState('');
+    const [reservedSearch, setReservedSearch] = useState('');
     const locale = getLocale();
     const t = translations[locale];
     const [loading, setLoading] = useState(false);
@@ -198,9 +201,28 @@ export default function ListViewModal({
             setItems(listItems);
         }
     }, [listItems, showModal]);
-    const getPendingItems = useCallback(() => items.filter(item => item.state === 0), [items]);
-    const getReservedItems = useCallback(() => items.filter(item => item.state === 1), [items]);
-    const getBoughtItems = useCallback(() => items.filter(item => item.state === 2), [items]);
+    const filterByProductName = useCallback((items, searchTerm) => {
+        if (!searchTerm) return items;
+        return items.filter(item => {
+            const productName = getProductName(item.product, locale).toLowerCase();
+            return productName.includes(searchTerm.toLowerCase());
+        });
+    }, [locale]);
+
+    const getPendingItems = useCallback(() => {
+        const pendingItems = items.filter(item => item.state === 0);
+        return filterByProductName(pendingItems, pendingSearch);
+    }, [items, pendingSearch, filterByProductName]);
+
+    const getReservedItems = useCallback(() => {
+        const reservedItems = items.filter(item => item.state === 1);
+        return filterByProductName(reservedItems, reservedSearch);
+    }, [items, reservedSearch, filterByProductName]);
+
+    const getBoughtItems = useCallback(() => {
+        const boughtItems = items.filter(item => item.state === 2);
+        return filterByProductName(boughtItems, boughtSearch);
+    }, [items, boughtSearch, filterByProductName]);
     const confirmStateChange = async () => {
         if (!currentItem) return;
         const listId = selectedList.rawData?._id || selectedList._id;
@@ -321,7 +343,7 @@ export default function ListViewModal({
         if (!item?.product?._id) {
             console.warn('Missing product data for item:', item);
             return (
-                <div key={item?._id || `error-${index}`} className="p-4 bg-white border-b border-gray-200">
+                <div key={item?._id || `error-${index}`} className="p-4 bg-white border-b-1 border-gray-200">
                     <div className="flex items-start">
                         <div className="flex-1">
                             <p className="text-sm text-red-500">{t.errorProductData}</p>
@@ -337,7 +359,7 @@ export default function ListViewModal({
         // Get product name in correct locale with fallback
         const productName = getProductName(item.product, locale);
         return (
-            <div key={item._id} className="p-4 bg-white border-b border-gray-200">
+            <div key={item._id} className="p-4 bg-white border-b-1 border-gray-200">
                 <div className="flex items-start">
                     <div className="flex-shrink-0 h-16 w-16 bg-gray-100 rounded-md overflow-hidden mr-3">
                         {item.product?.image && (
@@ -490,7 +512,7 @@ export default function ListViewModal({
         <>
             <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg shadow-xl w-full h-auto overflow-y-auto">
-                    <div className="p-6 flex flex-col h-full">
+                    <div className="p-6 flex flex-col h-full min-h-[95vh]">
                         {/* Header */}
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center">
@@ -613,18 +635,34 @@ export default function ListViewModal({
                         <div className="grid grid-cols-3 gap-4 flex-1 h-full">
                             {/* Pending Items - Always shown, but for owner also show reserved with tag */}
                             <div className="flex flex-col">
-                                <div className="flex items-center mb-4">
-                                    <span className="text-[#36A9E1] mr-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                        </svg>
-                                    </span>
-                                    <h3 className="text-md font-semibold text-gray-800">{t.pendingProducts}</h3>
+                                <div className="space-y-4 mb-4">
+                                    <div className="flex items-center">
+                                        <span className="text-[#36A9E1] mr-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                            </svg>
+                                        </span>
+                                        <h3 className="text-md font-semibold text-gray-800">{t.pendingProducts}</h3>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder={locale === 'ca' ? "Cercar producte" : "Buscar producto"}
+                                            value={pendingSearch}
+                                            onChange={(e) => setPendingSearch(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
+                                        />
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-400">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[55vh] flex-1">
+                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[50vh] flex-1">
                                     {itemsLoading ? (
                                         <div className="flex justify-center items-center py-10">
-                                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]"></div>
+                                            <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
                                         </div>
                                     ) : (() => {
                                         // For the owner, show reserved products in pending with a tag
@@ -674,18 +712,34 @@ export default function ListViewModal({
                             </div>
                             {/* Bought Items - Always shown */}
                             <div className="flex flex-col">
-                                <div className="flex items-center mb-4">
-                                    <span className="text-[#36A9E1] mr-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                        </svg>
-                                    </span>
-                                    <h3 className="text-md font-semibold text-gray-800">{t.boughtProducts}</h3>
+                                <div className="space-y-4 mb-4">
+                                    <div className="flex items-center">
+                                        <span className="text-[#36A9E1] mr-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                            </svg>
+                                        </span>
+                                        <h3 className="text-md font-semibold text-gray-800">{t.boughtProducts}</h3>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder={locale === 'ca' ? "Cercar producte" : "Buscar producto"}
+                                            value={boughtSearch}
+                                            onChange={(e) => setBoughtSearch(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
+                                        />
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-400">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[55vh] flex-1">
+                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[50vh] flex-1">
                                     {itemsLoading ? (
                                         <div className="flex justify-center items-center py-10">
-                                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]"></div>
+                                            <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
                                         </div>
                                     ) : getBoughtItems().length === 0 ? (
                                         <div className="text-center py-10">
@@ -702,18 +756,34 @@ export default function ListViewModal({
                             {user.role === 'admin' ? (
                                 /* Admin view - Reserved Items */
                                 <div className="flex flex-col">
-                                    <div className="flex items-center mb-4">
-                                        <span className="text-[#36A9E1] mr-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                            </svg>
-                                        </span>
-                                        <h3 className="text-md font-semibold text-gray-800">{t.reservedProducts}</h3>
+                                    <div className="space-y-4 mb-4">
+                                        <div className="flex items-center">
+                                            <span className="text-[#36A9E1] mr-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                                </svg>
+                                            </span>
+                                            <h3 className="text-md font-semibold text-gray-800">{t.reservedProducts}</h3>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                placeholder={locale === 'ca' ? "Cercar producte" : "Buscar producto"}
+                                                value={reservedSearch}
+                                                onChange={(e) => setReservedSearch(e.target.value)}
+                                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
+                                            />
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-400">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                                </svg>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[55vh] flex-1">
+                                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[50vh] flex-1">
                                         {itemsLoading ? (
                                             <div className="flex justify-center items-center py-10">
-                                                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]"></div>
+                                                <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
                                             </div>
                                         ) : getReservedItems().length === 0 ? (
                                             <div className="text-center py-10">

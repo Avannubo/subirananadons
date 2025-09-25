@@ -6,7 +6,7 @@ export class DiscountService {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            });
+            }); 
             if (!response.ok) {
                 throw new Error('Failed to update discounts');
             }

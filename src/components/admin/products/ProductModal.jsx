@@ -195,36 +195,40 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             .filter(Boolean);
     };
     const filteredCategories = filterCategoriesByName(hierarchicalCategories, categorySearchTerm);
+
+
     // --- Load Product Data (Edit/New) ---
     // Check for expired discount periodically
-    useEffect(() => {
-        // Only check expiration for discounts that have both start and end dates
-        if (!formData.discount?.active || !formData.discount?.startDate || !formData.discount?.endDate) return;
-        // Set up timer to check expiration
-        const endDate = new Date(formData.discount.endDate);
-        const now = new Date();
-        const timeUntilExpiry = endDate.getTime() - now.getTime();
-        if (timeUntilExpiry > 0) {
-            const timer = setTimeout(() => {
-                setFormData(prev => ({
-                    ...prev,
-                    discount: {
-                        ...prev.discount,
-                        active: false
-                    }
-                }));
-                toast('El descompte ha expirat i s\'ha desactivat automàticament', {
-                    icon: '⚠️',
-                    style: {
-                        borderRadius: '10px',
-                        background: '#FFF3CD',
-                        color: '#856404',
-                    }
-                });
-            }, timeUntilExpiry);
-            return () => clearTimeout(timer);
-        }
-    }, [formData.discount?.endDate, formData.discount?.active]);
+    // useEffect(() => {
+    //     // Only check expiration for discounts that have both start and end dates
+    //     if (!formData.discount?.active || !formData.discount?.startDate || !formData.discount?.endDate) return;
+    //     // Set up timer to check expiration
+    //     const endDate = new Date(formData.discount.endDate);
+    //     const now = new Date();
+    //     const timeUntilExpiry = endDate.getTime() - now.getTime();
+    //     if (timeUntilExpiry > 0) {
+    //         const timer = setTimeout(() => {
+    //             setFormData(prev => ({
+    //                 ...prev,
+    //                 discount: {
+    //                     ...prev.discount,
+    //                     active: false
+    //                 }
+    //             }));
+    //             toast('El descompte ha expirat i s\'ha desactivat automàticament', {
+    //                 icon: '⚠️',
+    //                 style: {
+    //                     borderRadius: '10px',
+    //                     background: '#FFF3CD',
+    //                     color: '#856404',
+    //                 }
+    //             });
+    //         }, timeUntilExpiry);
+    //         return () => clearTimeout(timer);
+    //     }
+    // }, [formData.discount?.endDate, formData.discount?.active]);
+
+
     useEffect(() => {
         if (isEditing && product) {
             // Format all images into a single array for the UI
@@ -265,9 +269,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 active: product.discount.active ?? false,
                 type: product.discount.type ?? 'percentage',
                 value: product.discount.value ?? '',
-                // Format dates to local datetime-local input format
-                startDate: product.discount.startDate ? new Date(product.discount.startDate).toISOString().slice(0, 16) : '',
-                endDate: product.discount.endDate ? new Date(product.discount.endDate).toISOString().slice(0, 16) : '',
+                // Use the dates directly without any timezone conversion
+                startDate: product.discount.startDate || '',
+                endDate: product.discount.endDate || '',
+
                 minPurchaseAmount: product.discount.minPurchaseAmount ?? '',
                 minQuantity: product.discount.minQuantity ?? '',
                 finalPrice: product.discount.finalPrice ?? null
@@ -330,7 +335,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     active: false,
                     type: 'percentage',
                     value: '',
-                    startDate: '',
+                    startDate: '',  // Let user select the start date
                     endDate: '',
                     minPurchaseAmount: '',
                     minQuantity: ''
@@ -385,15 +390,30 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     };
                 }
             } else if (discountField === 'startDate' || discountField === 'endDate') {
-                // For date fields, store in ISO format but adjust for local timezone
-                let dateString = '';
-                if (value) {
-                    const dateValue = new Date(value);
-                    dateString = dateValue.toISOString();
+                const currentDiscount = formData.discount || {};
+                const startDate = discountField === 'startDate' ? value : currentDiscount.startDate;
+                const endDate = discountField === 'endDate' ? value : currentDiscount.endDate;
+
+                // If both dates are set, validate that end date is after start date
+                if (startDate && endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+
+                    if (end <= start) {
+                        toast.error('La data de fi ha de ser posterior a la data d\'inici', {
+                            style: {
+                                borderRadius: '10px',
+                                background: '#FFF3CD',
+                                color: '#856404',
+                            }
+                        });
+                        return; // Don't update if invalid
+                    }
                 }
+
                 newDiscount = {
-                    ...(formData.discount || {}),
-                    [discountField]: dateString
+                    ...currentDiscount,
+                    [discountField]: value
                 };
             } else {
                 newDiscount = {
@@ -1204,8 +1224,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     type="datetime-local"
                                                     id="discount-start-date"
                                                     name="discount.startDate"
-                                                    value={formData.discount?.startDate ? new Date(formData.discount.startDate).toISOString().slice(0, 16) : ''}
+                                                    value={formData.discount?.startDate || ''}
                                                     onChange={handleChange}
+                                                    min={new Date().toISOString().slice(0, 16)}
+                                                    max={formData.discount?.endDate || ''}
                                                     step="60"
                                                     className={`mt-1 block w-full px-3 py-2 border ${errors.discountStartDate ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                                 />
@@ -1221,8 +1243,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     type="datetime-local"
                                                     id="discount-end-date"
                                                     name="discount.endDate"
-                                                    value={formData.discount?.endDate ? new Date(formData.discount.endDate).toISOString().slice(0, 16) : ''}
+                                                    value={formData.discount?.endDate || ''}
                                                     onChange={handleChange}
+                                                    min={formData.discount?.startDate || new Date().toISOString().slice(0, 16)}
                                                     step="60"
                                                     className={`mt-1 block w-full px-3 py-2 border ${errors.discountEndDate ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                                 />

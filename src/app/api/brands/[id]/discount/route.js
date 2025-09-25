@@ -4,7 +4,7 @@ import Brand from '@/models/Brand';
 import Product from '@/models/Product';
 export async function PUT(request, { params }) {
     try {
-        await dbConnect();
+        await dbConnect(); 
         const { id } = params;
         const data = await request.json();
         // Update brand with new discount

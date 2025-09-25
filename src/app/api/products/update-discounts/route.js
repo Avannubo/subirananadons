@@ -14,7 +14,7 @@ export async function POST() {
         let updatedCount = 0;
         for (const product of products) {
             // Only process products that have valid dates
-            if (product.discount.startDate && product.discount.endDate) {
+            if (product.discount.startDate && product.discount.endDate) { 
                 const startDate = new Date(product.discount.startDate);
                 const endDate = new Date(product.discount.endDate);
                 // Check if the discount has expired

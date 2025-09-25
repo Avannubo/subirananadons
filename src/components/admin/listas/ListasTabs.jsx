@@ -15,6 +15,7 @@ const translations = {
         update: 'Actualitzar dades',
         newList: 'Nova Llista',
         searchReference: 'Cercar Referència',
+        searchBabyName: 'Cercar Nadó',
         searchName: 'Cercar Nom',
         searchCreator: 'Cercar Creador',
         searchProduct: 'Cercar per producte',
@@ -64,6 +65,7 @@ const translations = {
         update: 'Actualizar datos',
         newList: 'Nueva Lista',
         searchReference: 'Buscar Referencia',
+        searchBabyName: 'Buscar Bebé',
         searchName: 'Buscar Nombre',
         searchCreator: 'Buscar Creador',
         searchProduct: 'Buscar por producto',
@@ -127,7 +129,7 @@ export default function ListasTabs({ userRole = 'user' }) {
     //console.log("List Conditions:", listConditions, "Loading:", loadingConditions);
     const [filters, setFilters] = useState({
         searchId: '',
-        searchReference: '',
+        searchBabyName: '',
         searchName: '',
         searchCreator: '',
         searchProduct: '',
@@ -408,9 +410,9 @@ export default function ListasTabs({ userRole = 'user' }) {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder={t.searchReference}
-                                name="searchReference"
-                                value={filters.searchReference}
+                                placeholder={locale === 'ca' ? "Cercar Nadó" : "Buscar Bebé"}
+                                name="searchBabyName"
+                                value={filters.searchBabyName}
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
