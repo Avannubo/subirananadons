@@ -39,21 +39,28 @@ export default function AdminLayout({ children }) {
                     <div className="max-w-[1400px] mx-auto">
                         {children}
                         {/* Floating horizontal tabs for mobile (bottom) */}
-                        <div className="md:hidden m-2">
-                            <div className="fixed bottom-2 left-0  w-full rounded-2xl shadow-2xl shadow-cyan-900 bg-white z-[99] flex justify-around md:hidden">
-                                {mobileTabs.map((tab, idx) => {
-                                    const Icon = tab.icon;
-                                    return (
-                                        <Link
-                                            key={tab.href}
-                                            href={tab.href}
-                                            className="flex flex-col items-center justify-center py-2 px-4 text-xs text-gray-700 hover:text-[#36A9E1]"
-                                        >
-                                            <Icon size={22} className="mb-1" />
-                                            <span>{tab.label}</span>
-                                        </Link>
-                                    );
-                                })}
+                        <div className="md:hidden   ">
+
+                            <div className="fixed bottom-2 left-0 z-[99] w-full  md:hidden">
+
+                                <div className=' mx-2 rounded-2xl shadow-2xl shadow-cyan-900 bg-white flex flex-row justify-around'>
+                                    {mobileTabs.map((tab, idx) => {
+                                        const Icon = tab.icon;
+                                        return (
+                                            <Link
+                                                key={tab.href}
+                                                href={tab.href}
+                                                className=" flex flex-col items-center justify-center py-2 px-4 text-xs text-gray-700 hover:text-[#36A9E1]"
+                                            >
+                                                <Icon size={22} className="mb-1" />
+                                                <span>{tab.label}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+
+
+
                             </div>
                         </div>
 

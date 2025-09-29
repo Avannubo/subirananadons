@@ -474,14 +474,14 @@ export default function ListasTabs({ userRole = 'user' }) {
 
             {/* Create List Modal - kept as is */}
             {showCreateModal && (
-                <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-1  md:p-4">
                     <div
                         ref={modalRef}
-                        className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto"
+                        className="bg-white rounded-lg shadow-xl w-full max-w-5xl h-full md:max-h-[90vh] overflow-y-auto"
                     >
-                        <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold text-gray-800">{t.createTitle}</h2>
+                        <div className="p-2 md:p-6">
+                            <div className="flex items-center justify-between mb-2 md:mb-6">
+                                <h2 className="text-xl md:text-2xl font-bold text-gray-800">{t.createTitle}</h2>
                                 <button
                                     onClick={() => setShowCreateModal(false)}
                                     className="text-gray-500 hover:text-gray-700 cursor-pointer"
@@ -490,7 +490,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 </button>
                             </div>
                             {/* Step Indicator */}
-                            <div className="mb-8">
+                            <div className="mb-2 md:mb-8">
                                 <div className="flex items-center justify-between">
                                     <div className="flex-1">
                                         <div className="flex items-center">
@@ -522,7 +522,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                             </div>
                             {/* Step 1: Basic Information */}
                             {currentStep === 1 && (
-                                <form onSubmit={handleNextStep} className="space-y-6">
+                                <form onSubmit={handleNextStep} className="space-y-2 md:space-y-6">
                                     {/* Admin: Select user for the list */}
                                     {userRole === 'admin' && (
                                         <div>
@@ -646,8 +646,8 @@ export default function ListasTabs({ userRole = 'user' }) {
                             )}
                             {/* Step 2: Add Products */}
                             {currentStep === 2 && (
-                                <div className="space-y-6">
-                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                <div className="space-y-2 md:space-y-6 mb-6">
+                                    <div className="md:bg-gray-50  md:p-4 rounded-lg">
                                         <h3 className="text-lg font-medium text-gray-900 mb-2">{t.addProductsTitle}</h3>
                                         <p className="text-gray-600">
                                             {t.addProductsDesc}

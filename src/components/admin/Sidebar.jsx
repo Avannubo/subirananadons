@@ -76,7 +76,14 @@ export default function Sidebar() {
     const userRole = session?.user?.role || 'user';
     const defaultLocale = useLocale();
     // Sidebar is collapsed by default on desktop
-    const [isCollapsed, setIsCollapsed] = useState(true);
+    // Persist sidebar state across page navigation
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const stored = window.localStorage.getItem('sidebarCollapsed');
+            return stored === null ? true : stored === 'true';
+        }
+        return true;
+    });
     const isSidebarCollapsed = isCollapsed;
     // Detect browser language and set initial locale
     const [currentLocale, setCurrentLocale] = React.useState(defaultLocale);
@@ -90,6 +97,12 @@ export default function Sidebar() {
         }
         setCurrentLocale(detectedLocale);
     }, []);
+    // Save collapse state to localStorage on change
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            window.localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
+        }
+    }, [isCollapsed]);
     const navigationItems = getNavigationItems(userRole, currentLocale);
     const sidebarClasses = `
         ${isSidebarCollapsed ? 'w-20' : 'w-64'}
@@ -104,7 +117,7 @@ export default function Sidebar() {
                 <div className="px-4 py-2 min-h-[88vh] flex flex-col justify-between relative">
                     {/* Collapse Button only on desktop */}
                     <button
-                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        onClick={() => setIsCollapsed(prev => !prev)}
                         className="hidden md:flex absolute -right-4 top-4 p-1 bg-white rounded-full shadow-md"
                     >
                         {isSidebarCollapsed ? (

@@ -21,7 +21,6 @@ const translations = {
         next: 'Siguiente',
     }
 };
-
 function getLocale() {
     if (typeof window !== 'undefined') {
         const lang = window.navigator.language || 'es';
@@ -29,7 +28,6 @@ function getLocale() {
     }
     return 'es';
 }
-
 function getProductName(product, locale = 'es') {
     if (!product) return 'ND';
     if (typeof product.name === 'string') return product.name;
@@ -54,14 +52,12 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
     const [selectedItems, setSelectedItems] = useState(
         Array.isArray(selectedProducts) ? selectedProducts : []
     );
-
     // Sync selectedItems with selectedProducts prop (for edit mode)
     useEffect(() => {
         if (Array.isArray(selectedProducts)) {
             setSelectedItems(selectedProducts);
         }
     }, [selectedProducts]);
-
     // Reset selected items when resetSelection prop changes
     useEffect(() => {
         if (resetSelection) {
@@ -77,7 +73,6 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
         }, 400);
         return () => clearTimeout(debounceTimeout.current);
     }, [search]);
-
     useEffect(() => {
         const loadProducts = async () => {
             try {
@@ -89,7 +84,6 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                     search: debouncedSearch && debouncedSearch.trim() !== '' ? debouncedSearch : undefined
                 });
                 //console.log(result);
-
                 setProducts(result.products || []);
                 setTotalPages(result.pagination?.totalPages || 1);
             } catch (error) {
@@ -101,8 +95,6 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
         };
         loadProducts();
     }, [currentPage, debouncedSearch]);
-
-
     const handleSelectProduct = (product) => {
         // Prevent adding duplicate products
         const isProductInList = selectedItems.some(item => item.product._id === product._id);
@@ -110,13 +102,11 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
         //     toast.error(`${getProductName(product, locale)} ya está en la lista`);
         //     return;
         // }
-
         // Ensure we have a valid product object with _id
         if (!product || !product._id) {
             console.error('Invalid product:', product);
             return;
         }
-
         const newItem = {
             _id: crypto.randomUUID(), // Add a unique ID for each selected item
             product: {
@@ -155,7 +145,6 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
             onProductSelect(updatedItems);
         }
     };
-
     // const handleQuantityChange = (productId, newQuantity) => {
     //     if (newQuantity < 1) return;
     //     const updatedItems = selectedItems.map(item => {
@@ -172,8 +161,8 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
     return (
         <div>
             {selectedItems.length > 0 && (
-                <div className="mb-6   bg-gray-50 rounded-lg min-w-[600px] p-4 shadow-md">
-                    <h3 className="font-medium text-gray-900 mb-2">{t.selected} ({selectedItems.length})</h3>
+                <div className="mb-6   bg-gray-50 rounded-lg md:min-w-[600px] p-4 shadow-md">
+                    <h3 className="font-medium text-gray-900 mb-2 ">{t.selected} ({selectedItems.length})</h3>
                     <div className="space-y-2 max-h-[100px] overflow-y-auto">
                         {selectedItems
                             .filter(item => item.state === 0)
@@ -192,7 +181,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                             )}
                                         </div>
                                         <div>
-                                            <span className="text-sm font-medium">{getProductName(item.product, locale)}</span>
+                                            <span className="text-sm font-medium w-auto truncate">{getProductName(item.product, locale)}</span>
                                             <div className="text-sm">
                                                 {item.product.discount?.active ? (
                                                     <div className="flex items-center gap-2">
@@ -234,7 +223,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                 </div>
             )}
             {/* Search Bar */}
-            <div className="mb-6">
+            <div className="mb-2 md:mb-6">
                 <div className="relative">
                     <input
                         type="text"
@@ -274,7 +263,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                             <p className="text-gray-500">{t.noProducts}</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
                             {products.map((product) => (
                                 <div
                                     key={product._id}

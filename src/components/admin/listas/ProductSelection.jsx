@@ -138,7 +138,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
     return (
         <div>
             {selectedItems.length > 0 && (
-                <div className="mb-6 bg-gray-50 rounded-lg min-w-[600px] p-4 shadow-md">
+                <div className="mb-6 bg-gray-50 rounded-lg md:min-w-[600px] p-4 shadow-md">
                     <h3 className="font-medium text-gray-900 mb-2">{t.selected} ({selectedItems.length})</h3>
                     <div className="space-y-2 max-h-[100px] overflow-y-auto">
                         {selectedItems
@@ -158,7 +158,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                             )}
                                         </div>
                                         <div className='flex flex-col'>
-                                            <span className="text-sm font-medium truncate max-w-[400px] block">{getProductName(item.product)}</span>
+                                            <span className="text-sm font-medium w-auto truncate md:max-w-[400px] block">{getProductName(item.product)}</span>
                                             <div className="flex items-center gap-2">
                                                 {item.product.discount?.active ? (
                                                     <>
@@ -233,7 +233,7 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                             <p className="text-gray-500">{t.noProducts}</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
                             {products.map((product) => (
                                 <div
                                     key={product._id}
@@ -251,14 +251,14 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
                                                     src={product.image}
                                                     alt={getProductName(product)}
                                                     width={300}
-                                                    height={150}
-                                                    className="object-contain p-2 w-full h-[150px]"
+                                                    height={120}
+                                                    className="object-contain p-2 w-full h-[120px]"
                                                 />
                                             </div>
                                         )}
                                     </div>
                                     <div className="p-4 pt-2 pb-3 bg-white">
-                                        <h3 className="font-medium text-gray-900 text-center w-[200px] truncate">{getProductName(product)}</h3>
+                                        <h3 className="font-medium text-gray-900 text-center w-auto md:w-[200px] truncate">{getProductName(product)}</h3>
                                         <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
                                             {product.discount?.active ? (
                                                 <div className='flex flex-col items-center'>
