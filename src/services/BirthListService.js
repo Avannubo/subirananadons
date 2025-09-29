@@ -172,10 +172,9 @@ export const fetchBirthListItems = async (id) => {
  * @param {string} listId - The birth list ID
  * @param {string} productId - The product ID to add
  * @param {number} quantity - Quantity of the product (default: 1)
- * @param {number} priority - Priority of the product (1-3, default: 2)
  * @param {number} state - State of the item (0-2, default: 0)
  */
-export const addProductToBirthList = async (listId, productId, quantity = 1, priority = 2, state = 0) => {
+export const addProductToBirthList = async (listId, productId, quantity = 1, state = 0) => {
     try {
         const response = await fetch(`/api/birthlists/${listId}/items`, {
             method: 'POST',
@@ -185,7 +184,6 @@ export const addProductToBirthList = async (listId, productId, quantity = 1, pri
             body: JSON.stringify({
                 product: productId,
                 quantity,
-                priority,
                 state
             }),
         });
@@ -218,7 +216,6 @@ export const updateBirthListItems = async (listId, items) => {
             product: item.product?._id || item.product,
             quantity: item.quantity || 1,
             state: typeof item.state === 'number' ? item.state : 0,
-            priority: item.priority || 2,
             productSnapshot: item.productSnapshot || undefined // Preserve snapshot if it exists
         }));
         const response = await fetch(`/api/birthlists/${listId}/items`, {

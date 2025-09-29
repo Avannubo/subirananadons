@@ -130,39 +130,63 @@ export default function ListEditModal({
 
             if (!currentListData.success) {
                 throw new Error(t.errorFetch);
-            }            // Combine current items with new ones
+            }
+
+            // Get current items
             const currentItems = currentListData.data || [];
 
-            // Keep existing items and add new ones without _id field (let MongoDB generate it)
+            // Filter out items with missing products and log warning
+            const validItems = currentItems.filter(item => {
+                if (!item.product) {
+                    console.warn('Missing product in birth list item:', item._id);
+                    return false;
+                }
+                return true;
+            });
+
+            // Log warning if any items were filtered out
+            if (validItems.length < currentItems.length) {
+                console.warn(`${currentItems.length - validItems.length} items had missing product data in birth list ${selectedList.id}`);
+            }
+
+            // Prepare the new items array with proper handling of userData
             const newItems = [
-                ...currentItems.map(item => {
-                    const obj = {
+                // Handle existing items - preserve their data including _id
+                ...validItems.map(item => {
+                    const cleanItem = {
                         _id: item._id,
-                        product: item.product._id || item.product,
+                        product: item.product?._id || item.product,
                         quantity: item.quantity || 1,
                         state: item.state || 0,
                         reserved: item.reserved || 0,
-                        priority: item.priority || 2
+                        userData: {} // Ensure userData is an empty object when creating or updating items
                     };
-                    if (item.userData !== undefined && item.userData !== null) {
-                        obj.userData = item.userData;
+
+                    // Only include userData if it has actual data
+                    if (item.userData && typeof item.userData === 'object' && Object.keys(item.userData).length > 0) {
+                        cleanItem.userData = item.userData;
                     }
-                    return obj;
+
+                    return cleanItem;
                 }),
-                ...selectedProducts.map(item => ({
-                    product: item.product._id || item.product,
-                    quantity: item.quantity || 1,
-                    state: item.state || 0,
-                    reserved: 0,
-                    priority: item.priority || 2,
-                    userData: {} // Always send a valid object
-                }))
-            ].map(item => {
-                if (item.userData === null || item.userData === undefined) {
-                    delete item.userData;
-                }
-                return item;
-            });
+
+                // Handle new items with empty userData object
+                ...selectedProducts.map(item => {
+                    // Ensure we have a valid product id
+                    const productId = item.product?._id || (typeof item.product === 'string' ? item.product : null);
+                    if (!productId) {
+                        console.warn('Missing product ID for item:', item);
+                        return null;
+                    }
+                    return {
+                        product: productId,
+                        quantity: item.quantity || 1,
+                        state: 0,
+                        reserved: 0,
+                        userData: {} // Set an empty object instead of null/undefined
+                    };
+                }).filter(Boolean) // Remove any null items
+            ];
 
             // Update the list with all items
             const response = await fetch(`/api/birthlists/${selectedList.id}/items`, {
@@ -175,7 +199,8 @@ export default function ListEditModal({
                 })
             });
 
-            const result = await response.json(); if (result.success) {
+            const result = await response.json();
+            if (result.success) {
                 toast.success(t.successAdd(selectedProducts.length));
                 setSelectedProducts([]); // Clear selected products
                 setResetSelection(prev => !prev); // Toggle to trigger useEffect in AddProductToList

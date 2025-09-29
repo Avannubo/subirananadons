@@ -24,7 +24,7 @@ export default function Footer() {
                                     alt="logo"
                                     width={160}
                                     height={60}
-                                    className="w-[160px] md:w-[180px] h-auto"
+                                    className="w-[260px] md:w-[380px] h-auto"
                                 />
                             </div>
                             {/* Socials from DB */}
@@ -98,6 +98,26 @@ export default function Footer() {
                                 alt="footer logo"
                                 width={200}
                                 height={40}
+                            />
+                        </div>
+                    </div >
+                </div>
+                <div className="border-t-2 border-gray-200">
+                    <div className="max-w-[1500px] mx-auto px-4 py-6">
+                        <div className="flex justify-between items-center">
+                            <img
+                                src="/assets/logo-header.svg"
+                                alt="logo"
+                                width={160}
+                                height={60}
+                                className="w-[160px] md:w-[180px] h-auto"
+                            />
+                            <img
+                                src="/assets/logo-header.svg"
+                                alt="logo"
+                                width={160}
+                                height={60}
+                                className="w-[160px] md:w-[180px] h-auto"
                             />
                         </div>
                     </div>

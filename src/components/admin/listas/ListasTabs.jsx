@@ -297,7 +297,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                 product: item.product._id,
                 quantity: item.quantity,
                 reserved: item.reserved || 0,
-                priority: item.priority || 2
+
             }));
             // Create the birth list in the database
             // Always use selected user as creator if admin
@@ -378,9 +378,9 @@ export default function ListasTabs({ userRole = 'user' }) {
                 }}
             />
             <div className="bg-white rounded-lg shadow">
-                <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="p-4 border-b border-gray-200 flex flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">
-                        <h2 className="text-lg font-medium">{t.heading} ({displayLists.length})</h2>
+                        <h2 className="hidden md:block text-lg font-medium">{t.heading} ({displayLists.length})</h2>
                         <button
                             className="ml-2 text-gray-500 cursor-pointer hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
                             onClick={refreshData}
@@ -417,7 +417,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                        <div className="relative">
+                        <div className="hidden md:block relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -428,7 +428,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                        <div className="relative">
+                        <div className="hidden md:block relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -439,7 +439,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                        <div className="relative">
+                        <div className="hidden md:block relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -450,24 +450,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                    </div>
-                    {/* <div className="flex sm:flex-row flex-col justify-start gap-2">
-                        <button
-                            className="flex items-center justify-center px-4 py-2 bg-[#36A9E1] text-white rounded hover:bg-[#00B0C890]"
-                            onClick={applyFilters}
-                            title="Aplicar filtros"
-                        >
-                            <FiFilter className="mr-2" />
-                            Filtrar
-                        </button>
-                        <button
-                            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                            onClick={clearFilters}
-                            title="Limpiar filtros"
-                        >
-                            Limpiar
-                        </button>
-                    </div> */}
+                    </div> 
                 </div>
                 {/* Loading Indicator */}
                 {isLoading ? (

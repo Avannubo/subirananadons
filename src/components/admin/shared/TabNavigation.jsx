@@ -1,7 +1,7 @@
 'use client';
 export default function TabNavigation({ tabs, activeTab, setActiveTab, counts }) {
-    return (
-        <div className="flex flex-wrap overflow-x-auto border-b border-gray-200">
+    return ( 
+        <div className="hidden md:flex flex-wrap overflow-x-auto border-b border-gray-200">
             {tabs.map((tab) => (
                 <button
                     key={tab}

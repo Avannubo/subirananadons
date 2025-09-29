@@ -156,6 +156,8 @@ export default function ListViewModal({
     const [showDataModal, setShowDataModal] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [direction, setDirection] = useState(null);
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [cancelItem, setCancelItem] = useState(null);
     const [userData, setUserData] = useState({
         name: '',
         email: '',
@@ -286,38 +288,13 @@ export default function ListViewModal({
         }
     };
     const moveItem = async (item, dir) => {
-        setCurrentItem(item);
-        setDirection(dir);
-        // If moving left (undoing reservation/purchase), handle it in a single API call
         if (dir === 'left') {
-            try {
-                setLoading(true);
-                const listId = selectedList.rawData?._id || selectedList._id;
-                if (!listId) {
-                    toast.error('Error: ID de lista no encontrado');
-                    return;
-                }
-
-                // Move directly to pending state with null user data in a single API call
-                const result = await updateBirthListItemState(listId, item._id, 0, null);
-                if (result.success) {
-                    // Update the item in the local state
-                    const updatedItems = items.map(i =>
-                        i._id === item._id ? result.data : i
-                    );
-                    setItems(updatedItems);
-                    toast.success('Producto cancelado correctamente');
-                }
-            } catch (error) {
-                console.error('Error updating item:', error);
-                toast.error(error.message || 'Error al cancelar el producto');
-            } finally {
-                setLoading(false);
-            }
+            setCancelItem(item);
+            setShowCancelConfirm(true);
         } else {
-            // If moving to reserved or bought state, show data modal
+            setCurrentItem(item);
+            setDirection(dir);
             setShowDataModal(true);
-            // If the item already has user data, populate the form
             if (item.userData) {
                 setUserData({
                     name: item.userData.name || '',
@@ -538,11 +515,11 @@ export default function ListViewModal({
     if (!showModal || !selectedList) return null;
     return (
         <>
-            <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg shadow-xl w-full h-auto overflow-y-auto">
-                    <div className="p-6 flex flex-col h-full min-h-[95vh]">
+            <div className="fixed inset-0  overflow-y-auto bg-[#00000050] z-[100]  bg-opacity-50 flex items-center justify-center md:p-4 p-1">
+                <div className="  bg-white rounded-lg shadow-xl w-full h-auto overflow-hidden ">
+                    <div className="p-1 md:p-6 flex flex-col h-auto md:min-h-[95vh]">
                         {/* Header */}
-                        <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center justify-between md:mb-6">
                             <div className="flex items-center">
                                 <span className="text-[#36A9E1] mr-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -562,7 +539,7 @@ export default function ListViewModal({
                         </div>
                         {/* Main information cards */}
                         <div>
-                            <div className="flex items-center mb-4 ">
+                            <div className="hidden md:flex items-center mb-4 ">
                                 <span className="text-[#36A9E1] mr-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
@@ -570,8 +547,8 @@ export default function ListViewModal({
                                 </span>
                                 <h3 className="text-md font-semibold text-gray-800">{t.info}</h3>
                             </div>
-                            <div className='flex flex-row space-x-4 mb-4'>
-                                <div className="bg-white rounded-lg border border-gray-200 w-[500px] ">
+                            <div className='hidden md:flex flex-row space-x-4 mb-4'>
+                                <div className="bg-white rounded-lg border border-gray-200 md:w-[500px] ">
                                     <div className="flex flex-row space-x-2 justify-between p-4 space-y-3">
                                         <div>
                                             <span className="block text-xs font-medium text-gray-500">{t.reference}</span>
@@ -658,147 +635,51 @@ export default function ListViewModal({
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        {/* Products sections */}
-                        <div className="grid grid-cols-3 gap-4 flex-1 h-full">
-                            {/* Pending Items - Always shown, but for owner also show reserved with tag */}
-                            <div className="flex flex-col">
-                                <div className="space-y-4 mb-4">
-                                    <div className="flex items-center">
-                                        <span className="text-[#36A9E1] mr-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                            </svg>
-                                        </span>
-                                        <h3 className="text-md font-semibold text-gray-800">{t.pendingProducts}</h3>
-                                    </div>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            placeholder={locale === 'ca' ? "Cercar producte" : "Buscar producto"}
-                                            value={pendingSearch}
-                                            onChange={(e) => setPendingSearch(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
-                                        />
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-400">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                            </svg>
-                                        </div>
-                                    </div>
+                            <div className='md:hidden grid grid-cols-2 mb-2 h-full overflow-scroll p-1 mt-2'>
+                                <div className='mb-2'>
+                                    <span className="block text-xs font-medium text-gray-500">{t.reference}</span>
+                                    <p className="text-sm text-gray-900 ">{selectedList.reference}</p>
                                 </div>
-                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[50vh] flex-1">
-                                    {itemsLoading ? (
-                                        <div className="flex justify-center items-center py-10">
-                                            <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
-                                        </div>
-                                    ) : (() => {
-                                        // For the owner, show reserved products in pending with a tag
-                                        const isOwner = user && selectedList && user._id === selectedList.ownerId;
-                                        let pendingItems = getPendingItems();
-                                        let reservedItems = [];
-                                        const isAdmin = user && user.role === 'admin';
-                                        if (!isAdmin && isOwner) {
-                                            reservedItems = getReservedItems();
-                                        }
-                                        // For admin, do NOT show reserved products in pending or with tag
-                                        if (isAdmin) {
-                                            pendingItems = pendingItems.filter(item => item.state !== 1);
-                                        }
-                                        const allItems = (!isAdmin && isOwner) ? [...pendingItems, ...reservedItems] : pendingItems;
-                                        if (allItems.length === 0) {
-                                            return (
-                                                <div className="text-center py-10">
-                                                    <p className="text-gray-500">{t.noPending}</p>
-                                                </div>
-                                            );
-                                        }
-                                        return (
-                                            <div className="divide-y divide-gray-200 h-full overflow-y-auto">
-                                                {allItems.map((item, index) => {
-                                                    // If owner and item is reserved, add tag and hide reserver info
-                                                    const isReserved = !isAdmin && isOwner && reservedItems.some(r => r._id === item._id);
-                                                    // If reserved, render product without reserver info
-                                                    if (isReserved) {
-                                                        return (
-                                                            <div key={item._id || index} className="relative">
-                                                                {renderProduct({ ...item, reservedBy: undefined, reservedData: undefined }, index)}
-                                                                <span className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">{t.reservedTag}</span>
-                                                            </div>
-                                                        );
-                                                    }
-                                                    return (
-                                                        <div key={item._id || index} className="relative">
-                                                            {renderProduct(item, index)}
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        );
-                                    })()}
+                                <div className='mb-2'>
+                                    <span className="block text-xs font-medium text-gray-500">{t.babyName}</span>
+                                    <p className="text-sm text-gray-900">{selectedList.babyName}</p>
+                                </div>
+                                <div className='mb-2'>
+                                    <span className="block text-xs font-medium text-gray-500">{t.visibility}</span>
+                                    <p className="text-sm text-gray-900">{selectedList.isPublic ? t.public : t.private}</p>
+                                </div>
+                                <div className='mb-2'>
+                                    <span className="block text-xs font-medium text-gray-500">{t.date}</span>
+                                    <p className="text-sm text-gray-900">{selectedList.creationDate}</p>
+                                </div>
+                                <div className='mb-2'>
+                                    <span className="block text-xs font-medium text-gray-500">{t.total}</span>
+                                    <p className="text-sm text-gray-900">{selectedList.products} {t.productos}</p>
+                                </div>
+                                <div className='mb-2'>
+                                    <span className="block text-xs font-medium text-gray-500">{t.dueDate}</span>
+                                    <p className="text-sm text-gray-900">{selectedList.dueDate}</p>
                                 </div>
                             </div>
-                            {/* Bought Items - Always shown */}
-                            <div className="flex flex-col">
-                                <div className="space-y-4 mb-4">
-                                    <div className="flex items-center">
-                                        <span className="text-[#36A9E1] mr-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                            </svg>
-                                        </span>
-                                        <h3 className="text-md font-semibold text-gray-800">{t.boughtProducts}</h3>
-                                    </div>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            placeholder={locale === 'ca' ? "Cercar producte" : "Buscar producto"}
-                                            value={boughtSearch}
-                                            onChange={(e) => setBoughtSearch(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
-                                        />
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-400">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[50vh] flex-1">
-                                    {itemsLoading ? (
-                                        <div className="flex justify-center items-center py-10">
-                                            <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
-                                        </div>
-                                    ) : getBoughtItems().length === 0 ? (
-                                        <div className="text-center py-10">
-                                            <p className="text-gray-500">{t.noBought}</p>
-                                        </div>
-                                    ) : (
-                                        <div className="divide-y divide-gray-200 h-full overflow-y-auto">
-                                            {getBoughtItems().map((item, index) => renderProduct(item, index))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            {/* Third column - Different based on user role */}
-                            {user.role === 'admin' ? (
-                                /* Admin view - Reserved Items */
+                            {/* Products sections */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1  ">
+                                {/* Pending Items - Always shown, but for owner also show reserved with tag */}
                                 <div className="flex flex-col">
-                                    <div className="space-y-4 mb-4">
+                                    <div className="space-y-4 md:mb-4">
                                         <div className="flex items-center">
                                             <span className="text-[#36A9E1] mr-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                                 </svg>
                                             </span>
-                                            <h3 className="text-md font-semibold text-gray-800">{t.reservedProducts}</h3>
+                                            <h3 className="text-md font-semibold text-gray-800">{t.pendingProducts}</h3>
                                         </div>
-                                        <div className="relative">
+                                        <div className="hidden md:block relative">
                                             <input
                                                 type="text"
                                                 placeholder={locale === 'ca' ? "Cercar producte" : "Buscar producto"}
-                                                value={reservedSearch}
-                                                onChange={(e) => setReservedSearch(e.target.value)}
+                                                value={pendingSearch}
+                                                onChange={(e) => setPendingSearch(e.target.value)}
                                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
                                             />
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -808,111 +689,265 @@ export default function ListViewModal({
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden max-h-[50vh] flex-1">
+                                    <div className="bg-white rounded-lg border border-gray-200 overflow-auto h-[25vh] md:max-h-[50vh] md:flex-1">
                                         {itemsLoading ? (
                                             <div className="flex justify-center items-center py-10">
                                                 <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
                                             </div>
-                                        ) : getReservedItems().length === 0 ? (
+                                        ) : (() => {
+                                            // For the owner, show reserved products in pending with a tag
+                                            const isOwner = user && selectedList && user._id === selectedList.ownerId;
+                                            let pendingItems = getPendingItems();
+                                            let reservedItems = [];
+                                            const isAdmin = user && user.role === 'admin';
+                                            if (!isAdmin && isOwner) {
+                                                reservedItems = getReservedItems();
+                                            }
+                                            // For admin, do NOT show reserved products in pending or with tag
+                                            if (isAdmin) {
+                                                pendingItems = pendingItems.filter(item => item.state !== 1);
+                                            }
+                                            const allItems = (!isAdmin && isOwner) ? [...pendingItems, ...reservedItems] : pendingItems;
+                                            if (allItems.length === 0) {
+                                                return (
+                                                    <div className="text-center py-10">
+                                                        <p className="text-gray-500">{t.noPending}</p>
+                                                    </div>
+                                                );
+                                            }
+                                            return (
+                                                <div className="divide-y divide-gray-200 h-full overflow-y-auto">
+                                                    {allItems.map((item, index) => {
+                                                        // If owner and item is reserved, add tag and hide reserver info
+                                                        const isReserved = !isAdmin && isOwner && reservedItems.some(r => r._id === item._id);
+                                                        // If reserved, render product without reserver info
+                                                        if (isReserved) {
+                                                            return (
+                                                                <div key={item._id || index} className="relative">
+                                                                    {renderProduct({ ...item, reservedBy: undefined, reservedData: undefined }, index)}
+                                                                    <span className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">{t.reservedTag}</span>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return (
+                                                            <div key={item._id || index} className="relative">
+                                                                {renderProduct(item, index)}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+                                </div>
+
+                                {/* Bought Items - Always shown */}
+                                <div className="flex flex-col">
+                                    <div className="space-y-4 md:mb-4">
+                                        <div className="flex items-center">
+                                            <span className="text-[#36A9E1] mr-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                                </svg>
+                                            </span>
+                                            <h3 className="text-md font-semibold text-gray-800">{t.boughtProducts}</h3>
+                                        </div>
+                                        <div className="hidden md:block relative">
+                                            <input
+                                                type="text"
+                                                placeholder={locale === 'ca' ? "Cercar producte" : "Buscar producto"}
+                                                value={boughtSearch}
+                                                onChange={(e) => setBoughtSearch(e.target.value)}
+                                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
+                                            />
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-400">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white rounded-lg border border-gray-200 h-[120px] md:max-h-[50vh] md:flex-1">
+                                        {itemsLoading ? (
+                                            <div className="flex justify-center items-center py-10">
+                                                <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
+                                            </div>
+                                        ) : getBoughtItems().length === 0 ? (
                                             <div className="text-center py-10">
-                                                <p className="text-gray-500">{t.noReserved}</p>
+                                                <p className="text-gray-500">{t.noBought}</p>
                                             </div>
                                         ) : (
                                             <div className="divide-y divide-gray-200 h-full overflow-y-auto">
-                                                {getReservedItems().map((item, index) => renderProduct(item, index))}
+                                                {getBoughtItems().map((item, index) => renderProduct(item, index))}
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                            ) : (
-                                /* Owner view - Progress */
-                                <div>
-                                    <div className="flex items-center mb-4">
-                                        <span className="text-[#36A9E1] mr-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                                            </svg>
-                                        </span>
-                                        <h3 className="text-md font-semibold text-gray-800">{t.progress}</h3>
-                                    </div>
-                                    <div className="bg-white rounded-lg border border-gray-200 p-4 h-[300px]">
-                                        <div className="mb-6">
-                                            <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-xs text-gray-500">{t.progresoTotal}</span>
-                                                <span className="text-xs font-medium">{calculateProgress()}%</span>
+                                {/* Third column - Different based on user role */}
+                                <div className="hidden md:block">
+                                    {user.role === 'admin' ? (
+                                        /* Admin view - Reserved Items */
+                                        <div className="flex flex-col">
+                                            <div className="space-y-4 md:mb-4">
+                                                <div className="flex items-center">
+                                                    <span className="text-[#36A9E1] mr-2">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                                        </svg>
+                                                    </span>
+                                                    <h3 className="text-md font-semibold text-gray-800">{t.reservedProducts}</h3>
+                                                </div>
+                                                <div className="hidden md:block relative">
+                                                    <input
+                                                        type="text"
+                                                        placeholder={locale === 'ca' ? "Cercar producte" : "Buscar producto"}
+                                                        value={reservedSearch}
+                                                        onChange={(e) => setReservedSearch(e.target.value)}
+                                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm"
+                                                    />
+                                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-400">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                                <div
-                                                    className={`h-2.5 rounded-full ${calculateProgress() >= 100 ? 'bg-[#36A9E1]' :
-                                                        calculateProgress() >= 75 ? 'bg-[#36A9E1]' :
-                                                            calculateProgress() >= 50 ? 'bg-yellow-500' :
-                                                                'bg-green-500'
-                                                        }`}
-                                                    style={{ width: `${calculateProgress()}%` }}
-                                                />
+                                            <div className="bg-white rounded-lg border border-gray-200 h-[25vh] md:max-h-[50vh] md:flex-1">
+                                                {itemsLoading ? (
+                                                    <div className="flex justify-center items-center py-10">
+                                                        <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
+                                                    </div>
+                                                ) : getReservedItems().length === 0 ? (
+                                                    <div className="text-center py-10">
+                                                        <p className="text-gray-500">{t.noReserved}</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="divide-y divide-gray-200 h-full overflow-y-auto">
+                                                        {getReservedItems().map((item, index) => renderProduct(item, index))}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                        <div className="grid grid-row-2 gap-4 text-center">
-                                            <div className="bg-gray-50 p-4 rounded-lg">
-                                                <div className="text-4xl font-bold text-[#36A9E1]">{selectedList.products}</div>
-                                                <div className="text-xs text-gray-500 mt-1">{t.totalProducts}</div>
+                                    ) : (
+                                        /* Owner view - Progress */
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center mb-4">
+                                                <span className="text-[#36A9E1] mr-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                                                    </svg>
+                                                </span>
+                                                <h3 className="text-md font-semibold text-gray-800">{t.progress}</h3>
                                             </div>
-                                            <div className="bg-gray-50 p-4 rounded-lg">
-                                                <div className="text-4xl font-bold text-green-500">{selectedList.purchased}</div>
-                                                <div className="text-xs text-gray-500 mt-1">{t.receivedProducts}</div>
+                                            <div className="bg-white rounded-lg border border-gray-200 p-4 h-[120px] md:h-[300px]">
+                                                <div className="mb-6">
+                                                    <div className="flex justify-between text-sm mb-2">
+                                                        <span className="text-xs text-gray-500">{t.progresoTotal}</span>
+                                                        <span className="text-xs font-medium">{calculateProgress()}%</span>
+                                                    </div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                                        <div
+                                                            className={`h-2.5 rounded-full ${calculateProgress() >= 100 ? 'bg-[#36A9E1]' :
+                                                                calculateProgress() >= 75 ? 'bg-[#36A9E1]' :
+                                                                    calculateProgress() >= 50 ? 'bg-yellow-500' :
+                                                                        'bg-green-500'
+                                                                }`}
+                                                            style={{ width: `${calculateProgress()}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4 text-center">
+                                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                                        <div className="text-4xl font-bold text-[#36A9E1]">{selectedList.products}</div>
+                                                        <div className="text-xs text-gray-500 mt-1">{t.totalProducts}</div>
+                                                    </div>
+                                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                                        <div className="text-4xl font-bold text-green-500">{selectedList.purchased}</div>
+                                                        <div className="text-xs text-gray-500 mt-1">{t.receivedProducts}</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        {/* <div className="text-center mt-6">
-                                            <button
-                                                onClick={() => {
-                                                    setShowModal(false);
-                                                    openEditModal(selectedList);
-                                                }}
-                                                className="w-full px-4 py-2 bg-[#36A9E1] text-white rounded hover:bg-[#008da0] text-sm font-medium mb-2"
-                                            >
-                                                Gestionar Productos
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setShowModal(false);
-                                                    openStatusModal(selectedList);
-                                                }}
-                                                className="w-full px-4 py-2 border border-[#36A9E1] text-[#36A9E1] rounded hover:bg-[#00B0C810] text-sm font-medium"
-                                            >
-                                                Cambiar Estado
-                                            </button>
-                                        </div> */}
-                                    </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                        {/* Footer */}
-                        <div className="border-t border-gray-200 mt-6 pt-4">
-                            <div className="flex justify-end">
-                                <button
-                                    onClick={handleSaveList}
-                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#36A9E1] border border-transparent rounded-md hover:bg-[#36A9E1]/80 focus:outline-none"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 3.75H6.912a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859M12 3v8.25m0 0l-3-3m3 3l3-3" />
-                                    </svg>
-                                    {t.save}
-                                </button>
-                                {/* <button
+
+                            </div>
+                            {/* Footer */}
+                            <div className="border-t border-gray-200 mt-6 pt-4">
+                                <div className="flex justify-end">
+                                    <button
+                                        onClick={handleSaveList}
+                                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#36A9E1] border border-transparent rounded-md hover:bg-[#36A9E1]/80 focus:outline-none"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 3.75H6.912a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859M12 3v8.25m0 0l-3-3m3 3l3-3" />
+                                        </svg>
+                                        {t.save}
+                                    </button>
+                                    {/* <button
                                 type="button"
                                 onClick={() => setShowModal(false)}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                                 >
                                 Cerrar
                             </button> */}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {/* Cancel Confirmation Modal */}
+            {showCancelConfirm && cancelItem && (
+                <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 flex items-center justify-center z-[101]">
+                    <div className="bg-white p-6 rounded-lg w-full max-w-sm">
+                        <div className="flex flex-col items-center justify-center">
+                            <h3 className="text-lg font-medium mb-4 text-center text-red-600">{t.cancelarCompra || '¿Cancelar compra?'}</h3>
+                            <p className="text-sm text-gray-700 mb-6 text-center">¿Estás seguro que quieres cancelar la compra de este producto? Esta acción no se puede deshacer.</p>
+                            <div className="flex gap-3 justify-center">
+                                <button
+                                    onClick={() => setShowCancelConfirm(false)}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1]">
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        setShowCancelConfirm(false);
+                                        setLoading(true);
+                                        const listId = selectedList.rawData?._id || selectedList._id;
+                                        if (!listId) {
+                                            toast.error('Error: ID de lista no encontrado');
+                                            setLoading(false);
+                                            return;
+                                        }
+                                        try {
+                                            const result = await updateBirthListItemState(listId, cancelItem._id, 0, null);
+                                            if (result.success) {
+                                                const updatedItems = items.map(i =>
+                                                    i._id === cancelItem._id ? result.data : i
+                                                );
+                                                setItems(updatedItems);
+                                                toast.success('Producto cancelado correctamente');
+                                            }
+                                        } catch (error) {
+                                            console.error('Error updating item:', error);
+                                            toast.error(error.message || 'Error al cancelar el producto');
+                                        } finally {
+                                            setLoading(false);
+                                            setCancelItem(null);
+                                        }
+                                    }}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600">
+                                    Sí, cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Data Collection Modal */}
             {showDataModal && currentItem && (
-                <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 flex items-center justify-center z-[101] p-1">
                     <div className="bg-white p-6 rounded-lg w-full max-w-md">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-medium">{t.buyerData}</h3>

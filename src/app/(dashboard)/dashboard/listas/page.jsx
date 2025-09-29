@@ -26,7 +26,7 @@ export default function ListasPage() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="py-6 min-h-[90vh]">
+                <div className="md:py-6 md:min-h-[90vh]">
                     <h1 className="text-2xl font-bold mb-6">
                         {userRole === 'admin' ? t.admin : t.user}
                     </h1>

@@ -5,14 +5,17 @@ import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
 import Product from '@/models/Product';
 import mongoose from 'mongoose';
+
 // Helper function to check if a MongoDB ObjectId is valid
 const isValidObjectId = (id) => {
     return mongoose.Types.ObjectId.isValid(id);
 };
+
 // Helper function to check if user has access to the birth list
 const hasAccess = (birthList, userId, role) => {
     return role === 'admin' || birthList.user.toString() === userId;
 };
+
 // GET: Retrieve items from a birth list
 export async function GET(request, { params }) {
     try {
@@ -27,6 +30,7 @@ export async function GET(request, { params }) {
             );
         }
         await dbConnect();
+
         // Find the birth list
         const birthList = await BirthList.findById(id)
             .populate('items.product')
@@ -216,10 +220,9 @@ export async function PUT(request, { params }) {
                 birthList.items.push({
                     product: newItem.product,
                     productSnapshot,
-                    quantity: parseInt(newItem.quantity || 1),
-                    state: parseInt(newItem.state || 0),
-                    priority: parseInt(newItem.priority || 2),
-                    userData: newItem.userData || null
+                    quantity: parseInt(1),
+                    state: parseInt(0),
+                    userData: {}
                 });
             }
             // If status is Completada and adding new items, change to Activa

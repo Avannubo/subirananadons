@@ -25,6 +25,8 @@ const translations = {
         product: 'Producto',
         price: 'Precio',
         actions: 'Acciones',
+        productRemoved: 'El producto ha sido eliminado o descatalogado de la tienda',
+        productUnavailable: 'Producto no disponible',
     }
 };
 
@@ -118,7 +120,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                 product: item.product._id,
                 quantity: parseInt(item.quantity),
                 reserved: parseInt(item.reserved || 0),
-                priority: parseInt(item.priority || 2),
+
                 productSnapshot: {
                     name: item.product.name,
                     reference: item.product.reference,
@@ -214,19 +216,35 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
                                                         <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md overflow-hidden">
-                                                            {item.product.image && (
-                                                                <img
-                                                                    src={item.product.image}
-                                                                    alt={item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
-                                                                    width={40}
-                                                                    height={40}
-                                                                    className="object-cover w-full h-full"
-                                                                />
+                                                            {item.product ? (
+                                                                item.product.image ? (
+                                                                    <img
+                                                                        src={item.product.image}
+                                                                        alt={item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
+                                                                        width={40}
+                                                                        height={40}
+                                                                        className="object-cover w-full h-full"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                                        <InfoIcon className="h-6 w-6 text-gray-400" />
+                                                                    </div>
+                                                                )
+                                                            ) : (
+                                                                <div className="w-full h-full bg-red-50 flex items-center justify-center">
+                                                                    <InfoIcon className="h-6 w-6 text-red-300" />
+                                                                </div>
                                                             )}
                                                         </div>
                                                         <div className="ml-4">
                                                             <div className="text-sm text-start min-w-[300px] w-[300px] truncate font-medium text-gray-900">
-                                                                {item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
+                                                                {item.product ? (
+                                                                    item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ?
+                                                                        (item.product.name[locale] || item.product.name.ca || item.product.name.es)
+                                                                        : item.productSnapshot?.name || t.productUnavailable
+                                                                ) : (
+                                                                    <span className="text-red-500">{t.productRemoved}</span>
+                                                                )}
                                                             </div>
                                                             {/* <div className="text-sm text-gray-500">
                                                                 {item.product.brand.name}
@@ -235,9 +253,9 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                                                    {item.product.discount?.active ? (
-                                                        <>
-                                                            {item.product.discount?.active ? (
+                                                    {item.product ? (
+                                                        item.product.discount?.active ? (
+                                                            <>
                                                                 <div className="flex flex-col">
                                                                     <span className="text-sm text-gray-400 line-through">
                                                                         {item.product.price_incl_tax.toFixed(2)}€
@@ -246,14 +264,16 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                                         {item.product.discount.finalPrice?.toFixed(2)} € {item.product.discount.type === 'percentage' ? `(-${item.product.discount.value}%)` : ''}
                                                                     </span>
                                                                 </div>
-                                                            ) : (
-                                                                <span className="text-sm text-gray-500">
-                                                                    {item.product.price_incl_tax.toFixed(2)} €
-                                                                </span>
-                                                            )}
-                                                        </>
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-sm text-gray-500">
+                                                                {item.product.price_incl_tax?.toFixed(2) || (item.productSnapshot?.price?.toFixed(2) || '0.00')} €
+                                                            </span>
+                                                        )
                                                     ) : (
-                                                        <p className="text-gray-700 hover:text-gray-900">{item.product.discount.finalPrice?.toFixed(2)} €</p>
+                                                        <span className="text-sm text-red-500">
+                                                            {item.productSnapshot?.price?.toFixed(2) || '0.00'} €
+                                                        </span>
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">

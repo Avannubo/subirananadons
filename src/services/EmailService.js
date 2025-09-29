@@ -146,7 +146,6 @@ class EmailService {
                 `<tr>
                     <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}</td>
                     <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.priority === 1 ? 'Alta' : item.priority === 2 ? 'Media' : 'Baja'}</td>
                     <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.reserved || 0}</td>
                 </tr>`
             ).join('');

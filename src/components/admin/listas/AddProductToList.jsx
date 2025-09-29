@@ -110,9 +110,21 @@ export default function ProductSelection({ onProductSelect, selectedProducts = [
         //     toast.error(`${getProductName(product, locale)} ya está en la lista`);
         //     return;
         // }
+
+        // Ensure we have a valid product object with _id
+        if (!product || !product._id) {
+            console.error('Invalid product:', product);
+            return;
+        }
+
         const newItem = {
             _id: crypto.randomUUID(), // Add a unique ID for each selected item
-            product,
+            product: {
+                _id: product._id,
+                name: getProductName(product, locale),
+                price_incl_tax: product.price_incl_tax,
+                image: product.image
+            },
             quantity: 1,
             state: 0 // default state: pending
         };

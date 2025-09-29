@@ -260,7 +260,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 z-50 flex justify-center items-center p-4">
             <div className="bg-white rounded-lg shadow-lg w-full max-h-[90vh] flex flex-col">
                 {/* Header */}
-                <div className='rounded-lg overflow-hidden'>
+                <div className='rounded-lg overflow-y-scroll'>
                     <div className="flex justify-between items-center border-b border-gray-300 p-4 sticky top-0 bg-white z-10">
                         <h3 className="text-xl font-semibold flex items-center">
                             <FiPackage className="mr-2 text-[#36A9E1]" />
@@ -288,11 +288,11 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                 </div>
                             </div>
                         ) : order ? (
-                            <div className="p-6">
+                            <div className="p-2 md:p-6">
                                 {/* Order Summary Card */}
                                 <div className="rounded-lg mb-6">
-                                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                    <div className="flex flex-col md:flex-row gap-2">
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-blue-100 bg-opacity-10 p-2 rounded-full mr-3">
                                                 <FiCalendar className="text-[#36A9E1]" />
                                             </div>
@@ -301,7 +301,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{formatDate(order.createdAt)}</p>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                                <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-blue-100 p-2 rounded-full mr-3">
                                                 <FiTruck className="text-blue-600" />
                                             </div>
@@ -310,7 +310,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{order.shippingCost === 0 ? 'Gratis' : formatPrice(order.shippingCost)}</p>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                                <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-green-100 p-2 rounded-full mr-3">
                                                 <FiDollarSign className="text-green-600" />
                                             </div>
@@ -319,7 +319,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{formatPrice(order.totalAmount)}</p>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                                <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-purple-100 p-2 rounded-full mr-3">
                                                 <FiCreditCard className="text-purple-600" />
                                             </div>
@@ -328,7 +328,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{order.paymentMethod || 'Pendiente'}</p>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                                <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-blue-100 p-2 rounded-full mr-3">
                                                 <FiTruck className="text-blue-600" />
                                             </div>
@@ -342,17 +342,17 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                     </div>
                                 </div>
                                 {/* Main content with 2 columns layout */}
-                                <div className="flex gap-6">
+                                <div className="flex flex-col md:flex-row gap-6">
                                     {/* Left Column - Customer Info and Shipping */}
-                                    <div className="space-y-6 w-[40%]">
-                                        <div className="flex flex-row justify-between gap-4" >
+                                    <div className="flex flex-col gap-2 w-full md:w-[40%]">
+                                        <div className="flex flex-col md:flex-row justify-between gap-4" >
                                             {/* Customer Information */}
-                                            <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                                <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
+                                            <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col">
+                                                <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
                                                     <FiUser className="mr-2 text-[#36A9E1]" /> {t.customerInfo}
                                                 </h4>
                                                 <div className="space-y-3 p-4">
-                                                    <div>
+                                                    <div className="space-y-1 p-2">
                                                         <p className="text-xs text-gray-500">{t.name}</p>
                                                         <p className="font-medium">{`${order.shippingAddress.name} ${order.shippingAddress.lastName}`}</p>
                                                     </div>
@@ -368,17 +368,17 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                             </div>
                                             {/* Shipping Information */}
                                             <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                                <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
+                                                <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
                                                     <FiMapPin className="mr-2 text-[#36A9E1]" /> {t.shippingAddress}
                                                 </h4>
                                                 {order.deliveryMethod === 'pickup' ? (
-                                                    <div className="p-4 flex flex-col items-center justify-center text-center text-[#36A9E1] font-semibold min-h-[150px]">
-                                                        <svg width="84px" height="84px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M22 22H2" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M20 22V11" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M4 22V11" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M16.5278 2H7.47214C6.26932 2 5.66791 2 5.18461 2.2987C4.7013 2.5974 4.43234 3.13531 3.89443 4.21114L2.49081 7.75929C2.16652 8.57905 1.88279 9.54525 2.42867 10.2375C2.79489 10.7019 3.36257 11 3.99991 11C5.10448 11 5.99991 10.1046 5.99991 9C5.99991 10.1046 6.89534 11 7.99991 11C9.10448 11 9.99991 10.1046 9.99991 9C9.99991 10.1046 10.8953 11 11.9999 11C13.1045 11 13.9999 10.1046 13.9999 9C13.9999 10.1046 14.8953 11 15.9999 11C17.1045 11 17.9999 10.1046 17.9999 9C17.9999 10.1046 18.8953 11 19.9999 11C20.6373 11 21.205 10.7019 21.5712 10.2375C22.1171 9.54525 21.8334 8.57905 21.5091 7.75929L20.1055 4.21114C19.5676 3.13531 19.2986 2.5974 18.8153 2.2987C18.332 2 17.7306 2 16.5278 2Z" stroke="#1C274C" strokeWidth="1.5" strokeLinejoin="round"></path> <path opacity="0.5" d="M9.5 21.5V18.5C9.5 17.5654 9.5 17.0981 9.70096 16.75C9.83261 16.522 10.022 16.3326 10.25 16.201C10.5981 16 11.0654 16 12 16C12.9346 16 13.4019 16 13.75 16.201C13.978 16.3326 14.1674 16.522 14.299 16.75C14.5 17.0981 14.5 17.5654 14.5 18.5V21.5" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> </g></svg>
-                                                        <span className="block mt-2 text-lg">{t.pickup}</span>
+                                                    <div className="p-2 flex flex-col h-full md:flex-row items-center justify-center text-center   rounded-lg  w-full gap-1 md:gap-4">
+                                                        <svg width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-1 md:mb-0 md:mr-2"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M22 22H2" stroke="#36A9E1" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M20 22V11" stroke="#36A9E1" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M4 22V11" stroke="#36A9E1" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M16.5278 2H7.47214C6.26932 2 5.66791 2 5.18461 2.2987C4.7013 2.5974 4.43234 3.13531 3.89443 4.21114L2.49081 7.75929C2.16652 8.57905 1.88279 9.54525 2.42867 10.2375C2.79489 10.7019 3.36257 11 3.99991 11C5.10448 11 5.99991 10.1046 5.99991 9C5.99991 10.1046 6.89534 11 7.99991 11C9.10448 11 9.99991 10.1046 9.99991 9C9.99991 10.1046 10.8953 11 11.9999 11C13.1045 11 13.9999 10.1046 13.9999 9C13.9999 10.1046 14.8953 11 15.9999 11C17.1045 11 17.9999 10.1046 17.9999 9C17.9999 10.1046 18.8953 11 19.9999 11C20.6373 11 21.205 10.7019 21.5712 10.2375C22.1171 9.54525 21.8334 8.57905 21.5091 7.75929L20.1055 4.21114C19.5676 3.13531 19.2986 2.5974 18.8153 2.2987C18.332 2 17.7306 2 16.5278 2Z" stroke="#36A9E1" strokeWidth="1.5" strokeLinejoin="round"></path> <path opacity="0.5" d="M9.5 21.5V18.5C9.5 17.5654 9.5 17.0981 9.70096 16.75C9.83261 16.522 10.022 16.3326 10.25 16.201C10.5981 16 11.0654 16 12 16C12.9346 16 13.4019 16 13.75 16.201C13.978 16.3326 14.1674 16.522 14.299 16.75C14.5 17.0981 14.5 17.5654 14.5 18.5V21.5" stroke="#36A9E1" strokeWidth="1.5" strokeLinecap="round"></path> </g></svg>
+                                                        <span className="text-base font-semibold text-[#36A9E1] tracking-wide">{t.pickup}</span>
                                                     </div>
                                                 ) : (
                                                     <div className=" p-4 space-y-3">
-                                                        <div>
+                                                        <div className="space-y-1 p-2">
                                                             <p className="text-xs text-gray-500">{t.street}:</p>
                                                             <p className="font-medium ">{order.shippingAddress.address}</p>
                                                         </div>
@@ -408,7 +408,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         </div>
                                         {/* Notes */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                            <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
+                                            <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
                                                 <FiMessageSquare className="mr-2 text-[#36A9E1]" /> {t.notes}
                                             </h4>
                                             <p className="text-gray-700 p-4">
@@ -417,7 +417,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         </div>
                                         {/* Tracking */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                            <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
+                                            <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
                                                 <FiTruck className="mr-2 text-[#36A9E1]" /> {t.tracking}
                                             </h4>
                                             <p className="text-gray-700 p-4">
@@ -428,14 +428,14 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         </div>
                                     </div>
                                     {/* Right Column - Products and Order Summary */}
-                                    <div className="space-y-6 w-[60%]">
+                                    <div className="space-y-6 w-full md:w-[60%]">
                                         {/* Products */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                            <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
+                                            <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
                                                 <FiPackage className="mr-2 text-[#36A9E1]" /> {t.products}
                                             </h4>
                                             <div className="overflow-x-auto">
-                                                <div className="overflow-x-auto" style={{ maxHeight: '300px', minHeight: '300px', height: '300px', overflowY: 'auto' }}>
+                                                <div className="overflow-x-auto" style={{ maxHeight: '300px', minHeight: '200px', height: '200px', overflowY: 'auto' }}>
                                                     <table className="min-w-full divide-y divide-gray-200">
                                                         <thead className="bg-gray-50">
                                                             <tr>
@@ -524,55 +524,48 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         </div>
                                         {/* Order Summary */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                            <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
+                                            <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
                                                 <FiCreditCard className="mr-2 text-[#36A9E1]" /> {t.orderSummary}
                                             </h4>
                                             <div className="flex p-4 flex-row space-x-4 justify-between">
-                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center">
-                                                        <div className="mr-4 bg-purple-100 p-3 rounded-full">
-                                                            <FiCreditCard className="text-purple-600" />
-                                                        </div>
-                                                        <div>
+                                                <div className="flex flex-col md:flex-row gap-2 w-full">
+                                                    <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
+                                                        <div className="flex items-center mb-1">
+                                                            <div className="mr-2 bg-purple-100 p-2 rounded-full">
+                                                                <FiCreditCard className="text-purple-600" />
+                                                            </div>
                                                             <p className="text-sm font-medium">{t.taxes}</p>
-                                                            <p className="text-gray-600">{formatPrice(order.tax) || t.pending}</p>
                                                         </div>
+                                                        <p className="text-gray-600 text-sm">{formatPrice(order.tax) || t.pending}</p>
                                                     </div>
-                                                </div>
-                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center">
-                                                        <div className="mr-4 bg-pink-100 p-3 rounded-full">
-                                                            <FiDollarSign className="text-pink-600" />
-                                                        </div>
-                                                        <div>
+                                                    <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
+                                                        <div className="flex items-center mb-1">
+                                                            <div className="mr-2 bg-pink-100 p-2 rounded-full">
+                                                                <FiDollarSign className="text-pink-600" />
+                                                            </div>
                                                             <p className="text-sm font-medium">Descuento Total</p>
-                                                            <p className="text-pink-600 font-medium">
-                                                                {order.discounts?.total ? `-${formatPrice(order.discounts.total)}` : '-'}
-                                                            </p>
                                                         </div>
+                                                        <p className="text-pink-600 font-medium text-sm">
+                                                            {order.discounts?.total ? `-${formatPrice(order.discounts.total)}` : '-'}
+                                                        </p>
                                                     </div>
-                                                </div>
-
-                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center">
-                                                        <div className="mr-4 bg-green-100 p-3 rounded-full">
-                                                            <FiDollarSign className="text-green-600" />
-                                                        </div>
-                                                        <div>
+                                                    <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
+                                                        <div className="flex items-center mb-1">
+                                                            <div className="mr-2 bg-green-100 p-2 rounded-full">
+                                                                <FiDollarSign className="text-green-600" />
+                                                            </div>
                                                             <p className="text-sm font-medium">{t.subtotalLabel}</p>
-                                                            <p className="text-gray-600">{formatPrice(order.subtotal) || t.pending}</p>
                                                         </div>
+                                                        <p className="text-gray-600 text-sm">{formatPrice(order.subtotal) || t.pending}</p>
                                                     </div>
-                                                </div>
-                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center">
-                                                        <div className="mr-4 bg-green-100 p-3 rounded-full">
-                                                            <FiDollarSign className="text-green-600" />
-                                                        </div>
-                                                        <div>
+                                                    <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
+                                                        <div className="flex items-center mb-1">
+                                                            <div className="mr-2 bg-green-100 p-2 rounded-full">
+                                                                <FiDollarSign className="text-green-600" />
+                                                            </div>
                                                             <p className="text-sm font-medium">{t.totalLabel}</p>
-                                                            <p className="text-gray-600">{formatPrice(order.totalAmount) || t.pending}</p>
                                                         </div>
+                                                        <p className="text-gray-600 text-sm">{formatPrice(order.totalAmount) || t.pending}</p>
                                                     </div>
                                                 </div>
                                             </div>

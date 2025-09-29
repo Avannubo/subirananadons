@@ -104,7 +104,7 @@ export default function PedidosPage() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="py-6 min-h-[85vh] h-full\t">
+                <div className="md:py-6 md:min-h-[85vh] h-full">
                     <h1 className="text-2xl font-bold mb-6">
                         {heading}
                     </h1>

@@ -369,19 +369,19 @@ export default function BirthListPage({ params }) {
                                 onMouseEnter={() => setHoveredId(product.id)}
                                 onMouseLeave={() => setHoveredId(null)}
                             >
-                                <div className="relative w-full overflow-hidden" style={{ aspectRatio: '1/0.8' }}>
+                                <div className="relative w-full overflow-hidden h-[200px] " style={{ aspectRatio: '1/0.8' }}>
                                     {product.imageHover ? (
                                         <>
                                             <img
                                                 src={product.image}
                                                 alt={product.name}
-                                                className="object-cover h-[200px] w-full bg-white transition-opacity duration-300"
+                                                className="object-contain h-[200px] w-full bg-white transition-opacity duration-300"
                                                 style={{ opacity: hoveredId === product.id ? 0 : 1 }}
                                             />
                                             <img
                                                 src={product.imageHover}
                                                 alt={`${product.name} - hover`}
-                                                className="object-cover h-[200px] w-full bg-white absolute inset-0 transition-opacity duration-300"
+                                                className="object-contain h-[200px] w-full bg-white absolute inset-0 transition-opacity duration-300"
                                                 style={{ opacity: hoveredId === product.id ? 1 : 0 }}
                                             />
                                         </>
@@ -389,11 +389,11 @@ export default function BirthListPage({ params }) {
                                         <img
                                             src={product.image}
                                             alt={product.name}
-                                            className="object-cover h-[200px] w-full bg-white"
+                                            className="object-contain h-[200px] w-full bg-white"
                                         />
                                     )}
                                     {product.status !== 'available' && (
-                                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
+                                        <div className="absolute inset-0 bg-black/60 h-[200px] backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
                                             <div className=" px-4 py-2 rounded-lg">
                                                 <span className="text-white text-lg font-medium uppercase tracking-wider">
                                                     {product.status === 'purchased' ? t('productPurchased') : t('productReserved')}

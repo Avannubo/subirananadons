@@ -192,7 +192,7 @@ export default function Page() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="mx-auto p-6 min-h-[90vh]">
+                <div className="md:mx-auto md:p-6 md:min-h-[90vh]">
                     <h1 className="text-2xl font-bold mb-6">El meu compte</h1>
                     <div className="bg-white rounded-lg p-6">
                         <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Informació personal</h2>
