@@ -145,6 +145,7 @@ export default function ListViewModal({
     openStatusModal,
     onStatusChange
 }) {
+    console.log(selectedList);
     const [pendingSearch, setPendingSearch] = useState('');
     const [boughtSearch, setBoughtSearch] = useState('');
     const [reservedSearch, setReservedSearch] = useState('');
@@ -227,6 +228,7 @@ export default function ListViewModal({
     const confirmStateChange = async () => {
         if (!currentItem) return;
         const listId = selectedList.rawData?._id || selectedList._id;
+        
         if (!listId) {
             toast.error('Error: ID de lista no encontrado');
             return;
@@ -275,6 +277,22 @@ export default function ListViewModal({
                     phone: '',
                     message: ''
                 });
+                // Send email notification for reserved or purchased product via API route
+                try {
+                    if (newState === 1 || newState === 2) {
+                        await fetch('/api/send-gift-notification', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                selectedList
+                            })
+                        });
+                    }
+                } catch (emailError) {
+                    console.error('Error sending notification email:', emailError);
+                }
             }
         } catch (error) {
             console.error('Error updating item state:', error);
@@ -927,6 +945,8 @@ export default function ListViewModal({
                                                     );
                                                     setItems(updatedItems);
                                                     toast.success('Producto cancelado correctamente');
+                                                    // Optionally send email for cancellation (if needed)
+                                                    // await EmailService.sendGiftPurchaseNotification(..., ..., ..., 'cancelled');
                                                 }
                                             } catch (error) {
                                                 console.error('Error updating item:', error);

@@ -103,6 +103,7 @@ import ListDeleteModal from './ListDeleteModal';
 import ListViewModal from './ListViewModal';
 import ListStatusModal from './ListStatusModal';
 export default function ListasTable({ lists, filters, setFilters, userRole = 'user', onUpdate }) {
+    // console.log('Rendering ListasTable with lists:', lists);
     const locale = getLocale();
     const t = translations[locale];
     const [showEditModal, setShowEditModal] = useState(false);
@@ -555,6 +556,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 setShowModal={setShowViewModal}
                 selectedList={selectedList}
                 listItems={listItems}
+                // rawData={}
                 itemsLoading={itemsLoading}
                 openEditModal={openEditModal}
                 openStatusModal={openStatusModal}

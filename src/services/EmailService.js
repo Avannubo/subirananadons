@@ -15,7 +15,6 @@ class EmailService {
             const items_list = order.items.map(item => {
                 const hasDiscount = item.priceDetails?.discountAmount > 0;
                 const finalPrice = hasDiscount ? item.priceDetails.finalPrice : item.price;
-
                 return `<tr>
                     <td style="padding: 10px; border-bottom: 1px solid #eee; max-width: 400px;">
                         <div style="display: flex; align-items: center;">
@@ -225,27 +224,6 @@ class EmailService {
             throw error;
         }
     }
-    static async sendGiftPurchaseNotification(gift, buyer, listOwner) {
-        try {
-            const templateParams = {
-                to_email: listOwner.email,
-                to_name: listOwner.name,
-                buyer_name: buyer.name,
-                product_name: gift.product.name,
-                list_title: gift.listTitle,
-                buyer_message: gift.buyerInfo?.note || 'Sin mensaje',
-                baby_name: gift.babyName
-            };
-            await emailjs.send(
-                EMAILJS_SERVICE_ID,
-                TEMPLATES.GIFT_PURCHASED,
-                templateParams
-            );
-        } catch (error) {
-            console.error('Error sending gift purchase notification:', error);
-            throw error;
-        }
-    }
     static async sendPasswordResetEmail(email, resetToken) {
         try {
             // Determine base URL based on environment
@@ -277,6 +255,72 @@ class EmailService {
             await transporter.sendMail(mailOptions);
         } catch (error) {
             console.error('Error sending password reset email:', error);
+            throw error;
+        }
+    }
+    /**
+     * Accepts all modal data and filters/prepares the email payload internally.
+     */
+    static async sendGiftPurchaseNotification(selectedList) {
+        // Accepts the entire list data and robustly extracts owner, product, and buyer info
+        try {
+            // Use rawData if present
+            const list = selectedList.rawData || selectedList;
+            // Find the first item with state 1 or 2 (reserved or purchased)
+            const item = Array.isArray(list.items) ? list.items.find(i => i.state === 1 || i.state === 2) : null;
+            // Owner info
+            const ownerName = (list.Creator || list.ownerName || (list.user && list.user.name) || list.owner || list.title) || 'Propietario';
+            const ownerEmail = (list.email || (list.user && list.user.email)) || '';
+            // Product info
+            const product = (item && item.product) || {};
+            // Prefer Spanish name, fallback to any name
+            const productName = product?.name?.es || product?.name?.ca || product?.name || 'Producto';
+            const listTitle = list.title || '';
+            const babyName = list.babyName || '';
+            // Buyer info
+            const buyerInfo = (item && item.userData) || {};
+            const buyer = {
+                name: buyerInfo.name || '-',
+                email: buyerInfo.email || '-',
+                phone: buyerInfo.phone || '-',
+                message: buyerInfo.message || 'Sin mensaje'
+            };
+            // Type
+            const type = item && item.state === 1 ? 'reserved' : 'purchased';
+            const actionType = type === 'reserved' ? 'Reservado' : 'Comprado';
+            // Build HTML template
+            const html = `
+                <div style="font-family: Arial, sans-serif; background: #f8f9fa; padding: 24px;">
+                    <h2 style="color: #36A9E1;">${type === 'reserved' ? 'Producto reservado en tu lista' : '¡Producto comprado en tu lista!'}</h2>
+                    <p>Hola ${ownerName},</p>
+                    <p>
+                        El producto <strong>${productName}</strong> ha sido <strong>${actionType.toLowerCase()}</strong> en tu lista <strong>${listTitle}</strong>.
+                    </p>
+                    <p><strong>Nombre del bebé:</strong> ${babyName}</p>
+                    <hr style="margin: 16px 0;">
+                    <p><strong>Comprador:</strong> ${buyer.name}</p>
+                    <p><strong>Email:</strong> ${buyer.email}</p>
+                    <p><strong>Teléfono:</strong> ${buyer.phone}</p>
+                    <p><strong>Mensaje del comprador:</strong></p>
+                    <div style="background: #fff; border-radius: 8px; padding: 12px; border: 1px solid #eee; margin-bottom: 16px;">${buyer.message}</div>
+                    <p style="font-size: 13px; color: #888;">Este mensaje ha sido enviado automáticamente por Subirana Nadons.</p>
+                </div>
+            `;
+            // Send using nodemailer for consistency with other emails
+            const mailOptions = {
+                from: "info@subirananadons.com",
+                to: ownerEmail,
+                subject: type === 'reserved'
+                    ? `Producto reservado en tu lista - ${listTitle}`
+                    : `¡Producto comprado en tu lista! - ${listTitle}`,
+                html
+            };
+            if (!mailOptions.to) {
+                throw new Error("No recipient email defined for gift notification");
+            }
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error('Error sending gift notification:', error);
             throw error;
         }
     }
