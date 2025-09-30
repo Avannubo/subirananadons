@@ -134,7 +134,7 @@ export default function Sidebar() {
                                         {session?.user.name?.charAt(0) || '!'}
                                     </div>
                                 ) : (
-                                    `${currentLocale === 'ca' ? 'Hola' : 'Hola'}! ${session?.user.name}`
+                                    `${currentLocale === 'ca' ? 'Hola' : 'Hola'}! ${session?.user.name?.split(' ')[0] || ''}`
                                 )}
                             </span>
                         </div>

@@ -11,7 +11,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
         const lang = window.navigator.language || window.navigator.userLanguage;
         if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
     }
-
     // Translations
     const translations = {
         ca: {
@@ -73,9 +72,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
             errorExport: 'Error al exportar los pedidos: '
         }
     };
-
     const t = translations[locale];
-
     // Removed tab navigation logic
     const [isExporting, setIsExporting] = useState(false);
     const [rangeDropdownOpen, setRangeDropdownOpen] = useState(false);
@@ -102,8 +99,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
         setCurrentPage,
         setLimit
     } = useOrders(userRole);
-
-
     // Initial fetch of all orders when component mounts
     useEffect(() => {
         //console.log(`OrdersTabs mounted with userRole: ${userRole}`);
@@ -271,7 +266,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
             setIsExporting(false);
         }
     };
-
     // Helper function to trigger download
     const triggerDownload = (url, filename) => {
         const link = document.createElement('a');
@@ -285,20 +279,17 @@ export default function OrdersTabs({ userRole = 'user' }) {
             URL.revokeObjectURL(url);
         }, 100);
     };
-
     // Update filters and refresh table
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         const newFilters = { ...filters, [name]: value };
         setFilters(newFilters);
     };
-
     // Apply filters
     const applyFilters = () => {
         setPagination(prev => ({ ...prev, currentPage: 1 })); // Reset to first page
         fetchOrders(pagination.currentPage, pagination.limit, filters);
     };
-
     // Clear all filters
     const clearFilters = () => {
         setFilters({
@@ -324,7 +315,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
     };
     // No tab filtering, show all orders
     const filteredOrders = orders;
-
     return (
         <div className="bg-white rounded-lg shadow">
             <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
