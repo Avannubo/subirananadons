@@ -51,7 +51,12 @@ export function useOrders(userRole) {
                     return dateB - dateA;
                 });
                 setOrders(formattedOrders);
-                setPagination(data.pagination);
+                // Ensure totalPages is at least 1
+                setPagination(prev => ({
+                    ...data.pagination,
+                    totalPages: Math.max(1, data.pagination.totalPages),
+                    totalItems: data.pagination.totalItems || formattedOrders.length
+                }));
             } else {
                 throw new Error(data.message || 'Failed to fetch orders');
             }
