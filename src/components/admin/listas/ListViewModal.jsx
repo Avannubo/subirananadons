@@ -228,7 +228,7 @@ export default function ListViewModal({
     const confirmStateChange = async () => {
         if (!currentItem) return;
         const listId = selectedList.rawData?._id || selectedList._id;
-        
+
         if (!listId) {
             toast.error('Error: ID de lista no encontrado');
             return;
@@ -279,14 +279,28 @@ export default function ListViewModal({
                 });
                 // Send email notification for reserved or purchased product via API route
                 try {
-                    if (newState === 1 || newState === 2) {
+                    if (newState === 1) {
                         await fetch('/api/send-gift-notification', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
-                                selectedList
+                                selectedList,
+                                action: 'reserve',
+                                item: result.data
+                            })
+                        });
+                    } else if (newState === 2) {
+                        await fetch('/api/send-gift-notification', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                selectedList,
+                                action: 'buy',
+                                item: result.data
                             })
                         });
                     }
@@ -945,8 +959,35 @@ export default function ListViewModal({
                                                     );
                                                     setItems(updatedItems);
                                                     toast.success('Producto cancelado correctamente');
-                                                    // Optionally send email for cancellation (if needed)
-                                                    // await EmailService.sendGiftPurchaseNotification(..., ..., ..., 'cancelled');
+                                                    // Send cancellation email via API
+                                                    try {
+                                                        const response = await fetch('/api/send-gift-notification', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                            },
+                                                            body: JSON.stringify({
+                                                                selectedList: selectedList,
+                                                                action: 'cancel',
+                                                                cancelledItem: { ...result.data, state: 0 }
+                                                            })
+                                                        });
+                                                        let data = {};
+                                                        try {
+                                                            data = await response.json();
+                                                        } catch (jsonError) {
+                                                            console.error('Error parsing API response:', jsonError);
+                                                        }
+                                                        console.log('Cancel notification API response:', response.status, data);
+                                                        if (response.ok && data.success) {
+                                                            toast.success('Notificación de cancelación enviada correctamente');
+                                                        } else {
+                                                            toast.error('Error al enviar la notificación de cancelación: ' + (data.error || response.status));
+                                                        }
+                                                    } catch (emailError) {
+                                                        console.error('Error sending cancel notification:', emailError);
+                                                        toast.error('Error al enviar la notificación de cancelación: ' + (emailError.message || 'Error desconocido'));
+                                                    }
                                                 }
                                             } catch (error) {
                                                 console.error('Error updating item:', error);
