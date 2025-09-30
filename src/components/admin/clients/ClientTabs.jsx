@@ -2,6 +2,10 @@
 import { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiRefreshCw, FiPlus, FiDownload } from 'react-icons/fi';
 import ClientsTable from '@/components/admin/clients/ClientTable';
+// Helper to remove accents from a string
+const removeAccents = (str) => {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+};
 import ClientModal from '@/components/admin/clients/ClientModal';
 import ClientViewModal from '@/components/admin/clients/ClientViewModal';
 import ConfirmDeleteModal from '@/components/admin/clients/ConfirmDeleteModal';
@@ -139,7 +143,14 @@ export default function ClientsTabs() {
         }
     };
     // Filter clients - now handled on the server side through API calls
-    const filteredClients = clients;
+    const filteredClients = clients.filter(client => {
+        return (
+            removeAccents((client.id || '').toString()).includes(removeAccents(filters.searchId)) &&
+            removeAccents((client.name || '').toLowerCase()).includes(removeAccents(filters.searchName.toLowerCase())) &&
+            removeAccents((client.lastName || '').toLowerCase()).includes(removeAccents(filters.searchLastName.toLowerCase())) &&
+            removeAccents((client.email || '').toLowerCase()).includes(removeAccents(filters.searchEmail.toLowerCase()))
+        );
+    });
     // Handle filter changes
     const handleFilterChange = (e) => {
         const { name, value } = e.target;

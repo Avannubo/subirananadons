@@ -1,5 +1,9 @@
 'use client';
 import { useState, useRef } from 'react';
+// Helper to remove accents from a string
+const removeAccents = (str) => {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+};
 // Translation object for Catalan and Spanish
 const translations = {
     ca: {
@@ -134,15 +138,15 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 }
                 if (typeof productName !== 'string') productName = '';
                 const productRef = item.product?.reference || '';
-                const searchTerm = (filters.searchProduct || '').toLowerCase();
-                return productName.toLowerCase().includes(searchTerm) ||
-                    productRef.toLowerCase().includes(searchTerm);
+                const searchTerm = removeAccents((filters.searchProduct || '').toLowerCase());
+                return removeAccents(productName.toLowerCase()).includes(searchTerm) ||
+                    removeAccents(productRef.toLowerCase()).includes(searchTerm);
             });
         return (
-            list.id.toString().includes(filters.searchId || '') &&
-            list.babyName.toLowerCase().includes((filters.searchBabyName || '').toLowerCase()) &&
-            list.name.toLowerCase().includes((filters.searchName || '').toLowerCase()) &&
-            list.creator.toLowerCase().includes((filters.searchCreator || '').toLowerCase()) &&
+            removeAccents(list.id.toString()).includes(removeAccents(filters.searchId || '')) &&
+            removeAccents(list.babyName.toLowerCase()).includes(removeAccents((filters.searchBabyName || '').toLowerCase())) &&
+            removeAccents(list.name.toLowerCase()).includes(removeAccents((filters.searchName || '').toLowerCase())) &&
+            removeAccents(list.creator.toLowerCase()).includes(removeAccents((filters.searchCreator || '').toLowerCase())) &&
             hasMatchingProduct
         );
     });
@@ -515,11 +519,11 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                                 }} title={t.copyLink}>
                                                     <FiLink size={20} />
                                                 </button>
-                                                
+
                                                 <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)} title={t.deleteList}>
                                                     <FiTrash2 size={20} />
                                                 </button>
-                                            </div> 
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

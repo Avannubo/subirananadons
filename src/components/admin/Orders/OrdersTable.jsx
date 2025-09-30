@@ -7,6 +7,11 @@ import Pagination from '@/components/admin/shared/Pagination';
 import OrderDeleteModal from '@/components/admin/orders/OrderDeleteModal';
 import OrderEditModal from '@/components/admin/orders/OrderEditModal';
 import OrderViewModal from '@/components/admin/orders/OrderViewModal';
+
+// Helper to remove accents from a string
+const removeAccents = (str) => {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+};
 export default function OrdersTable({
     orders,
     filters,
@@ -145,11 +150,11 @@ export default function OrdersTable({
     // Filter the orders based on search criteria
     const filteredOrders = orders.filter((order) => {
         return (
-            (order.id?.toString() || '').includes(filters.searchId) &&
-            (order.reference?.toLowerCase() || '').includes(filters.searchReference.toLowerCase()) &&
-            (order.customer?.toLowerCase() || '').includes(filters.searchCustomer.toLowerCase()) &&
-            (order.total || '').includes(filters.searchTotal) &&
-            (order.payment?.toLowerCase() || '').includes(filters.searchPayment.toLowerCase())
+            removeAccents(order.id?.toString() || '').includes(removeAccents(filters.searchId)) &&
+            removeAccents(order.reference?.toLowerCase() || '').includes(removeAccents(filters.searchReference.toLowerCase())) &&
+            removeAccents(order.customer?.toLowerCase() || '').includes(removeAccents(filters.searchCustomer.toLowerCase())) &&
+            removeAccents(order.total || '').includes(removeAccents(filters.searchTotal)) &&
+            removeAccents(order.payment?.toLowerCase() || '').includes(removeAccents(filters.searchPayment.toLowerCase()))
         );
     });
     const handleSelectAll = (e) => {

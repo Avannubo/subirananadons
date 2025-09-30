@@ -28,6 +28,10 @@ export default function ProductsTable(props) {
     const [hoveredImage, setHoveredImage] = useState(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     // Unified fetchProducts logic (instant search, translation support, client-side pagination)
+    // Helper to remove accents from a string
+    const removeAccents = (str) => {
+        return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+    };
     const fetchProducts = async () => {
         try {
             setLoading(true);
@@ -61,14 +65,14 @@ export default function ProductsTable(props) {
                     }
                     return prod.category;
                 };
-                const search = searchTerm.trim().toLowerCase();
+                const search = removeAccents(searchTerm.trim().toLowerCase());
                 let filtered = data.products;
                 if (search) {
                     filtered = data.products.filter(prod => {
-                        const name = getName(prod).toLowerCase();
-                        const brand = getBrand(prod).toLowerCase();
-                        const category = getCategory(prod).toLowerCase();
-                        const ref = (prod.reference || '').toLowerCase();
+                        const name = removeAccents(getName(prod).toLowerCase());
+                        const brand = removeAccents(getBrand(prod).toLowerCase());
+                        const category = removeAccents(getCategory(prod).toLowerCase());
+                        const ref = removeAccents((prod.reference || '').toLowerCase());
                         return (
                             name.includes(search) ||
                             brand.includes(search) ||
@@ -372,7 +376,7 @@ export default function ProductsTable(props) {
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
         };
-    }, []); 
+    }, []);
     return (
         <div className="bg-white rounded-lg shadow">
             {/* Table Header with Actions */}
