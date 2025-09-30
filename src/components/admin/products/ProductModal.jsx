@@ -196,39 +196,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
     const filteredCategories = filterCategoriesByName(hierarchicalCategories, categorySearchTerm);
 
-
-    // --- Load Product Data (Edit/New) ---
-    // Check for expired discount periodically
-    // useEffect(() => {
-    //     // Only check expiration for discounts that have both start and end dates
-    //     if (!formData.discount?.active || !formData.discount?.startDate || !formData.discount?.endDate) return;
-    //     // Set up timer to check expiration
-    //     const endDate = new Date(formData.discount.endDate);
-    //     const now = new Date();
-    //     const timeUntilExpiry = endDate.getTime() - now.getTime();
-    //     if (timeUntilExpiry > 0) {
-    //         const timer = setTimeout(() => {
-    //             setFormData(prev => ({
-    //                 ...prev,
-    //                 discount: {
-    //                     ...prev.discount,
-    //                     active: false
-    //                 }
-    //             }));
-    //             toast('El descompte ha expirat i s\'ha desactivat automàticament', {
-    //                 icon: '⚠️',
-    //                 style: {
-    //                     borderRadius: '10px',
-    //                     background: '#FFF3CD',
-    //                     color: '#856404',
-    //                 }
-    //             });
-    //         }, timeUntilExpiry);
-    //         return () => clearTimeout(timer);
-    //     }
-    // }, [formData.discount?.endDate, formData.discount?.active]);
-
-
     useEffect(() => {
         if (isEditing && product) {
             // Format all images into a single array for the UI
@@ -447,10 +414,25 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         } else if (name === 'price_incl_tax') {
             // When price changes, recalculate final price if discount is active
             const newPrice = parseFloat(value);
-            setFormData(prev => ({
-                ...prev,
-                [name]: value
-            }));
+            setFormData(prev => {
+                let updatedDiscount = prev.discount;
+                if (prev.discount?.active) {
+                    // Set discount startDate to now + 1min
+                    const nowPlusOneMin = new Date(Date.now() + 60 * 1000);
+                    // Format to yyyy-MM-ddTHH:mm for input type="datetime-local"
+                    const pad = n => n.toString().padStart(2, '0');
+                    const formatted = `${nowPlusOneMin.getFullYear()}-${pad(nowPlusOneMin.getMonth() + 1)}-${pad(nowPlusOneMin.getDate())}T${pad(nowPlusOneMin.getHours())}:${pad(nowPlusOneMin.getMinutes())}`;
+                    updatedDiscount = {
+                        ...prev.discount,
+                        startDate: formatted
+                    };
+                }
+                return {
+                    ...prev,
+                    [name]: value,
+                    discount: updatedDiscount
+                };
+            });
             if (formData.discount?.active && newPrice) {
                 const finalPrice = calculateFinalPrice(newPrice, formData.discount);
                 setCalculatedFinalPrice(finalPrice);
