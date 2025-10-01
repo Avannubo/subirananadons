@@ -311,7 +311,7 @@ export default function OrdersTable({
             )}
             {/* Orders Table */}
             <div className="overflow-x-auto">
-                <table className="w-full whitespace-nowrap">
+                <table className="w-full whitespace-nowrap ">
                     <thead className="bg-gray-50 text-gray-700 uppercase text-xs">
                         <tr>
                             {userRole === 'admin' && (
@@ -432,7 +432,7 @@ export default function OrdersTable({
             </div>
             {/* Pagination */}
             {orders.length > 0 && (
-                <div className="px-4 py-3 border-t border-gray-200 sm:px-6">
+                <div className="px-4 py-3 border-t border-gray-200 sm:px-6 md:mb-0 mb-20">
                     <Pagination
                         currentPage={pagination.currentPage}
                         totalPages={pagination.totalPages}

@@ -545,7 +545,7 @@ export default function ListViewModal({
         <>
             <div className="fixed inset-0  overflow-y-auto bg-[#00000050] z-[100]  bg-opacity-50 flex items-center justify-center md:p-4 p-1">
                 <div className="  bg-white rounded-lg shadow-xl w-full h-auto overflow-hidden ">
-                    <div className="p-1 md:p-6 flex flex-col h-auto md:min-h-[95vh]">
+                    <div className="p-2 md:p-6 flex flex-col h-full md:min-h-[95vh]">
                         {/* Header */}
                         <div className="flex items-center justify-between md:mb-6 mb-2">
                             <div className="flex items-center">
@@ -663,7 +663,7 @@ export default function ListViewModal({
                                     </div>
                                 </div>
                             </div>
-                            <div className='md:hidden grid grid-cols-2 mb-2 h-full overflow-scroll p-1 mt-2'>
+                            <div className='md:hidden grid grid-cols-2 mb-2 h-full overflow-auto p-1 mt-2'>
                                 <div className='mb-2'>
                                     <span className="block text-xs font-medium text-gray-500">{t.reference}</span>
                                     <p className="text-sm text-gray-900 ">{selectedList.reference}</p>
@@ -717,7 +717,7 @@ export default function ListViewModal({
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-white rounded-lg border border-gray-200 overflow-auto h-[25vh] md:max-h-[50vh] md:flex-1">
+                                    <div className="bg-white rounded-lg border border-gray-200 overflow-auto h-[25vh] md:max-h-[50vh] md:flex-1 md:min-h-[50vh]">
                                         {itemsLoading ? (
                                             <div className="flex justify-center items-center py-10">
                                                 <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
@@ -738,7 +738,7 @@ export default function ListViewModal({
                                             const allItems = (!isAdmin && isOwner) ? [...pendingItems, ...reservedItems] : pendingItems;
                                             if (allItems.length === 0) {
                                                 return (
-                                                    <div className="text-center py-10">
+                                                    <div className="text-center py-10 h-[30vh] md:h-full">
                                                         <p className="text-gray-500">{t.noPending}</p>
                                                     </div>
                                                 );
@@ -794,13 +794,14 @@ export default function ListViewModal({
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-white rounded-lg border border-gray-200 h-[120px] md:max-h-[50vh] md:flex-1">
+                                    <div className="bg-white rounded-lg border border-gray-200 overflow-auto h-[25vh] md:max-h-[50vh] md:flex-1">
+                                        
                                         {itemsLoading ? (
                                             <div className="flex justify-center items-center py-10">
                                                 <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
                                             </div>
                                         ) : getBoughtItems().length === 0 ? (
-                                            <div className="text-center py-10">
+                                            <div className="text-center py-10 h-[30vh] md:h-full">
                                                 <p className="text-gray-500">{t.noBought}</p>
                                             </div>
                                         ) : (
@@ -839,13 +840,13 @@ export default function ListViewModal({
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="bg-white rounded-lg border border-gray-200 h-[25vh] md:max-h-[50vh] md:flex-1">
+                                            <div className="bg-white rounded-lg border border-gray-200 overflow-auto h-[25vh] md:max-h-[50vh] md:flex-1">
                                                 {itemsLoading ? (
                                                     <div className="flex justify-center items-center py-10">
                                                         <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
                                                     </div>
                                                 ) : getReservedItems().length === 0 ? (
-                                                    <div className="text-center py-10">
+                                                        <div className="text-center py-10 h-[30vh] md:h-full">
                                                         <p className="text-gray-500">{t.noReserved}</p>
                                                     </div>
                                                 ) : (

@@ -133,7 +133,7 @@ export default function Sidebar() {
                                     <div className='p-6 bg-[#36A9E1] text-white rounded-full flex items-center uppercase font-bold text-lg justify-center h-10 w-10'>
                                         {session?.user.name?.charAt(0) || '!'}
                                     </div>
-                                ) : (
+                                ) : ( 
                                     `${currentLocale === 'ca' ? 'Hola' : 'Hola'}! ${session?.user.name?.split(' ')[0] || ''}`
                                 )}
                             </span>

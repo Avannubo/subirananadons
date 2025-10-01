@@ -91,7 +91,6 @@ const translations = {
         requiredFields: 'Por favor complete todos los campos obligatorios',
     }
 };
-
 function getLocale() {
     if (typeof window !== 'undefined') {
         const lang = window.navigator.language || 'es';
@@ -419,7 +418,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             toast.error('Error al imprimir la lista');
         }
     };
-
     const handleDownloadPDF = async (list) => {
         try {
             const toastId = toast.loading('Generando PDF...');
@@ -448,9 +446,9 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         }
     };
     return (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-hidden  mb-20 md:mb-0">
             <div className="overflow-x-auto">
-                <table className="w-full whitespace-nowrap">
+                <table className="w-full whitespace-nowrap mb-20 md:mb-0">
                     <thead className="bg-gray-50 text-gray-700 uppercase text-xs">
                         <tr>
                             <th className="px-6 py-3 text-left hidden md:table-cell">{t.id}</th>
@@ -519,7 +517,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                                 }} title={t.copyLink}>
                                                     <FiLink size={20} />
                                                 </button>
-
                                                 <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)} title={t.deleteList}>
                                                     <FiTrash2 size={20} />
                                                 </button>
@@ -537,7 +534,8 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                 </tr>)}
                     </tbody>
                 </table>
-            </div>{/* Using modular components for modals */}
+            </div>
+            {/* Using modular components for modals */} 
             <ListEditModal
                 showModal={showEditModal}
                 setShowModal={setShowEditModal}

@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { FiX, FiPackage, FiMapPin, FiUser, FiCreditCard, FiTruck, FiCalendar, FiDollarSign, FiFileText, FiMessageSquare } from 'react-icons/fi';
-
 export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) {
     // Locale detection (default to 'ca')
     let locale = 'ca';
@@ -9,7 +8,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         const lang = window.navigator.language || window.navigator.userLanguage;
         if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
     }
-
     // Translations
     const translations = {
         ca: {
@@ -110,14 +108,11 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
     const [products, setProducts] = useState({});
     const [retryCount, setRetryCount] = useState(0);
     const MAX_RETRIES = 3;
-
     useEffect(() => {
         const fetchOrderDetails = async () => {
             if (!orderId) return;
-
             setLoadingOrder(true);
             setError(null);
-
             try {
                 const response = await fetch(`/api/orders/${orderId}`, {
                     method: 'GET',
@@ -125,7 +120,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                         'Content-Type': 'application/json',
                     },
                 });
-
                 let data;
                 try {
                     data = await response.json();
@@ -133,16 +127,13 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                     console.error('Error parsing response:', parseError);
                     throw new Error('Failed to parse server response');
                 }
-
                 if (!response.ok) {
                     throw new Error(data?.message || `Failed to fetch order (Status: ${response.status})`);
                 }
-
                 if (data.success && data.order) {
                     setOrder(data.order);
                     setError(null);
                     setRetryCount(0);
-
                     if (data.order?.items?.length > 0) {
                         await fetchProductDetails(data.order.items);
                     }
@@ -152,7 +143,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             } catch (err) {
                 console.error('Error fetching order details:', err);
                 setError(err.message);
-
                 if (retryCount < MAX_RETRIES) {
                     setRetryCount(prev => prev + 1);
                     setTimeout(() => {
@@ -163,11 +153,9 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                 setLoadingOrder(false);
             }
         };
-
         if (isOpen && orderId) {
             fetchOrderDetails();
         }
-
         return () => {
             setOrder(null);
             setError(null);
@@ -175,24 +163,19 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             setRetryCount(0);
         };
     }, [isOpen, orderId, retryCount]);
-
     const fetchProductDetails = async (items) => {
         try {
             const productsMap = {};
-
             for (const item of items) {
                 if (item.product && !productsMap[item.product]) {
                     try {
                         const response = await fetch(`${window.location.origin}/api/products/${item.product}`);
-
                         if (!response.ok) {
                             console.error(`Failed to fetch product ${item.product}: ${response.status}`);
                             continue;
                         }
-
                         const data = await response.json();
                         //console.log('Product API response:', data);
-
                         if (data.product) {
                             productsMap[item.product] = data.product;
                         } else if (data.success && data.data) {
@@ -205,16 +188,13 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                     }
                 }
             }
-
             //console.log('Final products map:', productsMap);
             setProducts(productsMap);
         } catch (error) {
             console.error("Error fetching product details:", error);
         }
     };
-
     if (!isOpen) return null;
-
     const formatDate = (dateString) => {
         try {
             return new Date(dateString).toLocaleDateString(locale === 'ca' ? 'ca-ES' : 'es-ES', {
@@ -229,18 +209,15 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             return dateString;
         }
     };
-
     const formatPrice = (price) => {
         if (!price || parseFloat(price) === 0) {
             return locale === 'ca' ? 'Gratuït' : 'Gratis';
         }
         return `${parseFloat(price).toFixed(2)} €`;
     };
-
     const mapStatus = (status) => {
         return t.statusMap[status] || status;
     };
-
     const getStatusColorClass = (status) => {
         const colorMap = {
             'pending': 'bg-yellow-100 text-yellow-800',
@@ -251,11 +228,9 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         };
         return colorMap[status] || 'bg-gray-100 text-gray-800';
     };
-
     const getProductDetails = (productId) => {
         return products[productId] || null;
     };
-
     return (
         <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 z-50 flex justify-center items-center p-4">
             <div className="bg-white rounded-lg shadow-lg w-full max-h-[90vh] flex flex-col">
@@ -274,7 +249,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                             <FiX size={24} />
                         </button>
                     </div>
-
                     {/* Content */}
                     <div className="flex-grow overflow-auto rounded-lg">
                         {loadingOrder ? (
@@ -301,7 +275,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{formatDate(order.createdAt)}</p>
                                             </div>
                                         </div>
-                                                <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-blue-100 p-2 rounded-full mr-3">
                                                 <FiTruck className="text-blue-600" />
                                             </div>
@@ -310,7 +284,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{order.shippingCost === 0 ? 'Gratis' : formatPrice(order.shippingCost)}</p>
                                             </div>
                                         </div>
-                                                <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-green-100 p-2 rounded-full mr-3">
                                                 <FiDollarSign className="text-green-600" />
                                             </div>
@@ -319,7 +293,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{formatPrice(order.totalAmount)}</p>
                                             </div>
                                         </div>
-                                                <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-purple-100 p-2 rounded-full mr-3">
                                                 <FiCreditCard className="text-purple-600" />
                                             </div>
@@ -328,7 +302,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{order.paymentMethod || 'Pendiente'}</p>
                                             </div>
                                         </div>
-                                                <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-blue-100 p-2 rounded-full mr-3">
                                                 <FiTruck className="text-blue-600" />
                                             </div>
@@ -435,7 +409,8 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <FiPackage className="mr-2 text-[#36A9E1]" /> {t.products}
                                             </h4>
                                             <div className="overflow-x-auto">
-                                                <div className="overflow-x-auto" style={{ maxHeight: '300px', minHeight: '200px', height: '200px', overflowY: 'auto' }}>
+                                                <div className="md:overflow-x-auto md:max-h-[300px] min-h[200px] md:h-[200px] h-full">
+                                                    {/* style={{ maxHeight: '300px', minHeight: '200px', height: '200px', overflowY: 'auto' }} */}
                                                     <table className="min-w-full divide-y divide-gray-200">
                                                         <thead className="bg-gray-50">
                                                             <tr>
@@ -528,7 +503,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <FiCreditCard className="mr-2 text-[#36A9E1]" /> {t.orderSummary}
                                             </h4>
                                             <div className="flex p-4 flex-row space-x-4 justify-between">
-                                                <div className="flex flex-col md:flex-row gap-2 w-full">
+                                                <div className="grid grid-cols-2 md:flex md:flex-row gap-2 w-full">
                                                     <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
                                                         <div className="flex items-center mb-1">
                                                             <div className="mr-2 bg-purple-100 p-2 rounded-full">
@@ -536,7 +511,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                             </div>
                                                             <p className="text-sm font-medium">{t.taxes}</p>
                                                         </div>
-                                                        <p className="text-gray-600 text-sm">{formatPrice(order.tax) || t.pending}</p>
+                                                        <p className="text-gray-600 text-sm ml-10">{formatPrice(order.tax) || t.pending}</p>
                                                     </div>
                                                     <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
                                                         <div className="flex items-center mb-1">
@@ -545,7 +520,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                             </div>
                                                             <p className="text-sm font-medium">Descuento Total</p>
                                                         </div>
-                                                        <p className="text-pink-600 font-medium text-sm">
+                                                        <p className="text-pink-600 font-medium text-sm ml-10">
                                                             {order.discounts?.total ? `-${formatPrice(order.discounts.total)}` : '-'}
                                                         </p>
                                                     </div>
@@ -556,7 +531,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                             </div>
                                                             <p className="text-sm font-medium">{t.subtotalLabel}</p>
                                                         </div>
-                                                        <p className="text-gray-600 text-sm">{formatPrice(order.subtotal) || t.pending}</p>
+                                                        <p className="text-gray-600 text-sm ml-10">{formatPrice(order.subtotal) || t.pending}</p>
                                                     </div>
                                                     <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
                                                         <div className="flex items-center mb-1">
@@ -565,7 +540,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                             </div>
                                                             <p className="text-sm font-medium">{t.totalLabel}</p>
                                                         </div>
-                                                        <p className="text-gray-600 text-sm">{formatPrice(order.totalAmount) || t.pending}</p>
+                                                        <p className="text-gray-600 text-sm ml-10">{formatPrice(order.totalAmount) || t.pending}</p>
                                                     </div>
                                                 </div>
                                             </div>
