@@ -359,8 +359,7 @@ export default function ListViewModal({
                 // Call onStatusChange if provided
                 if (onStatusChange) {
                     onStatusChange(newStatus);
-                }
-                // toast.success(`Lista marcada como ${newStatus}`);
+                } 
             } else {
                 toast.success('Lista guardada');
             }
@@ -922,7 +921,7 @@ export default function ListViewModal({
                                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                                 >
                                 Cerrar
-                            </button> */}
+                                </button> */}
                             </div>
                         </div>
                     </div>
@@ -1007,6 +1006,7 @@ export default function ListViewModal({
                     </div>
                 )
             }
+            
             {/* Data Collection Modal */}
             {
                 showDataModal && currentItem && (
