@@ -28,7 +28,7 @@ export async function GET(request, { params }) {
             <html>
             <head>
             <meta charset="UTF-8">
-            <title>Ticket - ${order.orderNumber}</title>
+            <title>Rebut - ${order.orderNumber}</title>
             <style>
                 @page { size: A4; margin: 0; }
                 body { 
@@ -162,15 +162,15 @@ export async function GET(request, { params }) {
                 <div class="header">
                 <div class="logo">SUBIRANANADONS</div>
                 <div class="invoice-details">
-                    <h2>TICKET</h2>
-                    <div>Nº: ${order.orderNumber}</div>
-                    <div>Fecha: ${new Date(order.createdAt).toLocaleDateString('es-ES')}</div>
+                    <h2>REBUT</h2>
+                    <div>Núm.: ${order.orderNumber}</div>
+                    <div>Data: ${new Date(order.createdAt).toLocaleDateString('ca-ES')}</div>
                 </div>
                 </div>
                 <div class="info">
             ${order.deliveryMethod === 'delivery' ? ` 
                 <div>
-                    <h3>Datos de Facturación</h3>
+                    <h3>Dades de Facturació</h3>
                     <div>${order.shippingAddress.name} ${order.shippingAddress.lastName}</div>
                         <div>${order.shippingAddress.address}</div>
                         <div>${order.shippingAddress.city}, ${order.shippingAddress.province}</div>
@@ -178,20 +178,20 @@ export async function GET(request, { params }) {
                         <div>${order.shippingAddress.country}</div>
                 </div> ` : ''}
                 <div>
-                    <h3>Datos de Contacto</h3>
-                    <div>Email: ${order.shippingAddress.email}</div>
-                    <div>Teléfono: ${order.shippingAddress.phone}</div>
-                    <div>Método de entrega: ${order.deliveryMethod === 'delivery' ? 'Envío a domicilio' : 'Recogida en tienda'}</div>
+                    <h3>Dades de Contacte</h3>
+                    <div>Correu electrònic: ${order.shippingAddress.email}</div>
+                    <div>Telèfon: ${order.shippingAddress.phone}</div>
+                    <div>Mètode d'entrega: ${order.deliveryMethod === 'delivery' ? 'Enviament a domicili' : 'Recollida a botiga'}</div>
                 </div>
                 </div>                  
                 <table>
                 <thead>
                     <tr>
-                    <th>Producto</th>
-                    <th>Tipo</th>
-                    <th>Cantidad</th>
-                    <th>Precio</th>
-                    <th>Descuento</th>
+                    <th>Producte</th>
+                    <th>Tipus</th>
+                    <th>Quantitat</th>
+                    <th>Preu</th>
+                    <th>Descompte</th>
                     <th>Total</th>
                     </tr>
                 </thead>
@@ -207,7 +207,7 @@ export async function GET(request, { params }) {
                             ${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producto') : 'Producto'}
                         </td>
                         <td class="item-type ${item.type === 'gift' ? 'gift-type' : 'personal-type'}">
-                            ${item.type === 'gift' ? 'Regalo' : 'Personal'}
+                            ${item.type === 'gift' ? 'Regal' : 'Personal'}
                         </td>
                         <td>${item.quantity}</td>
                         <td>${originalPrice.toFixed(2)}€</td>
@@ -231,12 +231,12 @@ export async function GET(request, { params }) {
                 </tr>
                 ${order.discounts && order.discounts.total > 0 ? `
                 <tr class="discount-row">
-                    <td style="min-width: 150px;">Descuento</td>
+                    <td style="min-width: 150px;">Descompte</td>
                     <td>-${order.discounts.total.toFixed(2)} €</td>
                 </tr>
                 ` : ''}
                 <tr>
-                    <td style="min-width: 150px;">Gastos de envío</td>
+                    <td style="min-width: 150px;">Despeses d'enviament</td>
                     <td>${order.shippingCost.toFixed(2)} €</td>
                 </tr>
                 <tr class="total-row">
@@ -245,8 +245,8 @@ export async function GET(request, { params }) {
                 </tr>
                 </table>
                 <div class="footer">
-                <p>Gracias por su compra</p>
-                <small>Este documento sirve como ticket simplificada según el Real Decreto 1619/2012</small>
+                <p>Gràcies per la teva compra</p>
+                <small>Aquest document serveix com a rebut simplificat segons el Reial Decret 1619/2012</small>
                 </div>
             </div>
             </body>
