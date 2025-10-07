@@ -133,8 +133,7 @@ function getLocale() {
     return 'es';
 }
 import { updateBirthListItems, fetchBirthListItems, updateBirthListItemState, updateBirthList } from '@/services/BirthListService';
-import { toast } from 'react-hot-toast';
-import { stringify } from 'querystring';
+import { toast } from 'react-hot-toast'; 
 export default function ListViewModal({
     showModal,
     setShowModal,
@@ -654,8 +653,8 @@ export default function ListViewModal({
                                                     {selectedList.status === t.active
                                                         ? t.activeDesc
                                                         : selectedList.status === t.completed
-                                                            ? t.completedDesc
-                                                            : t.inactiveDesc}
+                                                        ? t.completedDesc
+                                                        : t.inactiveDesc}
                                                 </p>
                                             </div>
                                         </div>
@@ -1006,7 +1005,7 @@ export default function ListViewModal({
                     </div>
                 )
             }
-            
+
             {/* Data Collection Modal */}
             {
                 showDataModal && currentItem && (

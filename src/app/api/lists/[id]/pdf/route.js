@@ -15,13 +15,16 @@ export async function GET(request, { params }) {
                 message: 'Lista no encontrada'
             }, { status: 404 });
         }
-        // Generate HTML content
+        // Helper for Catalan/EU date/time
+        const formatDate = (date) => new Date(date).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const formatTime = (date) => new Date(date).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+        // Generate HTML content in Catalan
         const html = `
             <!DOCTYPE html>
             <html>
                 <head>
                     <meta charset="UTF-8">
-                    <title>Lista de Regalos - ${list.name}</title>
+                    <title>Llista de Regals - ${list.name}</title>
                     <style>
                         body { 
                             font-family: Arial, sans-serif;
@@ -58,49 +61,49 @@ export async function GET(request, { params }) {
                 </head>
                 <body>
                     <div class="header">
-                        <h1>Lista de Regalos</h1>
+                        <h1>Llista de Regals</h1>
                         <h2>${list.title}</h2>
                     </div>
                     <div class="list-info"> 
-                        <p><strong>Nombre del Bebé:</strong> ${list.babyName}</p>
-                        <p><strong>Fecha de Creación:</strong> ${new Date(list.createdAt).toLocaleDateString()}</p>
-                        <p><strong>Fecha Prevista:</strong> ${new Date(list.dueDate).toLocaleDateString()}</p>
-                        <p><strong>Estado:</strong> ${list.status}</p>
+                        <p><strong>Nom del nadó:</strong> ${list.babyName}</p>
+                        <p><strong>Data de creació:</strong> ${formatDate(list.createdAt)}</p>
+                        <p><strong>Data prevista:</strong> ${formatDate(list.dueDate)}</p>
+                        <p><strong>Estat:</strong> ${list.status === 'Activa' ? 'Activa' : list.status === 'Completada' ? 'Completada' : 'Inactiva'}</p>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th>Producto</th> 
-                                <th>Cantidad</th>
-                                <th>Estado</th>
+                                <th>Producte</th> 
+                                <th>Quantitat</th>
+                                <th>Estat</th>
                             </tr>
                         </thead>
                         <tbody>
                         ${list.items.map(item => {
-                        // Map the state number to status text
-                        let status;
-                        switch (item.state) {
-                            case 1:
-                                status = 'Reservado';
-                                break;
-                            case 2:
-                                status = 'Comprado';
-                                break;
-                            default:
-                                status = 'Pendiente';
-                        }
-                        return `
+            // Map the state number to status text (Catalan)
+            let status;
+            switch (item.state) {
+                case 1:
+                    status = 'Reservat';
+                    break;
+                case 2:
+                    status = 'Comprat';
+                    break;
+                default:
+                    status = 'Pendent';
+            }
+            return `
                                 <tr>
-                                    <td>${item.product ? (item.product.name?.es || item.product.name?.ca || item.product.name || 'Producto no disponible') : 'Producto no disponible'}</td> 
+                                    <td>${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producte no disponible') : 'Producte no disponible'}</td> 
                                     <td>${item.quantity}</td>
                                     <td>${status}</td>
                                 </tr>
                                 `;
-                            }).join('')}
+        }).join('')}
                         </tbody>
                     </table>
                     <div class="footer">
-                        <p>Generado el ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+                        <p>Generat el ${formatDate(new Date())} ${formatTime(new Date())}</p>
                     </div>
                 </body>
             </html>

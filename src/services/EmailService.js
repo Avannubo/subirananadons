@@ -232,9 +232,9 @@ class EmailService {
                 baseUrl = 'http://localhost:3000';
             } else {
                 // Use your production domain (prefer HTTPS)
-                baseUrl = 'https://subirana.avannubo.net';
+                baseUrl = 'https://subirananadons.com';
                 // If you want to support both, you could add logic here
-                // baseUrl = process.env.PROD_URL || 'https://subirana.avannubo.net';
+                // baseUrl = process.env.PROD_URL || 'https://subirananadons.com';
             }
             const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
             const mailOptions = {
@@ -284,7 +284,7 @@ class EmailService {
                 phone: buyerInfo.phone || '-',
                 message: buyerInfo.message || 'Sin mensaje'
             };
-            const listUrl = `${process.env.DOMAIN || 'https://subirana.avannubo.net'}/listas-de-nacimiento/${list._id}`;
+            const listUrl = `${process.env.DOMAIN || 'https://subirananadons.com'}/listas-de-nacimiento/${list._id}`;
             let html = '';
             if (action === 'reserve') {
                 html = `
@@ -366,7 +366,7 @@ class EmailService {
                 message: buyerInfo.message || 'Sin mensaje'
             };
             // Build HTML template
-            const listUrl = `${process.env.DOMAIN || 'https://subirana.avannubo.net'}/listas-de-nacimiento/${list._id}`;
+            const listUrl = `${process.env.DOMAIN || 'https://subirananadons.com'}/listas-de-nacimiento/${list._id}`;
             const html = `
                 <div style="font-family: Arial, sans-serif; background: #f8f9fa; padding: 24px;">
                     <h2 style="color: #e41e31;">Reserva/compra cancelada en tu lista</h2>

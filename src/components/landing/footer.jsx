@@ -102,7 +102,7 @@ export default function Footer() {
                         </div>
                     </div >
                 </div>
-                <div className="border-t-2 border-gray-200">
+                {/* <div className="border-t-2 border-gray-200">
                     <div className="max-w-[1500px] mx-auto px-4 py-6">
                         <div className="flex justify-between items-center">
                             <img
@@ -121,7 +121,7 @@ export default function Footer() {
                             />
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
         </footer>
     );

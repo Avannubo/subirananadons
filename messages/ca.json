@@ -16,6 +16,7 @@
     "sortNameAsc": "Nom A-Z",
     "sortNewest": "Més nous",
     "noResults": "No s'han trobat productes que coincideixin amb la teva cerca.",
+    "noProductsFound": "No s'han trobat productes en aquesta categoria.",
     "showingText": "Mostrant {count} de {total} productes"
   },
   "BannerTab": {
