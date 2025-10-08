@@ -11,7 +11,7 @@ export default function LoginButton() {
                 if (btn) btn.click();
             }}
         >
-            {t('loginBtnShort', { default: 'Iniciar sesión' })}
+            {t('loginBtnShort', { default: 'Crea tu Listas' })}
         </button>
     );
 }

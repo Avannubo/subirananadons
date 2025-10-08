@@ -17,64 +17,16 @@ import {
 } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { useSession, signOut } from 'next-auth/react';
-const getNavigationItems = (userRole, locale) => [
-    {
-        href: "/dashboard/account",
-        icon: CircleUserRound,
-        label: locale === 'ca' ? "El Meu Compte" : "Mi Cuenta",
-        roles: ['user', 'admin']
-    },
-    {
-        href: "/dashboard/productos",
-        icon: ShoppingBag,
-        label: locale === 'ca' ? "Productes" : "Productos",
-        roles: ['admin']
-    },
-    {
-        href: "/dashboard/featured-products",
-        icon: Star,
-        label: locale === 'ca' ? "Destacats" : "Destacados",
-        roles: ['admin']
-    },
-    {
-        href: "/dashboard/brands",
-        icon: TagIcon,
-        label: locale === 'ca' ? "Marques" : "Marcas",
-        roles: ['admin']
-    },
-    {
-        href: "/dashboard/orders",
-        icon: ClipboardList,
-        label: userRole === 'admin'
-            ? (locale === 'ca' ? "Comandes" : "Pedidos")
-            : (locale === 'ca' ? "Les Meves Comandes" : "Mis Pedidos"),
-        roles: ['user', 'admin']
-    },
-    {
-        href: "/dashboard/clientes",
-        icon: Users,
-        label: locale === 'ca' ? "Clients" : "Clientes",
-        roles: ['admin']
-    },
-    {
-        href: "/dashboard/listas",
-        icon: GiftIcon,
-        label: userRole === 'admin'
-            ? (locale === 'ca' ? "Llistes" : "Listas")
-            : (locale === 'ca' ? "Les Meves Llistes" : "Mis Listas"),
-        roles: ['user', 'admin']
-    },
-    {
-        href: "/dashboard/configuracion",
-        icon: Settings,
-        label: locale === 'ca' ? "Configuracions" : "Configuraciones",
-        roles: ['admin']
-    }
-];
 export default function Sidebar() {
     const { data: session } = useSession();
     const userRole = session?.user?.role || 'user';
-    const defaultLocale = useLocale();
+    // Detect browser language (ca or es) for dashboard labels
+    const getBrowserLang = () => {
+        if (typeof window === 'undefined') return 'es';
+        const nav = window.navigator.language || window.navigator.userLanguage || 'es';
+        return nav.split('-')[0] === 'ca' ? 'ca' : 'es';
+    };
+    const lang = getBrowserLang();
     // Sidebar is collapsed by default on desktop
     // Persist sidebar state across page navigation
     const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -85,25 +37,67 @@ export default function Sidebar() {
         return true;
     });
     const isSidebarCollapsed = isCollapsed;
-    // Detect browser language and set initial locale
-    const [currentLocale, setCurrentLocale] = React.useState(defaultLocale);
-    React.useEffect(() => {
-        let detectedLocale = 'ca';
-        if (typeof window !== 'undefined' && window.navigator) {
-            const lang = window.navigator.language || window.navigator.userLanguage;
-            if (lang && lang.toLowerCase().startsWith('es')) {
-                detectedLocale = 'es';
-            }
+    // Build navigation items using browser language
+    const navigationItems = [
+        {
+            href: "/dashboard/account",
+            icon: CircleUserRound,
+            label: lang === 'ca' ? 'El Meu Compte' : 'Mi Cuenta',
+            roles: ['user', 'admin']
+        },
+        {
+            href: "/dashboard/productos",
+            icon: ShoppingBag,
+            label: lang === 'ca' ? 'Productes' : 'Productos',
+            roles: ['admin']
+        },
+        {
+            href: "/dashboard/featured-products",
+            icon: Star,
+            label: lang === 'ca' ? 'Destacats' : 'Destacados',
+            roles: ['admin']
+        },
+        {
+            href: "/dashboard/brands",
+            icon: TagIcon,
+            label: lang === 'ca' ? 'Marques' : 'Marcas',
+            roles: ['admin']
+        },
+        {
+            href: "/dashboard/orders",
+            icon: ClipboardList,
+            label: userRole === 'admin'
+                ? (lang === 'ca' ? 'Comandes' : 'Pedidos')
+                : (lang === 'ca' ? 'Les Meves Comandes' : 'Mis Pedidos'),
+            roles: ['user', 'admin']
+        },
+        {
+            href: "/dashboard/clientes",
+            icon: Users,
+            label: lang === 'ca' ? 'Clients' : 'Clientes',
+            roles: ['admin']
+        },
+        {
+            href: "/dashboard/listas",
+            icon: GiftIcon,
+            label: userRole === 'admin'
+                ? (lang === 'ca' ? 'Llistes' : 'Listas')
+                : (lang === 'ca' ? 'Les Meves Llistes' : 'Mis Listas'),
+            roles: ['user', 'admin']
+        },
+        {
+            href: "/dashboard/configuracion",
+            icon: Settings,
+            label: lang === 'ca' ? 'Configuracions' : 'Configuraciones',
+            roles: ['admin']
         }
-        setCurrentLocale(detectedLocale);
-    }, []);
+    ];
     // Save collapse state to localStorage on change
     React.useEffect(() => {
         if (typeof window !== 'undefined') {
             window.localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
         }
     }, [isCollapsed]);
-    const navigationItems = getNavigationItems(userRole, currentLocale);
     const sidebarClasses = `
         ${isSidebarCollapsed ? 'w-20' : 'w-64'}
         hidden md:block md:sticky
@@ -133,8 +127,8 @@ export default function Sidebar() {
                                     <div className='p-6 bg-[#36A9E1] text-white rounded-full flex items-center uppercase font-bold text-lg justify-center h-10 w-10'>
                                         {session?.user.name?.charAt(0) || '!'}
                                     </div>
-                                ) : ( 
-                                    `${currentLocale === 'ca' ? 'Hola' : 'Hola'}! ${session?.user.name?.split(' ')[0] || ''}`
+                                ) : (
+                                    `${lang === 'ca' ? 'Hola' : 'Hola'}! ${session?.user.name?.split(' ')[0] || ''}`
                                 )}
                             </span>
                         </div>
@@ -162,7 +156,7 @@ export default function Sidebar() {
                             className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-center gap-2'} py-2 mb-4 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-[#36A9E1] hover:text-white rounded-lg transition-colors`}
                         >
                             <LogOut size={20} />
-                            {!isSidebarCollapsed && (currentLocale === 'ca' ? 'Tancar sessió' : 'Cerrar sesión')}
+                            {!isSidebarCollapsed && (lang === 'ca' ? 'Tancar sessió' : 'Cerrar sesión')}
                         </button>
                         {!isSidebarCollapsed && <p className="text-sm text-center text-gray-500 mt-2">© 2025 Subirana</p>}
                     </div>

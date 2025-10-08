@@ -333,7 +333,7 @@ export default function ClientsTabs() {
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="relative">
+                        {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -343,7 +343,7 @@ export default function ClientsTabs() {
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
-                        </div>
+                        </div> */}
                         <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
@@ -378,7 +378,7 @@ export default function ClientsTabs() {
                             />
                         </div>
                     </div>
-                    <div className="flex sm:flex-row flex-col justify-start gap-2">
+                    {/* <div className="flex sm:flex-row flex-col justify-start gap-2">
                         <button
                             className="flex items-center justify-center px-4 py-2 bg-[#36A9E1] text-white rounded hover:bg-[#00B0C890] cursor-pointer"
                             onClick={applyFilters}
@@ -394,7 +394,7 @@ export default function ClientsTabs() {
                         >
                             {t.clear}
                         </button>
-                    </div>
+                    </div> */}
                 </div>
                 {/* Client data table */}
                 {isLoading ? (

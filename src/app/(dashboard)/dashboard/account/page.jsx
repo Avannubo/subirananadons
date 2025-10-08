@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { toast } from 'react-hot-toast'; 
+import { toast } from 'react-hot-toast';
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import { useUser } from '@/contexts/UserContext';
@@ -24,6 +24,63 @@ export default function Page() {
     const [imagePreview, setImagePreview] = useState('');
     const [isUpdating, setIsUpdating] = useState(false);
     const [lastUpdate, setLastUpdate] = useState(null);
+
+    // Localization: prefer browser locale when in dashboard (client-side)
+    const getBrowserLang = () => {
+        if (typeof window === 'undefined') return 'es';
+        const nav = window.navigator.language || window.navigator.userLanguage || 'es';
+        return nav.split('-')[0];
+    };
+    const lang = getBrowserLang() === 'ca' ? 'ca' : 'es';
+    const L = {
+        ca: {
+            title: 'El meu compte',
+            subtitle: 'Edita la teva Informació',
+            firstName: 'Nom',
+            lastName: 'Cognoms',
+            nameHelp: "Només es permeten caràcters alfabètics (lletres) i el punt (.), seguits d'un espai.",
+            email: 'Correu electrònic',
+            password: 'Contrasenya',
+            change: 'Canvia',
+            newPassword: 'Nova contrasenya',
+            newPasswordPlaceholder: 'Introdueix la teva nova contrasenya',
+            min6: 'Mínim 6 caràcters',
+            saving: 'Guardant...',
+            updating: 'Actualitzant...',
+            saveChanges: 'Desa els canvis',
+            lastUpdateText: 'Última actualització:',
+            imgProcessing: "Processant la imatge...",
+            usingLocalImage: "S'està utilitzant la imatge local",
+            uploadFailed: "No s'ha pogut pujar la imatge",
+            uploadSuccess: 'Imatge pujada correctament!',
+            profileUpdated: 'Perfil actualitzat correctament. Se tancarà la sessió.',
+            updateError: 'Error en actualitzar el perfil'
+        },
+        es: {
+            title: 'Mi cuenta',
+            subtitle: 'Edita tu Información',
+            firstName: 'Nombre',
+            lastName: 'Apellidos',
+            nameHelp: 'Sólo se permiten caracteres alfabéticos (letras) y el punto (.), seguidos de un espacio.',
+            email: 'Correo electrónico',
+            password: 'Contraseña',
+            change: 'Cambiar',
+            newPassword: 'Nueva contraseña',
+            newPasswordPlaceholder: 'Introduce tu nueva contraseña',
+            min6: 'Mínimo 6 caracteres',
+            saving: 'Guardando...',
+            updating: 'Actualizando...',
+            saveChanges: 'Guardar cambios',
+            lastUpdateText: 'Última actualización:',
+            imgProcessing: 'Procesando la imagen...',
+            usingLocalImage: 'Se está utilizando la imagen local',
+            uploadFailed: 'No se pudo subir la imagen',
+            uploadSuccess: 'Imagen subida correctamente!',
+            profileUpdated: 'Perfil actualizado correctamente. Se cerrará la sesión.',
+            updateError: 'Error al actualizar el perfil'
+        }
+    };
+    const t = (key) => (L[lang] && L[lang][key]) || L['es'][key] || key;
     useEffect(() => {
         if (session?.user) {
             const nameParts = session.user.name?.split(' ') || ['', ''];
@@ -59,7 +116,7 @@ export default function Page() {
     const uploadImage = async () => {
         if (!selectedImage) return null;
         // Create a loading toast that can be updated
-        const toastId = toast.loading('Processant la imatge...');
+        const toastId = toast.loading(t('imgProcessing'));
         // Set updating state to show loading UI
         setIsUpdating(true);
         try {
@@ -92,11 +149,11 @@ export default function Page() {
                 // but only in development to avoid database bloat in production
                 if (process.env.NODE_ENV === 'development') {
                     //console.log('Using base64 image as fallback in development');
-                    toast.success('S\'està utilitzant la imatge local', { id: toastId });
+                    toast.success(t('usingLocalImage'), { id: toastId });
                     setIsUpdating(false);
                     return base64Image;
                 } else {
-                    toast.error('No s\'ha pogut pujar la imatge', { id: toastId });
+                    toast.error(t('uploadFailed'), { id: toastId });
                     setIsUpdating(false);
                     return null;
                 }
@@ -104,7 +161,7 @@ export default function Page() {
             // If the request was successful, parse the response
             const data = await response.json();
             //console.log('Server upload successful, Cloudinary URL:', data.url);
-            toast.success('Imatge pujada correctament!', { id: toastId });
+            toast.success(t('uploadSuccess'), { id: toastId });
             // Set the image preview directly from the Cloudinary URL to update UI immediately
             setImagePreview(data.url);
             // Record the time of the last update
@@ -114,7 +171,7 @@ export default function Page() {
             return data.url;
         } catch (error) {
             console.error('Error in image upload process:', error);
-            toast.error('No s\'ha pogut pujar la imatge', { id: toastId });
+            toast.error(t('uploadFailed'), { id: toastId });
             // In development, use the base64 image as fallback
             if (process.env.NODE_ENV === 'development') {
                 //console.log('Using base64 image as fallback due to error');
@@ -169,7 +226,7 @@ export default function Page() {
                 throw new Error(responseData.message || 'Error en actualitzar el perfil');
             }
             setLastUpdate(new Date().toISOString());
-            toast.success('Perfil actualitzat correctament. Se tancarà la sessió.');
+            toast.success(t('profileUpdated'));
             // Reset state after successful update
             if (showPasswordChange && newPassword) {
                 setNewPassword('');
@@ -183,7 +240,7 @@ export default function Page() {
                 signOut({ callbackUrl: '/' });
             }
         } catch (error) {
-            toast.error(error.message || 'Error en actualitzar el perfil');
+            toast.error(error.message || t('updateError'));
         } finally {
             setLoading(false);
             setIsUpdating(false);
@@ -193,14 +250,14 @@ export default function Page() {
         <AuthCheck>
             <AdminLayout>
                 <div className="md:mx-auto md:p-6 md:min-h-[90vh]">
-                    <h1 className="text-2xl font-bold mb-6">El meu compte</h1>
+                    <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
                     <div className="bg-white rounded-lg p-6">
-                        <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Edita tu Informació</h2>
+                        <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">{t('subtitle')}</h2>
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             {/* Nombre */}
                             <div>
                                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Nom
+                                    {t('firstName')}
                                 </label>
                                 <input
                                     type="text"
@@ -211,13 +268,13 @@ export default function Page() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                 />
                                 <p className="mt-1 text-xs text-gray-500">
-                                    Només es permeten caràcters alfabètics (lletres) i el punt (.), seguits d'un espai.
+                                    {t('nameHelp')}
                                 </p>
                             </div>
                             {/* Apellidos */}
                             <div>
                                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Cognoms
+                                    {t('lastName')}
                                 </label>
                                 <input
                                     type="text"
@@ -228,13 +285,13 @@ export default function Page() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                 />
                                 <p className="mt-1 text-xs text-gray-500">
-                                    Només es permeten caràcters alfabètics (lletres) i el punt (.), seguits d'un espai.
+                                    {t('nameHelp')}
                                 </p>
                             </div>
                             {/* Email */}
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Correu electrònic
+                                    {t('email')}
                                 </label>
                                 <input
                                     type="email"
@@ -248,7 +305,7 @@ export default function Page() {
                             {/* Current Password */}
                             <div>
                                 <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Contrasenya
+                                    {t('password')}
                                 </label>
                                 <div className="relative">
                                     <input
@@ -263,7 +320,7 @@ export default function Page() {
                                         onClick={() => setShowPasswordChange(!showPasswordChange)}
                                         className="absolute right-2 top-2 text-[#36A9E1] text-sm font-medium"
                                     >
-                                        Canvia
+                                        {t('change')}
                                     </button>
                                 </div>
                             </div>
@@ -271,38 +328,38 @@ export default function Page() {
                             {showPasswordChange && (
                                 <div>
                                     <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Nova contrasenya
+                                        {t('newPassword')}
                                     </label>
                                     <input
                                         type="password"
                                         id="newPassword"
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
-                                        placeholder="Introdueix la teva nova contrasenya"
+                                        placeholder={t('newPasswordPlaceholder')}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
                                         minLength={6}
                                     />
                                     <p className="mt-1 text-xs text-gray-500">
-                                        Mínim 6 caràcters
+                                        {t('min6')}
                                     </p>
                                 </div>
                             )}
                             {/* Submit Button */}
                             <div className="pt-4">
-                                <button 
+                                <button
                                     type="submit"
                                     disabled={loading || isUpdating}
                                     className={`px-4 py-2 bg-[#36A9E1] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C860] ${(loading || isUpdating) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#00B0C890]'
                                         }`}
                                 >
-                                    {loading ? 'Guardant...' : isUpdating ? 'Actualitzant...' : 'Desa els canvis'}
+                                    {loading ? t('saving') : isUpdating ? t('updating') : t('saveChanges')}
                                 </button>
                             </div>
                         </form>
                         {/* Add last update information if available */}
                         {lastUpdate && (
                             <p className="text-xs text-gray-500 mt-2">
-                                Última actualització: {new Date(lastUpdate).toLocaleString()}
+                                {t('lastUpdateText')} {new Date(lastUpdate).toLocaleString()}
                             </p>
                         )}
                     </div>

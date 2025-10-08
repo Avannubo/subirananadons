@@ -16,7 +16,10 @@ export default function ProductsTable(props) {
     const [products, setProducts] = useState([]);
     const [sortOrder, setSortOrder] = useState('newest'); // default: newest first
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchName, setSearchName] = useState('');
+    const [searchBrand, setSearchBrand] = useState('');
+    const [searchCategory, setSearchCategory] = useState('');
+    const [searchRef, setSearchRef] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [totalItems, setTotalItems] = useState(0);
@@ -65,20 +68,23 @@ export default function ProductsTable(props) {
                     }
                     return prod.category;
                 };
-                const search = removeAccents(searchTerm.trim().toLowerCase());
+                const sName = removeAccents((searchName || '').trim().toLowerCase());
+                const sBrand = removeAccents((searchBrand || '').trim().toLowerCase());
+                const sCategory = removeAccents((searchCategory || '').trim().toLowerCase());
+                const sRef = removeAccents((searchRef || '').trim().toLowerCase());
                 let filtered = data.products;
-                if (search) {
+                // Apply AND filters when any search field is provided
+                if (sName || sBrand || sCategory || sRef) {
                     filtered = data.products.filter(prod => {
                         const name = removeAccents(getName(prod).toLowerCase());
                         const brand = removeAccents(getBrand(prod).toLowerCase());
                         const category = removeAccents(getCategory(prod).toLowerCase());
                         const ref = removeAccents((prod.reference || '').toLowerCase());
-                        return (
-                            name.includes(search) ||
-                            brand.includes(search) ||
-                            category.includes(search) ||
-                            ref.includes(search)
-                        );
+                        if (sName && !name.includes(sName)) return false;
+                        if (sBrand && !brand.includes(sBrand)) return false;
+                        if (sCategory && !category.includes(sCategory)) return false;
+                        if (sRef && !ref.includes(sRef)) return false;
+                        return true;
                     });
                 }
                 // Sort client-side
@@ -122,15 +128,15 @@ export default function ProductsTable(props) {
     // Reset to first page when search/filter/sort changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, sortOrder]);
+    }, [searchName, searchBrand, searchCategory, searchRef, sortOrder]);
     useEffect(() => {
         fetchProducts();
-    }, [searchTerm, currentPage, itemsPerPage, sortOrder]);
-    // Handle search input change
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1);
-    };
+    }, [searchName, searchBrand, searchCategory, searchRef, currentPage, itemsPerPage, sortOrder]);
+    // Handle search input changes (four separate fields)
+    const handleNameChange = (e) => setSearchName(e.target.value);
+    const handleBrandChange = (e) => setSearchBrand(e.target.value);
+    const handleCategoryChange = (e) => setSearchCategory(e.target.value);
+    const handleRefChange = (e) => setSearchRef(e.target.value);
     // Handle sort order change
     const handleSortOrderChange = (e) => {
         setSortOrder(e.target.value);
@@ -394,7 +400,7 @@ export default function ProductsTable(props) {
             </div>
             {/* Unified Search and Sort */}
             <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center gap-4">
-                <div className="w-full md:w-1/4">
+                <div className="w-full md:w-[250px]">
                     <select
                         value={sortOrder}
                         onChange={handleSortOrderChange}
@@ -407,16 +413,54 @@ export default function ProductsTable(props) {
                         <option value="lastmodified">Última modificació</option>
                     </select>
                 </div>
-                <div className="relative flex-1 w-full">
-                    <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                    <input
-                        type="search"
-                        autoComplete="off"
-                        placeholder="Cerca per nom, marca, categoria o referència"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                    />
+                <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-4 gap-2">
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                        <input
+                            type="search"
+                            autoComplete="off"
+                            placeholder="Cerca per nom"
+                            value={searchName}
+                            onChange={handleNameChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+
+                        <input
+                            type="search"
+                            autoComplete="off"
+                            placeholder="Marca"
+                            value={searchBrand}
+                            onChange={handleBrandChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+
+                        <input
+                            type="search"
+                            autoComplete="off"
+                            placeholder="Categoria"
+                            value={searchCategory}
+                            onChange={handleCategoryChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+
+                        <input
+                            type="search"
+                            autoComplete="off"
+                            placeholder="Referència"
+                            value={searchRef}
+                            onChange={handleRefChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
                 </div>
             </div>
             {/* Products Table */}

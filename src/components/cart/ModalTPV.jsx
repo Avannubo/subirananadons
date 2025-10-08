@@ -32,7 +32,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             total: "Total",
             totalOrderPrice: "Preu total de la comanda:",
             totalDiscount: "Total descomptes",
-            confirmPayment: "Confirmar Pagament",
+            confirmPayment: "Continuar",
             cancel: "Cancel·lar"
         },
         es: {
@@ -54,7 +54,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             total: "Total",
             totalOrderPrice: "Precio total del pedido:",
             totalDiscount: "Total descuentos",
-            confirmPayment: "Confirmar Pago",
+            confirmPayment: "Continuar",
             cancel: "Cancelar"
         }
     };
@@ -63,11 +63,79 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             setCartItems(orderData.cartProducts);
         }
     }, [orderData]);
+
+    // Helper to render localized fields safely (handles {ca, es} objects)
+    const renderField = (field) => {
+        try {
+            if (field == null) return '';
+            if (typeof field === 'string' || typeof field === 'number') return String(field);
+            if (typeof field === 'object') {
+                // If it's an object with a nested name, prefer that
+                if (field.name) return renderField(field.name);
+                // prefer current locale, then es, then ca, then first string value
+                if (field[locale]) return String(field[locale]);
+                if (field.es) return String(field.es);
+                if (field.ca) return String(field.ca);
+                // pick first string value
+                for (const k in field) {
+                    if (typeof field[k] === 'string') return field[k];
+                }
+                // fallback to JSON string for debugging
+                console.warn('renderField: object field has no string values', field);
+                return JSON.stringify(field);
+            }
+            return String(field);
+        } catch (err) {
+            console.error('renderField error:', err, field);
+            return '';
+        }
+    };
+
+    // Detect id-like strings (mongodb ObjectId or long hex strings) to avoid showing them as names
+    const isIdLike = (s) => {
+        try {
+            if (!s || typeof s !== 'string') return false;
+            // remove common separators
+            const tokens = s.split(/[-\s,;|]+/).filter(Boolean);
+            // if any token is a long hex string (>=8 hex chars), treat as id-like
+            return tokens.every(t => /^[a-f0-9]{6,24}$/i.test(t));
+        } catch (e) {
+            return false;
+        }
+    };
+
+    // Get a display name for brand/category: resolve nested objects and filter out id-like values
+    const getName = (field) => {
+        const val = renderField(field);
+        if (!val) return '';
+        if (isIdLike(val)) return '';
+        return val;
+    };
     const getItemPrice = (item) => {
+        // Robust numeric parsing helper
+        const parseNumeric = (v) => {
+            try {
+                if (typeof v === 'number' && Number.isFinite(v)) return v;
+                if (typeof v === 'string') {
+                    const clean = v.replace(/[^0-9,.-]/g, '').replace(',', '.');
+                    const n = parseFloat(clean);
+                    return Number.isFinite(n) ? n : 0;
+                }
+                // fallback: try to stringify and parse
+                const s = String(v || '0');
+                const clean = s.replace(/[^0-9,.-]/g, '').replace(',', '.');
+                const n = parseFloat(clean);
+                return Number.isFinite(n) ? n : 0;
+            } catch (e) {
+                return 0;
+            }
+        };
+
         // Get base price
-        let basePrice = typeof item.priceValue === 'number' ? item.priceValue :
-            (typeof item.price === 'number' ? item.price :
-                parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
+        let basePrice = 0;
+        if (typeof item.priceValue === 'number' && Number.isFinite(item.priceValue)) basePrice = item.priceValue;
+        else if (typeof item.price === 'number' && Number.isFinite(item.price)) basePrice = item.price;
+        else basePrice = parseNumeric(item.priceValue ?? item.price ?? 0);
         // Check if there's an active discount
         if (item.discount && item.discount.active) {
             const now = new Date();
@@ -82,12 +150,13 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                 }
             }
         }
-        return basePrice;
+        return Number.isFinite(basePrice) ? basePrice : 0;
     };
     const calculateTotal = () => {
         return cartItems.reduce((sum, item) => {
             const price = getItemPrice(item);
-            return sum + (price * (item.quantity || 1));
+            const qty = Number.isFinite(Number(item.quantity)) ? Number(item.quantity) : (item.quantity ? Number(item.quantity) : 0);
+            return sum + (price * (qty || 0));
         }, 0);
     };
     const stringBase64Encode = (input) => {
@@ -108,8 +177,10 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
         return encode_str.toString();
     };
     const calcularFirma = () => {
-        const total = calculateTotal();
-        let cleanPrecioTotal = (total * 100).toString(); // Convert to cents and string
+        try {
+            const total = calculateTotal();
+            const cents = Math.round(Number(total) * 100);
+            const cleanPrecioTotal = Number.isFinite(cents) ? String(cents) : '0'; // Convert to cents and string
         let merchantOrder = orderData?.orderId || String(Date.now()).substring(0, 12).padStart(4, '0');
         // Create data object for the payment request
         let data = {
@@ -124,16 +195,40 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
         };
         // Encode parameters and calculate signature
         let encodedParameters = stringBase64Encode(JSON.stringify(data));
-        let encodedSignature = "sq7HjrUOBfKmC576ILgskD5srU870gJ7";
-        let encodedSignatureDES = des_encrypt(merchantOrder, base64Decode(encodedSignature));
-        let encodedDsSignature = CryptoJS.HmacSHA256(encodedParameters, base64Decode(encodedSignatureDES));
-        let dsSignature = CryptoJS.enc.Base64.stringify(encodedDsSignature);
-        // Populate form fields safely
-        if (typeof document !== 'undefined') {
-            const form = document.forms["pago"];
-            if (form) {
-                if (form.Ds_MerchantParameters) form.Ds_MerchantParameters.value = encodedParameters;
-                if (form.Ds_Signature) form.Ds_Signature.value = dsSignature;
+            // signature generation can fail if keys/values are malformed; protect with try/catch
+            try {
+                let encodedSignature = "R3zJ3xZGifR1ZHVOEwNpuUn1c+l1jI7S";
+                let encodedSignatureDES = des_encrypt(merchantOrder, base64Decode(encodedSignature));
+                let encodedDsSignature = CryptoJS.HmacSHA256(encodedParameters, base64Decode(encodedSignatureDES));
+                let dsSignature = CryptoJS.enc.Base64.stringify(encodedDsSignature);
+                // Populate form fields safely
+                if (typeof document !== 'undefined') {
+                    const form = document.forms["pago"];
+                    if (form) {
+                        if (form.Ds_MerchantParameters) form.Ds_MerchantParameters.value = encodedParameters;
+                        if (form.Ds_Signature) form.Ds_Signature.value = dsSignature;
+                    }
+                }
+            } catch (sigErr) {
+                console.error('calcularFirma signature error:', sigErr, { data, encodedParameters });
+                // Clear any existing values to avoid sending malformed data
+                if (typeof document !== 'undefined') {
+                    const form = document.forms["pago"];
+                    if (form) {
+                        if (form.Ds_MerchantParameters) form.Ds_MerchantParameters.value = '';
+                        if (form.Ds_Signature) form.Ds_Signature.value = '';
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('calcularFirma error:', err);
+            // ensure we don't leave invalid data in the form
+            if (typeof document !== 'undefined') {
+                const form = document.forms["pago"];
+                if (form) {
+                    if (form.Ds_MerchantParameters) form.Ds_MerchantParameters.value = '';
+                    if (form.Ds_Signature) form.Ds_Signature.value = '';
+                }
             }
         }
     };
@@ -197,30 +292,55 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                 ) : (
                     <div className="px-6 md:px-12 py-8 rounded-2xl shadow-xl bg-white">
                         <h2 className="text-2xl font-bold text-[#3f93ba] mb-4">{translations[locale].orderSummary}</h2>
-                        <div className="overflow-x-auto rounded-lg border border-gray-100">
-                            <table className="w-full table-auto border-collapse text-sm">
+                        {/* Mobile: stacked cards to avoid overlaps */}
+                        <div className="md:hidden space-y-3">
+                            {cartItems.map((product, idx) => (
+                                <div key={product._id || product.id || idx} className="bg-white rounded-lg border border-gray-100 p-3">
+                                    <div className="flex items-start gap-3">
+                                        {product.image && (
+                                            <img src={renderField(product.image)} alt={renderField(product.name)} className="w-16 h-16 object-cover rounded-md border border-gray-200 bg-gray-50 flex-shrink-0" />
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium text-base text-gray-900 truncate">{renderField(product.name)}</div>
+                                            <div className="text-xs text-gray-500 truncate">{getName(product.brand)}{getName(product.brand) && getName(product.category) ? ' - ' : ''}{getName(product.category)}</div>
+                                            <div className="mt-2 text-sm text-gray-700 space-y-1">
+                                                <div className="flex justify-between"><span className="text-xs text-gray-500">{translations[locale].quantity}</span><span className="font-medium">{product.quantity}</span></div>
+                                                <div className="flex justify-between"><span className="text-xs text-gray-500">{translations[locale].price}</span><span className="font-medium">{getItemPrice(product).toFixed(2)}€</span></div>
+                                                <div className="flex justify-between"><span className="text-xs text-gray-500">{translations[locale].total}</span><span className="font-medium">{(getItemPrice(product) * (product.quantity || 1)).toFixed(2)}€</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop/tablet: keep table layout */}
+                        <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
+                            <table className="w-full table-fixed md:table-auto border-collapse text-sm">
                                 <thead>
                                     <tr className="bg-gray-50 text-gray-700">
-                                        <th className="px-4 py-2 font-semibold">{translations[locale].product}</th>
-                                        <th className="px-4 py-2 font-semibold">{translations[locale].quantity}</th>
-                                        <th className="px-4 py-2 font-semibold">{translations[locale].price}</th>
-                                        <th className="px-4 py-2 font-semibold">{translations[locale].total}</th>
+                                        {/* Product column: flexible so it can expand and use remaining space */}
+                                        <th className="px-4 py-2 font-semibold text-left">{translations[locale].product}</th>
+                                        {/* Numeric columns fixed so product column won't collapse */}
+                                        <th className="px-4 py-2 font-semibold text-center w-20 md:w-24">{translations[locale].quantity}</th>
+                                        <th className="px-4 py-2 font-semibold text-center w-24 md:w-28">{translations[locale].price}</th>
+                                        <th className="px-4 py-2 font-semibold text-center w-24 md:w-28">{translations[locale].total}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {cartItems.map((product) => (
-                                        <tr key={product.id} className="border-b border-b-gray-100 last:border-b-0">
-                                            <td className="px-4 py-2 flex items-center gap-3">
+                                    {cartItems.map((product, idx) => (
+                                        <tr key={product._id || product.id || idx} className="border-b border-b-gray-100 last:border-b-0">
+                                            <td className="px-4 py-2 flex items-center gap-3 min-w-0">
                                                 {product.image && (
-                                                    <img src={product.image} alt={product.name} className="w-32 h-32 object-cover rounded-lg border border-gray-200 bg-gray-50" />
+                                                    <img src={renderField(product.image)} alt={renderField(product.name)} className="w-20 h-20 md:w-32 md:h-32 flex-shrink-0 object-cover rounded-lg border border-gray-200 bg-gray-50" />
                                                 )}
-                                                <div>
-                                                    <div className="font-medium text-xl text-gray-900">{product.name}</div>
-                                                    <div className="text-xs text-gray-500">{product.brand}{product.brand && product.category ? ' - ' : ''}{product.category}</div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-medium text-lg md:text-xl text-gray-900 max-w-[12rem] md:max-w-none truncate">{renderField(product.name)}</div>
+                                                    <div className="text-xs text-gray-500">{getName(product.brand)}{getName(product.brand) && getName(product.category) ? ' - ' : ''}{getName(product.category)}</div>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-2 text-lg text-center">{product.quantity}</td>
-                                            <td className="px-4 py-2 text-lg">
+                                            <td className="px-4 py-2 text-base md:text-lg text-center whitespace-nowrap">{product.quantity}</td>
+                                            <td className="px-4 py-2 text-base md:text-lg text-center md:text-right whitespace-nowrap">
                                                 {product.discount && product.discount.active ? (
                                                     <div className="flex flex-col">
                                                         <span className="text-gray-400 line-through text-sm">
@@ -239,7 +359,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-2 font-medium text-lg">
+                                            <td className="px-4 py-2 font-medium text-base md:text-lg text-center md:text-right whitespace-nowrap">
                                                 {(getItemPrice(product) * (product.quantity || 1)).toFixed(2)}€
                                             </td>
                                         </tr>

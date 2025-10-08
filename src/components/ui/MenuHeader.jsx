@@ -8,6 +8,8 @@ import { InstagramIcon, UserRound, Search, ShoppingBag, TagIcon, Gift, Mail, Sho
 import useShopSocials from "@/lib/useShopSocials";
 import useShopParameter from "@/lib/useShopParameter";
 import { useTranslations } from 'next-intl';
+import esMessages from '../../../messages/es.json';
+import caMessages from '../../../messages/ca.json';
 export default function Menu() {
     const t = useTranslations('Menu');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,42 +34,54 @@ export default function Menu() {
             closeMenu();
         }
     };
+    const pathname = usePathname();
+    const isDashboardRoute = /^\/(ca|es)?\/?dashboard/.test(pathname || '');
+
+    const getMenuLabel = (key) => {
+        // When in the dashboard route, prefer the browser locale (client-side)
+        if (isDashboardRoute && typeof window !== 'undefined') {
+            const navLang = (navigator.language || navigator.userLanguage || 'es').split('-')[0];
+            if (navLang === 'ca') return caMessages?.Menu?.[key] ?? t(key);
+            return esMessages?.Menu?.[key] ?? t(key);
+        }
+        return t(key);
+    };
+
     const menuData = {
         logo: "/assets/logo-header.svg",
         items: [
             {
-                label: t('products'),
+                label: getMenuLabel('products'),
                 href: "/products",
                 icon: ShoppingBag
             },
             {
-                label: t('brands'),
+                label: getMenuLabel('brands'),
                 href: "/brands",
                 icon: TagIcon
             },
             {
-                label: t('birthlists'),
+                label: getMenuLabel('birthlists'),
                 href: "/listas-de-nacimiento",
                 icon: Gift
             },
             {
-                label: t('contact'),
+                label: getMenuLabel('contact'),
                 href: "/contact",
                 icon: Mail
             },
             {
-                label: t('search'),
+                label: getMenuLabel('search'),
                 href: "/search",
                 icon: Search
             },
             {
-                label: t('cart'),
+                label: getMenuLabel('cart'),
                 href: "/cart",
                 icon: ShoppingCart
             }
         ]
     };
-    const pathname = usePathname();
     // Locale switcher component (only for localized routes)
     const locales = [
         { code: 'ca', label: 'CA' },
