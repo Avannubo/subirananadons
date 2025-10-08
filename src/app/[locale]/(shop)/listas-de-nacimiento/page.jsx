@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import ShopLayout from "@/components/Layouts/shop-layout";
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
+import CrearLista from '@/components/ui/CrearListasBtn';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 export default function BirthListsPage() {
@@ -115,18 +116,7 @@ export default function BirthListsPage() {
                                 <h2 className="text-2xl text-center font-bold mb-2">{t('expectingTitle')}</h2>
                                 <p className="text-white/90 text-center">{t('expectingDesc')}</p>
                             </div>
-                            <button
-                                onClick={() => {
-                                    if (!session) {
-                                        toast.error(t('notLoggedIn'));
-                                    } else {
-                                        router.push('/dashboard/listas');
-                                    }
-                                }}
-                                className="mt-4 md:mt-0 px-8 py-3 bg-white text-[#36A9E1] rounded-full font-medium hover:bg-gray-100 transition-colors"
-                            >
-                                {t('createListBtn')}
-                            </button>
+                            <CrearLista />
                         </div>
                     </motion.div>
                     <motion.div

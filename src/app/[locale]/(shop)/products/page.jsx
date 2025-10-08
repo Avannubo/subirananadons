@@ -47,10 +47,8 @@ export default function Page() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    // Pagination removed: always show all products
     const [totalProducts, setTotalProducts] = useState(0);
-    const productsPerPage = 6;
     const searchParams = useSearchParams();
     const router = useRouter();
     const [bannerUrl, setBannerUrl] = useState(null);
@@ -175,7 +173,7 @@ export default function Page() {
             try {
                 // Update the API call to specifically request active categories
                 const res = await fetch('/api/categories?flat=true&status=active');
-                if (!res.ok) throw new Error('Error loading categories');
+                if (!res.ok) throw new Error('Error carregant les categories');
                 const cats = await res.json();
                 // Filter out inactive categories and their children
                 const filterInactiveCategories = (categories) => {
@@ -191,7 +189,7 @@ export default function Page() {
                 setCategoriesError(null);
             } catch (err) {
                 // console.error('Error loading categories:', err);
-                setCategoriesError('Error loading categories');
+                setCategoriesError('Error carregant les categories');
                 setCategories([]);
                 setCategoriesFlat([]);
             } finally {
@@ -207,13 +205,10 @@ export default function Page() {
         async function loadProducts() {
             try {
                 setLoading(true);
-                // Define fetch options
+                // Fetch ALL products for the current category (no pagination)
                 const options = {
-                    page: currentPage,
-                    limit: productsPerPage,
                     status: 'active'
                 };
-                // Get all leaf category ids under the current node (including itself if it's a leaf)
                 if (currentCategoryNode && categoryPath.length > 1) {
                     function getAllLeafIds(node) {
                         if (!node.children || node.children.length === 0) {
@@ -225,49 +220,33 @@ export default function Page() {
                     const allLeafIds = getAllLeafIds(currentCategoryNode);
                     options.category = allLeafIds.join(',');
                 }
-                // Fetch products with category filtering
+                // Set a very high limit to get all products
+                options.limit = 10000;
                 const data = await fetchProducts(options);
-                // Safely access data properties with checks for undefined/null
                 if (data && data.products) {
-                    // Format the products for display
-                    const formattedProducts = data.products.map(product => formatProduct(product));
+                    const formattedProducts = data.products.map(product => formatProduct(product, locale));
                     setProducts(formattedProducts);
-                    // Safely access pagination data
-                    if (data.pagination) {
-                        setTotalPages(data.pagination.totalPages || 1);
-                        setTotalProducts(data.pagination.totalItems || 0);
-                    } else {
-                        setTotalPages(1);
-                        setTotalProducts(formattedProducts.length);
-                    }
+                    setTotalProducts(formattedProducts.length);
                     setError(null);
                 } else {
-                    // Handle case where data or data.products is undefined
                     setProducts([]);
-                    setTotalPages(1);
                     setTotalProducts(0);
-                    setError('No products found. Please try again later.');
+                    setError("No s'han trobat productes. Si us plau, torna-ho a intentar més tard.");
                 }
             } catch (err) {
-                // console.error('Error fetching products:', err);
-                setError('Failed to load products. Please try again later.');
+                setError("No s'han pogut carregar els productes. Si us plau, torna-ho a intentar més tard.");
                 setProducts([]);
-                setTotalPages(1);
                 setTotalProducts(0);
             } finally {
                 setLoading(false);
             }
         }
         loadProducts();
-    }, [categoriesLoading, categoryPath, currentCategoryNode, currentPage, searchParams]);
-    // Reset to page 1 when category changes
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [categoryPath]);
-    // Memoize filtered and sorted products
+    }, [categoriesLoading, categoryPath, currentCategoryNode, searchParams, locale]);
+    // Pagination removed: no need to reset page
+    // Always show all products, sorted alphabetically by name (locale-aware)
     const filteredAndSortedProducts = useMemo(() => {
         if (loading) return [];
-        // Products are already filtered by the API call, we just need to sort them
         const sortableProducts = [...products];
         // Helper to get translated name for sorting
         const getTranslatedName = (product) => {
@@ -279,26 +258,9 @@ export default function Page() {
             }
             return product.name;
         };
-        switch (sortOrder) {
-            case 'price-asc':
-                sortableProducts.sort((a, b) => a.priceValue - b.priceValue);
-                break;
-            case 'price-desc':
-                sortableProducts.sort((a, b) => b.priceValue - a.priceValue);
-                break;
-            case 'name-asc':
-                sortableProducts.sort((a, b) => getTranslatedName(a).localeCompare(getTranslatedName(b)));
-                break;
-            case 'name-desc':
-                sortableProducts.sort((a, b) => getTranslatedName(b).localeCompare(getTranslatedName(a)));
-                break;
-            case 'sales-desc':
-            default:
-                sortableProducts.sort((a, b) => b.salesCount - a.salesCount);
-                break;
-        }
+        sortableProducts.sort((a, b) => getTranslatedName(a).localeCompare(getTranslatedName(b)));
         return sortableProducts;
-    }, [products, sortOrder, loading]);
+    }, [products, loading, locale]);
     const handleSortChange = (event) => {
         setSortOrder(event.target.value);
     };
@@ -327,64 +289,7 @@ export default function Page() {
     const handleCloseBirthListSelectModal = () => {
         setBirthListProduct(null);
     };
-    // Pagination handlers
-    const goToPage = (page) => {
-        setCurrentPage(page);
-        // Scroll to top when changing pages
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-    const goToPreviousPage = () => {
-        if (currentPage > 1) {
-            goToPage(currentPage - 1);
-        }
-    };
-    const goToNextPage = () => {
-        if (currentPage < totalPages) {
-            goToPage(currentPage + 1);
-        }
-    };
-    // Generate page numbers for pagination
-    const getPageNumbers = () => {
-        let pages = [];
-        const maxPagesToShow = 1;
-        if (totalPages <= maxPagesToShow) {
-            // If we have fewer pages than the max, show all pages
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            // Calculate how many numbers to show on each side of current page
-            const sidesCount = Math.floor(maxPagesToShow / 2);
-            // Start with the current page in the center
-            let startPage = Math.max(2, currentPage - sidesCount);
-            let endPage = Math.min(totalPages - 1, currentPage + sidesCount);
-            // Adjust if we're near the start
-            if (currentPage - sidesCount < 2) {
-                endPage = Math.min(1 + maxPagesToShow - 1, totalPages - 1);
-            }
-            // Adjust if we're near the end
-            if (currentPage + sidesCount > totalPages - 1) {
-                startPage = Math.max(2, totalPages - maxPagesToShow + 1);
-            }
-            // Always add first page
-            pages.push(1);
-            // Add ellipsis after first page if needed
-            if (startPage > 2) {
-                pages.push('...');
-            }
-            // Add pages around current page
-            for (let i = startPage; i <= endPage; i++) {
-                pages.push(i);
-            }
-            // Add ellipsis before last page if needed
-            if (endPage < totalPages - 1) {
-                pages.push('...');
-            }
-            // Always add last page
-            pages.push(totalPages);
-        }
-        return pages;
-    };
+    // Pagination removed
     // Flatten all categories for mobile selector (all leaves, all levels)
     // For mobile: show only unique category names (no path, just the name)
     function flattenCategoriesForMobile(categories, locale = 'es') {
@@ -558,8 +463,8 @@ export default function Page() {
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                                     </button>
-                                </div> 
-                            </div> 
+                                </div>
+                            </div>
                             <div className="hidden sm:flex items-center justify-between space-x-4 w-full sm:w-auto mt-2 sm:mt-0">
                                 <div className="flex items-center space-x-2">
                                     {/* Grid/List view toggle icons */}
@@ -579,8 +484,8 @@ export default function Page() {
                                 {!loading && totalProducts > 0 && (
                                     <span className="text-sm text-gray-500 mr-0 sm:mr-4">
                                         {t('showingProducts', {
-                                            from: (currentPage - 1) * productsPerPage + 1,
-                                            to: Math.min(currentPage * productsPerPage, totalProducts),
+                                            from: 1,
+                                            to: totalProducts,
                                             total: totalProducts
                                         })}
                                     </span>
@@ -622,55 +527,7 @@ export default function Page() {
                         {!loading && !error && filteredAndSortedProducts.length === 0 && (
                             <p className="text-center text-gray-500 mt-8">{t('noProductsForCategory')}</p>
                         )}
-                        {/* Pagination controls */}
-                        {!loading && !error && totalPages > 1 && (
-                            <div className="flex justify-center mt-10">
-                                <nav className="flex items-center space-x-1" aria-label="Pagination">
-                                    {/* Previous page button */}
-                                    <button
-                                        onClick={goToPreviousPage}
-                                        disabled={currentPage === 1}
-                                        className={`px-3 py-2 rounded-md cursor-pointer ${currentPage === 1
-                                            ? 'text-gray-400 cursor-not-allowed'
-                                            : 'text-gray-700 hover:bg-gray-100'}`}
-                                    >
-                                        <span className="sr-only">{t('prevPageAria')}</span>
-                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
-                                    {/* Page numbers */}
-                                    {getPageNumbers().map((page, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => typeof page === 'number' ? goToPage(page) : null}
-                                            disabled={page === '...'}
-                                            className={`px-4 py-2 rounded-md cursor-pointer ${page === currentPage
-                                                ? 'bg-[#36A9E1] text-white'
-                                                : page === '...'
-                                                    ? 'text-gray-500'
-                                                    : 'text-gray-700 hover:bg-gray-100'
-                                                }`}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
-                                    {/* Next page button */}
-                                    <button
-                                        onClick={goToNextPage}
-                                        disabled={currentPage === totalPages}
-                                        className={`px-3 py-2 rounded-md cursor-pointer ${currentPage === totalPages
-                                            ? 'text-gray-400 cursor-not-allowed'
-                                            : 'text-gray-700 hover:bg-gray-100'}`}
-                                    >
-                                        <span className="sr-only">{t('nextPageAria')}</span>
-                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </nav>
-                            </div>
-                        )}
+                        {/* Pagination controls removed */}
                     </main>
                 </div>
             </div>

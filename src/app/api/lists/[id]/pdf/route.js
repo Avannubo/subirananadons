@@ -90,16 +90,16 @@ export async function GET(request, { params }) {
                     status = 'Comprat';
                     break;
                 default:
-                    status = 'Pendent';
+                    status = 'Pendent'; 
             }
             return `
-                                <tr>
-                                    <td>${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producte no disponible') : 'Producte no disponible'}</td> 
-                                    <td>${item.quantity}</td>
-                                    <td>${status}</td>
-                                </tr>
-                                `;
-        }).join('')}
+                <tr>
+                    <td>${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producte no disponible') : 'Producte no disponible'}</td> 
+                    <td>${item.quantity}</td>
+                    <td>${status}</td>
+                </tr>
+                `;
+            }).join('')}
                         </tbody>
                     </table>
                     <div class="footer">

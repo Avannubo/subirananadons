@@ -16,8 +16,11 @@ export async function GET(request) {
             .populate('brand')
             .populate('category')
             .limit(limit);
+        // Determine locale from request headers (x-next-intl-locale) or Accept-Language, default to 'ca'
+        const headerLocale = request.headers.get('x-next-intl-locale') || request.headers.get('accept-language') || 'ca';
+        const locale = headerLocale.split(',')[0].split('-')[0];
         // Format products for frontend consumption using the shared formatProduct function
-        const formattedProducts = featuredProducts.map(product => formatProduct(product));
+        const formattedProducts = featuredProducts.map(product => formatProduct(product, locale));
         return NextResponse.json({
             success: true,
             products: formattedProducts

@@ -20,7 +20,7 @@ export default function BrandsPage() {
     const [brands, setBrands] = useState([]);
     // Remove local state for selectedBrand and selectedBrandId
     const [viewMode, setViewMode] = useState('grid');
-    const [sortBy, setSortBy] = useState('default');
+    const [sortBy, setSortBy] = useState('name-asc');
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [quickViewProduct, setQuickViewProduct] = useState(null);
@@ -30,7 +30,7 @@ export default function BrandsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const productsPerPage = 6;
+    const productsPerPage = 99999; // Show all products by default
     const t = useTranslations('BrandsPage');
     // Fetch brands with product counts
     useEffect(() => {
@@ -162,42 +162,7 @@ export default function BrandsPage() {
     }, [selectedBrandId]);
     // Sort products when sortBy changes
     // Filter and sort products whenever products, sortBy, or selectedBrandId changes
-    useEffect(() => {
-        let filtered = products;
-        if (selectedBrandId !== 'all') {
-            filtered = filtered.filter(product => {
-                if (!product.brand) return false;
-                if (typeof product.brand === 'object' && product.brand._id) {
-                    return String(product.brand._id) === String(selectedBrandId);
-                }
-                if (typeof product.brand === 'string') {
-                    return String(product.brand) === String(selectedBrandId);
-                }
-                if (product.brand instanceof Object && product.brand.toString) {
-                    return product.brand.toString() === String(selectedBrandId);
-                }
-                return false;
-            });
-        }
-        let sorted = [...filtered];
-        switch (sortBy) {
-            case 'price-asc':
-                sorted.sort((a, b) => a.priceValue - b.priceValue);
-                break;
-            case 'price-desc':
-                sorted.sort((a, b) => b.priceValue - a.priceValue);
-                break;
-            case 'name-asc':
-                sorted.sort((a, b) => a.name.localeCompare(b.name));
-                break;
-            case 'newest':
-                sorted.sort((a, b) => b.salesCount - a.salesCount);
-                break;
-            default:
-                break;
-        }
-        setFilteredProducts(sorted);
-    }, [products, sortBy, selectedBrandId]);
+    // ...existing code...
     // Debug: log filteredProducts before render
     // useEffect(() => {
     //     console.log('filteredProducts state:', filteredProducts);
@@ -547,14 +512,26 @@ export default function BrandsPage() {
                                         : 'space-y-6'
                                         }`}
                                 >
-                                    {products.map((product, index) => (
-                                        <ProductCard
-                                            key={product.id}
-                                            product={product}
-                                            viewMode={viewMode}
-                                            onQuickViewClick={handleOpenQuickView}
-                                        />
-                                    ))}
+                                    {[...products]
+                                        .sort((a, b) => {
+                                            // Helper to get translated name for sorting
+                                            const getProductName = (product) => {
+                                                if (product.translations) {
+                                                    if (product.translations.es && product.translations.es.name) return product.translations.es.name;
+                                                    if (product.translations.ca && product.translations.ca.name) return product.translations.ca.name;
+                                                }
+                                                return product.name || '';
+                                            };
+                                            return getProductName(a).toString().localeCompare(getProductName(b).toString());
+                                        })
+                                        .map((product, index) => (
+                                            <ProductCard
+                                                key={product.id}
+                                                product={product}
+                                                viewMode={viewMode}
+                                                onQuickViewClick={handleOpenQuickView}
+                                            />
+                                        ))}
                                 </motion.div>
                             </>
                         )}

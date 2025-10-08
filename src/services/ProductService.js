@@ -107,11 +107,12 @@ export async function fetchProducts(options = {}) {
  * @param {Object} product - Raw product data from API
  * @returns {Object} - Formatted product data
  */
-export function formatProduct(product) {
+export function formatProduct(product, localeArg) {
     // Used for product lists only, not for product detail page
     // Import translation utility
     const { getTranslatedField } = require('@/lib/getTranslatedField');
-    const locale = typeof window !== 'undefined' ? (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca').split('-')[0] : 'ca';
+    // Determine locale: prefer passed localeArg, else fall back to previous window-based logic
+    const locale = (localeArg || (typeof window !== 'undefined' ? (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca') : 'ca')).split('-')[0];
     // Helper to ensure only strings are returned, including nested objects
     const ensureString = (val) => {
         if (!val) return '';
