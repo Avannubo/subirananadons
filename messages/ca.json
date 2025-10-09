@@ -173,7 +173,7 @@
     "contactData": "Dades de contacte",
     "shippingData": "Dades d'enviament",
     "loadingUserData": "Carregant les teves dades...",
-    "giftPickupOnly": "Els productes de regal només es poden recollir a la botiga pel propietari de la llista.",
+    "giftPickupOnly": "Subirana es fa càrrec de lliurar els regals de la llista als futurs pares.",
     "autofillInfo": "Hem omplert automàticament alguns camps amb les teves dades. Si us plau, verifica i completa la informació.",
     "nameLabel": "Nom",
     "lastNameLabel": "Cognoms",
@@ -278,7 +278,9 @@
     "productPurchased": "Comprat",
     "productReserved": "Reservat",
     "noProductsFound": "No s'han trobat productes en aquesta categoria.",
+    "errorLoadListDesc": "Error al cargar la lista de nacimiento",
     "defaultThankYou": "Gràcies per ajudar-nos a preparar l'arribada!"
+    
   },
   "BrandsPage": {
     "title": "Marques",

@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer';
+import dbConnect from '@/lib/dbConnect';
+import User from '@/models/User';
 const transporter = nodemailer.createTransport({
     service: 'outlook',
     port: 587,
@@ -116,8 +118,100 @@ class EmailService {
                 `
             };
             await transporter.sendMail(mailOptions);
+            // After sending the customer confirmation, notify list owners about purchased/reserved gifts
+            try {
+                const hasGifts = Array.isArray(order.items) && order.items.some(it => it && (it.type === 'gift' || (it.listInfo && (it.listInfo.listId || it.listInfo.listOwnerId))));
+                if (hasGifts) {
+                    await EmailService.sendOrderConfirmationToListOwners(order);
+                }
+            } catch (err) {
+                console.error('Error notifying list owners for order:', err);
+            }
         } catch (error) {
             console.error('Error sending order confirmation email:', error);
+            throw error;
+        }
+    }
+    /**
+     * Notify list owners when an order contains gift items for their lists.
+     * Groups items by list owner id and sends a single email per owner with the items relevant to them.
+     * @param {Object} order
+     */
+    static async sendOrderConfirmationToListOwners(order) {
+        try {
+            if (!order || !Array.isArray(order.items)) return;
+            await dbConnect();
+            // Group gift items by listOwnerId
+            const ownerMap = new Map();
+            for (const item of order.items) {
+                if (!item || item.type !== 'gift') continue;
+                const listInfo = item.listInfo || {};
+                const ownerId = listInfo.listOwnerId || listInfo.userId || listInfo.ownerId || null;
+                if (!ownerId) continue;
+                if (!ownerMap.has(ownerId)) ownerMap.set(ownerId, []);
+                ownerMap.get(ownerId).push({ item, listInfo });
+            }
+            // For each owner, fetch email and send a summary
+            for (const [ownerId, entries] of ownerMap.entries()) {
+                try {
+                    const owner = await User.findById(ownerId).select('email name').lean();
+                    const ownerEmail = owner?.email || null;
+                    const ownerName = owner?.name || '';
+                    if (!ownerEmail) {
+                        console.warn(`Skipping list owner notification: no email for ownerId ${ownerId}`);
+                        continue;
+                    }
+                    // Build HTML table of items
+                    const rows = entries.map(({ item, listInfo }) => {
+                        const prod = item.product || {};
+                        const prodName = prod?.name?.es || prod?.name?.ca || prod?.name || item.name || 'Producto';
+                        const qty = item.quantity || 1;
+                        const unitPrice = (item.priceDetails?.finalPrice ?? item.price ?? item.priceValue) || 0;
+                        const total = (unitPrice * qty) || 0;
+                        return `
+                            <tr>
+                                <td style="padding:8px;border-bottom:1px solid #eee">${prodName}</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:center">${qty}</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${unitPrice.toFixed(2)}€</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${total.toFixed(2)}€</td>
+                            </tr>`;
+                    }).join('');
+                    const mailHtml = `
+                        <div style="font-family:Arial, sans-serif; background:#f8f9fa; padding:20px;">
+                            <h2 style="color:#36A9E1;">Tu lista ha recibido una compra</h2>
+                            <p>Hola ${ownerName || 'Propietario'},</p>
+                            <p>Se ha realizado un pedido en la tienda que incluye artículos reservados/comprados de tu lista.</p>
+                            <p><strong>Número de pedido:</strong> ${order.orderNumber}</p>
+                            <p><strong>Comprador:</strong> ${order.shippingAddress?.name || order.shippingAddress?.fullName || 'Cliente'}</p>
+                            <table style="width:100%; border-collapse:collapse; margin-top:12px;">
+                                <thead>
+                                    <tr style="background:#f0f0f0">
+                                        <th style="padding:8px;text-align:left">Producto</th>
+                                        <th style="padding:8px;text-align:center">Cantidad</th>
+                                        <th style="padding:8px;text-align:right">Precio unidad</th>
+                                        <th style="padding:8px;text-align:right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rows}
+                                </tbody>
+                            </table>
+                            <p style="margin-top:12px;">Puedes ver y gestionar tu lista en: <a href="${process.env.DOMAIN || 'https://subirananadons.com'}/listas-de-nacimiento/${entries[0].listInfo?.listId || ''}" style="color:#36A9E1">Ir a la lista</a></p>
+                            <p style="font-size:12px; color:#666;">Este mensaje se ha enviado automáticamente.</p>
+                        </div>`;
+                    const mailOptions = {
+                        from: 'info@subirananadons.com',
+                        to: ownerEmail,
+                        subject: `Pedido #${order.orderNumber} - artículos de tu lista`,
+                        html: mailHtml
+                    };
+                    await transporter.sendMail(mailOptions);
+                } catch (err) {
+                    console.error(`Error sending list-owner email for ownerId ${ownerId}:`, err);
+                }
+            }
+        } catch (error) {
+            console.error('Error in sendOrderConfirmationToListOwners:', error);
             throw error;
         }
     }

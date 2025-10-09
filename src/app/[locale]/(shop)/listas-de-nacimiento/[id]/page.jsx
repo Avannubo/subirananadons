@@ -11,6 +11,15 @@ import { useTranslations } from 'next-intl';
 export default function BirthListPage({ params }) {
     const { locale, id } = use(params);
     const t = useTranslations('BirthListDetailPage');
+    // Safe translation helper: returns fallback when a message key is missing for current locale
+    const safeT = (key, opts = {}, fallback = null) => {
+        try {
+            return t(key, opts);
+        } catch (err) {
+            // Missing message for locale -> return fallback or key
+            return fallback !== null ? fallback : key;
+        }
+    };
     const [selectedCategory, setSelectedCategory] = useState("Todos");
     const [sortBy, setSortBy] = useState("default");
     const [list, setList] = useState(null);
@@ -44,53 +53,69 @@ export default function BirthListPage({ params }) {
                     throw new Error(data.message || 'Failed to fetch birth list data');
                 }
                 // Format the data for display
-                const birthListData = data.data;
-                const progress = calculateProgress(birthListData.items);
+                const birthListData = data.data || {};
+                // Ensure items is always an array to avoid .map on null
+                const items = Array.isArray(birthListData.items) ? birthListData.items : [];
+                const progress = calculateProgress(items);
                 setList({
-                    id: birthListData._id,
-                    userId: birthListData.user?._id,
-                    babyName: birthListData.babyName,
-                    parents: birthListData.user ? birthListData.user.name : t('anonymous'),
-                    dueDate: birthListData.dueDate,
-                    title: birthListData.title,
-                    description: birthListData.description,
-                    image: birthListData.image,
-                    status: birthListData.status,
-                    isPublic: birthListData.isPublic,
+                    id: birthListData._id ?? birthListData.id ?? null,
+                    userId: birthListData.user?._id ?? birthListData.userId ?? null,
+                    babyName: birthListData.babyName ?? '',
+                    parents: birthListData.user?.name ?? t('anonymous'),
+                    dueDate: birthListData.dueDate ?? null,
+                    title: birthListData.title ?? '',
+                    description: birthListData.description ?? '',
+                    image: birthListData.image ?? null,
+                    status: birthListData.status ?? null,
+                    isPublic: birthListData.isPublic ?? false,
                     progress: progress,
                     message: birthListData.description || t('defaultThankYou'),
-                    products: birthListData.items.map(item => {
-                        let name = '';
-                        const prod = item.product;
-                        if (prod && prod.name && typeof prod.name === 'object') {
-                            name = prod.name[locale] || prod.name.es || prod.name.ca || prod.name.name || 'N/D';
-                        } else if (prod && prod.name) {
-                            name = prod.name;
-                        } else {
-                            name = 'N/D';
-                        }
+                    products: items.map(item => {
+                        // Defensive mapping: some items may have missing product objects
+                        const snapshot = item?.productSnapshot || {};
+                        const prod = item?.product || null;
+
+                        const getNameFrom = (src) => {
+                            if (!src) return null;
+                            if (typeof src === 'object') return src[locale] || src.es || src.ca || src.name || null;
+                            if (typeof src === 'string') return src;
+                            return null;
+                        };
+
+                        // Normalize name to always be a string for safe rendering and alt text
+                        const nameRaw = getNameFrom(snapshot.name) || getNameFrom(prod?.name) || 'N/D';
+                        const name = typeof nameRaw === 'string' ? nameRaw : String(nameRaw);
+                        const priceValue = Number(snapshot.price ?? prod?.price_incl_tax ?? prod?.price ?? 0) || 0;
+                        const priceStr = `${priceValue.toFixed(2).replace('.', ',')} €`;
+                        const category = snapshot.category ?? prod?.category ?? null;
+                        const brand = snapshot.brand ?? prod?.brand ?? '';
+                        const reference = snapshot.reference ?? prod?.reference ?? '';
+                        const image = snapshot.image ?? prod?.image ?? '/assets/images/Screenshot_4.png';
+                        const imageHover = snapshot.imageHover ?? prod?.imageHover ?? '';
+                        const discount = snapshot.discount ?? prod?.discount ?? null;
+
                         return {
-                            id: item._id,
-                            productId: prod._id,
+                            id: item?._id ?? null,
+                            productId: prod?._id ?? snapshot.product ?? null,
                             name,
-                            price: `${(item.productSnapshot?.price || prod.price_incl_tax).toFixed(2).replace('.', ',')} €`,
-                            priceValue: item.productSnapshot?.price || prod.price_incl_tax,
-                            discount: prod.discount,
-                            image: item.productSnapshot?.image || prod.image || '/assets/images/Screenshot_4.png',
-                            imageHover: item.productSnapshot?.imageHover || prod.imageHover || '',
-                            category: item.productSnapshot?.category || prod.category,
-                            brand: item.productSnapshot?.brand || prod.brand,
-                            reference: item.productSnapshot?.reference || prod.reference,
-                            status: item.state === 2 ? 'purchased' : item.state === 1 ? 'reserved' : 'available',
-                            state: item.state || 0,
-                            priority: item.priority
+                            price: priceStr,
+                            priceValue,
+                            discount,
+                            image,
+                            imageHover,
+                            category,
+                            brand,
+                            reference,
+                            status: item?.state === 2 ? 'purchased' : item?.state === 1 ? 'reserved' : 'available',
+                            state: item?.state || 0,
+                            priority: item?.priority || 0
                         };
                     })
                 });
-                // Extract unique categories from products
+                // Extract unique categories from products (defensive)
                 const uniqueCategoryIds = [];
                 birthListData.items.forEach(item => {
-                    const catId = item.product.category;
+                    const catId = (item.productSnapshot && item.productSnapshot.category) || (item.product && item.product.category) || null;
                     if (catId && !uniqueCategoryIds.includes(catId)) {
                         uniqueCategoryIds.push(catId);
                     }
@@ -101,7 +126,11 @@ export default function BirthListPage({ params }) {
                     try {
                         const res = await fetch(`/api/categories?ids=${uniqueCategoryIds.join(',')}`);
                         if (res.ok) {
-                            categoriesObjs = await res.json();
+                            const body = await res.json().catch(() => null);
+                            // Expecting an array or { data: [...] }
+                            if (Array.isArray(body)) categoriesObjs = body;
+                            else if (body && Array.isArray(body.data)) categoriesObjs = body.data;
+                            else categoriesObjs = [];
                         } else {
                             console.error('Failed to fetch category objects');
                         }
@@ -174,8 +203,8 @@ export default function BirthListPage({ params }) {
                         <svg className="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('errorLoadListTitle')}</h3>
-                        <p className="text-gray-500 mb-6">{t('errorLoadListDesc', { error })}</p>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{safeT('errorLoadListTitle', {}, 'Error al cargar')}</h3>
+                        <p className="text-gray-500 mb-6">{safeT('errorLoadListDesc', { error }, `Error: ${error || ''}` || "Error al cargar la lista de nacimiento")}</p>
                         <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#36A9E1] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>
@@ -225,7 +254,7 @@ export default function BirthListPage({ params }) {
             </ShopLayout>
         );
     }
-    const filteredProducts = list.products
+    const filteredProducts = (list?.products || [])
         .filter(product => selectedCategory === "Todos" || product.category === selectedCategory)
         .sort((a, b) => {
             switch (sortBy) {
@@ -234,7 +263,8 @@ export default function BirthListPage({ params }) {
                 case "price-desc":
                     return b.priceValue - a.priceValue;
                 case "name":
-                    return a.name.localeCompare(b.name);
+                    // Ensure name is string before comparing
+                    return String(a.name || '').localeCompare(String(b.name || ''));
                 default:
                     return 0;
             }
@@ -299,7 +329,7 @@ export default function BirthListPage({ params }) {
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                         >
-                            {t('listTitle', { babyName: list?.babyName })}
+                            {safeT('listTitle', { babyName: list?.babyName }, `Lista de ${list?.babyName || ''}`)}
                         </motion.h1>
                         <motion.p
                             className="text-lg text-zinc-900 mb-2"
@@ -374,13 +404,13 @@ export default function BirthListPage({ params }) {
                                         <>
                                             <img
                                                 src={product.image}
-                                                alt={product.name}
+                                                alt={typeof product.name === 'string' ? product.name : (product.name?.[locale] || product.name?.es || product.name?.ca || 'Producto')}
                                                 className="object-contain h-[200px] w-full bg-white transition-opacity duration-300"
                                                 style={{ opacity: hoveredId === product.id ? 0 : 1 }}
                                             />
                                             <img
                                                 src={product.imageHover}
-                                                alt={`${product.name} - hover`}
+                                                alt={typeof product.name === 'string' ? `${product.name} - hover` : ((product.name?.[locale] || product.name?.es || product.name?.ca || 'Producto') + ' - hover')}
                                                 className="object-contain h-[200px] w-full bg-white absolute inset-0 transition-opacity duration-300"
                                                 style={{ opacity: hoveredId === product.id ? 1 : 0 }}
                                             />
@@ -388,7 +418,7 @@ export default function BirthListPage({ params }) {
                                     ) : (
                                         <img
                                             src={product.image}
-                                            alt={product.name}
+                                            alt={typeof product.name === 'string' ? product.name : (product.name?.[locale] || product.name?.es || product.name?.ca || 'Producto')}
                                             className="object-contain h-[200px] w-full bg-white"
                                         />
                                     )}

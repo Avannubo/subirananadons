@@ -48,6 +48,20 @@ export function CartProvider({ children }) {
     const calculateCount = useCallback((items) => {
         return items.reduce((count, item) => count + item.quantity, 0);
     }, []);
+    // Dedicated helper to fetch owner email by user id
+    const getOwnerEmailById = useCallback(async (userId) => {
+        if (!userId) return null;
+        try {
+            const res = await fetch(`/api/users/${userId}`);
+            if (!res.ok) return null;
+            const body = await res.json();
+            const email = body?.user?.email || null;
+            return typeof email === 'string' && email.includes('@') ? email.trim().toLowerCase() : null;
+        } catch (err) {
+            console.error('Error fetching owner email by id', userId, err);
+            return null;
+        }
+    }, []);
     // Helper function to clear all cart data from localStorage
     const clearLocalCartData = useCallback(() => {
         localStorage.removeItem('cart');
@@ -116,6 +130,13 @@ export function CartProvider({ children }) {
             if (product.type === 'gift' && !product.listInfo) {
                 throw new Error('List information is required for gift items');
             }
+            // Resolve owner email for list/gift: try synchronous extraction first, otherwise fetch by listOwnerId
+            let ownerEmail = null;
+
+            if (!ownerEmail && product.listInfo && product.listInfo.listOwnerId) {
+                ownerEmail = await getOwnerEmailById(product.listInfo.listOwnerId);
+            }
+
             const productData = {
                 id: product.id || product._id,
                 name: product.name,
@@ -128,6 +149,7 @@ export function CartProvider({ children }) {
                 type: product.type || 'regular',
                 listInfo: product.type === 'gift' ? {
                     ...product.listInfo,
+                    ownerEmail: ownerEmail || (product.listInfo && product.listInfo.ownerEmail) || null,
                     updatedAt: new Date().toISOString(),
                 } : null,
                 // Add discount information if present

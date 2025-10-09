@@ -1,3 +1,103 @@
-Preparing to send gift purchase notification with data: {"product":{"name":{"es":"Espiral Forest Friends","ca":"Espiral Forest Friends"},"description":{"es":"¡Mira, siente y descubre! Esta divertida y entretenida espiral de actividades mantendrá a los bebés ocupados tanto en casa como cuando están de viaje. Fija fácilmente este práctico juguete a cualquier lugar, desde una 
-cuna hasta un corralito. Fortalece los sentidos y estimula la coordinación mano-ojo. La espiral de actividades está hecha de pana con algodón y presenta un pequeño ciervo, un pequeño hongo y una hermosa flor. ¡ADVERTENCIA! Fija este juguete fuera del alcance del niño. Para evitar posibles lesiones por enredos, retira este juguete cuando el niño comience a intentar levantarse sobre sus manos y rodillas en posición de gateo. Requiere ensamblaje por parte de un adulto. ","ca":"Mira, sent i descobreix! Aquesta divertida i entretinguda espiral d'activitats mantindrà els nadons ocupats tant a casa com quan estan de viatge. Fixa fàcilment aquesta pràctica joguina a qualsevol lloc, des d'un bressol fins 
-a un corralito. Enforteix els sentits i estimula la coordinació mà-ull. L'espiral d'activitats està feta de pana amb cotó i presenta un cérvol petit, un fong i una bonica flor. ADVERTÈNCIA! Fixeu aquesta joguina fora de l'abast del nen. Per evitar possibles lesions per embolics, retira aquesta joguina quan el nen comenci a intentar aixecar-se sobre les mans i els genolls en posició de gateig. Requereix assemblatge per part d'un adult."},"stock":{"available":0,"minStock":5},"discount":{"active":false,"type":"percentage","value":0,"startDate":null,"endDate":null,"minPurchaseAmount":0,"minQuantity":1,"finalPrice":22.95},"_id":"68da5d63f707194d33687796","reference":"LD8912","category":"680a29343ca38baf336fda9b","brand":"680b607cff50ec9b0d050b25","price_excl_tax":0,"price_incl_tax":22.95,"image":"https://res.cloudinary.com/dmv3sqzfp/image/upload/v1759141218/user_profiles/user_686cdb7514cfe8c659c0c6cf_1759141217412.jpg","imageHover":"","additionalImages":[],"status":"active","salesCount":0,"featured":false,"createdAt":"2025-09-29T10:20:19.260Z","updatedAt":"2025-09-29T10:20:19.260Z","__v":0},"babyName":"qwe","buyerInfo":{"name":"s","email":"arjun.singh@avannubo.com","phone":"s","message":"s"}}
+{
+    "items": [
+        {
+            "id": "68e396f939973459d1558e54",
+            "name": {
+                "es": "Producto de prueba",
+                "ca": "Producte de prova"
+            },
+            "price": "0,01 €",
+            "priceValue": 0.01,
+            "image": "https://res.cloudinary.com/dmv3sqzfp/image/upload/v1750843703/user_profiles/user_683edc32e0d409ba221b11a7_1750843701800.png",
+            "brand": "Béaba",
+            "category": {
+                "ca": "Cadires per a bicicleta",
+                "es": "Silla para bici"
+            },
+            "quantity": 2,
+            "type": "regular",
+            "listInfo": null,
+            "discount": null,
+            "updatedAt": 1759920012504,
+            "notes": "",
+            "priceDetails": {
+                "originalPrice": "0,01 €",
+                "finalPrice": "0,01 €",
+                "discountAmount": 0,
+                "discountPercentage": 0
+            }
+        },
+        {
+            "id": "68e1607e39973459d155385b",
+            "name": "Embolcall Polar",
+            "price": 42.95,
+            "priceValue": 42.95,
+            "image": "https://res.cloudinary.com/dmv3sqzfp/image/upload/v1759600765/user_profiles/user_686cdb7514cfe8c659c0c6cf_1759600764959.jpg",
+            "brand": "680b607cff50ec9b0d050b1f",
+            "category": "680a29363ca38baf336fdabb",
+            "quantity": 1,
+            "type": "gift",
+            "listInfo": {
+                "listId": "68b03923d781d4ec69dbe155",
+                "itemId": "68e4bd622938ffaf8b6b70b8",
+                "babyName": "asdaa",
+                "listOwnerId": "686d164b6e0e5b5b737d4bd4",
+                "status": "reserved",
+                "state": 1,
+                "addedAt": "2025-10-08T11:30:44.311Z",
+                "price": 42.95,
+                "priority": 0,
+                "updatedAt": "2025-10-08T11:30:44.311Z"
+            },
+            "discount": null,
+            "updatedAt": 1759923044311,
+            "buyerInfo": {
+                "name": "User1 Admin",
+                "email": "admin@avannubo.com",
+                "phone": "695047174",
+                "listId": "68b03923d781d4ec69dbe155",
+                "itemId": "68e4bd622938ffaf8b6b70b8",
+                "babyName": "asdaa",
+                "listOwnerId": "686d164b6e0e5b5b737d4bd4",
+                "status": "reserved",
+                "state": 1,
+                "addedAt": "2025-10-08T11:30:44.311Z",
+                "price": 42.95,
+                "priority": 0,
+                "updatedAt": "2025-10-08T11:30:44.311Z",
+                "note": ""
+            },
+            "notes": "",
+            "priceDetails": {
+                "originalPrice": 42.95,
+                "finalPrice": 42.95,
+                "discountAmount": 0,
+                "discountPercentage": 0
+            }
+        }
+    ],
+    "shippingDetails": {
+        "name": "User1",
+        "lastName": "Admin",
+        "email": "admin@avannubo.com",
+        "phone": "695047174",
+        "country": "España",
+        "notes": "",
+        "giftNote": ""
+    },
+    "deliveryMethod": "pickup",
+    "hasGiftItems": true,
+    "isGiftOnly": false,
+    "notes": "",
+    "giftNote": "",
+    "totals": {
+        "subtotal": 42.970000000000006,
+        "shipping": 0,
+        "tax": null,
+        "total": 42.970000000000006,
+        "discounts": {
+            "total": 0,
+            "items": {}
+        }
+    }
+}

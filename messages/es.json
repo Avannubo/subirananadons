@@ -142,7 +142,7 @@
     "contactData": "Datos de contacto",
     "shippingData": "Datos de envío",
     "loadingUserData": "Cargando tus datos...",
-    "giftPickupOnly": "Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista.",
+    "giftPickupOnly": "Subirana se hace cargo de entregar los regalos de la lista a los futuros padres",
     "autofillInfo": "Hemos rellenado automáticamente algunos campos con tus datos. Por favor, verifica y completa la información.",
     "nameLabel": "Nombre",
     "lastNameLabel": "Apellidos",
@@ -246,6 +246,7 @@
     "productPurchased": "Comprado",
     "productReserved": "Reservado",
     "noProductsFound": "No se han encontrado productos en esta categoría.",
+    "errorLoadListDesc": "Error al cargar la lista de nacimiento",
     "defaultThankYou": "¡Gracias por ayudarnos a preparar la llegada!"
   },
   "BrandsPage": {
