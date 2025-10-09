@@ -11,6 +11,42 @@ import { useTranslations } from 'next-intl';
 export default function BirthListPage({ params }) {
     const { locale, id } = use(params);
     const t = useTranslations('BirthListDetailPage');
+    // Robust name resolver: accepts object, proper string, or stringified object and returns localized string
+    const resolveName = (raw) => {
+        if (!raw) return 'N/D';
+        // object with locales
+        if (typeof raw === 'object') return raw.name[locale] || raw.name.es || raw.name.ca || raw.name || 'N/D';
+        if (typeof raw === 'string') {
+            const s = raw.trim();
+            // Try JSON.parse directly
+            try {
+                const parsed = JSON.parse(s);
+                if (parsed && typeof parsed === 'object') return parsed[locale] || parsed.es || parsed.ca || parsed.name || s;
+            } catch (e) {
+                // ignore
+            }
+            // Try converting single quotes to double quotes and parse
+            try {
+                const jsonish = s.replace(/(["'])?([a-zA-Z0-9_\-]+)\1?\s*:/g, '"$2":');
+                const normalized = jsonish.replace(/'/g, '"');
+                const parsed2 = JSON.parse(normalized);
+                if (parsed2 && typeof parsed2 === 'object') return parsed2[locale] || parsed2.es || parsed2.ca || parsed2.name || s;
+            } catch (e) {
+                // ignore
+            }
+            // Regex extraction for common patterns: es: 'text' or "es":"text"
+            const esMatch = s.match(/es\s*[:=]\s*['\"]([^'\"]+)['\"]/i);
+            if (esMatch) return esMatch[1];
+            const caMatch = s.match(/ca\s*[:=]\s*['\"]([^'\"]+)['\"]/i);
+            if (caMatch) return caMatch[1];
+            // Fallback: return first quoted chunk if it looks like an object literal
+            const quoteMatch = s.match(/['\"]([^'\"]+)['\"]/);
+            if (quoteMatch) return quoteMatch[1];
+            // Otherwise return the original string
+            return s;
+        }
+        return String(raw);
+    };
     // Safe translation helper: returns fallback when a message key is missing for current locale
     const safeT = (key, opts = {}, fallback = null) => {
         try {
@@ -84,7 +120,7 @@ export default function BirthListPage({ params }) {
 
                         // Normalize name to always be a string for safe rendering and alt text
                         const nameRaw = getNameFrom(snapshot.name) || getNameFrom(prod?.name) || 'N/D';
-                        const name = typeof nameRaw === 'string' ? nameRaw : String(nameRaw);
+                        const name = resolveName(nameRaw);
                         const priceValue = Number(snapshot.price ?? prod?.price_incl_tax ?? prod?.price ?? 0) || 0;
                         const priceStr = `${priceValue.toFixed(2).replace('.', ',')} €`;
                         const category = snapshot.category ?? prod?.category ?? null;
@@ -280,7 +316,7 @@ export default function BirthListPage({ params }) {
             // Format product for unified cart structure 
             const productForCart = {
                 id: product.productId,
-                name: product.name,
+                name: resolveName(product.name),
                 price: product.discount?.active ? product.discount.finalPrice : product.priceValue,
                 image: product.image,
                 brand: product.brand || '',
@@ -404,13 +440,13 @@ export default function BirthListPage({ params }) {
                                         <>
                                             <img
                                                 src={product.image}
-                                                alt={typeof product.name === 'string' ? product.name : (product.name?.[locale] || product.name?.es || product.name?.ca || 'Producto')}
+                                                alt={resolveName(product.name)}
                                                 className="object-contain h-[200px] w-full bg-white transition-opacity duration-300"
                                                 style={{ opacity: hoveredId === product.id ? 0 : 1 }}
                                             />
                                             <img
                                                 src={product.imageHover}
-                                                alt={typeof product.name === 'string' ? `${product.name} - hover` : ((product.name?.[locale] || product.name?.es || product.name?.ca || 'Producto') + ' - hover')}
+                                                alt={`${resolveName(product.name)} - hover`}
                                                 className="object-contain h-[200px] w-full bg-white absolute inset-0 transition-opacity duration-300"
                                                 style={{ opacity: hoveredId === product.id ? 1 : 0 }}
                                             />
@@ -435,9 +471,7 @@ export default function BirthListPage({ params }) {
                                 <div className="p-3 flex flex-col flex-grow justify-between">
                                     <div>
                                         <h3 className="text-sm font-medium mb-1 h-10 line-clamp-2">
-                                            {product.name && typeof product.name === 'object'
-                                                ? (product.name[locale] || product.name.es || product.name.ca || product.name.name || 'N/D')
-                                                : product.name}
+                                            {resolveName(product.name)}
                                         </h3>
                                         <div className="flex flex-col items-start mb-2">
                                             {product.discount?.active ? (

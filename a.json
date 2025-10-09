@@ -1,103 +1,77 @@
 {
+    "_id": "68e779a1feda7eebd7ca2599",
+    "orderNumber": "ORD-00417771-0406",
     "items": [
         {
-            "id": "68e396f939973459d1558e54",
-            "name": {
-                "es": "Producto de prueba",
-                "ca": "Producte de prova"
-            },
-            "price": "0,01 €",
-            "priceValue": 0.01,
-            "image": "https://res.cloudinary.com/dmv3sqzfp/image/upload/v1750843703/user_profiles/user_683edc32e0d409ba221b11a7_1750843701800.png",
-            "brand": "Béaba",
-            "category": {
-                "ca": "Cadires per a bicicleta",
-                "es": "Silla para bici"
-            },
-            "quantity": 2,
-            "type": "regular",
-            "listInfo": null,
-            "discount": null,
-            "updatedAt": 1759920012504,
-            "notes": "",
-            "priceDetails": {
-                "originalPrice": "0,01 €",
-                "finalPrice": "0,01 €",
-                "discountAmount": 0,
-                "discountPercentage": 0
-            }
-        },
-        {
-            "id": "68e1607e39973459d155385b",
-            "name": "Embolcall Polar",
-            "price": 42.95,
-            "priceValue": 42.95,
-            "image": "https://res.cloudinary.com/dmv3sqzfp/image/upload/v1759600765/user_profiles/user_686cdb7514cfe8c659c0c6cf_1759600764959.jpg",
-            "brand": "680b607cff50ec9b0d050b1f",
-            "category": "680a29363ca38baf336fdabb",
+            "product": "680b340b720673b5c5fe8d3c",
             "quantity": 1,
+            "price": 169,
             "type": "gift",
-            "listInfo": {
-                "listId": "68b03923d781d4ec69dbe155",
-                "itemId": "68e4bd622938ffaf8b6b70b8",
-                "babyName": "asdaa",
-                "listOwnerId": "686d164b6e0e5b5b737d4bd4",
+            "giftInfo": {
+                "listId": "68dfa4f239973459d15453d7",
+                "itemId": "68dfa4f239973459d15453d8",
+                "babyName": "Eliette Merino Mariño",
+                "listOwnerId": "68de986839973459d1543295",
                 "status": "reserved",
-                "state": 1,
-                "addedAt": "2025-10-08T11:30:44.311Z",
-                "price": 42.95,
-                "priority": 0,
-                "updatedAt": "2025-10-08T11:30:44.311Z"
+                "state": 1
             },
-            "discount": null,
-            "updatedAt": 1759923044311,
             "buyerInfo": {
-                "name": "User1 Admin",
-                "email": "admin@avannubo.com",
-                "phone": "695047174",
-                "listId": "68b03923d781d4ec69dbe155",
-                "itemId": "68e4bd622938ffaf8b6b70b8",
-                "babyName": "asdaa",
-                "listOwnerId": "686d164b6e0e5b5b737d4bd4",
-                "status": "reserved",
-                "state": 1,
-                "addedAt": "2025-10-08T11:30:44.311Z",
-                "price": 42.95,
-                "priority": 0,
-                "updatedAt": "2025-10-08T11:30:44.311Z",
+                "name": "ANDREA",
+                "email": "amerinoherreros@gmail.com",
+                "phone": "620416400",
                 "note": ""
             },
-            "notes": "",
-            "priceDetails": {
-                "originalPrice": 42.95,
-                "finalPrice": 42.95,
-                "discountAmount": 0,
-                "discountPercentage": 0
-            }
+            "_id": "68e779a1feda7eebd7ca259a"
+        },
+        {
+            "product": "68d819f1f707194d3367f2b1",
+            "quantity": 1,
+            "price": 59,
+            "type": "gift",
+            "giftInfo": {
+                "listId": "68dfa4f239973459d15453d7",
+                "itemId": "68dfa4f239973459d15453d9",
+                "babyName": "Eliette Merino Mariño",
+                "listOwnerId": "68de986839973459d1543295",
+                "status": "reserved",
+                "state": 1
+            },
+            "buyerInfo": {
+                "name": "ANDREA",
+                "email": "amerinoherreros@gmail.com",
+                "phone": "620416400",
+                "note": ""
+            },
+            "_id": "68e779a1feda7eebd7ca259b"
         }
     ],
-    "shippingDetails": {
-        "name": "User1",
-        "lastName": "Admin",
-        "email": "admin@avannubo.com",
-        "phone": "695047174",
-        "country": "España",
-        "notes": "",
-        "giftNote": ""
+    "shippingAddress": {
+        "name": "ANDREA",
+        "lastName": "MERINO HERREROS",
+        "email": "amerinoherreros@gmail.com",
+        "phone": "620416400",
+        "country": "España"
     },
     "deliveryMethod": "pickup",
-    "hasGiftItems": true,
-    "isGiftOnly": false,
+    "status": "acceptado",
+    "totalAmount": 228,
+    "subtotal": 228,
+    "tax": 47.88,
+    "shippingCost": 0,
+    "discounts": {
+        "total": 0,
+        "items": {}
+    },
+    "paymentMethod": "pending",
     "notes": "",
-    "giftNote": "",
-    "totals": {
-        "subtotal": 42.970000000000006,
-        "shipping": 0,
-        "tax": null,
-        "total": 42.970000000000006,
-        "discounts": {
-            "total": 0,
-            "items": {}
+    "invoices": [
+        {
+            "_id": "68e779a3feda7eebd7ca25ca",
+            "invoiceNumber": "2025-000119",
+            "pdfUrl": "/uploads/invoices/invoice-ORD-00417771-0406.pdf"
         }
-    }
+    ],
+    "createdAt": "2025-10-09T09:00:17.780Z",
+    "updatedAt": "2025-10-09T09:00:19.382Z",
+    "__v": 0
 }

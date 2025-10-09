@@ -106,6 +106,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
     const [error, setError] = useState(null);
     const [loadingOrder, setLoadingOrder] = useState(false);
     const [products, setProducts] = useState({});
+    const [listsInfo, setListsInfo] = useState({});
     const [retryCount, setRetryCount] = useState(0);
     const MAX_RETRIES = 3;
     useEffect(() => {
@@ -132,6 +133,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                 }
                 if (data.success && data.order) {
                     setOrder(data.order);
+                    console.log('Fetched order data:', data.order);
                     setError(null);
                     setRetryCount(0);
                     if (data.order?.items?.length > 0) {
@@ -194,7 +196,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             console.error("Error fetching product details:", error);
         }
     };
-    if (!isOpen) return null;
+    // NOTE: keep hook declarations above this point. We'll early-return below after hooks are declared.
     const formatDate = (dateString) => {
         try {
             return new Date(dateString).toLocaleDateString(locale === 'ca' ? 'ca-ES' : 'es-ES', {
@@ -231,6 +233,104 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
     const getProductDetails = (productId) => {
         return products[productId] || null;
     };
+
+    // Fetch birth list and owner info for gift items in the order
+    const getListsInfoFromOrder = async (orderObj) => {
+        if (!orderObj || !Array.isArray(orderObj.items)) return {};
+        const listIds = [...new Set(orderObj.items
+            .filter(i => i.type === 'gift')
+            .map(i => (i.giftInfo && (i.giftInfo.listId || i.giftInfo.listId)) || i.listId)
+            .filter(Boolean))];
+
+        const result = {};
+        for (const listId of listIds) {
+            try {
+                // Try fetching the birth list
+                const res = await fetch(`${window.location.origin}/api/birthlists/${listId}`);
+                if (res.ok) {
+                    const body = await res.json().catch(() => null);
+                    const data = body?.data || body;
+                    if (data) {
+                        const ownerId = data.user?._id ?? data.userId ?? (data.user && data.user._id) ?? null;
+                        const ownerName = data.user?.name ?? data.user?.fullName ?? null;
+                        const ownerEmail = data.user?.email ?? null;
+                        result[listId] = {
+                            listId,
+                            title: data.title ?? data.name ?? null,
+                            babyName: data.babyName ?? null,
+                            ownerId,
+                            ownerName,
+                            ownerEmail
+                        };
+                        // if we don't have an email but we have an ownerId, try fetching user
+                        if (!result[listId].ownerEmail && ownerId) {
+                            try {
+                                const ures = await fetch(`${window.location.origin}/api/users/${ownerId}`);
+                                if (ures.ok) {
+                                    const ubody = await ures.json().catch(() => null);
+                                    const udata = ubody?.data || ubody?.user || ubody;
+                                    if (udata) {
+                                        result[listId].ownerEmail = udata.email ?? result[listId].ownerEmail;
+                                        result[listId].ownerName = result[listId].ownerName || udata.name || udata.fullName || null;
+                                    }
+                                }
+                            } catch (uerr) {
+                                console.error('Error fetching user for list owner:', uerr);
+                            }
+                        }
+                        continue;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching birth list', listId, err);
+            }
+
+            // Fallback: try to derive from order items' giftInfo and/or fetch owner
+            const itemWithList = orderObj.items.find(it => (it.giftInfo && (it.giftInfo.listId === listId)) || it.listId === listId);
+            const babyName = itemWithList?.giftInfo?.babyName ?? itemWithList?.babyName ?? null;
+            const ownerId = itemWithList?.giftInfo?.listOwnerId ?? itemWithList?.listOwnerId ?? null;
+            result[listId] = {
+                listId,
+                title: null,
+                babyName,
+                ownerId,
+                ownerName: null,
+                ownerEmail: null
+            };
+            if (ownerId) {
+                try {
+                    const ures2 = await fetch(`${window.location.origin}/api/users/${ownerId}`);
+                    if (ures2.ok) {
+                        const ubody2 = await ures2.json().catch(() => null);
+                        const udata2 = ubody2?.data || ubody2?.user || ubody2;
+                        if (udata2) {
+                            result[listId].ownerEmail = udata2.email ?? null;
+                            result[listId].ownerName = udata2.name ?? udata2.fullName ?? null;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error fetching user for ownerId fallback:', err);
+                }
+            }
+        }
+        return result;
+    };
+
+    // When order is loaded, fetch related lists info (gift lists)
+    useEffect(() => {
+        if (!order) return;
+        (async () => {
+            try {
+                const info = await getListsInfoFromOrder(order);
+                setListsInfo(info);
+                console.log('Lists info for order:', info);
+            } catch (err) {
+                console.error('Error fetching lists info for order:', err);
+            }
+        })();
+    }, [order]);
+    // Early return only after all hooks are declared
+    if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 z-50 flex justify-center items-center p-4">
             <div className="bg-white rounded-lg shadow-lg w-full max-h-[90vh] flex flex-col mb-14">
@@ -449,7 +549,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                                         <img
                                                                                             src={product.image}
                                                                                             alt={product.name || `Producto ${index + 1}`}
-                                                                                            className="h-full w-full object-cover"
+                                                                                            className="h-32 w-32 object-contain"
                                                                                         />
                                                                                     ) : (
                                                                                         <FiPackage className="text-gray-500" />
@@ -457,12 +557,27 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                                 </div>
                                                                                 <div className="ml-4">
                                                                                     <div className="text-sm font-medium text-gray-900 flex flex-col">
-                                                                                        <span>{product?.name.ca || product?.name || `Producto ${index + 1}`}</span>
-                                                                                        {(item.listName || item.list || item.listTitle) && (
-                                                                                            <span className="italic text-xs text-pink-600 mt-1">
-                                                                                                (Lista: {item.listName || item.list || item.listTitle})
-                                                                                            </span>
-                                                                                        )}
+                                                                                        <span>{product?.name?.ca || product?.name || `Producto ${index + 1}`}</span>
+                                                                                        {/* {(item.giftInfo?.listId || item.listId || item.list || item.listName || item.listTitle) && (
+                                                                                            
+                                                                                        )} */}
+                                                                                        {/* Show resolved list/baby/owner info when available */}
+                                                                                        {(() => {
+                                                                                            const lid = item.giftInfo?.listId || item.listId || null;
+                                                                                            if (lid && listsInfo && listsInfo[lid]) {
+                                                                                                const info = listsInfo[lid];
+                                                                                                return (<>
+                                                                                                    <span className="italic text-xs text-pink-600 mt-1">
+                                                                                                        Lista: {info.title || info.list || info.listTitle}
+                                                                                                    </span><span className="text-xs text-gray-600 mt-1 block">
+
+                                                                                                        {info.babyName ? `Bebé: ${info.babyName}` : null} {info.ownerEmail ? ` ` : null}<br></br>
+                                                                                                        Email propietario: {info.ownerEmail}
+                                                                                                    </span></>
+                                                                                                );
+                                                                                            }
+                                                                                            return null;
+                                                                                        })()}
                                                                                     </div>
                                                                                     <div className="text-xs text-gray-500 flex flex-col">
                                                                                         <span>Ref: {product?.reference || "N/A"}</span>
