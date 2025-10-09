@@ -112,7 +112,10 @@ export function formatProduct(product, localeArg) {
     // Import translation utility
     const { getTranslatedField } = require('@/lib/getTranslatedField');
     // Determine locale: prefer passed localeArg, else fall back to previous window-based logic
-    const locale = (localeArg || (typeof window !== 'undefined' ? (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca') : 'ca')).split('-')[0];
+    // Accept only string localeArg; if not provided or not a string, fall back to window/browser locale or 'ca'
+    const defaultLocale = (typeof window !== 'undefined' ? (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca') : 'ca');
+    const localeSource = (typeof localeArg === 'string' && localeArg) ? localeArg : defaultLocale;
+    const locale = String(localeSource).split('-')[0];
     // Helper to ensure only strings are returned, including nested objects
     const ensureString = (val) => {
         if (!val) return '';

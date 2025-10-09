@@ -181,20 +181,20 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             const total = calculateTotal();
             const cents = Math.round(Number(total) * 100);
             const cleanPrecioTotal = Number.isFinite(cents) ? String(cents) : '0'; // Convert to cents and string
-        let merchantOrder = orderData?.orderId || String(Date.now()).substring(0, 12).padStart(4, '0');
-        // Create data object for the payment request
-        let data = {
-            "DS_MERCHANT_AMOUNT": cleanPrecioTotal,
-            "DS_MERCHANT_CURRENCY": "978",
-            "DS_MERCHANT_MERCHANTCODE": "352203061",
-            "DS_MERCHANT_ORDER": merchantOrder,
-            "DS_MERCHANT_TERMINAL": "2",
-            "DS_MERCHANT_TRANSACTIONTYPE": "0",
-            "DS_MERCHANT_URLOK": `${window.location.origin}/cart/order/success`,
-            "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed`
-        };
-        // Encode parameters and calculate signature
-        let encodedParameters = stringBase64Encode(JSON.stringify(data));
+            let merchantOrder = orderData?.orderId || String(Date.now()).substring(0, 12).padStart(4, '0');
+            // Create data object for the payment request
+            let data = {
+                "DS_MERCHANT_AMOUNT": cleanPrecioTotal,
+                "DS_MERCHANT_CURRENCY": "978",
+                "DS_MERCHANT_MERCHANTCODE": "352203061",
+                "DS_MERCHANT_ORDER": merchantOrder,
+                "DS_MERCHANT_TERMINAL": "2",
+                "DS_MERCHANT_TRANSACTIONTYPE": "0",
+                "DS_MERCHANT_URLOK": `${window.location.origin}/cart/order/success`,
+                "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed`
+            };
+            // Encode parameters and calculate signature
+            let encodedParameters = stringBase64Encode(JSON.stringify(data));
             // signature generation can fail if keys/values are malformed; protect with try/catch
             try {
                 let encodedSignature = "R3zJ3xZGifR1ZHVOEwNpuUn1c+l1jI7S";
