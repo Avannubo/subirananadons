@@ -32,8 +32,13 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             total: "Total",
             totalOrderPrice: "Preu total de la comanda:",
             totalDiscount: "Total descomptes",
-            confirmPayment: "Continuar",
+            confirmPayment: "Procedir al Pagament",
             cancel: "Cancel·lar"
+            ,
+            paymentDisclaimerTitle: "Important",
+            paymentDisclaimerPart1: "Seràs redirigit a la plataforma de pagament de Redsys.",
+            paymentDisclaimerHighlight: " Recorda prémer el botó CONTINUAR en finalitzar",
+            paymentDisclaimerPart2: ", encara que completis o cancells el pagament, perquè puguem registrar la resposta."
         },
         es: {
             processingPayment: "Pago en proceso...",
@@ -54,8 +59,13 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             total: "Total",
             totalOrderPrice: "Precio total del pedido:",
             totalDiscount: "Total descuentos",
-            confirmPayment: "Continuar",
+            confirmPayment: "Proceder al Pago",
             cancel: "Cancelar"
+            ,
+            paymentDisclaimerTitle: "Importante",
+            paymentDisclaimerPart1: "Serás redirigido a la plataforma de pago de Redsys.",
+            paymentDisclaimerHighlight: " Recuerda pulsar el botón CONTINUAR al finalizar",
+            paymentDisclaimerPart2: ", aunque completes o canceles el pago, para que podamos registrar la respuesta."
         }
     };
     useEffect(() => {
@@ -383,6 +393,17 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                             )}
                             <p className="text-lg font-bold text-gray-900">
                                 {translations[locale].totalOrderPrice} {calculateTotal().toFixed(2)}€
+                            </p>
+                        </div>
+                        <div>
+                            {/* <p className="text-sm text-gray-600">
+                                {locale === 'ca' ? "Tots els preus inclouen IVA." : "Todos los precios incluyen IVA."}
+                            </p> */}
+                            <p className="text-lg mt-2">
+                                <strong>*{translations[locale].paymentDisclaimerTitle}: </strong>
+                                <span className="text-gray-700">{translations[locale].paymentDisclaimerPart1}</span>
+                                <span className="text-red-600 font-semibold">{translations[locale].paymentDisclaimerHighlight}</span>
+                                <span className="text-gray-700">{translations[locale].paymentDisclaimerPart2}</span>
                             </p>
                         </div>
                         <div className="flex flex-row justify-center gap-3 mt-8">
