@@ -390,7 +390,7 @@ class EmailService {
                         <p><strong>Marca:</strong> ${productBrand}</p>
                         <p><strong>Precio:</strong> ${productPrice}</p>
                         <p><strong>Nombre del bebé:</strong> ${babyName}</p>
-                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Editar tu lista aquí</a></p>
+                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Revísalo en el panel de tu lista</a></p>
                         <hr style="margin: 16px 0;">
                         <p style="font-size: 13px; color: #888;">Este mensaje ha sido enviado automáticamente por Subirana Nadons.</p>
                     </div>
@@ -405,7 +405,7 @@ class EmailService {
                         <p><strong>Marca:</strong> ${productBrand}</p>
                         <p><strong>Precio:</strong> ${productPrice}</p>
                         <p><strong>Nombre del bebé:</strong> ${babyName}</p>
-                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Editar tu lista aquí</a></p>
+                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Revísalo en el panel de tu lista</a></p>
                         <hr style="margin: 16px 0;">
                         <p><strong>Comprador:</strong> ${buyer.name}</p>
                         <p><strong>Email:</strong> ${buyer.email}</p>
@@ -469,7 +469,7 @@ class EmailService {
                         La reserva o compra del producto <strong>${productName}</strong> ha sido <strong>cancelada</strong> en tu lista <strong>${listTitle}</strong>.
                     </p>
                     <p><strong>Nombre del bebé:</strong> ${babyName}</p>
-                    <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Editar tu lista aquí</a></p>
+                    <p><a href="${process.env.DOMAIN}/dashboard/listas" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Editar tu lista aquí</a></p>
                     <hr style="margin: 16px 0;">
                     <p style="font-size: 13px; color: #888;">Este mensaje ha sido enviado automáticamente por Subirana Nadons.</p>
                 </div>

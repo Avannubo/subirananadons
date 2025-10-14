@@ -28,35 +28,49 @@ const ADMIN_ROUTES = [
 const authMiddleware = withAuth(
     function middleware(req) {
         const path = req.nextUrl.pathname;
+        
+        // If user is not authenticated, redirect to home with login modal parameter
+        if (!req.nextauth.token) {
+            const homeUrl = new URL('/', req.url);
+            // Add parameter to trigger login modal
+            homeUrl.searchParams.set('showLogin', 'true');
+            // Store the original URL to redirect back after login
+            homeUrl.searchParams.set('callbackUrl', req.url);
+            return NextResponse.redirect(homeUrl);
+        }
+
         const userRole = req.nextauth.token?.role || 'user';
+        
         // First check if it's an admin route
         const isAdminRoute = ADMIN_ROUTES.some(route => path.startsWith(route));
         if (isAdminRoute) {
             // If user is not an admin, redirect to dashboard
             if (userRole !== 'admin') {
-                //console.log('Unauthorized admin access attempt:', path);
                 return NextResponse.redirect(new URL('/dashboard', req.url));
             }
             // If user is admin, allow access
             return NextResponse.next();
         }
+        
         // Then check if it's an allowed user route
         const isAllowedUserRoute = ALLOWED_USER_ROUTES.some(route =>
             path === route || path.startsWith(route + '/'));
         if (isAllowedUserRoute) {
             return NextResponse.next();
         }
+        
         // If the path starts with /dashboard but isn't in either list, handle based on role
         if (path.startsWith('/dashboard/')) {
             if (userRole !== 'admin') {
-                //console.log('Unauthorized route access attempt:', path);
                 return NextResponse.redirect(new URL('/dashboard', req.url));
             }
         }
+        
         // Allow access to dashboard root for all authenticated users
         if (path === '/dashboard') {
             return NextResponse.next();
         }
+        
         return NextResponse.next();
     },
     {

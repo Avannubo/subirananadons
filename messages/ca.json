@@ -197,12 +197,12 @@
     "giftItemsMandatory": "Els articles de regal han de ser recollits a la botiga pel propietari de la llista. Aquests articles no poden ser enviats a domicili.",
     "remove": "Eliminar",
     "deliveryMethod": "Mètode d'entrega",
-    "onlyGiftItemsInfo": "El teu carret només conté productes de regal que han de ser recollits a la botiga pel propietari de la llista. En comprar aquests articles, seran marcats com a comprats a la llista de regal.",
-    "giftItemsInfo": "Aquesta comanda inclou articles de regal (recollida a la botiga obligatòria pel propietari de la llista). Aquests articles no es poden enviar a domicili.",
+    "onlyGiftItemsInfo": "El teu carret només conté productes d'una llista de regals. Subirana es fará càrrec de lliurar els regals de la llista als futurs pares . En comprar aquests articles, seran marcats com a comprats a la llista de regal.",
+    "giftItemsInfo": "Aquesta comanda inclou articles d'una llista de regals. Subirana es farà càrrec d'entregar els regals als futurs pares.",
     "addForFreeShipping": "Afegeix {amount}€ més a la teva comanda per aconseguir enviament gratuït!",
     "deliveryOption": "Enviament a domicili",
     "freeShippingInfo": "Enviament gratuït en comandes superiors a 60€",
-    "giftPickupInfo": "Els productes de regal s'han de recollir a la botiga pel propietari de la llista",
+    "giftPickupInfo": "Només els productes que no formen part de la llista de regals seran enviats a domicili.",
     "free": "Gratuït",
     "shippingPrice": "5,99 €",
     "pickupOption": "Recollir a la botiga",
@@ -280,7 +280,6 @@
     "noProductsFound": "No s'han trobat productes en aquesta categoria.",
     "errorLoadListDesc": "Error al cargar la lista de nacimiento",
     "defaultThankYou": "Gràcies per ajudar-nos a preparar l'arribada!"
-    
   },
   "BrandsPage": {
     "title": "Marques",

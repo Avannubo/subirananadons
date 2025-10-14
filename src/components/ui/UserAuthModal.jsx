@@ -89,9 +89,9 @@ export default function AuthModal({ title }) {
                 redirect: false,
                 email,
                 password,
-            }); 
+            });
             if (result?.error) {
-                let errorMessage = t('loginError') + ' '; 
+                let errorMessage = t('loginError') + ' ';
                 if (result.error === 'Account not active') {
                     errorMessage = t('loginAccountNotActive') || 'Tu cuenta no está activa. Contacta con el propietario de la tienda.';
                 } else {
@@ -109,7 +109,7 @@ export default function AuthModal({ title }) {
                 toast.error(errorMessage);
                 return;
             }
-            toast.success(t('loginSuccess')); 
+            toast.success(t('loginSuccess'));
             setTimeout(() => {
                 closeModal();
                 router.push('/dashboard');
@@ -187,6 +187,20 @@ export default function AuthModal({ title }) {
             toast.error(t('registerErrorGeneric'));
         }
     };
+    useEffect(() => {
+        // Check for showLogin parameter in URL
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const showLogin = urlParams.get('showLogin');
+            console.log(showLogin);
+            
+            if (showLogin === 'true') {
+                // setActiveView('login');
+                setIsOpen(true);
+            }
+        }
+    }, []);
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
