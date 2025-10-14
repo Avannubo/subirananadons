@@ -54,7 +54,15 @@ export async function POST(request) {
                         discountAmount: item.priceDetails.discountAmount,
                         discountPercentage: item.priceDetails.discountPercentage
                     } : undefined,
-                    giftInfo: item.type === 'gift' ? item.listInfo : undefined,
+                    giftInfo: item.type === 'gift' ? {
+                        listId: item.listInfo.listId,
+                        itemId: item.listInfo.itemId,
+                        babyName: item.listInfo.babyName,
+                        listOwnerId: item.listInfo.listOwnerId,
+                        listOwnerEmail: item.listInfo.ownerEmail,
+                        status: item.listInfo.status,
+                        state: item.listInfo.state
+                    } : undefined,
                     buyerInfo: item.type === 'gift' ? {
                         name: shippingDetails.name,
                         email: shippingDetails.email,

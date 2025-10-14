@@ -1,5 +1,6 @@
 // models/Order.js
 import mongoose from 'mongoose';
+import { list } from 'pdfkit';
 const orderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -53,6 +54,7 @@ const orderSchema = new mongoose.Schema({
             itemId: mongoose.Schema.Types.ObjectId,
             babyName: String,
             listOwnerId: mongoose.Schema.Types.ObjectId,
+            listOwnerEmail: String,
             status: String,
             state: Number
         },
