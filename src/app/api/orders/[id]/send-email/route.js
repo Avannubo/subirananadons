@@ -104,6 +104,29 @@ export async function POST(request, { params }) {
         //console.log('Transformed order:', JSON.stringify(transformedOrder, null, 2));
         // Send confirmation email with transformed data
         await EmailService.sendOrderConfirmation(transformedOrder);
+        // Send gift notifications for items that are gifts
+        if (order.items && order.items.length > 0) {
+
+            for (const item of order.items) {
+                console.log(item);
+                if (item.type === 'gift' && item.giftInfo) {
+                    try {
+                        await EmailService.sendGiftPurchaseNotification({
+                            _id: item.giftInfo.listId,
+                            title: item.giftInfo.babyName,
+                            email: item.giftInfo.listOwnerEmail || '',
+                            user: { email: item.giftInfo.listOwnerEmail || '' }
+                        }, {
+                            product: item.product,
+                            userData: item.buyerInfo
+                        }, item.giftInfo.status || 'comprado', item.giftInfo.state || 2);
+                    } catch (error) {
+                        console.error('Error sending gift notification:', error);
+                        // Continue with other items even if one fails
+                    }
+                }
+            }
+        }
         return NextResponse.json({
             message: 'Correo de confirmación de pedido enviado correctamente',
             orderId: order._id

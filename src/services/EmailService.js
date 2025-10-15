@@ -365,11 +365,8 @@ class EmailService {
             // Product info
             const product = (item && item.product) || {};
             const productName = product?.name?.es || product?.name?.ca || product?.name || 'Producto';
-            const productRef = product?.reference || '-';
-            const productBrand = product?.brand || '-';
-            const productPrice = product?.price_incl_tax ? `${product.price_incl_tax} €` : '-';
             const listTitle = list.title || '';
-            const babyName = list.babyName || '';
+            const babyName = list.babyName || product?.giftInfo?.babyName || '';
             // Buyer info
             const buyerInfo = (item && item.userData) || {};
             const buyer = {
@@ -378,7 +375,7 @@ class EmailService {
                 phone: buyerInfo.phone || '-',
                 message: buyerInfo.message || 'Sin mensaje'
             };
-            const listUrl = `${process.env.DOMAIN || 'https://subirananadons.com'}/listas-de-nacimiento/${list._id}`;
+            const listUrl = `${process.env.DOMAIN}dashboard/listas`;
             let html = '';
             if (action === 'reserve') {
                 html = `
@@ -386,11 +383,9 @@ class EmailService {
                         <h2 style="color: #36A9E1;">Producto reservado en tu lista</h2>
                         <p>Hola ${ownerName},</p>
                         <p>El producto <strong>${productName}</strong> ha sido <strong>reservado</strong> en tu lista <strong>${listTitle}</strong>.</p>
-                        <p><strong>Referencia:</strong> ${productRef}</p>
-                        <p><strong>Marca:</strong> ${productBrand}</p>
-                        <p><strong>Precio:</strong> ${productPrice}</p>
-                        <p><strong>Nombre del bebé:</strong> ${babyName}</p>
-                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Revísalo en el panel de tu lista</a></p>
+                        
+                        <p><strong>Lista:</strong> ${listTitle}</p>
+                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Revísalo en tu perfil</a></p>
                         <hr style="margin: 16px 0;">
                         <p style="font-size: 13px; color: #888;">Este mensaje ha sido enviado automáticamente por Subirana Nadons.</p>
                     </div>
@@ -401,11 +396,9 @@ class EmailService {
                         <h2 style="color: #36A9E1;">¡Producto comprado en tu lista!</h2>
                         <p>Hola ${ownerName},</p>
                         <p>El producto <strong>${productName}</strong> ha sido <strong>comprado</strong> en tu lista <strong>${listTitle}</strong>.</p>
-                        <p><strong>Referencia:</strong> ${productRef}</p>
-                        <p><strong>Marca:</strong> ${productBrand}</p>
-                        <p><strong>Precio:</strong> ${productPrice}</p>
-                        <p><strong>Nombre del bebé:</strong> ${babyName}</p>
-                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Revísalo en el panel de tu lista</a></p>
+                        
+                        <p><strong>Lista:</strong> ${listTitle}</p>
+                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Revísalo en tu perfil</a></p>
                         <hr style="margin: 16px 0;">
                         <p><strong>Comprador:</strong> ${buyer.name}</p>
                         <p><strong>Email:</strong> ${buyer.email}</p>
@@ -469,7 +462,7 @@ class EmailService {
                         La reserva o compra del producto <strong>${productName}</strong> ha sido <strong>cancelada</strong> en tu lista <strong>${listTitle}</strong>.
                     </p>
                     <p><strong>Nombre del bebé:</strong> ${babyName}</p>
-                    <p><a href="${process.env.DOMAIN}/dashboard/listas" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Editar tu lista aquí</a></p>
+                    <p><a href="${process.env.DOMAIN}dashboard/listas" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Editar tu lista aquí</a></p>
                     <hr style="margin: 16px 0;">
                     <p style="font-size: 13px; color: #888;">Este mensaje ha sido enviado automáticamente por Subirana Nadons.</p>
                 </div>
