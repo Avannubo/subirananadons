@@ -311,7 +311,8 @@
     "showingProducts": "Mostrant {from}-{to} de {total} productes",
     "noProductsForCategory": "No s'han trobat productes per a aquesta categoria.",
     "prevPageAria": "Pàgina anterior",
-    "nextPageAria": "Pàgina següent"
+    "nextPageAria": "Pàgina següent",
+    "allProducts": "Tots els productes"
   },
   "UserAuthModal": {
     "loginTitle": "Iniciar sessió",

@@ -93,6 +93,35 @@ export default function Page() {
     const currentSubcategories = currentCategoryNode?.children || [];
     // State for expanded categories in sidebar (array of _id)
     const [expandedCategories, setExpandedCategories] = useState([]);
+
+    // Reset category on page load/navigation
+    useEffect(() => {
+        const handleRouteChange = () => {
+            if (typeof window !== 'undefined') {
+                // Reset the category path to root
+                setCategoryPath([{ _id: 'root', label: 'Productes' }]);
+                // Clear the category from URL
+                const params = new URLSearchParams(window.location.search);
+                params.delete('category');
+                router.replace(`/products?${params.toString()}`, { scroll: false });
+            }
+        };
+
+        // Handle initial page load
+        if (typeof window !== 'undefined' && !searchParams.get('category')) {
+            handleRouteChange();
+        }
+
+        // Add event listeners for navigation
+        window.addEventListener('popstate', handleRouteChange);
+        window.addEventListener('pageshow', handleRouteChange);
+
+        return () => {
+            window.removeEventListener('popstate', handleRouteChange);
+            window.removeEventListener('pageshow', handleRouteChange);
+        };
+    }, [router]);
+
     // Toggle expand/collapse for a category in sidebar
     const handleSidebarCategoryToggle = (catId) => {
         setExpandedCategories((prev) =>
@@ -105,21 +134,35 @@ export default function Page() {
     // Only set categoryPath after categories are loaded
     useEffect(() => {
         if (categoriesLoading) return;
-        const categoryId = searchParams.get('category');
-        if (categoryId && categories && categories.length > 0) {
-            // Support multiple category ids (comma separated)
-            const ids = categoryId.split(',');
-            // Use the first id for path
-            const found = findCategoryPathById(categories, ids[0], locale);
-            if (found) {
-                setCategoryPath([{ _id: 'root', label: 'Productes' }, ...found.path]);
-            } else {
-                // If not found, fallback to root
+
+        // Create a flag to track if the component is still mounted
+        let isActive = true;
+
+        const updateCategoryPath = () => {
+            const categoryId = searchParams.get('category');
+            if (categoryId && categories && categories.length > 0) {
+                // Support multiple category ids (comma separated)
+                const ids = categoryId.split(',');
+                // Use the first id for path
+                const found = findCategoryPathById(categories, ids[0], locale);
+                if (found && isActive) {
+                    setCategoryPath([{ _id: 'root', label: 'Productes' }, ...found.path]);
+                } else if (isActive) {
+                    // If not found, fallback to root
+                    setCategoryPath([{ _id: 'root', label: 'Productes' }]);
+                }
+            } else if (isActive) {
                 setCategoryPath([{ _id: 'root', label: 'Productes' }]);
             }
-        } else {
-            setCategoryPath([{ _id: 'root', label: 'Productes' }]);
-        }
+        };
+
+        // Use a small timeout to ensure stable state updates
+        const timeoutId = setTimeout(updateCategoryPath, 50);
+
+        return () => {
+            isActive = false;
+            clearTimeout(timeoutId);
+        };
     }, [categoriesLoading, categories, searchParams, locale]);
     // //console.log('CATEGORIES', categories)
     // Fetch active banner image on mount
@@ -198,30 +241,48 @@ export default function Page() {
         }
         loadCategories();
     }, []);
-    // // Fetch products from the database
+    // Fetch products from the database
     useEffect(() => {
-        // Only load products after categories, categoryPath, and currentCategoryNode are ready
-        if (categoriesLoading || !categoryPath || categoryPath.length === 0 || (categoryPath.length > 1 && !currentCategoryNode)) return;
+        // Only load products after categories are loaded
+        if (categoriesLoading) return;
+
         async function loadProducts() {
             try {
                 setLoading(true);
-                // Fetch ALL products for the current category (no pagination)
                 const options = {
                     status: 'active'
                 };
-                if (currentCategoryNode && categoryPath.length > 1) {
-                    function getAllLeafIds(node) {
-                        if (!node.children || node.children.length === 0) {
-                            return [node._id];
-                        } else {
-                            return node.children.flatMap(getAllLeafIds);
+
+                // Get category from URL params first
+                const categoryId = searchParams.get('category');
+
+                if (categoryId && categories.length > 0) {
+                    // Find the category node from the ID
+                    let categoryNode = null;
+                    for (const cat of categories) {
+                        const found = findCategoryPathById(categories, categoryId, locale);
+                        if (found) {
+                            categoryNode = found.node;
+                            break;
                         }
                     }
-                    const allLeafIds = getAllLeafIds(currentCategoryNode);
-                    options.category = allLeafIds.join(',');
+
+                    if (categoryNode) {
+                        function getAllLeafIds(node) {
+                            if (!node.children || node.children.length === 0) {
+                                return [node._id];
+                            } else {
+                                return node.children.flatMap(getAllLeafIds);
+                            }
+                        }
+                        const allLeafIds = getAllLeafIds(categoryNode);
+                        options.category = allLeafIds.join(',');
+                    }
                 }
+
                 // Set a very high limit to get all products
                 options.limit = 10000;
+
                 const data = await fetchProducts(options);
                 if (data && data.products) {
                     const formattedProducts = data.products.map(product => formatProduct(product, locale));
@@ -234,6 +295,7 @@ export default function Page() {
                     setError("No s'han trobat productes. Si us plau, torna-ho a intentar més tard.");
                 }
             } catch (err) {
+                console.error('Error loading products:', err);
                 setError("No s'han pogut carregar els productes. Si us plau, torna-ho a intentar més tard.");
                 setProducts([]);
                 setTotalProducts(0);
@@ -241,8 +303,9 @@ export default function Page() {
                 setLoading(false);
             }
         }
+
         loadProducts();
-    }, [categoriesLoading, categoryPath, currentCategoryNode, searchParams, locale]);
+    }, [categoriesLoading, categories, searchParams, locale]);
     // Pagination removed: no need to reset page
     // Always show all products, sorted alphabetically by name (locale-aware)
     const filteredAndSortedProducts = useMemo(() => {
@@ -290,46 +353,56 @@ export default function Page() {
         setBirthListProduct(null);
     };
     // Pagination removed
-    // Flatten all categories for mobile selector (all leaves, all levels)
-    // For mobile: show only unique category names (no path, just the name)
-    function flattenCategoriesForMobile(categories, locale = 'es') {
+    // Flatten categories for mobile selector - only include leaf categories (no children)
+    function flattenCategoriesForMobile(categories, locale = 'es', parentPath = []) {
         let flat = [];
         for (const cat of categories) {
             const catLabel = getCategoryDisplayName(cat, locale);
-            flat.push({
-                label: catLabel,
-                value: cat._id,
-                path: [{ _id: cat._id, label: catLabel }]
-            });
+            const currentPath = [...parentPath, { _id: cat._id, label: catLabel }];
+
+            // If category has no children or empty children array, add it to the flat list
+            if (!cat.children || cat.children.length === 0) {
+                flat.push({
+                    label: parentPath.map(p => p.label).concat(catLabel).join(' › '),
+                    value: cat._id,
+                    path: currentPath
+                });
+            }
+
+            // If it has children, recursively process them
             if (cat.children && cat.children.length > 0) {
-                flat = flat.concat(flattenCategoriesForMobile(cat.children, locale));
+                flat = flat.concat(flattenCategoriesForMobile(cat.children, locale, currentPath));
             }
         }
-        // Remove duplicates by label (in case of repeated names)
-        const seen = new Set();
-        return flat.filter(cat => {
-            if (seen.has(cat.label)) return false;
-            seen.add(cat.label);
-            return true;
-        });
+
+        // Sort by label for better organization
+        flat.sort((a, b) => a.label.localeCompare(b.label, locale));
+
+        return flat;
     }
     const allCategories = useMemo(() => flattenCategoriesForMobile(categories, locale), [categories, locale]);
     // Handler for mobile dropdown change
     const handleMobileCategoryChange = (e) => {
         const selectedId = e.target.value;
+        // Prevent default form submission
+        e.preventDefault();
+
         // Find the selected option in allCategories
         const selectedOption = allCategories.find(cat => cat.value === selectedId);
         if (selectedOption) {
-            // Always update breadcrumbs to full path from root to selected
-            setCategoryPath(selectedOption.path);
-            // Update URL params
+            // Create new params first
             const params = new URLSearchParams(searchParams);
             if (selectedId === 'root') {
                 params.delete('category');
             } else {
                 params.set('category', selectedId);
             }
-            router.push(`/products?${params.toString()}`);
+
+            // Update state and URL atomically
+            Promise.resolve().then(() => {
+                setCategoryPath(selectedOption.path);
+                router.replace(`/products?${params.toString()}`, { scroll: false });
+            });
         }
     };
     return (
@@ -354,7 +427,7 @@ export default function Page() {
                 </div>
             )}
             <div className="container w-full max-w-[1500px] bg-white px-1 sm:px-4 py-2 sm:py-2 rounded-t-2xl sm:mt-0 ">
-                <nav aria-label="Breadcrumb" className="hidden lg:flex mb-4 pb-2 pl-2 overflow-x-auto border-b border-[#36A9E1]">
+                <nav aria-label="Breadcrumb" className=" hidden lg:flex mb-4 pb-2 pl-2 overflow-x-auto border-b border-[#36A9E1]">
                     <ol className="flex items-center space-x-1 text-sm sm:text-md text-gray-500 flex-wrap min-w-[200px]">
                         {categoryPath.map((cat, index) => (
                             <li key={cat.slug || index} className="flex items-center">
@@ -379,15 +452,19 @@ export default function Page() {
                         <select
                             id="mobile-category-select"
                             className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition"
-                            value={categoryPath[categoryPath.length - 1]?._id || 'root'}
+                            value={searchParams.get('category') || 'root'}
                             onChange={handleMobileCategoryChange}
+                            key={searchParams.get('category') || 'root'} // Force re-render on category change
                         >
+                            <option value="root">{t('allProducts')}</option>
                             {allCategories.map(cat => (
-                                <option key={cat.value} value={cat.value}>{cat.label}</option>
+                                <option key={cat.value} value={cat.value} className="py-1">
+                                    {cat.label}
+                                </option>
                             ))}
                         </select>
                     </div>
-                    <aside className="hidden lg:flex w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 mb-6 lg:mb-0">
+                    <aside className="hidden lg:flex w-full lg:w-1/4 xl:w-1/5 flex-shrink-0 mb-6 lg:mb-0 ">
                         {/* Category selector: show current subcategories, or siblings if no subcategories */}
                         {currentSubcategories && currentSubcategories.length > 0 ? (
                             <ul className="space-y-1">

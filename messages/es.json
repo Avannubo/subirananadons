@@ -279,7 +279,8 @@
     "showingProducts": "Mostrando {from}-{to} de {total} productos",
     "noProductsForCategory": "No se han encontrado productos para esta categoría.",
     "prevPageAria": "Página anterior",
-    "nextPageAria": "Página siguiente"
+    "nextPageAria": "Página siguiente",
+    "allProducts": "Todos los productos"
   },
   "UserAuthModal": {
     "loginTitle": "Iniciar Sesión",

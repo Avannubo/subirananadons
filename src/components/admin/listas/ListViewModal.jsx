@@ -133,7 +133,7 @@ function getLocale() {
     return 'es';
 }
 import { updateBirthListItems, fetchBirthListItems, updateBirthListItemState, updateBirthList } from '@/services/BirthListService';
-import { toast } from 'react-hot-toast'; 
+import { toast } from 'react-hot-toast';
 export default function ListViewModal({
     showModal,
     setShowModal,
@@ -358,7 +358,7 @@ export default function ListViewModal({
                 // Call onStatusChange if provided
                 if (onStatusChange) {
                     onStatusChange(newStatus);
-                } 
+                }
             } else {
                 toast.success('Lista guardada');
             }
@@ -467,20 +467,20 @@ export default function ListViewModal({
                                         {item.product.discount?.active ? (
                                             <div className="flex flex-col">
                                                 <span className="text-sm text-gray-400 line-through">
-                                                    {item.product.price_incl_tax.toFixed(2)}€
+                                                    {item.product.price_incl_tax.toFixed(2).replace('.', ',')}€
                                                 </span>
                                                 <span className="text-sm font-medium text-red-600">
-                                                    {item.product.discount.finalPrice?.toFixed(2)} € {item.product.discount.type === 'percentage' ? `(-${item.product.discount.value}%)` : ''}
+                                                    {item.product.discount.finalPrice?.toFixed(2).replace('.', ',')} € {item.product.discount.type === 'percentage' ? `(-${item.product.discount.value}%)` : ''}
                                                 </span>
                                             </div>
                                         ) : (
                                             <span className="text-sm text-gray-500">
-                                                {item.product.price_incl_tax.toFixed(2)} €
+                                                {item.product.price_incl_tax.toFixed(2).replace('.', ',')} €
                                             </span>
                                         )}
                                     </>
                                 ) : (
-                                    <p className="text-sm  text-gray-900">{item.product.discount.finalPrice} €</p>
+                                    <p className="text-sm text-gray-900">{parseFloat(item.product.price_incl_tax).toFixed(2).replace('.', ',')} €</p>
                                 )}
                             </div>
                             <p className="text-xs text-gray-500">Ref: {item.product.reference || '-'}</p>
@@ -653,8 +653,8 @@ export default function ListViewModal({
                                                     {selectedList.status === t.active
                                                         ? t.activeDesc
                                                         : selectedList.status === t.completed
-                                                        ? t.completedDesc
-                                                        : t.inactiveDesc}
+                                                            ? t.completedDesc
+                                                            : t.inactiveDesc}
                                                 </p>
                                             </div>
                                         </div>
@@ -793,7 +793,7 @@ export default function ListViewModal({
                                         </div>
                                     </div>
                                     <div className="bg-white rounded-lg border border-gray-200 overflow-auto h-[25vh] md:max-h-[50vh] md:flex-1">
-                                        
+
                                         {itemsLoading ? (
                                             <div className="flex justify-center items-center py-10">
                                                 <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
@@ -844,7 +844,7 @@ export default function ListViewModal({
                                                         <div className="animate-spin rounded-full h-10 w-10 border-t-1 border-b-1 border-[#36A9E1]"></div>
                                                     </div>
                                                 ) : getReservedItems().length === 0 ? (
-                                                        <div className="text-center py-10 h-[30vh] md:h-full">
+                                                    <div className="text-center py-10 h-[30vh] md:h-full">
                                                         <p className="text-gray-500">{t.noReserved}</p>
                                                     </div>
                                                 ) : (
