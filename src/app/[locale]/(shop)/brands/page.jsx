@@ -90,7 +90,7 @@ export default function BrandsPage() {
                 let fetchedProducts = data.products || [];
                 // Format products to match the expected structure
                 fetchedProducts = fetchedProducts.map(product => {
-                    console.log(fetchedProducts);
+                    // console.log(fetchedProducts);
 
                     const now = new Date();
                     const hasDiscount = product.discount?.active &&

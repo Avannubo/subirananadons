@@ -170,7 +170,7 @@ export async function POST(request) {
         return NextResponse.json({
             success: true,
             message: 'Pedido creado correctamente',
-            order: {
+            order: { 
                 id: order._id,
                 orderNumber: order.orderNumber
             }

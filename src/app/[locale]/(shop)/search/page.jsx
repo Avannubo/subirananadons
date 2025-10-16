@@ -26,7 +26,7 @@ export default function SearchPage() {
     const [selectedBrand, setSelectedBrand] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [priceRange, setPriceRange] = useState([0, 1000]);
+    const [priceRange, setPriceRange] = useState([0, 5000]);
     const [sortBy, setSortBy] = useState('newest');
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [viewMode, setViewMode] = useState('grid'); // Add view mode state
@@ -76,7 +76,7 @@ export default function SearchPage() {
                 const prodResponse = await fetch('/api/products?limit=99999');
                 if (!prodResponse.ok) throw new Error('Failed to fetch products');
                 const data = await prodResponse.json();
-                console.log('Total products from API:', data.products.length);
+                // console.log('Total products from API:', data.products.length);
 
                 const formattedProducts = data.products.map(product => ({
                     ...product,
@@ -91,7 +91,7 @@ export default function SearchPage() {
                     description: product.description || '',
                     rawName: product.name // Store the raw name for search
                 }));
-                console.log('Fetched products:', formattedProducts);
+                // console.log('Fetched products:', formattedProducts);
                 setAllProducts(formattedProducts);
             } catch (err) {
                 console.error('Error fetching meta/products:', err);

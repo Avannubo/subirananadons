@@ -81,7 +81,7 @@ export default function Page() {
                         </Link>
                         <Link
                             className="hidden md:block  cursor-pointer"
-                            href={whatsappNumber ? "https://wa.me/" + whatsappNumber : "+34 691 357 211"}
+                            href={whatsappNumber ? "https://wa.me/" + whatsappNumber : "https://wa.me/34691357211"}
                             target="_blank"
                             rel="noopener noreferrer"
                         >

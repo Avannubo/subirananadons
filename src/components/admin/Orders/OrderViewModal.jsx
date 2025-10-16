@@ -133,7 +133,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                 }
                 if (data.success && data.order) {
                     setOrder(data.order);
-                    console.log('Fetched order data:', data.order);
+                    // console.log('Fetched order data:', data.order);
                     setError(null);
                     setRetryCount(0);
                     if (data.order?.items?.length > 0) {
@@ -323,7 +323,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             try {
                 const info = await getListsInfoFromOrder(order);
                 setListsInfo(info);
-                console.log('Lists info for order:', info);
+                // console.log('Lists info for order:', info);
             } catch (err) {
                 console.error('Error fetching lists info for order:', err);
             }
@@ -335,7 +335,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 z-50 flex justify-center items-center p-4">
             <div className="bg-white rounded-lg shadow-lg w-full max-h-[90vh] flex flex-col mb-14">
                 {/* Header */}
-                <div className='rounded-lg overflow-y-scroll '>
+                <div className='rounded-lg overflow-y-auto '>
                     <div className="flex justify-between items-center border-b border-gray-300 p-4 sticky top-0 bg-white z-10">
                         <h3 className="text-xl font-semibold flex items-center">
                             <FiPackage className="mr-2 text-[#36A9E1]" />

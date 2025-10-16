@@ -144,7 +144,7 @@ export default function ListViewModal({
     openStatusModal,
     onStatusChange
 }) {
-    console.log(selectedList);
+    // console.log(selectedList);
     const [pendingSearch, setPendingSearch] = useState('');
     const [boughtSearch, setBoughtSearch] = useState('');
     const [reservedSearch, setReservedSearch] = useState('');
@@ -977,7 +977,7 @@ export default function ListViewModal({
                                                         } catch (jsonError) {
                                                             console.error('Error parsing API response:', jsonError);
                                                         }
-                                                        console.log('Cancel notification API response:', response.status, data);
+                                                        // console.log('Cancel notification API response:', response.status, data);
                                                         if (response.ok && data.success) {
                                                             toast.success('Notificación de cancelación enviada correctamente');
                                                         } else {

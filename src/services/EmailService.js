@@ -356,7 +356,7 @@ class EmailService {
      * Accepts all modal data and filters/prepares the email payload internally.
      */
     static async sendGiftPurchaseNotification(selectedList, item, action) {
-        console.log('sendGiftPurchaseNotification called with:', selectedList, item, action);
+        // console.log('sendGiftPurchaseNotification called with:', selectedList, item, action);
         try {
             const list = selectedList.rawData || selectedList;
             // Owner info
@@ -433,7 +433,7 @@ class EmailService {
     * @param {Object} [cancelledItem] - Optionally, the cancelled item (if not, will find first with state 0)
     */
     static async sendGiftCancelNotification(selectedList, cancelledItem = null) {
-        console.log('sendGiftCancelNotification called with:', selectedList, cancelledItem);
+        // console.log('sendGiftCancelNotification called with:', selectedList, cancelledItem);
         try {
             const list = selectedList.rawData || selectedList;
             // Find the first item with state 0 (cancelled) if not provided

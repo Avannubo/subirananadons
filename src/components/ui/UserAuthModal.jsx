@@ -192,7 +192,7 @@ export default function AuthModal({ title }) {
         if (typeof window !== 'undefined') {
             const urlParams = new URLSearchParams(window.location.search);
             const showLogin = urlParams.get('showLogin');
-            console.log(showLogin);
+            // console.log(showLogin);
             
             if (showLogin === 'true') {
                 // setActiveView('login');
