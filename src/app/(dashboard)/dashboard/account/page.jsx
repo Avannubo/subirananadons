@@ -9,6 +9,7 @@ export default function Page() {
     const { data: session, update: updateSession } = useSession();
     const { user: globalUser, updateUser, refreshUser } = useUser();
     const [loading, setLoading] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const [userData, setUserData] = useState({
         firstName: '',
         lastName: '',
@@ -35,47 +36,51 @@ export default function Page() {
     const L = {
         ca: {
             title: 'El meu compte',
-            subtitle: 'Edita la teva Informació',
+            subtitle: 'Les meves dades',
             firstName: 'Nom',
             lastName: 'Cognoms',
-            nameHelp: "Només es permeten caràcters alfabètics (lletres) i el punt (.), seguits d'un espai.",
+            nameHelp: "Només es permeten lletres i el punt (.), seguits d'un espai.",
             email: 'Correu electrònic',
             password: 'Contrasenya',
-            change: 'Canvia',
+            change: 'Canviar',
             newPassword: 'Nova contrasenya',
-            newPasswordPlaceholder: 'Introdueix la teva nova contrasenya',
+            newPasswordPlaceholder: 'Escriu la nova contrasenya',
             min6: 'Mínim 6 caràcters',
-            saving: 'Guardant...',
+            saving: 'Desant...',
             updating: 'Actualitzant...',
-            saveChanges: 'Desa els canvis',
+            saveChanges: 'Desar canvis',
+            cancelEdit: 'Cancel·lar',
+            editInfo: 'Editar dades',
             lastUpdateText: 'Última actualització:',
             imgProcessing: "Processant la imatge...",
-            usingLocalImage: "S'està utilitzant la imatge local",
-            uploadFailed: "No s'ha pogut pujar la imatge",
-            uploadSuccess: 'Imatge pujada correctament!',
-            profileUpdated: 'Perfil actualitzat correctament. Se tancarà la sessió.',
+            usingLocalImage: "Utilitzant imatge local",
+            uploadFailed: "Error en pujar la imatge",
+            uploadSuccess: 'Imatge pujada correctament',
+            profileUpdated: 'Perfil actualitzat correctament. Es tancarà la sessió.',
             updateError: 'Error en actualitzar el perfil'
         },
         es: {
             title: 'Mi cuenta',
-            subtitle: 'Edita tu Información',
+            subtitle: 'Mis datos',
             firstName: 'Nombre',
             lastName: 'Apellidos',
-            nameHelp: 'Sólo se permiten caracteres alfabéticos (letras) y el punto (.), seguidos de un espacio.',
+            nameHelp: 'Solo se permiten letras y el punto (.), seguidos de un espacio.',
             email: 'Correo electrónico',
             password: 'Contraseña',
             change: 'Cambiar',
             newPassword: 'Nueva contraseña',
-            newPasswordPlaceholder: 'Introduce tu nueva contraseña',
+            newPasswordPlaceholder: 'Escribe la nueva contraseña',
             min6: 'Mínimo 6 caracteres',
             saving: 'Guardando...',
             updating: 'Actualizando...',
             saveChanges: 'Guardar cambios',
+            cancelEdit: 'Cancelar',
+            editInfo: 'Editar datos',
             lastUpdateText: 'Última actualización:',
             imgProcessing: 'Procesando la imagen...',
-            usingLocalImage: 'Se está utilizando la imagen local',
-            uploadFailed: 'No se pudo subir la imagen',
-            uploadSuccess: 'Imagen subida correctamente!',
+            usingLocalImage: 'Usando imagen local',
+            uploadFailed: 'Error al subir la imagen',
+            uploadSuccess: 'Imagen subida correctamente',
             profileUpdated: 'Perfil actualizado correctamente. Se cerrará la sesión.',
             updateError: 'Error al actualizar el perfil'
         }
@@ -252,113 +257,154 @@ export default function Page() {
                 <div className="md:mx-auto md:p-6 md:min-h-[90vh]">
                     <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
                     <div className="bg-white rounded-lg p-6">
-                        <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">{t('subtitle')}</h2>
-                        <form className="space-y-6" onSubmit={handleSubmit}>
-                            {/* Nombre */}
-                            <div>
-                                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                                    {t('firstName')}
-                                </label>
-                                <input
-                                    type="text"
-                                    id="firstName"
-                                    name="firstName"
-                                    value={userData.firstName}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                />
-                                <p className="mt-1 text-xs text-gray-500">
-                                    {t('nameHelp')}
-                                </p>
-                            </div>
-                            {/* Apellidos */}
-                            <div>
-                                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                                    {t('lastName')}
-                                </label>
-                                <input
-                                    type="text"
-                                    id="lastName"
-                                    name="lastName"
-                                    value={userData.lastName}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                />
-                                <p className="mt-1 text-xs text-gray-500">
-                                    {t('nameHelp')}
-                                </p>
-                            </div>
-                            {/* Email */}
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                    {t('email')}
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={userData.email}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                />
-                            </div>
-                            {/* Current Password */}
-                            <div>
-                                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                                    {t('password')}
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        id="currentPassword"
-                                        defaultValue="•••••••••••••••••••"
-                                        readOnly
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPasswordChange(!showPasswordChange)}
-                                        className="absolute right-2 top-2 text-[#36A9E1] text-sm font-medium"
-                                    >
-                                        {t('change')}
-                                    </button>
-                                </div>
-                            </div>
-                            {/* New Password */}
-                            {showPasswordChange && (
+                        <div className="flex justify-between items-center mb-6 border-b border-gray-300 pb-2">
+                            <h2 className="text-xl font-semibold">{t('subtitle')}</h2>
+                            {!isEditing && (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="px-4 py-2 bg-[#36A9E1] text-white rounded-md hover:bg-[#00B0C890] transition-colors"
+                                >
+                                    {t('editInfo')}
+                                </button>
+                            )}
+                        </div>
+
+                        {isEditing ? (
+                            <form className="space-y-6" onSubmit={handleSubmit}>
+                                {/* Nombre */}
                                 <div>
-                                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                                        {t('newPassword')}
+                                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('firstName')}
                                     </label>
                                     <input
-                                        type="password"
-                                        id="newPassword"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        placeholder={t('newPasswordPlaceholder')}
+                                        type="text"
+                                        id="firstName"
+                                        name="firstName"
+                                        value={userData.firstName}
+
+                                        onChange={handleInputChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                        minLength={6}
                                     />
                                     <p className="mt-1 text-xs text-gray-500">
-                                        {t('min6')}
+                                        {t('nameHelp')}
                                     </p>
                                 </div>
-                            )}
-                            {/* Submit Button */}
-                            <div className="pt-4">
-                                <button
-                                    type="submit"
-                                    disabled={loading || isUpdating}
-                                    className={`px-4 py-2 bg-[#36A9E1] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C860] ${(loading || isUpdating) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#00B0C890]'
-                                        }`}
-                                >
-                                    {loading ? t('saving') : isUpdating ? t('updating') : t('saveChanges')}
-                                </button>
+                                {/* Apellidos */}
+                                <div>
+                                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('lastName')}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="lastName"
+                                        name="lastName"
+                                        value={userData.lastName}
+                                        onChange={handleInputChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
+                                    />
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        {t('nameHelp')}
+                                    </p>
+                                </div>
+                                {/* Email */}
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('email')}
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={userData.email}
+                                        onChange={handleInputChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
+                                    />
+                                </div>
+                                {/* Current Password */}
+                                <div>
+                                    <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('password')}
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="password"
+                                            id="currentPassword"
+                                            defaultValue="•••••••••••••••••••"
+                                            readOnly
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswordChange(!showPasswordChange)}
+                                            className="absolute right-2 top-2 text-[#36A9E1] text-sm font-medium"
+                                        >
+                                            {t('change')}
+                                        </button>
+                                    </div>
+                                </div>
+                                {/* New Password */}
+                                {showPasswordChange && (
+                                    <div>
+                                        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t('newPassword')}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            id="newPassword"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder={t('newPasswordPlaceholder')}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
+                                            minLength={6}
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            {t('min6')}
+                                        </p>
+                                    </div>
+                                )}
+                                {/* Action Buttons */}
+                                <div className="pt-4 flex space-x-4">
+                                    <button
+                                        type="submit"
+                                        disabled={loading || isUpdating}
+                                        className={`px-4 py-2 bg-[#36A9E1] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C860] ${(loading || isUpdating) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#00B0C890]'}`}
+                                    >
+                                        {loading ? t('saving') : isUpdating ? t('updating') : t('saveChanges')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditing(false)}
+                                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                                    >
+                                        {t('cancelEdit')}
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="space-y-6">
+                                {/* Display mode - show information as read-only */}
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className='border-2 border-gray-300 rounded-2xl p-2'>
+                                        <p className="text-sm font-medium text-gray-500">{t('firstName')}:</p>
+                                        <p className="mt-1">{userData.firstName}</p>
+                                    </div>
+                                    <div className='border-2 border-gray-300 rounded-2xl p-2'>
+                                        <p className="text-sm font-medium text-gray-500">{t('lastName')}:</p>
+                                        <p className="mt-1">{userData.lastName}</p>
+                                    </div>
+                                    <div className='border-2 border-gray-300 rounded-2xl p-2'>
+                                        <p className="text-sm font-medium text-gray-500">{t('email')}:</p>
+                                        <p className="mt-1">{userData.email}</p>
+                                    </div>
+                                    <div className='border-2 border-gray-300 rounded-2xl p-2'>
+                                        <p className="text-sm font-medium text-gray-500">{t('password')}:</p>
+                                        <p className="mt-1">•••••••••••••••••••</p>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
-                        {/* Add last update information if available */}
+                        )}
                         {lastUpdate && (
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-gray-500 mt-6">
                                 {t('lastUpdateText')} {new Date(lastUpdate).toLocaleString()}
                             </p>
                         )}

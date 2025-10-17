@@ -64,7 +64,7 @@ export default function Page() {
                 category.children = filterActiveCategories(category.children);
                 // If all children were filtered out and category has no other data, filter out the category
                 return category.children.length > 0 || category.name;
-            }
+            }   
             return true;
         });
     };
@@ -93,7 +93,6 @@ export default function Page() {
     const currentSubcategories = currentCategoryNode?.children || [];
     // State for expanded categories in sidebar (array of _id)
     const [expandedCategories, setExpandedCategories] = useState([]);
-
     // Reset category on page load/navigation
     useEffect(() => {
         const handleRouteChange = () => {
@@ -106,22 +105,18 @@ export default function Page() {
                 router.replace(`/products?${params.toString()}`, { scroll: false });
             }
         };
-
         // Handle initial page load
         if (typeof window !== 'undefined' && !searchParams.get('category')) {
             handleRouteChange();
         }
-
         // Add event listeners for navigation
         window.addEventListener('popstate', handleRouteChange);
         window.addEventListener('pageshow', handleRouteChange);
-
         return () => {
             window.removeEventListener('popstate', handleRouteChange);
             window.removeEventListener('pageshow', handleRouteChange);
         };
     }, [router]);
-
     // Toggle expand/collapse for a category in sidebar
     const handleSidebarCategoryToggle = (catId) => {
         setExpandedCategories((prev) =>
@@ -134,10 +129,8 @@ export default function Page() {
     // Only set categoryPath after categories are loaded
     useEffect(() => {
         if (categoriesLoading) return;
-
         // Create a flag to track if the component is still mounted
         let isActive = true;
-
         const updateCategoryPath = () => {
             const categoryId = searchParams.get('category');
             if (categoryId && categories && categories.length > 0) {
@@ -155,10 +148,8 @@ export default function Page() {
                 setCategoryPath([{ _id: 'root', label: 'Productes' }]);
             }
         };
-
         // Use a small timeout to ensure stable state updates
         const timeoutId = setTimeout(updateCategoryPath, 50);
-
         return () => {
             isActive = false;
             clearTimeout(timeoutId);
@@ -245,17 +236,14 @@ export default function Page() {
     useEffect(() => {
         // Only load products after categories are loaded
         if (categoriesLoading) return;
-
         async function loadProducts() {
             try {
                 setLoading(true);
                 const options = {
                     status: 'active'
                 };
-
                 // Get category from URL params first
                 const categoryId = searchParams.get('category');
-
                 if (categoryId && categories.length > 0) {
                     // Find the category node from the ID
                     let categoryNode = null;
@@ -266,7 +254,6 @@ export default function Page() {
                             break;
                         }
                     }
-
                     if (categoryNode) {
                         function getAllLeafIds(node) {
                             if (!node.children || node.children.length === 0) {
@@ -279,10 +266,8 @@ export default function Page() {
                         options.category = allLeafIds.join(',');
                     }
                 }
-
                 // Set a very high limit to get all products
                 options.limit = 10000;
-
                 const data = await fetchProducts(options);
                 if (data && data.products) {
                     const formattedProducts = data.products.map(product => formatProduct(product, locale));
@@ -303,7 +288,6 @@ export default function Page() {
                 setLoading(false);
             }
         }
-
         loadProducts();
     }, [categoriesLoading, categories, searchParams, locale]);
     // Pagination removed: no need to reset page
@@ -359,7 +343,6 @@ export default function Page() {
         for (const cat of categories) {
             const catLabel = getCategoryDisplayName(cat, locale);
             const currentPath = [...parentPath, { _id: cat._id, label: catLabel }];
-
             // If category has no children or empty children array, add it to the flat list
             if (!cat.children || cat.children.length === 0) {
                 flat.push({
@@ -368,16 +351,13 @@ export default function Page() {
                     path: currentPath
                 });
             }
-
             // If it has children, recursively process them
             if (cat.children && cat.children.length > 0) {
                 flat = flat.concat(flattenCategoriesForMobile(cat.children, locale, currentPath));
             }
         }
-
         // Sort by label for better organization
         flat.sort((a, b) => a.label.localeCompare(b.label, locale));
-
         return flat;
     }
     const allCategories = useMemo(() => flattenCategoriesForMobile(categories, locale), [categories, locale]);
@@ -386,7 +366,6 @@ export default function Page() {
         const selectedId = e.target.value;
         // Prevent default form submission
         e.preventDefault();
-
         // Find the selected option in allCategories
         const selectedOption = allCategories.find(cat => cat.value === selectedId);
         if (selectedOption) {
@@ -397,7 +376,6 @@ export default function Page() {
             } else {
                 params.set('category', selectedId);
             }
-
             // Update state and URL atomically
             Promise.resolve().then(() => {
                 setCategoryPath(selectedOption.path);
