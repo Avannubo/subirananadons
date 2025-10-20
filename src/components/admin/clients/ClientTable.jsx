@@ -1,10 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2, FiEye } from 'react-icons/fi';
-
 export default function ClientsTable({ clients, onEditClient, onDeleteClient, onViewClient }) {
     const [orderCounts, setOrderCounts] = useState({});
-
     // Fetch order counts for all clients
     useEffect(() => {
         const fetchOrderCounts = async () => {
@@ -27,7 +25,6 @@ export default function ClientsTable({ clients, onEditClient, onDeleteClient, on
                                 }
                             })
                         });
-
                         if (res.ok) {
                             const data = await res.json();
                             counts[userId] = data.count || 0;
@@ -39,12 +36,11 @@ export default function ClientsTable({ clients, onEditClient, onDeleteClient, on
                 console.error('Error fetching order counts:', error);
             }
         };
-
         if (clients.length > 0) {
             fetchOrderCounts();
         }
     }, [clients]);
-    // console.log('ClientsTable rendered with clients:', clients);
+    // //console.log('ClientsTable rendered with clients:', clients);
     // Locale detection (default to 'ca')
     let locale = 'ca';
     if (typeof window !== 'undefined' && window.navigator) {
@@ -95,7 +91,6 @@ export default function ClientsTable({ clients, onEditClient, onDeleteClient, on
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.lastName}</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.email}</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.sales}</th>
-                        {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.active}</th> */}
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.actions}</th>
                     </tr>
                 </thead>
@@ -112,15 +107,10 @@ export default function ClientsTable({ clients, onEditClient, onDeleteClient, on
                                         {orderCounts[client._id || client.id] || 0}
                                     </div>
                                 </td>
-                                {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${client.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                        {client.active ? t.yes : t.no}
-                                    </span>
-                                </td> */}
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
                                     <button
                                         onClick={() => onViewClient(client)}
-                                        className="text-[#00B0C8] hover:text-[#008A9B] cursor-pointer"
+                                        className="text-[#36A9E1] hover:text-[#008A9B] cursor-pointer"
                                         title={t.view}
                                     >
                                         <FiEye size={20} />

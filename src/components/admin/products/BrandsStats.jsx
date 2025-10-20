@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { TagIcon, CheckCircle, XCircle, Image, ShoppingBag } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-
 export default function BrandsStats() {
     const [stats, setStats] = useState({
         totalBrands: '--',
@@ -13,33 +12,27 @@ export default function BrandsStats() {
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
-
     const fetchStats = async () => {
         try {
             setLoading(true);
             setRefreshing(true);
             const response = await fetch('/api/brands');
-
             if (!response.ok) {
                 throw new Error('Failed to fetch brands data');
             }
-
             const data = await response.json();
             const brands = Array.isArray(data) ? data : (data.brands || []);
-
             // Calculate stats
             const totalBrands = brands.length;
             const activeBrands = brands.filter(brand => brand.enabled).length;
             const inactiveBrands = totalBrands - activeBrands;
             const brandsWithLogo = brands.filter(brand => brand.logo && brand.logo.trim() !== '').length;
-
             setStats({
                 totalBrands,
                 activeBrands,
                 inactiveBrands,
                 brandsWithLogo
             });
-
             setLastUpdated(new Date());
         } catch (error) {
             console.error('Error fetching brand stats:', error);
@@ -49,22 +42,18 @@ export default function BrandsStats() {
             setRefreshing(false);
         }
     };
-
     useEffect(() => {
         fetchStats();
     }, []);
-
     // Format the last updated time
     const formatLastUpdated = () => {
         if (!lastUpdated) return '';
-
         return new Intl.DateTimeFormat('es', {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit'
         }).format(lastUpdated);
     };
-
     return (
         <div className="mb-6">
             <div className="flex justify-between items-center mb-4">
@@ -95,7 +84,6 @@ export default function BrandsStats() {
                     <span>{refreshing ? 'Actualizando...' : 'Actualizar'}</span>
                 </button>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow">
                     <div className="flex items-center">
@@ -111,7 +99,6 @@ export default function BrandsStats() {
                         </div>
                     </div>
                 </div>
-
                 <div className="bg-white p-4 rounded-lg shadow">
                     <div className="flex items-center">
                         <div className="flex-shrink-0 mr-3">
@@ -126,7 +113,6 @@ export default function BrandsStats() {
                         </div>
                     </div>
                 </div>
-
                 <div className="bg-white p-4 rounded-lg shadow">
                     <div className="flex items-center">
                         <div className="flex-shrink-0 mr-3">
@@ -141,7 +127,6 @@ export default function BrandsStats() {
                         </div>
                     </div>
                 </div>
-
                 <div className="bg-white p-4 rounded-lg shadow">
                     <div className="flex items-center">
                         <div className="flex-shrink-0 mr-3">

@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { FiSearch, FiImage, FiCheck, FiX, FiTrash2 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
-
 export default function ImageSelector({ onSelect, onClose }) {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
-
     useEffect(() => {
         async function fetchImages() {
             try {
@@ -28,18 +26,15 @@ export default function ImageSelector({ onSelect, onClose }) {
         }
         fetchImages();
     }, []);
-
     const filteredImages = images.filter(img =>
         img.public_id.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
     const handleSelect = () => {
         if (selectedImage) {
             onSelect(selectedImage.secure_url);
             onClose();
         }
     };
-
     // Delete image handler
     const handleDelete = async (img) => {
         if (!window.confirm('Segur que vols eliminar aquesta imatge?')) return;
@@ -61,7 +56,6 @@ export default function ImageSelector({ onSelect, onClose }) {
             toast.error('Error eliminant la imatge');
         }
     };
-
     return (
         <div className="fixed inset-0 h-screen bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4 z-50 border-gray-300">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col">
@@ -71,21 +65,19 @@ export default function ImageSelector({ onSelect, onClose }) {
                         <FiX size={24} />
                     </button>
                 </div>
-
                 <div className="p-4 border-b border-gray-300">
                     <div className="relative">
                         <FiSearch className="absolute left-3 top-3 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Cerca imatges..."
-                            className="w-full pl-10 pr-4 py-2 border-gray-300 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00B0C8] transition-colors"
+                            className="w-full pl-10 pr-4 py-2 border-gray-300 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#36A9E1] transition-colors"
                             autoFocus
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                 </div>
-
                 {loading ? (
                     <div className="flex-1 flex items-center justify-center">
                         {/* Skeleton grid for loading */}
@@ -129,16 +121,12 @@ export default function ImageSelector({ onSelect, onClose }) {
                                                 </div>
                                             )}
                                         </div>
-                                        {/* <div className="absolute bottom-0 left-0 right-0 bg-[#00b1c8be] bg-opacity-50 text-white p-2 text-xs truncate">
-                                            {img.public_id.split('/').pop()}
-                                        </div> */}
                                     </div>
                                 ))}
                             </div>
                         )}
                     </div>
                 )}
-
                 <div className="flex justify-end p-4 border-t border-gray-300 ">
                     <button
                         onClick={onClose}

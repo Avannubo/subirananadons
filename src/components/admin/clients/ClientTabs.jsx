@@ -2,11 +2,14 @@
 import { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiRefreshCw, FiPlus, FiDownload } from 'react-icons/fi';
 import ClientsTable from '@/components/admin/clients/ClientTable';
+// Helper to remove accents from a string
+const removeAccents = (str) => {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+};
 import ClientModal from '@/components/admin/clients/ClientModal';
 import ClientViewModal from '@/components/admin/clients/ClientViewModal';
 import ConfirmDeleteModal from '@/components/admin/clients/ConfirmDeleteModal';
-import { toast } from 'react-hot-toast'; 
-import Pagination from '@/components/admin/shared/Pagination';
+import { toast } from 'react-hot-toast';
 export default function ClientsTabs() {
     // Locale detection (default to 'ca')
     let locale = 'ca';
@@ -68,7 +71,7 @@ export default function ClientsTabs() {
             refreshSuccess: 'Datos actualizados correctamente',
             yes: 'Sí',
             no: 'No',
-            headers: ['Nombre', 'Apellidos', 'Email','Fecha de registro'],
+            headers: ['Nombre', 'Apellidos', 'Email', 'Fecha de registro'],
         }
     };
     const t = translations[locale];
@@ -91,17 +94,12 @@ export default function ClientsTabs() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [clients, setClients] = useState([]);
-    const [pagination, setPagination] = useState({
-        currentPage: 1,
-        totalPages: 1,
-        totalItems: 0,
-        limit: 5
-    });
+
     // const tabs = ['Todos', 'Activos', 'Inactivos', 'Newsletter', 'Ofertas'];
     // Load clients when component mounts
     useEffect(() => {
         fetchClients();
-    }, [activeTab, pagination.currentPage]);
+    }, [activeTab]);
     // Calculate status counts
     const statusCounts = {
         [t.tabs[0]]: clients.length,
@@ -113,9 +111,7 @@ export default function ClientsTabs() {
         try {
             setIsLoading(true);
             const queryParams = new URLSearchParams();
-            // Add pagination parameters
-            queryParams.append('page', pagination.currentPage);
-            queryParams.append('limit', pagination.limit);
+
             // Add search filters
             if (filters.searchId) queryParams.append('searchId', filters.searchId);
             if (filters.searchName) queryParams.append('searchName', filters.searchName);
@@ -127,21 +123,15 @@ export default function ClientsTabs() {
             // if (activeTab === 'Newsletter') queryParams.append('newsletter', 'true');
             // if (activeTab === 'Ofertas') queryParams.append('partnerOffers', 'true');
             const url = `/api/clients?${queryParams.toString()}`;
-            console.log('Fetching clients with URL:', url);
+            //console.log('Fetching clients with URL:', url);
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Error fetching clients');
             }
             const data = await response.json();
-            console.log('API response:', data);
+            //console.log('API response:', data);
             if (data.success) {
                 setClients(data.clients || []);
-                setPagination(data.pagination || {
-                    currentPage: 1,
-                    totalPages: 1,
-                    totalItems: data.clients?.length || 0,
-                    limit: 5
-                });
             } else {
                 throw new Error(data.message || 'Failed to fetch clients');
             }
@@ -153,7 +143,14 @@ export default function ClientsTabs() {
         }
     };
     // Filter clients - now handled on the server side through API calls
-    const filteredClients = clients;
+    const filteredClients = clients.filter(client => {
+        return (
+            removeAccents((client.id || '').toString()).includes(removeAccents(filters.searchId)) &&
+            removeAccents((client.name || '').toLowerCase()).includes(removeAccents(filters.searchName.toLowerCase())) &&
+            removeAccents((client.lastName || '').toLowerCase()).includes(removeAccents(filters.searchLastName.toLowerCase())) &&
+            removeAccents((client.email || '').toLowerCase()).includes(removeAccents(filters.searchEmail.toLowerCase()))
+        );
+    });
     // Handle filter changes
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -164,7 +161,6 @@ export default function ClientsTabs() {
     };
     // Apply filters
     const applyFilters = () => {
-        setPagination(prev => ({ ...prev, currentPage: 1 })); // Reset to first page
         fetchClients();
     };
     // Clear all filters
@@ -178,8 +174,7 @@ export default function ClientsTabs() {
             registrationDateFrom: '',
             registrationDateTo: ''
         });
-        // Reset page and fetch
-        setPagination(prev => ({ ...prev, currentPage: 1 }));
+
         fetchClients();
     };
     // Refresh data
@@ -211,33 +206,32 @@ export default function ClientsTabs() {
     // Save client (new or edit)
     const handleSaveClient = async (formData) => {
         try {
-            let response;
+            // If formData is null, it means a new user was created through register endpoint
+            if (formData === null) {
+                // Just refresh the client list
+                await fetchClients();
+                return null;
+            }
+
             if (selectedClient) {
                 // Edit existing client
-                response = await fetch(`/api/clients/${selectedClient.id}`, {
+                const response = await fetch(`/api/clients/${selectedClient.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formData),
                 });
-            } else {
-                // Add new client
-                response = await fetch('/api/clients', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData),
-                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Operation failed');
+                }
+
+                // Refresh the client list
+                await fetchClients();
+                return data.client;
             }
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || 'Operation failed');
-            }
-            // Refresh the client list
-            fetchClients();
-            return data.client;
         } catch (error) {
             console.error('Error saving client:', error);
             throw error;
@@ -283,7 +277,7 @@ export default function ClientsTabs() {
                 // client.id,
                 client.name,
                 client.lastName,
-                client.email, 
+                client.email,
                 client.registrationDate
             ].join(','))
         ].join('\n');
@@ -309,7 +303,7 @@ export default function ClientsTabs() {
             <div className="bg-white rounded-lg shadow">
                 <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">
-                        <h2 className="text-lg font-medium">{t.adminTitle} ({pagination.totalItems})</h2>
+                        <h2 className="text-lg font-medium">{t.adminTitle} ({clients.length})</h2>
                         <button
                             className="ml-2 text-gray-500 hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer"
                             onClick={refreshData}
@@ -328,7 +322,7 @@ export default function ClientsTabs() {
                             <FiDownload className="mr-1" /> {t.export}
                         </button>
                         <button
-                            className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors cursor-pointer"
+                            className="flex items-center px-3 py-2 bg-[#36A9E1] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors cursor-pointer"
                             onClick={handleAddNewClient}
                             title={t.addTitle}
                         >
@@ -339,7 +333,7 @@ export default function ClientsTabs() {
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="relative">
+                        {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -349,7 +343,7 @@ export default function ClientsTabs() {
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
-                        </div>
+                        </div> */}
                         <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
@@ -384,9 +378,9 @@ export default function ClientsTabs() {
                             />
                         </div>
                     </div>
-                    <div className="flex sm:flex-row flex-col justify-start gap-2">
+                    {/* <div className="flex sm:flex-row flex-col justify-start gap-2">
                         <button
-                            className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890] cursor-pointer"
+                            className="flex items-center justify-center px-4 py-2 bg-[#36A9E1] text-white rounded hover:bg-[#00B0C890] cursor-pointer"
                             onClick={applyFilters}
                             title={t.filterTitle}
                         >
@@ -400,12 +394,12 @@ export default function ClientsTabs() {
                         >
                             {t.clear}
                         </button>
-                    </div>
+                    </div> */}
                 </div>
                 {/* Client data table */}
                 {isLoading ? (
                     <div className="py-20 text-center">
-                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
+                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#36A9E1]"></div>
                         <p className="mt-3 text-gray-600">{t.loading}</p>
                     </div>
                 ) : (
@@ -416,27 +410,7 @@ export default function ClientsTabs() {
                             onDeleteClient={handleDeleteClient}
                             onViewClient={handleViewClient}
                         />
-                        {/* Pagination */}
-                        {!isLoading && pagination.totalPages > 0 && (
-                            <div className="p-4 border-t border-gray-200">
-                                <Pagination
-                                    currentPage={pagination.currentPage}
-                                    totalPages={pagination.totalPages}
-                                    totalItems={pagination.totalItems}
-                                    itemsPerPage={pagination.limit}
-                                    onPageChange={handlePageChange}
-                                    onItemsPerPageChange={(newLimit) => {
-                                        setPagination(prev => ({
-                                            ...prev,
-                                            limit: newLimit,
-                                            currentPage: 1
-                                        }));
-                                        fetchClients();
-                                    }}
-                                    showingText={t.showingText}
-                                />
-                            </div>
-                        )}
+
                     </>
                 )}
             </div>

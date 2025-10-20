@@ -5,7 +5,6 @@ import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
 import User from '@/models/User';
 import EmailService from '@/services/EmailService';
-
 export async function GET(request) {
     try {
         // Check if user is authenticated
@@ -16,12 +15,9 @@ export async function GET(request) {
                 { status: 401 }
             );
         }
-
         await dbConnect();
-
         const { searchParams } = new URL(request.url);
         const preventSort = searchParams.get('preventSort') === 'true';
-
         // If admin, return all birth lists
         // Otherwise, return only the user's birth lists
         let query = {};
@@ -31,25 +27,21 @@ export async function GET(request) {
         let birthListsQuery = BirthList.find(query)
             .populate('user', 'name email')
             .populate('items.product', 'name reference'); // Populate product data for each item
-
         // Apply sorting only if preventSort is false
         if (!preventSort) {
             birthListsQuery = birthListsQuery.sort({ createdAt: -1 });
         }
-
         // Execute the query
         const birthLists = await birthListsQuery.lean();
-
         return NextResponse.json({ success: true, data: birthLists });
     } catch (error) {
-        console.error('Error fetching birth lists:', error);
+        console.error('Error en obtenir les llistes de naixement:', error);
         return NextResponse.json(
-            { success: false, message: 'Error fetching birth lists', error: error.message },
+            { success: false, message: 'Error en obtenir les llistes de naixement', error: error.message },
             { status: 500 }
         );
     }
 }
-
 export async function POST(request) {
     try {
         // Check if user is authenticated
@@ -60,13 +52,10 @@ export async function POST(request) {
                 { status: 401 }
             );
         }
-
         await dbConnect();
-
         // Parse request body
         const data = await request.json();
-        console.log('Creating birth list with data:', data);
-
+        //console.log('Creating birth list with data:', data);
         // Determine the user for the list (admin can set userId or user, others use their own)
         let userIdToUse = session.user.id;
         if (session.user.role === 'admin') {
@@ -79,19 +68,17 @@ export async function POST(request) {
         const user = await User.findById(userIdToUse);
         if (!user) {
             return NextResponse.json(
-                { success: false, message: 'User not found' },
+                { success: false, message: 'Usuari no trobat' },
                 { status: 404 }
             );
         }
-
         // Validate required fields
         if (!data.title || !data.babyName || !data.dueDate) {
             return NextResponse.json(
-                { success: false, message: 'Required fields missing: title, babyName, dueDate' },
+                { success: false, message: 'Falten camps obligatoris: títol, nom del nadó, data prevista' },
                 { status: 400 }
             );
         }
-
         // Set userEmail and userName
         let userEmail = undefined;
         let userName = undefined;
@@ -105,7 +92,7 @@ export async function POST(request) {
         } else if (user.name) {
             userName = user.name;
         }
-        console.log('Creating birth list for user:', userIdToUse, 'with email:', userEmail, 'and name:', userName);
+        //console.log('Creating birth list for user:', userIdToUse, 'with email:', userEmail, 'and name:', userName);
         const birthListData = {
             user: userIdToUse,
             // userEmail,
@@ -122,30 +109,28 @@ export async function POST(request) {
             status: data.status || 'Activa'
         };
         // Create the birth list in the database
-         const birthList = await BirthList.create(birthListData);
-
+        const birthList = await BirthList.create(birthListData);
         // Send confirmation emails
         try {
             await EmailService.sendListCreationConfirmation(birthList, user);
         } catch (emailError) {
-            console.error('Error sending creation confirmation email:', emailError);
+            console.error('Error en enviar el correu de confirmació de creació:', emailError);
             // We don't want to fail the list creation if email sending fails
         }
-
         // Return the created birth list
         return NextResponse.json(
             {
                 success: true,
-                message: 'Birth list created successfully',
+                message: 'Llista de naixement creada correctament',
                 _id: birthList._id,
                 ...birthList.toObject()
             },
             { status: 201 }
         );
     } catch (error) {
-        console.error('Error creating birth list:', error);
+        console.error('Error en crear la llista de naixement:', error);
         return NextResponse.json(
-            { success: false, message: 'Error creating birth list', error: error.message },
+            { success: false, message: 'Error en crear la llista de naixement', error: error.message },
             { status: 500 }
         );
     }

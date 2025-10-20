@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-
 const userSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
@@ -72,14 +71,12 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
-
 // Virtual for user's sessions
 userSchema.virtual('sessions', {
     ref: 'Session',
     localField: '_id',
     foreignField: 'userId'
 });
-
 // Method to get active sessions
 userSchema.methods.getActiveSessions = async function () {
     await this.populate({
@@ -88,7 +85,6 @@ userSchema.methods.getActiveSessions = async function () {
     });
     return this.sessions;
 };
-
 // Method to invalidate all sessions
 userSchema.methods.invalidateAllSessions = async function () {
     const Session = mongoose.model('Session');
@@ -97,12 +93,10 @@ userSchema.methods.invalidateAllSessions = async function () {
         { isValid: false }
     );
 };
-
 // Hash password before saving
 userSchema.pre('save', async function (next) {
     // Only hash the password if it's modified or new
     if (!this.isModified('password')) return next();
-
     try {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
@@ -111,18 +105,15 @@ userSchema.pre('save', async function (next) {
         next(error);
     }
 });
-
 // Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
     return bcrypt.compare(candidatePassword, this.password);
 };
-
 // Method to update last login
 userSchema.methods.updateLastLogin = async function () {
     this.createdAt = new Date();
     return this.save();
 };
-
 // Ensure email is lowercase before saving
 userSchema.pre('save', function (next) {
     if (this.email) {
@@ -130,7 +121,6 @@ userSchema.pre('save', function (next) {
     }
     next();
 });
-
 // Virtual for formatted birth date
 userSchema.virtual('formattedBirthDate').get(function () {
     if (!this.birthDate) return null;
@@ -139,9 +129,7 @@ userSchema.virtual('formattedBirthDate').get(function () {
     const year = this.birthDate.getFullYear();
     return `${day}/${month}/${year}`;
 });
-
 // Delete existing model if it exists to prevent model redefinition errors
 mongoose.models = {};
-
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 export default User;

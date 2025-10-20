@@ -4,7 +4,6 @@ import { FiChevronRight, FiChevronDown, FiPlus, FiEdit, FiTrash2, FiFolder, FiFo
 import { toast } from 'react-hot-toast';
 import CategoryModal from './CategoryModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
-
 // Utility to get display name from category (handles both string and object)
 function getCategoryDisplayName(cat) {
     if (!cat) return '';
@@ -108,10 +107,8 @@ export default function CategoriesTree() {
                 throw new Error('Failed to fetch categories');
             }
             const data = await response.json();
-            console.log('Fetched categories (raw):', data);
             // Organize into proper hierarchy
             const organizedCategories = organizeCategories(data);
-            console.log('Organized categories:', organizedCategories);
             setCategories(organizedCategories);
             // Don't automatically overwrite expanded state here to preserve 
             // user's previous choices from localStorage
@@ -160,7 +157,6 @@ export default function CategoriesTree() {
     };
     const saveCategory = async (categoryData) => {
         try {
-            // Defensiu: sempre envia el nom com {es, ca}
             let migratedName = categoryData.name;
             if (typeof migratedName === 'string') {
                 migratedName = { es: migratedName, ca: '' };
@@ -228,7 +224,8 @@ export default function CategoriesTree() {
             if (parentId) {
                 setLastModifiedCategoryId(parentId);
             }
-            fetchCategories(); // Refresca les categories
+            // Refresca les categories
+            fetchCategories();
         } catch (error) {
             console.error('Error deleting category:', error);
             toast.error(error.message || 'Error eliminant la categoria');
@@ -277,7 +274,7 @@ export default function CategoriesTree() {
                     </span>
                     <div className="flex items-center space-x-1 invisible group-hover:visible transition-all absolute right-2">
                         <button
-                            className="p-1 text-[#00abc2] hover:text-[#00B0C8] rounded cursor-pointer"
+                            className="p-1 text-[#00abc2] hover:text-[#36A9E1] rounded cursor-pointer"
                             onClick={(e) => handleAddCategory(category, e)}
                             title="Afegir subcategoria"
                         >
@@ -337,7 +334,7 @@ export default function CategoriesTree() {
                     </div>
                     <button
                         onClick={() => handleAddCategory(null)}
-                        className="flex items-center text-sm px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] cursor-pointer"
+                        className="flex items-center text-sm px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#008A9B] cursor-pointer"
                     >
                         <FiPlus className="mr-1" /> Afegir categoria
                     </button>
@@ -347,7 +344,7 @@ export default function CategoriesTree() {
             <div ref={treeContainerRef} className="p-4 max-h-[550px] overflow-y-auto">
                 {loading ? (
                     <div className="flex justify-center my-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#36A9E1]"></div>
                     </div>
                 ) : categories.length === 0 ? (
                     <div className="text-center text-gray-500 my-4">

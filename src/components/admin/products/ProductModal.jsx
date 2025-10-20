@@ -18,14 +18,49 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         if (!formData.price_incl_tax || isNaN(parseFloat(formData.price_incl_tax))) newErrors.price_incl_tax = 'Preu amb impostos obligatori';
         if (!formData.category) newErrors.category = 'Categoria obligatòria';
         if (!formData.brand) newErrors.brand = 'Marca obligatòria';
-        // if (!formData.stock || isNaN(parseInt(formData.stock.available))) newErrors.available = 'Estoc obligatori';
         if (!formData.stock || isNaN(parseInt(formData.stock.minStock))) newErrors.minStock = 'Estoc mínim obligatori';
+        // Validate discount dates if discount is active and dates are provided
+        if (formData.discount?.active) {
+            // Only validate start date if it's provided
+            if (formData.discount.startDate) {
+                const startDate = new Date(formData.discount.startDate);
+                const now = new Date();
+                if (startDate < now) {
+                    newErrors.discountStartDate = 'La data d\'inici no pot ser anterior a ara';
+                }
+            }
+            // Only validate date range if both dates are provided
+            if (formData.discount.startDate && formData.discount.endDate) {
+                const startDate = new Date(formData.discount.startDate);
+                const endDate = new Date(formData.discount.endDate);
+                if (startDate >= endDate) {
+                    newErrors.discountDates = 'La data i hora de fi han de ser posteriors a la data i hora d\'inici';
+                }
+                // Calculate duration if both dates are set
+                if (formData.discount.startDate && formData.discount.endDate) {
+                    const startDate = new Date(formData.discount.startDate);
+                    const endDate = new Date(formData.discount.endDate);
+                    const duration = endDate - startDate;
+                    // Add warning for flash offers (less than 2 hours)
+                    if (duration <= 2 * 60 * 60 * 1000) {
+                        toast('Atenció: Aquest és un descompte flash de curta durada', {
+                            icon: '⚡',
+                            style: {
+                                borderRadius: '10px',
+                                background: '#FFF3CD',
+                                color: '#856404',
+                            }
+                        });
+                    }
+                }
+            }
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
     // --- Shop Parameter (IVA) ---
     const { value: ivaValue, loading: ivaLoading } = useShopParameter('iva');
-    // console.log(product);
+    // //console.log(product);
     const [formData, setFormData] = useState({
         name: { es: '', ca: '' },
         reference: '',
@@ -61,7 +96,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     const [brandSearchTerm, setBrandSearchTerm] = useState('');
     const [calculatedFinalPric, setCalculatedFinalPrice] = useState(0);
     const [productImages, setProductImages] = useState([]);
-
     // selectedImages: array of preview URLs for selected files
     const [selectedImages, setSelectedImages] = useState([]);
     // selectedFiles: array of File objects for selected files
@@ -161,7 +195,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             .filter(Boolean);
     };
     const filteredCategories = filterCategoriesByName(hierarchicalCategories, categorySearchTerm);
-    // --- Load Product Data (Edit/New) ---
+
     useEffect(() => {
         if (isEditing && product) {
             // Format all images into a single array for the UI
@@ -196,16 +230,19 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             } else if (typeof product.description === 'string') {
                 description = { es: product.description, ca: '' };
             }
-
             // Handle discount data
             const discount = product.discount ? {
-                active: product.discount.active || false,
-                type: product.discount.type || 'percentage',
-                value: product.discount.value || '',
-                startDate: product.discount.startDate ? new Date(product.discount.startDate).toISOString().slice(0, 16) : '',
-                endDate: product.discount.endDate ? new Date(product.discount.endDate).toISOString().slice(0, 16) : '',
-                minPurchaseAmount: product.discount.minPurchaseAmount || '',
-                minQuantity: product.discount.minQuantity || ''
+                ...product.discount,
+                active: product.discount.active ?? false,
+                type: product.discount.type ?? 'percentage',
+                value: product.discount.value ?? '',
+                // Use the dates directly without any timezone conversion
+                startDate: product.discount.startDate || '',
+                endDate: product.discount.endDate || '',
+
+                minPurchaseAmount: product.discount.minPurchaseAmount ?? '',
+                minQuantity: product.discount.minQuantity ?? '',
+                finalPrice: product.discount.finalPrice ?? null
             } : {
                 active: false,
                 type: 'percentage',
@@ -213,9 +250,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 startDate: '',
                 endDate: '',
                 minPurchaseAmount: '',
-                minQuantity: ''
+                minQuantity: '',
+                finalPrice: null
             };
-
             setFormData({
                 name,
                 reference: product.reference || '',
@@ -265,7 +302,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     active: false,
                     type: 'percentage',
                     value: '',
-                    startDate: '',
+                    startDate: '',  // Let user select the start date
                     endDate: '',
                     minPurchaseAmount: '',
                     minQuantity: ''
@@ -276,14 +313,81 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     // --- Form Input Change Handler ---
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-
+        if (name === 'status' && value !== 'active') {
+            // If product is deactivated or discontinued, reset the discount
+            setFormData(prev => ({
+                ...prev,
+                [name]: value,
+                discount: {
+                    active: false,
+                    type: 'percentage',
+                    value: '',
+                    startDate: '',
+                    endDate: '',
+                    minPurchaseAmount: '',
+                    minQuantity: '',
+                    finalPrice: null
+                }
+            }));
+            return;
+        }
         if (name.startsWith('discount.')) {
             const discountField = name.split('.')[1];
-            const newDiscount = {
-                ...formData.discount,
-                [discountField]: type === 'checkbox' ? checked : value
-            };
+            let newDiscount;
+            if (discountField === 'active') {
+                if (!checked) {
+                    // When deactivating discount, reset all discount fields
+                    newDiscount = {
+                        active: false,
+                        type: 'percentage',
+                        value: '',
+                        startDate: '',
+                        endDate: '',
+                        minPurchaseAmount: '',
+                        minQuantity: '',
+                        finalPrice: null
+                    };
+                } else {
+                    // When activating, just set active state and preserve existing values
+                    const existingDiscount = formData.discount || {};
+                    newDiscount = {
+                        ...existingDiscount,
+                        active: true,
+                        type: existingDiscount.type || 'percentage'
+                    };
+                }
+            } else if (discountField === 'startDate' || discountField === 'endDate') {
+                const currentDiscount = formData.discount || {};
+                const startDate = discountField === 'startDate' ? value : currentDiscount.startDate;
+                const endDate = discountField === 'endDate' ? value : currentDiscount.endDate;
 
+                // If both dates are set, validate that end date is after start date
+                if (startDate && endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+
+                    if (end <= start) {
+                        toast.error('La data de fi ha de ser posterior a la data d\'inici', {
+                            style: {
+                                borderRadius: '10px',
+                                background: '#FFF3CD',
+                                color: '#856404',
+                            }
+                        });
+                        return; // Don't update if invalid
+                    }
+                }
+
+                newDiscount = {
+                    ...currentDiscount,
+                    [discountField]: value
+                };
+            } else {
+                newDiscount = {
+                    ...(formData.discount || {}),
+                    [discountField]: type === 'checkbox' ? checked : value
+                };
+            }
             // If changing the type or value, recalculate the final price
             if (discountField === 'type' || discountField === 'value' || discountField === 'active') {
                 const basePrice = parseFloat(formData.price_incl_tax);
@@ -295,12 +399,10 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                     setCalculatedFinalPrice(finalPrice);
                 }
             }
-
             setFormData(prev => ({
                 ...prev,
                 discount: newDiscount
             }));
-
             // Clear any previous discount-related errors
             setErrors(prev => {
                 const newErrors = { ...prev };
@@ -312,14 +414,29 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         } else if (name === 'price_incl_tax') {
             // When price changes, recalculate final price if discount is active
             const newPrice = parseFloat(value);
-            if (formData.discount.active && newPrice) {
+            setFormData(prev => {
+                let updatedDiscount = prev.discount;
+                if (prev.discount?.active) {
+                    // Set discount startDate to now + 1min
+                    const nowPlusOneMin = new Date(Date.now() + 60 * 1000);
+                    // Format to yyyy-MM-ddTHH:mm for input type="datetime-local"
+                    const pad = n => n.toString().padStart(2, '0');
+                    const formatted = `${nowPlusOneMin.getFullYear()}-${pad(nowPlusOneMin.getMonth() + 1)}-${pad(nowPlusOneMin.getDate())}T${pad(nowPlusOneMin.getHours())}:${pad(nowPlusOneMin.getMinutes())}`;
+                    updatedDiscount = {
+                        ...prev.discount,
+                        startDate: formatted
+                    };
+                }
+                return {
+                    ...prev,
+                    [name]: value,
+                    discount: updatedDiscount
+                };
+            });
+            if (formData.discount?.active && newPrice) {
                 const finalPrice = calculateFinalPrice(newPrice, formData.discount);
                 setCalculatedFinalPrice(finalPrice);
             }
-            setFormData(prev => ({
-                ...prev,
-                [name]: value
-            }));
         } else if (name === 'name') {
             setFormData(prev => ({
                 ...prev,
@@ -415,127 +532,32 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
     };
     // --- Add Image to Product Gallery ---
     const handleAddImage = async () => {
-        if (!selectedImage && !formData.image) {
-            toast.error('Por favor seleccione una imagen o proporcione una URL');
-            return;
-        }
         // If URL provided, add it directly
-        if (formData.image && !selectedImage) {
-            // Check if this URL already exists in the product images
+        if (formData.image && (!selectedFiles || selectedFiles.length === 0)) {
             if (productImages.includes(formData.image)) {
-                // toast.error('Esta imagen ya ha sido añadida');
+                toast.error('La imagen ya existe en la galería');
                 return;
             }
-            const newImages = [...productImages, formData.image];
-            setProductImages(newImages);
-            // Clear inputs for next image
-            setSelectedImage(null);
+            setProductImages(prev => [...prev, formData.image]);
+            setFormData(prev => ({ ...prev, image: '' }));
             setImagePreview('');
-            setFormData(prev => ({
-                ...prev,
-                image: ''
-            }));
             toast.success('Imagen añadida correctamente');
             return;
         }
         // Handle multiple files upload
-        if (selectedImage && selectedImage.length) {
+        if (selectedFiles && selectedFiles.length > 0) {
             setIsUploading(true);
-            const toastId = toast.loading(`Subiendo ${selectedImage.length} imágenes...`);
+            const toastId = toast.loading(`Subiendo ${selectedFiles.length} imágenes...`);
             try {
-                const uploadPromises = [];
-                const filesArray = Array.from(selectedImage);
-                // Process each file for upload
-                for (const file of filesArray) {
-                    uploadPromises.push(
-                        new Promise(async (resolve) => {
-                            try {
-                                // Convert image to base64
-                                const base64Image = await new Promise((resolveBase64) => {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => resolveBase64(reader.result);
-                                    reader.readAsDataURL(file);
-                                });
-                                // Upload to server
-                                const response = await fetch('/api/cloudinary/upload', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ image: base64Image })
-                                });
-                                if (!response.ok) {
-                                    const errorData = await response.json();
-                                    throw new Error(errorData.error || `Error al subir la imagen ${file.name}`);
-                                }
-                                const data = await response.json();
-                                resolve(data.url);
-                            } catch (error) {
-                                console.error('Error uploading image:', error);
-                                resolve(null); // Return null for failed uploads
-                            }
-                        })
-                    );
-                }
-                // Wait for all uploads to complete
-                const uploadedUrls = await Promise.all(uploadPromises);
-                const validUrls = uploadedUrls.filter(url => url !== null);
-                if (validUrls.length > 0) {
-                    // Filter out any URLs that already exist in the product images
-                    const newUrls = validUrls.filter(url => !productImages.includes(url));
-                    if (newUrls.length === 0) {
-                        toast.warning('Todas las imágenes ya han sido añadidas', { id: toastId });
-                    } else {
-                        setProductImages(prev => [...prev, ...newUrls]);
-                        toast.success(`${newUrls.length} de ${filesArray.length} imágenes añadidas`, { id: toastId });
-                    }
-                } else {
-                    toast.error('Error al subir las imágenes', { id: toastId });
-                }
-                // Clear inputs for next upload
-                setSelectedImage(null);
-                setImagePreview('');
-            } catch (error) {
-                console.error('Error uploading images:', error);
-                toast.error('Error al subir las imágenes', { id: toastId });
-            } finally {
-                setIsUploading(false);
-            }
-            return;
-        }
-        // Handle single file upload (legacy path)
-        // Add selected images to productImages (upload to server)
-        const handleAddImage = async () => {
-            if ((!selectedFiles || selectedFiles.length === 0) && !formData.image) {
-                toast.error('Por favor seleccione una imagen o proporcione una URL');
-                return;
-            }
-            // If URL provided, add it directly
-            if (formData.image && (!selectedFiles || selectedFiles.length === 0)) {
-                if (productImages.includes(formData.image)) {
-                    toast.error('La imagen ya existe en la galería');
-                    return;
-                }
-                setProductImages(prev => [...prev, formData.image]);
-                setFormData(prev => ({ ...prev, image: '' }));
-                setImagePreview('');
-                toast.success('Imagen añadida correctamente');
-                return;
-            }
-            // Handle multiple files upload
-            if (selectedFiles && selectedFiles.length > 0) {
-                setIsUploading(true);
-                const toastId = toast.loading(`Subiendo ${selectedFiles.length} imágenes...`);
-                try {
-                    // Upload each file and collect URLs
-                    const uploadedUrls = [];
-                    for (let i = 0; i < selectedFiles.length; i++) {
-                        const file = selectedFiles[i];
+                const uploadPromises = selectedFiles.map(async (file) => {
+                    try {
+                        // Convert image to base64
                         const base64Image = await new Promise((resolve) => {
                             const reader = new FileReader();
                             reader.onloadend = () => resolve(reader.result);
                             reader.readAsDataURL(file);
                         });
+                        // Upload to server
                         const response = await fetch('/api/cloudinary/upload', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -543,36 +565,63 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         });
                         if (!response.ok) {
                             const errorData = await response.json();
-                            toast.error(errorData.error || 'Error al subir la imagen', { id: toastId });
-                            continue;
+                            throw new Error(errorData.error || `Error al subir la imagen ${file.name}`);
                         }
                         const data = await response.json();
-                        uploadedUrls.push(data.url);
+                        return data.url;
+                    } catch (error) {
+                        console.error('Error uploading image:', error);
+                        toast.error(`Error al subir la imagen ${file.name}`);
+                        return null;
                     }
-                    setProductImages(prev => [...prev, ...uploadedUrls]);
-                    toast.success('Imágenes añadidas correctamente', { id: toastId });
-                } catch (error) {
+                });
+                const uploadedUrls = await Promise.all(uploadPromises);
+                const validUrls = uploadedUrls.filter(url => url !== null);
+                if (validUrls.length > 0) {
+                    // Filter out any URLs that already exist in the product images
+                    const newUrls = validUrls.filter(url => !productImages.includes(url));
+                    if (newUrls.length > 0) {
+                        setProductImages(prev => [...prev, ...newUrls]);
+                        toast.success(`${newUrls.length} de ${selectedFiles.length} imágenes añadidas`, {
+                            id: toastId
+                        });
+                    } else {
+                        toast.warning('Todas las imágenes ya han sido añadidas', { id: toastId });
+                    }
+                } else {
                     toast.error('Error al subir las imágenes', { id: toastId });
-                } finally {
-                    setIsUploading(false);
-                    setSelectedFiles([]);
-                    setSelectedImages([]);
-                    setSelectedImage(null);
-                    setImagePreview('');
                 }
-                return;
+            } catch (error) {
+                console.error('Error uploading images:', error);
+                toast.error('Error al subir las imágenes', { id: toastId });
+            } finally {
+                setIsUploading(false);
+                setSelectedFiles([]);
+                setSelectedImages([]);
+                setSelectedImage(null);
+                setImagePreview('');
             }
-        };
-        if (formData.stock.minStock && isNaN(parseInt(formData.stock.minStock))) {
-            newErrors.minStock = 'Ha de ser un número enter';
         }
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
     };
     // --- Form Submission Handler ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) return;
+        // Check if discount is expired before saving
+        if (formData.discount?.active && isDiscountExpired(formData.discount)) {
+            const confirmSave = window.confirm('El descompte ha expirat. Voleu desar el producte amb el descompte desactivat?');
+            if (confirmSave) {
+                setFormData(prev => ({
+                    ...prev,
+                    discount: {
+                        ...prev.discount,
+                        active: false
+                    }
+                }));
+            } else {
+                return;
+            }
+        }
         setLoading(true);
         try {
             // Prepare images for submission
@@ -587,7 +636,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
             // Ensure category and brand are ObjectId (not name or empty string)
             let categoryId = formData.category;
             let brandId = formData.brand;
-            console.log(categoryId, brandId);
+            //console.log(categoryId, brandId);
             const isObjectId = (val) => typeof val === 'string' && /^[a-fA-F0-9]{24}$/.test(val);
             // Treat empty string as null for category/brand
             if (categoryId === "") categoryId = null;
@@ -637,12 +686,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                 }
                 throw apiError;
             }
-            // Notify stats context about the change
-            // if (stats.notifyChange) {
-            //     setTimeout(() => {
-            //         stats.notifyChange();
-            //     }, 500);
-            // }
         } catch (error) {
             console.error('Error saving product:', error);
             // Only show toast if not already shown by API error block
@@ -724,7 +767,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                         <span className="text-gray-400 font-mono mr-1">{currentPrefix}</span>
                     )}
                     <div className="flex items-center">
-                        <FiFolder className={`mr-1 ${level === 0 ? 'text-[#00B0C8]' : 'text-gray-400'}`} size={14} />
+                        <FiFolder className={`mr-1 ${level === 0 ? 'text-[#36A9E1]' : 'text-gray-400'}`} size={14} />
                         <span className={`${level === 0 ? 'font-medium' : ''} text-sm`}>{getCategoryDisplayName(category)}</span>
                     </div>
                 </div>
@@ -786,7 +829,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="name"
                                                 value={formData.name.ca}
                                                 onChange={handleChange}
-                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                             {errors.name && (
                                                 <p className=" text-sm text-red-600">{errors.name}</p>
@@ -802,7 +845,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="name"
                                                 value={formData.name.es}
                                                 onChange={handleChange}
-                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                         </div>
                                     </div>
@@ -817,7 +860,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 rows={6}
                                                 value={formData.description.ca}
                                                 onChange={handleChange}
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1] whitespace-pre-line"
                                                 style={{ whiteSpace: 'pre-line' }}
                                             />
                                         </div>
@@ -831,7 +874,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 rows={6}
                                                 value={formData.description.es}
                                                 onChange={handleChange}
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8] whitespace-pre-line"
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1] whitespace-pre-line"
                                                 style={{ whiteSpace: 'pre-line' }}
                                             />
                                         </div>
@@ -847,7 +890,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             value={formData.reference}
                                             onChange={handleChange}
                                             className={`mt-1 block w-full px-3 py-2 border ${errors.reference ? 'border-red-300' : 'border-gray-300'
-                                                } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                } rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                         />
                                         {errors.reference && (
                                             <p className="mt-1 text-sm text-red-600">{errors.reference}</p>
@@ -884,7 +927,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md overflow-auto border border-gray-300">
                                                         {loadingCategories ? (
                                                             <div className="flex justify-center p-4">
-                                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                                                 <span className="ml-2">Carregant categories...</span>
                                                             </div>
                                                         ) : hierarchicalCategories.length === 0 ? (
@@ -895,7 +938,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                     <input
                                                                         type="text"
                                                                         placeholder="Cerca categoria..."
-                                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                                         value={categorySearchTerm}
                                                                         onChange={e => setCategorySearchTerm(e.target.value)}
                                                                     />
@@ -910,7 +953,8 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                             margin: 0;
                                                                             padding: 0;
                                                                     }
-                                                                `}</style>
+                                                                `}
+                                                                    </style>
                                                                     {filteredCategories.length === 0 ? (
                                                                         <div className="p-4 text-center text-gray-500">
                                                                             {categorySearchTerm
@@ -993,7 +1037,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                 placeholder="Cerca marca..."
                                                                 value={brandSearchTerm}
                                                                 onChange={handleBrandSearch}
-                                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             />
                                                         </div>
@@ -1001,7 +1045,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                         <div className="overflow-auto max-h-60">
                                                             {loadingBrands ? (
                                                                 <div className="flex justify-center p-4">
-                                                                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                                                     <span className="ml-2">Carregant marques...</span>
                                                                 </div>
                                                             ) : filteredBrands.length === 0 ? (
@@ -1091,14 +1135,13 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 value={formData.price_incl_tax}
                                                 onChange={handleChange}
                                                 className={`mt-1 block w-full px-3 py-2 border ${errors.price_incl_tax ? 'border-red-300' : 'border-gray-300'
-                                                    } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                    } rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                             {errors.price_incl_tax && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.price_incl_tax}</p>
                                             )}
                                         </div>
                                     </div>
-
                                     <h3 className="text-md font-medium mt-6">Descompte</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="flex items-center h-full">
@@ -1106,16 +1149,22 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 type="checkbox"
                                                 id="discount-active"
                                                 name="discount.active"
-                                                checked={formData.discount?.active || false}
+                                                checked={formData.discount?.active ?? false}
                                                 onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
+                                                className="h-4 w-4 text-[#36A9E1] border-gray-300 rounded focus:ring-[#36A9E1]"
                                             />
                                             <label htmlFor="discount-active" className="ml-2 block text-sm font-medium text-gray-700">
                                                 Activar descompte
                                             </label>
                                         </div>
+                                        {isEditing && formData.discount?.active && formData.discount?.startDate && (
+                                            <div className="flex items-center justify-end">
+                                                <span className="text-sm text-gray-500">
+                                                    Descompte actiu des de {new Date(formData.discount.startDate).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
-
                                     {formData.discount?.active && (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                             <div>
@@ -1127,7 +1176,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     name="discount.type"
                                                     value={formData.discount?.type || 'percentage'}
                                                     onChange={handleChange}
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 >
                                                     <option value="percentage">Percentatge (%)</option>
                                                     <option value="fixed">Import fix (€)</option>
@@ -1144,85 +1193,67 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     value={formData.discount?.value || ''}
                                                     onChange={handleChange}
                                                     min="0"
-                                                    max={formData.discount?.type === 'percentage' ? "100" : undefined}
+                                                    max={formData.discount?.type === 'percentage' ? "99" : undefined}
                                                     step={formData.discount?.type === 'percentage' ? "1" : "0.01"}
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 />
                                             </div>
                                             <div>
                                                 <label htmlFor="discount-start-date" className="block text-sm font-medium text-gray-700">
-                                                    Data d'inici
+                                                    Data i hora d'inici
                                                 </label>
                                                 <input
                                                     type="datetime-local"
                                                     id="discount-start-date"
                                                     name="discount.startDate"
-                                                    value={formData.discount?.startDate ? new Date(formData.discount.startDate).toISOString().slice(0, 16) : ''}
+                                                    value={formData.discount?.startDate || ''}
                                                     onChange={handleChange}
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    min={new Date().toISOString().slice(0, 16)}
+                                                    max={formData.discount?.endDate || ''}
+                                                    step="60"
+                                                    className={`mt-1 block w-full px-3 py-2 border ${errors.discountStartDate ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                                 />
+                                                {errors.discountStartDate && (
+                                                    <p className="mt-1 text-sm text-red-600">{errors.discountStartDate}</p>
+                                                )}
                                             </div>
                                             <div>
                                                 <label htmlFor="discount-end-date" className="block text-sm font-medium text-gray-700">
-                                                    Data de fi
+                                                    Data i hora de fi
                                                 </label>
                                                 <input
                                                     type="datetime-local"
                                                     id="discount-end-date"
                                                     name="discount.endDate"
-                                                    value={formData.discount?.endDate ? new Date(formData.discount.endDate).toISOString().slice(0, 16) : ''}
+                                                    value={formData.discount?.endDate || ''}
                                                     onChange={handleChange}
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    min={formData.discount?.startDate || new Date().toISOString().slice(0, 16)}
+                                                    step="60"
+                                                    className={`mt-1 block w-full px-3 py-2 border ${errors.discountEndDate ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                                 />
+                                                {errors.discountEndDate && (
+                                                    <p className="mt-1 text-sm text-red-600">{errors.discountEndDate}</p>
+                                                )}
+                                                {errors.discountDates && (
+                                                    <p className="mt-1 text-sm text-red-600">{errors.discountDates}</p>
+                                                )}
                                             </div>
-                                            {/* <div>
-                                                <label htmlFor="discount-min-amount" className="block text-sm font-medium text-gray-700">
-                                                    Import mínim de compra (€)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    id="discount-min-amount"
-                                                    name="discount.minPurchaseAmount"
-                                                    value={formData.discount?.minPurchaseAmount || ''}
-                                                    onChange={handleChange}
-                                                    min="0"
-                                                    step="0.01"
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                                />
-                                            </div>
-                                            <div>
+                                            <div className="md:col-span-2">
                                                 <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">
-                                                    Quantitat mínima
+                                                    Preu final amb descompte:
                                                 </label>
-                                                <input
-                                                    type="number"
-                                                    id="discount-min-quantity"
-                                                    name="discount.minQuantity"
-                                                    value={formData.discount?.minQuantity || ''}
-                                                    onChange={handleChange}
-                                                    min="1"
-                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                                />
-                                            </div> */}
-                                            {formData.discount?.type && formData.discount?.value && formData.price_incl_tax && (
-                                                <div className="md:col-span-2">
-                                                    <label htmlFor="discount-min-quantity" className="block text-sm font-medium text-gray-700">
-                                                        Preu final amb descompte:
-                                                    </label>
-                                                    <div className="mt-2 p-4 bg-gray-50 rounded-md border border-gray-200">
-                                                        <p className="text-lg font-medium text-gray-700">
-                                                            {
-                                                                formData.discount.type === 'percentage'
-                                                                    ? (formData.price_incl_tax * (1 - formData.discount.value / 100)).toFixed(2)
-                                                                    : Math.max(0, formData.price_incl_tax - formData.discount.value).toFixed(2)
-                                                            } €
-                                                        </p>
-                                                    </div>
+                                                <div className="mt-2 p-4 bg-gray-50 rounded-md border border-gray-200">
+                                                    <p className="text-lg font-medium text-gray-700">
+                                                        {
+                                                            formData.discount.type === 'percentage'
+                                                                ? (formData.price_incl_tax * (1 - formData.discount.value / 100)).toFixed(2)
+                                                                : Math.max(0, formData.price_incl_tax - formData.discount.value).toFixed(2)
+                                                        } €
+                                                    </p>
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
                                     )}
-
                                     <h3 className="text-md font-medium mt-6">Inventari</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
@@ -1237,7 +1268,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 onChange={handleChange}
                                                 min="0"
                                                 className={`mt-1 block w-full px-3 py-2 border ${errors.available ? 'border-red-300' : 'border-gray-300'
-                                                    } rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                    } rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                             {errors.available && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.available}</p>
@@ -1254,7 +1285,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 value={formData.stock.minStock}
                                                 onChange={handleChange}
                                                 min="0"
-                                                className={`mt-1 block w-full px-3 py-2 border ${errors.minStock ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]`}
+                                                className={`mt-1 block w-full px-3 py-2 border ${errors.minStock ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]`}
                                             />
                                             {errors.minStock && (
                                                 <p className="mt-1 text-sm text-red-600">{errors.minStock}</p>
@@ -1271,7 +1302,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="status"
                                                 value={formData.status}
                                                 onChange={handleChange}
-                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             >
                                                 <option value="active">Actiu</option>
                                                 <option value="inactive">Inactiu</option>
@@ -1285,7 +1316,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                 name="featured"
                                                 checked={formData.featured}
                                                 onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] border-gray-300 rounded focus:ring-[#00B0C8]"
+                                                className="h-4 w-4 text-[#36A9E1] border-gray-300 rounded focus:ring-[#36A9E1]"
                                             />
                                             <label htmlFor="featured" className="ml-2 block text-sm font-medium text-gray-700">
                                                 Destacat
@@ -1297,7 +1328,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                 <div className="space-y-6">
                                     <h3 className="text-md font-medium">Imatges del producte</h3>
                                     {/* Current Images */}
-                                    {/* productImages.length > 0 && ( */}
                                     <div className="mb-6">
                                         <h4 className="text-sm font-medium text-gray-700 mb-2">Imatges actuals</h4>
                                         <p className="text-xs text-gray-500 mb-2">
@@ -1310,7 +1340,6 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     className={`relative flex-shrink-0 border border-gray-200 rounded-md overflow-hidden ring-1 ring-gray-200`}
                                                 >
                                                     <div className="relative " >
-                                                        {/* onClick={() => handleSelectImage(index)} */}
                                                         <img
                                                             src={img || '/assets/images/product-placeholder.jpg'}
                                                             alt={`Imatge de producte ${index + 1}`}
@@ -1319,12 +1348,12 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             className="h-[100px] w-[100px] object-cover"
                                                         />
                                                         {index === 0 && (
-                                                            <div className="absolute top-0 left-0 bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">
+                                                            <div className="absolute top-0 left-0 bg-[#36A9E1] text-white text-xs px-2 py-1 rounded-br-md">
                                                                 Principal
                                                             </div>
                                                         )}
                                                         {index === 1 && (
-                                                            <div className="absolute top-0 left-0 rounded-br-md bg-[#00B0C8] text-white text-xs px-2 py-1">
+                                                            <div className="absolute top-0 left-0 rounded-br-md bg-[#36A9E1] text-white text-xs px-2 py-1">
                                                                 Secundària
                                                             </div>
                                                         )}
@@ -1362,22 +1391,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                if (selectedImages && selectedImages.length > 0) {
-                                                    // Only add images not already in productImages
-                                                    const newImages = selectedImages.filter(img => !productImages.includes(img));
-                                                    if (newImages.length > 0) {
-                                                        setProductImages(prev => [...prev, ...newImages]);
-                                                        setSelectedImages([]);
-                                                        setSelectedFiles([]);
-                                                        toast.success('Imatges afegides a la galeria');
-                                                    } else {
-                                                        toast.warning('Totes les imatges ja són a la galeria');
-                                                    }
-                                                } else {
-                                                    handleAddImage();
-                                                }
-                                            }}
+                                            onClick={handleAddImage}
                                             disabled={isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)}
                                             className={`w-full my-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || (selectedImages.length === 0 && !selectedImage && !formData.image)
                                                 ? 'bg-gray-400 cursor-not-allowed'
@@ -1408,9 +1422,9 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                                 {/* Distintiu per imatges noves o seleccionades */}
                                                                 <div className="absolute -top-0.5 left-0">
                                                                     {img.startsWith('data:') ? (
-                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
+                                                                        <span className="bg-[#36A9E1] text-white text-xs px-2 py-1 rounded-br-md">Nova</span>
                                                                     ) : (
-                                                                        <span className="bg-[#00B0C8] text-white text-xs px-2 py-1 rounded-br-md">Existent</span>
+                                                                        <span className="bg-[#36A9E1] text-white text-xs px-2 py-1 rounded-br-md">Existent</span>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -1439,42 +1453,15 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                             </div>
                                         )}
                                     </div>
-                                    {/* )} */}
                                     {/* Image Upload */}
                                     <div className="flex flex-col items-center space-y-4">
-                                        {/* <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
-                                        {isUploading && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
-                                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-                                            </div>
-                                        )}
-                                        {imagePreview ? (
-                                            <Image
-                                                src={imagePreview || '/assets/images/product-placeholder.jpg'}
-                                                alt="Vista previa"
-                                                width={1000}
-                                                height={1000}
-                                                className="w-full h-full object-contain rounded-lg"
-                                            />
-                                        ) : ( 
-                                            <div className="flex flex-col items-center justify-center h-full">
-                                                <FiUpload className="w-10 h-10 text-gray-400" />
-                                                <p className="mt-2 text-sm text-gray-500">No hi ha imatge leccionada</p>
-                                                <p className="mt-1 text-xs text-gray-400">
-                                                    {productImages.length === 0
-                                                        ? "Afegeix almenys una imatge principal"
-                                                        : "Afegeix més imatges (opcional)"}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div> */}
                                         <div className="w-full grid grid-row-2 gap-2">
                                             <div className='flex flex-row gap-2'>
                                                 <label
                                                     htmlFor="productImage"
                                                     className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading
                                                         ? 'bg-gray-400 cursor-not-allowed'
-                                                        : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
+                                                        : 'bg-[#36A9E1] hover:bg-[#008A9B] cursor-pointer'
                                                         }`}
                                                 >
                                                     {isUploading ? 'Pujant...' : 'Selecciona imatges'}
@@ -1491,7 +1478,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     type="button"
                                                     onClick={() => setShowImageSelector(true)}
                                                     disabled={isUploading}
-                                                    className={`w-full col-span-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                                                    className={`w-full col-span-2 px-4 py-2 cursor-pointer text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#36A9E1] hover:bg-[#008A9B]'}`}
                                                 >
                                                     Selecciona existent
                                                 </button>
@@ -1500,18 +1487,18 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                         {showImageSelector && (
                                             <ImageSelector
                                                 onSelect={(url) => {
-                                                    // Add selected image URL to preview list (selectedImages), do not upload
-                                                    setSelectedImages(prev => [...prev, url]);
-                                                    setFormData(f => ({ ...f, image: '' }));
-                                                    setImagePreview(url);
+                                                    // Add the selected image directly to productImages
+                                                    if (!productImages.includes(url)) {
+                                                        setProductImages(prev => [...prev, url]);
+                                                        toast.success('Imatge afegida a la galeria');
+                                                    } else {
+                                                        toast.warning('Aquesta imatge ja existeix a la galeria');
+                                                    }
                                                     setShowImageSelector(false);
                                                 }}
                                                 onClose={() => setShowImageSelector(false)}
                                             />
                                         )}
-                                        {/* <p className="mt-1 text-xs text-gray-500 text-center">
-                                        Formats: JPG, PNG. Màx: 5MB
-                                    </p> */}
                                         {/* Manual URL input */}
                                         <div className="w-full mt-4">
                                             <label htmlFor="image" className="block text-sm font-medium text-gray-700">
@@ -1524,7 +1511,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                     name="image"
                                                     value={formData.image}
                                                     onChange={handleChange}
-                                                    className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                     placeholder="https://exemple.com/imatge.jpg"
                                                 />
                                                 <button
@@ -1535,7 +1522,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                                                             setFormData(f => ({ ...f, image: '' }));
                                                         }
                                                     }}
-                                                    className="text-nowrap bg-[#00B0C8] cursor-pointer text-white px-3 py-2 border border-l-0 border-[#00B0C8] rounded-r-md hover:bg-[#008A9B]"
+                                                    className="text-nowrap bg-[#36A9E1] cursor-pointer text-white px-3 py-2 border border-l-0 border-[#36A9E1] rounded-r-md hover:bg-[#008A9B]"
                                                 >
                                                     Vista prèvia
                                                 </button>
@@ -1559,7 +1546,7 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
                             <button
                                 type="submit"
                                 disabled={loading || isUploading}
-                                className="px-4 py-2 bg-[#00B0C8] cursor-pointer text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8] disabled:opacity-50"
+                                className="px-4 py-2 bg-[#36A9E1] cursor-pointer text-white rounded-md text-sm font-medium hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1] disabled:opacity-50"
                             >
                                 {loading ? 'Desant...' : isEditing ? 'Actualitza' : 'Crea'}
                             </button>
@@ -1570,44 +1557,26 @@ export default function ProductModal({ isOpen, onClose, product, isEditing, onSa
         </Dialog>
     );
 }
-
 // Add these utility functions right after your state declarations
+const isDiscountExpired = (discount) => {
+    if (!discount?.active || !discount?.startDate || !discount?.endDate) return false;
+    const endDate = new Date(discount.endDate);
+    const startDate = new Date(discount.startDate);
+    const now = new Date();
+    // Check if the current time is after the end date
+    return now > endDate && startDate < endDate;
+};
 const calculateFinalPrice = (basePrice, discount) => {
+    // Check if discount has expired
+    if (isDiscountExpired(discount)) {
+        return basePrice;
+    }
     if (!discount?.active || !basePrice || !discount?.value) {
         return basePrice;
     }
-
     if (discount.type === 'percentage') {
         return basePrice * (1 - discount.value / 100);
     } else {
         return Math.max(0, basePrice - discount.value);
     }
-};
-
-const validateDiscountFields = (discount) => {
-    const errors = {};
-
-    if (discount.active) {
-        if (!discount.type) {
-            errors.discountType = "El tipus de descompte és obligatori";
-        }
-
-        if (!discount.value) {
-            errors.discountValue = "El valor del descompte és obligatori";
-        } else if (discount.type === 'percentage' && (discount.value < 0 || discount.value > 100)) {
-            errors.discountValue = "El percentatge ha d'estar entre 0 i 100";
-        } else if (discount.type === 'fixed' && discount.value < 0) {
-            errors.discountValue = "El descompte no pot ser negatiu";
-        }
-
-        if (discount.startDate && discount.endDate) {
-            const start = new Date(discount.startDate);
-            const end = new Date(discount.endDate);
-            if (start > end) {
-                errors.discountDates = "La data de fi ha de ser posterior a la data d'inici";
-            }
-        }
-    }
-
-    return errors;
 };

@@ -5,10 +5,8 @@ import ProductsTable from './ProductsTable';
 import StockManagement from './StockManagement';
 import ProductsStats from './ProductsStats';
 import TabNavigation from '@/components/admin/shared/TabNavigation';
-
 export default function ProductsTabs() {
     const [activeTab, setActiveTab] = useState('Productos');
-
     const tabConfig = [
         {
             name: 'Productos',
@@ -26,14 +24,10 @@ export default function ProductsTabs() {
             component: <ProductsStats />
         }
     ];
-
     // Format tabs for the TabNavigation component
     const tabs = tabConfig.map(tab => tab.name);
-
     // Get the current component based on active tab
-    
     const activeComponent = tabConfig.find(tab => tab.name === activeTab)?.component || null;
-
     return (
         <div className="w-full">
             <TabNavigation
@@ -41,7 +35,6 @@ export default function ProductsTabs() {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
             />
-
             <div className="mt-4">
                 {activeComponent}
             </div>

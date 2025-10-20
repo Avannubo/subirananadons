@@ -9,7 +9,7 @@ export default function ListasStats() {
 
     const statsItems = [
         {
-            icon: <FiGift className="text-[#00B0C8] text-xl" />,
+            icon: <FiGift className="text-[#36A9E1] text-xl" />,
             title: "Listas totales",
             value: loading ? "Cargando..." : stats.listsThisMonth.toString(),
             description: "Este mes",

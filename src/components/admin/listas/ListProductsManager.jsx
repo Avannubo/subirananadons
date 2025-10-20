@@ -25,6 +25,8 @@ const translations = {
         product: 'Producto',
         price: 'Precio',
         actions: 'Acciones',
+        productRemoved: 'El producto ha sido eliminado o descatalogado de la tienda',
+        productUnavailable: 'Producto no disponible',
     }
 };
 
@@ -56,8 +58,8 @@ export default function ListProductsManager({ listId, onUpdate }) {
             setLoading(true);
             const result = await fetchBirthListItems(listId);
             if (result.success) {
-                // console.log('Birth list items loaded:', result.data);
-                
+                // //console.log('Birth list items loaded:', result.data);
+
                 setItems(result.data || []);
             } else {
                 toast.error(t.errorLoad);
@@ -118,7 +120,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                 product: item.product._id,
                 quantity: parseInt(item.quantity),
                 reserved: parseInt(item.reserved || 0),
-                priority: parseInt(item.priority || 2),
+
                 productSnapshot: {
                     name: item.product.name,
                     reference: item.product.reference,
@@ -147,32 +149,17 @@ export default function ListProductsManager({ listId, onUpdate }) {
             });
     };
     return (
-        <div className=" ">
+        <div className="w-full">
             {/* Product selection toggle and component */}
-            <div className="flex justify-between items-center mb-4">
-                <h4 className="text-gray-700">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                <h4 className="text-gray-700 text-base sm:text-lg">
                     {showAddProducts ? (locale === 'ca' ? 'Seleccionar Productes' : 'Seleccionar Productos') : `${t.product} (${items.length})`}
                 </h4>
-                {/* <button
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setShowAddProducts(!showAddProducts);
-                    }}
-                    className="flex items-center px-3 py-1 text-sm bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0]"
-                >
-                    {showAddProducts ? (
-                        locale === 'ca' ? 'Tornar a la llista' : 'Volver a la lista'
-                    ) : (
-                        <>
-                            <FiPlus className="mr-1" />{locale === 'ca' ? 'Afegir Productes' : 'Añadir Productos'}
-                        </>
-                    )}
-                </button> */}
+                {/* Toggle button can be added here if needed */}
             </div>
             {loading && !showAddProducts && (
                 <div className="flex justify-center items-center py-10">
-                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]" />
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]" />
                 </div>
             )}
             {showAddProducts && (
@@ -192,16 +179,16 @@ export default function ListProductsManager({ listId, onUpdate }) {
                         </div>
                     ) : (
                         <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden w-full max-h-[400px] overflow-y-auto">
-                            <table className="flex-1 min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50 hidden md:table-header-group">
                                     <tr>
-                                            <th scope="col" className="px-6 py-3 text-start min-w-[300px] w-[300px] truncate text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-2 sm:px-6 py-3 text-start min-w-[120px] sm:min-w-[300px] w-[120px] sm:w-[300px] truncate text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             {t.product}
                                         </th>
-                                        <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             {t.price}
                                         </th>
-                                        <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" className="px-2 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             {t.actions}
                                         </th>
                                     </tr>
@@ -210,53 +197,66 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                     {items
                                         .filter(item => item.state === 0)
                                         .map((item) => (
-                                            <tr key={item._id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center">
+                                            <tr key={item._id} className="flex flex-row md:flex-col md:table-row w-full md:w-auto">
+                                                <td className="md:px-6 md:py-4 p-2 whitespace-nowrap w-full md:w-[80px] truncate flex flex-row md:table-cell items-center">
+                                                    <div className="flex items-center w-full">
                                                         <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md overflow-hidden">
-                                                            {item.product.image && (
-                                                                <img
-                                                                    src={item.product.image}
-                                                                    alt={item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
-                                                                    width={40}
-                                                                    height={40}
-                                                                    className="object-cover w-full h-full"
-                                                                />
+                                                            {item.product ? (
+                                                                item.product.image ? (
+                                                                    <img
+                                                                        src={item.product.image}
+                                                                        alt={item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
+                                                                        width={40}
+                                                                        height={40}
+                                                                        className="object-cover w-full h-full"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                                        <InfoIcon className="h-6 w-6 text-gray-400" />
+                                                                    </div>
+                                                                )
+                                                            ) : (
+                                                                <div className="w-full h-full bg-red-50 flex items-center justify-center">
+                                                                    <InfoIcon className="h-6 w-6 text-red-300" />
+                                                                </div>
                                                             )}
                                                         </div>
-                                                        <div className="ml-4">
-                                                            <div className="text-sm text-start min-w-[300px] w-[300px] truncate font-medium text-gray-900">
-                                                                {item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ? (item.product.name[locale] || item.product.name.ca || item.product.name.es) : ''}
+                                                        <div className="ml-2 sm:ml-4 flex-1">
+                                                            <div className="text-sm text-start min-w-[120px] sm:min-w-[300px] w-[120px] sm:w-[300px] truncate font-medium text-gray-900">
+                                                                {item.product ? (
+                                                                    item.product.name && (item.product.name[locale] || item.product.name.ca || item.product.name.es) ?
+                                                                        (item.product.name[locale] || item.product.name.ca || item.product.name.es)
+                                                                        : item.productSnapshot?.name || t.productUnavailable
+                                                                ) : (
+                                                                    <span className="text-red-500">{t.productRemoved}</span>
+                                                                )}
                                                             </div>
-                                                            {/* <div className="text-sm text-gray-500">
-                                                                {item.product.brand.name}
-                                                            </div> */}
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                                                    {item.product.discount?.active ? (
-                                                        <>
-                                                            {item.product.discount?.active ? (
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-sm text-gray-400 line-through">
-                                                                        {item.product.price_incl_tax.toFixed(2)}€
-                                                                    </span>
-                                                                    <span className="text-sm font-medium text-red-600">
-                                                                        {item.product.discount.finalPrice?.toFixed(2)} € {item.product.discount.type === 'percentage' ? `(-${item.product.discount.value}%)` : ''}
-                                                                    </span>
-                                                                </div>
-                                                            ) : (
-                                                                <span className="text-sm text-gray-500">
-                                                                    {item.product.price_incl_tax.toFixed(2)} €
+                                                <td className="px-2 sm:px-6 py-2 md:py-4 whitespace-nowrap text-center text-sm text-gray-500 md:table-cell">
+                                                    {item.product ? (
+                                                        item.product.discount?.active ? (
+                                                            <div className="flex flex-col items-center">
+                                                                <span className="text-sm text-gray-400 line-through">
+                                                                    {item.product.price_incl_tax.toFixed(2)}€
                                                                 </span>
-                                                            )}
-                                                        </>
+                                                                <span className="text-sm font-medium text-red-600">
+                                                                    {item.product.discount.finalPrice?.toFixed(2)} € {item.product.discount.type === 'percentage' ? `(-${item.product.discount.value}%)` : ''}
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-sm text-gray-500">
+                                                                {item.product.price_incl_tax?.toFixed(2) || (item.productSnapshot?.price?.toFixed(2) || '0.00')} €
+                                                            </span>
+                                                        )
                                                     ) : (
-                                                            <p className="text-gray-700 hover:text-gray-900">{item.product.discount.finalPrice?.toFixed(2)} €</p>
+                                                        <span className="text-sm text-red-500">
+                                                            {item.productSnapshot?.price?.toFixed(2) || '0.00'} €
+                                                        </span>
                                                     )}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                <td className="px-2 sm:px-6 py-2 md:py-4 whitespace-nowrap text-center text-sm font-medium md:table-cell">
                                                     <button
                                                         onClick={() => handleRemoveProduct(item._id)}
                                                         className="text-red-600 hover:text-red-900"
@@ -271,7 +271,6 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                                 </td>
                                             </tr>
                                         ))}
-
                                 </tbody>
                             </table>
                         </div>

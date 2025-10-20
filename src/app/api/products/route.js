@@ -146,7 +146,7 @@ export async function GET(request) {
         });
     } catch (error) {
         console.error('Error fetching products:', error);
-        return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+        return NextResponse.json({ error: 'Error al obtener los productos' }, { status: 500 });
     }
 }
 // Create a new product
@@ -155,14 +155,14 @@ export async function POST(request) {
         const session = await getServerSession(authOptions);
         // Check if user is admin
         if (!session?.user || session.user.role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
+            return NextResponse.json({ error: 'No autorizado - Se requiere acceso de administrador' }, { status: 401 });
         }
         await dbConnect();
         const body = await request.json();
-        console.log('Creating product with body:', body);
+        //console.log('Creating product with body:', body);
         // Validate required fields
         if (!body.name || body.price_incl_tax === undefined) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+            return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
         }
         const product = await Product.create({
             name: body.name,
@@ -209,8 +209,8 @@ export async function POST(request) {
         console.error('Error creating product:', error);
         // Handle duplicate reference error
         if (error.code === 11000) {
-            return NextResponse.json({ error: 'Product reference already exists' }, { status: 400 });
+            return NextResponse.json({ error: 'La referencia del producto ya existe' }, { status: 400 });
         }
-        return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+        return NextResponse.json({ error: 'Error al crear el producto' }, { status: 500 });
     }
 }

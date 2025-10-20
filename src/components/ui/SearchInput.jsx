@@ -1,6 +1,5 @@
-// components/SearchInput.tsx
 'use client';
-import { FiSearch } from 'react-icons/fi'; 
+import { FiSearch } from 'react-icons/fi';
 export const SearchInput = ({ placeholder, value, onChange }) => (
     <div className="relative">
         <FiSearch className="absolute left-3 top-3 text-gray-400" />

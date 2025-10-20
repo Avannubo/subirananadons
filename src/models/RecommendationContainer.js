@@ -1,7 +1,4 @@
 import mongoose from 'mongoose';
-
-
-
 const RecommendationContainerSchema = new mongoose.Schema({
     title: {
         es: { type: String, required: true },
@@ -24,5 +21,4 @@ const RecommendationContainerSchema = new mongoose.Schema({
         }
     ]
 }, { timestamps: true });
-
 export default mongoose.models.RecommendationContainer || mongoose.model('RecommendationContainer', RecommendationContainerSchema);

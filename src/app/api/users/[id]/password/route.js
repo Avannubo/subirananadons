@@ -9,21 +9,19 @@ export async function PUT(request, context) {
         const session = await getServerSession(authOptions);
         if (!session || !session.user || !session.user.isAdmin) {
             return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
+                { success: false, error: 'No autorizado' },
                 { status: 401 }
             );
         }
-
         // Get and validate params
         const params = await Promise.resolve(context.params);
         const id = params.id;
         if (!id) {
             return NextResponse.json(
-                { success: false, error: 'Missing user ID' },
+                { success: false, error: 'Falta el ID de usuario' },
                 { status: 400 }
             );
         }
-
         const { password } = await request.json();
         await dbConnect();
         // Hash the new password
@@ -39,19 +37,19 @@ export async function PUT(request, context) {
         ).select('-password');
         if (!updatedUser) {
             return NextResponse.json(
-                { success: false, error: 'User not found' },
+                { success: false, error: 'Usuario no encontrado' },
                 { status: 404 }
             );
         }
         return NextResponse.json({
             success: true,
-            message: 'Password updated successfully',
+            message: 'Contraseña actualizada correctamente',
             user: updatedUser
         });
     } catch (error) {
         console.error('Error updating password:', error);
         return NextResponse.json(
-            { success: false, error: 'Failed to update password' },
+            { success: false, error: 'Error al actualizar la contraseña' },
             { status: 500 }
         );
     }

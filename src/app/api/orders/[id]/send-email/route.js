@@ -2,20 +2,17 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import EmailService from '@/services/EmailService';
-
 export async function POST(request, { params }) {
     try {
         await dbConnect();
-
         // Get and validate params
         const { id } = await Promise.resolve(params);
         if (!id) {
             return NextResponse.json(
-                { message: 'Order ID is required' },
+                { message: 'Se requiere ID del pedido' },
                 { status: 400 }
             );
         }
-
         // Find order and populate product information
         const order = await Order.findById(id)
             .populate({
@@ -24,52 +21,47 @@ export async function POST(request, { params }) {
                 select: 'name price slug image description brand category'
             })
             .lean();
-
         if (!order) {
             return NextResponse.json(
-                { message: 'Order not found' },
+                { message: 'Pedido no encontrado' },
                 { status: 404 }
             );
         }
-
         // Validate essential order data
         const requiredFields = ['orderNumber', 'items', 'shippingAddress', 'totalAmount'];
         const missingFields = requiredFields.filter(field => !order[field]);
-        
         if (missingFields.length > 0) {
             return NextResponse.json(
-                { 
-                    message: 'Incomplete order data', 
-                    details: `Missing required fields: ${missingFields.join(', ')}`
+                {
+                    message: 'Datos del pedido incompletos',
+                    details: `Faltan campos obligatorios: ${missingFields.join(', ')}`
                 },
                 { status: 400 }
             );
         }
-
         // Validate shipping address
         const requiredAddressFields = ['email', 'name'];
         const missingAddressFields = requiredAddressFields.filter(
             field => !order.shippingAddress[field]
         );
-
         if (missingAddressFields.length > 0) {
             return NextResponse.json(
-                { 
-                    message: 'Incomplete shipping address', 
-                    details: `Missing required address fields: ${missingAddressFields.join(', ')}`
+                {
+                    message: 'Dirección de envío incompleta',
+                    details: `Faltan campos obligatorios en la dirección: ${missingAddressFields.join(', ')}`
                 },
                 { status: 400 }
             );
-        } 
-        console.log('Original order:', JSON.stringify(order, null, 2)); 
+        }
+        //console.log('Original order:', JSON.stringify(order, null, 2));
         // Transform the order data
         const transformedOrder = {
             ...order,
             items: order.items.map(item => {
-                console.log(item); 
-                const productData = item.product || {}; 
+                //console.log(item);
+                const productData = item.product || {};
                 const price = Number(item.price || 0);
-                const quantity = Number(item.quantity || 1); 
+                const quantity = Number(item.quantity || 1);
                 return {
                     product: {
                         name: productData.name.es || 'Producto no disponible',
@@ -109,20 +101,40 @@ export async function POST(request, { params }) {
             paymentMethod: order.paymentMethod || 'pending',
             notes: order.notes || ''
         };
-
-        console.log('Transformed order:', JSON.stringify(transformedOrder, null, 2));
-
+        //console.log('Transformed order:', JSON.stringify(transformedOrder, null, 2));
         // Send confirmation email with transformed data
         await EmailService.sendOrderConfirmation(transformedOrder);
+        // Send gift notifications for items that are gifts
+        if (order.items && order.items.length > 0) {
 
+            for (const item of order.items) {
+                console.log(item);
+                if (item.type === 'gift' && item.giftInfo) {
+                    try {
+                        await EmailService.sendGiftPurchaseNotification({
+                            _id: item.giftInfo.listId,
+                            title: item.giftInfo.babyName,
+                            email: item.giftInfo.listOwnerEmail || '',
+                            user: { email: item.giftInfo.listOwnerEmail || '' }
+                        }, {
+                            product: item.product,
+                            userData: item.buyerInfo
+                        }, item.giftInfo.status || 'comprado', item.giftInfo.state || 2);
+                    } catch (error) {
+                        console.error('Error sending gift notification:', error);
+                        // Continue with other items even if one fails
+                    }
+                }
+            }
+        }
         return NextResponse.json({
-            message: 'Order confirmation email sent successfully',
+            message: 'Correo de confirmación de pedido enviado correctamente',
             orderId: order._id
         });
     } catch (error) {
-        console.error('Error sending order confirmation email:', error);
+        console.error('Error al enviar el correo de confirmación del pedido:', error);
         return NextResponse.json(
-            { message: 'Error sending confirmation email', error: error.message },
+            { message: 'Error al enviar el correo de confirmación', error: error.message },
             { status: 500 }
         );
     }

@@ -1,10 +1,8 @@
 import Session from '@/models/Session';
 import dbConnect from '@/lib/dbConnect';
-
 export async function trackUserSession(userId, sessionToken, userAgent, ipAddress) {
     try {
         await dbConnect();
-
         // Create new session record
         const session = await Session.create({
             userId,
@@ -14,18 +12,15 @@ export async function trackUserSession(userId, sessionToken, userAgent, ipAddres
             ipAddress,
             isValid: true
         });
-
         return session;
     } catch (error) {
         console.error('Error tracking session:', error);
         throw error;
     }
 }
-
 export async function invalidateSession(sessionToken) {
     try {
         await dbConnect();
-
         await Session.findOneAndUpdate(
             { accessToken: sessionToken },
             { isValid: false }
@@ -35,11 +30,9 @@ export async function invalidateSession(sessionToken) {
         throw error;
     }
 }
-
 export async function updateLastActivity(sessionToken) {
     try {
         await dbConnect();
-
         await Session.findOneAndUpdate(
             { accessToken: sessionToken },
             { lastActivity: new Date() }

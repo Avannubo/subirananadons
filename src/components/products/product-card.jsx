@@ -1,5 +1,4 @@
 "use client"
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from 'react';
@@ -8,7 +7,6 @@ import { useLocale } from 'next-intl';
 import { getTranslatedField } from '@/lib/getTranslatedField';
 import { useCart } from '@/contexts/CartContext.jsx';
 import { useSession } from 'next-auth/react';
-import { addProductToBirthList, fetchBirthLists } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import BirthListSelectModal from './BirthListSelectModal.jsx';
@@ -18,8 +16,6 @@ export default function ProductCard({
     viewMode = "grid",
     onQuickViewClick
 }) {
-    console.log(product);
-
     const [isHovered, setIsHovered] = useState(false);
     const [showBirthListModal, setShowBirthListModal] = useState(false);
     const { addToCart } = useCart();
@@ -27,14 +23,27 @@ export default function ProductCard({
     const router = useRouter();
     const locale = useLocale();
     const currentImageUrl = isHovered && product.imageUrlHover ? product.imageUrlHover : product.imageUrl;
-
     // Get translated name/description
     const translatedName = getTranslatedField(product, 'name', locale);
     const translatedDescription = getTranslatedField(product, 'description', locale);
-
+    // Check if discount is currently active based on date range
+    const isDiscountActive = () => {
+        if (!product.discount?.active) return false;
+        const now = new Date();
+        const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
+        const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
+        // If no dates are set, discount is always active
+        if (!startDate && !endDate) return true;
+        // If only start date is set, check if current date is after start
+        if (startDate && !endDate) return now >= startDate;
+        // If only end date is set, check if current date is before end
+        if (!startDate && endDate) return now <= endDate;
+        // If both dates are set, check if current date is within range
+        return now >= startDate && now <= endDate;
+    };
     // Calculate discount percentage
     const getDiscountPercentage = () => {
-        if (!product.discount?.active) return null;
+        if (!isDiscountActive()) return null;
         if (product.discount.type === 'percentage') return product.discount.value;
         return Math.round(((product.priceValue - product.discount.finalPrice) / product.priceValue) * 100);
     };
@@ -63,7 +72,6 @@ export default function ProductCard({
     };
     // Generate the product URL based on product id only
     const productUrl = `/products/${product.id}`;
-
     // Modal wrapper for BirthListSelectModal with framer-motion, AnimatePresence, backdrop click-to-close, scroll lock
     function BirthListModalWrapper({ show, onClose, product, userId }) {
         React.useEffect(() => {
@@ -74,13 +82,11 @@ export default function ProductCard({
                 document.body.style.overflow = 'unset';
             };
         }, [show]);
-
         const handleBackdropClick = (e) => {
             if (e.target === e.currentTarget) {
                 onClose();
             }
         };
-
         return (
             <BirthListSelectModal
                 show={show}
@@ -90,7 +96,6 @@ export default function ProductCard({
             />
         );
     }
-
     // Render product card and modal
     const cardContent = viewMode === 'grid' ? (
         <motion.div
@@ -102,16 +107,15 @@ export default function ProductCard({
             style={{
                 boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
                 borderRadius: '10px',
-                margin: '10px',
-                // padding: '10px',
+                margin: '10px'
             }}
-            className="flex flex-col items-center text-center h-full group hover:text-[#00B0C8] bg-white rounded-lg overflow-hidden"
+            className="flex flex-col items-center text-center h-full group hover:text-[#36A9E1] bg-white rounded-lg overflow-hidden"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             <Link href={productUrl} className="w-full flex flex-col items-center h-full">
                 <div className="relative w-full h-[300px]">
-                    {product.discount?.active && (
+                    {isDiscountActive() && (
                         <div className="absolute top-0 right-4 bg-red-600 text-white rounded-bl-lg rounded-br-lg  w-12 h-8 flex items-center justify-center transform ">
                             <span className="text-sm font-bold -rotate-12">
                                 {product.discount.type === 'percentage'
@@ -123,10 +127,8 @@ export default function ProductCard({
                     <img
                         src={currentImageUrl}
                         alt={product.name.ca || product.name.es || product.name}
-                        className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
+                        className="transition-opacity duration-300 p-4 ease-in-out rounded-lg object-contain w-full h-full"
                     />
-                    {/* Discount Badge */}
-
                     {/* Hover Overlay Buttons - Grid View */}
                     <div className="absolute -bottom-2 p- left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3 px-3 py-2 transition-all duration-300 z-10">
                         <HoverButton onClick={handleAddToCart}>
@@ -155,16 +157,13 @@ export default function ProductCard({
                 <div className="flex-1 w-full flex flex-col justify-between p-4">
                     <h3 className="font-semibold text-lg w-full overflow-hidden text-ellipsis line-clamp-2 min-h-[56px]" title={translatedName}>{translatedName}</h3>
                     <div className="flex flex-wrap items-center justify-center gap-2 mt-auto">
-                        {product.discount?.active ? (
+                        {isDiscountActive() ? (
                             <>
                                 <span className="text-gray-400 line-through text-base">{product.price}</span>
-                                {/* <span className="text-red-500 text-sm font-medium px-1">
-                                    {product.discount.type === 'percentage' ? `-${product.discount.value}%` : `-${product.discount.value}€`}
-                                </span> */}
-                                <span className="text-[#00B0C8] font-bold text-lg">{product.discount.finalPrice.toFixed(2)}€</span>
+                                <span className="text-[#36A9E1] font-bold text-lg">{product.discount.finalPrice.toFixed(2)}€</span>
                             </>
                         ) : (
-                            <p className="text-[#00B0C8] font-bold text-lg">{product.price}</p>
+                            <p className="text-[#36A9E1] font-bold text-lg">{product.price}</p>
                         )}
                     </div>
                 </div>
@@ -190,7 +189,7 @@ export default function ProductCard({
                         className="transition-opacity duration-300 ease-in-out rounded-lg object-contain w-full h-full"
                     />
                     {/* Discount Badge */}
-                    {product.discount?.active && (
+                    {isDiscountActive() && (
                         <div className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-12 h-12 flex items-center justify-center transform rotate-12">
                             <span className="text-sm font-bold -rotate-12">
                                 {product.discount.type === 'percentage'
@@ -203,8 +202,8 @@ export default function ProductCard({
                 <div className="flex flex-col justify-start w-3/4">
                     <h3 className="font-semibold text-xl mb-2 whitespace-nowrap overflow-hidden text-ellipsis w-full" title={translatedName}>{translatedName}</h3>
                     <div className="mb-3">
-                        {product.discount?.active ? (
-                            <div className="flex flex-row space-x-4 justify-between gap-2 text-center ">
+                        {isDiscountActive() ? (
+                            <div className="flex flex-row space-x-4 justify-start gap-2 text-center ">
                                 <p className="text-gray-400 line-through text-base">{product.price}</p>
                                 <p className="text-red-600 font-semibold text-lg">
                                     {`${product.discount.finalPrice.toFixed(2).replace('.', ',')} €`}
@@ -249,7 +248,6 @@ export default function ProductCard({
             </Link>
         </motion.div>
     );
-
     return (
         <>
             {cardContent}

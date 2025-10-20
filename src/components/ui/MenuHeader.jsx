@@ -8,6 +8,8 @@ import { InstagramIcon, UserRound, Search, ShoppingBag, TagIcon, Gift, Mail, Sho
 import useShopSocials from "@/lib/useShopSocials";
 import useShopParameter from "@/lib/useShopParameter";
 import { useTranslations } from 'next-intl';
+import esMessages from '../../../messages/es.json';
+import caMessages from '../../../messages/ca.json';
 export default function Menu() {
     const t = useTranslations('Menu');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,42 +34,54 @@ export default function Menu() {
             closeMenu();
         }
     };
+    const pathname = usePathname();
+    const isDashboardRoute = /^\/(ca|es)?\/?dashboard/.test(pathname || '');
+
+    const getMenuLabel = (key) => {
+        // When in the dashboard route, prefer the browser locale (client-side)
+        if (isDashboardRoute && typeof window !== 'undefined') {
+            const navLang = (navigator.language || navigator.userLanguage || 'es').split('-')[0];
+            if (navLang === 'ca') return caMessages?.Menu?.[key] ?? t(key);
+            return esMessages?.Menu?.[key] ?? t(key);
+        }
+        return t(key);
+    };
+
     const menuData = {
         logo: "/assets/logo-header.svg",
         items: [
             {
-                label: t('products'),
+                label: getMenuLabel('products'),
                 href: "/products",
                 icon: ShoppingBag
             },
             {
-                label: t('brands'),
+                label: getMenuLabel('brands'),
                 href: "/brands",
                 icon: TagIcon
             },
             {
-                label: t('birthlists'),
+                label: getMenuLabel('birthlists'),
                 href: "/listas-de-nacimiento",
                 icon: Gift
             },
             {
-                label: t('contact'),
+                label: getMenuLabel('contact'),
                 href: "/contact",
                 icon: Mail
             },
             {
-                label: t('search'),
+                label: getMenuLabel('search'),
                 href: "/search",
                 icon: Search
             },
             {
-                label: t('cart'),
+                label: getMenuLabel('cart'),
                 href: "/cart",
                 icon: ShoppingCart
             }
         ]
     };
-    const pathname = usePathname();
     // Locale switcher component (only for localized routes)
     const locales = [
         { code: 'ca', label: 'CA' },
@@ -88,7 +102,7 @@ export default function Menu() {
             return (
                 <li key={currentPath} className="relative">
                     {!item.submenu ? (
-                        <Link href={item.href} className="py-2.5 font-medium text-[#353535] hover:text-[#00B0C8] hover:bg-gray-50 px-4 rounded transition-colors uppercase flex items-center">
+                        <Link href={item.href} className="py-2.5 font-medium text-[#353535] hover:text-[#36A9E1] hover:bg-gray-50 px-4 rounded transition-colors uppercase flex items-center">
                             {IconComponent && <IconComponent className="mr-3" size={20} />}
                             {item.label.toUpperCase()}
                         </Link>
@@ -96,7 +110,7 @@ export default function Menu() {
                         <>
                             <button
                                 onClick={() => toggleSubmenu(currentPath)}
-                                className="w-full text-left py-2.5 text-[#353535] hover:text-[#00B0C8]  px-4 rounded flex justify-between items-center uppercase transition-colors"
+                                className="w-full text-left py-2.5 text-[#353535] hover:text-[#36A9E1]  px-4 rounded flex justify-between items-center uppercase transition-colors"
                             >
                                 <div className="flex items-center">
                                     {IconComponent && <IconComponent className="mr-3" size={20} />}
@@ -136,7 +150,7 @@ export default function Menu() {
                         height="34px"
                         viewBox="0 0 24 24"
                         fill="none"
-                        className="text-gray-700 hover:text-[#00B0C8] transition-colors duration-200"
+                        className="text-gray-700 hover:text-[#36A9E1] transition-colors duration-200"
                         xmlns="http://www.w3.org/2000/svg"
                     >
                         <path
@@ -193,7 +207,7 @@ export default function Menu() {
                                                 <a
                                                     key={locale.code}
                                                     href={pathname.replace(/^\/(ca|es)/, `/${locale.code}`)}
-                                                    className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${currentLocale === locale.code ? 'bg-[#00B0C8] text-white border-[#00B0C8]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                                    className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${currentLocale === locale.code ? 'bg-[#36A9E1] text-white border-[#36A9E1]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
                                                     aria-current={currentLocale === locale.code ? 'page' : undefined}
                                                 >
                                                     {locale.label}
@@ -202,17 +216,7 @@ export default function Menu() {
                                         </div>
                                     )}
                                 </div>
-                                {/* <div className="flex space-x-2 justify-center my-2 md:my-4">
-                                    {socials.map((social) => {
-                                        const Icon = social.Icon;
-                                        return (
-                                            <Link key={social.key} target="_blank" href={social.link} aria-label={social.name} className="flex justify-center items-center text-gray-700 hover:text-[#00B0C8] cursor-pointer" rel="noopener noreferrer">
-                                                <Icon className="w-6 h-6" />
-                                            </Link>
-                                        );
-                                    })}
-                                </div> */}
-                                <Link href={`tel:${shopPhone || '938751567'}`} className="block text-gray-700 text-sm hover:text-[#00B0C8] cursor-pointer text-center">
+                                <Link href={`tel:${shopPhone || '938751567'}`} className="block text-gray-700 text-sm hover:text-[#36A9E1] cursor-pointer text-center">
                                     Tel: {shopPhone || '938 751 567'}
                                 </Link>
                                 <p className="text-xs md:text-sm text-center text-gray-400 mt-2">© 2025 Subirana</p>

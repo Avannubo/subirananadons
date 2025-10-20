@@ -10,12 +10,12 @@ export async function POST(request) {
         await dbConnect();
         // Parse the request body
         const body = await request.json();
-        console.log('Add to cart request:', JSON.stringify(body, null, 2));
+        //console.log('Add to cart request:', JSON.stringify(body, null, 2));
         const { productId, quantity, isGift, giftInfo } = body;
         if (!productId || !quantity) {
             return NextResponse.json({
                 success: false,
-                message: 'Product ID and quantity are required'
+                message: 'L\'ID del producte i la quantitat són obligatoris'
             }, { status: 400 });
         }
         try {
@@ -23,13 +23,12 @@ export async function POST(request) {
             let product;
             // Check if productId is a valid ObjectId
             const isValidObjectId = mongoose.Types.ObjectId.isValid(productId);
-            console.log(`Searching for product with ID: ${productId}, valid MongoDB ID: ${isValidObjectId}`);
+            //console.log(`Searching for product with ID: ${productId}, valid MongoDB ID: ${isValidObjectId}`);
             if (isValidObjectId) {
                 product = await Product.findById(productId);
             }
             // If not found by ID, try searching by other fields
-            if (!product) {
-                console.log('Product not found by ID, trying to find by other fields...');
+            if (!product) { 
                 product = await Product.findOne({
                     $or: [
                         { _id: productId },
@@ -38,19 +37,18 @@ export async function POST(request) {
                 });
             }
             if (!product) {
-                console.log(`Product not found: ${productId}`);
+                //console.log(`Product not found: ${productId}`);
                 return NextResponse.json({
                     success: false,
-                    message: `Product not found with ID: ${productId}`
+                    message: `Producte no trobat amb l'ID: ${productId}`
                 }, { status: 404 });
-            }
-            console.log(`Found product: ${product.name} (ID: ${product._id})`);
+            } 
             // Get the session for authenticated users
             let session;
             try {
                 session = await getServerSession(authOptions);
             } catch (authError) {
-                console.error('Authentication error:', authError);
+                console.error('Error d\'autenticació:', authError);
                 // Continue without session
             }
             const userId = session?.user?.id;
@@ -58,7 +56,7 @@ export async function POST(request) {
             const price = product.price_incl_tax || product.price || 0;
             // Create cart response for guest users if no session
             if (!userId) {
-                console.log('Guest user adding to cart - returning product info only');
+                //console.log('Guest user adding to cart - returning product info only');
                 const cartItem = {
                     product: product._id.toString(),
                     quantity: Number(quantity),
@@ -72,7 +70,7 @@ export async function POST(request) {
                 };
                 return NextResponse.json({
                     success: true,
-                    message: 'Product info retrieved for guest cart',
+                    message: 'Informació del producte obtinguda per al carret de convidat',
                     cart: {
                         items: [cartItem]
                     },
@@ -87,14 +85,13 @@ export async function POST(request) {
                     cart = existingCart.toObject();
                 }
             } catch (cartError) {
-                console.error('Error finding user cart:', cartError);
+                console.error('Error en trobar el carret de l\'usuari:', cartError);
                 // Continue with empty cart
             }
             // Check if product already exists in cart            // For gift items, always add as new. For regular items, check for duplicates
             const existingItemIndex = !isGift ? cart.items.findIndex(
                 item => item.product?.toString() === product._id.toString() && !item.isGift
             ) : -1;
-
             if (existingItemIndex > -1) {
                 // Update existing non-gift item quantity
                 cart.items[existingItemIndex].quantity += Number(quantity);
@@ -123,10 +120,10 @@ export async function POST(request) {
                     cart._id = newCart._id;
                 }
             } catch (saveError) {
-                console.error('Error saving cart to database:', saveError);
+                console.error('Error en desar el carret a la base de dades:', saveError);
                 return NextResponse.json({
                     success: false,
-                    message: 'Error saving cart to database',
+                    message: 'Error en desar el carret a la base de dades',
                     error: saveError.message
                 }, { status: 500 });
             }
@@ -145,26 +142,26 @@ export async function POST(request) {
             });
             return NextResponse.json({
                 success: true,
-                message: 'Product added to cart',
+                message: 'Producte afegit al carret',
                 cart: {
                     items: formattedItems,
                     _id: cart._id
                 }
             });
         } catch (dbError) {
-            console.error('Database error:', dbError);
+            console.error('Error de base de dades:', dbError);
             return NextResponse.json({
                 success: false,
-                message: 'Database error',
+                message: 'Error de base de dades',
                 error: dbError.message,
                 stack: dbError.stack
             }, { status: 500 });
         }
     } catch (error) {
-        console.error('Error adding to cart:', error);
+        console.error('Error en afegir al carret:', error);
         return NextResponse.json({
             success: false,
-            message: 'Error adding product to cart',
+            message: 'Error en afegir el producte al carret',
             error: error.message,
             stack: error.stack
         }, { status: 500 });

@@ -1,6 +1,5 @@
 // models/Address.js
 import mongoose from 'mongoose';
-
 const addressSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -38,7 +37,6 @@ const addressSchema = new mongoose.Schema({
     },
     contactPhone: String
 }, { timestamps: true });
-
 // Add address to user's addresses array when created
 addressSchema.post('save', async function (doc) {
     await mongoose.model('User').updateOne(
@@ -46,7 +44,6 @@ addressSchema.post('save', async function (doc) {
         { $addToSet: { addresses: doc._id } }
     );
 });
-
 // Remove address from user's addresses array when deleted
 addressSchema.post('remove', async function (doc) {
     await mongoose.model('User').updateOne(
@@ -54,5 +51,4 @@ addressSchema.post('remove', async function (doc) {
         { $pull: { addresses: doc._id } }
     );
 });
-
 export default mongoose.models.Address || mongoose.model('Address', addressSchema);

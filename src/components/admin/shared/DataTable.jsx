@@ -1,5 +1,4 @@
 'use client';
-
 export default function DataTable({ columns, data, renderRow, emptyMessage }) {
     return (
         <div className="bg-white rounded-lg shadow overflow-hidden">

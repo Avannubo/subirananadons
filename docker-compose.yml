@@ -14,8 +14,8 @@ services:
       - CLOUDINARY_API_SECRET=HCTqDgizlCuVT2hFf2tTCiFYWbA
       - CLOUDINARY_API_KEY=544412284116647
       - NEXTAUTH_SECRET=e991fff4025f411ec955c2d62674427bcfcb49e01bc5a2b488985ddc864ba25e
-      - NEXTAUTH_URL=https://subirana.avannubo.net
-      - DOMAIN=https://subirana.avannubo.net/
+      - NEXTAUTH_URL=https://subirananadons.com
+      - DOMAIN=https://subirananadons.com/
       - JWT_SECRET=65a7a69f249b740949483caf84c583f7da58312e8c6ae80f93a0fcefd2458038171c8626e513cd55cc67944621cd8526ededf5389d4fb639d5bac4b8eac081dc
     volumes:
       - ./public:/app/public

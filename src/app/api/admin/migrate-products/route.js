@@ -3,40 +3,32 @@ import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-
 export async function GET(request) {
     try {
         const session = await getServerSession(authOptions);
-
         // Check authentication
         if (!session || !session.user) {
             return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
         }
-
         // Check if the user has admin role
         const isAdmin = session.user.role === 'admin';
         if (!isAdmin) {
             return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
         }
-
         // Connect to MongoDB
         await dbConnect();
-        console.log('Connected to MongoDB');
-
+        //console.log('Connected to MongoDB');
         // Get all products
         const products = await Product.find({});
-        console.log(`Found ${products.length} products to migrate`);
-
+        //console.log(`Found ${products.length} products to migrate`);
         let migratedCount = 0;
         let errorCount = 0;
         let results = [];
-
         // Process each product
         for (const product of products) {
             try {
                 const originalProduct = { ...product.toObject() };
                 let changes = [];
-
                 // Handle stock structure changes
                 if (product.stock) {
                     // Make sure available exists and has a value
@@ -50,7 +42,6 @@ export async function GET(request) {
                             changes.push(`Set available to 0 (default)`);
                         }
                     }
-                    
                     // Make sure minStock exists and has a value
                     if (product.stock.minStock === undefined) {
                         // Convert from reserved to minStock if needed
@@ -62,13 +53,11 @@ export async function GET(request) {
                             changes.push(`Set minStock to 5 (default)`);
                         }
                     }
-                    
                     // Remove physical field
                     if (product.stock.physical !== undefined) {
                         delete product.stock.physical;
                         changes.push(`Removed physical field`);
                     }
-                    
                     // Remove reserved field
                     if (product.stock.reserved !== undefined) {
                         delete product.stock.reserved;
@@ -82,13 +71,11 @@ export async function GET(request) {
                     };
                     changes.push(`Initialized stock structure`);
                 }
-
                 // Clean up any other fields not in the schema
                 if (product.stockHistory !== undefined) {
                     delete product.stockHistory;
                     changes.push(`Removed stockHistory field`);
                 }
-
                 // Save the updated product only if there were changes
                 if (changes.length > 0) {
                     await product.save();
@@ -108,7 +95,6 @@ export async function GET(request) {
                 });
             }
         }
-
         return NextResponse.json({
             success: true,
             message: `Migration complete. Successfully migrated ${migratedCount} products. Errors: ${errorCount}`,

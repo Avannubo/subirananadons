@@ -2,19 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CryptoJS from 'crypto-js';
-
 export default function ModalTPV({ isOpen, onClose, orderData }) {
     const [cartItems, setCartItems] = useState(orderData?.cartProducts || []);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null);
-
     // Get locale from URL or default to 'ca'
     let locale = 'ca';
     if (typeof window !== 'undefined') {
         const pathLocale = window.location.pathname.split('/')[1];
         if (['ca', 'es'].includes(pathLocale)) locale = pathLocale;
     }
-
     const translations = {
         ca: {
             processingPayment: "Pagament en procés...",
@@ -35,8 +32,13 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             total: "Total",
             totalOrderPrice: "Preu total de la comanda:",
             totalDiscount: "Total descomptes",
-            confirmPayment: "Confirmar Pagament",
+            confirmPayment: "Procedir al Pagament",
             cancel: "Cancel·lar"
+            ,
+            paymentDisclaimerTitle: "Important",
+            paymentDisclaimerPart1: "Seràs redirigit a la plataforma de pagament de Redsys.",
+            paymentDisclaimerHighlight: " Recorda prémer el botó CONTINUAR en finalitzar",
+            paymentDisclaimerPart2: ", encara que completis o cancells el pagament, perquè puguem registrar la resposta."
         },
         es: {
             processingPayment: "Pago en proceso...",
@@ -57,29 +59,98 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             total: "Total",
             totalOrderPrice: "Precio total del pedido:",
             totalDiscount: "Total descuentos",
-            confirmPayment: "Confirmar Pago",
+            confirmPayment: "Proceder al Pago",
             cancel: "Cancelar"
+            ,
+            paymentDisclaimerTitle: "Importante",
+            paymentDisclaimerPart1: "Serás redirigido a la plataforma de pago de Redsys.",
+            paymentDisclaimerHighlight: " Recuerda pulsar el botón CONTINUAR al finalizar",
+            paymentDisclaimerPart2: ", aunque completes o canceles el pago, para que podamos registrar la respuesta."
         }
     };
-
     useEffect(() => {
         if (orderData && Array.isArray(orderData.cartProducts)) {
             setCartItems(orderData.cartProducts);
         }
     }, [orderData]);
 
-    const getItemPrice = (item) => {
-        // Get base price
-        let basePrice = typeof item.priceValue === 'number' ? item.priceValue :
-            (typeof item.price === 'number' ? item.price :
-                parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.')));
+    // Helper to render localized fields safely (handles {ca, es} objects)
+    const renderField = (field) => {
+        try {
+            if (field == null) return '';
+            if (typeof field === 'string' || typeof field === 'number') return String(field);
+            if (typeof field === 'object') {
+                // If it's an object with a nested name, prefer that
+                if (field.name) return renderField(field.name);
+                // prefer current locale, then es, then ca, then first string value
+                if (field[locale]) return String(field[locale]);
+                if (field.es) return String(field.es);
+                if (field.ca) return String(field.ca);
+                // pick first string value
+                for (const k in field) {
+                    if (typeof field[k] === 'string') return field[k];
+                }
+                // fallback to JSON string for debugging
+                console.warn('renderField: object field has no string values', field);
+                return JSON.stringify(field);
+            }
+            return String(field);
+        } catch (err) {
+            console.error('renderField error:', err, field);
+            return '';
+        }
+    };
 
+    // Detect id-like strings (mongodb ObjectId or long hex strings) to avoid showing them as names
+    const isIdLike = (s) => {
+        try {
+            if (!s || typeof s !== 'string') return false;
+            // remove common separators
+            const tokens = s.split(/[-\s,;|]+/).filter(Boolean);
+            // if any token is a long hex string (>=8 hex chars), treat as id-like
+            return tokens.every(t => /^[a-f0-9]{6,24}$/i.test(t));
+        } catch (e) {
+            return false;
+        }
+    };
+
+    // Get a display name for brand/category: resolve nested objects and filter out id-like values
+    const getName = (field) => {
+        const val = renderField(field);
+        if (!val) return '';
+        if (isIdLike(val)) return '';
+        return val;
+    };
+    const getItemPrice = (item) => {
+        // Robust numeric parsing helper
+        const parseNumeric = (v) => {
+            try {
+                if (typeof v === 'number' && Number.isFinite(v)) return v;
+                if (typeof v === 'string') {
+                    const clean = v.replace(/[^0-9,.-]/g, '').replace(',', '.');
+                    const n = parseFloat(clean);
+                    return Number.isFinite(n) ? n : 0;
+                }
+                // fallback: try to stringify and parse
+                const s = String(v || '0');
+                const clean = s.replace(/[^0-9,.-]/g, '').replace(',', '.');
+                const n = parseFloat(clean);
+                return Number.isFinite(n) ? n : 0;
+            } catch (e) {
+                return 0;
+            }
+        };
+
+        // Get base price
+        let basePrice = 0;
+        if (typeof item.priceValue === 'number' && Number.isFinite(item.priceValue)) basePrice = item.priceValue;
+        else if (typeof item.price === 'number' && Number.isFinite(item.price)) basePrice = item.price;
+        else basePrice = parseNumeric(item.priceValue ?? item.price ?? 0);
         // Check if there's an active discount
         if (item.discount && item.discount.active) {
             const now = new Date();
             const startDate = item.discount.startDate ? new Date(item.discount.startDate) : null;
             const endDate = item.discount.endDate ? new Date(item.discount.endDate) : null;
-
             // Verify if discount is currently valid
             if ((!startDate || now >= startDate) && (!endDate || now <= endDate)) {
                 if (item.discount.type === 'percentage') {
@@ -89,25 +160,22 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                 }
             }
         }
-        return basePrice;
+        return Number.isFinite(basePrice) ? basePrice : 0;
     };
-
     const calculateTotal = () => {
         return cartItems.reduce((sum, item) => {
             const price = getItemPrice(item);
-            return sum + (price * (item.quantity || 1));
+            const qty = Number.isFinite(Number(item.quantity)) ? Number(item.quantity) : (item.quantity ? Number(item.quantity) : 0);
+            return sum + (price * (qty || 0));
         }, 0);
     };
-
     const stringBase64Encode = (input) => {
         let utf8Input = CryptoJS.enc.Utf8.parse(input);
         return CryptoJS.enc.Base64.stringify(utf8Input);
     };
-
     const base64Decode = (input) => {
         return CryptoJS.enc.Base64.parse(input);
     };
-
     const des_encrypt = (message, key) => {
         let ivArray = [0, 0, 0, 0, 0, 0, 0, 0];
         let IV = ivArray.map(item => String.fromCharCode(item)).join("");
@@ -118,47 +186,62 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
         });
         return encode_str.toString();
     };
-
     const calcularFirma = () => {
-        const total = calculateTotal();
-        let cleanPrecioTotal = (total * 100).toString(); // Convert to cents and string
-        let merchantOrder = orderData?.orderId || String(Date.now()).substring(0, 12).padStart(4, '0');
-
-        // Create data object for the payment request
-        let data = {
-            "DS_MERCHANT_AMOUNT": cleanPrecioTotal,
-            "DS_MERCHANT_CURRENCY": "978",
-            "DS_MERCHANT_MERCHANTCODE": "352203061",
-            "DS_MERCHANT_ORDER": merchantOrder,
-            "DS_MERCHANT_TERMINAL": "2",
-            "DS_MERCHANT_TRANSACTIONTYPE": "0",
-            "DS_MERCHANT_URLOK": `${window.location.origin}/cart/order/success`,
-            "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed`
-        };
-
-        console.log('Payment Data:', data);
-
-        // Encode parameters and calculate signature
-        let encodedParameters = stringBase64Encode(JSON.stringify(data));
-        let encodedSignature = "sq7HjrUOBfKmC576ILgskD5srU870gJ7";
-        let encodedSignatureDES = des_encrypt(merchantOrder, base64Decode(encodedSignature));
-        let encodedDsSignature = CryptoJS.HmacSHA256(encodedParameters, base64Decode(encodedSignatureDES));
-        let dsSignature = CryptoJS.enc.Base64.stringify(encodedDsSignature);
-
-
-        // Populate form fields safely
-        if (typeof document !== 'undefined') {
-            const form = document.forms["pago"];
-            if (form) {
-                if (form.Ds_MerchantParameters) form.Ds_MerchantParameters.value = encodedParameters;
-                if (form.Ds_Signature) form.Ds_Signature.value = dsSignature;
+        try {
+            const total = calculateTotal();
+            const cents = Math.round(Number(total) * 100);
+            const cleanPrecioTotal = Number.isFinite(cents) ? String(cents) : '0'; // Convert to cents and string
+            let merchantOrder = orderData?.orderId || String(Date.now()).substring(0, 12).padStart(4, '0');
+            // Create data object for the payment request
+            let data = {
+                "DS_MERCHANT_AMOUNT": cleanPrecioTotal,
+                "DS_MERCHANT_CURRENCY": "978",
+                "DS_MERCHANT_MERCHANTCODE": "352203061",
+                "DS_MERCHANT_ORDER": merchantOrder,
+                "DS_MERCHANT_TERMINAL": "2",
+                "DS_MERCHANT_TRANSACTIONTYPE": "0",
+                "DS_MERCHANT_URLOK": `${window.location.origin}/cart/order/success`,
+                "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed`
+            };
+            // Encode parameters and calculate signature
+            let encodedParameters = stringBase64Encode(JSON.stringify(data));
+            // signature generation can fail if keys/values are malformed; protect with try/catch
+            try {
+                let encodedSignature = "R3zJ3xZGifR1ZHVOEwNpuUn1c+l1jI7S";
+                let encodedSignatureDES = des_encrypt(merchantOrder, base64Decode(encodedSignature));
+                let encodedDsSignature = CryptoJS.HmacSHA256(encodedParameters, base64Decode(encodedSignatureDES));
+                let dsSignature = CryptoJS.enc.Base64.stringify(encodedDsSignature);
+                // Populate form fields safely
+                if (typeof document !== 'undefined') {
+                    const form = document.forms["pago"];
+                    if (form) {
+                        if (form.Ds_MerchantParameters) form.Ds_MerchantParameters.value = encodedParameters;
+                        if (form.Ds_Signature) form.Ds_Signature.value = dsSignature;
+                    }
+                }
+            } catch (sigErr) {
+                console.error('calcularFirma signature error:', sigErr, { data, encodedParameters });
+                // Clear any existing values to avoid sending malformed data
+                if (typeof document !== 'undefined') {
+                    const form = document.forms["pago"];
+                    if (form) {
+                        if (form.Ds_MerchantParameters) form.Ds_MerchantParameters.value = '';
+                        if (form.Ds_Signature) form.Ds_Signature.value = '';
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('calcularFirma error:', err);
+            // ensure we don't leave invalid data in the form
+            if (typeof document !== 'undefined') {
+                const form = document.forms["pago"];
+                if (form) {
+                    if (form.Ds_MerchantParameters) form.Ds_MerchantParameters.value = '';
+                    if (form.Ds_Signature) form.Ds_Signature.value = '';
+                }
             }
         }
-
-        console.log('Encoded Parameters:', encodedParameters);
-        console.log('DS Signature:', dsSignature);
     };
-
     const handlePaymentProcess = async () => {
         setIsProcessingPayment(true);
         try {
@@ -173,37 +256,35 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             setIsProcessingPayment(false);
         }
     };
-
     const handleCloseModal = () => {
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState(null, '', cleanUrl);
         window.location.reload();
     };
-
     return isOpen || paymentStatus ? (
         <div className="fixed inset-0 flex flex-wrap justify-center items-center w-full h-full z-[999] bg-[rgba(0,0,0,0.45)] overflow-auto font-[sans-serif]">
             <div className="z-[1000] max-w-4xl w-full mx-auto bg-white rounded-2xl shadow-2xl border border-gray-100 px-0 md:px-0">
                 {isProcessingPayment ? (
                     <div className="p-8 rounded-2xl shadow-xl text-center bg-white">
-                        <h2 className="text-2xl font-bold text-[#0090a8]">{translations[locale].processingPayment}</h2>
+                        <h2 className="text-2xl font-bold text-[#3f93ba]">{translations[locale].processingPayment}</h2>
                         <p className="text-base mt-2 text-gray-700">{translations[locale].pleaseWait}</p>
                         <div className="mt-6 flex justify-center">
-                            <span className="inline-block w-8 h-8 border-4 border-[#0090a8] border-t-transparent rounded-full animate-spin"></span>
+                            <span className="inline-block w-8 h-8 border-4 border-[#3f93ba] border-t-transparent rounded-full animate-spin"></span>
                         </div>
                     </div>
                 ) : paymentStatus === 'OK' ? (
                     <div className="p-8 rounded-2xl shadow-xl text-center bg-white">
                         <h2 className="text-2xl font-bold text-green-600">{translations[locale].paymentSuccess}</h2>
                         <p className="text-base mt-2 text-gray-700">{translations[locale].paymentCompleted}</p>
-                        <h2 className="text-xl mt-4 font-semibold text-[#0090a8]">{translations[locale].orderSummaryEmail}</h2>
+                        <h2 className="text-xl mt-4 font-semibold text-[#3f93ba]">{translations[locale].orderSummaryEmail}</h2>
                         <div className='flex flex-row justify-center gap-3 mt-6'>
-                            <Link href="/" className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
+                            <Link href="/" className="bg-[#3f93ba] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
                                 {translations[locale].home}
                             </Link>
-                            <Link href="/products" className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
+                            <Link href="/products" className="bg-[#3f93ba] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
                                 {translations[locale].shop}
                             </Link>
-                            <Link href="/about/contacto" className="bg-[#0090a8] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
+                            <Link href="/about/contacto" className="bg-[#3f93ba] hover:bg-[#008fa8d5] text-white px-5 py-2 rounded-lg font-semibold transition-colors duration-150">
                                 {translations[locale].contact}
                             </Link>
                         </div>
@@ -220,31 +301,56 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                     </div>
                 ) : (
                     <div className="px-6 md:px-12 py-8 rounded-2xl shadow-xl bg-white">
-                        <h2 className="text-2xl font-bold text-[#0090a8] mb-4">{translations[locale].orderSummary}</h2>
-                        <div className="overflow-x-auto rounded-lg border border-gray-100">
-                            <table className="w-full table-auto border-collapse text-sm">
+                        <h2 className="text-2xl font-bold text-[#3f93ba] mb-4">{translations[locale].orderSummary}</h2>
+                        {/* Mobile: stacked cards to avoid overlaps */}
+                        <div className="md:hidden space-y-3">
+                            {cartItems.map((product, idx) => (
+                                <div key={product._id || product.id || idx} className="bg-white rounded-lg border border-gray-100 p-3">
+                                    <div className="flex items-start gap-3">
+                                        {product.image && (
+                                            <img src={renderField(product.image)} alt={renderField(product.name)} className="w-16 h-16 object-cover rounded-md border border-gray-200 bg-gray-50 flex-shrink-0" />
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium text-base text-gray-900 truncate">{renderField(product.name)}</div>
+                                            <div className="text-xs text-gray-500 truncate">{getName(product.brand)}{getName(product.brand) && getName(product.category) ? ' - ' : ''}{getName(product.category)}</div>
+                                            <div className="mt-2 text-sm text-gray-700 space-y-1">
+                                                <div className="flex justify-between"><span className="text-xs text-gray-500">{translations[locale].quantity}</span><span className="font-medium">{product.quantity}</span></div>
+                                                <div className="flex justify-between"><span className="text-xs text-gray-500">{translations[locale].price}</span><span className="font-medium">{getItemPrice(product).toFixed(2)}€</span></div>
+                                                <div className="flex justify-between"><span className="text-xs text-gray-500">{translations[locale].total}</span><span className="font-medium">{(getItemPrice(product) * (product.quantity || 1)).toFixed(2)}€</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop/tablet: keep table layout */}
+                        <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
+                            <table className="w-full table-fixed md:table-auto border-collapse text-sm">
                                 <thead>
                                     <tr className="bg-gray-50 text-gray-700">
-                                        <th className="px-4 py-2 font-semibold">{translations[locale].product}</th>
-                                        <th className="px-4 py-2 font-semibold">{translations[locale].quantity}</th>
-                                        <th className="px-4 py-2 font-semibold">{translations[locale].price}</th>
-                                        <th className="px-4 py-2 font-semibold">{translations[locale].total}</th>
+                                        {/* Product column: flexible so it can expand and use remaining space */}
+                                        <th className="px-4 py-2 font-semibold text-left">{translations[locale].product}</th>
+                                        {/* Numeric columns fixed so product column won't collapse */}
+                                        <th className="px-4 py-2 font-semibold text-center w-20 md:w-24">{translations[locale].quantity}</th>
+                                        <th className="px-4 py-2 font-semibold text-center w-24 md:w-28">{translations[locale].price}</th>
+                                        <th className="px-4 py-2 font-semibold text-center w-24 md:w-28">{translations[locale].total}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {cartItems.map((product) => (
-                                        <tr key={product.id} className="border-b border-b-gray-100 last:border-b-0">
-                                            <td className="px-4 py-2 flex items-center gap-3">
+                                    {cartItems.map((product, idx) => (
+                                        <tr key={product._id || product.id || idx} className="border-b border-b-gray-100 last:border-b-0">
+                                            <td className="px-4 py-2 flex items-center gap-3 min-w-0">
                                                 {product.image && (
-                                                    <img src={product.image} alt={product.name} className="w-32 h-32 object-cover rounded-lg border border-gray-200 bg-gray-50" />
+                                                    <img src={renderField(product.image)} alt={renderField(product.name)} className="w-20 h-20 md:w-32 md:h-32 flex-shrink-0 object-cover rounded-lg border border-gray-200 bg-gray-50" />
                                                 )}
-                                                <div>
-                                                    <div className="font-medium text-xl text-gray-900">{product.name}</div>
-                                                    <div className="text-xs text-gray-500">{product.brand}{product.brand && product.category ? ' - ' : ''}{product.category}</div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-medium text-lg md:text-xl text-gray-900 max-w-[12rem] md:max-w-none truncate">{renderField(product.name)}</div>
+                                                    <div className="text-xs text-gray-500">{getName(product.brand)}{getName(product.brand) && getName(product.category) ? ' - ' : ''}{getName(product.category)}</div>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-2 text-lg text-center">{product.quantity}</td>
-                                            <td className="px-4 py-2 text-lg">
+                                            <td className="px-4 py-2 text-base md:text-lg text-center whitespace-nowrap">{product.quantity}</td>
+                                            <td className="px-4 py-2 text-base md:text-lg text-center md:text-right whitespace-nowrap">
                                                 {product.discount && product.discount.active ? (
                                                     <div className="flex flex-col">
                                                         <span className="text-gray-400 line-through text-sm">
@@ -263,7 +369,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-2 font-medium text-lg">
+                                            <td className="px-4 py-2 font-medium text-base md:text-lg text-center md:text-right whitespace-nowrap">
                                                 {(getItemPrice(product) * (product.quantity || 1)).toFixed(2)}€
                                             </td>
                                         </tr>
@@ -289,8 +395,19 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                                 {translations[locale].totalOrderPrice} {calculateTotal().toFixed(2)}€
                             </p>
                         </div>
+                        <div>
+                            {/* <p className="text-sm text-gray-600">
+                                {locale === 'ca' ? "Tots els preus inclouen IVA." : "Todos los precios incluyen IVA."}
+                            </p> */}
+                            <p className="text-lg mt-2">
+                                <strong>*{translations[locale].paymentDisclaimerTitle}: </strong>
+                                <span className="text-gray-700">{translations[locale].paymentDisclaimerPart1}</span>
+                                <span className="text-red-600 font-semibold">{translations[locale].paymentDisclaimerHighlight}</span>
+                                <span className="text-gray-700">{translations[locale].paymentDisclaimerPart2}</span>
+                            </p>
+                        </div>
                         <div className="flex flex-row justify-center gap-3 mt-8">
-                                        <button onClick={handlePaymentProcess} className="bg-[#00B0C8] hover:bg-[#008fa8d5] text-white px-6 py-2 rounded-lg font-normal transition-colors duration-150 h-[42px]">
+                            <button onClick={handlePaymentProcess} className="bg-[#36A9E1] hover:bg-[#008fa8d5] text-white px-6 py-2 rounded-lg font-normal transition-colors duration-150 h-[42px]">
                                 {translations[locale].confirmPayment}
                             </button>
                             <button onClick={onClose} className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-normal transition-colors duration-150 h-[42px]">
@@ -299,8 +416,8 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                         </div>
                     </div>
                 )}
-                {/* Hidden payment form for Redsys */}
-                <form className="hidden" name="pago" action="https://sis-t.redsys.es:25443/sis/realizarPago" method="POST" >
+                {/* Hidden payment form for Redsys           https://sis.redsys.es/sis/realizarPago */}
+                <form className="hidden" name="pago" action="https://sis.redsys.es/sis/realizarPago" method="POST" >
                     <textarea name="Ds_MerchantParameters" cols="80" rows="5" readOnly></textarea>
                     <input type="text" name="Ds_Signature" defaultValue="" size="100" readOnly />
                     <input type="text" name="Ds_SignatureVersion" defaultValue="HMAC_SHA256_V1" readOnly />

@@ -4,11 +4,9 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
-
 export async function PUT(request) {
     try {
         const session = await getServerSession(authOptions);
-
         // Check if user is authenticated
         if (!session?.user?.id) {
             return NextResponse.json(
@@ -16,41 +14,34 @@ export async function PUT(request) {
                 { status: 401 }
             );
         }
-
         // Connect to the database
         await dbConnect();
-
         // Get request body
         const data = await request.json();
         const { name, email, birthDate, image, newsletter, partnerOffers, password } = data;
-
-        console.log('Update user request:', { userId: session.user.id, name, email, hasImage: !!image });
-
+        //console.log('Update user request:', { userId: session.user.id, name, email, hasImage: !!image });
         // Find user
         const user = await User.findById(session.user.id);
         if (!user) {
-            console.error('User not found:', session.user.id);
+            console.error('Usuari no trobat:', session.user.id);
             return NextResponse.json(
-                { message: 'User not found' },
+                { message: 'Usuari no trobat' },
                 { status: 404 }
             );
         }
-
         // Check if email is already in use by another user
         if (email !== user.email) {
             const existingUser = await User.findOne({ email });
             if (existingUser && existingUser._id.toString() !== user._id.toString()) {
                 return NextResponse.json(
-                    { message: 'Email already in use' },
+                    { message: 'Aquest correu electrònic ja està en ús' },
                     { status: 400 }
                 );
             }
         }
-
         // Update user data
         user.name = name || user.name;
         user.email = email || user.email;
-
         // Only update these fields if they are provided
         if (birthDate !== undefined) user.birthDate = birthDate;
         if (image !== undefined) user.image = image;
@@ -60,15 +51,13 @@ export async function PUT(request) {
             user.password = password;
             user.markModified('password'); // Ensure mongoose knows the password was modified
         }
-
         // Save updated user
         await user.save();
-        console.log('User updated successfully:', user._id);
-
+        //console.log('User updated successfully:', user._id);
         // Return success response
         return NextResponse.json(
             {
-                message: 'Profile updated successfully',
+                message: 'Perfil actualitzat correctament',
                 user: {
                     id: user._id,
                     name: user.name,
@@ -81,20 +70,17 @@ export async function PUT(request) {
             },
             { status: 200 }
         );
-
     } catch (error) {
-        console.error('Error updating profile:', error);
+        console.error('Error en actualitzar el perfil:', error);
         return NextResponse.json(
-            { message: 'Error updating profile', error: error.message },
+            { message: 'Error en actualitzar el perfil', error: error.message },
             { status: 500 }
         );
     }
 }
-
 export async function GET(request) {
     try {
         const session = await getServerSession(authOptions);
-
         // Check if user is authenticated
         if (!session?.user?.id) {
             return NextResponse.json(
@@ -102,10 +88,8 @@ export async function GET(request) {
                 { status: 401 }
             );
         }
-
         // Connect to the database
         await dbConnect();
-
         // Find user
         const user = await User.findById(session.user.id).select('-password');
         if (!user) {
@@ -114,7 +98,6 @@ export async function GET(request) {
                 { status: 404 }
             );
         }
-
         // Return user data
         return NextResponse.json(
             {
@@ -130,11 +113,10 @@ export async function GET(request) {
             },
             { status: 200 }
         );
-
     } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Error en obtenir el perfil:', error);
         return NextResponse.json(
-            { message: 'Error fetching profile', error: error.message },
+            { message: 'Error en obtenir el perfil', error: error.message },
             { status: 500 }
         );
     }

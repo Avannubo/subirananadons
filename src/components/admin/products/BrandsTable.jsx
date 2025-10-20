@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { FiFilter, FiSearch, FiUpload, FiDownload, FiEdit, FiTrash2, FiEye, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
@@ -8,7 +7,6 @@ import ImageHoverPreview from '@/components/shared/ImageHoverPreview';
 import BrandModal from './BrandModal';
 import BrandViewModal from './BrandViewModal';
 import Pagination from '@/components/admin/shared/Pagination';
-
 export default function BrandsTable() {
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -28,16 +26,13 @@ export default function BrandsTable() {
     const [allBrands, setAllBrands] = useState([]);
     const [useClientPagination, setUseClientPagination] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
-
     // Fetch brands from the API
     const fetchBrands = async (page = 1, limit = pagination.limit, search = searchTerm, enabledOnly = showEnabledOnly) => {
         try {
             setLoading(true);
             const queryParams = new URLSearchParams();
-
             // Add preventSort=true to ensure server doesn't apply its own sorting
             queryParams.append('preventSort', 'true');
-
             // Add pagination parameters for server-side pagination
             if (!useClientPagination) {
                 queryParams.append('page', page);
@@ -45,15 +40,11 @@ export default function BrandsTable() {
                 if (search) queryParams.append('search', search);
                 if (enabledOnly) queryParams.append('enabled', 'true');
             }
-
             const response = await fetch(`/api/brands?${queryParams.toString()}`);
-
             if (!response.ok) {
                 throw new Error('Failed to fetch brands');
             }
-
             const data = await response.json();
-
             // For now, we'll use client-side pagination
             if (Array.isArray(data)) {
                 setAllBrands(data);
@@ -61,13 +52,11 @@ export default function BrandsTable() {
             } else if (data.brands && Array.isArray(data.brands)) {
                 if (data.pagination) {
                     setUseClientPagination(false);
-
                     // Sort brands by _id to ensure stable order
                     const sortedBrands = [...data.brands].sort((a, b) => {
                         // Sort by _id which is tied to creation time and immutable
                         return a._id > b._id ? -1 : 1;
                     });
-
                     setBrands(sortedBrands);
                     setPagination({
                         currentPage: data.pagination.currentPage || page,
@@ -102,32 +91,26 @@ export default function BrandsTable() {
             setLoading(false);
         }
     };
-
     // Apply client-side pagination
     const applyClientPagination = (brandsArray, page, limit, customSearchTerm = null, customShowEnabledOnly = null) => {
         // Sort brands by MongoDB _id to maintain a stable order
         brandsArray.sort((a, b) => {
             return a._id > b._id ? -1 : 1;
         });
-
         // Use the latest search/filter values if provided, otherwise from state
         const search = customSearchTerm !== null ? customSearchTerm : searchTerm;
         const enabledOnly = customShowEnabledOnly !== null ? customShowEnabledOnly : showEnabledOnly;
-
         const filteredBrands = brandsArray.filter((brand) => {
             const matchesSearch = !search ||
                 (brand._id?.toString().toLowerCase().includes(search.toLowerCase())) ||
                 (brand.id?.toString().toLowerCase().includes(search.toLowerCase())) ||
                 (brand.name?.toLowerCase().includes(search.toLowerCase()));
-
             const matchesStatus = !enabledOnly || brand.enabled;
             return matchesSearch && matchesStatus;
         });
-
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const paginatedBrands = filteredBrands.slice(startIndex, endIndex);
-
         setBrands(paginatedBrands);
         setPagination({
             currentPage: page,
@@ -136,12 +119,10 @@ export default function BrandsTable() {
             limit: limit
         });
     };
-
     // Load brands on component mount
     useEffect(() => {
         fetchBrands(1);
     }, []);
-
     // Apply filters when search or filter changes
     useEffect(() => {
         if (useClientPagination && allBrands.length > 0) {
@@ -151,7 +132,6 @@ export default function BrandsTable() {
             fetchBrands(1, pagination.limit, searchTerm, showEnabledOnly);
         }
     }, [searchTerm, showEnabledOnly]);
-
     // Handle page change
     const handlePageChange = (page) => {
         if (useClientPagination) {
@@ -160,7 +140,6 @@ export default function BrandsTable() {
             fetchBrands(page);
         }
     };
-
     // Handle items per page change
     const handleLimitChange = (valueOrEvent) => {
         // Handle both direct value (number) or event object
@@ -173,33 +152,28 @@ export default function BrandsTable() {
             console.error('Invalid value passed to handleLimitChange:', valueOrEvent);
             return; // Exit if we can't determine the value
         }
-
         if (useClientPagination) {
             applyClientPagination(allBrands, 1, newLimit);
         } else {
             fetchBrands(1, newLimit);
         }
     };
-
     // Handle brand view
     const handleViewBrand = (brand) => {
         setSelectedBrand(brand);
         setShowViewModal(true);
     };
-
     // Handle brand edit
     const handleEditBrand = (brand) => {
         setSelectedBrand(brand);
         setIsEditing(true);
         setShowModal(true);
     };
-
     // Handle brand delete confirmation
     const handleDeleteConfirm = (brand) => {
         setSelectedBrand(brand);
         setShowConfirmModal(true);
     };
-
     // Handle brand deletion
     const handleDeleteBrand = async (brandId) => {
         setIsLoading(true);
@@ -207,23 +181,19 @@ export default function BrandsTable() {
             const response = await fetch(`/api/brands/${brandId}`, {
                 method: 'DELETE',
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Error en eliminar la marca');
             }
-
             // Update the brands list by removing the deleted brand
             const updatedAllBrands = allBrands.filter(brand => (brand._id || brand.id) !== brandId);
             setAllBrands(updatedAllBrands);
-
             // Recalculate pagination with the updated brands list
             if (useClientPagination) {
                 applyClientPagination(updatedAllBrands, pagination.currentPage, pagination.limit);
             } else {
                 fetchBrands(pagination.currentPage);
             }
-
             setShowConfirmModal(false);
             toast.success('Marca eliminada correctament');
         } catch (error) {
@@ -233,26 +203,22 @@ export default function BrandsTable() {
             setIsLoading(false);
         }
     };
-
     // Handle adding new brand
     const handleAddBrand = () => {
         setSelectedBrand(null);
         setIsEditing(false);
         setShowModal(true);
     };
-
     // Handle form submission for add/edit
     const handleSaveBrand = async (formData) => {
         try {
             let response;
-
             // Add timestamps
             const now = new Date();
             const brandData = {
                 ...formData,
                 updatedAt: now
             };
-
             if (isEditing) {
                 // Update existing brand
                 response = await fetch(`/api/brands/${selectedBrand._id || selectedBrand.id}`, {
@@ -265,7 +231,6 @@ export default function BrandsTable() {
             } else {
                 // Create new brand - add createdAt timestamp
                 brandData.createdAt = now;
-
                 response = await fetch('/api/brands', {
                     method: 'POST',
                     headers: {
@@ -274,19 +239,15 @@ export default function BrandsTable() {
                     body: JSON.stringify(brandData),
                 });
             }
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Operació fallida');
             }
-
             const savedBrand = await response.json();
             toast.success(isEditing ? 'Marca actualitzada correctament' : 'Marca afegida correctament');
             setShowModal(false);
-
             if (useClientPagination) {
                 let updatedBrands;
-
                 if (isEditing) {
                     // Find and update the brand in the array
                     updatedBrands = allBrands.map(b =>
@@ -296,7 +257,6 @@ export default function BrandsTable() {
                     // Add the new brand to the beginning of the array
                     updatedBrands = [savedBrand, ...allBrands];
                 }
-
                 setAllBrands(updatedBrands);
                 // Always go to first page to see the newly added/edited brand
                 applyClientPagination(updatedBrands, 1, pagination.limit);
@@ -309,7 +269,6 @@ export default function BrandsTable() {
             toast.error(error.message || 'Error en desar la marca');
         }
     };
-
     return (
         <div className="bg-white rounded-lg shadow">
             {/* Header with title and actions */}
@@ -318,22 +277,13 @@ export default function BrandsTable() {
                 <div className="flex space-x-2">
                     <button
                         onClick={handleAddBrand}
-                        className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#008A9B] flex items-center cursor-pointer"
+                        className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#008A9B] flex items-center cursor-pointer"
                     >
                         <FiPlus className="mr-1" />
                         Afegir marca
-                    </button>
-                    {/* <button className="flex items-center px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
-                        <FiUpload className="mr-2" />
-                        Importa
-                    </button>
-                    <button className="flex items-center px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
-                        <FiDownload className="mr-2" />
-                        Exporta
-                    </button> */}
+                    </button> 
                 </div>
             </div>
-
             {/* Search and filters */}
             <div className="p-4 border-b border-gray-200">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -353,18 +303,13 @@ export default function BrandsTable() {
                                 type="checkbox"
                                 checked={showEnabledOnly}
                                 onChange={() => setShowEnabledOnly(!showEnabledOnly)}
-                                className="rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
+                                className="rounded border-gray-300 text-[#36A9E1] focus:ring-[#36A9E1]"
                             />
                             <span>Mostrar només actives</span>
                         </label>
-                        {/* <button className="flex items-center px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
-                            <FiFilter className="mr-2" />
-                            Filtres avançats
-                        </button> */}
                     </div>
                 </div>
             </div>
-
             {/* Brands table */}
             <div className="overflow-x-auto">
                 {loading ? (
@@ -469,7 +414,7 @@ export default function BrandsTable() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
                                                 <button
-                                                    className="text-[#00B0C8] hover:text-[#008A9B] cursor-pointer"
+                                                    className="text-[#36A9E1] hover:text-[#008A9B] cursor-pointer"
                                                     onClick={() => handleViewBrand(brand)}
                                                     title="Veure detalls"
                                                 >
@@ -510,7 +455,6 @@ export default function BrandsTable() {
                     </table>
                 )}
             </div>
-
             {/* Pagination */}
             {brands.length > 0 && (
                 <div className="px-4 py-3 border-t border-gray-200">
@@ -525,7 +469,6 @@ export default function BrandsTable() {
                     />
                 </div>
             )}
-
             {/* Brand View Modal */}
             {showViewModal && selectedBrand && (
                 <BrandViewModal
@@ -534,7 +477,6 @@ export default function BrandsTable() {
                     brand={selectedBrand}
                 />
             )}
-
             {/* Add/Edit Brand Modal */}
             {showModal && (
                 <BrandModal
@@ -545,7 +487,6 @@ export default function BrandsTable() {
                     onSave={handleSaveBrand}
                 />
             )}
-
             {/* Confirm Delete Modal */}
             {showConfirmModal && selectedBrand && (
                 <ConfirmModal

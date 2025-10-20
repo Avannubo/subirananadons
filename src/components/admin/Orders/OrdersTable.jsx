@@ -1,13 +1,17 @@
 // State for bulk status selector
 'use client';
-import { FiEye, FiTrash2, FiEdit } from 'react-icons/fi';
-import { FaRegFilePdf } from 'react-icons/fa';
+import { FiEye, FiTrash2, FiEdit, FiDownload } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import Pagination from '@/components/admin/shared/Pagination';
 import OrderDeleteModal from '@/components/admin/orders/OrderDeleteModal';
 import OrderEditModal from '@/components/admin/orders/OrderEditModal';
 import OrderViewModal from '@/components/admin/orders/OrderViewModal';
+
+// Helper to remove accents from a string
+const removeAccents = (str) => {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+};
 export default function OrdersTable({
     orders,
     filters,
@@ -112,29 +116,45 @@ export default function OrdersTable({
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
     useEffect(() => {
-        console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
-        console.log('Orders data:', orders);
+        //console.log(`OrdersTable received ${orders?.length || 0} orders for userRole ${userRole}`);
+        //console.log('Orders data:', orders);
     }, [orders, userRole]);
-    const viewPdf = async (pdfUrl) => {
-        if (!pdfUrl || pdfUrl === '#') {
-            toast.error('PDF no disponible');
-            return;
-        }
+    const handleDownloadPDF = async (order) => {
         try {
-            window.open(pdfUrl, '_blank');
+            const toastId = toast.loading('Generando PDF...');
+            const response = await fetch(`/api/invoices/${order.id}/pdf`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/pdf'
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al generar el PDF');
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Factura_${order.reference}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success('Factura descargada correctamente', { id: toastId });
         } catch (error) {
-            console.error('Error viewing PDF:', error);
-            toast.error('Error al visualizar el PDF');
+            console.error('Error downloading PDF:', error);
+            toast.error('Error al descargar el PDF');
         }
-    }; 
+    };
     // Filter the orders based on search criteria
     const filteredOrders = orders.filter((order) => {
         return (
-            (order.id?.toString() || '').includes(filters.searchId) &&
-            (order.reference?.toLowerCase() || '').includes(filters.searchReference.toLowerCase()) &&
-            (order.customer?.toLowerCase() || '').includes(filters.searchCustomer.toLowerCase()) &&
-            (order.total || '').includes(filters.searchTotal) &&
-            (order.payment?.toLowerCase() || '').includes(filters.searchPayment.toLowerCase())
+            removeAccents(order.id?.toString() || '').includes(removeAccents(filters.searchId)) &&
+            removeAccents(order.reference?.toLowerCase() || '').includes(removeAccents(filters.searchReference.toLowerCase())) &&
+            removeAccents(order.customer?.toLowerCase() || '').includes(removeAccents(filters.searchCustomer.toLowerCase())) &&
+            removeAccents(order.total || '').includes(removeAccents(filters.searchTotal)) &&
+            removeAccents(order.payment?.toLowerCase() || '').includes(removeAccents(filters.searchPayment.toLowerCase()))
         );
     });
     const handleSelectAll = (e) => {
@@ -291,7 +311,7 @@ export default function OrdersTable({
             )}
             {/* Orders Table */}
             <div className="overflow-x-auto">
-                <table className="w-full whitespace-nowrap">
+                <table className="w-full whitespace-nowrap ">
                     <thead className="bg-gray-50 text-gray-700 uppercase text-xs">
                         <tr>
                             {userRole === 'admin' && (
@@ -364,20 +384,20 @@ export default function OrdersTable({
                                         })()}
                                     </td>
                                     <td className="px-6 py-4">{order.date}</td>
-                                    <td className="px-6 py-4 text-sm flex flex-row items-center space-x-4 justify-center">
+                                    <td className="px-6 py-4 text-sm flex flex-row items-center space-x-4 justify-start">
                                         <button
-                                            onClick={() => viewPdf("/uploads/invoices/invoice-" + order.reference + ".pdf")}
+                                            onClick={() => handleDownloadPDF(order)}
                                             className="text-green-600 hover:text-green-800 flex items-center cursor-pointer"
                                             title={t.viewPDF}
                                         >
-                                            <FaRegFilePdf size={20} />
+                                            <FiDownload size={22} />
                                         </button>
                                         <button
-                                            className="text-[#00B0C8] hover:text-[#008A9B] mr-4 text-center cursor-pointer"
+                                            className="text-[#36A9E1] hover:text-[#008A9B] mr-4 text-center cursor-pointer"
                                             title={t.viewDetails}
                                             onClick={() => handleViewOrder(order)}
                                         >
-                                            <FiEye size={20} />
+                                            <FiEye size={22} />
                                         </button>
                                         {userRole === 'admin' && (
                                             <>
@@ -386,14 +406,14 @@ export default function OrdersTable({
                                                     title={t.editOrder}
                                                     onClick={() => handleEditOrder(order)}
                                                 >
-                                                    <FiEdit size={20} />
+                                                    <FiEdit size={22} />
                                                 </button>
                                                 <button
                                                     className="text-red-600 hover:text-red-900 text-center cursor-pointer"
                                                     title={t.deleteOrder}
                                                     onClick={() => handleDeleteOrder(order)}
                                                 >
-                                                    <FiTrash2 size={20} />
+                                                    <FiTrash2 size={22} />
                                                 </button>
                                             </>
                                         )}
@@ -412,7 +432,7 @@ export default function OrdersTable({
             </div>
             {/* Pagination */}
             {orders.length > 0 && (
-                <div className="px-4 py-3 border-t border-gray-200 sm:px-6">
+                <div className="px-4 py-3 border-t border-gray-200 sm:px-6 md:mb-0 mb-20">
                     <Pagination
                         currentPage={pagination.currentPage}
                         totalPages={pagination.totalPages}
@@ -420,7 +440,7 @@ export default function OrdersTable({
                         itemsPerPage={pagination.limit}
                         onPageChange={onPageChange}
                         onItemsPerPageChange={onLimitChange || ((newLimit) => {
-                            console.log('Items per page changed to', newLimit);
+                            //console.log('Items per page changed to', newLimit);
                         })}
                         showingText={locale === 'ca' ? 'Mostrant {} de {} comandes' : 'Mostrando {} de {} pedidos'}
                     />

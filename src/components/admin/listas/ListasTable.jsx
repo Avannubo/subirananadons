@@ -1,5 +1,9 @@
 'use client';
 import { useState, useRef } from 'react';
+// Helper to remove accents from a string
+const removeAccents = (str) => {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+};
 // Translation object for Catalan and Spanish
 const translations = {
     ca: {
@@ -42,8 +46,10 @@ const translations = {
         imageUploadSuccess: 'Imatge pujada correctament',
         imageUploadError: 'Error en pujar la imatge. Es desarà la llista sense la nova imatge.',
         requiredFields: 'Si us plau, completa tots els camps obligatoris',
+        babyname: 'Nom del nadó',
     },
     es: {
+        babyname: 'Nombre del bebé',
         id: 'ID',
         reference: 'Referencia',
         name: 'Nombre',
@@ -85,7 +91,6 @@ const translations = {
         requiredFields: 'Por favor complete todos los campos obligatorios',
     }
 };
-
 function getLocale() {
     if (typeof window !== 'undefined') {
         const lang = window.navigator.language || 'es';
@@ -101,6 +106,7 @@ import ListDeleteModal from './ListDeleteModal';
 import ListViewModal from './ListViewModal';
 import ListStatusModal from './ListStatusModal';
 export default function ListasTable({ lists, filters, setFilters, userRole = 'user', onUpdate }) {
+    // console.log('Rendering ListasTable with lists:', lists);
     const locale = getLocale();
     const t = translations[locale];
     const [showEditModal, setShowEditModal] = useState(false);
@@ -131,15 +137,15 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 }
                 if (typeof productName !== 'string') productName = '';
                 const productRef = item.product?.reference || '';
-                const searchTerm = (filters.searchProduct || '').toLowerCase();
-                return productName.toLowerCase().includes(searchTerm) ||
-                    productRef.toLowerCase().includes(searchTerm);
+                const searchTerm = removeAccents((filters.searchProduct || '').toLowerCase());
+                return removeAccents(productName.toLowerCase()).includes(searchTerm) ||
+                    removeAccents(productRef.toLowerCase()).includes(searchTerm);
             });
         return (
-            list.id.toString().includes(filters.searchId || '') &&
-            list.reference.toLowerCase().includes((filters.searchReference || '').toLowerCase()) &&
-            list.name.toLowerCase().includes((filters.searchName || '').toLowerCase()) &&
-            list.creator.toLowerCase().includes((filters.searchCreator || '').toLowerCase()) &&
+            removeAccents(list.id.toString()).includes(removeAccents(filters.searchId || '')) &&
+            removeAccents(list.babyName.toLowerCase()).includes(removeAccents((filters.searchBabyName || '').toLowerCase())) &&
+            removeAccents(list.name.toLowerCase()).includes(removeAccents((filters.searchName || '').toLowerCase())) &&
+            removeAccents(list.creator.toLowerCase()).includes(removeAccents((filters.searchCreator || '').toLowerCase())) &&
             hasMatchingProduct
         );
     });
@@ -412,7 +418,6 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
             toast.error('Error al imprimir la lista');
         }
     };
-
     const handleDownloadPDF = async (list) => {
         try {
             const toastId = toast.loading('Generando PDF...');
@@ -441,21 +446,19 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
         }
     };
     return (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-hidden  mb-20 md:mb-0">
             <div className="overflow-x-auto">
-                <table className="w-full whitespace-nowrap">
-                    <thead className="bg-gray-50 text-gray-700 uppercasªe text-xs">
+                <table className="w-full whitespace-nowrap mb-20 md:mb-0">
+                    <thead className="bg-gray-50 text-gray-700 uppercase text-xs">
                         <tr>
-                            <th className="px-6 py-3 text-left">{t.id}</th>
-                            <th className="px-6 py-3 text-left">{t.reference}</th>
-                            <th className="px-6 py-3 text-left">{t.name}</th>
-                            {userRole === 'admin' && <th className="px-6 py-3 text-left">{t.creator}</th>}
-                            <th className="px-6 py-3 text-left">{t.creationDate}</th>
-                            <th className="px-6 py-3 text-left">{t.dueDate}</th>
-                            <th className="px-6 py-3 text-left">{t.privacy}</th>
-                            <th className="px-6 py-3 text-left">{t.status}</th>
-                            <th className="px-6 py-3 text-left">{t.viewShare}</th>
-                            <th className="px-6 py-3 text-left">{t.documents}</th>
+                            <th className="px-6 py-3 text-left hidden md:table-cell">{t.id}</th>
+                            <th className="px-6 py-3 text-left">{t.babyname}</th>
+                            <th className="px-6 py-3 text-left hidden md:table-cell">{t.name}</th>
+                            {userRole === 'admin' && <th className="px-6 py-3 text-left hidden md:table-cell">{t.creator}</th>}
+                            <th className="px-6 py-3 text-left hidden md:table-cell">{t.dueDate}</th>
+                            <th className="px-6 py-3 text-left hidden md:table-cell">{t.status}</th>
+                            <th className="px-6 py-3 text-left hidden md:table-cell">{t.viewShare}</th>
+                            <th className="px-6 py-3 text-left hidden md:table-cell">{t.documents}</th>
                             <th className="px-6 py-3 text-left">{t.action}</th>
                         </tr>
                     </thead>
@@ -463,39 +466,61 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                         {filteredLists.length > 0 ?
                             (filteredLists.map((list, index) => (
                                 <tr key={index} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 w-[50px]">{index + 1}</td>
-                                    <td className="px-6 py-4 w-[100px] truncate">{list.reference}</td>
-                                    <td className="px-6 py-4 max-w-[150px] truncate" title={list.name}>{list.name}</td>
-                                    {userRole === 'admin' && <td className="px-6 py-4 w-[120px] truncate" title={list.creator}>{list.creator}</td>}
-                                    <td className="px-6 py-4 w-[120px]">{list.creationDate}</td>
-                                    <td className="px-6 py-4 w-[120px]">{list.dueDate}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.isPublic ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'}`}>
-                                            {list.isPublic ? t.public : t.private}
-                                        </span>
+                                    <td className="px-6 py-4 w-[50px] hidden md:table-cell">{index + 1}</td>
+                                    <td className="px-6 py-4 max-w-[200px] truncate">
+                                        <div className="flex flex-col">
+                                            <span>{list.babyName}</span>
+                                            <span className="text-xs text-gray-500 md:hidden">{list.name}</span>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 max-w-[220px] truncate hidden md:table-cell" title={list.name}>{list.name}</td>
+                                    {userRole === 'admin' && <td className="px-6 py-4 max-w-[150px] truncate hidden md:table-cell" title={list.creator}>{list.creator}</td>}
+                                    <td className="px-6 py-4 w-[120px] hidden md:table-cell">{list.dueDate}</td>
+                                    <td className="px-6 py-4 hidden md:table-cell">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${list.status === t.active ? 'bg-green-100 text-green-800' : list.status === t.completed ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
                                             {list.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm">
+                                    <td className="px-6 py-4 text-sm hidden md:table-cell">
                                         <div className="flex items-center justify-center space-x-3">
-                                            <button className="text-[#00B0C8] hover:text-[#008da0]" onClick={() => openViewModal(list)} title={t.viewDetails}><FiEye size={22} /></button>
+                                            <button className="text-[#36A9E1] hover:text-[#008da0]" onClick={() => openViewModal(list)} title={t.viewDetails}><FiEye size={22} /></button>
                                             <button className="text-indigo-600 hover:text-indigo-900" onClick={() => { const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`; navigator.clipboard.writeText(url).then(() => toast.success(t.linkCopied)).catch(() => toast.error(t.linkCopyError)); }} title={t.copyLink}><FiLink size={22} /></button>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm">
+                                    <td className="px-6 py-4 text-sm hidden md:table-cell">
                                         <div className="flex items-center justify-center space-x-3">
                                             <button className="text-green-600 hover:text-green-900" onClick={() => handleDownloadPDF(list)} title={t.downloadPDF}><FiDownload size={22} /></button>
                                             <button className="text-blue-600 hover:text-blue-900" onClick={() => handlePrintPDF(list)} title={t.printList}><FiPrinter size={22} /></button>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-sm">
-                                        <div className="flex items-center justify-center space-x-3">
+                                        {/* Desktop Actions */}
+                                        <div className="hidden md:flex items-center justify-center space-x-3">
                                             <button className="text-yellow-600 hover:text-yellow-900" onClick={() => openEditModal(list)} title={t.editList}><FiEdit size={22} /></button>
                                             <button className="text-purple-600 hover:text-purple-900" onClick={() => openStatusModal(list)} title={t.changeStatus}><FiToggleLeft size={22} /></button>
                                             <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)} title={t.deleteList}><FiTrash2 size={22} /></button>
+                                        </div>
+                                        {/* Mobile Actions */}
+                                        <div className="md:hidden flex flex-wrap items-start justify-start gap-4">
+                                            <div className="flex space-x-2">
+                                                <button className="text-[#36A9E1] hover:text-[#008da0]" onClick={() => openViewModal(list)} title={t.viewDetails}>
+                                                    <FiEye size={20} />
+                                                </button>
+                                                <button className="text-yellow-600 hover:text-yellow-900" onClick={() => openEditModal(list)} title={t.editList}>
+                                                    <FiEdit size={20} />
+                                                </button>
+                                                <button className="text-indigo-600 hover:text-indigo-900" onClick={() => {
+                                                    const url = `${window.location.origin}/listas-de-nacimiento/${list.id}`;
+                                                    navigator.clipboard.writeText(url)
+                                                        .then(() => toast.success(t.linkCopied))
+                                                        .catch(() => toast.error(t.linkCopyError));
+                                                }} title={t.copyLink}>
+                                                    <FiLink size={20} />
+                                                </button>
+                                                <button className="text-red-600 hover:text-red-900" onClick={() => openDeleteModal(list)} title={t.deleteList}>
+                                                    <FiTrash2 size={20} />
+                                                </button>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -509,7 +534,8 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                 </tr>)}
                     </tbody>
                 </table>
-            </div>{/* Using modular components for modals */}
+            </div>
+            {/* Using modular components for modals */} 
             <ListEditModal
                 showModal={showEditModal}
                 setShowModal={setShowEditModal}
@@ -532,6 +558,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                 setShowModal={setShowViewModal}
                 selectedList={selectedList}
                 listItems={listItems}
+                // rawData={}
                 itemsLoading={itemsLoading}
                 openEditModal={openEditModal}
                 openStatusModal={openStatusModal}

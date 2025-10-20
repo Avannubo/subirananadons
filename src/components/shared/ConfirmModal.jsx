@@ -1,8 +1,6 @@
 'use client';
-
 import { Dialog } from '@headlessui/react';
 import { FiX } from 'react-icons/fi';
-
 export default function ConfirmModal({
     isOpen,
     onClose,
@@ -15,7 +13,6 @@ export default function ConfirmModal({
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-
             <div className="fixed inset-0 flex items-center justify-center p-4">
                 <Dialog.Panel className="mx-auto max-w-md rounded-lg bg-white p-6 shadow-xl">
                     <div className="flex items-center justify-between mb-4">
@@ -31,13 +28,11 @@ export default function ConfirmModal({
                             <span className="sr-only">Cerrar</span>
                         </button>
                     </div>
-
                     <div className="mt-2">
                         <p className="text-sm text-gray-500">
                             {message}
                         </p>
                     </div>
-
                     <div className="mt-6 flex justify-end space-x-3">
                         <button
                             type="button"
@@ -49,7 +44,7 @@ export default function ConfirmModal({
                         <button
                             type="button"
                             onClick={onConfirm}
-                            className="inline-flex justify-center rounded-md border border-transparent bg-[#00B0C8] px-4 py-2 text-sm font-medium text-white hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:ring-offset-2"
+                            className="inline-flex justify-center rounded-md border border-transparent bg-[#36A9E1] px-4 py-2 text-sm font-medium text-white hover:bg-[#008A9B] focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:ring-offset-2"
                         >
                             {confirmText}
                         </button>

@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { use } from 'react';
 import ShopLayout from "@/components/Layouts/shop-layout";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -12,6 +11,51 @@ import { useTranslations } from 'next-intl';
 export default function BirthListPage({ params }) {
     const { locale, id } = use(params);
     const t = useTranslations('BirthListDetailPage');
+    // Robust name resolver: accepts object, proper string, or stringified object and returns localized string
+    const resolveName = (raw) => {
+        if (!raw) return 'N/D';
+        // object with locales
+        if (typeof raw === 'object') return raw.name[locale] || raw.name.es || raw.name.ca || raw.name || 'N/D';
+        if (typeof raw === 'string') {
+            const s = raw.trim();
+            // Try JSON.parse directly
+            try {
+                const parsed = JSON.parse(s);
+                if (parsed && typeof parsed === 'object') return parsed[locale] || parsed.es || parsed.ca || parsed.name || s;
+            } catch (e) {
+                // ignore
+            }
+            // Try converting single quotes to double quotes and parse
+            try {
+                const jsonish = s.replace(/(["'])?([a-zA-Z0-9_\-]+)\1?\s*:/g, '"$2":');
+                const normalized = jsonish.replace(/'/g, '"');
+                const parsed2 = JSON.parse(normalized);
+                if (parsed2 && typeof parsed2 === 'object') return parsed2[locale] || parsed2.es || parsed2.ca || parsed2.name || s;
+            } catch (e) {
+                // ignore
+            }
+            // Regex extraction for common patterns: es: 'text' or "es":"text"
+            const esMatch = s.match(/es\s*[:=]\s*['\"]([^'\"]+)['\"]/i);
+            if (esMatch) return esMatch[1];
+            const caMatch = s.match(/ca\s*[:=]\s*['\"]([^'\"]+)['\"]/i);
+            if (caMatch) return caMatch[1];
+            // Fallback: return first quoted chunk if it looks like an object literal
+            const quoteMatch = s.match(/['\"]([^'\"]+)['\"]/);
+            if (quoteMatch) return quoteMatch[1];
+            // Otherwise return the original string
+            return s;
+        }
+        return String(raw);
+    };
+    // Safe translation helper: returns fallback when a message key is missing for current locale
+    const safeT = (key, opts = {}, fallback = null) => {
+        try {
+            return t(key, opts);
+        } catch (err) {
+            // Missing message for locale -> return fallback or key
+            return fallback !== null ? fallback : key;
+        }
+    };
     const [selectedCategory, setSelectedCategory] = useState("Todos");
     const [sortBy, setSortBy] = useState("default");
     const [list, setList] = useState(null);
@@ -21,7 +65,8 @@ export default function BirthListPage({ params }) {
     const router = useRouter();
     const { addToCart } = useCart();
     // Remove or simplify unused states related to the modal
-    const [selectedProduct, setSelectedProduct] = useState(null);    // Calculate progress percentage based on item states (2=purchased, 1=reserved, 0=available)
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [hoveredId, setHoveredId] = useState(null);    // Calculate progress percentage based on item states (2=purchased, 1=reserved, 0=available)
     const calculateProgress = (items) => {
         if (!items || items.length === 0) return 0;
         const purchasedCount = items.filter(item => item.state === 2).length;
@@ -44,52 +89,69 @@ export default function BirthListPage({ params }) {
                     throw new Error(data.message || 'Failed to fetch birth list data');
                 }
                 // Format the data for display
-                const birthListData = data.data;
-                const progress = calculateProgress(birthListData.items);
+                const birthListData = data.data || {};
+                // Ensure items is always an array to avoid .map on null
+                const items = Array.isArray(birthListData.items) ? birthListData.items : [];
+                const progress = calculateProgress(items);
                 setList({
-                    id: birthListData._id,
-                    userId: birthListData.user?._id,
-                    babyName: birthListData.babyName,
-                    parents: birthListData.user ? birthListData.user.name : t('anonymous'),
-                    dueDate: birthListData.dueDate,
-                    title: birthListData.title,
-                    description: birthListData.description,
-                    image: birthListData.image,
-                    status: birthListData.status,
-                    isPublic: birthListData.isPublic,
+                    id: birthListData._id ?? birthListData.id ?? null,
+                    userId: birthListData.user?._id ?? birthListData.userId ?? null,
+                    babyName: birthListData.babyName ?? '',
+                    parents: birthListData.user?.name ?? t('anonymous'),
+                    dueDate: birthListData.dueDate ?? null,
+                    title: birthListData.title ?? '',
+                    description: birthListData.description ?? '',
+                    image: birthListData.image ?? null,
+                    status: birthListData.status ?? null,
+                    isPublic: birthListData.isPublic ?? false,
                     progress: progress,
                     message: birthListData.description || t('defaultThankYou'),
-                    products: birthListData.items.map(item => {
-                        let name = '';
-                        const prod = item.product;
-                        if (prod && prod.name && typeof prod.name === 'object') {
-                            name = prod.name[locale] || prod.name.es || prod.name.ca || prod.name.name || 'N/D';
-                        } else if (prod && prod.name) {
-                            name = prod.name;
-                        } else {
-                            name = 'N/D';
-                        }
+                    products: items.map(item => {
+                        // Defensive mapping: some items may have missing product objects
+                        const snapshot = item?.productSnapshot || {};
+                        const prod = item?.product || null;
+
+                        const getNameFrom = (src) => {
+                            if (!src) return null;
+                            if (typeof src === 'object') return src[locale] || src.es || src.ca || src.name || null;
+                            if (typeof src === 'string') return src;
+                            return null;
+                        };
+
+                        // Normalize name to always be a string for safe rendering and alt text
+                        const nameRaw = getNameFrom(snapshot.name) || getNameFrom(prod?.name) || 'N/D';
+                        const name = resolveName(nameRaw);
+                        const priceValue = Number(snapshot.price ?? prod?.price_incl_tax ?? prod?.price ?? 0) || 0;
+                        const priceStr = `${priceValue.toFixed(2).replace('.', ',')} €`;
+                        const category = snapshot.category ?? prod?.category ?? null;
+                        const brand = snapshot.brand ?? prod?.brand ?? '';
+                        const reference = snapshot.reference ?? prod?.reference ?? '';
+                        const image = snapshot.image ?? prod?.image ?? '/assets/images/Screenshot_4.png';
+                        const imageHover = snapshot.imageHover ?? prod?.imageHover ?? '';
+                        const discount = snapshot.discount ?? prod?.discount ?? null;
+
                         return {
-                            id: item._id,
-                            productId: prod._id,
+                            id: item?._id ?? null,
+                            productId: prod?._id ?? snapshot.product ?? null,
                             name,
-                            price: `${(item.productSnapshot?.price || prod.price_incl_tax).toFixed(2).replace('.', ',')} €`,
-                            priceValue: item.productSnapshot?.price || prod.price_incl_tax,
-                            discount: prod.discount,
-                            image: item.productSnapshot?.image || prod.image || '/assets/images/Screenshot_4.png',
-                            category: item.productSnapshot?.category || prod.category,
-                            brand: item.productSnapshot?.brand || prod.brand,
-                            reference: item.productSnapshot?.reference || prod.reference,
-                            status: item.state === 2 ? 'purchased' : item.state === 1 ? 'reserved' : 'available',
-                            state: item.state || 0,
-                            priority: item.priority
+                            price: priceStr,
+                            priceValue,
+                            discount,
+                            image,
+                            imageHover,
+                            category,
+                            brand,
+                            reference,
+                            status: item?.state === 2 ? 'purchased' : item?.state === 1 ? 'reserved' : 'available',
+                            state: item?.state || 0,
+                            priority: item?.priority || 0
                         };
                     })
                 });
-                // Extract unique categories from products
+                // Extract unique categories from products (defensive)
                 const uniqueCategoryIds = [];
                 birthListData.items.forEach(item => {
-                    const catId = item.product.category;
+                    const catId = (item.productSnapshot && item.productSnapshot.category) || (item.product && item.product.category) || null;
                     if (catId && !uniqueCategoryIds.includes(catId)) {
                         uniqueCategoryIds.push(catId);
                     }
@@ -100,7 +162,11 @@ export default function BirthListPage({ params }) {
                     try {
                         const res = await fetch(`/api/categories?ids=${uniqueCategoryIds.join(',')}`);
                         if (res.ok) {
-                            categoriesObjs = await res.json();
+                            const body = await res.json().catch(() => null);
+                            // Expecting an array or { data: [...] }
+                            if (Array.isArray(body)) categoriesObjs = body;
+                            else if (body && Array.isArray(body.data)) categoriesObjs = body.data;
+                            else categoriesObjs = [];
                         } else {
                             console.error('Failed to fetch category objects');
                         }
@@ -173,9 +239,9 @@ export default function BirthListPage({ params }) {
                         <svg className="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('errorLoadListTitle')}</h3>
-                        <p className="text-gray-500 mb-6">{t('errorLoadListDesc', { error })}</p>
-                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{safeT('errorLoadListTitle', {}, 'Error al cargar')}</h3>
+                        <p className="text-gray-500 mb-6">{safeT('errorLoadListDesc', { error }, `Error: ${error || ''}` || "Error al cargar la lista de nacimiento")}</p>
+                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#36A9E1] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>
                     </div>
@@ -197,7 +263,7 @@ export default function BirthListPage({ params }) {
                         <p className="text-gray-500 mb-6">
                             {!list ? t('listNotFoundDesc') : t('listInactiveDesc')}
                         </p>
-                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
+                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#36A9E1] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>
                     </div>
@@ -205,7 +271,6 @@ export default function BirthListPage({ params }) {
             </ShopLayout>
         );
     }
-
     // Show a different message for completed lists
     if (list.status === 'Completada') {
         return (
@@ -217,7 +282,7 @@ export default function BirthListPage({ params }) {
                         </svg>
                         <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('listCompletedTitle')}</h3>
                         <p className="text-gray-500 mb-6">{t('listCompletedDesc')}</p>
-                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#00B0C8] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
+                        <Link href="/listas-de-nacimiento" className="px-4 py-2 bg-[#36A9E1] text-white rounded-md hover:bg-[#008da0] transition-colors cursor-pointer">
                             {t('backToListsBtn')}
                         </Link>
                     </div>
@@ -225,7 +290,7 @@ export default function BirthListPage({ params }) {
             </ShopLayout>
         );
     }
-    const filteredProducts = list.products
+    const filteredProducts = (list?.products || [])
         .filter(product => selectedCategory === "Todos" || product.category === selectedCategory)
         .sort((a, b) => {
             switch (sortBy) {
@@ -234,7 +299,8 @@ export default function BirthListPage({ params }) {
                 case "price-desc":
                     return b.priceValue - a.priceValue;
                 case "name":
-                    return a.name.localeCompare(b.name);
+                    // Ensure name is string before comparing
+                    return String(a.name || '').localeCompare(String(b.name || ''));
                 default:
                     return 0;
             }
@@ -250,7 +316,7 @@ export default function BirthListPage({ params }) {
             // Format product for unified cart structure 
             const productForCart = {
                 id: product.productId,
-                name: product.name,
+                name: resolveName(product.name),
                 price: product.discount?.active ? product.discount.finalPrice : product.priceValue,
                 image: product.image,
                 brand: product.brand || '',
@@ -269,9 +335,9 @@ export default function BirthListPage({ params }) {
                 }
             };
             const success = await addToCart(productForCart, 1); if (success) {
-                console.log('Regalo añadido al carrito');
+                //console.log('Regalo añadido al carrito');
             } else {
-                console.log('No se pudo añadir el regalo al carrito');
+                //console.log('No se pudo añadir el regalo al carrito');
             }
         } catch (error) {
             console.error('Error adding gift to cart:', error);
@@ -299,7 +365,7 @@ export default function BirthListPage({ params }) {
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                         >
-                            {t('listTitle', { babyName: list?.babyName })}
+                            {safeT('listTitle', { babyName: list?.babyName }, `Lista de ${list?.babyName || ''}`)}
                         </motion.h1>
                         <motion.p
                             className="text-lg text-zinc-900 mb-2"
@@ -337,7 +403,7 @@ export default function BirthListPage({ params }) {
                         </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
-                                    className="bg-[#00B0C8] h-2 rounded-full transition-all duration-500"
+                                    className="bg-[#36A9E1] h-2 rounded-full transition-all duration-500"
                                     style={{ width: `${list.progress}%` }}
                                     title={t('giftsPurchasedTitle', { percent: list.progress })}
                                 />
@@ -346,7 +412,7 @@ export default function BirthListPage({ params }) {
                         <div className="flex space-x-4 relative">
                             <button
                                 onClick={handleShareClick}
-                                className="cursor-pointer px-4 py-2 bg-[#00B0C8] text-white rounded-full hover:bg-[#0090a8] transition-colors flex items-center gap-2"
+                                className="cursor-pointer px-4 py-2 bg-[#36A9E1] text-white rounded-full hover:bg-[#3f93ba] transition-colors flex items-center gap-2"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
@@ -356,68 +422,44 @@ export default function BirthListPage({ params }) {
                         </div>
                     </div>
                 </div>
-                {/* <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-                    <div className="w-full md:w-auto mb-4 md:mb-0 overflow-x-auto">
-                        <div className="inline-flex border border-gray-200 rounded-lg p-1 min-w-max bg-gray-50">
-                            {availableCategories.map((category, idx) => {
-                                let label = '';
-                                if (category === 'Todos') {
-                                    label = 'Todos';
-                                } else if (category && category.name) {
-                                    label = getTranslatedName(category.name);
-                                } else if (typeof category === 'string') {
-                                    label = category;
-                                } else {
-                                    label = 'N/D';
-                                }
-                                const isSelected = (selectedCategory && category && typeof selectedCategory === 'object' && typeof category === 'object')
-                                    ? selectedCategory._id === category._id
-                                    : selectedCategory === category;
-                                return (
-                                    <button
-                                        key={category._id ? category._id : label + idx}
-                                        onClick={() => setSelectedCategory(category)}
-                                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isSelected
-                                            ? 'bg-[#00B0C8] text-white shadow-sm'
-                                            : 'bg-transparent text-gray-600 hover:bg-gray-200'
-                                            }`}
-                                    >
-                                        {label}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div> */}
-                {/* <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-md"
-                    >
-                        <option value="default">{t('sortDefault')}</option>
-                        <option value="price-asc">{t('sortPriceAsc')}</option>
-                        <option value="price-desc">{t('sortPriceDesc')}</option>
-                        <option value="name">{t('sortName')}</option>
-                    </select> */}
                 {/* Products Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {filteredProducts.length > 0 ? (
                         filteredProducts.map((product) => (
                             <motion.div
                                 key={product.id}
-                                className="bg-white rounded-lg overflow-hidden shadow-sm flex flex-col h-full"
+                                className="bg-white rounded-lg overflow-hidden shadow-sm flex flex-col h-full group"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 whileHover={{ y: -3 }}
+                                onMouseEnter={() => setHoveredId(product.id)}
+                                onMouseLeave={() => setHoveredId(null)}
                             >
-                                <div className="relative w-full" style={{ aspectRatio: '1/0.8' }}>
-                                    <img
-                                        src={product.image}
-                                        alt={product.name}
-                                        className="object-contain"
-                                    />
+                                <div className="relative w-full overflow-hidden h-[200px] " style={{ aspectRatio: '1/0.8' }}>
+                                    {product.imageHover ? (
+                                        <>
+                                            <img
+                                                src={product.image}
+                                                alt={resolveName(product.name)}
+                                                className="object-contain h-[200px] w-full bg-white transition-opacity duration-300"
+                                                style={{ opacity: hoveredId === product.id ? 0 : 1 }}
+                                            />
+                                            <img
+                                                src={product.imageHover}
+                                                alt={`${resolveName(product.name)} - hover`}
+                                                className="object-contain h-[200px] w-full bg-white absolute inset-0 transition-opacity duration-300"
+                                                style={{ opacity: hoveredId === product.id ? 1 : 0 }}
+                                            />
+                                        </>
+                                    ) : (
+                                        <img
+                                            src={product.image}
+                                            alt={typeof product.name === 'string' ? product.name : (product.name?.[locale] || product.name?.es || product.name?.ca || 'Producto')}
+                                            className="object-contain h-[200px] w-full bg-white"
+                                        />
+                                    )}
                                     {product.status !== 'available' && (
-                                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
+                                        <div className="absolute inset-0 bg-black/60 h-[200px] backdrop-blur-[2px] flex items-center justify-center transition-all duration-300">
                                             <div className=" px-4 py-2 rounded-lg">
                                                 <span className="text-white text-lg font-medium uppercase tracking-wider">
                                                     {product.status === 'purchased' ? t('productPurchased') : t('productReserved')}
@@ -429,9 +471,7 @@ export default function BirthListPage({ params }) {
                                 <div className="p-3 flex flex-col flex-grow justify-between">
                                     <div>
                                         <h3 className="text-sm font-medium mb-1 h-10 line-clamp-2">
-                                            {product.name && typeof product.name === 'object'
-                                                ? (product.name[locale] || product.name.es || product.name.ca || product.name.name || 'N/D')
-                                                : product.name}
+                                            {resolveName(product.name)}
                                         </h3>
                                         <div className="flex flex-col items-start mb-2">
                                             {product.discount?.active ? (
@@ -444,7 +484,7 @@ export default function BirthListPage({ params }) {
                                                             -{product.discount.value}%
                                                         </span>
                                                     </div>
-                                                    <span className="text-sm font-semibold text-[#00B0C8]">
+                                                    <span className="text-sm font-semibold text-[#36A9E1]">
                                                         {product.discount.finalPrice?.toFixed(2)}€
                                                     </span>
                                                 </>
@@ -457,7 +497,7 @@ export default function BirthListPage({ params }) {
                                         {product.status === 'available' ? (
                                             <button
                                                 onClick={() => handleReserveClick(product)}
-                                                className="cursor-pointer w-full bg-[#00B0C8] text-white py-1.5 text-sm rounded-md hover:bg-[#0090a8] transition-colors"
+                                                className="cursor-pointer w-full bg-[#36A9E1] text-white py-1.5 text-sm rounded-md hover:bg-[#3f93ba] transition-colors"
                                             >
                                                 {t('addToCartBtn')}
                                             </button>

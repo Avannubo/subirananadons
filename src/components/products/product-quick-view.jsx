@@ -11,11 +11,9 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 export default function ProductQuickView({ product, onClose }) {
     const { addToCart } = useCart();
-
-
     // Get current locale from next-intl
     const locale = useLocale();
-    console.log(product.description);
+    //console.log(product.description);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(product?.imageUrl); // State for main image
     const { data: session } = useSession();
@@ -26,7 +24,6 @@ export default function ProductQuickView({ product, onClose }) {
             setSelectedImage(product.imageUrl);
         }
     }, [product]);
-
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -62,9 +59,6 @@ export default function ProductQuickView({ product, onClose }) {
         new Set([
             product.imageUrl,
             product.imageUrlHover,
-            // Add more actual image URLs from product data if available
-            // product.image3,
-            // product.image4,
         ].filter(Boolean))
     ).slice(0, 4); // Filter out falsy values, remove duplicates, and limit
     const handleThumbnailClick = (imageUrl) => {
@@ -124,7 +118,7 @@ export default function ProductQuickView({ product, onClose }) {
                                 {thumbnailImages.map((thumb, index) => (
                                     <div
                                         key={index}
-                                        className={`relative w-12 h-12 sm:w-16 sm:h-16 border rounded overflow-hidden cursor-pointer ${selectedImage === thumb ? 'border-[#00B0C8] border-2' : 'border-gray-200'}`}
+                                        className={`relative w-12 h-12 sm:w-16 sm:h-16 border rounded overflow-hidden cursor-pointer ${selectedImage === thumb ? 'border-[#36A9E1] border-2' : 'border-gray-200'}`}
                                         onClick={() => handleThumbnailClick(thumb)}
                                     >
                                         <img
@@ -183,25 +177,16 @@ export default function ProductQuickView({ product, onClose }) {
                                         </button>
                                     </div>
                                 </div>
-                                {/* Lista button */}
-                                {/* <div className='mb-3'>
-                                    <button
-                                        onClick={handleAddToWishlist}
-                                        className="w-full bg-gray-400 text-white uppercase p-2 py-3 rounded font-semibold transition duration-200 hover:bg-gray-500 mb-2"
-                                    >
-                                        Añadir a mi lista
-                                    </button>
-                                </div> */}
                                 {/* Comprar and Ver detalles side by side */}
                                 <div className="flex flex-row gap-2 mb-1">
                                     <button
-                                        className="cursor-pointer w-1/2 bg-black text-white py-3 rounded font-medium hover:bg-gray-700 transition duration-200"
+                                        className="cursor-pointer w-1/2 bg-transparent border-1 border-gray-300 hover:bg-gray-50 py-3 rounded font-medium  text-gray-800 transition duration-200"
                                         onClick={() => router.push(`/products/${product.id}`)}
                                     >
                                         Més informació
                                     </button>
                                     <button
-                                        className="cursor-pointer w-1/2 bg-[#00B0C8] text-white py-3 rounded font-medium hover:bg-[#0090a8] transition duration-200"
+                                        className="cursor-pointer w-1/2 bg-[#36A9E1] text-white py-3 rounded font-medium hover:bg-[#3f93ba] transition duration-200"
                                         onClick={handleAddToCart}
                                     >
                                         Afegir al carret

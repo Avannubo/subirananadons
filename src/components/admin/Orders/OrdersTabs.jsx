@@ -11,7 +11,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
         const lang = window.navigator.language || window.navigator.userLanguage;
         if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
     }
-
     // Translations
     const translations = {
         ca: {
@@ -73,9 +72,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
             errorExport: 'Error al exportar los pedidos: '
         }
     };
-
     const t = translations[locale];
-
     // Removed tab navigation logic
     const [isExporting, setIsExporting] = useState(false);
     const [rangeDropdownOpen, setRangeDropdownOpen] = useState(false);
@@ -102,11 +99,9 @@ export default function OrdersTabs({ userRole = 'user' }) {
         setCurrentPage,
         setLimit
     } = useOrders(userRole);
-
-
     // Initial fetch of all orders when component mounts
     useEffect(() => {
-        console.log(`OrdersTabs mounted with userRole: ${userRole}`);
+        //console.log(`OrdersTabs mounted with userRole: ${userRole}`);
         fetchOrders(pagination.currentPage, pagination.limit);
     }, [userRole]);
     // Fetch orders when filters change
@@ -152,7 +147,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             text-align: left;
                         }
                         th { 
-                            background-color: #00B0C8; 
+                            background-color: #36A9E1; 
                             color: white; 
                             font-weight: bold;
                         }
@@ -160,7 +155,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             background-color: #f9f9f9;
                         }
                         h1 { 
-                            color: #00B0C8; 
+                            color: #36A9E1; 
                             font-family: Arial, sans-serif;
                         }
                     </style>
@@ -245,7 +240,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             <p>${t.exportDate}: ${new Date().toLocaleDateString()}</p>
                             ${generateTableHtml()}
                             <div style="text-align: center; margin-top: 30px;">
-                                <button onclick="window.print(); window.close();" style="padding: 10px 20px; background-color: #00B0C8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                <button onclick="window.print(); window.close();" style="padding: 10px 20px; background-color: #36A9E1; color: white; border: none; border-radius: 4px; cursor: pointer;">
                                     ${t.printPDF}
                                 </button>
                             </div>
@@ -271,7 +266,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
             setIsExporting(false);
         }
     };
-
     // Helper function to trigger download
     const triggerDownload = (url, filename) => {
         const link = document.createElement('a');
@@ -285,20 +279,17 @@ export default function OrdersTabs({ userRole = 'user' }) {
             URL.revokeObjectURL(url);
         }, 100);
     };
-
     // Update filters and refresh table
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         const newFilters = { ...filters, [name]: value };
         setFilters(newFilters);
     };
-
     // Apply filters
     const applyFilters = () => {
         setPagination(prev => ({ ...prev, currentPage: 1 })); // Reset to first page
         fetchOrders(pagination.currentPage, pagination.limit, filters);
     };
-
     // Clear all filters
     const clearFilters = () => {
         setFilters({
@@ -324,7 +315,6 @@ export default function OrdersTabs({ userRole = 'user' }) {
     };
     // No tab filtering, show all orders
     const filteredOrders = orders;
-
     return (
         <div className="bg-white rounded-lg shadow">
             <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -350,7 +340,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                         </button> */}
                     {/* {userRole === 'admin' && (
                             <button
-                                className="flex items-center px-3 py-2 bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
+                                className="flex items-center px-3 py-2 bg-[#36A9E1] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
                                 onClick={() =>  }
                                 title="Añadir nuevo pedido"
                             >
@@ -372,7 +362,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div> */}
-                    {/* <div className="relative">
+            {/* <div className="relative">
                         <FiSearch className="absolute left-3 top-3 text-gray-400" />
                         <input
                             type="text"
@@ -394,7 +384,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
                             className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                         />
                     </div> */}
-                    {/* <div className="relative">
+            {/* <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -411,7 +401,7 @@ export default function OrdersTabs({ userRole = 'user' }) {
             {/* Order data table */}
             {loading ? (
                 <div className="py-20 text-center">
-                    <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
+                    <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#36A9E1]"></div>
                     <p className="mt-3 text-gray-600">{t.loading}</p>
                 </div>
             ) : (

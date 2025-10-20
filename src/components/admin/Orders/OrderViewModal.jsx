@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { FiX, FiPackage, FiMapPin, FiUser, FiCreditCard, FiTruck, FiCalendar, FiDollarSign, FiFileText, FiMessageSquare } from 'react-icons/fi';
-
 export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) {
     // Locale detection (default to 'ca')
     let locale = 'ca';
@@ -9,7 +8,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         const lang = window.navigator.language || window.navigator.userLanguage;
         if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
     }
-
     // Translations
     const translations = {
         ca: {
@@ -108,16 +106,14 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
     const [error, setError] = useState(null);
     const [loadingOrder, setLoadingOrder] = useState(false);
     const [products, setProducts] = useState({});
+    const [listsInfo, setListsInfo] = useState({});
     const [retryCount, setRetryCount] = useState(0);
     const MAX_RETRIES = 3;
-
     useEffect(() => {
         const fetchOrderDetails = async () => {
             if (!orderId) return;
-
             setLoadingOrder(true);
             setError(null);
-
             try {
                 const response = await fetch(`/api/orders/${orderId}`, {
                     method: 'GET',
@@ -125,7 +121,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                         'Content-Type': 'application/json',
                     },
                 });
-
                 let data;
                 try {
                     data = await response.json();
@@ -133,16 +128,14 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                     console.error('Error parsing response:', parseError);
                     throw new Error('Failed to parse server response');
                 }
-
                 if (!response.ok) {
                     throw new Error(data?.message || `Failed to fetch order (Status: ${response.status})`);
                 }
-
                 if (data.success && data.order) {
                     setOrder(data.order);
+                    // console.log('Fetched order data:', data.order);
                     setError(null);
                     setRetryCount(0);
-
                     if (data.order?.items?.length > 0) {
                         await fetchProductDetails(data.order.items);
                     }
@@ -152,7 +145,6 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             } catch (err) {
                 console.error('Error fetching order details:', err);
                 setError(err.message);
-
                 if (retryCount < MAX_RETRIES) {
                     setRetryCount(prev => prev + 1);
                     setTimeout(() => {
@@ -163,11 +155,9 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                 setLoadingOrder(false);
             }
         };
-
         if (isOpen && orderId) {
             fetchOrderDetails();
         }
-
         return () => {
             setOrder(null);
             setError(null);
@@ -175,24 +165,19 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             setRetryCount(0);
         };
     }, [isOpen, orderId, retryCount]);
-
     const fetchProductDetails = async (items) => {
         try {
             const productsMap = {};
-
             for (const item of items) {
                 if (item.product && !productsMap[item.product]) {
                     try {
                         const response = await fetch(`${window.location.origin}/api/products/${item.product}`);
-
                         if (!response.ok) {
                             console.error(`Failed to fetch product ${item.product}: ${response.status}`);
                             continue;
                         }
-
                         const data = await response.json();
-                        console.log('Product API response:', data);
-
+                        //console.log('Product API response:', data);
                         if (data.product) {
                             productsMap[item.product] = data.product;
                         } else if (data.success && data.data) {
@@ -205,16 +190,13 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                     }
                 }
             }
-
-            console.log('Final products map:', productsMap);
+            //console.log('Final products map:', productsMap);
             setProducts(productsMap);
         } catch (error) {
             console.error("Error fetching product details:", error);
         }
     };
-
-    if (!isOpen) return null;
-
+    // NOTE: keep hook declarations above this point. We'll early-return below after hooks are declared.
     const formatDate = (dateString) => {
         try {
             return new Date(dateString).toLocaleDateString(locale === 'ca' ? 'ca-ES' : 'es-ES', {
@@ -229,18 +211,15 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
             return dateString;
         }
     };
-
     const formatPrice = (price) => {
         if (!price || parseFloat(price) === 0) {
             return locale === 'ca' ? 'Gratuït' : 'Gratis';
         }
         return `${parseFloat(price).toFixed(2)} €`;
     };
-
     const mapStatus = (status) => {
         return t.statusMap[status] || status;
     };
-
     const getStatusColorClass = (status) => {
         const colorMap = {
             'pending': 'bg-yellow-100 text-yellow-800',
@@ -251,21 +230,117 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
         };
         return colorMap[status] || 'bg-gray-100 text-gray-800';
     };
-
     const getProductDetails = (productId) => {
         return products[productId] || null;
     };
 
+    // Fetch birth list and owner info for gift items in the order
+    const getListsInfoFromOrder = async (orderObj) => {
+        if (!orderObj || !Array.isArray(orderObj.items)) return {};
+        const listIds = [...new Set(orderObj.items
+            .filter(i => i.type === 'gift')
+            .map(i => (i.giftInfo && (i.giftInfo.listId || i.giftInfo.listId)) || i.listId)
+            .filter(Boolean))];
+
+        const result = {};
+        for (const listId of listIds) {
+            try {
+                // Try fetching the birth list
+                const res = await fetch(`${window.location.origin}/api/birthlists/${listId}`);
+                if (res.ok) {
+                    const body = await res.json().catch(() => null);
+                    const data = body?.data || body;
+                    if (data) {
+                        const ownerId = data.user?._id ?? data.userId ?? (data.user && data.user._id) ?? null;
+                        const ownerName = data.user?.name ?? data.user?.fullName ?? null;
+                        const ownerEmail = data.user?.email ?? null;
+                        result[listId] = {
+                            listId,
+                            title: data.title ?? data.name ?? null,
+                            babyName: data.babyName ?? null,
+                            ownerId,
+                            ownerName,
+                            ownerEmail
+                        };
+                        // if we don't have an email but we have an ownerId, try fetching user
+                        if (!result[listId].ownerEmail && ownerId) {
+                            try {
+                                const ures = await fetch(`${window.location.origin}/api/users/${ownerId}`);
+                                if (ures.ok) {
+                                    const ubody = await ures.json().catch(() => null);
+                                    const udata = ubody?.data || ubody?.user || ubody;
+                                    if (udata) {
+                                        result[listId].ownerEmail = udata.email ?? result[listId].ownerEmail;
+                                        result[listId].ownerName = result[listId].ownerName || udata.name || udata.fullName || null;
+                                    }
+                                }
+                            } catch (uerr) {
+                                console.error('Error fetching user for list owner:', uerr);
+                            }
+                        }
+                        continue;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching birth list', listId, err);
+            }
+
+            // Fallback: try to derive from order items' giftInfo and/or fetch owner
+            const itemWithList = orderObj.items.find(it => (it.giftInfo && (it.giftInfo.listId === listId)) || it.listId === listId);
+            const babyName = itemWithList?.giftInfo?.babyName ?? itemWithList?.babyName ?? null;
+            const ownerId = itemWithList?.giftInfo?.listOwnerId ?? itemWithList?.listOwnerId ?? null;
+            result[listId] = {
+                listId,
+                title: null,
+                babyName,
+                ownerId,
+                ownerName: null,
+                ownerEmail: null
+            };
+            if (ownerId) {
+                try {
+                    const ures2 = await fetch(`${window.location.origin}/api/users/${ownerId}`);
+                    if (ures2.ok) {
+                        const ubody2 = await ures2.json().catch(() => null);
+                        const udata2 = ubody2?.data || ubody2?.user || ubody2;
+                        if (udata2) {
+                            result[listId].ownerEmail = udata2.email ?? null;
+                            result[listId].ownerName = udata2.name ?? udata2.fullName ?? null;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error fetching user for ownerId fallback:', err);
+                }
+            }
+        }
+        return result;
+    };
+
+    // When order is loaded, fetch related lists info (gift lists)
+    useEffect(() => {
+        if (!order) return;
+        (async () => {
+            try {
+                const info = await getListsInfoFromOrder(order);
+                setListsInfo(info);
+                // console.log('Lists info for order:', info);
+            } catch (err) {
+                console.error('Error fetching lists info for order:', err);
+            }
+        })();
+    }, [order]);
+    // Early return only after all hooks are declared
+    if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-[#00000050] bg-opacity-50 z-50 flex justify-center items-center p-4">
-            <div className="bg-white rounded-lg shadow-lg w-full max-h-[90vh] flex flex-col">
+            <div className="bg-white rounded-lg shadow-lg w-full max-h-[90vh] flex flex-col mb-14">
                 {/* Header */}
-                <div className='rounded-lg overflow-hidden'>
+                <div className='rounded-lg overflow-y-auto '>
                     <div className="flex justify-between items-center border-b border-gray-300 p-4 sticky top-0 bg-white z-10">
                         <h3 className="text-xl font-semibold flex items-center">
-                            <FiPackage className="mr-2 text-[#00B0C8]" />
+                            <FiPackage className="mr-2 text-[#36A9E1]" />
                             {t.orderDetails}
-                            {order && <span className="ml-2 text-[#00B0C8]">#{order.orderNumber}</span>}
+                            {order && <span className="ml-2 text-[#36A9E1]">#{order.orderNumber}</span>}
                         </h3>
                         <button
                             onClick={onClose}
@@ -274,12 +349,11 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                             <FiX size={24} />
                         </button>
                     </div>
-
                     {/* Content */}
                     <div className="flex-grow overflow-auto rounded-lg">
                         {loadingOrder ? (
                             <div className="flex justify-center items-center py-12">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00B0C8]"></div>
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#36A9E1]"></div>
                             </div>
                         ) : error ? (
                             <div className="p-6">
@@ -288,20 +362,29 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                 </div>
                             </div>
                         ) : order ? (
-                            <div className="p-6">
+                            <div className="p-2 md:p-6">
                                 {/* Order Summary Card */}
                                 <div className="rounded-lg mb-6">
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                    <div className="flex flex-col md:flex-row gap-2">
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-blue-100 bg-opacity-10 p-2 rounded-full mr-3">
-                                                <FiCalendar className="text-[#00B0C8]" />
+                                                <FiCalendar className="text-[#36A9E1]" />
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-500">{t.date}</p>
                                                 <p className="font-medium text-sm">{formatDate(order.createdAt)}</p>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
+                                            <div className="bg-blue-100 p-2 rounded-full mr-3">
+                                                <FiTruck className="text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-500">{t.shipping}</p>
+                                                <p className="font-medium text-sm">{order.shippingCost === 0 ? 'Gratis' : formatPrice(order.shippingCost)}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-green-100 p-2 rounded-full mr-3">
                                                 <FiDollarSign className="text-green-600" />
                                             </div>
@@ -310,7 +393,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{formatPrice(order.totalAmount)}</p>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-purple-100 p-2 rounded-full mr-3">
                                                 <FiCreditCard className="text-purple-600" />
                                             </div>
@@ -319,7 +402,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                 <p className="font-medium text-sm">{order.paymentMethod || 'Pendiente'}</p>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center">
+                                        <div className="flex-1 bg-gray-50 rounded-lg p-2 border border-gray-200 flex items-center">
                                             <div className="bg-blue-100 p-2 rounded-full mr-3">
                                                 <FiTruck className="text-blue-600" />
                                             </div>
@@ -333,17 +416,17 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                     </div>
                                 </div>
                                 {/* Main content with 2 columns layout */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="flex flex-col md:flex-row gap-6">
                                     {/* Left Column - Customer Info and Shipping */}
-                                    <div className="space-y-6">
-                                        <div className="flex flex-row justify-between gap-4" >
+                                    <div className="flex flex-col gap-2 w-full md:w-[40%]">
+                                        <div className="flex flex-col md:flex-row justify-between gap-4" >
                                             {/* Customer Information */}
-                                            <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                                <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                    <FiUser className="mr-2 text-[#00B0C8]" /> {t.customerInfo}
+                                            <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col">
+                                                <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
+                                                    <FiUser className="mr-2 text-[#36A9E1]" /> {t.customerInfo}
                                                 </h4>
                                                 <div className="space-y-3 p-4">
-                                                    <div>
+                                                    <div className="space-y-1 p-2">
                                                         <p className="text-xs text-gray-500">{t.name}</p>
                                                         <p className="font-medium">{`${order.shippingAddress.name} ${order.shippingAddress.lastName}`}</p>
                                                     </div>
@@ -359,17 +442,17 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                             </div>
                                             {/* Shipping Information */}
                                             <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                                <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                    <FiMapPin className="mr-2 text-[#00B0C8]" /> {t.shippingAddress}
+                                                <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
+                                                    <FiMapPin className="mr-2 text-[#36A9E1]" /> {t.shippingAddress}
                                                 </h4>
                                                 {order.deliveryMethod === 'pickup' ? (
-                                                    <div className="p-4 flex flex-col items-center justify-center text-center text-[#00B0C8] font-semibold min-h-[150px]">
-                                                        <svg width="84px" height="84px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M22 22H2" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M20 22V11" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M4 22V11" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M16.5278 2H7.47214C6.26932 2 5.66791 2 5.18461 2.2987C4.7013 2.5974 4.43234 3.13531 3.89443 4.21114L2.49081 7.75929C2.16652 8.57905 1.88279 9.54525 2.42867 10.2375C2.79489 10.7019 3.36257 11 3.99991 11C5.10448 11 5.99991 10.1046 5.99991 9C5.99991 10.1046 6.89534 11 7.99991 11C9.10448 11 9.99991 10.1046 9.99991 9C9.99991 10.1046 10.8953 11 11.9999 11C13.1045 11 13.9999 10.1046 13.9999 9C13.9999 10.1046 14.8953 11 15.9999 11C17.1045 11 17.9999 10.1046 17.9999 9C17.9999 10.1046 18.8953 11 19.9999 11C20.6373 11 21.205 10.7019 21.5712 10.2375C22.1171 9.54525 21.8334 8.57905 21.5091 7.75929L20.1055 4.21114C19.5676 3.13531 19.2986 2.5974 18.8153 2.2987C18.332 2 17.7306 2 16.5278 2Z" stroke="#1C274C" strokeWidth="1.5" strokeLinejoin="round"></path> <path opacity="0.5" d="M9.5 21.5V18.5C9.5 17.5654 9.5 17.0981 9.70096 16.75C9.83261 16.522 10.022 16.3326 10.25 16.201C10.5981 16 11.0654 16 12 16C12.9346 16 13.4019 16 13.75 16.201C13.978 16.3326 14.1674 16.522 14.299 16.75C14.5 17.0981 14.5 17.5654 14.5 18.5V21.5" stroke="#1C274C" strokeWidth="1.5" strokeLinecap="round"></path> </g></svg>
-                                                        <span className="block mt-2 text-lg">{t.pickup}</span>
+                                                    <div className="p-2 flex flex-col h-full md:flex-row items-center justify-center text-center   rounded-lg  w-full gap-1 md:gap-4">
+                                                        <svg width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-1 md:mb-0 md:mr-2"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M22 22H2" stroke="#36A9E1" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M20 22V11" stroke="#36A9E1" strokeWidth="1.5" strokeLinecap="round"></path> <path opacity="0.5" d="M4 22V11" stroke="#36A9E1" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M16.5278 2H7.47214C6.26932 2 5.66791 2 5.18461 2.2987C4.7013 2.5974 4.43234 3.13531 3.89443 4.21114L2.49081 7.75929C2.16652 8.57905 1.88279 9.54525 2.42867 10.2375C2.79489 10.7019 3.36257 11 3.99991 11C5.10448 11 5.99991 10.1046 5.99991 9C5.99991 10.1046 6.89534 11 7.99991 11C9.10448 11 9.99991 10.1046 9.99991 9C9.99991 10.1046 10.8953 11 11.9999 11C13.1045 11 13.9999 10.1046 13.9999 9C13.9999 10.1046 14.8953 11 15.9999 11C17.1045 11 17.9999 10.1046 17.9999 9C17.9999 10.1046 18.8953 11 19.9999 11C20.6373 11 21.205 10.7019 21.5712 10.2375C22.1171 9.54525 21.8334 8.57905 21.5091 7.75929L20.1055 4.21114C19.5676 3.13531 19.2986 2.5974 18.8153 2.2987C18.332 2 17.7306 2 16.5278 2Z" stroke="#36A9E1" strokeWidth="1.5" strokeLinejoin="round"></path> <path opacity="0.5" d="M9.5 21.5V18.5C9.5 17.5654 9.5 17.0981 9.70096 16.75C9.83261 16.522 10.022 16.3326 10.25 16.201C10.5981 16 11.0654 16 12 16C12.9346 16 13.4019 16 13.75 16.201C13.978 16.3326 14.1674 16.522 14.299 16.75C14.5 17.0981 14.5 17.5654 14.5 18.5V21.5" stroke="#36A9E1" strokeWidth="1.5" strokeLinecap="round"></path> </g></svg>
+                                                        <span className="text-base font-semibold text-[#36A9E1] tracking-wide">{t.pickup}</span>
                                                     </div>
                                                 ) : (
                                                     <div className=" p-4 space-y-3">
-                                                        <div>
+                                                        <div className="space-y-1 p-2">
                                                             <p className="text-xs text-gray-500">{t.street}:</p>
                                                             <p className="font-medium ">{order.shippingAddress.address}</p>
                                                         </div>
@@ -399,8 +482,8 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         </div>
                                         {/* Notes */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                            <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                <FiMessageSquare className="mr-2 text-[#00B0C8]" /> {t.notes}
+                                            <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
+                                                <FiMessageSquare className="mr-2 text-[#36A9E1]" /> {t.notes}
                                             </h4>
                                             <p className="text-gray-700 p-4">
                                                 {order.notes || t.noNotes}
@@ -408,8 +491,8 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         </div>
                                         {/* Tracking */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                            <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                <FiTruck className="mr-2 text-[#00B0C8]" /> {t.tracking}
+                                            <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
+                                                <FiTruck className="mr-2 text-[#36A9E1]" /> {t.tracking}
                                             </h4>
                                             <p className="text-gray-700 p-4">
                                                 {order.trackingNumber
@@ -419,14 +502,15 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         </div>
                                     </div>
                                     {/* Right Column - Products and Order Summary */}
-                                    <div className="space-y-6">
+                                    <div className="space-y-6 w-full md:w-[60%]">
                                         {/* Products */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                            <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                <FiPackage className="mr-2 text-[#00B0C8]" /> {t.products}
+                                            <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
+                                                <FiPackage className="mr-2 text-[#36A9E1]" /> {t.products}
                                             </h4>
                                             <div className="overflow-x-auto">
-                                                <div className="overflow-x-auto" style={{ maxHeight: '300px', minHeight: '300px', height: '300px', overflowY: 'auto' }}>
+                                                <div className="md:overflow-x-auto md:max-h-[300px] min-h[200px] md:h-[200px] h-full">
+                                                    {/* style={{ maxHeight: '300px', minHeight: '200px', height: '200px', overflowY: 'auto' }} */}
                                                     <table className="min-w-full divide-y divide-gray-200">
                                                         <thead className="bg-gray-50">
                                                             <tr>
@@ -440,7 +524,13 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                     {t.type}
                                                                 </th>
                                                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                    {t.price}
+                                                                    Original
+                                                                </th>
+                                                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                    Descuento
+                                                                </th>
+                                                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                    Final
                                                                 </th>
                                                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                     {t.subtotal}
@@ -459,7 +549,7 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                                         <img
                                                                                             src={product.image}
                                                                                             alt={product.name || `Producto ${index + 1}`}
-                                                                                            className="h-full w-full object-cover"
+                                                                                            className="h-32 w-32 object-contain"
                                                                                         />
                                                                                     ) : (
                                                                                         <FiPackage className="text-gray-500" />
@@ -467,12 +557,27 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                                 </div>
                                                                                 <div className="ml-4">
                                                                                     <div className="text-sm font-medium text-gray-900 flex flex-col">
-                                                                                        <span>{product?.name.ca || product?.name || `Producto ${index + 1}`}</span>
-                                                                                        {(item.listName || item.list || item.listTitle) && (
-                                                                                            <span className="italic text-xs text-pink-600 mt-1">
-                                                                                                (Lista: {item.listName || item.list || item.listTitle})
-                                                                                            </span>
-                                                                                        )}
+                                                                                        <span>{product?.name?.ca || product?.name || `Producto ${index + 1}`}</span>
+                                                                                        {/* {(item.giftInfo?.listId || item.listId || item.list || item.listName || item.listTitle) && (
+                                                                                            
+                                                                                        )} */}
+                                                                                        {/* Show resolved list/baby/owner info when available */}
+                                                                                        {(() => {
+                                                                                            const lid = item.giftInfo?.listId || item.listId || null;
+                                                                                            if (lid && listsInfo && listsInfo[lid]) {
+                                                                                                const info = listsInfo[lid];
+                                                                                                return (<>
+                                                                                                    <span className="italic text-xs text-pink-600 mt-1">
+                                                                                                        Lista: {info.title || info.list || info.listTitle}
+                                                                                                    </span><span className="text-xs text-gray-600 mt-1 block">
+
+                                                                                                        {info.babyName ? `Bebé: ${info.babyName}` : null} {info.ownerEmail ? ` ` : null}<br></br>
+                                                                                                        Email propietario: {info.ownerEmail}
+                                                                                                    </span></>
+                                                                                                );
+                                                                                            }
+                                                                                            return null;
+                                                                                        })()}
                                                                                     </div>
                                                                                     <div className="text-xs text-gray-500 flex flex-col">
                                                                                         <span>Ref: {product?.reference || "N/A"}</span>
@@ -488,10 +593,16 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                                                             {item.type === 'gift' ? t.gift : t.personal}
                                                                         </td>
                                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                                                                            {formatPrice(item.price)}
+                                                                            {formatPrice(item.priceDetails?.originalPrice || item.price)}
+                                                                        </td>
+                                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-pink-600">
+                                                                            {item.priceDetails?.discountPercentage ? `-${item.priceDetails.discountPercentage}%` : '-'}
+                                                                        </td>
+                                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                                                            {formatPrice(item.priceDetails?.finalPrice || item.price)}
                                                                         </td>
                                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-                                                                            {formatPrice(item.price * item.quantity)}
+                                                                            {formatPrice((item.priceDetails?.finalPrice || item.price) * item.quantity)}
                                                                         </td>
                                                                     </tr>
                                                                 );
@@ -503,53 +614,48 @@ export default function OrderViewModal({ isOpen, onClose, orderId, isLoading }) 
                                         </div>
                                         {/* Order Summary */}
                                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                            <h4 className="text-md bg-gray-50 p-4 font-medium flex items-center border-b border-gray-300">
-                                                <FiCreditCard className="mr-2 text-[#00B0C8]" /> {t.orderSummary}
+                                            <h4 className="text-md bg-gray-50 p-2 font-medium flex items-center border-b border-gray-300">
+                                                <FiCreditCard className="mr-2 text-[#36A9E1]" /> {t.orderSummary}
                                             </h4>
                                             <div className="flex p-4 flex-row space-x-4 justify-between">
-
-                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center">
-                                                        <div className="mr-4 bg-blue-100 p-3 rounded-full">
-                                                            <FiTruck className="text-blue-600" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm font-medium">{t.shipping}</p>
-                                                            <p className="text-gray-600">{formatPrice(order.shippingCost) || t.pending}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center">
-                                                        <div className="mr-4 bg-purple-100 p-3 rounded-full">
-                                                            <FiCreditCard className="text-purple-600" />
-                                                        </div>
-                                                        <div>
+                                                <div className="grid grid-cols-2 md:flex md:flex-row gap-2 w-full">
+                                                    <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
+                                                        <div className="flex items-center mb-1">
+                                                            <div className="mr-2 bg-purple-100 p-2 rounded-full">
+                                                                <FiCreditCard className="text-purple-600" />
+                                                            </div>
                                                             <p className="text-sm font-medium">{t.taxes}</p>
-                                                            <p className="text-gray-600">{formatPrice(order.tax) || t.pending}</p>
                                                         </div>
+                                                        <p className="text-gray-600 text-sm ml-10">{formatPrice(order.tax) || t.pending}</p>
                                                     </div>
-                                                </div>
-                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center">
-                                                        <div className="mr-4 bg-green-100 p-3 rounded-full">
-                                                            <FiDollarSign className="text-green-600" />
+                                                    <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
+                                                        <div className="flex items-center mb-1">
+                                                            <div className="mr-2 bg-pink-100 p-2 rounded-full">
+                                                                <FiDollarSign className="text-pink-600" />
+                                                            </div>
+                                                            <p className="text-sm font-medium">Descuento Total</p>
                                                         </div>
-                                                        <div>
+                                                        <p className="text-pink-600 font-medium text-sm ml-10">
+                                                            {order.discounts?.total ? `-${formatPrice(order.discounts.total)}` : '-'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
+                                                        <div className="flex items-center mb-1">
+                                                            <div className="mr-2 bg-green-100 p-2 rounded-full">
+                                                                <FiDollarSign className="text-green-600" />
+                                                            </div>
                                                             <p className="text-sm font-medium">{t.subtotalLabel}</p>
-                                                            <p className="text-gray-600">{formatPrice(order.subtotal) || t.pending}</p>
                                                         </div>
+                                                        <p className="text-gray-600 text-sm ml-10">{formatPrice(order.subtotal) || t.pending}</p>
                                                     </div>
-                                                </div>
-                                                <div className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center">
-                                                        <div className="mr-4 bg-green-100 p-3 rounded-full">
-                                                            <FiDollarSign className="text-green-600" />
-                                                        </div>
-                                                        <div>
+                                                    <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-lg flex flex-col justify-center">
+                                                        <div className="flex items-center mb-1">
+                                                            <div className="mr-2 bg-green-100 p-2 rounded-full">
+                                                                <FiDollarSign className="text-green-600" />
+                                                            </div>
                                                             <p className="text-sm font-medium">{t.totalLabel}</p>
-                                                            <p className="text-gray-600">{formatPrice(order.totalAmount) || t.pending}</p>
                                                         </div>
+                                                        <p className="text-gray-600 text-sm ml-10">{formatPrice(order.totalAmount) || t.pending}</p>
                                                     </div>
                                                 </div>
                                             </div>

@@ -9,11 +9,6 @@ import OrdersTabs from '@/components/admin/orders/OrdersTabs';
 export default function PedidosPage() {
     const { data: session, status } = useSession();
     const userRole = session?.user?.role || 'user';
-    useEffect(() => {
-        console.log('Pedidos Page - Session Status:', status);
-        console.log('Pedidos Page - User Role:', userRole);
-        console.log('Pedidos Page - Session Data:', session);
-    }, [session, status, userRole]);
     // Get browser language (default to 'ca' if not found)
     let locale = 'ca';
     if (typeof window !== 'undefined' && window.navigator) {
@@ -106,15 +101,10 @@ export default function PedidosPage() {
         }
     };
     const heading = userRole === 'admin' ? translations[locale].admin : translations[locale].user;
-    useEffect(() => {
-        console.log('Pedidos Page - Session Status:', status);
-        console.log('Pedidos Page - User Role:', userRole);
-        console.log('Pedidos Page - Session Data:', session);
-    }, [session, status, userRole]);
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="py-6 min-h-[85vh] h-full\t">
+                <div className="md:py-6 md:min-h-[85vh] h-full">
                     <h1 className="text-2xl font-bold mb-6">
                         {heading}
                     </h1>
@@ -123,7 +113,7 @@ export default function PedidosPage() {
                     </div>
                     {loading ? (
                         <div className="py-20 text-center">
-                            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
+                            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#36A9E1]"></div>
                             <p className="mt-3 text-gray-600">loading...</p>
                         </div>
                     ) : (

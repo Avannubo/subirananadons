@@ -6,17 +6,14 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
     const [orderCount, setOrderCount] = useState(0);
     useEffect(() => {
         if (!client) return;
-
         const fetchOrderCount = async () => {
             try {
                 // Get all possible ID forms from the client object
-                const userId = client._id || client.id;
-                console.log('[ClientViewModal] Fetching orders for userId:', userId, 'Client:', client);
+                const userId = client._id || client.id; 
                 if (!userId) {
                     console.error('[ClientViewModal] No valid user ID found:', client);
                     return;
                 }
-
                 const res = await fetch(`/api/orders/count`, {
                     method: 'POST',
                     headers: {
@@ -31,20 +28,17 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                         }
                     })
                 });
-
                 if (!res.ok) {
                     throw new Error(`Failed to fetch order count: ${res.status} ${res.statusText}`);
                 }
-
                 const data = await res.json();
-                console.log('[ClientViewModal] Order count response:', data);
+                //console.log('[ClientViewModal] Order count response:', data);
                 setOrderCount(data.count || 0);
             } catch (err) {
                 console.error('[ClientViewModal] Error fetching order count:', err);
                 setOrderCount(0);
             }
         };
-
         fetchOrderCount();
     }, [client]);
     if (!client) return null;
@@ -110,7 +104,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                     {/* Header with client name */}
                     <div className="flex justify-between items-center p-4 border-b border-gray-300 bg-gray-50">
                         <Dialog.Title className="text-lg font-medium text-gray-800 flex items-center">
-                            <FiUser className="mr-2 text-[#00B0C8]" />
+                            <FiUser className="mr-2 text-[#36A9E1]" />
                             {client.name} {client.lastName}
                         </Dialog.Title>
                         <button
@@ -144,11 +138,6 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                         <h3 className="text-xl font-semibold text-gray-800">
                                             {client.name} {client.lastName}
                                         </h3>
-                                        {/* <p className="text-sm text-gray-500 mt-1">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${client.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                {client.active ? t.active : t.inactive}
-                                            </span>
-                                        </p> */}
                                         <p className="text-sm text-gray-600 mt-2">
                                             {t.clientSince} {formatDate(client.registrationDate)}
                                         </p>
@@ -160,7 +149,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                 {/* Contact Information */}
                                 <section className="border-b border-gray-200 pb-4 space-y-2">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiMail className="mr-2 text-[#00B0C8]" /> {t.contact}
+                                        <FiMail className="mr-2 text-[#36A9E1]" /> {t.contact}
                                     </h3>
                                     <div className="space-y-2">
                                         <div className='bg-gray-50 p-2 rounded-lg border border-gray-200'>
@@ -175,7 +164,7 @@ export default function ClientViewModal({ isOpen, onClose, client }) {
                                 </section>
                                 <section>
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-3 flex items-center">
-                                        <FiShoppingBag className="mr-2 text-[#00B0C8]" /> {t.purchaseHistory}
+                                        <FiShoppingBag className="mr-2 text-[#36A9E1]" /> {t.purchaseHistory}
                                     </h3>
                                     <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
                                         <span className="text-sm font-medium text-gray-500">{t.totalOrders}:</span>

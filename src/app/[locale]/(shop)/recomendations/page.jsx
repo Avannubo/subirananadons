@@ -34,7 +34,7 @@ export default function RecommendationsPage() {
                 if (!res.ok) throw new Error('Failed to fetch recommendations');
                 const data = await res.json();
                 setGroups(data.containers || []);
-                console.log("Fetched recommendation groups:", data.containers);
+                //console.log("Fetched recommendation groups:", data.containers);
             } catch (err) {
                 setGroups([]);
             } finally {
@@ -110,9 +110,9 @@ export default function RecommendationsPage() {
                                                     {g.category && g.category._id && (
                                                         <Link
                                                             href={`/products?category=${g.category._id}`}
-                                                            className="text-[#0090a8] hover:underline"
+                                                            className="text-[#3f93ba] hover:underline"
                                                         >
-                                                            <span className="ml-2 text-sm text-[#0090a8]">({g.category.name?.[locale]})</span>
+                                                            <span className="ml-2 text-sm text-[#3f93ba]">({g.category.name?.[locale]})</span>
                                                         </Link>
                                                     )}
                                                 </motion.li>

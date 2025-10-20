@@ -1,27 +1,22 @@
 import { NextResponse } from 'next/server';
 import User from '@/models/User';
 import dbConnect from '@/lib/dbConnect';
-
 export async function POST(request) {
     await dbConnect();
-
     try {
         const { name, email, password } = await request.json();
-
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return NextResponse.json(
-                { error: 'User already exists' },
+                { error: 'El usuario ya existe' },
                 { status: 400 }
             );
         }
-
         // Split full name into first and last names
         const nameParts = name.split(' ');
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
-
         // Create new user with only essential fields
         const user = await User.create({
             firstName,
@@ -30,7 +25,6 @@ export async function POST(request) {
             password,
             // All other fields will use their default values from the schema
         });
-
         return NextResponse.json({
             success: true,
             user: {
@@ -42,7 +36,7 @@ export async function POST(request) {
         });
     } catch (error) {
         return NextResponse.json(
-            { error: error.message || 'Registration failed' },
+            { error: error.message || 'Error en el registro' },
             { status: 400 }
         );
     }

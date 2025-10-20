@@ -6,29 +6,23 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
     const [loading, setLoading] = useState(true);
     const [usingSampleData, setUsingSampleData] = useState(false);
     const [error, setError] = useState(null);
-
     useEffect(() => {
         const getProducts = async () => {
             try {
                 setLoading(true);
                 setError(null);
-
                 // If forceUseSampleData is true, use sample data
                 // if (forceUseSampleData) {
                 //     setProducts(sampleFeaturedProducts.slice(0, limit));
                 //     setUsingSampleData(true);
                 //     return;
                 // }
-
                 // Fetch data from API
                 const response = await fetch(`/api/products/featured?limit=${limit}`);
-
                 if (!response.ok) {
                     throw new Error(`API request failed with status: ${response.status}`);
                 }
-
                 const data = await response.json();
-
                 // Check API response format
                 if (data.success && Array.isArray(data.products)) {
                     if (data.products.length > 0) {
@@ -52,10 +46,8 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
                 setLoading(false);
             }
         };
-
         getProducts();
     }, [limit, forceUseSampleData]);
-
     if (loading) {
         return (
             <div className="w-full py-8">
@@ -70,11 +62,9 @@ export default function FeaturedProducts({ limit = 8, forceUseSampleData = false
             </div>
         );
     }
-
     if (products.length === 0) {
         return null; // Don't render the section if there are no products
     }
-
     return (
         <div className="w-full py-8 p-12">
             <div className="container mx-auto px-2">

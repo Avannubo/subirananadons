@@ -201,14 +201,23 @@ export default function Page() {
     const handleAddToCart = async () => {
         if (!product) return;
         try {
+            const isDiscountActive = () => {
+                if (!product.discount?.active) return false;
+                const now = new Date();
+                const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
+                const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
+                if (!startDate && !endDate) return true;
+                if (startDate && !endDate) return now >= startDate;
+                if (!startDate && endDate) return now <= endDate;
+                return now >= startDate && now <= endDate;
+            };
             // Create a product object with the correct price structure
             const productToAdd = {
                 ...product,
                 price: `${product.price_incl_tax?.toFixed(2).replace('.', ',')} €`,  // Formatted price string
                 priceValue: product.price_incl_tax,  // Numerical value for calculations
-                finalPrice: product.discount?.active ? product.discount.finalPrice : product.price_incl_tax
+                finalPrice: (product.discount?.active && isDiscountActive()) ? product.discount.finalPrice : product.price_incl_tax
             };
-
             await addToCart(productToAdd, quantity);
             // toast.success(`${quantity} ${product.name} ${t(addedToCart)} `);//añadido al carrito
         } catch (error) {
@@ -308,7 +317,7 @@ export default function Page() {
                     <div className="text-center py-16">
                         <h2 className="text-2xl text-red-500 mb-4">{t('errorTitle')}</h2>
                         <p className="text-gray-600">{error || t('errorNotFound')}</p>
-                        <a href="/products" className="mt-6 inline-block bg-[#00B0C8] text-white py-2 px-6 rounded-md hover:bg-[#009bb1]">
+                        <a href="/products" className="mt-6 inline-block bg-[#36A9E1] text-white py-2 px-6 rounded-md hover:bg-[#3f93ba]">
                             {t('backToShop')}
                         </a>
                     </div>
@@ -320,7 +329,7 @@ export default function Page() {
         <ShopLayout>
             <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 mt-20">
                 {/* Breadcrumb */}
-                <nav className="mb-6   sm:mb-8 overflow-x-auto mt-10 border-b border-[#00B0C8]">
+                <nav className="mb-6   sm:mb-8 overflow-x-auto mt-10 border-b border-[#36A9E1]">
                     <ol className="hidden pl-2 md:flex items-center space-x-2 text-xs sm:text-sm text-gray-500 min-w-[200px]">
                         <li><a href="/products" className="hover:text-gray-700">{t('breadcrumbProducts')}</a></li>
                         {/* Render full category path if possible */}
@@ -356,7 +365,6 @@ export default function Page() {
                                 </svg>
                             </div>
                         </motion.div>
-
                         {/* Fullscreen Preview Modal */}
                         <AnimatePresence>
                             {showFullscreen && (
@@ -392,7 +400,7 @@ export default function Page() {
                                                 <div
                                                     key={index}
                                                     className={`relative border border-gray-200 rounded-md overflow-hidden \
-                                                        ${selectedImage === index ? 'ring-2 ring-[#00B0C8]' : 'ring-1 ring-gray-200'}\
+                                                        ${selectedImage === index ? 'ring-2 ring-[#36A9E1]' : 'ring-1 ring-gray-200'}\
                                                         w-[90px] xs:w-[120px] sm:w-[140px] md:w-[180px] flex-shrink-0`}
                                                 >
                                                     <div
@@ -417,10 +425,21 @@ export default function Page() {
                     {/* Product Info */}
                     <div className="space-y-6">
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{typeof product.name === 'object' ? product.name[locale] : product.name}</h1>
-
                         {/* Price and Discount Section */}
                         <div className="flex flex-col gap-2">
-                            {product.discount?.active ? (
+                            {product.discount?.active && (() => {
+                                const now = new Date();
+                                const startDate = product.discount.startDate ? new Date(product.discount.startDate) : null;
+                                const endDate = product.discount.endDate ? new Date(product.discount.endDate) : null;
+                                // If no dates are set, discount is always active
+                                if (!startDate && !endDate) return true;
+                                // If only start date is set, check if current date is after start
+                                if (startDate && !endDate) return now >= startDate;
+                                // If only end date is set, check if current date is before end
+                                if (!startDate && endDate) return now <= endDate;
+                                // If both dates are set, check if current date is within range
+                                return now >= startDate && now <= endDate;
+                            })() ? (
                                 <>
                                     <div className="flex items-center gap-4">
                                         <p className="text-2xl sm:text-3xl font-bold text-red-600">
@@ -455,7 +474,6 @@ export default function Page() {
                                 </p>
                             )}
                         </div>
-
                         <div className="space-y-4">
                             {/* Only show the first two plain lines of the description, remove the rest */}
                             {(() => {
@@ -471,23 +489,6 @@ export default function Page() {
                                     <p key={idx} className="text-gray-600 break-words">{line}</p>
                                 ));
                             })()}
-                            {/* <div className="py-4">
-                                <h3 className="font-bold text-gray-900 mb-2">{t('detailsTitle')}</h3>
-                                <ul className="list-disc list-inside space-y-1 text-gray-600">
-                                    {product.details.dimensions && (
-                                        <li>{t('dimensions')}: {product.details.dimensions}</li>
-                                    )}
-                                    {product.details.washingInstructions && (
-                                        <li>{t('washingInstructions')}: {product.details.washingInstructions}</li>
-                                    )}
-                                    {product.details.reference && (
-                                        <li>{t('reference')}: {product.details.reference}</li>
-                                    )} 
-                                    {product.details.brand && (
-                                        <li>{t('brand')}: {product.details.brand}</li>
-                                    )}
-                                </ul>
-                            </div>*/}
                             {/* Quantity Selector */}
                             <div className="flex flex-wrap items-center space-x-2 ">
                                 <span className="text-gray-700">{t('quantity')}:</span>
@@ -510,7 +511,7 @@ export default function Page() {
                             {/* Add to Cart Button */}
                             <button
                                 onClick={handleAddToCart}
-                                className="cursor-pointer w-full bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#009bb1] transition-colors duration-200 mt-2"
+                                className="cursor-pointer w-full bg-[#36A9E1] text-white py-3 px-6 rounded-md hover:bg-[#3f93ba] transition-colors duration-200 mt-2"
                             >
                                 {t('addToCart')}
                             </button>
@@ -542,7 +543,7 @@ export default function Page() {
                                     key={tab}
                                     // onClick={() => setActiveTab(idx === 0 ? 'DETALLES DEL PRODUCTO' : 'DETALLES DEL PRODUCTO')}
                                     className={`pb-4 px-1 select-none text-xs sm:text-sm font-medium ${activeTab === (idx === 0 ? 'DETALLES DEL PRODUCTO' : 'DETALLES DEL PRODUCTO')
-                                        ? 'border-b-2 border-[#00B0C8] text-[#00B0C8]'
+                                        ? 'border-b-2 border-[#36A9E1] text-[#36A9E1]'
                                         : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
                                 >
@@ -579,24 +580,6 @@ export default function Page() {
                                 </>;
                             })()}
                         </div>
-                        {/* {activeTab === 'DETALLES DEL PRODUCTO' && (
-                            <div className="prose max-w-none">
-                                <ul className="list-disc list-inside space-y-2 text-gray-600">
-                                {product.details.dimensions && (
-                                        <li>{t('dimensions')}: {product.details.dimensions}</li>
-                                    )}
-                                    {product.details.washingInstructions && (
-                                        <li>{t('washingInstructions')}: {product.details.washingInstructions}</li>
-                                    )}
-                                    {product.details.reference && (
-                                        <li>{t('reference')}: {product.details.reference}</li>
-                                    )} 
-                                    {product.details.brand && (
-                                        <li>{t('brand')}: {product.details.brand}</li>
-                                    )} 
-                                </ul>
-                            </div>
-                        )} */}
                     </div>
                 </div>
                 {/* Related Products */}

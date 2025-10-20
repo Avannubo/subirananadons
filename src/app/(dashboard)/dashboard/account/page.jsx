@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
-import Image from 'next/image';
 import AuthCheck from '@/components/auth/AuthCheck';
 import AdminLayout from '@/components/Layouts/admin-layout';
 import { useUser } from '@/contexts/UserContext';
@@ -10,6 +9,7 @@ export default function Page() {
     const { data: session, update: updateSession } = useSession();
     const { user: globalUser, updateUser, refreshUser } = useUser();
     const [loading, setLoading] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const [userData, setUserData] = useState({
         firstName: '',
         lastName: '',
@@ -25,6 +25,67 @@ export default function Page() {
     const [imagePreview, setImagePreview] = useState('');
     const [isUpdating, setIsUpdating] = useState(false);
     const [lastUpdate, setLastUpdate] = useState(null);
+
+    // Localization: prefer browser locale when in dashboard (client-side)
+    const getBrowserLang = () => {
+        if (typeof window === 'undefined') return 'es';
+        const nav = window.navigator.language || window.navigator.userLanguage || 'es';
+        return nav.split('-')[0];
+    };
+    const lang = getBrowserLang() === 'ca' ? 'ca' : 'es';
+    const L = {
+        ca: {
+            title: 'El meu compte',
+            subtitle: 'Les meves dades',
+            firstName: 'Nom',
+            lastName: 'Cognoms',
+            nameHelp: "Només es permeten lletres i el punt (.), seguits d'un espai.",
+            email: 'Correu electrònic',
+            password: 'Contrasenya',
+            change: 'Canviar',
+            newPassword: 'Nova contrasenya',
+            newPasswordPlaceholder: 'Escriu la nova contrasenya',
+            min6: 'Mínim 6 caràcters',
+            saving: 'Desant...',
+            updating: 'Actualitzant...',
+            saveChanges: 'Desar canvis',
+            cancelEdit: 'Cancel·lar',
+            editInfo: 'Editar dades',
+            lastUpdateText: 'Última actualització:',
+            imgProcessing: "Processant la imatge...",
+            usingLocalImage: "Utilitzant imatge local",
+            uploadFailed: "Error en pujar la imatge",
+            uploadSuccess: 'Imatge pujada correctament',
+            profileUpdated: 'Perfil actualitzat correctament. Es tancarà la sessió.',
+            updateError: 'Error en actualitzar el perfil'
+        },
+        es: {
+            title: 'Mi cuenta',
+            subtitle: 'Mis datos',
+            firstName: 'Nombre',
+            lastName: 'Apellidos',
+            nameHelp: 'Solo se permiten letras y el punto (.), seguidos de un espacio.',
+            email: 'Correo electrónico',
+            password: 'Contraseña',
+            change: 'Cambiar',
+            newPassword: 'Nueva contraseña',
+            newPasswordPlaceholder: 'Escribe la nueva contraseña',
+            min6: 'Mínimo 6 caracteres',
+            saving: 'Guardando...',
+            updating: 'Actualizando...',
+            saveChanges: 'Guardar cambios',
+            cancelEdit: 'Cancelar',
+            editInfo: 'Editar datos',
+            lastUpdateText: 'Última actualización:',
+            imgProcessing: 'Procesando la imagen...',
+            usingLocalImage: 'Usando imagen local',
+            uploadFailed: 'Error al subir la imagen',
+            uploadSuccess: 'Imagen subida correctamente',
+            profileUpdated: 'Perfil actualizado correctamente. Se cerrará la sesión.',
+            updateError: 'Error al actualizar el perfil'
+        }
+    };
+    const t = (key) => (L[lang] && L[lang][key]) || L['es'][key] || key;
     useEffect(() => {
         if (session?.user) {
             const nameParts = session.user.name?.split(' ') || ['', ''];
@@ -60,7 +121,7 @@ export default function Page() {
     const uploadImage = async () => {
         if (!selectedImage) return null;
         // Create a loading toast that can be updated
-        const toastId = toast.loading('Processant la imatge...');
+        const toastId = toast.loading(t('imgProcessing'));
         // Set updating state to show loading UI
         setIsUpdating(true);
         try {
@@ -70,7 +131,6 @@ export default function Page() {
                 reader.onloadend = () => resolve(reader.result);
                 reader.readAsDataURL(selectedImage);
             });
-            console.log('Image converted to base64, uploading to server...');
             // Upload using our server API endpoint (which handles Cloudinary authentication)
             const response = await fetch('/api/cloudinary/upload', {
                 method: 'POST',
@@ -93,20 +153,20 @@ export default function Page() {
                 // When server-side upload fails, fall back to using the base64 image directly
                 // but only in development to avoid database bloat in production
                 if (process.env.NODE_ENV === 'development') {
-                    console.log('Using base64 image as fallback in development');
-                    toast.success('S\'està utilitzant la imatge local', { id: toastId });
+                    //console.log('Using base64 image as fallback in development');
+                    toast.success(t('usingLocalImage'), { id: toastId });
                     setIsUpdating(false);
                     return base64Image;
                 } else {
-                    toast.error('No s\'ha pogut pujar la imatge', { id: toastId });
+                    toast.error(t('uploadFailed'), { id: toastId });
                     setIsUpdating(false);
                     return null;
                 }
             }
             // If the request was successful, parse the response
             const data = await response.json();
-            console.log('Server upload successful, Cloudinary URL:', data.url);
-            toast.success('Imatge pujada correctament!', { id: toastId });
+            //console.log('Server upload successful, Cloudinary URL:', data.url);
+            toast.success(t('uploadSuccess'), { id: toastId });
             // Set the image preview directly from the Cloudinary URL to update UI immediately
             setImagePreview(data.url);
             // Record the time of the last update
@@ -116,10 +176,10 @@ export default function Page() {
             return data.url;
         } catch (error) {
             console.error('Error in image upload process:', error);
-            toast.error('No s\'ha pogut pujar la imatge', { id: toastId });
+            toast.error(t('uploadFailed'), { id: toastId });
             // In development, use the base64 image as fallback
             if (process.env.NODE_ENV === 'development') {
-                console.log('Using base64 image as fallback due to error');
+                //console.log('Using base64 image as fallback due to error');
                 setIsUpdating(false);
                 return imagePreview;
             }
@@ -171,7 +231,7 @@ export default function Page() {
                 throw new Error(responseData.message || 'Error en actualitzar el perfil');
             }
             setLastUpdate(new Date().toISOString());
-            toast.success('Perfil actualitzat correctament. Se tancarà la sessió.');
+            toast.success(t('profileUpdated'));
             // Reset state after successful update
             if (showPasswordChange && newPassword) {
                 setNewPassword('');
@@ -185,7 +245,7 @@ export default function Page() {
                 signOut({ callbackUrl: '/' });
             }
         } catch (error) {
-            toast.error(error.message || 'Error en actualitzar el perfil');
+            toast.error(error.message || t('updateError'));
         } finally {
             setLoading(false);
             setIsUpdating(false);
@@ -194,215 +254,158 @@ export default function Page() {
     return (
         <AuthCheck>
             <AdminLayout>
-                <div className="mx-auto p-6 min-h-[90vh]">
-                    <h1 className="text-2xl font-bold mb-6">El meu compte</h1>
+                <div className="md:mx-auto md:p-6 md:min-h-[90vh]">
+                    <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
                     <div className="bg-white rounded-lg p-6">
-                        <h2 className="text-xl font-semibold mb-6 border-b border-gray-300 pb-2">Informació personal</h2>
-                        <form className="space-y-6" onSubmit={handleSubmit}>
-                            {/* Profile Image */}
-                            {/* <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 mb-6">
-                                <div className="w-32 h-32 relative rounded-full overflow-hidden border-2 border-gray-200">
-                                    {isUpdating && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
-                                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-                                        </div>
-                                    )}
-                                    <img
-                                        src={imagePreview || userData.image || '/assets/images/joie.png'}
-                                        alt="Profile"
-                                        width={128}
-                                        height={128}
-                                        className="object-cover w-full h-full"
-                                    />
-                                </div>  
-                                <div className="flex flex-col justify-center">
-                                    <label
-                                        htmlFor="profileImage"
-                                        className={`px-4 py-2 text-white rounded-md text-center ${isUpdating
-                                            ? 'bg-gray-400 cursor-not-allowed'
-                                            : 'bg-[#00B0C8] hover:bg-[#00B0C890] cursor-pointer'
-                                            }`}
-                                    >
-                                        {isUpdating ? 'Uploading...' : 'Change image'}
-                                    </label>
-                                    <input
-                                        type="file"
-                                        id="profileImage"
-                                        accept="image/*"
-                                        onChange={handleImageChange}
-                                        disabled={isUpdating}
-                                        className="hidden"
-                                    />
-                                    <p className="mt-2 text-xs text-gray-500">
-                                        Formatos recomendados: JPG, PNG. Máximo 5MB.
-                                    </p>
-                                </div>
-                            // </div>
-                            
-                            // Nombre */}
-                            <div>
-                                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Nom
-                                </label>
-                                <input
-                                    type="text"
-                                    id="firstName"
-                                    name="firstName"
-                                    value={userData.firstName}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                />
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Només es permeten caràcters alfabètics (lletres) i el punt (.), seguits d'un espai.
-                                </p>
-                            </div>
-                            {/* Apellidos */}
-                            <div>
-                                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Cognoms
-                                </label>
-                                <input
-                                    type="text"
-                                    id="lastName"
-                                    name="lastName"
-                                    value={userData.lastName}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                />
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Només es permeten caràcters alfabètics (lletres) i el punt (.), seguits d'un espai.
-                                </p>
-                            </div>
-                            {/* Email */}
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Correu electrònic
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={userData.email}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                />
-                            </div>
-                            {/* Current Password */}
-                            <div>
-                                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Contrasenya
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        id="currentPassword"
-                                        defaultValue="•••••••••••••••••••"
-                                        readOnly
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPasswordChange(!showPasswordChange)}
-                                        className="absolute right-2 top-2 text-[#00B0C8] text-sm font-medium"
-                                    >
-                                        Canvia
-                                    </button>
-                                </div>
-                            </div>
-                            {/* New Password */}
-                            {showPasswordChange && (
+                        <div className="flex justify-between items-center mb-6 border-b border-gray-300 pb-2">
+                            <h2 className="text-xl font-semibold">{t('subtitle')}</h2>
+                            {!isEditing && (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="px-4 py-2 bg-[#36A9E1] text-white rounded-md hover:bg-[#00B0C890] transition-colors"
+                                >
+                                    {t('editInfo')}
+                                </button>
+                            )}
+                        </div>
+
+                        {isEditing ? (
+                            <form className="space-y-6" onSubmit={handleSubmit}>
+                                {/* Nombre */}
                                 <div>
-                                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Nova contrasenya
+                                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('firstName')}
                                     </label>
                                     <input
-                                        type="password"
-                                        id="newPassword"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        placeholder="Introdueix la teva nova contrasenya"
+                                        type="text"
+                                        id="firstName"
+                                        name="firstName"
+                                        value={userData.firstName}
+
+                                        onChange={handleInputChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                        minLength={6}
                                     />
                                     <p className="mt-1 text-xs text-gray-500">
-                                        Mínim 6 caràcters
+                                        {t('nameHelp')}
                                     </p>
                                 </div>
-                            )}
-                            {/* Birth Date */}
-                            {/* <div>
-                                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Data de naixement
-                                </label>
-                                <input
-                                    type="text"
-                                    id="birthDate"
-                                    name="birthDate"
-                                    value={userData.birthDate}
-                                    onChange={handleInputChange}
-                                    placeholder="Exemple: 31/05/1970"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
-                                />
-                                <p className="mt-1 text-xs text-gray-500">Opcional</p>
-                            </div> */}
-                            {/* Privacy Section */}
-                            {/* <div className="pt-4 border-t border-gray-200">
-                                <div className="flex items-start mb-4">
-                                    <div className="flex items-center h-5">
-                                        <input
-                                            id="partnerOffers"
-                                            name="partnerOffers"
-                                            type="checkbox"
-                                            checked={userData.partnerOffers}
-                                            onChange={handleInputChange}
-                                            className="focus:ring-[#00B0C860] h-4 w-4 text-[#00B0C8] border-gray-300 rounded"
-                                        />
-                                    </div>
-                                    <label htmlFor="partnerOffers" className="ml-2 block text-sm text-gray-700">
-                                        Recibir ofertas de nuestros socios
+                                {/* Apellidos */}
+                                <div>
+                                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('lastName')}
                                     </label>
-                                </div>
-                                <div className="bg-gray-50 p-4 rounded-md mb-4">
-                                    <p className="text-sm text-gray-600">
-                                        The personal data you provide is used to answer queries, process orders or allow access to specific information.
-                                        You have the right to modify and delete all the personal information found in the "My Account" page.
+                                    <input
+                                        type="text"
+                                        id="lastName"
+                                        name="lastName"
+                                        value={userData.lastName}
+                                        onChange={handleInputChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
+                                    />
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        {t('nameHelp')}
                                     </p>
                                 </div>
-                                <div className="flex items-start">
-                                    <div className="flex items-center h-5">
-                                        <input
-                                            id="newsletter"
-                                            name="newsletter"
-                                            type="checkbox"
-                                            checked={userData.newsletter}
-                                            onChange={handleInputChange}
-                                            className="focus:ring-[rgba(0,177,200,0.66)] h-4 w-4 text-[#00B0C8] border-gray-300 rounded"
-                                        />
-                                    </div>
-                                    <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-700">
-                                        Suscribirse a nuestro boletín de noticias
-                                        <span className="block text-xs text-gray-500 mt-1">
-                                            Puede darse de baja en cualquier momento. Para ello, consulte nuestra información de contacto en el aviso legal.
-                                        </span>
+                                {/* Email */}
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('email')}
                                     </label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={userData.email}
+                                        onChange={handleInputChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
+                                    />
                                 </div>
-                            </div> */}
-                            {/* Submit Button */}
-                            <div className="pt-4">
-                                <button
-                                    type="submit"
-                                    disabled={loading || isUpdating}
-                                    className={`px-4 py-2 bg-[#00B0C8] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C860] ${(loading || isUpdating) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#00B0C890]'
-                                        }`}
-                                >
-                                    {loading ? 'Guardant...' : isUpdating ? 'Actualitzant...' : 'Desa els canvis'}
-                                </button>
+                                {/* Current Password */}
+                                <div>
+                                    <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('password')}
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="password"
+                                            id="currentPassword"
+                                            defaultValue="•••••••••••••••••••"
+                                            readOnly
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswordChange(!showPasswordChange)}
+                                            className="absolute right-2 top-2 text-[#36A9E1] text-sm font-medium"
+                                        >
+                                            {t('change')}
+                                        </button>
+                                    </div>
+                                </div>
+                                {/* New Password */}
+                                {showPasswordChange && (
+                                    <div>
+                                        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t('newPassword')}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            id="newPassword"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder={t('newPasswordPlaceholder')}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#00B0C860] focus:border-[#00B0C860]"
+                                            minLength={6}
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            {t('min6')}
+                                        </p>
+                                    </div>
+                                )}
+                                {/* Action Buttons */}
+                                <div className="pt-4 flex space-x-4">
+                                    <button
+                                        type="submit"
+                                        disabled={loading || isUpdating}
+                                        className={`px-4 py-2 bg-[#36A9E1] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C860] ${(loading || isUpdating) ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#00B0C890]'}`}
+                                    >
+                                        {loading ? t('saving') : isUpdating ? t('updating') : t('saveChanges')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditing(false)}
+                                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                                    >
+                                        {t('cancelEdit')}
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="space-y-6">
+                                {/* Display mode - show information as read-only */}
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className='border-2 border-gray-300 rounded-2xl p-2'>
+                                        <p className="text-sm font-medium text-gray-500">{t('firstName')}:</p>
+                                        <p className="mt-1">{userData.firstName}</p>
+                                    </div>
+                                    <div className='border-2 border-gray-300 rounded-2xl p-2'>
+                                        <p className="text-sm font-medium text-gray-500">{t('lastName')}:</p>
+                                        <p className="mt-1">{userData.lastName}</p>
+                                    </div>
+                                    <div className='border-2 border-gray-300 rounded-2xl p-2'>
+                                        <p className="text-sm font-medium text-gray-500">{t('email')}:</p>
+                                        <p className="mt-1">{userData.email}</p>
+                                    </div>
+                                    <div className='border-2 border-gray-300 rounded-2xl p-2'>
+                                        <p className="text-sm font-medium text-gray-500">{t('password')}:</p>
+                                        <p className="mt-1">•••••••••••••••••••</p>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
-                        {/* Add last update information if available */}
+                        )}
                         {lastUpdate && (
-                            <p className="text-xs text-gray-500 mt-2">
-                                Última actualització: {new Date(lastUpdate).toLocaleString()}
+                            <p className="text-xs text-gray-500 mt-6">
+                                {t('lastUpdateText')} {new Date(lastUpdate).toLocaleString()}
                             </p>
                         )}
                     </div>

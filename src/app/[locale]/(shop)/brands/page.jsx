@@ -20,7 +20,7 @@ export default function BrandsPage() {
     const [brands, setBrands] = useState([]);
     // Remove local state for selectedBrand and selectedBrandId
     const [viewMode, setViewMode] = useState('grid');
-    const [sortBy, setSortBy] = useState('default');
+    const [sortBy, setSortBy] = useState('name-asc');
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [quickViewProduct, setQuickViewProduct] = useState(null);
@@ -30,7 +30,7 @@ export default function BrandsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const productsPerPage = 6;
+    const productsPerPage = 99999; // Show all products by default
     const t = useTranslations('BrandsPage');
     // Fetch brands with product counts
     useEffect(() => {
@@ -90,7 +90,7 @@ export default function BrandsPage() {
                 let fetchedProducts = data.products || [];
                 // Format products to match the expected structure
                 fetchedProducts = fetchedProducts.map(product => {
-                    console.log(fetchedProducts);
+                    // console.log(fetchedProducts);
 
                     const now = new Date();
                     const hasDiscount = product.discount?.active &&
@@ -162,42 +162,7 @@ export default function BrandsPage() {
     }, [selectedBrandId]);
     // Sort products when sortBy changes
     // Filter and sort products whenever products, sortBy, or selectedBrandId changes
-    useEffect(() => {
-        let filtered = products;
-        if (selectedBrandId !== 'all') {
-            filtered = filtered.filter(product => {
-                if (!product.brand) return false;
-                if (typeof product.brand === 'object' && product.brand._id) {
-                    return String(product.brand._id) === String(selectedBrandId);
-                }
-                if (typeof product.brand === 'string') {
-                    return String(product.brand) === String(selectedBrandId);
-                }
-                if (product.brand instanceof Object && product.brand.toString) {
-                    return product.brand.toString() === String(selectedBrandId);
-                }
-                return false;
-            });
-        }
-        let sorted = [...filtered];
-        switch (sortBy) {
-            case 'price-asc':
-                sorted.sort((a, b) => a.priceValue - b.priceValue);
-                break;
-            case 'price-desc':
-                sorted.sort((a, b) => b.priceValue - a.priceValue);
-                break;
-            case 'name-asc':
-                sorted.sort((a, b) => a.name.localeCompare(b.name));
-                break;
-            case 'newest':
-                sorted.sort((a, b) => b.salesCount - a.salesCount);
-                break;
-            default:
-                break;
-        }
-        setFilteredProducts(sorted);
-    }, [products, sortBy, selectedBrandId]);
+    // ...existing code...
     // Debug: log filteredProducts before render
     // useEffect(() => {
     //     console.log('filteredProducts state:', filteredProducts);
@@ -351,7 +316,7 @@ export default function BrandsPage() {
             )}
             {/* <h2 className="hidden lg:block font-medium text-lg mb-4 px-4">{t('sidebarTitle')}</h2> */}
             <div className="container mx-auto px-2 sm:px-4 py-4 ">
-                <div className="flex flex-col lg:flex-row gap-2 border-t border-[#00B0C8] pb-2">
+                <div className="flex flex-col lg:flex-row gap-2 border-t border-[#36A9E1] pb-2">
                     {/* Brands Sidebar */}
                     <motion.div
                         className="w-full lg:w-1/6 mb-2 md:mb-0 pt-6"
@@ -364,18 +329,15 @@ export default function BrandsPage() {
                                 <ul className="space-y-1">
                                     {/* All Products option - always show this */}
                                     {!brandsLoading ? (
-                                        <motion.li
+                                        <li
                                             key="all-products"
                                             className='hover:font-bold text-zinc-700 transition-all duration-300'
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.05, duration: 0.5 }}
                                         >
                                             <button
                                                 onClick={() => handleBrandSelect('all')}
                                                 data-brand="all"
                                                 className={`w-full text-left px-4 py-2 transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-3 ${selectedBrandId === 'all'
-                                                    ? 'bg-gray-50 font-medium text-[#00B0C8]'
+                                                    ? 'bg-gray-50 font-medium text-[#36A9E1]'
                                                     : ''
                                                     } cursor-pointer`}
                                             >
@@ -384,9 +346,9 @@ export default function BrandsPage() {
                                                         <span className="text-gray-500 text-xs">ALL</span>
                                                     </div>
                                                 </div>
-                                                <span className="hover:text-[#00B0C8] transition-colors active:font-bold">{t('allBrandsOption')}</span>
+                                                <span className="hover:text-[#36A9E1] transition-colors active:font-bold">{t('allBrandsOption')}</span>
                                             </button>
-                                        </motion.li>
+                                        </li>
                                     ) : (
                                         <BrandSkeleton key="all-skeleton" />
                                     )}
@@ -399,18 +361,15 @@ export default function BrandsPage() {
                                     ) : (
                                         // Show actual brands when loaded
                                         brands.map((brand, index) => (
-                                            <motion.li
+                                            <li
                                                 key={brand._id}
                                                 className='hover:font-bold text-zinc-700 transition-all duration-300'
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.1 * index, duration: 0.5 }}
                                             >
                                                 <button
                                                     onClick={() => handleBrandSelect(brand._id)}
                                                     data-brand={brand._id}
                                                     className={`w-full text-left px-4 py-2 transition-colors hover:bg-gray-50 flex items-center gap-3 ${selectedBrandId === brand._id
-                                                        ? 'bg-gray-50 font-medium text-[#00B0C8]'
+                                                        ? 'bg-gray-50 font-medium text-[#36A9E1]'
                                                         : ''
                                                         } cursor-pointer`}
                                                 >
@@ -429,9 +388,9 @@ export default function BrandsPage() {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <span className="hover:text-[#00B0C8] transition-colors active:font-bold">{brand.name}</span>
+                                                    <span className="hover:text-[#36A9E1] transition-colors active:font-bold">{brand.name}</span>
                                                 </button>
-                                            </motion.li>
+                                            </li>
                                         ))
                                     )}
                                 </ul>
@@ -439,7 +398,7 @@ export default function BrandsPage() {
                             {/* Brand selection dropdown for mobile and tablet (up to lg) */}
                             <div className="block lg:hidden w-full">
                                 <select
-                                    className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#00B0C8] focus:border-[#00B0C8] transition"
+                                    className="w-full border border-gray-300 text-gray-700 rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-[#36A9E1] focus:border-[#36A9E1] transition"
                                     value={selectedBrandId || 'all'}
                                     onChange={e => handleBrandSelect(e.target.value)}
                                     disabled={brandsLoading}
@@ -553,14 +512,26 @@ export default function BrandsPage() {
                                         : 'space-y-6'
                                         }`}
                                 >
-                                    {products.map((product, index) => (
-                                        <ProductCard
-                                            key={product.id}
-                                            product={product}
-                                            viewMode={viewMode}
-                                            onQuickViewClick={handleOpenQuickView}
-                                        />
-                                    ))}
+                                    {[...products]
+                                        .sort((a, b) => {
+                                            // Helper to get translated name for sorting
+                                            const getProductName = (product) => {
+                                                if (product.translations) {
+                                                    if (product.translations.es && product.translations.es.name) return product.translations.es.name;
+                                                    if (product.translations.ca && product.translations.ca.name) return product.translations.ca.name;
+                                                }
+                                                return product.name || '';
+                                            };
+                                            return getProductName(a).toString().localeCompare(getProductName(b).toString());
+                                        })
+                                        .map((product, index) => (
+                                            <ProductCard
+                                                key={product.id}
+                                                product={product}
+                                                viewMode={viewMode}
+                                                onQuickViewClick={handleOpenQuickView}
+                                            />
+                                        ))}
                                 </motion.div>
                             </>
                         )}
@@ -596,7 +567,7 @@ export default function BrandsPage() {
                                                 key={`page-${page}`}
                                                 onClick={() => goToPage(page)}
                                                 className={`min-w-[40px] px-4 py-2 ${currentPage === page
-                                                    ? 'bg-[#00B0C8] text-white font-medium'
+                                                    ? 'bg-[#36A9E1] text-white font-medium'
                                                     : 'text-gray-700 hover:bg-gray-50'} cursor-pointer`}
                                             >
                                                 {page}

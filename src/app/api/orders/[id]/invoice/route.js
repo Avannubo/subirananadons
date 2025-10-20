@@ -25,7 +25,7 @@ export async function GET(request, { params }) {
                     }
                 });
             } catch (error) {
-                console.error('Error reading existing PDF:', error);
+                console.error('Error al leer el PDF existente:', error);
                 // If we can't read the existing PDF, continue to generate a new one
             }
         }
@@ -36,9 +36,9 @@ export async function GET(request, { params }) {
                 select: 'name reference'
             })
             .lean();
-        console.log('Order:', order);
+        //console.log('Order:', order);
         if (!order) {
-            return new NextResponse('Order not found', { status: 404 });
+            return new NextResponse('Pedido no encontrado', { status: 404 });
         }
         // HTML template for the invoice
         const html = `
@@ -64,7 +64,7 @@ export async function GET(request, { params }) {
                 .logo { 
                     font-size: 24px;
                     font-weight: bold;
-                    color: #00B0C8;
+                    color: #36A9E1;
                     white-space: nowrap;
                 }
                 .invoice-details {
@@ -100,7 +100,7 @@ export async function GET(request, { params }) {
                     border-bottom: 1px solid #eee;
                 }
                 th {
-                    background: #00B0C8;
+                    background: #36A9E1;
                     color: white;
                     font-weight: normal;
                     text-align: left;
@@ -114,7 +114,6 @@ export async function GET(request, { params }) {
                 th:nth-child(4) { width: 10%; text-align: right; }
                 th:nth-child(5) { width: 10%; text-align: right; }
                 th:nth-child(6) { width: 10%; text-align: right; }
-                
                 td {
                     vertical-align: top;
                 }
@@ -129,13 +128,12 @@ export async function GET(request, { params }) {
                 td:nth-child(4) { text-align: right; }
                 td:nth-child(5) { text-align: right; }
                 td:nth-child(6) { text-align: right; }
-                
                 .item-type {
                     font-weight: normal;
                     text-align: left;
                 }
                 .personal-type {
-                    color: #00B0C8;
+                    color: #36A9E1;
                 }
                 .gift-type {
                     color: #FF0080;
@@ -161,7 +159,7 @@ export async function GET(request, { params }) {
                 .total-row td {
                     padding-top: 12px;
                     font-weight: bold;
-                    border-top: 2px solid #00B0C8;
+                    border-top: 2px solid #36A9E1;
                 }
                 .discount-row td {
                     color: #FF0080;
@@ -203,7 +201,8 @@ export async function GET(request, { params }) {
                     <div>Teléfono: ${order.shippingAddress.phone}</div>
                     <div>Método de entrega: ${order.deliveryMethod === 'delivery' ? 'Envío a domicilio' : 'Recogida en tienda'}</div>
                 </div>
-                </div>                  <table>
+                </div>                  
+                <table>
                 <thead>
                     <tr>
                     <th>Producto</th>
@@ -248,7 +247,6 @@ export async function GET(request, { params }) {
                     <td style="min-width: 150px;">IVA (21%)</td>
                     <td>${order.tax.toFixed(2)} €</td>
                 </tr>
-                
                 ${order.discounts && order.discounts.total > 0 ? `
                 <tr class="discount-row">
                     <td style="min-width: 150px;">Descuento</td>
@@ -344,10 +342,10 @@ export async function GET(request, { params }) {
             }
         });
     } catch (error) {
-        console.error('Error generating invoice:', error);
+        console.error('Error al generar la factura:', error);
         return NextResponse.json({
             success: false,
-            message: 'Error generating invoice',
+            message: 'Error al generar la factura',
             error: error.message
         }, { status: 500 });
     }
@@ -358,14 +356,14 @@ export async function DELETE(request, { params }) {
         const { id } = params;
         const deletedInvoice = await Invoice.findByIdAndDelete(id);
         if (!deletedInvoice) {
-            return new NextResponse('Invoice not found', { status: 404 });
+            return new NextResponse('Factura no encontrada', { status: 404 });
         }
         return new NextResponse(null, { status: 200 });
     } catch (error) {
-        console.error('Error deleting invoice:', error);
+        console.error('Error al eliminar la factura:', error);
         return NextResponse.json({
             success: false,
-            message: 'Error deleting invoice',
+            message: 'Error al eliminar la factura',
             error: error.message
         }, { status: 500 });
     }

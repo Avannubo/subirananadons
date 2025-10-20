@@ -3,13 +3,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { fetchBirthLists, addProductToBirthList } from '@/services/BirthListService';
 import { toast } from 'react-hot-toast';
 import { useLocale } from 'next-intl';
-
 export default function BirthListSelectModal({ show, onClose, product, userId }) {
     const locale = useLocale();
     const [lists, setLists] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedList, setSelectedList] = useState(null);
-
     useEffect(() => {
         if (show && userId) {
             setLoading(true);
@@ -23,7 +21,6 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
                 .finally(() => setLoading(false));
         }
     }, [show, userId]);
-
     const handleAddToList = async (listId) => {
         try {
             setLoading(true);
@@ -38,9 +35,7 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
             setSelectedList(null);
         }
     };
-
     if (!show) return null;
-
     // Prevent background scroll when modal is open
     useEffect(() => {
         if (show) {
@@ -50,14 +45,12 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
             document.body.style.overflow = 'unset';
         };
     }, [show]);
-
     // Backdrop click closes modal
     const handleBackdropClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();
         }
     };
-
     return (
         <AnimatePresence>
             {show && (
@@ -84,17 +77,15 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
                         >
                             ✕
                         </button>
-
                         <div className="p-6">
                             <h2 className="text-xl font-bold mb-4 text-gray-800">
                                 {locale === 'es' ? 'Selecciona una lista de nacimiento' :
                                     locale === 'en' ? 'Select a birth list' :
                                         'Selecciona una llista de naixement'}
                             </h2>
-
                             {loading && !selectedList ? (
                                 <div className="flex justify-center items-center py-10">
-                                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                 </div>
                             ) : (
                                 <ul className="divide-y divide-gray-200 max-h-[200px] overflow-y-auto">
@@ -130,7 +121,7 @@ export default function BirthListSelectModal({ show, onClose, product, userId })
                                                         )}
                                                     </div>
                                                     {selectedList === list._id && (
-                                                        <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#00B0C8]"></div>
+                                                        <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#36A9E1]"></div>
                                                     )}
                                                 </div>
                                             </li>

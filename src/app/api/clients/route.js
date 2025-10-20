@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
-
+import bcrypt from 'bcryptjs';
 // Get all clients (users with role 'user')
 export async function GET(request) {
     try {
@@ -15,14 +15,10 @@ export async function GET(request) {
                 { status: 403 }
             );
         }
-
         // Connect to database
         await dbConnect();
-
         // Get query parameters
         const { searchParams } = new URL(request.url);
-        const page = parseInt(searchParams.get('page')) || 1;
-        const limit = parseInt(searchParams.get('limit')) || 10;
         const searchId = searchParams.get('searchId') || '';
         const searchName = searchParams.get('searchName') || '';
         const searchLastName = searchParams.get('searchLastName') || '';
@@ -30,10 +26,8 @@ export async function GET(request) {
         const active = searchParams.get('active');
         const newsletter = searchParams.get('newsletter');
         const partnerOffers = searchParams.get('partnerOffers');
-
         // Build query
         const query = { role: 'user' };
-
         // Add search filters
         if (searchId) {
             // MongoDB ObjectId is 24 hex characters. If searchId is valid, search by _id, otherwise ignore
@@ -41,38 +35,30 @@ export async function GET(request) {
                 query._id = searchId;
             }
         }
-
-        if (searchName) {
-            query.name = { $regex: searchName, $options: 'i' };
+        if (searchName || searchLastName) {
+            const nameParts = [];
+            if (searchName) nameParts.push(searchName);
+            if (searchLastName) nameParts.push(searchLastName);
+            const nameRegex = nameParts.join(' ');
+            query.name = { $regex: nameRegex, $options: 'i' };
         }
-
         if (searchEmail) {
             query.email = { $regex: searchEmail, $options: 'i' };
         }
-
         // Handle boolean filters
         if (active !== null && active !== undefined) {
             query.emailVerified = active === 'true' ? { $ne: null } : null;
         }
-
         if (newsletter !== null && newsletter !== undefined) {
             query.newsletter = newsletter === 'true';
         }
-
         if (partnerOffers !== null && partnerOffers !== undefined) {
             query.partnerOffers = partnerOffers === 'true';
         }
-
-        // Execute query with pagination
+        // Execute query without pagination
         const users = await User.find(query)
             .select('-password -resetPasswordToken -resetPasswordExpires -__v')
-            .skip((page - 1) * limit)
-            .limit(limit)
             .sort({ createdAt: -1 });
-
-        // Get total count for pagination
-        const total = await User.countDocuments(query);
-
         // Transform data to client format
         const clients = users.map(user => ({
             id: user._id.toString(),
@@ -85,17 +71,10 @@ export async function GET(request) {
             partnerOffers: user.partnerOffers || false,
             sales: 0 // This would need to come from an Orders collection in a real app
         }));
-
-        // Return paginated results
+        // Return all clients
         return NextResponse.json({
             success: true,
-            clients,
-            pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
-                totalItems: total,
-                limit
-            }
+            clients
         });
     } catch (error) {
         console.error('Error fetching clients:', error);
@@ -105,7 +84,6 @@ export async function GET(request) {
         );
     }
 }
-
 // Create a new client (user with role 'user')
 export async function POST(request) {
     try {
@@ -117,14 +95,11 @@ export async function POST(request) {
                 { status: 403 }
             );
         }
-
         // Connect to database
         await dbConnect();
-
         // Get request body
         const data = await request.json();
-        const { name, lastName, email, active, newsletter, partnerOffers } = data;
-
+        const { name, lastName, email, password, active, newsletter, partnerOffers } = data;
         // Validate required fields
         if (!name || !lastName || !email) {
             return NextResponse.json(
@@ -132,7 +107,13 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-
+        // Validate password when creating new user
+        if (!password) {
+            return NextResponse.json(
+                { success: false, message: 'Password is required for new users' },
+                { status: 400 }
+            );
+        }
         // Check if email already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -141,23 +122,20 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-
-        // Create temporary password (in a real app, you'd send an email to the user to set their password)
-        const tempPassword = Math.random().toString(36).slice(-8);
-
+        // Hash the provided password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
         // Create new user
         const newUser = new User({
             name: `${name} ${lastName}`,
             email,
-            password: tempPassword,
+            password: hashedPassword,
             role: 'user',
             emailVerified: active ? new Date() : null,
             newsletter: newsletter || false,
             partnerOffers: partnerOffers || false
         });
-
         await newUser.save();
-
         // Transform to client format for response
         const client = {
             id: newUser._id.toString(),
@@ -170,7 +148,6 @@ export async function POST(request) {
             partnerOffers: partnerOffers || false,
             sales: 0
         };
-
         return NextResponse.json({
             success: true,
             message: 'Client created successfully',

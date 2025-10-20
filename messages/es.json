@@ -47,7 +47,8 @@
     "notAvailable": "N/D",
     "seeLabel": "Ver etiqueta",
     "uncategorized": "Sin categoría",
-    "addedToCart": "añadido al carrito"
+    "addedToCart": "añadido al carrito",
+    "validUntil": "Válido hasta"
   },
   "CookiesPage": {
     "title": "Política de Cookies",
@@ -141,7 +142,7 @@
     "contactData": "Datos de contacto",
     "shippingData": "Datos de envío",
     "loadingUserData": "Cargando tus datos...",
-    "giftPickupOnly": "Los productos de regalo solo pueden recogerse en tienda por el dueño de la lista.",
+    "giftPickupOnly": "Subirana se hace cargo de entregar los regalos de la lista a los futuros padres",
     "autofillInfo": "Hemos rellenado automáticamente algunos campos con tus datos. Por favor, verifica y completa la información.",
     "nameLabel": "Nombre",
     "lastNameLabel": "Apellidos",
@@ -165,12 +166,12 @@
     "giftItemsMandatory": "Los artículos de regalo deben ser recogidos en tienda por el propietario de la lista. Estos artículos no pueden ser enviados a domicilio.",
     "remove": "Eliminar",
     "deliveryMethod": "Método de entrega",
-    "onlyGiftItemsInfo": "Tu carrito contiene solo productos de regalo que deben ser recogidos en tienda por el propietario de la lista. Al comprar estos artículos, serán marcados como comprados en la lista de regalo.",
-    "giftItemsInfo": "Este pedido incluye artículos de regalo (recogida en tienda obligatoria por el propietario de la lista). Estos artículos no pueden ser enviados a domicilio.",
+    "onlyGiftItemsInfo": "Tu carrito contiene únicamente productos de una lista de regalos. Subirana se hará cargo de entregar los regalos de la lista a los futuros padres. Al comprar estos artículos, serán marcados como comprados en la lista de regalo.",
+    "giftItemsInfo": "Este pedido incluye artículos de una lista de regalos. Subirana se hará cargo de entregarlos a los futuros padres.",
     "addForFreeShipping": "¡Añade {amount}€ más a tu pedido para conseguir envío gratis!",
     "deliveryOption": "Envío a domicilio",
     "freeShippingInfo": "Envío gratis en pedidos superiores a 60€",
-    "giftPickupInfo": "Los productos de regalo deberán recogerse en tienda por el propietario de la lista",
+    "giftPickupInfo": "Únicamente los productos que no forman parte de la lista de regalos serán envíados a domicilio.",
     "free": "Gratis",
     "shippingPrice": "5,99 €",
     "pickupOption": "Recoger en tienda",
@@ -213,8 +214,8 @@
     "expectingTitle": "¿Estás esperando un bebé?",
     "expectingDesc": "Crea y comparte tu lista de nacimiento para que te cojan lo que realmente necesitas.",
     "createListBtn": "Crear lista",
-    "recommendTitle": "¿No sabes qué regalar?",
-    "recommendDesc": "Descubre recomendaciones de regalos para bebés y ayuda a los futuros padres a prepararse.",
+    "recommendTitle": "Recomendaciones para listas",
+    "recommendDesc": "Todo lo que le puede hacer falta para su bebé.",
     "recommendBtn": "Ver recomendaciones",
     "howWorksTitle": "¿Cómo funciona?",
     "howWorksStep1Title": "Crea tu lista",
@@ -241,10 +242,11 @@
     "listInactiveDesc": "Esta lista de nacimiento no está actualmente disponible para compras.",
     "listCompletedTitle": "Lista completada",
     "listCompletedDesc": "Todos los regalos de esta lista han sido comprados. ¡Gracias por tu interés!",
-    "addToCartBtn": "Añadir al carrito",
+    "addToCartBtn": "Comprar regalo",
     "productPurchased": "Comprado",
     "productReserved": "Reservado",
     "noProductsFound": "No se han encontrado productos en esta categoría.",
+    "errorLoadListDesc": "Error al cargar la lista de nacimiento",
     "defaultThankYou": "¡Gracias por ayudarnos a preparar la llegada!"
   },
   "BrandsPage": {
@@ -277,7 +279,8 @@
     "showingProducts": "Mostrando {from}-{to} de {total} productos",
     "noProductsForCategory": "No se han encontrado productos para esta categoría.",
     "prevPageAria": "Página anterior",
-    "nextPageAria": "Página siguiente"
+    "nextPageAria": "Página siguiente",
+    "allProducts": "Todos los productos"
   },
   "UserAuthModal": {
     "loginTitle": "Iniciar Sesión",
@@ -301,7 +304,8 @@
     "termsLink": "Términos y Condiciones",
     "registerBtn": "REGISTRARSE",
     "alreadyHaveAccount": "¿Ya tienes cuenta?",
-    "loginBtnShort": "Inicia sesión",
+    "loginBtnShort": "Crea tu lista",
+    "CrearLista": "Crear lista",
     "forgotEmailError": "Por favor, introduce tu correo electrónico",
     "forgotEmailSendError": "Error al enviar el email de recuperación",
     "forgotEmailSuccess": "Si el correo existe en nuestra base de datos, recibirás un email con instrucciones para restablecer tu contraseña",

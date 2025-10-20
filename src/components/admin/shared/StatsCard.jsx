@@ -1,5 +1,4 @@
 'use client';
-
 export default function StatsCard({ icon, bgColor, title, value, description, trend, trendIcon }) {
     return (
         <div className="bg-white p-4 rounded-lg shadow flex items-center">

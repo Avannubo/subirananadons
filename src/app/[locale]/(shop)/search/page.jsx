@@ -9,7 +9,6 @@ import { Range } from 'react-range';
 import ProductCard from "@/components/products/product-card";
 import ProductQuickView from "@/components/products/product-quick-view";
 import { toast } from 'react-hot-toast';
-import Pagination from "@/components/admin/shared/Pagination";
 import { useTranslations } from 'next-intl';
 export default function SearchPage() {
     const t = useTranslations('SearchPage');
@@ -25,19 +24,15 @@ export default function SearchPage() {
     const [brands, setBrands] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedBrand, setSelectedBrand] = useState('');
-    const [stockStatus, setStockStatus] = useState('all'); // 'all', 'in-stock', 'out-of-stock'
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [priceRange, setPriceRange] = useState([0, 1000]);
+    const [priceRange, setPriceRange] = useState([0, 5000]);
     const [sortBy, setSortBy] = useState('newest');
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [viewMode, setViewMode] = useState('grid'); // Add view mode state
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false); // Add quick view modal state
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false); // Add filter modal state
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalItems, setTotalItems] = useState(0);
-    const [itemsPerPage, setItemsPerPage] = useState(6);
+
     const handleQuickView = (product) => {
         setQuickViewProduct(product);
         setIsQuickViewOpen(true);
@@ -59,7 +54,7 @@ export default function SearchPage() {
                 const flattenCategories = (categories) => {
                     let flat = [];
                     categories.forEach(cat => {
-                        // console.log('Flattening category:', cat);
+                        // //console.log('Flattening category:', cat);
                         flat.push({
                             id: cat._id,
                             name: cat.name,
@@ -78,9 +73,11 @@ export default function SearchPage() {
                 const brandsData = await brandsResponse.json();
                 setBrands(brandsData.brands || []);
                 // Products (fetch all, filter client-side)
-                const prodResponse = await fetch('/api/products?limit=99999&status=active');
+                const prodResponse = await fetch('/api/products?limit=99999');
                 if (!prodResponse.ok) throw new Error('Failed to fetch products');
                 const data = await prodResponse.json();
+                // console.log('Total products from API:', data.products.length);
+
                 const formattedProducts = data.products.map(product => ({
                     ...product,
                     id: product._id,
@@ -92,11 +89,9 @@ export default function SearchPage() {
                     imageUrlHover: product.imageHover || product.image || '/assets/images/Screenshot_4.png',
                     brand: product.brand || '',
                     description: product.description || '',
-                    stock: {
-                        available: product.stock?.available || 0,
-                        minStock: product.stock?.minStock || 5
-                    }
+                    rawName: product.name // Store the raw name for search
                 }));
+                // console.log('Fetched products:', formattedProducts);
                 setAllProducts(formattedProducts);
             } catch (err) {
                 console.error('Error fetching meta/products:', err);
@@ -114,15 +109,24 @@ export default function SearchPage() {
         let filtered = allProducts;
         // Search term (name, brand, category, reference)
         if (searchTerm) {
-            const term = searchTerm.toLowerCase();
+            const term = searchTerm.toLowerCase().trim();
             filtered = filtered.filter(p => {
-                // Name
+                // Name handling with both raw and localized versions
                 let name = '';
+                let rawName = '';
+
+                // Handle raw name (non-localized)
+                if (p.rawName && typeof p.rawName === 'string') {
+                    rawName = p.rawName;
+                }
+
+                // Handle localized name
                 if (p.name && typeof p.name === 'object') {
                     name = p.name[locale] || p.name.ca || p.name.es || '';
                 } else if (typeof p.name === 'string') {
                     name = p.name;
                 }
+
                 // Brand
                 let brand = '';
                 if (p.brand && typeof p.brand === 'object') {
@@ -130,6 +134,7 @@ export default function SearchPage() {
                 } else if (typeof p.brand === 'string') {
                     brand = p.brand;
                 }
+
                 // Category
                 let category = '';
                 if (p.category && typeof p.category === 'object') {
@@ -137,13 +142,13 @@ export default function SearchPage() {
                 } else if (typeof p.category === 'string') {
                     category = p.category;
                 }
-                // Reference
-                const ref = p.reference || '';
+
+                // Search in all fields
                 return (
+                    (rawName && rawName.toLowerCase().includes(term)) ||
                     (name && name.toLowerCase().includes(term)) ||
                     (brand && brand.toLowerCase().includes(term)) ||
-                    (category && category.toLowerCase().includes(term)) ||
-                    (ref && ref.toLowerCase().includes(term))
+                    (category && category.toLowerCase().includes(term))
                 );
             });
         }
@@ -191,12 +196,6 @@ export default function SearchPage() {
                 return brand === selectedBrand;
             });
         }
-        // Stock status
-        if (stockStatus === 'in-stock') {
-            filtered = filtered.filter(p => p.stock && p.stock.available > 0);
-        } else if (stockStatus === 'out-of-stock') {
-            filtered = filtered.filter(p => !p.stock || p.stock.available <= 0);
-        }
         // Price range
         if (priceRange && priceRange.length === 2) {
             filtered = filtered.filter(p => p.priceValue >= priceRange[0] && p.priceValue <= priceRange[1]);
@@ -223,24 +222,15 @@ export default function SearchPage() {
             default:
                 break;
         }
-        // Pagination
-        const total = sorted.length;
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        setFilteredProducts(sorted.slice(start, end));
-        setTotalItems(total);
-        setTotalPages(Math.max(1, Math.ceil(total / itemsPerPage)));
+        setFilteredProducts(sorted);
         setIsLoading(false);
-    }, [allProducts, searchTerm, selectedCategory, selectedBrand, stockStatus, priceRange, sortBy, currentPage, itemsPerPage, locale]);
+    }, [allProducts, searchTerm, selectedCategory, selectedBrand, priceRange, sortBy, locale]);
     // (Removed: all filtering is now in the above effect)
     // Pagination logic is now handled in the main fetchFilteredProducts effect above
-    // Reset to page 1 when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, selectedCategory, selectedBrand, stockStatus, priceRange, sortBy]);
+
     const handleAddToCart = (e, product) => {
         e.preventDefault();
-        console.log('Add to cart:', product);
+        //console.log('Add to cart:', product);
     };
     // Fetch banner image from API
     const [bannerImage, setBannerImage] = useState(null);
@@ -290,7 +280,7 @@ export default function SearchPage() {
                             placeholder={t('searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full focus:bg-white p-2 bg-[#FFFFFF80] rounded-xl border border-gray-200 focus:border-[#00B0C8] focus:outline-none text-base sm:text-lg shadow-sm"
+                            className="w-full focus:bg-white p-2 bg-[#FFFFFF80] rounded-xl border border-gray-200 focus:border-[#36A9E1] focus:outline-none text-base sm:text-lg shadow-sm"
                         />
                         <button className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer">
                             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +291,7 @@ export default function SearchPage() {
                     {/* Filter Button for mobile */}
                     <div className="md:hidden flex justify-end">
                         <button
-                            className="px-4 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition cursor-pointer"
+                            className="px-4 py-2 bg-[#36A9E1] text-white rounded-lg font-semibold shadow hover:bg-[#3f93ba] transition cursor-pointer"
                             onClick={() => setIsFilterModalOpen(true)}
                         >
                             {t('filterButton')}
@@ -323,7 +313,7 @@ export default function SearchPage() {
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#36A9E1] focus:ring-[#36A9E1] focus:outline-none"
                                 >
                                     <option value="">{t('allCategoriesOption')}</option>
                                     {categories
@@ -363,7 +353,7 @@ export default function SearchPage() {
                                 <select
                                     value={selectedBrand}
                                     onChange={(e) => setSelectedBrand(e.target.value)}
-                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#36A9E1] focus:ring-[#36A9E1] focus:outline-none"
                                 >
                                     <option value="">{t('allBrandsOption')}</option>
                                     {brands.map((brand) => (
@@ -373,19 +363,6 @@ export default function SearchPage() {
                                     ))}
                                 </select>
                             </div>
-                            {/* Stock Status Selector */}
-                            {/* <div className="mb-8">
-                                <h3 className="text-lg font-medium mb-4">Disponibilidad</h3>
-                                <select
-                                    value={stockStatus}
-                                    onChange={(e) => setStockStatus(e.target.value)}
-                                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
-                                >
-                                    <option value="all">Todos los productos</option>
-                                    <option value="in-stock">En stock</option>
-                                    <option value="out-of-stock">Agotado</option>
-                                </select>
-                            </div> */}
                             {/* Price Range */}
                             <div className="mb-8">
                                 <h3 className="text-lg font-medium mb-4">{t('priceLabel')}</h3>
@@ -393,7 +370,7 @@ export default function SearchPage() {
                                     <Range
                                         step={5}
                                         min={0}
-                                        max={1000}
+                                        max={5000}
                                         values={priceRange}
                                         onChange={setPriceRange}
                                         renderTrack={({ props, children }) => {
@@ -421,7 +398,7 @@ export default function SearchPage() {
                                                 <div
                                                     key={key}
                                                     {...restProps}
-                                                    className="h-5 w-5 rounded-full bg-white border-2 border-[#00B0C8] focus:outline-none"
+                                                    className="h-5 w-5 rounded-full bg-white border-2 border-[#36A9E1] focus:outline-none"
                                                 />
                                             );
                                         }}
@@ -452,7 +429,7 @@ export default function SearchPage() {
                                         <select
                                             value={selectedCategory}
                                             onChange={(e) => setSelectedCategory(e.target.value)}
-                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#36A9E1] focus:ring-[#36A9E1] focus:outline-none"
                                         >
                                             <option value="">Todas las categorías</option>
                                             {categories.map((category, index) => (
@@ -479,7 +456,7 @@ export default function SearchPage() {
                                         <select
                                             value={selectedBrand}
                                             onChange={(e) => setSelectedBrand(e.target.value)}
-                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#00B0C8] focus:ring-[#00B0C8] focus:outline-none"
+                                            className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#36A9E1] focus:ring-[#36A9E1] focus:outline-none"
                                         >
                                             <option value="">Todas las marcas</option>
                                             {brands.map((brand) => (
@@ -523,7 +500,7 @@ export default function SearchPage() {
                                                         <div
                                                             key={key}
                                                             {...restProps}
-                                                            className="h-5 w-5 rounded-full bg-white border-2 border-[#00B0C8] focus:outline-none"
+                                                            className="h-5 w-5 rounded-full bg-white border-2 border-[#36A9E1] focus:outline-none"
                                                         />
                                                     );
                                                 }}
@@ -535,7 +512,7 @@ export default function SearchPage() {
                                         </div>
                                     </div>
                                     <button
-                                        className="w-full mt-2 py-2 bg-[#00B0C8] text-white rounded-lg font-semibold shadow hover:bg-[#0090a8] transition cursor-pointer"
+                                        className="w-full mt-2 py-2 bg-[#36A9E1] text-white rounded-lg font-semibold shadow hover:bg-[#3f93ba] transition cursor-pointer"
                                         onClick={() => setIsFilterModalOpen(false)}
                                     >
                                         Aplicar Filtros
@@ -595,7 +572,7 @@ export default function SearchPage() {
                         {isLoading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[...Array(6)].map((_, index) => (
-                                    <div key={index} className="animate-pulse"> 
+                                    <div key={index} className="animate-pulse">
                                         <div className="bg-gray-200 h-48 rounded-lg mb-2"></div>
                                         <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                                         <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -611,6 +588,7 @@ export default function SearchPage() {
                                     }`}
                             >
                                 {filteredProducts.map((product, index) => (
+
                                     <ProductCard
                                         key={index}
                                         product={product}
@@ -625,23 +603,7 @@ export default function SearchPage() {
                                 <p className="text-gray-500">{t('noProductsFound')}</p>
                             </div>
                         )}
-                        {/* Pagination */}
-                        {!isLoading && filteredProducts.length > 0 && (
-                            <div className="mt-8">
-                                <Pagination
-                                    currentPage={currentPage}
-                                    totalPages={totalPages}
-                                    totalItems={totalItems}
-                                    itemsPerPage={itemsPerPage}
-                                    onPageChange={setCurrentPage}
-                                    onItemsPerPageChange={(value) => {
-                                        setItemsPerPage(value);
-                                        setCurrentPage(1);
-                                    }}
-                                    showingText={t('showingText', { count: filteredProducts.length, total: totalItems })}
-                                />
-                            </div>
-                        )}
+
                     </motion.div>
                 </div>
             </div>

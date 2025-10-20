@@ -42,7 +42,7 @@ export default function ProductSlider({
     };
     const handleAddToCart = (product) => {
         // Implement add to cart functionality
-        console.log('Add to cart:', product);
+        //console.log('Add to cart:', product);
     };
     // Determine if we should show navigation arrows (for 5 or more products)
     const showNavigation = products.length >= 5;

@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
-
 export default function DashboardRedirect() {
-    redirect('/dashboard/productos');
+    redirect('/dashboard/listas');
     return null;
 }

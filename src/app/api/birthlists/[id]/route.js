@@ -4,21 +4,17 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
 import mongoose from 'mongoose';
-
 // Helper function to check if a MongoDB ObjectId is valid
 const isValidObjectId = (id) => {
     return mongoose.Types.ObjectId.isValid(id);
 };
-
 // Helper function to check if user has access to the birth list
 const hasAccess = (birthList, userId, role) => {
     return role === 'admin' || birthList.user.toString() === userId;
 };
-
 export async function GET(request, { params }) {
     try {
         const { id } = params;
-
         // Validate ID format
         if (!isValidObjectId(id)) {
             return NextResponse.json(
@@ -26,24 +22,19 @@ export async function GET(request, { params }) {
                 { status: 400 }
             );
         }
-
         await dbConnect();
-
         // Find the birth list
         const birthList = await BirthList.findById(id)
             .populate('user', 'name email')
             .populate('items.product');
-
         if (!birthList) {
             return NextResponse.json(
                 { success: false, message: 'Birth list not found' },
                 { status: 404 }
             );
         }
-
         const session = await getServerSession(authOptions);
         const isPublic = birthList.isPublic;
-
         // Only allow access if:
         // 1. The birth list is public, OR
         // 2. The user is logged in AND (is admin OR is the owner)
@@ -54,7 +45,6 @@ export async function GET(request, { params }) {
                     { status: 401 }
                 );
             }
-
             if (!hasAccess(birthList, session.user.id, session.user.role)) {
                 return NextResponse.json(
                     { success: false, message: 'Forbidden: You do not have access to this birth list' },
@@ -62,7 +52,6 @@ export async function GET(request, { params }) {
                 );
             }
         }
-
         return NextResponse.json({ success: true, data: birthList });
     } catch (error) {
         console.error('Error fetching birth list:', error);
@@ -72,11 +61,9 @@ export async function GET(request, { params }) {
         );
     }
 }
-
 export async function PUT(request, { params }) {
     try {
         const { id } = params;
-
         // Check authentication
         const session = await getServerSession(authOptions);
         if (!session?.user) {
@@ -85,7 +72,6 @@ export async function PUT(request, { params }) {
                 { status: 401 }
             );
         }
-
         // Validate ID format
         if (!isValidObjectId(id)) {
             return NextResponse.json(
@@ -93,19 +79,15 @@ export async function PUT(request, { params }) {
                 { status: 400 }
             );
         }
-
         await dbConnect();
-
         // Find the birth list
         const birthList = await BirthList.findById(id);
-
         if (!birthList) {
             return NextResponse.json(
                 { success: false, message: 'Birth list not found' },
                 { status: 404 }
             );
         }
-
         // Check if user has permission to update this list
         if (!hasAccess(birthList, session.user.id, session.user.role)) {
             return NextResponse.json(
@@ -113,10 +95,8 @@ export async function PUT(request, { params }) {
                 { status: 403 }
             );
         }
-
         // Parse request body
         const updates = await request.json();
-
         // Don't allow changing the user
         delete updates.user; try {
             // Validate update data
@@ -126,7 +106,6 @@ export async function PUT(request, { params }) {
                     { status: 400 }
                 );
             }
-
             // Update the birth list
             const updatedBirthList = await BirthList.findByIdAndUpdate(
                 id,
@@ -139,7 +118,6 @@ export async function PUT(request, { params }) {
                         { status: 500 }
                     );
                 }
-
             return NextResponse.json({
                 success: true,
                 message: 'Birth list updated successfully',
@@ -160,11 +138,9 @@ export async function PUT(request, { params }) {
         );
     }
 }
-
 export async function DELETE(request, { params }) {
     try {
         const { id } = params;
-
         // Check authentication
         const session = await getServerSession(authOptions);
         if (!session?.user) {
@@ -173,7 +149,6 @@ export async function DELETE(request, { params }) {
                 { status: 401 }
             );
         }
-
         // Validate ID format
         if (!isValidObjectId(id)) {
             return NextResponse.json(
@@ -181,19 +156,15 @@ export async function DELETE(request, { params }) {
                 { status: 400 }
             );
         }
-
         await dbConnect();
-
         // Find the birth list
         const birthList = await BirthList.findById(id);
-
         if (!birthList) {
             return NextResponse.json(
                 { success: false, message: 'Birth list not found' },
                 { status: 404 }
             );
         }
-
         // Check if user has permission to delete this list
         if (!hasAccess(birthList, session.user.id, session.user.role)) {
             return NextResponse.json(
@@ -201,10 +172,8 @@ export async function DELETE(request, { params }) {
                 { status: 403 }
             );
         }
-
         // Delete the birth list
         await BirthList.findByIdAndDelete(id);
-
         return NextResponse.json({
             success: true,
             message: 'Birth list deleted successfully'

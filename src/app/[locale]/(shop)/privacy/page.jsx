@@ -1,9 +1,8 @@
 "use client";
 import React from 'react';
 import useShopParameter from '@/lib/useShopParameter';
-import ShopLayout from '@/components/Layouts/shop-layout'; 
-// Removed export const metadata because it is not allowed in a client component
-import { useTranslations, useLocale } from 'next-intl';
+import ShopLayout from '@/components/Layouts/shop-layout';
+import { useLocale } from 'next-intl';
 export default function PrivacyPage() {
     const { value: privacyText, loading } = useShopParameter('privacy_policy');
     const [bannerUrl, setBanner] = React.useState(null);

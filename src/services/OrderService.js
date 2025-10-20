@@ -1,5 +1,4 @@
 // src/services/OrderService.js
-
 /**
  * OrderService - handles order creation, invoice download, and email sending
  */
@@ -18,12 +17,12 @@ export const OrderService = {
             return null;
         }
     },
-
     /**
      * Create order from orderPending object (from localStorage or passed in)
      * @param {object} orderPending
      * @returns {Promise<object>} API response data
      */
+
     async createOrder(orderPending) {
         const response = await fetch('/api/orders', {
             method: 'POST',
@@ -35,18 +34,6 @@ export const OrderService = {
         return data;
     },
 
-    /**
-        * Trigger download of the invoice blob
-        * @param {Blob} invoiceBlob
-        * @param {object} toast
-        */
-   
-
-    /**
-     * Download invoice PDF for the pending order
-     * @param {function} setInvoiceBlob
-     * @param {object} toast
-     */
     async downloadInvoice(orderPending, toast) {
         const order = orderPending || this.getPendingOrder();
         if (!order) return;
@@ -65,8 +52,7 @@ export const OrderService = {
             toast.error('Error al generar la Ticket');
         }
     },
-
-
+    
     /**
      * Send order confirmation email for the pending order
      * @param {object} toast

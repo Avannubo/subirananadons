@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 export default function BillsStats() {
     const [stats, setStats] = useState([
         {
-            icon: <FiUser className="text-[#00B0C8] text-xl" />,
+            icon: <FiUser className="text-[#36A9E1] text-xl" />,
             title: "Facturas emitidas",
             value: "...",
             description: "Este mes",
@@ -33,17 +33,15 @@ export default function BillsStats() {
             bgColor: "bg-purple-100"
         }
     ]);
-
     useEffect(() => {
         const fetchStats = async () => {
             try {
                 const response = await fetch('/api/stats/bills');
                 const data = await response.json();
-
                 if (data.success) {
                     setStats([
                         {
-                            icon: <FiUser className="text-[#00B0C8] text-xl" />,
+                            icon: <FiUser className="text-[#36A9E1] text-xl" />,
                             title: "Facturas emitidas",
                             value: data.data.totalBills.toString(),
                             description: "Este mes",
@@ -76,10 +74,8 @@ export default function BillsStats() {
                 console.error('Error fetching billing stats:', error);
             }
         };
-
         fetchStats();
     }, []);
-
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             {stats.map((stat, index) => (

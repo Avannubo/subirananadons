@@ -1,19 +1,14 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-
 export async function GET() {
     try {
         const { db } = await connectToDatabase();
-
         // Get total product count
         const totalProducts = await db.collection('products').countDocuments();
-
         // Get total categories count
         const totalCategories = await db.collection('categories').countDocuments();
-
         // Get total brands count
         const totalBrands = await db.collection('brands').countDocuments();
-
         // Get low stock products count - comprehensive query to handle different data structures
         const lowStockProducts = await db.collection('products')
             .countDocuments({
@@ -52,7 +47,6 @@ export async function GET() {
                     }
                 ]
             });
-
         return NextResponse.json({
             totalProducts,
             totalCategories,

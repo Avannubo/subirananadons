@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { LogOut, UserRound } from 'lucide-react';
-import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-hot-toast';
 export default function AuthModal({ title }) {
     const t = useTranslations('UserAuthModal');
@@ -85,16 +84,14 @@ export default function AuthModal({ title }) {
             const formData = new FormData(e.currentTarget);
             const email = formData.get('email');
             const password = formData.get('password');
-            console.log('Attempting login with email:', email);
+            //console.log('Attempting login with email:', email);
             const result = await signIn('credentials', {
                 redirect: false,
                 email,
                 password,
             });
-            console.log('Login result:', result);
             if (result?.error) {
                 let errorMessage = t('loginError') + ' ';
-                console.log('Login error:', result.error);
                 if (result.error === 'Account not active') {
                     errorMessage = t('loginAccountNotActive') || 'Tu cuenta no está activa. Contacta con el propietario de la tienda.';
                 } else {
@@ -113,7 +110,6 @@ export default function AuthModal({ title }) {
                 return;
             }
             toast.success(t('loginSuccess'));
-            console.log('Login successful, redirecting to dashboard...');
             setTimeout(() => {
                 closeModal();
                 router.push('/dashboard');
@@ -192,6 +188,20 @@ export default function AuthModal({ title }) {
         }
     };
     useEffect(() => {
+        // Check for showLogin parameter in URL
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const showLogin = urlParams.get('showLogin');
+            // console.log(showLogin);
+            
+            if (showLogin === 'true') {
+                // setActiveView('login');
+                setIsOpen(true);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setIsMenuOpen(false);
@@ -207,16 +217,16 @@ export default function AuthModal({ title }) {
             {title ? (
                 <button
                     onClick={openLogin}
-                    className="py-2.5 w-full cursor-pointer font-medium text-[#353535] hover:text-[#00B0C8] hover:bg-gray-50 px-4 rounded transition-colors uppercase flex items-center"
+                    className="py-2.5 w-full cursor-pointer font-medium text-[#353535] hover:text-[#3f93ba] hover:bg-gray-50 px-4 rounded transition-colors uppercase flex items-center"
                 >
                     <UserRound className="mr-3" size={20} />
                     {title.toUpperCase()}
                 </button>
             ) : (
                 <button
-                        onClick={openLogin}
-                        id='login-button'
-                    className="p-2  transition-colors flex items-center justify-center cursor-pointer text-gray-700 hover:text-[#00B0C8]"
+                    onClick={openLogin}
+                    id='login-button'
+                    className="p-2  transition-colors flex items-center justify-center cursor-pointer text-gray-700 hover:text-[#3f93ba]"
                     aria-label="Abrir modal de autenticación"
                 >
                     <UserRound size={24} />
@@ -260,7 +270,7 @@ export default function AuthModal({ title }) {
                                             type="email"
                                             id="email"
                                             name="email"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-transparent transition-all"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-transparent transition-all"
                                             placeholder={t('emailPlaceholder')}
                                             required
                                         />
@@ -273,34 +283,23 @@ export default function AuthModal({ title }) {
                                             type="password"
                                             id="password"
                                             name="password"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-transparent transition-all"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-transparent transition-all"
                                             placeholder={t('passwordPlaceholder')}
                                             required
                                         />
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        {/*  <div className="flex items-center">
-                                            <input
-                                                id="remember-me"
-                                                name="remember-me"
-                                                type="checkbox"
-                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 rounded transition-all"
-                                            />
-                                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                                                Recuérdame
-                                            </label>
-                                        </div> */}
                                         <button
                                             type="button"
                                             onClick={() => toggleView('recover')}
-                                            className="text-sm text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
+                                            className="text-sm text-[#36A9E1] hover:text-[#00a2b8] transition-colors"
                                         >
                                             {t('forgotPasswordBtn')}
                                         </button>
                                     </div>
                                     <button
                                         type="submit"
-                                        className="w-full bg-[#00B0C8] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
+                                        className="w-full bg-[#36A9E1] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
                                     >
                                         {t('loginBtn')}
                                     </button>
@@ -310,7 +309,7 @@ export default function AuthModal({ title }) {
                                             <button
                                                 type="button"
                                                 onClick={() => toggleView('register')}
-                                                className="text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
+                                                className="text-[#36A9E1] hover:text-[#00a2b8] transition-colors"
                                             >
                                                 {t('createAccountBtn')}
                                             </button>
@@ -329,14 +328,14 @@ export default function AuthModal({ title }) {
                                             id="recovery-email"
                                             value={resetEmail}
                                             onChange={(e) => setResetEmail(e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-transparent transition-all"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-transparent transition-all"
                                             placeholder={t('emailPlaceholder')}
                                             required
                                         />
                                     </div>
                                     <button
                                         type="submit"
-                                        className="w-full bg-[#00B0C8] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
+                                        className="w-full bg-[#36A9E1] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
                                     >
                                         {t('sendRecoveryEmailBtn')}
                                     </button>
@@ -344,7 +343,7 @@ export default function AuthModal({ title }) {
                                         <button
                                             type="button"
                                             onClick={() => toggleView('login')}
-                                            className="text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
+                                            className="text-[#36A9E1] hover:text-[#00a2b8] transition-colors"
                                         >
                                             {t('backToLoginBtn')}
                                         </button>
@@ -361,7 +360,7 @@ export default function AuthModal({ title }) {
                                             type="text"
                                             id="name"
                                             name="name"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-transparent transition-all"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-transparent transition-all"
                                             placeholder={t('namePlaceholder')}
                                             required
                                         />
@@ -374,7 +373,7 @@ export default function AuthModal({ title }) {
                                             type="email"
                                             id="register-email"
                                             name="email"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-transparent transition-all"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-transparent transition-all"
                                             placeholder={t('emailPlaceholder')}
                                             required
                                         />
@@ -387,7 +386,7 @@ export default function AuthModal({ title }) {
                                             type="password"
                                             id="register-password"
                                             name="password"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-transparent transition-all"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-transparent transition-all"
                                             placeholder={t('passwordPlaceholder')}
                                             required
                                             minLength={6}
@@ -401,7 +400,7 @@ export default function AuthModal({ title }) {
                                             type="password"
                                             id="confirmPassword"
                                             name="confirmPassword"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] focus:border-transparent transition-all"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] focus:border-transparent transition-all"
                                             placeholder={t('confirmPasswordPlaceholder')}
                                             required
                                             minLength={6}
@@ -412,16 +411,16 @@ export default function AuthModal({ title }) {
                                             id="terms"
                                             name="terms"
                                             type="checkbox"
-                                            className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 rounded transition-all"
+                                            className="h-4 w-4 text-[#36A9E1] focus:ring-[#36A9E1] border-gray-300 rounded transition-all"
                                             required
                                         />
                                         <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                                            {t('acceptTerms')} <a href="#" className="text-[#00B0C8] hover:text-[#00a2b8] transition-colors">{t('termsLink')}</a>
+                                            {t('acceptTerms')} <a href="/terms" className="text-[#36A9E1] hover:text-[#00a2b8] transition-colors">{t('termsLink')}</a>
                                         </label>
                                     </div>
                                     <button
                                         type="submit"
-                                        className="w-full bg-[#00B0C8] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
+                                        className="w-full bg-[#36A9E1] text-white py-2 px-4 rounded-md hover:bg-[#00a2b8] transition-colors"
                                     >
                                         {t('registerBtn')}
                                     </button>
@@ -431,7 +430,7 @@ export default function AuthModal({ title }) {
                                             <button
                                                 type="button"
                                                 onClick={() => toggleView('login')}
-                                                className="text-[#00B0C8] hover:text-[#00a2b8] transition-colors"
+                                                className="text-[#36A9E1] hover:text-[#00a2b8] transition-colors"
                                             >
                                                 {t('loginBtnShort')}
                                             </button>

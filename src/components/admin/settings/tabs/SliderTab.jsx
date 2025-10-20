@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FiUpload, FiPlus } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import ImageSelector from '@/components/admin/shared/ImageSelector';
-
 export default function ConfiguracionTab() {
     const [sliders, setSliders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -168,7 +167,6 @@ export default function ConfiguracionTab() {
         setImagePreview(slider.imageUrl || '');
         setEditingId(slider._id);
     };
-
     // Move slider up or down
     const moveSlider = (id, direction) => {
         setSliders(prev => {
@@ -243,7 +241,7 @@ export default function ConfiguracionTab() {
                                 htmlFor="sliderImage"
                                 className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading
                                     ? 'bg-gray-400 cursor-not-allowed'
-                                    : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'
+                                    : 'bg-[#36A9E1] hover:bg-[#008A9B] cursor-pointer'
                                     }`}
                             >
                                 {isUploading ? 'Pujant...' : 'Selecciona imatges'}
@@ -277,7 +275,7 @@ export default function ConfiguracionTab() {
                             type="button"
                             onClick={() => setShowImageSelector(true)}
                             disabled={isUploading}
-                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#36A9E1] hover:bg-[#008A9B]'}`}
                         >
                             Selecciona existent
                         </button>
@@ -297,7 +295,7 @@ export default function ConfiguracionTab() {
                                 name="imageUrl"
                                 value={form.imageUrl}
                                 onChange={handleChange}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                 placeholder="https://example.com/image.jpg"
                             />
                             <button
@@ -354,7 +352,7 @@ export default function ConfiguracionTab() {
                 <div className="flex gap-2">
                     <button
                         type="submit"
-                        className="bg-[#00B0C8] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm"
+                        className="bg-[#36A9E1] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm"
                         disabled={isUploading}
                     >
                         {editingId ? 'Actualitza' : 'Afegeix'} slider

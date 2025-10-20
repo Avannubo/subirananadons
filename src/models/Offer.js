@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-
 const OfferSchema = new mongoose.Schema({
     imageUrl: { type: String, required: true },
     title: {
@@ -20,5 +19,4 @@ const OfferSchema = new mongoose.Schema({
     brandLogo: { type: String },
     discount: { type: Number, min: 0, max: 100 },
 }, { timestamps: true });
-
 export default mongoose.models.Offer || mongoose.model('Offer', OfferSchema);

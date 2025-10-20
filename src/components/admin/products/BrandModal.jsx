@@ -1,13 +1,9 @@
 'use client';
-
 import { useState, useEffect, useRef } from 'react';
 import { FiX, FiUpload, FiImage } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import ImageSelector from '@/components/admin/shared/ImageSelector';
-
 export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }) {
-    console.log(brand);
-
     const [formData, setFormData] = useState({
         name: '',
         logo: '',
@@ -28,13 +24,9 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
     const [isDragging, setIsDragging] = useState(false);
     const [showImageSelector, setShowImageSelector] = useState(false);
     const fileInputRef = useRef(null);
-
     // Initialize form with brand data when editing
     useEffect(() => {
         if (isEditing && brand) {
-            console.log('Brand data:', brand);
-            console.log('Brand discount:', brand.discount);
-
             const discountData = brand.discount ? {
                 active: brand.discount.active,  // Ensure boolean
                 type: brand.discount.type || 'percentage',
@@ -52,9 +44,6 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                 minPurchaseAmount: '',
                 minQuantity: ''
             };
-
-            console.log('Processed discount data:', discountData);
-
             setFormData({
                 name: brand.name || '',
                 logo: brand.logo || '',
@@ -85,7 +74,6 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
             setImagePreview(null);
         }
     }, [isEditing, brand]);
-
     // Handle form field changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -94,7 +82,6 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
             [name]: type === 'checkbox' ? checked : value,
         });
     };
-
     // Generate slug from name
     const generateSlug = () => {
         if (formData.name) {
@@ -106,32 +93,26 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
             setSlug(newSlug);
         }
     };
-
     // Handle image upload
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         handleFile(file);
     };
-
     // Handle drag events
     const handleDragOver = (e) => {
         e.preventDefault();
         setIsDragging(true);
     };
-
     const handleDragLeave = () => {
         setIsDragging(false);
     };
-
     const handleDrop = (e) => {
         e.preventDefault();
         setIsDragging(false);
-
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             handleFile(e.dataTransfer.files[0]);
         }
     };
-
     // Process the selected file
     const handleFile = (file) => {
         if (file) {
@@ -140,13 +121,11 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                 toast.error('Si us plau, selecciona una imatge vàlida');
                 return;
             }
-
             // Check file size (5MB limit)
             if (file.size > 5 * 1024 * 1024) {
                 toast.error('La imatge és massa gran. La mida màxima és 5MB');
                 return;
             }
-
             const reader = new FileReader();
             reader.onload = (e) => {
                 const imageUrl = e.target.result;
@@ -156,59 +135,48 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
             reader.readAsDataURL(file);
         }
     };
-
     // Trigger file input click
     const handleImageClick = () => {
         fileInputRef.current.click();
     };
-
     // Remove image
     const handleRemoveImage = (e) => {
         e.stopPropagation();
         setImagePreview(null);
         setFormData(prev => ({ ...prev, logo: '' }));
     };
-
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!formData.name.trim()) {
             toast.error('El nom de la marca és obligatori');
             return;
         }
-
         // Validate discount data if active
         if (formData.discount.active) {
             if (!formData.discount.value || formData.discount.value <= 0) {
                 toast.error('El valor del descompte ha de ser superior a 0');
                 return;
             }
-
             if (formData.discount.type === 'percentage' && formData.discount.value > 100) {
                 toast.error('El percentatge de descompte no pot ser superior a 100%');
                 return;
             }
-
             const startDate = new Date(formData.discount.startDate);
             const endDate = new Date(formData.discount.endDate);
-
             if (startDate >= endDate) {
                 toast.error('La data de fi ha de ser posterior a la data d\'inici');
                 return;
             }
-
             if (formData.discount.minPurchaseAmount && formData.discount.minPurchaseAmount < 0) {
                 toast.error('L\'import mínim de compra no pot ser negatiu');
                 return;
             }
-
             if (formData.discount.minQuantity && formData.discount.minQuantity < 0) {
                 toast.error('La quantitat mínima no pot ser negativa');
                 return;
             }
         }
-
         // Generate slug if empty
         let brandData = { ...formData };
         if (!slug) {
@@ -221,11 +189,9 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
         } else {
             brandData.slug = slug;
         }
-
         try {
             // Step 1: Save the brand data first
             await onSave(brandData);
-
             // If editing and brand exists
             if (isEditing && brand && brand._id) {
                 // Get all active products for this brand using the method from fetchBrandsWithProducts
@@ -233,13 +199,10 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                 if (!productCountResponse.ok) {
                     throw new Error('Error en obtenir els productes de la marca');
                 }
-
                 const productData = await productCountResponse.json();
                 const products = productData.products;
-
                 if (products && products.length > 0) {
                     toast.loading(`Actualitzant ${products.length} productes...`, { id: 'updating-products' });
-
                     // Update all active products with the new brand discount info
                     const updatePromises = products.map(product =>
                         fetch(`/api/products/${product._id}`, {
@@ -260,24 +223,19 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                             })
                         })
                     );
-
                     // Wait for all product updates to complete
                     await Promise.all(updatePromises);
                     toast.success(`Descompte actualitzat per a ${products.length} productes actius`, { id: 'updating-products' });
                 }
             }
-
             // Step 4: Close the modal
             onClose();
-
         } catch (error) {
             console.error('Error saving brand with discount:', error);
             toast.error(error.message || 'Error en actualitzar la marca i els seus descomptes');
         }
     };
-
     if (!isOpen) return null;
-
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-start pt-10 p-4 overflow-y-auto">
             <div className="bg-white rounded-md shadow w-full max-w-lg">
@@ -292,7 +250,6 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                         <FiX className="w-5 h-5" />
                     </button>
                 </div>
-
                 <form onSubmit={handleSubmit} className="p-4">
                     <div className="space-y-4">
                         <div>
@@ -306,33 +263,9 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                             />
                         </div>
-
-                        {/* <div>
-                            <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
-                                Slug
-                            </label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    id="slug"
-                                    value={slug}
-                                    onChange={(e) => setSlug(e.target.value)}
-                                    className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={generateSlug}
-                                    className="px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm"
-                                >
-                                    Genera
-                                </button>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">S'utilitza a les URLs. Es generarà automàticament si es deixa en blanc.</p>
-                        </div> */}
-
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Logotip
@@ -340,7 +273,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                             <div className="flex flex-col items-center gap-2">
                                 <div
                                     className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer h-40 flex flex-col items-center justify-center ${isDragging
-                                        ? 'border-[#00B0C8] bg-blue-50'
+                                        ? 'border-[#36A9E1] bg-blue-50'
                                         : 'border-gray-300 hover:border-gray-400'
                                         }`}
                                     onClick={handleImageClick}
@@ -355,7 +288,6 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                         accept="image/*"
                                         onChange={handleImageUpload}
                                     />
-
                                     {imagePreview ? (
                                         <div className="relative h-full w-full flex items-center justify-center">
                                             <img
@@ -386,7 +318,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 <button
                                     type="button"
                                     onClick={() => setShowImageSelector(true)}
-                                    className="w-full px-4 py-2 text-white text-sm rounded-md bg-[#00B0C8] hover:bg-[#008A9B]"
+                                    className="w-full px-4 py-2 text-white text-sm rounded-md bg-[#36A9E1] hover:bg-[#008A9B]"
                                 >
                                     Selecciona existent
                                 </button>
@@ -402,23 +334,6 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 />
                             )}
                         </div>
-
-                        {/*
-                        <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                                Descripció
-                            </label>
-                            <textarea
-                                id="description"
-                                name="description"
-                                rows="3"
-                                value={formData.description}
-                                onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                            ></textarea>
-                        </div>
-                        */}
-
                         <div>
                             <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
                                 Lloc web
@@ -429,15 +344,12 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 name="website"
                                 value={formData.website}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                             />
                         </div>
-
-
                         {/* Discount Section */}
                         <div className="border-t border-gray-200 pt-4 mt-4">
                             <h3 className="text-lg font-medium mb-4">Descompte de Marca</h3>
-
                             <div className="space-y-4">
                                 <div className="flex items-center mb-4">
                                     <input
@@ -448,13 +360,12 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                             ...prev,
                                             discount: { ...prev.discount, active: e.target.checked }
                                         }))}
-                                        className="h-4 w-4 rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
+                                        className="h-4 w-4 rounded border-gray-300 text-[#36A9E1] focus:ring-[#36A9E1]"
                                     />
                                     <label htmlFor="discount-active" className="ml-2 block text-sm font-medium text-gray-700">
                                         Activar descompte
                                     </label>
                                 </div>
-
                                 {formData.discount?.active && (
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="col-span-2 sm:col-span-1">
@@ -467,13 +378,12 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                     ...prev,
                                                     discount: { ...prev.discount, type: e.target.value }
                                                 }))}
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             >
                                                 <option value="percentage">Percentatge (%)</option>
                                                 <option value="fixed">Import fix (€)</option>
                                             </select>
                                         </div>
-
                                         <div className="col-span-2 sm:col-span-1">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 {formData.discount.type === 'percentage' ? 'Percentatge' : 'Import'}
@@ -489,14 +399,13 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                     min="0"
                                                     max={formData.discount.type === 'percentage' ? "100" : ""}
                                                     step={formData.discount.type === 'percentage' ? "1" : "0.01"}
-                                                    className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                    className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                                 />
                                                 <span className="absolute right-3 top-2 text-gray-500">
                                                     {formData.discount.type === 'percentage' ? '%' : '€'}
                                                 </span>
                                             </div>
                                         </div>
-
                                         <div className="col-span-2 sm:col-span-1">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Data d'inici
@@ -508,10 +417,9 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                     ...prev,
                                                     discount: { ...prev.discount, startDate: e.target.value }
                                                 }))}
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             />
                                         </div>
-
                                         <div className="col-span-2 sm:col-span-1">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Data de fi
@@ -523,48 +431,13 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                                     ...prev,
                                                     discount: { ...prev.discount, endDate: e.target.value }
                                                 }))}
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
+                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#36A9E1] focus:border-[#36A9E1]"
                                             />
                                         </div>
-
-                                        {/* <div className="col-span-2 sm:col-span-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Import mínim de compra
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={formData.discount.minPurchaseAmount}
-                                                onChange={(e) => setFormData(prev => ({
-                                                    ...prev,
-                                                    discount: { ...prev.discount, minPurchaseAmount: e.target.value }
-                                                }))}
-                                                min="0"
-                                                step="0.01"
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                            />
-                                        </div>
-
-                                        <div className="col-span-2 sm:col-span-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Quantitat mínima
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={formData.discount.minQuantity}
-                                                onChange={(e) => setFormData(prev => ({
-                                                    ...prev,
-                                                    discount: { ...prev.discount, minQuantity: e.target.value }
-                                                }))}
-                                                min="0"
-                                                step="1"
-                                                className="w-full p-2 border border-gray-300 rounded focus:ring-[#00B0C8] focus:border-[#00B0C8]"
-                                            />
-                                        </div> */}
                                     </div>
                                 )}
                             </div>
                         </div>
-
                         <div className="flex items-center">
                             <input
                                 type="checkbox"
@@ -572,14 +445,13 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                                 name="enabled"
                                 checked={formData.enabled}
                                 onChange={handleChange}
-                                className="h-4 w-4 rounded border-gray-300 text-[#00B0C8] focus:ring-[#00B0C8]"
+                                className="h-4 w-4 rounded border-gray-300 text-[#36A9E1] focus:ring-[#36A9E1]"
                             />
                             <label htmlFor="enabled" className="ml-2 block text-sm font-medium text-gray-700">
                                 Marca activa
                             </label>
                         </div>
                     </div>
-
                     <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-300">
                         <button
                             type="button"
@@ -590,7 +462,7 @@ export default function BrandModal({ isOpen, onClose, brand, isEditing, onSave }
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 border border-transparent rounded text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008A9B]"
+                            className="px-4 py-2 border border-transparent rounded text-sm font-medium text-white bg-[#36A9E1] hover:bg-[#008A9B]"
                         >
                             {isEditing ? 'Actualitza' : 'Crea'}
                         </button>

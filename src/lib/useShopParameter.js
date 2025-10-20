@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-
 export default function useShopParameter(key) {
     const [value, setValue] = useState("");
     const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         async function fetchParam() {
             try {
@@ -18,6 +16,5 @@ export default function useShopParameter(key) {
         }
         fetchParam();
     }, [key]);
-
     return { value, loading };
 }

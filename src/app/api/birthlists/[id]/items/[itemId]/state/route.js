@@ -4,17 +4,14 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import dbConnect from '@/lib/dbConnect';
 import BirthList from '@/models/BirthList';
 import mongoose from 'mongoose';
-
 // Helper function to check if a MongoDB ObjectId is valid
 const isValidObjectId = (id) => {
     return mongoose.Types.ObjectId.isValid(id);
 };
-
 // PUT: Update item state and user data
 export async function PUT(request, { params }) {
     try {
         const { id, itemId } = params;
-
         // Validate ID formats
         if (!isValidObjectId(id) || !isValidObjectId(itemId)) {
             return NextResponse.json(
@@ -22,32 +19,25 @@ export async function PUT(request, { params }) {
                 { status: 400 }
             );
         }
-
         await dbConnect();
-
         // Find the birth list
         const birthList = await BirthList.findById(id);
-
         if (!birthList) {
             return NextResponse.json(
                 { success: false, message: 'Llista de naixement no trobada' },
                 { status: 404 }
             );
         }
-
         // Find the item in the birth list
         const itemIndex = birthList.items.findIndex(item => item._id.toString() === itemId);
-
         if (itemIndex === -1) {
             return NextResponse.json(
                 { success: false, message: 'Producte no trobat a la llista de naixement' },
                 { status: 404 }
             );
         }
-
         // Parse request body
         const { state, userData } = await request.json();
-
         // Validate state
         if (typeof state !== 'number' || state < 0 || state > 2) {
             return NextResponse.json(
@@ -55,17 +45,14 @@ export async function PUT(request, { params }) {
                 { status: 400 }
             );
         }
-
-        // Validate user data if state > 0
-        if (state > 0) {
-            if (!userData || !userData.name) {
-                return NextResponse.json(
-                    { success: false, message: 'Les dades de l\'usuari (nom i correu electrònic) són necessàries per a reserves i compres' },
-                    { status: 400 }
-                );
-            }
+        // Validate user data only when changing TO state > 0 (reserving or buying)
+        // Don't require user data when canceling (changing TO state 0)
+        if (state > 0 && !userData) {
+            return NextResponse.json(
+                { success: false, message: 'Les dades de l\'usuari (nom i correu electrònic) són necessàries per a reserves i compres' },
+                { status: 400 }
+            );
         }
-
         // Update the item
         birthList.items[itemIndex] = {
             ...birthList.items[itemIndex].toObject(),
@@ -79,16 +66,13 @@ export async function PUT(request, { params }) {
             } : null
         };        // The status will be automatically updated by the pre-save hook
         await birthList.save();
-
         // Fetch the updated list with populated products
         const updatedBirthList = await BirthList.findById(id).populate('items.product');
-
         return NextResponse.json({
             success: true,
             message: 'Estat del producte actualitzat correctament',
             data: updatedBirthList.items[itemIndex]
         });
-
     } catch (error) {
         console.error('Error actualitzant l\'estat del producte:', error);
         return NextResponse.json(

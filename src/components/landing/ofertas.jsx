@@ -11,7 +11,7 @@ const ImageGallery = () => {
                 if (!Array.isArray(data)) {
                     data = data ? [data] : [];
                 }
-                console.log("Offers fetched:", data);
+                //console.log("Offers fetched:", data);
                 setOffers(data);
             })
             .catch(err => {

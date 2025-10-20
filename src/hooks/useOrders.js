@@ -17,7 +17,6 @@ export function useOrders(userRole) {
     const fetchOrders = async (page = 1, limit = 5) => {
         setLoading(true);
         try {
-            console.log(`Fetching orders for role: ${userRole}, page: ${page}, limit: ${limit}`);
             const response = await fetch(`/api/orders?page=${page}&limit=${limit}`);
             if (!response.ok) {
                 const errorData = await response.json();
@@ -25,13 +24,13 @@ export function useOrders(userRole) {
                 throw new Error(errorData.message || 'Failed to fetch orders');
             }
             const data = await response.json();
-            console.log('Orders API response:', data);
             if (data.success) {
                 // Map orders to match our UI format
                 const formattedOrders = data.orders.map(order => ({
                     id: order._id,
                     reference: order.orderNumber || 'No ref',
-                    newCustomer: false, // This would need business logic to determine
+                    // This would need business logic to determine
+                    newCustomer: false,
                     delivery: order.shippingAddress?.country || 'España',
                     customer: order.shippingAddress ? `${order.shippingAddress.name || ''} ${order.shippingAddress.lastName || ''}`.trim() : 'Cliente',
                     total: order.totalAmount ? `${order.totalAmount.toFixed(2)} €` : '0.00 €',
@@ -42,21 +41,22 @@ export function useOrders(userRole) {
                     trackingNumber: order.trackingNumber || '',
                     notes: order.notes || ''
                 }));
-
                 // Sort orders by creation date to maintain a stable order even after updates
                 // This ensures edited orders stay in the same position
                 formattedOrders.sort((a, b) => {
                     // Extract dates from the formatted date strings or use default
                     const dateA = a.date ? new Date(a.date.split(',')[0].split('/').reverse().join('-')) : new Date(0);
                     const dateB = b.date ? new Date(b.date.split(',')[0].split('/').reverse().join('-')) : new Date(0);
-
                     // Sort by date (newest first)
                     return dateB - dateA;
                 });
-
-                console.log(`Formatted ${formattedOrders.length} orders for display`);
                 setOrders(formattedOrders);
-                setPagination(data.pagination);
+                // Ensure totalPages is at least 1
+                setPagination(prev => ({
+                    ...data.pagination,
+                    totalPages: Math.max(1, data.pagination.totalPages),
+                    totalItems: data.pagination.totalItems || formattedOrders.length
+                }));
             } else {
                 throw new Error(data.message || 'Failed to fetch orders');
             }
@@ -66,7 +66,8 @@ export function useOrders(userRole) {
         } finally {
             setLoading(false);
         }
-    };    // Map database status to UI status
+    };
+    // Map database status to UI status
     const mapOrderStatus = (status) => {
         const statusMap = {
             'acceptado': 'Acceptado',
@@ -77,7 +78,6 @@ export function useOrders(userRole) {
         };
         return statusMap[status] || status;
     };
-
     // Map UI status back to database status
     const mapStatusToDb = (uiStatus) => {
         const reverseStatusMap = {

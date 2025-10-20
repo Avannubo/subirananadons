@@ -47,6 +47,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             saving: 'Desant...',
             successAdd: 'Client afegit correctament',
             successEdit: 'Client actualitzat correctament',
+            successCreate: 'Client creat correctament',
             error: 'Error en desar el client',
             passwordSection: 'Canviar Contrasenya',
         },
@@ -83,6 +84,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             saving: 'Guardando...',
             successAdd: 'Cliente añadido correctamente',
             successEdit: 'Cliente actualizado correctamente',
+            successCreate: 'Cliente creado correctamente',
             error: 'Error al guardar el cliente',
             passwordSection: 'Cambiar Contraseña',
         }
@@ -103,7 +105,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
     const [loading, setLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     // Initialize form data when client is provided
-
     useEffect(() => {
         if (client) {
             setFormData({
@@ -138,9 +139,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
         // Reset errors when form is reset
         setErrors({});
     }, [client]);
-
-
-
     // Handle form input changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -152,7 +150,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
     // Form validation
     const validateForm = () => {
         const newErrors = {};
-
         if (!formData.name) {
             newErrors.name = t.nameRequired;
         }
@@ -164,7 +161,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = t.emailInvalid;
         }
-
         // Only validate password if either password field is filled
         if (formData.password || formData.confirmPassword) {
             if (formData.password.length < 6) {
@@ -174,28 +170,81 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                 newErrors.confirmPassword = t.passwordMismatch;
             }
         }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validateForm()) return;
         setLoading(true);
-        try {            // Save all client data including password in a single request
-            const dataToSend = {
-                ...formData,
-                // Only include password if it's provided and not empty
-                ...(formData.password ? { password: formData.password } : {})
-            };
-            delete dataToSend.confirmPassword; // Remove confirmPassword as it's not needed by the API
+        try {
+            if (client) {
+                // If editing existing client
+                if (!validateForm()) {
+                    setLoading(false);
+                    return;
+                }
+                const dataToSend = {
+                    ...formData,
+                    ...(formData.password ? { password: formData.password } : {})
+                };
+                delete dataToSend.confirmPassword;
+                await onSave(dataToSend);
+                toast.success(t.successEdit);
+                onClose();
+            } else {
+                // Validation for new client creation
+                if (!formData.name || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword) {
+                    toast.error(t.nameRequired);
+                    setLoading(false);
+                    return;
+                }
 
-            await onSave(dataToSend);
-            toast.success(client ? t.successEdit : t.successAdd);
-            // Notify the stats context that changes have been made
-            // await notifyChange();
-            onClose();
+                if (formData.password !== formData.confirmPassword) {
+                    toast.error(t.passwordMismatch);
+                    setLoading(false);
+                    return;
+                }
+
+                if (formData.password.length < 6) {
+                    toast.error(t.passwordShort);
+                    setLoading(false);
+                    return;
+                }
+
+                // Use register endpoint for creating new client
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: `${formData.name} ${formData.lastName}`.trim(),
+                        email: formData.email,
+                        password: formData.password,
+                        IsActive: true
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (data.message.includes('Ja existeix un usuari')) {
+                        toast.error(t.emailInvalid);
+                    } else {
+                        toast.error(data.message || t.error);
+                    }
+                    setLoading(false);
+                    return;
+                }
+
+                // Show success message
+                toast.success(t.successCreate);
+
+                // Successfully created user, just close the modal and refresh the list
+                await onSave(null); // Pass null to indicate successful creation                toast.success(t.successAdd);
+                onClose();
+            }
         } catch (error) {
             console.error('Error saving client:', error);
             toast.error(t.error);
@@ -203,7 +252,6 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
             setLoading(false);
         }
     };
-
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -211,7 +259,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                 <Dialog.Panel className="w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
                     <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
                         <DialogTitle className="text-lg font-medium text-gray-800 flex items-center">
-                            <FiUser className="mr-2 text-[#00B0C8]" />
+                            <FiUser className="mr-2 text-[#36A9E1]" />
                             {client ? t.edit : t.add}
                         </DialogTitle>
                         <button
@@ -227,7 +275,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                             <div className="md:col-span-1">
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col items-center">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-4 flex items-center">
-                                        <FiUser className="mr-2 text-[#00B0C8]" /> {t.profile}
+                                        <FiUser className="mr-2 text-[#36A9E1]" /> {t.profile}
                                     </h3>
                                     <div className="w-32 h-32 bg-gray-200 rounded-full overflow-hidden mb-4 flex items-center justify-center">
                                         {imagePreview ? (
@@ -260,7 +308,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                 {/* Contact Information */}
                                 <section className="space-y-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
-                                        <FiMail className="mr-2 text-[#00B0C8]" /> {t.contact}
+                                        <FiMail className="mr-2 text-[#36A9E1]" /> {t.contact}
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
@@ -273,7 +321,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="name"
                                                 value={formData.name}
                                                 onChange={handleChange}
-                                                className={`mt-1 block p-2 w-full rounded-md border-1 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.name ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block p-2 w-full rounded-md border-1 border-gray-300 focus:border-[#36A9E1] focus:ring-[#36A9E1] sm:text-sm ${errors.name ? 'border-red-500' : ''}`}
                                             />
                                             {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
                                         </div>
@@ -286,7 +334,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="lastName"
                                                 value={formData.lastName}
                                                 onChange={handleChange}
-                                                className={`mt-1 block p-2 w-full rounded-md border-1 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.lastName ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block p-2 w-full rounded-md border-1 border-gray-300 focus:border-[#36A9E1] focus:ring-[#36A9E1] sm:text-sm ${errors.lastName ? 'border-red-500' : ''}`}
                                             />
                                             {errors.lastName && <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>}
                                         </div>
@@ -301,15 +349,14 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className={`mt-1 block p-2 w-full rounded-md border-1 border-gray-300 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.email ? 'border-red-500' : ''}`}
+                                            className={`mt-1 block p-2 w-full rounded-md border-1 border-gray-300 focus:border-[#36A9E1] focus:ring-[#36A9E1] sm:text-sm ${errors.email ? 'border-red-500' : ''}`}
                                         />
                                         {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                                     </div>                                </section>
-
                                 {/* Password Change Section */}
                                 <section className="space-y-4">
                                     <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
-                                        <FiUser className="mr-2 text-[#00B0C8]" /> {t.passwordSection}
+                                        <FiUser className="mr-2 text-[#36A9E1]" /> {t.passwordSection}
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
@@ -322,7 +369,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="password"
                                                 value={formData.password || ''}
                                                 onChange={handleChange}
-                                                className={`mt-1 block w-full rounded-md border-gray-300 border-1 p-2 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.password ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block w-full rounded-md border-gray-300 border-1 p-2 focus:border-[#36A9E1] focus:ring-[#36A9E1] sm:text-sm ${errors.password ? 'border-red-500' : ''}`}
                                                 placeholder={t.passwordPlaceholder}
                                             />
                                             {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
@@ -337,49 +384,27 @@ export default function ClientModal({ isOpen, onClose, client, onSave }) {
                                                 name="confirmPassword"
                                                 value={formData.confirmPassword || ''}
                                                 onChange={handleChange}
-                                                className={`mt-1 block w-full rounded-md border-gray-300 border-1 p-2 focus:border-[#00B0C8] focus:ring-[#00B0C8] sm:text-sm ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                                                className={`mt-1 block w-full rounded-md border-gray-300 border-1 p-2 focus:border-[#36A9E1] focus:ring-[#36A9E1] sm:text-sm ${errors.confirmPassword ? 'border-red-500' : ''}`}
                                                 placeholder={t.passwordPlaceholder}
                                             />
                                             {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
                                         </div>
                                     </div>
                                 </section>
-
-                                {/* Preferences */}
-                                {/* <section className="space-y-4">
-                                    <h3 className="text-sm font-semibold text-gray-800 uppercase mb-2 flex items-center">
-                                        <FiBell className="mr-2 text-[#00B0C8]" /> {t.preferences}
-                                    </h3>
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                        <div className="flex items-center mb-3">
-                                            <input
-                                                id="active"
-                                                name="active"
-                                                type="checkbox"
-                                                checked={formData.active}
-                                                onChange={handleChange}
-                                                className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 border-1  rounded"
-                                            />
-                                            <label htmlFor="active" className="ml-2 block text-sm text-gray-700">
-                                                {t.accountActive}
-                                            </label>
-                                        </div> 
-                                    </div>
-                                </section> */}
                             </div>
                         </div>
                         <div className="mt-8 flex justify-end space-x-3 border-t border-gray-200 pt-4">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 cursor-pointer border-gray-300 border-1  rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
+                                className="px-4 py-2 cursor-pointer border-gray-300 border-1  rounded-md  text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1]"
                             >
                                 {t.cancel}
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-4 py-2 cursor-pointer border border-transparent rounded-md  text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#00B0C890] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B0C8]"
+                                className="px-4 py-2 cursor-pointer border border-transparent rounded-md  text-sm font-medium text-white bg-[#36A9E1] hover:bg-[#00B0C890] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#36A9E1]"
                             >
                                 {loading ? t.saving : t.save}
                             </button>

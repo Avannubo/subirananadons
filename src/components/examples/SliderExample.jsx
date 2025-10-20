@@ -1,9 +1,6 @@
 'use client';
-
 import FadeSlider from '@/components/ui/FadeSlider';
 import SwiperSlider from '@/components/ui/SwiperSlider';
-import Image from 'next/image';
-
 const SliderExample = () => {
     // Example slides data
     const slides = [
@@ -50,7 +47,6 @@ const SliderExample = () => {
             </div>
         </div>
     ];
-
     return (
         <div className="space-y-8">
             <section>
@@ -63,7 +59,6 @@ const SliderExample = () => {
                     className="h-[500px] rounded-lg overflow-hidden"
                 />
             </section>
-
             <section>
                 <h2 className="text-2xl font-bold mb-4">Swiper Slider Example</h2>
                 <SwiperSlider
@@ -78,5 +73,4 @@ const SliderExample = () => {
         </div>
     );
 };
-
 export default SliderExample; 

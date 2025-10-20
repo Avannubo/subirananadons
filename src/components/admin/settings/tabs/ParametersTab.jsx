@@ -15,14 +15,12 @@ import {
     Trash2
 } from 'lucide-react';
 import { useLocale } from 'next-intl';
-
 // Helper for fetching and saving parameters
 async function fetchParameters() {
     const res = await fetch("/api/shop-parameters");
     if (!res.ok) throw new Error("Failed to fetch parameters");
     return await res.json();
 }
-
 async function saveParameter(key, value, description = "") {
     const res = await fetch("/api/shop-parameters", {
         method: "POST",
@@ -32,17 +30,14 @@ async function saveParameter(key, value, description = "") {
     if (!res.ok) throw new Error("Failed to save parameter");
     return await res.json();
 }
-
 export default function ParametersTab() {
     const locale = useLocale();
-
     // Generalized parameter state
     const [parameters, setParameters] = useState({});
     const [edit, setEdit] = useState({}); // { key: value }
     const [editing, setEditing] = useState({}); // { key: boolean }
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
     // Load parameters and socials on mount
     useEffect(() => {
         fetchParameters()
@@ -77,7 +72,6 @@ export default function ParametersTab() {
             })
             .catch(() => setError(locale === 'ca' ? "No s'han pogut carregar els paràmetres" : "No se pudieron cargar los parámetros"));
     }, []);
-
     // Helper for starting edit
     const startEdit = (key) => {
         setEdit((prev) => ({ ...prev, [key]: parameters[key] }));
@@ -111,7 +105,6 @@ export default function ParametersTab() {
             setLoading(false);
         }
     };
-
     // Define parameters to show (add more here)
     const parameterDefs = [
         {
@@ -139,7 +132,8 @@ export default function ParametersTab() {
             sanitize: (value) => {
                 // Remove country code, non-digits, and keep first 9 digits
                 const digits = (value || "").replace(/\D/g, "");
-                return digits.slice(-9); // Take last 9 digits (in case user pastes with country code)
+                // Take last 9 digits (in case user pastes with country code)
+                return digits.slice(-9);
             }
         },
         {
@@ -181,14 +175,11 @@ export default function ParametersTab() {
             unit: "",
         },
     ];
-
     // Socials parameter state
     const [socials, setSocials] = useState([]);
-
     // For adding new social
     const [newSocial, setNewSocial] = useState({ name: '', link: '', icon: 'Instagram' });
     const [addingSocial, setAddingSocial] = useState(false);
-
     // Icon options
     const iconOptions = [
         { name: 'Facebook', Icon: Facebook },
@@ -202,8 +193,6 @@ export default function ParametersTab() {
         { name: 'Mail', Icon: Mail },
         { name: 'Globe', Icon: Globe },
     ];
-
-    // Add new social
     const handleAddSocial = async () => {
         const name = newSocial.name.trim();
         const link = newSocial.link.trim();
@@ -226,7 +215,6 @@ export default function ParametersTab() {
             setLoading(false);
         }
     };
-
     // Remove social (from UI and DB)
     const handleRemoveSocial = async (key) => {
         setLoading(true);
@@ -251,7 +239,6 @@ export default function ParametersTab() {
             setLoading(false);
         }
     };
-
     return (
         <div className="space-y-8 mx-auto ">
             {error && <div className="text-red-500">{error}</div>}
@@ -294,7 +281,7 @@ export default function ParametersTab() {
                             {param.unit && <span>{param.unit}</span>}
                             <button
                                 onClick={() => saveEdit(param.key, param.description)}
-                                className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8]"
+                                className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#3f93ba]"
                                 disabled={loading}
                             >
                                 {locale === 'ca' ? 'Desar' : 'Guardar'}
@@ -329,7 +316,7 @@ export default function ParametersTab() {
             <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
                 <h2 className="text-lg font-bold mb-4 flex items-center justify-between">{locale === 'ca' ? 'Xarxes Socials' : 'Redes Sociales'}
                     <button
-                        className="ml-4 px-3 py-1 bg-[#00B0C8]/10 text-[#00B0C8] rounded hover:bg-[#00B0C8]/20 border border-[#00B0C8] text-sm transition"
+                        className="ml-4 px-3 py-1 bg-[#36A9E1]/10 text-[#36A9E1] rounded hover:bg-[#36A9E1]/20 border border-[#36A9E1] text-sm transition"
                         onClick={() => setAddingSocial(v => !v)}
                     >
                         {addingSocial ? (locale === 'ca' ? 'Cancel·lar' : 'Cancelar') : (locale === 'ca' ? 'Afegir nova' : 'Añadir nueva')}
@@ -368,7 +355,7 @@ export default function ParametersTab() {
                             })()}
                         </div>
                         <button
-                            className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8] text-sm transition"
+                            className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#3f93ba] text-sm transition"
                             onClick={handleAddSocial}
                         >
                             {locale === 'ca' ? 'Afegir' : 'Añadir'}
@@ -396,7 +383,7 @@ export default function ParametersTab() {
                                         />
                                         <button
                                             onClick={() => saveEdit(param.key, param.name)}
-                                            className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8] transition"
+                                            className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#3f93ba] transition"
                                             disabled={loading}
                                         >
                                             {locale === 'ca' ? 'Desar' : 'Guardar'}
@@ -433,7 +420,6 @@ export default function ParametersTab() {
                     })}
                 </div>
             </div>
-
             {/* Google Maps Parameter at the end */}
             {(() => {
                 const param = parameterDefs.find(p => p.key === "googleMapsSrc");
@@ -459,7 +445,7 @@ export default function ParametersTab() {
                                 />
                                 <button
                                     onClick={() => saveEdit(param.key, param.description)}
-                                    className="px-3 py-1 bg-[#00B0C8] text-white rounded hover:bg-[#0090a8]"
+                                    className="px-3 py-1 bg-[#36A9E1] text-white rounded hover:bg-[#3f93ba]"
                                     disabled={loading}
                                 >
                                     {locale === 'ca' ? 'Desar' : 'Guardar'}
@@ -500,8 +486,6 @@ export default function ParametersTab() {
                     </div>
                 );
             })()}
-
-            
         </div>
     );
 }

@@ -1,6 +1,5 @@
 import Session from '@/models/Session';
 import { getServerSession } from 'next-auth';
-
 export function MongoDBSessionAdapter() {
     return {
         async createSession(session) {
@@ -17,29 +16,24 @@ export function MongoDBSessionAdapter() {
                 expires: newSession.expires
             };
         },
-
         async getSession(sessionToken) {
             const session = await Session.findOne({
                 accessToken: sessionToken,
                 isValid: true,
                 expires: { $gt: new Date() }
             });
-
             if (!session) return null;
-
             // Update last activity
             await Session.updateOne(
                 { _id: session._id },
                 { $set: { lastActivity: new Date() } }
             );
-
             return {
                 sessionToken: session.accessToken,
                 userId: session.userId,
                 expires: session.expires
             };
         },
-
         async updateSession(session, force) {
             const updatedSession = await Session.findOneAndUpdate(
                 { accessToken: session.sessionToken },
@@ -51,14 +45,12 @@ export function MongoDBSessionAdapter() {
                 },
                 { new: true }
             );
-
             return {
                 sessionToken: updatedSession.accessToken,
                 userId: updatedSession.userId,
                 expires: updatedSession.expires
             };
         },
-
         async deleteSession(sessionToken) {
             await Session.updateOne(
                 { accessToken: sessionToken },
@@ -68,16 +60,13 @@ export function MongoDBSessionAdapter() {
         }
     };
 }
-
 // Helper function to get current session with full details
 export async function getFullSession(req) {
     const session = await getServerSession(req);
     if (!session) return null;
-
     const dbSession = await Session.findOne({
         accessToken: session.sessionToken,
         isValid: true
     }).populate('userId');
-
     return dbSession;
 } 

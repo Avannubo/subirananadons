@@ -6,48 +6,40 @@ import mongoose from 'mongoose';
 import Order from '@/models/Order';
 import Invoice from '@/models/Invoice';
 // Ensure Invoice model is imported before using it in population
-
 // Get a single order by ID
 export async function GET(request, { params }) {
     try {
         const session = await getServerSession(authOptions);
-        console.log('Order Detail API - Session:', session);
-        console.log('Order Detail API - Request Params:', params);
-
+        //console.log('Order Detail API - Session:', session);
+        //console.log('Order Detail API - Request Params:', params);
         if (!session?.user?.id) {
             console.error('Order Detail API - No user ID in session');
             return NextResponse.json({
                 success: false,
-                message: 'Unauthorized'
+                message: 'No autorizado'
             }, { status: 401 });
         }
-
         await dbConnect();
         const { id } = params;
-
         if (!mongoose.Types.ObjectId.isValid(id)) {
             console.error('Order Detail API - Invalid order ID:', id);
             return NextResponse.json({
                 success: false,
-                message: 'Invalid order ID'
+                message: 'ID de pedido no válido'
             }, { status: 400 });
         }
-
         // First try to find the order without population to ensure it exists
         const order = await Order.findById(id);
-
         if (!order) {
             return NextResponse.json({
                 success: false,
                 message: 'Order not found'
             }, { status: 404 });
         }
-
         // Then populate the references if needed
         const populatedOrder = await Order.findById(id)
             .populate('user', 'name email')
             .lean(); // Use lean() for better performance
-
         // Handle invoices separately to avoid schema registration issues
         if (populatedOrder.invoices && populatedOrder.invoices.length > 0) {
             try {
@@ -60,7 +52,6 @@ export async function GET(request, { params }) {
                 populatedOrder.invoices = []; // Fallback to empty array if invoice fetch fails
             }
         }
-
         return NextResponse.json({
             success: true,
             order: populatedOrder
@@ -69,7 +60,7 @@ export async function GET(request, { params }) {
         console.error('Order Detail API - Error:', error);
         return NextResponse.json({
             success: false,
-            message: error.message || 'Failed to fetch order details'
+            message: error.message || 'Error al obtener los detalles del pedido'
         }, { status: 500 });
     }
 }
@@ -87,7 +78,7 @@ export async function PATCH(request, { params }) {
         if (!isAdmin) {
             return NextResponse.json({
                 success: false,
-                message: 'Only administrators can update orders'
+                message: 'Solo los administradores pueden actualizar pedidos'
             }, { status: 403 });
         }
         await dbConnect();
@@ -99,16 +90,19 @@ export async function PATCH(request, { params }) {
                 message: 'Invalid order ID'
             }, { status: 400 });
         }
-
         // Validate status if it's being updated
         const allowedStatuses = ['acceptado', 'procesando', 'enviado', 'completo', 'cancelado'];
-        if (data.status !== undefined && !allowedStatuses.includes(data.status)) {
-            return NextResponse.json({
-                success: false,
-                message: 'Invalid order status. Allowed values are: ' + allowedStatuses.join(', ')
-            }, { status: 400 });
+        if (data.status !== undefined) {
+            // Convert status to lowercase for validation and storage
+            data.status = data.status.toLowerCase();
+            if (!allowedStatuses.includes(data.status)) {
+                //console.log('Invalid status value:', data.status);
+                return NextResponse.json({
+                    success: false,
+                    message: 'Invalid order status. Allowed values are: ' + allowedStatuses.join(', ')
+                }, { status: 400 });
+            }
         }
-
         // Validate the update data
         const allowedFields = ['status', 'trackingNumber', 'notes', 'paymentDetails'];
         const updateData = {};
@@ -117,7 +111,6 @@ export async function PATCH(request, { params }) {
                 updateData[field] = data[field];
             }
         }
-
         // If no valid fields to update
         if (Object.keys(updateData).length === 0) {
             return NextResponse.json({
@@ -125,14 +118,12 @@ export async function PATCH(request, { params }) {
                 message: 'No valid fields to update'
             }, { status: 400 });
         }
-
         // Find and update the order
         const updatedOrder = await Order.findByIdAndUpdate(
             id,
             updateData,
             { new: true, runValidators: true }
         );
-
         // Check if order exists
         if (!updatedOrder) {
             return NextResponse.json({
@@ -140,17 +131,16 @@ export async function PATCH(request, { params }) {
                 message: 'Order not found'
             }, { status: 404 });
         }
-
         return NextResponse.json({
             success: true,
-            message: 'Order updated successfully',
+            message: 'Pedido actualizado correctamente',
             order: updatedOrder
         });
     } catch (error) {
         console.error('Error updating order:', error);
         return NextResponse.json({
             success: false,
-            message: 'Failed to update order',
+            message: 'Error al actualizar el pedido',
             error: error.message
         }, { status: 500 });
     }
@@ -169,7 +159,7 @@ export async function DELETE(request, { params }) {
         if (!isAdmin) {
             return NextResponse.json({
                 success: false,
-                message: 'Only administrators can delete orders'
+                message: 'Solo los administradores pueden eliminar pedidos'
             }, { status: 403 });
         }
         await dbConnect();
@@ -191,13 +181,13 @@ export async function DELETE(request, { params }) {
         }
         return NextResponse.json({
             success: true,
-            message: 'Order deleted successfully'
+            message: 'Pedido eliminado correctamente'
         });
     } catch (error) {
         console.error('Error deleting order:', error);
         return NextResponse.json({
             success: false,
-            message: 'Failed to delete order',
+            message: 'Error al eliminar el pedido',
             error: error.message
         }, { status: 500 });
     }

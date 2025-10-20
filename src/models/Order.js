@@ -1,6 +1,6 @@
 // models/Order.js
 import mongoose from 'mongoose';
-
+import { list } from 'pdfkit';
 const orderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -54,6 +54,7 @@ const orderSchema = new mongoose.Schema({
             itemId: mongoose.Schema.Types.ObjectId,
             babyName: String,
             listOwnerId: mongoose.Schema.Types.ObjectId,
+            listOwnerEmail: String,
             status: String,
             state: Number
         },
@@ -139,7 +140,6 @@ const orderSchema = new mongoose.Schema({
         ref: 'Invoice'
     }]
 }, { timestamps: true });
-
 // Add order to user's orders array when created
 orderSchema.post('save', async function (doc) {
     try {
@@ -154,5 +154,4 @@ orderSchema.post('save', async function (doc) {
         console.error('Error updating user orders:', error);
     }
 });
-
 export default mongoose.models.Order || mongoose.model('Order', orderSchema);

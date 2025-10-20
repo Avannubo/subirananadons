@@ -15,6 +15,7 @@ const translations = {
         update: 'Actualitzar dades',
         newList: 'Nova Llista',
         searchReference: 'Cercar Referència',
+        searchBabyName: 'Cercar Nadó',
         searchName: 'Cercar Nom',
         searchCreator: 'Cercar Creador',
         searchProduct: 'Cercar per producte',
@@ -64,6 +65,7 @@ const translations = {
         update: 'Actualizar datos',
         newList: 'Nueva Lista',
         searchReference: 'Buscar Referencia',
+        searchBabyName: 'Buscar Bebé',
         searchName: 'Buscar Nombre',
         searchCreator: 'Buscar Creador',
         searchProduct: 'Buscar por producto',
@@ -124,10 +126,10 @@ export default function ListasTabs({ userRole = 'user' }) {
     const t = translations[locale];
     const [activeTab, setActiveTab] = useState(t.tabs[0]);
     const { value: listConditions, loading: loadingConditions } = useShopParameter('list_conditions');
-    console.log("List Conditions:", listConditions, "Loading:", loadingConditions);
+    //console.log("List Conditions:", listConditions, "Loading:", loadingConditions);
     const [filters, setFilters] = useState({
         searchId: '',
-        searchReference: '',
+        searchBabyName: '',
         searchName: '',
         searchCreator: '',
         searchProduct: '',
@@ -208,7 +210,7 @@ export default function ListasTabs({ userRole = 'user' }) {
         const extractedEmail = emailMatch ? emailMatch[1] : '';
 
         const selectedUser = users.find(u => u.email === extractedEmail);
-        console.log("Selected User:", selectedUser);
+        //console.log("Selected User:", selectedUser);
         setSelectedUser(selectedUser);
         setFormData(prev => ({
             ...prev,
@@ -295,7 +297,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                 product: item.product._id,
                 quantity: item.quantity,
                 reserved: item.reserved || 0,
-                priority: item.priority || 2
+
             }));
             // Create the birth list in the database
             // Always use selected user as creator if admin
@@ -320,7 +322,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                 theme: 'default', // Default theme
                 status: 'Activa' // Active status
             };
-            // console.log('Creating birth list with data:', JSON.stringify(birthListData, null, 2));
+            // //console.log('Creating birth list with data:', JSON.stringify(birthListData, null, 2));
             const result = await createBirthList(birthListData);
             if (result.success) {
                 await loadBirthLists();
@@ -376,9 +378,9 @@ export default function ListasTabs({ userRole = 'user' }) {
                 }}
             />
             <div className="bg-white rounded-lg shadow">
-                <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="p-4 border-b border-gray-200 flex flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center">
-                        <h2 className="text-lg font-medium">{t.heading} ({displayLists.length})</h2>
+                        <h2 className="hidden md:block text-lg font-medium">{t.heading} ({displayLists.length})</h2>
                         <button
                             className="ml-2 text-gray-500 cursor-pointer hover:text-gray-700 h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
                             onClick={refreshData}
@@ -394,7 +396,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 setShowCreateModal(true);
                                 setCurrentStep(1);
                             }}
-                            className="flex items-center px-3 py-2 cursor-pointer bg-[#00B0C8] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
+                            className="flex items-center px-3 py-2 cursor-pointer bg-[#36A9E1] text-white rounded text-sm hover:bg-[#00B0C890] transition-colors"
                         >
                             <FiPlus className="mr-1" /> {t.newList}
                         </button>
@@ -408,14 +410,14 @@ export default function ListasTabs({ userRole = 'user' }) {
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder={t.searchReference}
-                                name="searchReference"
-                                value={filters.searchReference}
+                                placeholder={locale === 'ca' ? "Cercar Nadó" : "Buscar Bebé"}
+                                name="searchBabyName"
+                                value={filters.searchBabyName}
                                 onChange={handleFilterChange}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                        <div className="relative">
+                        <div className="hidden md:block relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -426,7 +428,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                        <div className="relative">
+                        <div className="hidden md:block relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -437,7 +439,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                        <div className="relative">
+                        <div className="hidden md:block relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
@@ -448,29 +450,12 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
                             />
                         </div>
-                    </div>
-                    {/* <div className="flex sm:flex-row flex-col justify-start gap-2">
-                        <button
-                            className="flex items-center justify-center px-4 py-2 bg-[#00B0C8] text-white rounded hover:bg-[#00B0C890]"
-                            onClick={applyFilters}
-                            title="Aplicar filtros"
-                        >
-                            <FiFilter className="mr-2" />
-                            Filtrar
-                        </button>
-                        <button
-                            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                            onClick={clearFilters}
-                            title="Limpiar filtros"
-                        >
-                            Limpiar
-                        </button>
-                    </div> */}
+                    </div> 
                 </div>
                 {/* Loading Indicator */}
                 {isLoading ? (
                     <div className="py-20 text-center">
-                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#00B0C8]"></div>
+                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-[#36A9E1]"></div>
                         <p className="mt-3 text-gray-600">{t.loading}</p>
                     </div>
                 ) : (
@@ -489,14 +474,14 @@ export default function ListasTabs({ userRole = 'user' }) {
 
             {/* Create List Modal - kept as is */}
             {showCreateModal && (
-                <div className="fixed inset-0 z-50 overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-1  md:p-4">
                     <div
                         ref={modalRef}
-                        className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto"
+                        className="bg-white rounded-lg shadow-xl w-full max-w-5xl h-full md:max-h-[90vh] overflow-y-auto"
                     >
-                        <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold text-gray-800">{t.createTitle}</h2>
+                        <div className="p-2 md:p-6">
+                            <div className="flex items-center justify-between mb-2 md:mb-6">
+                                <h2 className="text-xl md:text-2xl font-bold text-gray-800">{t.createTitle}</h2>
                                 <button
                                     onClick={() => setShowCreateModal(false)}
                                     className="text-gray-500 hover:text-gray-700 cursor-pointer"
@@ -505,39 +490,39 @@ export default function ListasTabs({ userRole = 'user' }) {
                                 </button>
                             </div>
                             {/* Step Indicator */}
-                            <div className="mb-8">
+                            <div className="mb-2 md:mb-8">
                                 <div className="flex items-center justify-between">
                                     <div className="flex-1">
                                         <div className="flex items-center">
-                                            <div className={`flex items-center justify-center w-8 h-8 ${currentStep === 1 ? 'bg-[#00B0C8] text-white' : 'bg-[#00B0C8] text-white'} rounded-full font-bold`}>
+                                            <div className={`flex items-center justify-center w-8 h-8 ${currentStep === 1 ? 'bg-[#36A9E1] text-white' : 'bg-[#36A9E1] text-white'} rounded-full font-bold`}>
                                                 1
                                             </div>
-                                            <div className={`ml-2 ${currentStep === 1 ? 'text-[#00B0C8]' : 'text-[#00B0C8]'} font-medium`}>{t.step1}</div>
+                                            <div className={`ml-2 ${currentStep === 1 ? 'text-[#36A9E1]' : 'text-[#36A9E1]'} font-medium`}>{t.step1}</div>
                                         </div>
                                     </div>
                                     <div className="hidden sm:flex flex-1">
                                         <div className="flex items-center">
-                                            <div className={`h-1 flex-1 ${currentStep >= 2 ? 'bg-[#00B0C8]' : 'bg-gray-200'}`}></div>
-                                            <div className={`flex items-center justify-center w-8 h-8 ${currentStep >= 2 ? 'bg-[#00B0C8] text-white' : 'bg-gray-200 text-gray-500'} rounded-full font-bold ml-2`}>
+                                            <div className={`h-1 flex-1 ${currentStep >= 2 ? 'bg-[#36A9E1]' : 'bg-gray-200'}`}></div>
+                                            <div className={`flex items-center justify-center w-8 h-8 ${currentStep >= 2 ? 'bg-[#36A9E1] text-white' : 'bg-gray-200 text-gray-500'} rounded-full font-bold ml-2`}>
                                                 2
                                             </div>
-                                            <div className={`ml-2 ${currentStep >= 2 ? 'text-[#00B0C8]' : 'text-gray-500'} font-medium`}>{t.step2}</div>
+                                            <div className={`ml-2 ${currentStep >= 2 ? 'text-[#36A9E1]' : 'text-gray-500'} font-medium`}>{t.step2}</div>
                                         </div>
                                     </div>
                                     <div className="hidden sm:flex flex-1">
                                         <div className="flex items-center">
-                                            <div className={`h-1 flex-1 ${currentStep >= 3 ? 'bg-[#00B0C8]' : 'bg-gray-200'}`}></div>
-                                            <div className={`flex items-center justify-center w-8 h-8 ${currentStep >= 3 ? 'bg-[#00B0C8] text-white' : 'bg-gray-200 text-gray-500'} rounded-full font-bold ml-2`}>
+                                            <div className={`h-1 flex-1 ${currentStep >= 3 ? 'bg-[#36A9E1]' : 'bg-gray-200'}`}></div>
+                                            <div className={`flex items-center justify-center w-8 h-8 ${currentStep >= 3 ? 'bg-[#36A9E1] text-white' : 'bg-gray-200 text-gray-500'} rounded-full font-bold ml-2`}>
                                                 3
                                             </div>
-                                            <div className={`ml-2 ${currentStep >= 3 ? 'text-[#00B0C8]' : 'text-gray-500'} font-medium`}>{t.step3}</div>
+                                            <div className={`ml-2 ${currentStep >= 3 ? 'text-[#36A9E1]' : 'text-gray-500'} font-medium`}>{t.step3}</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             {/* Step 1: Basic Information */}
                             {currentStep === 1 && (
-                                <form onSubmit={handleNextStep} className="space-y-6">
+                                <form onSubmit={handleNextStep} className="space-y-2 md:space-y-6">
                                     {/* Admin: Select user for the list */}
                                     {userRole === 'admin' && (
                                         <div>
@@ -636,7 +621,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             name="isPublic"
                                             checked={formData.isPublic}
                                             onChange={handleChange}
-                                            className="h-4 w-4 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 rounded"
+                                            className="h-4 w-4 text-[#36A9E1] focus:ring-[#36A9E1] border-gray-300 rounded"
                                         />
                                         <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-700">
                                             Lista Pública (Visible para cualquier persona con el enlace)
@@ -652,7 +637,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         </button>
                                         <button
                                             type="submit"
-                                            className="px-6 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none"
+                                            className="px-6 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#36A9E1] hover:bg-[#008da0] focus:outline-none"
                                         >
                                             {t.continue}
                                         </button>
@@ -661,8 +646,8 @@ export default function ListasTabs({ userRole = 'user' }) {
                             )}
                             {/* Step 2: Add Products */}
                             {currentStep === 2 && (
-                                <div className="space-y-6">
-                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                <div className="space-y-2 md:space-y-6 mb-6">
+                                    <div className="md:bg-gray-50  md:p-4 rounded-lg">
                                         <h3 className="text-lg font-medium text-gray-900 mb-2">{t.addProductsTitle}</h3>
                                         <p className="text-gray-600">
                                             {t.addProductsDesc}
@@ -688,7 +673,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         <button
                                             type="button"
                                             onClick={handleNextStep}
-                                            className="px-6 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none"
+                                            className="px-6 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#36A9E1] hover:bg-[#008da0] focus:outline-none"
                                         >
                                             {t.continue}
                                         </button>
@@ -708,7 +693,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             <p className="mt-4 text-gray-600">
                                                 {t.shareHelp}
                                             </p>
-                                            {/* <svg className="w-20 h-20 mx-auto text-[#00B0C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            {/* <svg className="w-20 h-20 mx-auto text-[#36A9E1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                             </svg> */}
                                         </div>
@@ -721,24 +706,24 @@ export default function ListasTabs({ userRole = 'user' }) {
                                                 <div className="animate-pulse bg-gray-200 h-20 rounded"></div>
                                             ) : (
                                                 <>
-                                                        <div className="text-sm text-gray-700 mb-2 pl-2">
-                                                            {(() => {
-                                                                const content = typeof listConditions === 'object'
-                                                                    ? listConditions[locale]?.value || listConditions.es?.value || listConditions.ca?.value || ''
-                                                                    : listConditions?.es?.value || '';
+                                                    <div className="text-sm text-gray-700 mb-2 pl-2">
+                                                        {(() => {
+                                                            const content = typeof listConditions === 'object'
+                                                                ? listConditions[locale]?.value || listConditions.es?.value || listConditions.ca?.value || ''
+                                                                : listConditions?.es?.value || '';
 
-                                                                // Split by regex into items (removing empty)
-                                                                const items = content.split(/\d+\.\s/).filter(Boolean);
+                                                            // Split by regex into items (removing empty)
+                                                            const items = content.split(/\d+\.\s/).filter(Boolean);
 
-                                                                return (
-                                                                    <ol className="list-decimal pl-4 space-y-2">
-                                                                        {items.map((item, index) => (
-                                                                            <li key={index} className="ml-2">{item.trim()}</li>
-                                                                        ))}
-                                                                    </ol>
-                                                                );
-                                                            })()}
-                                                        </div>
+                                                            return (
+                                                                <ol className="list-decimal pl-4 space-y-2">
+                                                                    {items.map((item, index) => (
+                                                                        <li key={index} className="ml-2">{item.trim()}</li>
+                                                                    ))}
+                                                                </ol>
+                                                            );
+                                                        })()}
+                                                    </div>
                                                     <span className="text-xs text-gray-500">{t.termsNote}</span>
                                                 </>
                                             )}
@@ -750,11 +735,11 @@ export default function ListasTabs({ userRole = 'user' }) {
                                                 type="checkbox"
                                                 checked={formData.acceptTerms || false}
                                                 onChange={e => setFormData(prev => ({ ...prev, acceptTerms: e.target.checked }))}
-                                                className="h-5 w-5 text-[#00B0C8] focus:ring-[#00B0C8] border-gray-300 rounded mt-1"
+                                                className="h-5 w-5 text-[#36A9E1] focus:ring-[#36A9E1] border-gray-300 rounded mt-1"
                                                 required
                                             />
                                             <label htmlFor="acceptTerms" className="ml-3 text-sm text-gray-700 select-none">
-                                                {t.acceptTerms} <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline text-[#00B0C8] hover:text-[#008da0]">{t.termsLink}</a> {locale === 'ca' ? 'i la' : 'y la'} <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline text-[#00B0C8] hover:text-[#008da0]">{t.privacyLink}</a> {locale === 'ca' ? 'd’aquest lloc web.' : 'de este sitio web.'}
+                                                {t.acceptTerms} <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline text-[#36A9E1] hover:text-[#008da0]">{t.termsLink}</a> {locale === 'ca' ? 'i la' : 'y la'} <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline text-[#36A9E1] hover:text-[#008da0]">{t.privacyLink}</a> {locale === 'ca' ? 'd’aquest lloc web.' : 'de este sitio web.'}
                                             </label>
                                         </div>
                                     </div>
@@ -769,7 +754,7 @@ export default function ListasTabs({ userRole = 'user' }) {
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className={`px-6 py-2 border cursor-pointer border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#00B0C8] hover:bg-[#008da0] focus:outline-none ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                                            className={`px-6 py-2 border cursor-pointer border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#36A9E1] hover:bg-[#008da0] focus:outline-none ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
                                         >
                                             {loading ? t.creating : t.createList}
                                         </button>

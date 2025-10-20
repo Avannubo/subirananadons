@@ -13,7 +13,7 @@ const ModalTPV = dynamic(() => import('@/components/cart/ModalTPV'), { ssr: fals
 export default function CartPage() {
     const t = useTranslations('CartPage');
     const { items: cartItems, updateQuantity, removeFromCart, updateItemNote, clearCart, loading: cartLoading } = useCart();
-    console.log('Cart items:', cartItems);
+    //console.log('Cart items:', cartItems);
     const { user, loading: userLoading } = useUser();
     const [deliveryMethod, setDeliveryMethod] = useState('delivery');
     const [formData, setFormData] = useState({
@@ -122,7 +122,7 @@ export default function CartPage() {
     useEffect(() => {
         // This will trigger a re-render with the correct shipping cost
         const shipping = calculateShipping();
-        // console.log(`Delivery method: ${deliveryMethod}, Subtotal: ${calculateSubtotal()}, Shipping: ${shipping}`);
+        // //console.log(`Delivery method: ${deliveryMethod}, Subtotal: ${calculateSubtotal()}, Shipping: ${shipping}`);
     }, [cartItems, deliveryMethod]);
     const handleDeliveryMethodChange = (method) => {
         // Only allow changing to 'delivery' if there are regular items
@@ -136,36 +136,29 @@ export default function CartPage() {
     const parsePrice = (price) => {
         // If it's already a number, return it
         if (typeof price === 'number') return price;
-
         // If it's undefined or null, return 0
         if (!price) return 0;
-
         // Remove currency symbol and convert to standard format
         const cleanPrice = String(price)
             .replace(/[^\d.,]/g, '')  // Remove all non-digit characters except . and ,
             .replace(/,(\d{2})$/, '.$1')  // Replace comma before last 2 digits with dot
             .replace(/,/g, '');  // Remove any remaining commas
-
         // Parse the clean price string to float
         return parseFloat(cleanPrice) || 0;
     };
-
     // Helper function to calculate the final price for an item
     const calculateItemPrice = (item) => {
         // First check if there's a valid discount with a final price
         if (item.discount?.active && item.discount.finalPrice !== undefined) {
             return parseFloat(item.discount.finalPrice);
         }
-
         // Parse the base price
         const basePrice = parsePrice(item.price);
-
         // Check for active discounts
         if (item.discount?.active) {
             const now = new Date();
             const startDate = item.discount.startDate ? new Date(item.discount.startDate) : null;
             const endDate = item.discount.endDate ? new Date(item.discount.endDate) : null;
-
             // Only apply discount if within valid date range
             if ((!startDate || now >= startDate) && (!endDate || now <= endDate)) {
                 if (item.discount.type === 'fixed') {
@@ -180,14 +173,12 @@ export default function CartPage() {
         }
         return basePrice;
     };
-
     const calculateSubtotal = () => {
         return cartItems.reduce((sum, item) => {
             const price = calculateItemPrice(item);
             return sum + (price * (item.quantity || 1));
         }, 0);
     };
-
     const calculateRegularSubtotal = () => {
         return regularItems.reduce((sum, item) => {
             const price = calculateItemPrice(item);
@@ -211,22 +202,22 @@ export default function CartPage() {
         return calculateSubtotal() + calculateShipping();// + calculateTax();
     };
     // Save user's address for future orders
-    const saveUserAddressPreferences = async () => {
-        if (!user?.id) return;
-        try {
-            console.log('Saving user address preferences:', {
-                name: formData.name,
-                lastName: formData.lastName,
-                phone: formData.phone,
-                address: formData.address,
-                city: formData.city,
-                postalCode: formData.postalCode,
-                province: formData.province,
-            });
-        } catch (error) {
-            console.error('Error saving address preferences:', error);
-        }
-    };
+    // const saveUserAddressPreferences = async () => {
+    //     if (!user?.id) return;
+    //     try {
+    //         console.log('Saving user address preferences:', {
+    //             name: formData.name,
+    //             lastName: formData.lastName,
+    //             phone: formData.phone,
+    //             address: formData.address,
+    //             city: formData.city,
+    //             postalCode: formData.postalCode,
+    //             province: formData.province,
+    //         });
+    //     } catch (error) {
+    //         console.error('Error saving address preferences:', error);
+    //     }
+    // };
     // Handle order submission
     const handleSubmitOrder = async () => {
         setOrderError(null);
@@ -257,7 +248,6 @@ export default function CartPage() {
                     parseFloat(String(item.price || "0").replace(/[^\d.,]/g, '').replace(',', '.'));
                 const discountedPrice = item.discount?.finalPrice || item.price || 0;
                 const hasDiscount = item.discount && item.discount.active;
-
                 return {
                     ...item,
                     buyerInfo: item.type === 'gift' ? {
@@ -358,15 +348,6 @@ export default function CartPage() {
                                     {/* User Type Selection - Only for guests */}
                                     <div className='bg-white rounded-lg shadow-sm p-6'>
                                         <div className="flex items-start justify-between">
-                                            {/* <h2 className="text-xl font-bold mb-6">{t('userData')}</h2> */}
-                                            {/* {!user && (
-                                                <button
-                                                    onClick={() => setIsAuthModalOpen(true)}
-                                                    className="text-[#00B0C8] text-sm hover:underline"
-                                                >
-                                                    {t('login')}
-                                                </button>
-                                            )} */}
                                         </div>
                                         {!user ? (
                                             <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
@@ -395,7 +376,7 @@ export default function CartPage() {
                                         <h2 className="text-xl font-bold mb-6">{deliveryMethod === 'pickup' ? t('contactData') : t('shippingData')}</h2>
                                         {userLoading ? (
                                             <div className="flex items-center justify-center py-4">
-                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00B0C8]"></div>
+                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#36A9E1]"></div>
                                                 <span className="ml-2 text-gray-600">{t('loadingUserData')}</span>
                                             </div>
                                         ) : (
@@ -430,7 +411,7 @@ export default function CartPage() {
                                                             name="name"
                                                             value={formData.name}
                                                             onChange={handleInputChange}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                             required
                                                         />
                                                     </div>
@@ -443,7 +424,7 @@ export default function CartPage() {
                                                             name="lastName"
                                                             value={formData.lastName}
                                                             onChange={handleInputChange}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                             required
                                                         />
                                                     </div>
@@ -456,7 +437,7 @@ export default function CartPage() {
                                                             name="email"
                                                             value={formData.email}
                                                             onChange={handleInputChange}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                             required
                                                         />
                                                     </div>
@@ -469,7 +450,7 @@ export default function CartPage() {
                                                             name="phone"
                                                             value={formData.phone}
                                                             onChange={handleInputChange}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                             required
                                                         />
                                                     </div>
@@ -484,7 +465,7 @@ export default function CartPage() {
                                                                     name="address"
                                                                     value={formData.address}
                                                                     onChange={handleInputChange}
-                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                                     required={deliveryMethod === 'delivery'}
                                                                 />
                                                             </div>
@@ -497,7 +478,7 @@ export default function CartPage() {
                                                                     name="city"
                                                                     value={formData.city}
                                                                     onChange={handleInputChange}
-                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                                     required={deliveryMethod === 'delivery'}
                                                                 />
                                                             </div>
@@ -510,7 +491,7 @@ export default function CartPage() {
                                                                     name="postalCode"
                                                                     value={formData.postalCode}
                                                                     onChange={handleInputChange}
-                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                                     required={deliveryMethod === 'delivery'}
                                                                 />
                                                             </div>
@@ -523,7 +504,7 @@ export default function CartPage() {
                                                                     name="province"
                                                                     value={formData.province}
                                                                     onChange={handleInputChange}
-                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8]"
+                                                                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1]"
                                                                     required={deliveryMethod === 'delivery'}
                                                                 />
                                                             </div>
@@ -539,7 +520,7 @@ export default function CartPage() {
                                                             onChange={handleInputChange}
                                                             placeholder={t('notesPlaceholder')}
                                                             rows={3}
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00B0C8] text-sm"
+                                                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#36A9E1] text-sm"
                                                         />
                                                     </div>
                                                     {hasGiftItems && (
@@ -574,16 +555,15 @@ export default function CartPage() {
                                         <h2 className="text-xl font-bold p-6 border-b border-gray-200">{t('yourOrder')}</h2>
                                         {regularItems.map((item, index) => (
                                             <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
-                                                <div className="relative w-20 h-20 overflow-hidden">
-                                                    <img
-                                                        src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
-                                                        alt={item.name || 'Producto'}
-                                                        fill="true"
-                                                        className="object-contain rounded-md z-0 overflow-hidden"
-                                                        onError={(e) => {
-                                                            e.target.src = '/assets/images/Screenshot_4.png';
-                                                        }}
-                                                    />
+                                                <div className="w-20 h-20 overflow-hidden rounded-md border border-gray-200 bg-gray-50 flex-shrink-0">
+                                                        <img
+                                                            src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
+                                                            alt={item.name || 'Producto'}
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => {
+                                                                e.target.src = '/assets/images/Screenshot_4.png';
+                                                            }}
+                                                        />
                                                     {item.isGift && (
                                                         <div className="absolute top-0 right-0 bg-pink-500 text-white text-xs px-1 rounded-bl rounded-tr">
                                                             Regalo
@@ -609,7 +589,7 @@ export default function CartPage() {
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        <p className="text-[#00B0C8] font-medium">{parsePrice(item.price).toFixed(2)}€</p>
+                                                        <p className="text-[#36A9E1] font-medium">{parsePrice(item.price).toFixed(2)}€</p>
                                                     )}
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
@@ -656,12 +636,11 @@ export default function CartPage() {
                                         <h2 className="text-xl font-bold p-6 border-b border-gray-200">{t('giftOrder')}</h2>
                                         {giftItems.map((item, index) => (
                                             <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
-                                                <div className="relative w-20 h-20">
+                                                <div className="w-20 h-20 overflow-hidden rounded-md border border-gray-200 bg-gray-50 flex-shrink-0">
                                                     <img
                                                         src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
                                                         alt={item.name || 'Producto'}
-                                                        fill="true"
-                                                        className="object-contain rounded-md"
+                                                        className="w-full h-full object-cover"
                                                         onError={(e) => {
                                                             e.target.src = '/assets/images/Screenshot_4.png';
                                                         }}
@@ -675,7 +654,6 @@ export default function CartPage() {
                                                 <div className="flex-1">
                                                     <h3 className="font-medium">{typeof item.name === 'object' ? item.name[t('locale')] || item.name['es'] || item.name['ca'] : item.name}</h3>
                                                     {/* <p className="text-gray-500 text-sm">{item.brand} - {typeof item.category === 'object' ? item.category[t('locale')] || item.category['es'] || item.category['ca'] : item.category}</p> */}
-
                                                     {item.discount && item.discount.active ? (
                                                         <div className="flex items-center gap-2">
                                                             <p className="text-gray-400 line-through text-sm">{parsePrice(item.price).toFixed(2)}€</p>
@@ -692,7 +670,7 @@ export default function CartPage() {
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        <p className="text-[#00B0C8] font-medium">{parsePrice(item.price).toFixed(2)} €</p>
+                                                        <p className="text-[#36A9E1] font-medium">{parsePrice(item.price).toFixed(2)} €</p>
                                                     )}
                                                     {item.isGift && item.listOwner && (
                                                         <p className="text-xs text-pink-600 mt-1">
@@ -742,7 +720,7 @@ export default function CartPage() {
                                             </p>
                                             <div className="w-full bg-gray-200 rounded-full h-2.5">
                                                 <div
-                                                    className="bg-[#00B0C8] h-2.5 rounded-full transition-all duration-500 ease-in-out"
+                                                    className="bg-[#36A9E1] h-2.5 rounded-full transition-all duration-500 ease-in-out"
                                                     style={{ width: `${Math.min(100, (calculateRegularSubtotal() / 60) * 100)}%` }}
                                                 ></div>
                                             </div>
@@ -753,18 +731,18 @@ export default function CartPage() {
                                             className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${hasOnlyGiftItems
                                                 ? 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-60'
                                                 : deliveryMethod === 'delivery'
-                                                    ? 'border-[#00B0C8] bg-[#00B0C8]/5 cursor-pointer'
-                                                    : 'border-gray-200 hover:border-[#00B0C8] cursor-pointer'
+                                                    ? 'border-[#36A9E1] bg-[#36A9E1]/5 cursor-pointer'
+                                                    : 'border-gray-200 hover:border-[#36A9E1] cursor-pointer'
                                                 }`}
                                             onClick={() => !hasOnlyGiftItems && handleDeliveryMethodChange('delivery')}
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${hasOnlyGiftItems
                                                     ? 'border-gray-400'
-                                                    : deliveryMethod === 'delivery' ? 'border-[#00B0C8]' : 'border-gray-400'
+                                                    : deliveryMethod === 'delivery' ? 'border-[#36A9E1]' : 'border-gray-400'
                                                     }`}>
                                                     {deliveryMethod === 'delivery' && !hasOnlyGiftItems && (
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#36A9E1]" />
                                                     )}
                                                 </div>
                                                 <div>
@@ -778,22 +756,22 @@ export default function CartPage() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <span className="text-[#00B0C8] font-medium">
+                                            <span className="text-[#36A9E1] font-medium">
                                                 {calculateRegularSubtotal() >= 60 || regularItems.length === 0 ? t('free') : t('shippingPrice')}
                                             </span>
                                         </div>
                                         <div
                                             className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${deliveryMethod === 'pickup'
-                                                ? 'border-[#00B0C8] bg-[#00B0C8]/5'
-                                                : 'border-gray-200 hover:border-[#00B0C8]'
+                                                ? 'border-[#36A9E1] bg-[#36A9E1]/5'
+                                                : 'border-gray-200 hover:border-[#36A9E1]'
                                                 }`}
                                             onClick={() => handleDeliveryMethodChange('pickup')}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${deliveryMethod === 'pickup' ? 'border-[#00B0C8]' : 'border-gray-400'
+                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${deliveryMethod === 'pickup' ? 'border-[#36A9E1]' : 'border-gray-400'
                                                     }`}>
                                                     {deliveryMethod === 'pickup' && (
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#00B0C8]" />
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#36A9E1]" />
                                                     )}
                                                 </div>
                                                 <div>
@@ -809,7 +787,7 @@ export default function CartPage() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <span className="text-[#00B0C8] font-medium">{t('free')}</span>
+                                            <span className="text-[#36A9E1] font-medium">{t('free')}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -850,7 +828,7 @@ export default function CartPage() {
                                                 }}
                                                 type="button"
                                                 disabled={isSubmitting}
-                                                className={`w-full ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#0090a8] cursor-pointer'} text-white py-3 px-6 rounded-md transition-colors duration-300`}
+                                                className={`w-full ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#36A9E1] hover:bg-[#3f93ba] cursor-pointer'} text-white py-3 px-6 rounded-md transition-colors duration-300`}
                                             >
                                                 {isSubmitting ? t('processing') : t('checkout')}
                                             </button>
@@ -876,7 +854,7 @@ export default function CartPage() {
                         <p className="text-gray-500 mb-8">{t('emptyDescription')}</p>
                         <Link
                             href="/products"
-                            className="inline-block bg-[#00B0C8] text-white py-3 px-6 rounded-md hover:bg-[#0090a8] transition-colors duration-300"
+                            className="inline-block bg-[#36A9E1] text-white py-3 px-6 rounded-md hover:bg-[#3f93ba] transition-colors duration-300"
                         >
                             {t('continueShopping')}
                         </Link>

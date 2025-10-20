@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer';
+import dbConnect from '@/lib/dbConnect';
+import User from '@/models/User';
 const transporter = nodemailer.createTransport({
     service: 'outlook',
     port: 587,
@@ -11,11 +13,10 @@ const transporter = nodemailer.createTransport({
 class EmailService {
     static async sendOrderConfirmation(order) {
         try {
-            console.log('Sending order confirmation email:', JSON.stringify(order));
+            //console.log('Sending order confirmation email:', JSON.stringify(order));
             const items_list = order.items.map(item => {
                 const hasDiscount = item.priceDetails?.discountAmount > 0;
                 const finalPrice = hasDiscount ? item.priceDetails.finalPrice : item.price;
-
                 return `<tr>
                     <td style="padding: 10px; border-bottom: 1px solid #eee; max-width: 400px;">
                         <div style="display: flex; align-items: center;">
@@ -117,8 +118,100 @@ class EmailService {
                 `
             };
             await transporter.sendMail(mailOptions);
+            // After sending the customer confirmation, notify list owners about purchased/reserved gifts
+            try {
+                const hasGifts = Array.isArray(order.items) && order.items.some(it => it && (it.type === 'gift' || (it.listInfo && (it.listInfo.listId || it.listInfo.listOwnerId))));
+                if (hasGifts) {
+                    await EmailService.sendOrderConfirmationToListOwners(order);
+                }
+            } catch (err) {
+                console.error('Error notifying list owners for order:', err);
+            }
         } catch (error) {
             console.error('Error sending order confirmation email:', error);
+            throw error;
+        }
+    }
+    /**
+     * Notify list owners when an order contains gift items for their lists.
+     * Groups items by list owner id and sends a single email per owner with the items relevant to them.
+     * @param {Object} order
+     */
+    static async sendOrderConfirmationToListOwners(order) {
+        try {
+            if (!order || !Array.isArray(order.items)) return;
+            await dbConnect();
+            // Group gift items by listOwnerId
+            const ownerMap = new Map();
+            for (const item of order.items) {
+                if (!item || item.type !== 'gift') continue;
+                const listInfo = item.listInfo || {};
+                const ownerId = listInfo.listOwnerId || listInfo.userId || listInfo.ownerId || null;
+                if (!ownerId) continue;
+                if (!ownerMap.has(ownerId)) ownerMap.set(ownerId, []);
+                ownerMap.get(ownerId).push({ item, listInfo });
+            }
+            // For each owner, fetch email and send a summary
+            for (const [ownerId, entries] of ownerMap.entries()) {
+                try {
+                    const owner = await User.findById(ownerId).select('email name').lean();
+                    const ownerEmail = owner?.email || null;
+                    const ownerName = owner?.name || '';
+                    if (!ownerEmail) {
+                        console.warn(`Skipping list owner notification: no email for ownerId ${ownerId}`);
+                        continue;
+                    }
+                    // Build HTML table of items
+                    const rows = entries.map(({ item, listInfo }) => {
+                        const prod = item.product || {};
+                        const prodName = prod?.name?.es || prod?.name?.ca || prod?.name || item.name || 'Producto';
+                        const qty = item.quantity || 1;
+                        const unitPrice = (item.priceDetails?.finalPrice ?? item.price ?? item.priceValue) || 0;
+                        const total = (unitPrice * qty) || 0;
+                        return `
+                            <tr>
+                                <td style="padding:8px;border-bottom:1px solid #eee">${prodName}</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:center">${qty}</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${unitPrice.toFixed(2)}€</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${total.toFixed(2)}€</td>
+                            </tr>`;
+                    }).join('');
+                    const mailHtml = `
+                        <div style="font-family:Arial, sans-serif; background:#f8f9fa; padding:20px;">
+                            <h2 style="color:#36A9E1;">Tu lista ha recibido una compra</h2>
+                            <p>Hola ${ownerName || 'Propietario'},</p>
+                            <p>Se ha realizado un pedido en la tienda que incluye artículos reservados/comprados de tu lista.</p>
+                            <p><strong>Número de pedido:</strong> ${order.orderNumber}</p>
+                            <p><strong>Comprador:</strong> ${order.shippingAddress?.name || order.shippingAddress?.fullName || 'Cliente'}</p>
+                            <table style="width:100%; border-collapse:collapse; margin-top:12px;">
+                                <thead>
+                                    <tr style="background:#f0f0f0">
+                                        <th style="padding:8px;text-align:left">Producto</th>
+                                        <th style="padding:8px;text-align:center">Cantidad</th>
+                                        <th style="padding:8px;text-align:right">Precio unidad</th>
+                                        <th style="padding:8px;text-align:right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rows}
+                                </tbody>
+                            </table>
+                            <p style="margin-top:12px;">Puedes ver y gestionar tu lista en: <a href="${process.env.DOMAIN || 'https://subirananadons.com'}/listas-de-nacimiento/${entries[0].listInfo?.listId || ''}" style="color:#36A9E1">Ir a la lista</a></p>
+                            <p style="font-size:12px; color:#666;">Este mensaje se ha enviado automáticamente.</p>
+                        </div>`;
+                    const mailOptions = {
+                        from: 'info@subirananadons.com',
+                        to: ownerEmail,
+                        subject: `Pedido #${order.orderNumber} - artículos de tu lista`,
+                        html: mailHtml
+                    };
+                    await transporter.sendMail(mailOptions);
+                } catch (err) {
+                    console.error(`Error sending list-owner email for ownerId ${ownerId}:`, err);
+                }
+            }
+        } catch (error) {
+            console.error('Error in sendOrderConfirmationToListOwners:', error);
             throw error;
         }
     }
@@ -146,7 +239,6 @@ class EmailService {
                 `<tr>
                     <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}</td>
                     <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.priority === 1 ? 'Alta' : item.priority === 2 ? 'Media' : 'Baja'}</td>
                     <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.reserved || 0}</td>
                 </tr>`
             ).join('');
@@ -162,8 +254,8 @@ class EmailService {
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
-                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
+                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #36A9E1; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
+                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #36A9E1; text-decoration: underline;">${list._id}</a></p>
                     <p>Puedes compartir el enlace de tu lista con familiares y amigos usando esta dirección:<br/>
                     <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">${process.env.DOMAIN}/listas-de-nacimiento/${list._id}</span></p>
                     <p>También puedes buscar tu lista usando este ID en el buscador de listas de nacimiento.</p>
@@ -183,8 +275,8 @@ class EmailService {
                     <p><strong>Título:</strong> ${list.title}</p>
                     <p><strong>Nombre del bebé:</strong> ${list.babyName}</p>
                     <p><strong>Fecha prevista:</strong> ${new Date(list.dueDate).toLocaleDateString('es-ES')}</p>
-                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
-                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #00B0C8; text-decoration: underline;">${list._id}</a></p>
+                    <p><strong>Enlace a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #36A9E1; text-decoration: underline;">Ver mi lista de nacimiento</a></p>
+                    <p><strong>ID a tu lista:</strong> <a href="${process.env.DOMAIN}/listas-de-nacimiento/${list._id}" style="color: #36A9E1; text-decoration: underline;">${list._id}</a></p>
                     <p>Puedes compartir el enlace de tu lista con familiares y amigos usando esta dirección:<br/>
                     <span style="background-color: #f5f5f5; padding: 8px; display: block; margin: 8px 0; border-radius: 4px; word-break: break-all;">${process.env.DOMAIN}/es/listas-de-nacimiento/${list._id}</span></p>
                     <p>También puedes buscar tu lista usando este ID en el buscador de listas de nacimiento.</p>
@@ -209,7 +301,7 @@ class EmailService {
                 to: "info@subirananadons.com",
                 subject: formData.subject || "Consulta general desde el formulario de contacto",
                 html: `
-                    <h1 style="color:#00B0C8;">Nuevo mensaje de contacto</h1>
+                    <h1 style="color:#36A9E1;">Nuevo mensaje de contacto</h1>
                     <p><strong>Nombre:</strong> ${formData.name}</p>
                     <p><strong>Email:</strong> ${formData.email}</p>
                     <p><strong>Teléfono:</strong> ${formData.phone || 'No proporcionado'}</p>
@@ -226,27 +318,6 @@ class EmailService {
             throw error;
         }
     }
-    static async sendGiftPurchaseNotification(gift, buyer, listOwner) {
-        try {
-            const templateParams = {
-                to_email: listOwner.email,
-                to_name: listOwner.name,
-                buyer_name: buyer.name,
-                product_name: gift.product.name,
-                list_title: gift.listTitle,
-                buyer_message: gift.buyerInfo?.note || 'Sin mensaje',
-                baby_name: gift.babyName
-            };
-            await emailjs.send(
-                EMAILJS_SERVICE_ID,
-                TEMPLATES.GIFT_PURCHASED,
-                templateParams
-            );
-        } catch (error) {
-            console.error('Error sending gift purchase notification:', error);
-            throw error;
-        }
-    }
     static async sendPasswordResetEmail(email, resetToken) {
         try {
             // Determine base URL based on environment
@@ -255,9 +326,9 @@ class EmailService {
                 baseUrl = 'http://localhost:3000';
             } else {
                 // Use your production domain (prefer HTTPS)
-                baseUrl = 'https://subirana.avannubo.net';
+                baseUrl = 'https://subirananadons.com';
                 // If you want to support both, you could add logic here
-                // baseUrl = process.env.PROD_URL || 'https://subirana.avannubo.net';
+                // baseUrl = process.env.PROD_URL || 'https://subirananadons.com';
             }
             const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
             const mailOptions = {
@@ -267,7 +338,7 @@ class EmailService {
                 html: `
                     <h1>Restablecer contraseña</h1>
                     <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para crear una nueva contraseña:</p>
-                    <p><a href="${resetUrl}" style="padding: 10px 20px; background-color: #00B0C8; color: white; text-decoration: none; border-radius: 5px;">Restablecer contraseña</a></p>
+                    <p><a href="${resetUrl}" style="padding: 10px 20px; background-color: #36A9E1; color: white; text-decoration: none; border-radius: 5px;">Restablecer contraseña</a></p>
                     <p><strong>IMPORTANTE:</strong> Este es un enlace de un solo uso y expirará en 1 hora.</p>
                     <p>Si no solicitaste restablecer tu contraseña, puedes ignorar este mensaje.</p>
                     <br>
@@ -278,6 +349,136 @@ class EmailService {
             await transporter.sendMail(mailOptions);
         } catch (error) {
             console.error('Error sending password reset email:', error);
+            throw error;
+        }
+    }
+    /**
+     * Accepts all modal data and filters/prepares the email payload internally.
+     */
+    static async sendGiftPurchaseNotification(selectedList, item, action) {
+        // console.log('sendGiftPurchaseNotification called with:', selectedList, item, action);
+        try {
+            const list = selectedList.rawData || selectedList;
+            // Owner info
+            const ownerName = (list.Creator || list.ownerName || (list.user && list.user.name) || list.owner || list.title) || 'Propietario';
+            const ownerEmail = (list.email || (list.user && list.user.email)) || '';
+            // Product info
+            const product = (item && item.product) || {};
+            const productName = product?.name?.es || product?.name?.ca || product?.name || 'Producto';
+            const listTitle = list.title || '';
+            const babyName = list.babyName || product?.giftInfo?.babyName || '';
+            // Buyer info
+            const buyerInfo = (item && item.userData) || {};
+            const buyer = {
+                name: buyerInfo.name || '-',
+                email: buyerInfo.email || '-',
+                phone: buyerInfo.phone || '-',
+                message: buyerInfo.message || 'Sin mensaje'
+            };
+            const listUrl = `${process.env.DOMAIN}dashboard/listas`;
+            let html = '';
+            if (action === 'reserve') {
+                html = `
+                    <div style="font-family: Arial, sans-serif; background: #f8f9fa; padding: 24px;">
+                        <h2 style="color: #36A9E1;">Producto reservado en tu lista</h2>
+                        <p>Hola ${ownerName},</p>
+                        <p>El producto <strong>${productName}</strong> ha sido <strong>reservado</strong> en tu lista <strong>${listTitle}</strong>.</p>
+                        
+                        <p><strong>Lista:</strong> ${listTitle}</p>
+                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Revísalo en tu perfil</a></p>
+                        <hr style="margin: 16px 0;">
+                        <p style="font-size: 13px; color: #888;">Este mensaje ha sido enviado automáticamente por Subirana Nadons.</p>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div style="font-family: Arial, sans-serif; background: #f8f9fa; padding: 24px;">
+                        <h2 style="color: #36A9E1;">¡Producto comprado en tu lista!</h2>
+                        <p>Hola ${ownerName},</p>
+                        <p>El producto <strong>${productName}</strong> ha sido <strong>comprado</strong> en tu lista <strong>${listTitle}</strong>.</p>
+                        
+                        <p><strong>Lista:</strong> ${listTitle}</p>
+                        <p><a href="${listUrl}" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Revísalo en tu perfil</a></p>
+                        <hr style="margin: 16px 0;">
+                        <p><strong>Comprador:</strong> ${buyer.name}</p>
+                        <p><strong>Email:</strong> ${buyer.email}</p>
+                        <p><strong>Teléfono:</strong> ${buyer.phone}</p>
+                        <p><strong>Mensaje del comprador:</strong></p>
+                        <div style="background: #fff; border-radius: 8px; padding: 12px; border: 1px solid #eee; margin-bottom: 16px;">${buyer.message}</div>
+                        <p style="font-size: 13px; color: #888;">Este mensaje ha sido enviado automáticamente por Subirana Nadons.</p>
+                    </div>
+                `;
+            }
+            const mailOptions = {
+                from: "info@subirananadons.com",
+                to: ownerEmail,
+                subject: action === 'reserve'
+                    ? `Producto reservado en tu lista - ${listTitle}`
+                    : `Producto comprado en tu lista - ${listTitle}`,
+                html
+            };
+            if (!mailOptions.to) {
+                throw new Error("No recipient email defined for gift notification");
+            }
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error('Error sending gift notification email:', error);
+            throw error;
+        }
+    }
+    /**
+    * Sends an email to the list owner when a product reservation or purchase is cancelled.
+    * Accepts the entire list data and   finds the cancelled item.
+    * @param {Object} selectedList - The full list data (with rawData/items)
+    * @param {Object} [cancelledItem] - Optionally, the cancelled item (if not, will find first with state 0)
+    */
+    static async sendGiftCancelNotification(selectedList, cancelledItem = null) {
+        // console.log('sendGiftCancelNotification called with:', selectedList, cancelledItem);
+        try {
+            const list = selectedList.rawData || selectedList;
+            // Find the first item with state 0 (cancelled) if not provided
+            const item = cancelledItem || (Array.isArray(list.items) ? list.items.find(i => i.state === 0) : null);
+            const ownerName = (list.Creator || list.ownerName || (list.user && list.user.name) || list.owner || list.title) || 'Propietario';
+            const ownerEmail = (list.email || (list.user && list.user.email)) || '';
+            const product = (item && item.product) || {};
+            const productName = product?.name?.es || product?.name?.ca || product?.name || 'Producto';
+            const listTitle = list.title || '';
+            const babyName = list.babyName || '';
+            // Buyer info (if available)
+            const buyerInfo = (item && item.userData) || {};
+            const buyer = {
+                name: buyerInfo.name || '-',
+                email: buyerInfo.email || '-',
+                phone: buyerInfo.phone || '-',
+                message: buyerInfo.message || 'Sin mensaje'
+            };
+            // Build HTML template
+            const listUrl = `${process.env.DOMAIN || 'https://subirananadons.com'}/listas-de-nacimiento/${list._id}`;
+            const html = `
+                <div style="font-family: Arial, sans-serif; background: #f8f9fa; padding: 24px;">
+                    <h2 style="color: #e41e31;">Reserva/compra cancelada en tu lista</h2>
+                    <p>Hola ${ownerName},</p>
+                    <p>
+                        La reserva o compra del producto <strong>${productName}</strong> ha sido <strong>cancelada</strong> en tu lista <strong>${listTitle}</strong>.
+                    </p>
+                    <p><strong>Nombre del bebé:</strong> ${babyName}</p>
+                    <p><a href="${process.env.DOMAIN}dashboard/listas" style="color: #36A9E1; text-decoration: underline; font-weight: 500;">Editar tu lista aquí</a></p>
+                    <hr style="margin: 16px 0;">
+                    <p style="font-size: 13px; color: #888;">Este mensaje ha sido enviado automáticamente por Subirana Nadons.</p>
+                </div>
+            `;
+            const mailOptions = {
+                from: "info@subirananadons.com",
+                to: ownerEmail,
+                subject: `Reserva/compra cancelada en tu lista - ${listTitle}`,
+                html
+            };
+            if (!mailOptions.to) {
+                throw new Error("No recipient email defined for gift cancel notification");
+            }
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error('Error sending gift cancel notification:', error);
             throw error;
         }
     }

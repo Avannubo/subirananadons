@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FiUpload, FiPlus } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import ImageSelector from "@/components/admin/shared/ImageSelector"; // Adjust the import based on your file structure
-
 export default function OffersTab() {
     const [offers, setOffers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,15 +21,13 @@ export default function OffersTab() {
     const [brands, setBrands] = useState([]);
     const [showImageSelector, setShowImageSelector] = useState(false);
     const maxOffers = 4;
-
     useEffect(() => {
         async function fetchOffers() {
             try {
                 const res = await fetch('/api/offers');
                 const data = await res.json();
                 setOffers(data);
-                console.log(data);
-
+                //console.log(data);
             } catch (err) {
                 toast.error('Error al cargar las ofertas');
             } finally {
@@ -51,7 +48,6 @@ export default function OffersTab() {
                 }
             });
     }, []);
-
     const handleChange = e => {
         const { name, value } = e.target;
         if (name === 'brand') {
@@ -77,7 +73,6 @@ export default function OffersTab() {
             setForm(f => ({ ...f, [name]: value }));
         }
     };
-
     const handleImageChange = (e) => {
         const files = e.target.files;
         if (files && files.length > 0) {
@@ -89,7 +84,6 @@ export default function OffersTab() {
             fileReader.readAsDataURL(files[0]);
         }
     };
-
     const uploadImage = async () => {
         if (!selectedImage) return null;
         setIsUploading(true);
@@ -117,7 +111,6 @@ export default function OffersTab() {
             setIsUploading(false);
         }
     };
-
     const handleSubmit = async e => {
         e.preventDefault();
         setError('');
@@ -135,7 +128,6 @@ export default function OffersTab() {
                 }
                 imageUrl = uploadedUrl;
             }
-
             // Find the selected brand from the brands list
             const selectedBrand = brands.find(b => b.id === form.brand || b.name === form.brand);
             if (!selectedBrand) {
@@ -153,29 +145,24 @@ export default function OffersTab() {
                 brand: selectedBrand.id, // Send ObjectId
                 brandLogo
             };
-
             // Add _id if editing
             if (editingId) {
                 offerData._id = editingId;
             }
-
             const res = await fetch('/api/offers', {
                 method: editingId ? 'PUT' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(offerData)
             });
-
             const data = await res.json();
             if (!res.ok) {
                 throw new Error(data.error || 'Error saving offer');
             }
-
             if (editingId) {
                 setOffers(offers.map(o => o._id === editingId ? data : o));
             } else {
                 setOffers([...offers, data]);
             }
-
             // Reset form
             setForm({
                 imageUrl: '',
@@ -194,7 +181,6 @@ export default function OffersTab() {
             toast.error(err.message);
         }
     };
-
     const handleEdit = offer => {
         // Determine the brand id for the select input
         let brandId = '';
@@ -214,7 +200,6 @@ export default function OffersTab() {
         setImagePreview(offer.imageUrl || '');
         setEditingId(offer._id);
     };
-
     const handleDelete = async id => {
         if (!window.confirm('¿Eliminar esta oferta?')) return;
         const res = await fetch('/api/offers', {
@@ -231,12 +216,10 @@ export default function OffersTab() {
         }
         toast.success('Oferta eliminada correctamente');
     };
-
     return (
         <div className="p-6 bg-white rounded-xl">
             <h2 className="font-bold mb-6 text-lg text-gray-800">Ofertes Destacades</h2>
             {error && <div className="text-red-500 mb-2">{error}</div>}
-
             <form onSubmit={handleSubmit} className="mb-8 space-y-6">
                 <div className="flex flex-col items-center space-y-4">
                     <div className="w-full p-2 h-44 relative rounded-lg border border-dashed border-gray-300 overflow-hidden bg-gray-50">
@@ -256,7 +239,7 @@ export default function OffersTab() {
                     </div>
                     <div className="w-full grid grid-cols-2 gap-2">
                         <div>
-                            <label htmlFor="offerImage" className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B] cursor-pointer'}`}>{isUploading ? 'Pujant...' : 'Selecciona Imatge'}</label>
+                            <label htmlFor="offerImage" className={`block w-full px-4 py-2 text-center text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#36A9E1] hover:bg-[#008A9B] cursor-pointer'}`}>{isUploading ? 'Pujant...' : 'Selecciona Imatge'}</label>
                             <input type="file" id="offerImage" accept="image/*" onChange={handleImageChange} disabled={isUploading} className="hidden" />
                         </div>
                         <button type="button" onClick={() => { if (form.imageUrl) { setImagePreview(form.imageUrl); } }} disabled={isUploading || !form.imageUrl} className={`w-full px-4 py-2 text-white text-sm rounded-md flex items-center justify-center gap-1 ${isUploading || !form.imageUrl ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>
@@ -267,7 +250,7 @@ export default function OffersTab() {
                             type="button"
                             onClick={() => setShowImageSelector(true)}
                             disabled={isUploading}
-                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#00B0C8] hover:bg-[#008A9B]'}`}
+                            className={`w-full col-span-2 px-4 py-2 text-white text-sm rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#36A9E1] hover:bg-[#008A9B]'}`}
                         >
                             Selecciona existent
                         </button>
@@ -286,7 +269,7 @@ export default function OffersTab() {
                     <div className="w-full">
                         <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">URL de la imatge (opcional)</label>
                         <div className="flex mt-1">
-                            <input type="text" id="imageUrl" name="imageUrl" value={form.imageUrl} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#00B0C8] focus:border-[#00B0C8]" placeholder="https://example.com/image.jpg" />
+                            <input type="text" id="imageUrl" name="imageUrl" value={form.imageUrl} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-[#36A9E1] focus:border-[#36A9E1]" placeholder="https://example.com/image.jpg" />
                             <button type="button" onClick={() => { if (form.imageUrl) { setImagePreview(form.imageUrl); } }} className="text-nowrap bg-gray-200 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-300">Vista previa</button>
                         </div>
                         <p className="mt-1 text-xs text-gray-500">O enganxa la URL directament aquí</p>
@@ -300,7 +283,6 @@ export default function OffersTab() {
                     <input name="description.ca" value={form.description.ca} onChange={handleChange} placeholder="Descripció (CA)" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
                     <input name="description.es" value={form.description.es} onChange={handleChange} placeholder="Descripción (ES)" className="border border-gray-300 p-2 rounded w-full bg-gray-50" />
                 </div>
-
                 {/* Brand selector and discount */}
                 <div className="flex flex-col md:flex-row gap-2">
                     <select name="brand" value={form.brand} onChange={handleChange} className="border border-gray-300 p-2 rounded w-full bg-gray-50">
@@ -312,7 +294,7 @@ export default function OffersTab() {
                     {/* <input name="discount" type="number" value={form.discount ?? ''} onChange={handleChange} placeholder="% Descompte" className="border border-gray-300 p-2 rounded w-full bg-gray-50" min="0" max="100" /> */}
                 </div>
                 <div className="flex gap-2">
-                    <button type="submit" className="bg-[#00B0C8] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm" disabled={isUploading || (offers.length >= maxOffers && !editingId)}>{editingId ? 'Actualitza' : 'Afegeix'} Oferta</button>
+                    <button type="submit" className="bg-[#36A9E1] hover:bg-[#62b7c2] text-white px-4 py-2 rounded shadow-sm" disabled={isUploading || (offers.length >= maxOffers && !editingId)}>{editingId ? 'Actualitza' : 'Afegeix'} Oferta</button>
                     {editingId && (
                         <button type="button" onClick={() => { setEditingId(null); setForm({ imageUrl: '', title: '', description: '', brand: '', brandLogo: '', discount: '' }); setImagePreview(''); }} className="px-4 py-2 text-gray-700 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200">Cancel·la</button>
                     )}
@@ -330,7 +312,6 @@ export default function OffersTab() {
                                 <th className="py-3 px-2 font-semibold text-left">Títol</th>
                                 <th className="py-3 px-2 font-semibold text-left">Descripció</th>
                                 <th className="py-3 px-2 font-semibold text-left">Marca</th>
-                                <th className="py-3 px-2 font-semibold text-left">Descompte %</th>
                                 <th className="py-3 px-2 font-semibold text-left">Accions</th>
                             </tr>
                         </thead>
@@ -350,10 +331,7 @@ export default function OffersTab() {
                                         <div className="h-4 w-20 bg-gray-200 rounded mx-auto" />
                                     </td>
                                     <td className="py-2 px-2">
-                                        <div className="h-4 w-10 bg-gray-200 rounded mx-auto" />
-                                    </td>
-                                    <td className="py-2 px-2">
-                                        <div className="flex gap-2 justify-center">
+                                        <div className="flex gap-2 justify-start">
                                             <div className="h-8 w-12 bg-gray-200 rounded-full" />
                                             <div className="h-8 w-12 bg-gray-200 rounded-full" />
                                         </div>
@@ -372,7 +350,6 @@ export default function OffersTab() {
                                 <th className="py-3 px-2 font-semibold text-left">Título</th>
                                 <th className="py-3 px-2 font-semibold text-left">Descripción</th>
                                 <th className="py-3 px-2 font-semibold text-left">Marca</th>
-                                <th className="py-3 px-2 font-semibold text-left">Desc. %</th>
                                 <th className="py-3 px-2 font-semibold text-left">Acciones</th>
                             </tr>
                         </thead>
@@ -408,7 +385,6 @@ export default function OffersTab() {
                                                 : (brands.find(b => b.id === offer.brand)?.name || offer.brand)}
                                         </a>
                                     </td>
-                                    <td className="py-2 px-2">{offer.discount ? `${offer.discount}%` : ''}</td>
                                     <td className="py-2 px-2 flex gap-2">
                                         <button onClick={() => handleEdit(offer)} className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 border border-blue-100 text-xs">Edita</button>
                                         <button onClick={() => handleDelete(offer._id)} className="bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100 border border-red-100 text-xs">Elimina</button>

@@ -3,16 +3,14 @@ import Link from "next/link";
 import { useEffect } from "react";
 import ShopLayout from "@/components/Layouts/shop-layout";
 import { useTranslations } from 'next-intl';
-
 export default function CartFailedPage() {
     const t = useTranslations('CartOrderFailedPage');
-
     useEffect(() => {
         // Clean up the orderpending from localStorage
         if (typeof window !== 'undefined') {
             try {
                 localStorage.removeItem('orderpending');
-                console.log('Cleaned up orderpending from localStorage');
+                //console.log('Cleaned up orderpending from localStorage');
             } catch (error) {
                 console.error('Error cleaning up localStorage:', error);
             }
@@ -24,7 +22,7 @@ export default function CartFailedPage() {
                 <h1 className="text-3xl font-bold text-red-600 mb-4">{t('title')}</h1>
                 <p className="mb-2">{t('description')}</p>
                 <div className="flex gap-4 mt-6">
-                    <Link href="/cart" className="bg-[#00B0C8] text-white px-6 py-2 rounded-md cursor-pointer">{t('backToCart')}</Link>
+                    <Link href="/cart" className="bg-[#36A9E1] text-white px-6 py-2 rounded-md cursor-pointer">{t('backToCart')}</Link>
                     <Link href="/products" className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md cursor-pointer">{t('continueShopping')}</Link>
                 </div>
             </div>

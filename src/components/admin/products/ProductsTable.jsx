@@ -7,9 +7,6 @@ import ProductViewModal from './ProductViewModal';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import Pagination from '@/components/admin/shared/Pagination';
 export default function ProductsTable(props) {
-    // Pagination handlers
-
-    // Remove allProducts and filters, not needed for API-driven filtering
     // Next Intl: detect browser locale
     let locale = 'ca'; // default
     if (typeof window !== 'undefined' && window.navigator?.language) {
@@ -19,7 +16,10 @@ export default function ProductsTable(props) {
     const [products, setProducts] = useState([]);
     const [sortOrder, setSortOrder] = useState('newest'); // default: newest first
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchName, setSearchName] = useState('');
+    const [searchBrand, setSearchBrand] = useState('');
+    const [searchCategory, setSearchCategory] = useState('');
+    const [searchRef, setSearchRef] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [totalItems, setTotalItems] = useState(0);
@@ -31,6 +31,10 @@ export default function ProductsTable(props) {
     const [hoveredImage, setHoveredImage] = useState(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     // Unified fetchProducts logic (instant search, translation support, client-side pagination)
+    // Helper to remove accents from a string
+    const removeAccents = (str) => {
+        return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+    };
     const fetchProducts = async () => {
         try {
             setLoading(true);
@@ -64,20 +68,23 @@ export default function ProductsTable(props) {
                     }
                     return prod.category;
                 };
-                const search = searchTerm.trim().toLowerCase();
+                const sName = removeAccents((searchName || '').trim().toLowerCase());
+                const sBrand = removeAccents((searchBrand || '').trim().toLowerCase());
+                const sCategory = removeAccents((searchCategory || '').trim().toLowerCase());
+                const sRef = removeAccents((searchRef || '').trim().toLowerCase());
                 let filtered = data.products;
-                if (search) {
+                // Apply AND filters when any search field is provided
+                if (sName || sBrand || sCategory || sRef) {
                     filtered = data.products.filter(prod => {
-                        const name = getName(prod).toLowerCase();
-                        const brand = getBrand(prod).toLowerCase();
-                        const category = getCategory(prod).toLowerCase();
-                        const ref = (prod.reference || '').toLowerCase();
-                        return (
-                            name.includes(search) ||
-                            brand.includes(search) ||
-                            category.includes(search) ||
-                            ref.includes(search)
-                        );
+                        const name = removeAccents(getName(prod).toLowerCase());
+                        const brand = removeAccents(getBrand(prod).toLowerCase());
+                        const category = removeAccents(getCategory(prod).toLowerCase());
+                        const ref = removeAccents((prod.reference || '').toLowerCase());
+                        if (sName && !name.includes(sName)) return false;
+                        if (sBrand && !brand.includes(sBrand)) return false;
+                        if (sCategory && !category.includes(sCategory)) return false;
+                        if (sRef && !ref.includes(sRef)) return false;
+                        return true;
                     });
                 }
                 // Sort client-side
@@ -118,28 +125,23 @@ export default function ProductsTable(props) {
             setLoading(false);
         }
     };
-
     // Reset to first page when search/filter/sort changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, sortOrder]);
-
+    }, [searchName, searchBrand, searchCategory, searchRef, sortOrder]);
     useEffect(() => {
         fetchProducts();
-    }, [searchTerm, currentPage, itemsPerPage, sortOrder]);
-
-    // Handle search input change
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1);
-    };
-
+    }, [searchName, searchBrand, searchCategory, searchRef, currentPage, itemsPerPage, sortOrder]);
+    // Handle search input changes (four separate fields)
+    const handleNameChange = (e) => setSearchName(e.target.value);
+    const handleBrandChange = (e) => setSearchBrand(e.target.value);
+    const handleCategoryChange = (e) => setSearchCategory(e.target.value);
+    const handleRefChange = (e) => setSearchRef(e.target.value);
     // Handle sort order change
     const handleSortOrderChange = (e) => {
         setSortOrder(e.target.value);
         setCurrentPage(1);
     };
-
     // Update the sortOrder useEffect to trigger a refresh
     useEffect(() => {
         fetchProducts();
@@ -149,9 +151,6 @@ export default function ProductsTable(props) {
     useEffect(() => {
         fetchProducts();
     }, [props.categoryFilter]);
-    // Removed handleFilterChange, not needed
-    // Removed filter-related useEffect
-    // Filter products client-side (accepts custom filters for instant search, left-side/startsWith for name)
     // For category, always use CA if available, then ES, then fallback to string
     // Show category name if cat is an ObjectId string by looking up in categories prop
     const getCategoryString = (cat) => {
@@ -212,8 +211,6 @@ export default function ProductsTable(props) {
         }
         return '';
     };
-    // Removed filterProductsClientSide
-    // Removed clearFilters
     // Handle product view
     const handleViewProduct = (product) => {
         // If product.category or product.brand is an ObjectId, try to populate from props
@@ -386,12 +383,6 @@ export default function ProductsTable(props) {
             window.removeEventListener('mousemove', handleMouseMove);
         };
     }, []);
-    // Removed duplicate sortOrder useEffect
-    // For debugging
-    // useEffect(() => {
-    //     console.log("Current pagination state:", pagination);
-    //     console.log("Products count:", products.length);
-    // }, [pagination, products]);
     return (
         <div className="bg-white rounded-lg shadow">
             {/* Table Header with Actions */}
@@ -400,7 +391,7 @@ export default function ProductsTable(props) {
                 <div className="flex space-x-2">
                     <button
                         onClick={handleAddProduct}
-                        className="px-3 py-1 bg-[#00B0C8] cursor-pointer text-white rounded hover:bg-[#008A9B] flex items-center"
+                        className="px-3 py-1 bg-[#36A9E1] cursor-pointer text-white rounded hover:bg-[#008A9B] flex items-center"
                     >
                         <FiPlus className="mr-1" />
                         Afegir producte
@@ -409,7 +400,7 @@ export default function ProductsTable(props) {
             </div>
             {/* Unified Search and Sort */}
             <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center gap-4">
-                <div className="w-full md:w-1/4">
+                <div className="w-full md:w-[250px]">
                     <select
                         value={sortOrder}
                         onChange={handleSortOrderChange}
@@ -422,16 +413,54 @@ export default function ProductsTable(props) {
                         <option value="lastmodified">Última modificació</option>
                     </select>
                 </div>
-                <div className="relative flex-1 w-full">
-                    <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                    <input
-                        type="search"
-                        autoComplete="off"
-                        placeholder="Cerca per nom, marca, categoria o referència"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
-                    />
+                <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-4 gap-2">
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                        <input
+                            type="search"
+                            autoComplete="off"
+                            placeholder="Cerca per nom"
+                            value={searchName}
+                            onChange={handleNameChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+
+                        <input
+                            type="search"
+                            autoComplete="off"
+                            placeholder="Marca"
+                            value={searchBrand}
+                            onChange={handleBrandChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+
+                        <input
+                            type="search"
+                            autoComplete="off"
+                            placeholder="Categoria"
+                            value={searchCategory}
+                            onChange={handleCategoryChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+
+                        <input
+                            type="search"
+                            autoComplete="off"
+                            placeholder="Referència"
+                            value={searchRef}
+                            onChange={handleRefChange}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded w-full"
+                        />
+                    </div>
                 </div>
             </div>
             {/* Products Table */}
@@ -454,9 +483,6 @@ export default function ProductsTable(props) {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {[1, 2, 3, 4, 5].map((item) => (
                                     <tr key={item}>
-                                        {/* <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
-                                        </td> */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
                                         </td>
@@ -491,27 +517,18 @@ export default function ProductsTable(props) {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    ID
-                                </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Imatge
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Nom
                                 </th>
-                                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Referència
-                                </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Categoria
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Marca
                                 </th>
-                                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Preu (imp. excl.)
-                                </th> */}
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Preu
                                 </th>
@@ -527,9 +544,6 @@ export default function ProductsTable(props) {
                             {products.length > 0 ? (
                                 products.map((product, index) => (
                                     <tr key={product._id}>
-                                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {index + 1}
-                                        </td> */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="relative">
                                                 <img
@@ -550,9 +564,6 @@ export default function ProductsTable(props) {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={getBrandString(product.brand)}>
                                             {getBrandString(product.brand)}
                                         </td>
-                                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {product.price_excl_tax.toFixed(2)} €
-                                        </td> */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {product.discount?.active ? (
                                                 <div className="flex flex-col">
@@ -560,8 +571,15 @@ export default function ProductsTable(props) {
                                                         {product.price_incl_tax.toFixed(2)}€
                                                     </span>
                                                     <span className="text-sm font-medium text-red-600">
-                                                        {product.discount.finalPrice?.toFixed(2)} € { product.discount.type === 'percentage' ? `(-${product.discount.value}%)` : '' }
+                                                        {product.discount.finalPrice?.toFixed(2)} € {product.discount.type === 'percentage' ? `(-${product.discount.value}%)` : ''}
                                                     </span>
+                                                    {product.discount.startDate && product.discount.endDate && (
+                                                        <span className="text-xs text-gray-500 mt-1">
+                                                            {new Date(product.discount.startDate).toLocaleDateString()} {new Date(product.discount.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            {' - '}
+                                                            {new Date(product.discount.endDate).toLocaleDateString()} {new Date(product.discount.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <span className="text-sm text-gray-500">
@@ -582,7 +600,7 @@ export default function ProductsTable(props) {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
                                                 <button
-                                                    className="text-[#00B0C8] hover:text-[#008A9B] cursor-pointer"
+                                                    className="text-[#36A9E1] hover:text-[#008A9B] cursor-pointer"
                                                     onClick={() => handleViewProduct(product)}
                                                     title="Ver detalles"
                                                 >

@@ -1,7 +1,6 @@
 /**
  * ProductService - Handles all product-related API calls
  */
-
 /**
  * Fetch products with optional filtering
  * @param {Object} options - Query options
@@ -26,19 +25,16 @@ export async function fetchProducts(options = {}) {
         lowStock,
         preventSort = false
     } = options;
-
     // Build query string from options
     const params = new URLSearchParams();
     params.append('page', page);
     params.append('limit', limit);
-
     if (status) params.append('status', status);
     if (category) params.append('category', category);
     if (search) params.append('search', search);
     if (brand) params.append('brand', brand);
     if (lowStock) params.append('lowStock', lowStock);
     if (preventSort) params.append('preventSort', 'true');
-
     try {
         // Make API request
         const response = await fetch(`/api/products?${params.toString()}`);
@@ -49,7 +45,6 @@ export async function fetchProducts(options = {}) {
             console.error('ProductService fetchProducts JSON parse error:', parseError);
             data = null;
         }
-
         if (!response.ok) {
             // Log error but do not throw, return default structure
             let errorMessage = `ProductService fetchProducts error: ${response.status} - ${response.statusText}`;
@@ -70,7 +65,6 @@ export async function fetchProducts(options = {}) {
                 }
             };
         }
-
         // Handle different response formats with default values
         if (Array.isArray(data)) {
             // If data is already an array of products, wrap it in the expected format
@@ -84,7 +78,6 @@ export async function fetchProducts(options = {}) {
                 }
             };
         }
-
         // Ensure we have a products array even if the API returns null/undefined
         return {
             products: (data && data.products) || [],
@@ -109,17 +102,20 @@ export async function fetchProducts(options = {}) {
         };
     }
 }
-
 /**
  * Format product data to be used in the shop
  * @param {Object} product - Raw product data from API
  * @returns {Object} - Formatted product data
  */
-export function formatProduct(product) {
+export function formatProduct(product, localeArg) {
     // Used for product lists only, not for product detail page
     // Import translation utility
     const { getTranslatedField } = require('@/lib/getTranslatedField');
-    const locale = typeof window !== 'undefined' ? (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca').split('-')[0] : 'ca';
+    // Determine locale: prefer passed localeArg, else fall back to previous window-based logic
+    // Accept only string localeArg; if not provided or not a string, fall back to window/browser locale or 'ca'
+    const defaultLocale = (typeof window !== 'undefined' ? (window.__NEXT_INTL_LOCALE || window.navigator.language || 'ca') : 'ca');
+    const localeSource = (typeof localeArg === 'string' && localeArg) ? localeArg : defaultLocale;
+    const locale = String(localeSource).split('-')[0];
     // Helper to ensure only strings are returned, including nested objects
     const ensureString = (val) => {
         if (!val) return '';
@@ -177,7 +173,6 @@ export function formatProduct(product) {
         } : null
     };
 }
-
 /**
  * Fetch a single product by ID
  * @param {string} id - Product ID
@@ -195,7 +190,6 @@ export async function fetchProductById(id) {
         throw error;
     }
 }
-
 /**
  * Fetch featured products
  * @param {number} limit - Maximum number of products to fetch
@@ -204,11 +198,9 @@ export async function fetchProductById(id) {
 export async function fetchFeaturedProducts(limit = 8) {
     try {
         const response = await fetch(`/api/products/featured?limit=${limit}`);
-
         if (!response.ok) {
             throw new Error(`Error fetching featured products: ${response.status}`);
         }
-
         const data = await response.json();
         return data.products || [];
     } catch (error) {
@@ -216,7 +208,6 @@ export async function fetchFeaturedProducts(limit = 8) {
         return [];
     }
 }
-
 /**
  * Toggle product status between active and inactive
  * @param {string} productId - ID of the product to toggle
@@ -231,11 +222,9 @@ export async function toggleProductStatus(productId) {
             },
             body: JSON.stringify({ productId }),
         });
-
         if (!response.ok) {
             throw new Error(`Error toggling product status: ${response.status}`);
         }
-
         const data = await response.json();
         return data.product;
     } catch (error) {
