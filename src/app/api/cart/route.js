@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import Cart from '@/models/Cart';
+// import Cart from '@/models/Cart';
 import dbConnect from '@/lib/dbConnect';
 // Create a new cart
 export async function POST(request) {

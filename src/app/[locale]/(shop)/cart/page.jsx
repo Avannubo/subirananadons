@@ -37,6 +37,7 @@ export default function CartPage() {
     const [showTPVModal, setShowTPVModal] = useState(false);
     const [tpvOrderData, setTpvOrderData] = useState(null);
     const [tpvTotal, setTpvTotal] = useState(0);
+    const [merchantOrderId, setMerchantOrderId] = useState(null);
     // Separate regular and gift items once cartItems is available
     const regularItems = useMemo(() => cartItems?.filter(item => item.type !== 'gift') ?? [], [cartItems]);
     const giftItems = useMemo(() => cartItems?.filter(item => item.type === 'gift') ?? [], [cartItems]);
@@ -315,23 +316,16 @@ export default function CartPage() {
             }
         };
         // Save orderData as 'orderpending' in localStorage
-        if (typeof window !== 'undefined') {
-            try {
-                window.localStorage.setItem('orderpending', JSON.stringify(orderData));
-            } catch (e) {
-                // Ignore localStorage errors
-            }
-        }
-        setTpvOrderData(prepareTPVOrderData());
+        const newMerchantOrderId = (Date.now() % 100000000).toString().padStart(8, '0');
+        window.localStorage.setItem('orderpending', JSON.stringify(orderData));
+        window.localStorage.setItem('orderId', newMerchantOrderId);
+        setMerchantOrderId(newMerchantOrderId);
+        setTpvOrderData({
+            orderId: newMerchantOrderId,
+            orderData: cartItems,
+        });
         setTpvTotal(calculateTotal());
         setShowTPVModal(true);
-    };
-    // Helper to prepare TPV order data
-    const prepareTPVOrderData = () => {
-        return {
-            orderId: (Date.now() % 100000000).toString().padStart(8, '0'),
-            cartProducts: cartItems,
-        };
     };
     // In the return JSX, after the main ShopLayout content:
     return (
@@ -556,14 +550,14 @@ export default function CartPage() {
                                         {regularItems.map((item, index) => (
                                             <div key={index} className="flex items-center gap-4 p-4 border-b border-gray-200 last:border-b-0">
                                                 <div className="w-20 h-20 overflow-hidden rounded-md border border-gray-200 bg-gray-50 flex-shrink-0">
-                                                        <img
-                                                            src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
-                                                            alt={item.name || 'Producto'}
-                                                            className="w-full h-full object-cover"
-                                                            onError={(e) => {
-                                                                e.target.src = '/assets/images/Screenshot_4.png';
-                                                            }}
-                                                        />
+                                                    <img
+                                                        src={item.image || item.imageUrl || '/assets/images/Screenshot_4.png'}
+                                                        alt={item.name || 'Producto'}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            e.target.src = '/assets/images/Screenshot_4.png';
+                                                        }}
+                                                    />
                                                     {item.isGift && (
                                                         <div className="absolute top-0 right-0 bg-pink-500 text-white text-xs px-1 rounded-bl rounded-tr">
                                                             Regalo
@@ -866,6 +860,7 @@ export default function CartPage() {
                 onClose={() => setShowTPVModal(false)}
                 orderData={tpvOrderData}
                 precioTotal={tpvTotal}
+                merchantOrderId={merchantOrderId}
             />
         </ShopLayout>
     );

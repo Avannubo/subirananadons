@@ -3,7 +3,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CryptoJS from 'crypto-js';
 export default function ModalTPV({ isOpen, onClose, orderData }) {
-    const [cartItems, setCartItems] = useState(orderData?.cartProducts || []);
+    // Save merchantOrderId from localStorage in a variable and use everywhere
+    const merchantOrderId = typeof window !== 'undefined' ? window.localStorage.getItem('orderId') : '';
+    const localStorageOrder = typeof window !== 'undefined' ? window.localStorage.getItem('orderpending') : null;
+
+    const [cartItems, setCartItems] = useState(orderData?.orderData || (localStorageOrder ? JSON.parse(localStorageOrder).items : []));
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null);
     // Get locale from URL or default to 'ca'
@@ -191,28 +195,24 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             const total = calculateTotal();
             const cents = Math.round(Number(total) * 100);
             const cleanPrecioTotal = Number.isFinite(cents) ? String(cents) : '0'; // Convert to cents and string
-            let merchantOrder = orderData?.orderId || String(Date.now()).substring(0, 12).padStart(4, '0');
-            // Create data object for the payment request
+            // Use merchantOrderId variable everywhere
             let data = {
                 "DS_MERCHANT_AMOUNT": cleanPrecioTotal,
                 "DS_MERCHANT_CURRENCY": "978",
                 "DS_MERCHANT_MERCHANTCODE": "352203061",
-                "DS_MERCHANT_ORDER": merchantOrder,
+                "DS_MERCHANT_ORDER": merchantOrderId,
                 "DS_MERCHANT_TERMINAL": "2",
                 "DS_MERCHANT_TRANSACTIONTYPE": "0",
-                // "DS_MERCHANT_URL": `${window.location.origin}`,
-                "DS_MERCHANT_URLOK": `${window.location.origin}/cart/order/success`,
+                "DS_MERCHANT_MERCHANTURL": `${window.location.origin}/api/redsys/notification`,
+                "DS_MERCHANT_URLOK": `${window.location.origin}/cart/order/success?merchantOrder=${merchantOrderId}`,
                 "DS_MERCHANT_URLKO": `${window.location.origin}/cart/order/failed`
             };
-            // Encode parameters and calculate signature
             let encodedParameters = stringBase64Encode(JSON.stringify(data));
-            // signature generation can fail if keys/values are malformed; protect with try/catch
             try {
                 let encodedSignature = "R3zJ3xZGifR1ZHVOEwNpuUn1c+l1jI7S";
-                let encodedSignatureDES = des_encrypt(merchantOrder, base64Decode(encodedSignature));
+                let encodedSignatureDES = des_encrypt(merchantOrderId, base64Decode(encodedSignature));
                 let encodedDsSignature = CryptoJS.HmacSHA256(encodedParameters, base64Decode(encodedSignatureDES));
                 let dsSignature = CryptoJS.enc.Base64.stringify(encodedDsSignature);
-                // Populate form fields safely
                 if (typeof document !== 'undefined') {
                     const form = document.forms["pago"];
                     if (form) {
@@ -222,7 +222,6 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                 }
             } catch (sigErr) {
                 console.error('calcularFirma signature error:', sigErr, { data, encodedParameters });
-                // Clear any existing values to avoid sending malformed data
                 if (typeof document !== 'undefined') {
                     const form = document.forms["pago"];
                     if (form) {
@@ -233,7 +232,6 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             }
         } catch (err) {
             console.error('calcularFirma error:', err);
-            // ensure we don't leave invalid data in the form
             if (typeof document !== 'undefined') {
                 const form = document.forms["pago"];
                 if (form) {
@@ -245,7 +243,34 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
     };
     const handlePaymentProcess = async () => {
         setIsProcessingPayment(true);
+        console.log('Starting payment process with orderData:', orderData);
         try {
+            // Always use the same merchantOrderId for pending order and payment
+            const response = await fetch('/api/orders/pending', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderData: {
+                        ...orderData.fullOrderData || localStorageOrder ? JSON.parse(localStorageOrder) : {},
+                    },
+                    merchantOrder: merchantOrderId,
+                    sessionId: window.sessionStorage.getItem('sessionId') || Date.now().toString()
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error('Failed to save pending order: ' + errorText);
+            }
+
+            const { pendingOrderId } = await response.json();
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem('pendingOrderId', pendingOrderId);
+            }
+
+            // Process payment
             calcularFirma();
             if (typeof document !== 'undefined' && document.forms["pago"]) {
                 document.forms["pago"].submit();
@@ -256,7 +281,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
         } finally {
             setIsProcessingPayment(false);
         }
-    };
+    }
     const handleCloseModal = () => {
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState(null, '', cleanUrl);
