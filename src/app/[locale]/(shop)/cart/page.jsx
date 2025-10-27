@@ -226,6 +226,32 @@ export default function CartPage() {
             setOrderError('No hay productos en el carrito');
             return;
         }
+        // Check gift product availability before proceeding
+        const giftCheckList = cartItems
+            .filter(item => item.type === 'gift' && item.listInfo && item.listInfo.listId && item.listInfo.itemId)
+            .map(item => ({ listId: item.listInfo.listId, itemId: item.listInfo.itemId }));
+        if (giftCheckList.length > 0) {
+            try {
+                const res = await fetch('/api/gifts/check-availability', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gifts: giftCheckList })
+                });
+                const data = await res.json();
+                if (data.success && data.unavailable && data.unavailable.length > 0) {
+                    // Remove unavailable gifts from cart and notify user
+                    data.unavailable.forEach(gift => {
+                        const toRemove = cartItems.find(item => item.type === 'gift' && item.listInfo && item.listInfo.listId === gift.listId && item.listInfo.itemId === gift.itemId);
+                        if (toRemove) removeFromCart(toRemove.id);
+                    });
+                    toast.error('Uno o más productos de regalo ya han sido comprados y se han eliminado del carrito.');
+                    return;
+                }
+            } catch (err) {
+                toast.error('Error comprobando disponibilidad de regalos. Inténtalo de nuevo.');
+                return;
+            }
+        }
         // Validate required fields (basic)
         const requiredFields = ['name', 'lastName', 'email', 'phone'];
         const needsShippingAddress = deliveryMethod === 'delivery' && regularItems.length > 0;
