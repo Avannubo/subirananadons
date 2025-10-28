@@ -102,6 +102,11 @@ const orderSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
+    MerchantOrder: {
+        type: String,
+        required: true,
+        index: true
+    },
     shippingCost: {
         type: Number,
         required: true,

@@ -199,7 +199,7 @@
     "orderNumber": "Pedido #{orderNumber}",
     "thanks": "Gracias por tu compra. Te hemos enviado un email con los detalles.",
     "downloadInvoice": "Descargar Ticket",
-    "sendEmail": "Enviar Email",
+    "sendEmail": "Enviar copia del email",
     "notFound": "No se pudo encontrar el pedido.",
     "continueShopping": "Seguir comprando",
     "home": "Inicio"

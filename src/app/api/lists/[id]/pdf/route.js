@@ -9,6 +9,7 @@ export async function GET(request, { params }) {
         // Get the birth list data
         const list = await BirthList.findById(id)
             .populate('items.product');
+        // console.log(JSON.stringify(list));
         if (!list) {
             return NextResponse.json({
                 success: false,
@@ -18,6 +19,8 @@ export async function GET(request, { params }) {
         // Helper for Catalan/EU date/time
         const formatDate = (date) => new Date(date).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
         const formatTime = (date) => new Date(date).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+        // Calculate total price
+        const totalPrice = list.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         // Generate HTML content in Catalan
         const html = `
             <!DOCTYPE html>
@@ -57,6 +60,12 @@ export async function GET(request, { params }) {
                             font-size: 0.8em;
                             color: #666;
                         }
+                        .total-price {
+                            margin-top: 20px;
+                            font-size: 1.1em;
+                            font-weight: bold;
+                            text-align: right;
+                        }
                     </style>
                 </head>
                 <body>
@@ -75,33 +84,35 @@ export async function GET(request, { params }) {
                             <tr>
                                 <th>Producte</th> 
                                 <th>Quantitat</th>
+                                <th>Preu</th>
                                 <th>Estat</th>
                             </tr>
                         </thead>
                         <tbody>
                         ${list.items.map(item => {
-            // Map the state number to status text (Catalan)
-            let status;
-            switch (item.state) {
-                case 1:
-                    status = 'Reservat';
-                    break;
-                case 2:
-                    status = 'Comprat';
-                    break;
-                default:
-                    status = 'Pendent'; 
-            }
-            return `
-                <tr>
-                    <td>${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producte no disponible') : 'Producte no disponible'}</td> 
-                    <td>${item.quantity}</td>
-                    <td>${status}</td>
-                </tr>
-                `;
-            }).join('')}
+                        // Map the state number to status text (Catalan)
+                        let status;
+                        switch (item.state) {
+                            case 1:
+                                status = 'Reservat';
+                                break;
+                            case 2:
+                                status = 'Comprat';
+                                break;
+                            default:
+                                status = 'Pendent';
+                        }
+                        return `
+                            <tr>
+                                <td>${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producte no disponible') : 'Producte no disponible'}</td> 
+                                <td>${item.quantity}</td>
+                                <td>${item.product.price_incl_tax.toFixed(2).replace('.', ',')}€</td>
+                                <td>${status}</td>
+                            </tr>
+                            `;
+                        }).join('')}
                         </tbody>
-                    </table>
+                    </table> 
                     <div class="footer">
                         <p>Generat el ${formatDate(new Date())} ${formatTime(new Date())}</p>
                     </div>

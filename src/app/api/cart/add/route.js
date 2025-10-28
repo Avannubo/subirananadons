@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import Cart from '@/models/Cart';
+// import Cart from '@/models/Cart';
 import Product from '@/models/Product';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/dbConnect';

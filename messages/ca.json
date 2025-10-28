@@ -230,7 +230,7 @@
     "orderNumber": "Comanda #{orderNumber}",
     "thanks": "Gràcies per la teva compra. T'hem enviat un correu electrònic amb els detalls.",
     "downloadInvoice": "Descarregar Ticket",
-    "sendEmail": "Enviar Email",
+    "sendEmail": "Enviar copia del correu electrònic",
     "notFound": "No s'ha pogut trobar la comanda.",
     "continueShopping": "Continuar comprant",
     "home": "Inici"

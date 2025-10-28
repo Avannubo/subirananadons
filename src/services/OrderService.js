@@ -19,7 +19,7 @@ export const OrderService = {
     },
     /**
      * Create order from orderPending object (from localStorage or passed in)
-     * @param {object} orderPending
+     * @param {object} orderPending 
      * @returns {Promise<object>} API response data
      */
 
