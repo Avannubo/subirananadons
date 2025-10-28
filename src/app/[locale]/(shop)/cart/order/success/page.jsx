@@ -20,7 +20,6 @@ export default function CartSuccessPage() {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [invoiceBlob, setInvoiceBlob] = useState(null);
-
     // On mount, get merchantOrder from URL and fetch the order
     useEffect(() => {
         clearLocalOrderStorage();
@@ -46,7 +45,6 @@ export default function CartSuccessPage() {
                 setLoading(false);
             });
     }, []);
-
     // When order is loaded, send email and generate invoice
     useEffect(() => {
         // if (!order) return;
@@ -72,7 +70,6 @@ export default function CartSuccessPage() {
         //     clearLocalOrderStorage();
         // })();
         // Generate invoice PDF blob
-        
         if (invoiceBlob) return;
         const generateInvoice = async () => {
             try {
@@ -90,7 +87,6 @@ export default function CartSuccessPage() {
         };
         generateInvoice();
     }, [order]);
-
     // Download the invoice PDF
     const handleDownloadInvoice = () => {
         if (!invoiceBlob || !order) return;
@@ -106,7 +102,6 @@ export default function CartSuccessPage() {
         window.URL.revokeObjectURL(url);
         toast.success('Ticket descargada correctamente');
     }
-
     // Handle sending email with receipt using API route
     const handleSendEmail = async () => {
         if (!order?._id && !order?.id) return;
@@ -127,7 +122,6 @@ export default function CartSuccessPage() {
             toast.error('Error al enviar el email');
         }
     };
-
     if (loading) return (
         <ShopLayout>
             <div className="min-h-[60vh] flex flex-col items-center justify-center">
