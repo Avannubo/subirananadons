@@ -283,7 +283,7 @@ export async function POST(req) {
                             : item.id.toString();
                         const price = typeof item.priceValue === 'number'
                             ? item.priceValue
-                            : parseFloat(String(item.price).replace(/[^ -9.,]/g, '').replace(',', '.'));
+                            : parseFloat(String(item.price).replace(/[^\u0000-9.,]/g, '').replace(',', '.'));
                         const hasDiscount = item.discount?.active && item.priceDetails;
                         return {
                             product: productId,
@@ -359,12 +359,25 @@ export async function POST(req) {
                     status: finalOrder.status,
                     itemsCount: finalOrder.items?.length || 0
                 });
+                // Call send-email API for the created order
+                try {
+                    const emailRes = await fetch(`${process.env.DOMAIN || ''}/api/orders/${finalOrder._id}/send-email`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                    if (!emailRes.ok) {
+                        console.error('❌ Error sending confirmation email for order:', finalOrder._id);
+                    } else {
+                        console.log('✅ Confirmation email sent for order:', finalOrder._id);
+                    }
+                } catch (emailErr) {
+                    console.error('❌ Error sending confirmation email:', emailErr);
+                }
                 // Delete the pending order after successful creation using Ds_Order
                 await PendingOrder.findOneAndDelete({ merchantOrder: decodedParams.Ds_Order });
                 console.log('🗑️ Pending order deleted by merchantOrder (Ds_Order):', decodedParams.Ds_Order);
             } catch (error) {
                 console.error('❌ Error creating final order:', error);
-                // We still return 200 to Redsys but log the error
             }
         } else {
             // Update pending order with failed payment status using Ds_Order

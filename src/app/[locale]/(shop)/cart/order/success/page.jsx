@@ -13,6 +13,7 @@ export default function CartSuccessPage() {
             window.localStorage.removeItem('cart');
             window.localStorage.removeItem('orderId');
             window.localStorage.removeItem('pendingOrderId');
+            window.localStorage.removeItem('merchantOrder');
         }
     };
     const t = useTranslations('CartOrderSuccessPage');
@@ -22,6 +23,7 @@ export default function CartSuccessPage() {
 
     // On mount, get merchantOrder from URL and fetch the order
     useEffect(() => {
+        clearLocalOrderStorage();
         const params = new URLSearchParams(window.location.search);
         const merchantOrder = params.get('merchantOrder') || window.localStorage.getItem('orderId');
         if (!merchantOrder) {
@@ -47,29 +49,30 @@ export default function CartSuccessPage() {
 
     // When order is loaded, send email and generate invoice
     useEffect(() => {
-        if (!order) return;
-        // Send email automatically
-        (async () => {
-            const orderId = order._id || order.id;
-            toast.loading('Enviando email...');
-            try {
-                const response = await fetch(`/api/orders/${orderId}/send-email`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                });
-                toast.dismiss();
-                if (!response.ok) {
-                    throw new Error('Error al enviar el email');
-                }
-                toast.success('Email enviado correctamente');
-            } catch (error) {
-                toast.dismiss();
-                toast.error('Error al enviar el email');
-            }
-            // Clear local storage after email is sent
-            clearLocalOrderStorage();
-        })();
+        // if (!order) return;
+        // // Send email automatically
+        // (async () => {
+        //     const orderId = order._id || order.id;
+        //     toast.loading('Enviando email...');
+        //     try {
+        //         const response = await fetch(`/api/orders/${orderId}/send-email`, {
+        //             method: 'POST',
+        //             headers: { 'Content-Type': 'application/json' },
+        //         });
+        //         toast.dismiss();
+        //         if (!response.ok) {
+        //             throw new Error('Error al enviar el email');
+        //         }
+        //         toast.success('Email enviado correctamente');
+        //     } catch (error) {
+        //         toast.dismiss();
+        //         toast.error('Error al enviar el email');
+        //     }
+        //     // Clear local storage after email is sent
+        //     clearLocalOrderStorage();
+        // })();
         // Generate invoice PDF blob
+        
         if (invoiceBlob) return;
         const generateInvoice = async () => {
             try {
