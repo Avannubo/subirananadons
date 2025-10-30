@@ -3,6 +3,9 @@ import CryptoJS from 'crypto-js';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import { OrderService } from '@/services/OrderService';
+import BirthList from '@/models/BirthList';
+import EmailService from '@/services/EmailService';
+import User from '@/models/User';
 import PendingOrder from '@/models/PendingOrder';
 
 // Redsys response codes and their meanings
@@ -268,7 +271,6 @@ export async function POST(req) {
                 // Format the pending order data as in /api/orders route
                 const pending = pendingOrder.orderData;
                 const { items, shippingDetails, deliveryMethod, totals } = pending;
-                // Prepare order data
                 if (!items || !items.length || !shippingDetails) {
                     throw new Error('Falta información requerida del pedido');
                 }
@@ -359,6 +361,60 @@ export async function POST(req) {
                     status: finalOrder.status,
                     itemsCount: finalOrder.items?.length || 0
                 });
+
+                // For gift items, update the birth list items to mark them as purchased and notify owner
+                // ...existing code...
+                const giftItems = items.filter(item => item.type === 'gift' && item.listInfo);
+                if (giftItems.length > 0) {
+                    for (const item of giftItems) {
+                        if (!item.listInfo.listId || !item.listInfo.itemId) continue;
+                        try {
+                            // Find the birth list
+                            const birthList = await BirthList.findById(item.listInfo.listId);
+                            if (!birthList) {
+                                console.error(`Birth list not found: ${item.listInfo.listId}`);
+                                continue;
+                            }
+                            // Find the specific item in the birth list
+                            const birthListItem = birthList.items.id(item.listInfo.itemId);
+                            if (!birthListItem) {
+                                console.error(`Item not found in birth list: ${item.listInfo.itemId}`);
+                                continue;
+                            }
+                            // Create buyer info with notes
+                            const buyerInfoWithNote = {
+                                ...item.buyerInfo,
+                                message: shippingDetails.giftNote || '',
+                                quantity: item.quantity
+                            };
+                            // Update the item's state to purchased (2) and include buyer info with note
+                            await birthList.updateItemState(item.listInfo.itemId, 2, buyerInfoWithNote);
+                            // Send notification email to list owner
+                            try {
+                                await EmailService.sendGiftPurchaseNotification(birthList, birthListItem, 'purchase');
+                            } catch (emailError) {
+                                console.error('Error sending gift purchase notification:', emailError);
+                            }
+                            // Check if the list is now complete after this item update
+                            if (birthList.status === 'Activa') {
+                                const isListComplete = birthList.items.every(item => item.state === 2);
+                                if (isListComplete) {
+                                    birthList.status = 'Completada';
+                                    await birthList.save();
+                                    // Send notification email for list completion
+                                    try {
+                                        await EmailService.sendListCompletedNotification(birthList, await User.findById(birthList.user));
+                                    } catch (emailError) {
+                                        console.error('Error sending list completion notification:', emailError);
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.error(`Error updating birth list item state: ${error.message}`);
+                        }
+                    }
+                }
+
                 // Call send-email API for the created order
                 try {
                     const emailRes = await fetch(`${process.env.DOMAIN || ''}/api/orders/${finalOrder._id}/send-email`, {

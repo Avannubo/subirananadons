@@ -7,7 +7,23 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
     const merchantOrderId = typeof window !== 'undefined' ? window.localStorage.getItem('orderId') : '';
     const localStorageOrder = typeof window !== 'undefined' ? window.localStorage.getItem('orderpending') : null;
     const [payWith, setPayWith] = useState("C");
-    const [cartItems, setCartItems] = useState(orderData?.orderData || (localStorageOrder ? JSON.parse(localStorageOrder).items : []));
+    const [cartItems, setCartItems] = useState(() => {
+        // Always prefer orderData.orderData, fallback to localStorage
+        if (orderData && Array.isArray(orderData.orderData) && orderData.orderData.length > 0) {
+            return orderData.orderData;
+        }
+        if (localStorageOrder) {
+            try {
+                const parsed = JSON.parse(localStorageOrder);
+                if (Array.isArray(parsed.items) && parsed.items.length > 0) {
+                    return parsed.items;
+                }
+            } catch (e) {
+                // ignore parse error
+            }
+        }
+        return []; 
+    });
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(null);
     // Get locale from URL or default to 'ca'
@@ -77,30 +93,37 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
         }
     };
     useEffect(() => {
-        if (orderData && Array.isArray(orderData.cartProducts)) {
-            setCartItems(orderData.cartProducts);
+        // Always update cartItems if orderData changes, fallback to localStorage if missing
+        if (orderData && Array.isArray(orderData.orderData) && orderData.orderData.length > 0) {
+            setCartItems(orderData.orderData);
+        } else if (localStorageOrder) {
+            try {
+                const parsed = JSON.parse(localStorageOrder);
+                if (Array.isArray(parsed.items) && parsed.items.length > 0) {
+                    setCartItems(parsed.items);
+                }
+            } catch (e) {
+                // ignore parse error
+            }
+        } else {
+            setCartItems([]);
         }
-    }, [orderData]);
-
+    }, [orderData, localStorageOrder]);
     // Use a ref to track the current payment method immediately
     const payWithRef = React.useRef("C");
-
     // Update both state and ref when payment method changes
     const updatePaymentMethod = (method) => {
         setPayWith(method);
         payWithRef.current = method;
     };
-
     const handleCardPayment = () => {
         updatePaymentMethod("C");
         handlePaymentProcess();
     };
-
     const handleBizumPayment = () => {
         updatePaymentMethod("z"); // Changed from "z" to "Z" for consistency
         handlePaymentProcess();
     };
-
     // Helper to render localized fields safely (handles {ca, es} objects)
     const renderField = (field) => {
         try {
@@ -127,7 +150,6 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             return '';
         }
     };
-
     // Detect id-like strings (mongodb ObjectId or long hex strings) to avoid showing them as names
     const isIdLike = (s) => {
         try {
@@ -140,7 +162,6 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
             return false;
         }
     };
-
     // Get a display name for brand/category: resolve nested objects and filter out id-like values
     const getName = (field) => {
         const val = renderField(field);
@@ -167,7 +188,6 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                 return 0;
             }
         };
-
         // Get base price
         let basePrice = 0;
         if (typeof item.priceValue === 'number' && Number.isFinite(item.priceValue)) basePrice = item.priceValue;
@@ -285,17 +305,14 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                     sessionId: window.sessionStorage.getItem('sessionId') || Date.now().toString()
                 }),
             });
-
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error('Failed to save pending order: ' + errorText);
             }
-
             const { pendingOrderId } = await response.json();
             if (typeof window !== 'undefined') {
                 window.localStorage.setItem('pendingOrderId', pendingOrderId);
             }
-
             // Process payment
             calcularFirma();
             if (typeof document !== 'undefined' && document.forms["pago"]) {
@@ -375,7 +392,6 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                                 </div>
                             ))}
                         </div>
-
                         {/* Desktop/tablet: keep table layout */}
                         <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
                             <table className="w-full table-fixed md:table-auto border-collapse text-sm">
@@ -455,26 +471,28 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
                                 <span className="text-gray-700">{translations[locale].paymentDisclaimerPart2}</span>
                             </p>
                         </div>
-                                    <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
-                                        <button
-                                            onClick={handleCardPayment}
-                                            className="bg-[#36A9E1] hover:bg-[#3f93ba] text-white px-4 sm:px-6 py-3 sm:py-2 rounded-lg font-normal transition-colors duration-150 h-[50px] sm:h-[42px] w-full sm:w-auto text-sm sm:text-base"
-                                        >
-                                            💳 {translations[locale].confirmPaymentTarjeta}
-                                        </button>
-                                        <button
-                                            onClick={handleBizumPayment}
-                                            className="bg-[#36A9E1] hover:bg-[#3f93ba] text-white px-4 sm:px-6 py-3 sm:py-2 rounded-lg font-normal transition-colors duration-150 h-[50px] sm:h-[42px] w-full sm:w-auto text-sm sm:text-base"
-                                        >
-                                            📱 {translations[locale].confirmPaymentBizum}
-                                        </button>
-                                        <button
-                                            onClick={onClose}
-                                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 sm:px-6 py-3 sm:py-2 rounded-lg font-normal transition-colors duration-150 h-[50px] sm:h-[42px] w-full sm:w-auto text-sm sm:text-base"
-                                        >
-                                            {translations[locale].cancel}
-                                        </button>
-                                    </div>
+                        <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
+                            <button
+                                onClick={handleCardPayment}
+                                className="flex items-center justify-center bg-[#36A9E1] hover:bg-[#3f93ba] text-white px-4 sm:px-6 py-3 sm:py-2 rounded-lg font-normal transition-colors duration-150 h-[50px] sm:h-[42px] w-full sm:w-auto text-sm sm:text-base"
+                            >
+                                <img src="/assets/debit-card-icon.svg" alt="Credit Card" className="w-7 h-7 mr-2 filter text-white " />
+                                {translations[locale].confirmPaymentTarjeta}
+                            </button>
+                            <button
+                                onClick={handleBizumPayment}
+                                className="flex items-center justify-center bg-[#36A9E1] hover:bg-[#3f93ba] text-white px-4 sm:px-6 py-3 sm:py-2 rounded-lg font-normal transition-colors duration-150 h-[50px] sm:h-[42px] w-full sm:w-auto text-sm sm:text-base"
+                            >
+                                <img src="/assets/bizum.svg" alt="Bizum" className="w-5 h-5 mr-2 filter text-white" />
+                                {translations[locale].confirmPaymentBizum}
+                            </button>
+                            <button
+                                onClick={onClose}
+                                className="flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white px-4 sm:px-6 py-3 sm:py-2 rounded-lg font-normal transition-colors duration-150 h-[50px] sm:h-[42px] w-full sm:w-auto text-sm sm:text-base"
+                            >
+                                {translations[locale].cancel}
+                            </button>
+                        </div>
                     </div>
                 )}
                 {/* Hidden payment form for Redsys           https://sis.redsys.es/sis/realizarPago */}

@@ -4,17 +4,17 @@ import { useEffect } from "react";
 import ShopLayout from "@/components/Layouts/shop-layout";
 import { useTranslations } from 'next-intl';
 export default function CartFailedPage() {
-    const clearLocalOrderStorage = () => {
-        if (typeof window !== 'undefined') {
-            window.localStorage.removeItem('orderpending'); 
-            window.localStorage.removeItem('orderId');
-            window.localStorage.removeItem('pendingOrderId');
-            window.localStorage.removeItem('merchantOrder');
-        }
-    };
+    // const clearLocalOrderStorage = () => {
+    //     if (typeof window !== 'undefined') {
+    //         window.localStorage.removeItem('orderpending'); 
+    //         window.localStorage.removeItem('orderId');
+    //         window.localStorage.removeItem('pendingOrderId');
+    //         window.localStorage.removeItem('merchantOrder');
+    //     }
+    // };
     const t = useTranslations('CartOrderFailedPage');
     useEffect(() => {
-        clearLocalOrderStorage();
+        // clearLocalOrderStorage();
         // Clean up the orderpending from localStorage
         if (typeof window !== 'undefined') {
             try {
