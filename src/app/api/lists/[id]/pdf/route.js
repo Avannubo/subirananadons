@@ -82,8 +82,7 @@ export async function GET(request, { params }) {
                     <table>
                         <thead>
                             <tr>
-                                <th>Producte</th> 
-                                <th>Quantitat</th>
+                                <th>Producte</th>  
                                 <th>Preu</th>
                                 <th>Estat</th>
                             </tr>
@@ -105,7 +104,6 @@ export async function GET(request, { params }) {
                         return `
                             <tr>
                                 <td>${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producte no disponible') : 'Producte no disponible'}</td> 
-                                <td>${item.quantity}</td>
                                 <td>${item.product.price_incl_tax.toFixed(2).replace('.', ',')}€</td>
                                 <td>${status}</td>
                             </tr>

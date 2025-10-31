@@ -288,7 +288,7 @@ export default function ModalTPV({ isOpen, onClose, orderData }) {
     };
     const handlePaymentProcess = async () => {
         setIsProcessingPayment(true);
-        console.log('Starting payment process with payment method:', payWithRef.current); // Debug log
+        console.log('Starting payment process with payment method:', payWithRef.current);
         console.log('Starting payment process with orderData:', orderData);
         try {
             // Always use the same merchantOrderId for pending order and payment

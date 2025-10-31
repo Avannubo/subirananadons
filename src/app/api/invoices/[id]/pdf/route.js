@@ -28,7 +28,7 @@ export async function GET(request, { params }) {
             <html>
             <head>
             <meta charset="UTF-8">
-            <title>Rebut - ${order.orderNumber}</title>
+            <title>TIQUET - ${order.orderNumber}</title>
             <style>
                 @page { size: A4; margin: 0; }
                 body { 
@@ -162,7 +162,11 @@ export async function GET(request, { params }) {
                 <div class="header">
                 <div class="logo">SUBIRANANADONS</div>
                 <div class="invoice-details">
-                    <h2>REBUT</h2>
+                    <h2>TIQUET</h2>
+                    <div>Morral-Cors SL</div>
+                    <div>Carrer Nou, 9</div>
+                    <div>08241 Manresa</div>
+                    <div>CIF: B61095998</div> 
                     <div>Núm.: ${order.orderNumber}</div>
                     <div>Data: ${new Date(order.createdAt).toLocaleDateString('ca-ES')}</div>
                 </div>

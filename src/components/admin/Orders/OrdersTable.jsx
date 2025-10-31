@@ -136,7 +136,7 @@ export default function OrdersTable({
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Factura_${order.reference}.pdf`;
+            link.download = `TIQUET_${order.reference}.pdf`;
             document.body.appendChild(link);
             link.click();
             link.remove();

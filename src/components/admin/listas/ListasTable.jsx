@@ -365,31 +365,31 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                         <thead>
                             <tr>
                                 <th>${'Producte'}</th>
-                                <th>${'Quantitat'}</th>
+                                <th>${'Preu'}</th>
                                 <th>${'Estat'}</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${(list.rawData?.items || []).map(item => {
-            // Fixed left-to-right priority: ca, es, name, 'N/D'
-            let prodName = 'N/D';
-            if (item.product) {
-                if (item.product.name.ca) prodName = item.product.name.ca;
-                else if (item.product.name.es) prodName = item.product.name.es;
-                else if (item.product.name) prodName = item.product.name;
-            }
-            // Map state: 0='Pendent', 1='Reservat', 2='Comprat'
-            let stateLabel = 'Pendent';
-            if (item.state === 1) stateLabel = 'Reservat';
-            else if (item.state === 2) stateLabel = 'Comprat';
-            return `
+                                // Fixed left-to-right priority: ca, es, name, 'N/D'
+                                let prodName = 'N/D';
+                                if (item.product) {
+                                    if (item.product.name.ca) prodName = item.product.name.ca;
+                                    else if (item.product.name.es) prodName = item.product.name.es;
+                                    else if (item.product.name) prodName = item.product.name;
+                                }
+                                // Map state: 0='Pendent', 1='Reservat', 2='Comprat'
+                                let stateLabel = 'Pendent';
+                                if (item.state === 1) stateLabel = 'Reservat';
+                                else if (item.state === 2) stateLabel = 'Comprat';
+                                return `
                                     <tr>
                                         <td>${prodName}</td>
-                                        <td>${item.quantity || 0}</td>
+                                        <td>${item.product.price_incl_tax.toFixed(2).replace('.', ',')}€</td>
                                         <td>${stateLabel}</td>
                                     </tr>
                                 `;
-        }).join('')}
+                            }).join('')}
                         </tbody>
                     </table>
                 </body>
@@ -535,7 +535,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                     </tbody>
                 </table>
             </div>
-            {/* Using modular components for modals */} 
+            {/* Using modular components for modals */}
             <ListEditModal
                 showModal={showEditModal}
                 setShowModal={setShowEditModal}
