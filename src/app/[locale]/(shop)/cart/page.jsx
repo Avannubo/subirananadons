@@ -703,7 +703,10 @@ export default function CartPage() {
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center space-x-2 justify-between">                                            <p className="text-sm text-gray-500">Cantidad: 1</p>
                                                             <button
-                                                                onClick={() => removeFromCart(item.id)}
+                                                                onClick={() => {
+                                                                    const cartIndex = cartItems.findIndex(ci => ci === item);
+                                                                    removeFromCart(item.id, cartIndex);
+                                                                }}
                                                                 className="cursor-pointer text-sm text-red-600 hover:text-red-900"
                                                             >
                                                                 {t('remove')}

@@ -15,7 +15,7 @@ const parsePrice = (price) => {
     return price;
 };
 export default function BrandsPage() {
-    const router = useRouter();
+    const router = useRouter(); 
     const searchParams = useSearchParams();
     const [brands, setBrands] = useState([]);
     // Remove local state for selectedBrand and selectedBrandId

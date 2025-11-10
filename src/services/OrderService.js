@@ -22,7 +22,6 @@ export const OrderService = {
      * @param {object} orderPending 
      * @returns {Promise<object>} API response data
      */
-
     async createOrder(orderPending) {
         const response = await fetch('/api/orders', {
             method: 'POST',
@@ -33,7 +32,6 @@ export const OrderService = {
         if (!response.ok) throw new Error(data.message || 'Error al procesar el pedido');
         return data;
     },
-
     async downloadInvoice(orderPending, toast) {
         const order = orderPending || this.getPendingOrder();
         if (!order) return;
@@ -52,7 +50,6 @@ export const OrderService = {
             toast.error('Error al generar la Ticket');
         }
     },
-    
     /**
      * Send order confirmation email for the pending order
      * @param {object} toast

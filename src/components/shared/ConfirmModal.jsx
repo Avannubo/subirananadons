@@ -17,7 +17,7 @@ export default function ConfirmModal({
                 <Dialog.Panel className="mx-auto max-w-md rounded-lg bg-white p-6 shadow-xl">
                     <div className="flex items-center justify-between mb-4">
                         <Dialog.Title className="text-lg font-medium text-gray-900">
-                            {title}
+                            {title} 
                         </Dialog.Title>
                         <button
                             type="button"

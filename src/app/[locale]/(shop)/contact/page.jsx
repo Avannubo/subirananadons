@@ -13,12 +13,17 @@ export default function ContactPage() {
         subject: '',
         message: ''
     });
+    const [acceptTerms, setAcceptTerms] = useState(false);
     const [bannerImage, setBannerImage] = useState(null);
     const [shopParams, setShopParams] = useState({ address: '', telephone: '', email: '', horari: '', googleMapsSrc: '' });
     const [submitStatus, setSubmitStatus] = useState('');
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitStatus("");
+        if (!acceptTerms) {
+            setSubmitStatus("error");
+            return;
+        }
         try {
             const res = await fetch("/api/contact", {
                 method: "POST",
@@ -28,6 +33,7 @@ export default function ContactPage() {
             if (!res.ok) throw new Error("No se pudo enviar el mensaje");
             setSubmitStatus("success");
             setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+            setAcceptTerms(false);
         } catch (err) {
             setSubmitStatus("error");
         }
@@ -255,6 +261,24 @@ export default function ContactPage() {
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#36A9E1] focus:border-[#36A9E1] outline-none transition-colors"
                                     required
                                 ></textarea>
+                            </div>
+                            <div className="flex items-start mb-2">
+                                <input
+                                    type="checkbox"
+                                    id="acceptTerms"
+                                    checked={acceptTerms}
+                                    onChange={e => setAcceptTerms(e.target.checked)}
+                                    className="mt-1 mr-2"
+                                    required
+                                />
+                                <label htmlFor="acceptTerms" className="text-sm text-gray-700 select-none">
+                                    {t('acceptTermsText', {
+                                        default: 'He llegit i accepto els '
+                                    })}
+                                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline text-[#36A9E1] mx-1">{t('termsLabel', {default: 'Termes i Condicions'})}</a>
+                                    {t('andText', {default: ' i la '})}
+                                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline text-[#36A9E1] mx-1">{t('privacyLabel', {default: 'Política de Privacitat'})}</a>
+                                </label>
                             </div>
                             <button
                                 type="submit"

@@ -41,7 +41,7 @@ export async function GET(request, { params }) {
                 { status: 404 }
             );
         }
-        // Check if the user is a client (role = 'user')
+        // Check if the user is a client (role = 'user') 
         if (user.role !== 'user') {
             return NextResponse.json(
                 { success: false, message: 'Record found is not a client' },

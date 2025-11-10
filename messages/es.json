@@ -92,6 +92,10 @@
     "howWorksStep4Desc": "Cuando la lista esté finalizada, podrás recoger todos los regalos en la tienda."
   },
   "ContactPage": {
+    "acceptTermsText": "He leído y acepto los ",
+    "termsLabel": "Términos y Condiciones",
+    "privacyLabel": "Política de Privacidad",
+    "andText": " y la ",
     "title": "Contacto",
     "errorMessage": "Ha habido un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.",
     "successMessage": "¡Tu mensaje se ha enviado correctamente!",

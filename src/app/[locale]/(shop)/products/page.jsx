@@ -1,5 +1,4 @@
 'use client';
-import Image from "next/image";
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ShopLayout from "@/components/Layouts/shop-layout";

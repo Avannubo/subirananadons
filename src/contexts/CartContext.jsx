@@ -137,6 +137,9 @@ export function CartProvider({ children }) {
                 ownerEmail = await getOwnerEmailById(product.listInfo.listOwnerId);
             }
 
+            const isGift = product.type === 'gift';
+            // For gifts, use a unique key (gift item id from listInfo)
+            const giftItemId = isGift && product.listInfo && product.listInfo.itemId ? product.listInfo.itemId : null;
             const productData = {
                 id: product.id || product._id,
                 name: product.name,
@@ -145,9 +148,9 @@ export function CartProvider({ children }) {
                 image: product.image || product.imageUrl,
                 brand: product.brand || '',
                 category: product.category || '',
-                quantity: Math.max(1, parseInt(quantity)),
+                quantity: isGift ? 1 : Math.max(1, parseInt(quantity)),
                 type: product.type || 'regular',
-                listInfo: product.type === 'gift' ? {
+                listInfo: isGift ? {
                     ...product.listInfo,
                     ownerEmail: ownerEmail || (product.listInfo && product.listInfo.ownerEmail) || null,
                     updatedAt: new Date().toISOString(),
@@ -169,15 +172,20 @@ export function CartProvider({ children }) {
                     })
                 } : null,
                 updatedAt: Date.now()
-            };            // Check if the product already exists in cart
-            const existingItemIndex = items.findIndex(item =>
-                item.id === productData.id && item.type === productData.type
-            );
-            // For gift products, prevent adding if it already exists
-            if (productData.type === 'gift' && existingItemIndex > -1) {
+            };
+            // Check if the product already exists in cart
+            let existingItemIndex;
+            if (isGift && giftItemId) {
+                existingItemIndex = items.findIndex(item => item.type === 'gift' && item.listInfo && item.listInfo.itemId === giftItemId);
+            } else {
+                existingItemIndex = items.findIndex(item => item.id === productData.id && item.type === productData.type);
+            }
+            // For gift products, block if already in cart (by unique gift item id)
+            if (isGift && giftItemId && existingItemIndex > -1) {
                 toast.error(t('giftAlreadyInCart'));
                 return false;
-            }            // Get current cart from localStorage to ensure we have the latest data
+            }
+            // Get current cart from localStorage to ensure we have the latest data
             const currentCart = localStorage.getItem('cart');
             let currentItems = [];
             try {
@@ -195,8 +203,8 @@ export function CartProvider({ children }) {
                 item.id === productData.id && item.type === productData.type
             );
             let updatedItems;
-            if (existingItemInCurrent > -1 && productData.type === 'regular') {
-                // Update existing regular item quantity
+            if (existingItemInCurrent > -1 && !(isGift && giftItemId)) {
+                // Update existing item quantity (for regular products only)
                 updatedItems = currentItems.map((item, index) =>
                     index === existingItemInCurrent
                         ? { ...item, quantity: item.quantity + productData.quantity }
@@ -204,10 +212,7 @@ export function CartProvider({ children }) {
                 );
             } else {
                 // Add as new item while preserving existing items
-                updatedItems = [...currentItems];
-                if (existingItemInCurrent === -1) { // Only add if not exists
-                    updatedItems.push(productData);
-                }
+                updatedItems = [...currentItems, productData];
             }
             // Update local storage with timestamp           
             localStorage.setItem('cart', JSON.stringify({

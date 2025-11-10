@@ -69,7 +69,7 @@ export async function GET(request) {
             active: user.emailVerified !== null,
             newsletter: user.newsletter || false,
             partnerOffers: user.partnerOffers || false,
-            sales: 0 // This would need to come from an Orders collection in a real app
+            sales: 0 // This would need to come from an Orders collection in a real app 
         }));
         // Return all clients
         return NextResponse.json({

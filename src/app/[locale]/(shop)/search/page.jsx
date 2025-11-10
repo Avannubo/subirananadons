@@ -13,9 +13,15 @@ import { useTranslations } from 'next-intl';
 export default function SearchPage() {
     const t = useTranslations('SearchPage');
     let locale = 'ca';
-    if (typeof window !== 'undefined' && window.navigator) {
-        const lang = window.navigator.language || window.navigator.userLanguage;
-        if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+    if (typeof window !== 'undefined') {
+        // Try to get locale from cookie 'NEXT_LOCALE'
+        const match = document.cookie.match(/(?:^|; )NEXT_LOCALE=([^;]*)/);
+        if (match && match[1]) {
+            locale = decodeURIComponent(match[1]);
+        } else if (window.navigator) {
+            const lang = window.navigator.language || window.navigator.userLanguage;
+            if (lang && lang.toLowerCase().startsWith('es')) locale = 'es';
+        }
     }
     const [searchTerm, setSearchTerm] = useState('');
     const [allProducts, setAllProducts] = useState([]);
@@ -32,7 +38,6 @@ export default function SearchPage() {
     const [viewMode, setViewMode] = useState('grid'); // Add view mode state
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false); // Add quick view modal state
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false); // Add filter modal state
-
     const handleQuickView = (product) => {
         setQuickViewProduct(product);
         setIsQuickViewOpen(true);
@@ -77,7 +82,6 @@ export default function SearchPage() {
                 if (!prodResponse.ok) throw new Error('Failed to fetch products');
                 const data = await prodResponse.json();
                 // console.log('Total products from API:', data.products.length);
-
                 const formattedProducts = data.products.map(product => ({
                     ...product,
                     id: product._id,
@@ -91,7 +95,7 @@ export default function SearchPage() {
                     description: product.description || '',
                     rawName: product.name // Store the raw name for search
                 }));
-                // console.log('Fetched products:', formattedProducts);
+                console.log('Fetched products:', formattedProducts);
                 setAllProducts(formattedProducts);
             } catch (err) {
                 console.error('Error fetching meta/products:', err);
@@ -107,26 +111,25 @@ export default function SearchPage() {
     useEffect(() => {
         setIsLoading(true);
         let filtered = allProducts;
+        // Helper to normalize diacritics
+        const normalize = (str) => str ? str.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase() : '';
         // Search term (name, brand, category, reference)
         if (searchTerm) {
-            const term = searchTerm.toLowerCase().trim();
+            const term = normalize(searchTerm.trim());
             filtered = filtered.filter(p => {
                 // Name handling with both raw and localized versions
                 let name = '';
                 let rawName = '';
-
                 // Handle raw name (non-localized)
                 if (p.rawName && typeof p.rawName === 'string') {
                     rawName = p.rawName;
                 }
-
                 // Handle localized name
                 if (p.name && typeof p.name === 'object') {
                     name = p.name[locale] || p.name.ca || p.name.es || '';
                 } else if (typeof p.name === 'string') {
                     name = p.name;
                 }
-
                 // Brand
                 let brand = '';
                 if (p.brand && typeof p.brand === 'object') {
@@ -134,7 +137,6 @@ export default function SearchPage() {
                 } else if (typeof p.brand === 'string') {
                     brand = p.brand;
                 }
-
                 // Category
                 let category = '';
                 if (p.category && typeof p.category === 'object') {
@@ -142,13 +144,18 @@ export default function SearchPage() {
                 } else if (typeof p.category === 'string') {
                     category = p.category;
                 }
-
-                // Search in all fields
+                // Description
+                let description = '';
+                if (p.description && typeof p.description === 'string') {
+                    description = p.description;
+                }
+                // Search in all fields, normalized
                 return (
-                    (rawName && rawName.toLowerCase().includes(term)) ||
-                    (name && name.toLowerCase().includes(term)) ||
-                    (brand && brand.toLowerCase().includes(term)) ||
-                    (category && category.toLowerCase().includes(term))
+                    (rawName && normalize(rawName).includes(term)) ||
+                    (name && normalize(name).includes(term)) ||
+                    (brand && normalize(brand).includes(term)) ||
+                    (category && normalize(category).includes(term)) ||
+                    (description && normalize(description).includes(term))
                 );
             });
         }
@@ -158,9 +165,10 @@ export default function SearchPage() {
             const getAllSubCatValues = (catList, parentValue) => {
                 let values = [];
                 for (const cat of catList) {
+                    // Always use Catalan name if locale is 'ca'
                     const catValue = typeof cat.name === 'string'
                         ? cat.name
-                        : (cat.name?.[locale] || cat.name?.ca || cat.name?.es || '');
+                        : (locale === 'ca' ? (cat.name?.ca || cat.name?.[locale] || cat.name?.es || '') : (cat.name?.[locale] || cat.name?.ca || cat.name?.es || ''));
                     if (String(catValue).trim().toLowerCase() === String(parentValue).trim().toLowerCase()) {
                         values.push(catValue);
                         if (cat.children && cat.children.length) {
@@ -176,7 +184,7 @@ export default function SearchPage() {
             filtered = filtered.filter(p => {
                 let cat = '';
                 if (p.category && typeof p.category === 'object') {
-                    cat = p.category[locale] || p.category.ca || p.category.es || '';
+                    cat = locale === 'ca' ? (p.category.ca || p.category[locale] || p.category.es || '') : (p.category[locale] || p.category.ca || p.category.es || '');
                 } else if (typeof p.category === 'string') {
                     cat = p.category;
                 }
@@ -212,7 +220,7 @@ export default function SearchPage() {
             case 'name-asc':
                 sorted.sort((a, b) => {
                     const aName = typeof a.name === 'object' ? (a.name[locale] || a.name.ca || a.name.es || '') : a.name;
-                    const bName = typeof b.name === 'object' ? (b.name[locale] || b.name.ca || b.name.es || '') : b.name;
+                    const bName = typeof b.name === 'object' ? (b.name[locale] || b.name.ca || b.nazame.es || '') : b.name;
                     return aName.localeCompare(bName);
                 });
                 break;
@@ -223,11 +231,19 @@ export default function SearchPage() {
                 break;
         }
         setFilteredProducts(sorted);
+        // Console log filtered product names and total count
+        console.log('Filtered products count:', sorted.length);
+        console.log(locale);
+        console.log('Filtered product names:', sorted.map(p => {
+            if (typeof p.name === 'object') {
+                return p.name[locale] || '';
+            }
+            return p.name;
+        }));
         setIsLoading(false);
     }, [allProducts, searchTerm, selectedCategory, selectedBrand, priceRange, sortBy, locale]);
     // (Removed: all filtering is now in the above effect)
     // Pagination logic is now handled in the main fetchFilteredProducts effect above
-
     const handleAddToCart = (e, product) => {
         e.preventDefault();
         //console.log('Add to cart:', product);
@@ -319,9 +335,10 @@ export default function SearchPage() {
                                     {categories
                                         // .filter(category => category.children ) // Ensure category has a name
                                         .map((category, index) => {
+                                            // Always show Catalan name if locale is 'ca'
                                             const catValue = typeof category.name === 'string'
                                                 ? category.name
-                                                : (category.name?.[locale] || category.name?.ca || category.name?.es || '');
+                                                : (locale === 'ca' ? (category.name?.ca || category.name?.[locale] || category.name?.es || '') : (category.name?.[locale] || category.name?.ca || category.name?.es || ''));
                                             return (
                                                 <React.Fragment key={category._id || `cat-${index}`}>
                                                     <option key={category.id || `catopt-${index}`}
@@ -331,7 +348,7 @@ export default function SearchPage() {
                                                     {category.children?.map((child, childIdx) => {
                                                         const childValue = typeof child.name === 'string'
                                                             ? child.name
-                                                            : (child.name?.[locale] || child.name?.ca || child.name?.es || '');
+                                                            : (locale === 'ca' ? (child.name?.ca || child.name?.[locale] || child.name?.es || '') : (child.name?.[locale] || child.name?.ca || child.name?.es || ''));
                                                         return (
                                                             <option
                                                                 key={child.id ? `${child.id}-child` : `childopt-${index}-${childIdx}`}
@@ -588,7 +605,6 @@ export default function SearchPage() {
                                     }`}
                             >
                                 {filteredProducts.map((product, index) => (
-
                                     <ProductCard
                                         key={index}
                                         product={product}
@@ -603,7 +619,6 @@ export default function SearchPage() {
                                 <p className="text-gray-500">{t('noProductsFound')}</p>
                             </div>
                         )}
-
                     </motion.div>
                 </div>
             </div>

@@ -48,7 +48,7 @@ export async function GET(request) {
                 currentPage: page,
                 totalPages,
                 totalItems,
-                limit
+                limit 
             }
         });
     } catch (error) {

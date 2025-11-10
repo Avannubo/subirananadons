@@ -149,7 +149,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
             });
     };
     return (
-        <div className="w-full">
+        <div className="w-full ">
             {/* Product selection toggle and component */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                 <h4 className="text-gray-700 text-base sm:text-lg">
@@ -178,7 +178,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                             <p className="text-gray-500 mb-4">{t.noPending}</p>
                         </div>
                     ) : (
-                        <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden w-full max-h-[400px] overflow-y-auto">
+                        <div className="flex-1 bg-white border border-gray-200 rounded-lg  w-full max-h-[400px] overflow-y-auto">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50 hidden md:table-header-group">
                                     <tr>
@@ -193,7 +193,7 @@ export default function ListProductsManager({ listId, onUpdate }) {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-white divide-y divide-gray-200 ">
                                     {items
                                         .filter(item => item.state === 0)
                                         .map((item) => (

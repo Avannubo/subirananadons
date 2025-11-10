@@ -115,6 +115,10 @@
     "howWorksStep4Desc": "Quan la llista estigui finalitzada podràs recollir tots els teus regals a la botiga."
   },
   "ContactPage": {
+    "acceptTermsText": "He llegit i accepto els ",
+    "termsLabel": "Termes i Condicions",
+    "privacyLabel": "Política de Privacitat",
+    "andText": " i la ",
     "title": "Contacte",
     "errorMessage": "Hi ha hagut un error en enviar el missatge. Si us plau, torna-ho a intentar més tard.",
     "successMessage": "El teu missatge s'ha enviat correctament!",
