@@ -147,6 +147,36 @@ export default function OrdersTable({
             toast.error('Error al descargar el PDF');
         }
     };
+    // Download XML handler
+    const handleDownloadXML = async (order) => {
+        try {
+            const toastId = toast.loading(locale === 'ca' ? 'Generant XML...' : 'Generando XML...');
+            const response = await fetch(`/api/orders/${order.id}/xml`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/xml'
+                }
+            });
+            if (!response.ok) {
+                let errorData;
+                try { errorData = await response.json(); } catch { errorData = {}; }
+                throw new Error(errorData.message || (locale === 'ca' ? 'Error en generar l\'XML' : 'Error al generar el XML'));
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ORDER_${order.reference}.xml`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success(locale === 'ca' ? 'XML descarregat correctament' : 'XML descargado correctamente', { id: toastId });
+        } catch (error) {
+            console.error('Error downloading XML:', error);
+            toast.error(locale === 'ca' ? 'Error en descarregar l\'XML' : 'Error al descargar el XML');
+        }
+    };
     // Filter the orders based on search criteria
     const filteredOrders = orders.filter((order) => {
         return (
@@ -391,6 +421,13 @@ export default function OrdersTable({
                                             title={t.viewPDF}
                                         >
                                             <FiDownload size={22} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDownloadXML(order)}
+                                            className="text-blue-600 hover:text-blue-800 flex items-center cursor-pointer"
+                                            title={locale === 'ca' ? 'Descarregar XML' : 'Descargar XML'}
+                                        >
+                                            <span className='text-lg font-bold '>XML</span> {/* <FiDownload size={22} style={{ transform: 'rotate(-90deg)' }} /> */}
                                         </button>
                                         <button
                                             className="text-[#36A9E1] hover:text-[#008A9B] mr-4 text-center cursor-pointer"
