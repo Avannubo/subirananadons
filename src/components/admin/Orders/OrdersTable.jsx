@@ -422,13 +422,13 @@ export default function OrdersTable({
                                         >
                                             <FiDownload size={22} />
                                         </button>
-                                        <button
+                                        {/* <button
                                             onClick={() => handleDownloadXML(order)}
                                             className="text-blue-600 hover:text-blue-800 flex items-center cursor-pointer"
                                             title={locale === 'ca' ? 'Descarregar XML' : 'Descargar XML'}
                                         >
-                                            <span className='text-lg font-bold '>XML</span> {/* <FiDownload size={22} style={{ transform: 'rotate(-90deg)' }} /> */}
-                                        </button>
+                                            <span className='text-lg font-bold '>XML</span> 
+                                              </button> */}
                                         <button
                                             className="text-[#36A9E1] hover:text-[#008A9B] mr-4 text-center cursor-pointer"
                                             title={t.viewDetails}

@@ -144,7 +144,7 @@ export default function ListViewModal({
     openStatusModal,
     onStatusChange
 }) {
-    // console.log(selectedList);
+    console.log(selectedList);
     const [pendingSearch, setPendingSearch] = useState('');
     const [boughtSearch, setBoughtSearch] = useState('');
     const [reservedSearch, setReservedSearch] = useState('');
@@ -460,31 +460,30 @@ export default function ListViewModal({
                             )}
                         </div>
                         <div className='grid grid-cols-3 gap-2 mt-1'>
-                            {/* <p className=''>{item.product?.discount?.finalPrice}€</p> */}
                             <div className="flex flex-col items-start">
-                                {item.product.discount?.active ? (
+                                {/* Show bought price for state === 2, otherwise show current price */}
+                                {item.state === 2 ? (
+                                    item.userData && typeof item.userData.price === 'number' ? (
+                                        <p className="text-sm text-green-700 font-semibold">{item.userData.price.toFixed(2).replace('.', ',')} €</p>
+                                    ) : (
+                                        <p className="text-sm text-gray-400 italic"></p>
+                                    )
+                                ) : item.product.discount?.active ? (
                                     <>
-                                        {item.product.discount?.active ? (
-                                            <div className="flex flex-col">
-                                                <span className="text-sm text-gray-400 line-through">
-                                                    {item.product.price_incl_tax.toFixed(2).replace('.', ',')}€
-                                                </span>
-                                                <span className="text-sm font-medium text-red-600">
-                                                    {item.product.discount.finalPrice?.toFixed(2).replace('.', ',')} € {item.product.discount.type === 'percentage' ? `(-${item.product.discount.value}%)` : ''}
-                                                </span>
-                                            </div>
-                                        ) : (
-                                            <span className="text-sm text-gray-500">
-                                                {item.product.price_incl_tax.toFixed(2).replace('.', ',')} €
+                                        <div className="flex flex-col">
+                                            <span className="text-sm text-gray-400 line-through">
+                                                {item.product.price_incl_tax.toFixed(2).replace('.', ',')}€
                                             </span>
-                                        )}
+                                            <span className="text-sm font-medium text-red-600">
+                                                {item.product.discount.finalPrice?.toFixed(2).replace('.', ',')} € {item.product.discount.type === 'percentage' ? `(-${item.product.discount.value}%)` : ''}
+                                            </span>
+                                        </div>
                                     </>
                                 ) : (
                                     <p className="text-sm text-gray-900">{parseFloat(item.product.price_incl_tax).toFixed(2).replace('.', ',')} €</p>
                                 )}
                             </div>
                             <p className="text-xs text-gray-500">Ref: {item.product.reference || '-'}</p>
-                            {/* <p className="text-xs text-gray-500 mt-1">{item.product.brand}</p> */}
                             {user.role === 'admin' && (
                                 <p className="text-xs mt-1">
                                     Estado:{" "}
@@ -575,21 +574,29 @@ export default function ListViewModal({
                             </div>
                             <div className='hidden md:flex flex-row space-x-4 mb-4'>
                                 <div className="bg-white rounded-lg border border-gray-200 md:w-[500px] ">
-                                    <div className="flex flex-row space-x-2 justify-between p-4 space-y-3">
+                                    <div className="grid grid-cols-3 gap-x-4 gap-y-2 px-4 pt-2">
                                         <div>
-                                            <span className="block text-xs font-medium text-gray-500">{t.reference}</span>
-                                            <p className="text-sm text-gray-900 mt-1">{selectedList.reference}</p>
+                                            <span className="block text-xs font-medium text-gray-500">Title</span>
+                                            <p className="text-sm text-gray-900 mt-1">{selectedList.name}</p>
                                         </div>
                                         <div>
                                             <span className="block text-xs font-medium text-gray-500">{t.babyName}</span>
                                             <p className="text-sm text-gray-900 mt-1">{selectedList.babyName}</p>
                                         </div>
                                         <div>
+                                            <span className="block text-xs font-medium text-gray-500">{t.reference}</span>
+                                            <p className="text-sm text-gray-900 mt-1">{selectedList.reference}</p>
+                                        </div>
+                                        <div>
                                             <span className="block text-xs font-medium text-gray-500">{t.visibility}</span>
                                             <p className="text-sm text-gray-900 mt-1">{selectedList.isPublic ? t.public : t.private}</p>
                                         </div>
+                                        <div>
+                                            <span className="block text-xs font-medium text-gray-500">Email</span>
+                                            <p className="text-sm text-gray-900 mt-1">{selectedList.rawData?.email}</p>
+                                        </div>
                                         {selectedList.description && (
-                                            <div>
+                                            <div className="col-span-3">
                                                 <span className="block text-xs font-medium text-gray-500">{t.description}</span>
                                                 <p className="text-sm text-gray-900 mt-1">{selectedList.description}</p>
                                             </div>

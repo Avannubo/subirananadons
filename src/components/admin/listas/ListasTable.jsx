@@ -364,8 +364,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                     <table>
                         <thead>
                             <tr>
-                                <th>${'Producte'}</th>
-                                <th>${'Preu'}</th>
+                                <th>${'Producte'}</th> 
                                 <th>${'Estat'}</th>
                             </tr>
                         </thead>
@@ -384,8 +383,7 @@ export default function ListasTable({ lists, filters, setFilters, userRole = 'us
                                 else if (item.state === 2) stateLabel = 'Comprat';
                                 return `
                                     <tr>
-                                        <td>${prodName}</td>
-                                        <td>${item.product.price_incl_tax.toFixed(2).replace('.', ',')}€</td>
+                                        <td>${prodName}</td> 
                                         <td>${stateLabel}</td>
                                     </tr>
                                 `;

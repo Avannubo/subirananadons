@@ -19,9 +19,33 @@ export async function GET(request, { params }) {
         // Helper for Catalan/EU date/time
         const formatDate = (date) => new Date(date).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
         const formatTime = (date) => new Date(date).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
-        // Calculate total price
-        const totalPrice = list.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        // Generate HTML content in Catalan
+
+        const { getGiftOrdersForList } = await import('@/lib/getGiftOrdersForList');
+        const giftOrders = await getGiftOrdersForList(id);
+
+        // Helper to get bought price from gift orders
+        function getBoughtPriceForItem(itemId) {
+            for (const order of giftOrders) {
+                for (const orderItem of order.items) {
+                    if (orderItem.type === 'gift' && orderItem.giftInfo && String(orderItem.giftInfo.itemId) === String(itemId)) {
+                        return orderItem.price;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Calculate total price using bought price for bought products
+        const totalPrice = list.items.reduce((sum, item) => {
+            let price = null;
+            if (item.state === 2) {
+                price = getBoughtPriceForItem(item._id);
+            }
+            if (price == null && item.product && typeof item.product.price_incl_tax === 'number') {
+                price = item.product.price_incl_tax;
+            }
+            return sum + ((price || 0) * (item.quantity || 1));
+        }, 0);
         const html = `
             <!DOCTYPE html>
             <html>
@@ -89,26 +113,34 @@ export async function GET(request, { params }) {
                         </thead>
                         <tbody>
                         ${list.items.map(item => {
-                        // Map the state number to status text (Catalan)
-                        let status;
-                        switch (item.state) {
-                            case 1:
-                                status = 'Reservat';
-                                break;
-                            case 2:
-                                status = 'Comprat';
-                                break;
-                            default:
-                                status = 'Pendent';
-                        }
-                        return `
+            // Map the state number to status text (Catalan)
+            let status;
+            switch (item.state) {
+                case 1:
+                    status = 'Reservat';
+                    break;
+                case 2:
+                    status = 'Comprat';
+                    break;
+                default:
+                    status = 'Pendent';
+            }
+            let price = null;
+            if (item.state === 2) {
+                price = getBoughtPriceForItem(item._id);
+            }
+            if (price == null && item.product && typeof item.product.price_incl_tax === 'number') {
+                price = item.product.price_incl_tax;
+            }
+            let priceStr = (typeof price === 'number') ? price.toFixed(2).replace('.', ',') + '€' : 'N/D';
+            return `
                             <tr>
                                 <td>${item.product ? (item.product.name?.ca || item.product.name?.es || item.product.name || 'Producte no disponible') : 'Producte no disponible'}</td> 
-                                <td>${item.product.price_incl_tax.toFixed(2).replace('.', ',')}€</td>
+                                <td>${priceStr}</td>
                                 <td>${status}</td>
                             </tr>
                             `;
-                        }).join('')}
+        }).join('')}
                         </tbody>
                     </table> 
                     <div class="footer">

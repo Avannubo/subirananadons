@@ -110,7 +110,6 @@ const translations = {
         requiredFields: 'Por favor complete todos los campos obligatorios',
     }
 };
-
 function getLocale() {
     if (typeof window !== 'undefined') {
         const lang = window.navigator.language || 'es';
@@ -118,9 +117,7 @@ function getLocale() {
     }
     return 'es';
 }
-
 import useShopParameter from '@/lib/useShopParameter';
-
 export default function ListasTabs({ userRole = 'user' }) {
     const locale = getLocale();
     const t = translations[locale];
@@ -185,7 +182,6 @@ export default function ListasTabs({ userRole = 'user' }) {
     // For admin: users dropdown
     const [users, setUsers] = useState([]);
     const [usersLoading, setUsersLoading] = useState(false);
-
     // Fetch users for admin dropdown
     useEffect(() => {
         if (userRole === 'admin' && showCreateModal) {
@@ -200,15 +196,12 @@ export default function ListasTabs({ userRole = 'user' }) {
                 .finally(() => setUsersLoading(false));
         }
     }, [userRole, showCreateModal]);
-
     const [selectedUser, setSelectedUser] = useState(null);
     const handleUserSelect = (e) => {
         const userId = e.target.value;
-
         // Extract email from the string in format "Name (email)"
         const emailMatch = userId.match(/\(([^)]+)\)/); // Matches content between parentheses
         const extractedEmail = emailMatch ? emailMatch[1] : '';
-
         const selectedUser = users.find(u => u.email === extractedEmail);
         //console.log("Selected User:", selectedUser);
         setSelectedUser(selectedUser);
@@ -219,10 +212,6 @@ export default function ListasTabs({ userRole = 'user' }) {
             userName: selectedUser ? selectedUser.name : userId.split('(')[0].trim(),
         }));
     };
-
-
-
-
     useEffect(() => {
         // Fetch lists from API
         loadBirthLists();
@@ -248,7 +237,6 @@ export default function ListasTabs({ userRole = 'user' }) {
         if (userRole !== 'admin' || !formData.userId) return null;
         return users.find(u => u._id === formData.userId) || null;
     };
-
     // Refresh data
     const refreshData = async () => {
         await loadBirthLists();
@@ -297,7 +285,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                 product: item.product._id,
                 quantity: item.quantity,
                 reserved: item.reserved || 0,
-
             }));
             // Create the birth list in the database
             // Always use selected user as creator if admin
@@ -405,7 +392,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                 {/* Search and Filters */}
                 <div className="p-4 border-b border-gray-200 grid md:grid-cols-4 gap-4">
                     <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-
                         <div className="relative">
                             <FiSearch className="absolute left-3 top-3 text-gray-400" />
                             <input
@@ -471,7 +457,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                     </div>
                 )}
             </div>
-
             {/* Create List Modal - kept as is */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#00000050] bg-opacity-50 flex items-center justify-center p-1  md:p-4">
@@ -689,7 +674,6 @@ export default function ListasTabs({ userRole = 'user' }) {
                                             {t.shareDesc}
                                         </p>
                                         <div className="text-start ">
-
                                             <p className="mt-4 text-gray-600">
                                                 {t.shareHelp}
                                             </p>
@@ -711,10 +695,8 @@ export default function ListasTabs({ userRole = 'user' }) {
                                                             const content = typeof listConditions === 'object'
                                                                 ? listConditions[locale]?.value || listConditions.es?.value || listConditions.ca?.value || ''
                                                                 : listConditions?.es?.value || '';
-
                                                             // Split by regex into items (removing empty)
                                                             const items = content.split(/\d+\.\s/).filter(Boolean);
-
                                                             return (
                                                                 <ol className="list-decimal pl-4 space-y-2">
                                                                     {items.map((item, index) => (
